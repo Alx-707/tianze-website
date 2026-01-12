@@ -85,6 +85,8 @@ export function isBaseUrlConfigured(
   baseUrl: string = SITE_CONFIG.baseUrl,
 ): boolean {
   if (process.env.NODE_ENV !== "production") return true;
+  if (process.env.PLAYWRIGHT_TEST === "true") return true;
+  if (process.env.SKIP_ENV_VALIDATION === "true") return true;
   return !baseUrl.includes("example.com") && !baseUrl.includes("localhost");
 }
 

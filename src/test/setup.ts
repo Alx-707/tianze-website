@@ -35,12 +35,12 @@ vi.mock("@/lib/mdx-importers.generated", () => ({
   },
 }));
 
-// Mock next/font/local for local font loading (P2-1 Phase 3: Geist Sans Latin subset)
+// Mock next/font/local for IBM Plex Sans (Manufacturing-First Design v2.1)
 vi.mock("next/font/local", () => ({
   default: vi.fn(() => ({
-    variable: "--font-geist-sans",
-    className: "geist-sans-subset",
-    style: { fontFamily: "Geist Sans Latin" },
+    variable: "--font-ibm-plex-sans",
+    className: "ibm-plex-sans",
+    style: { fontFamily: "IBM Plex Sans" },
   })),
 }));
 

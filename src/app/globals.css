@@ -11,11 +11,9 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  /* P2-1 Phase 2: 使用系统等宽字体栈替代 Geist Mono，节省 ~59KB */
-  --font-mono:
-    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
-    "Courier New", monospace;
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+  --font-chinese: var(--font-chinese);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -45,151 +43,363 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --radius-sm: var(--radius-sharp);
+  --radius-md: var(--radius-base);
+  --radius-lg: var(--radius-soft);
+  --radius-xl: 0.75rem;
 }
+
+/* ==================== PRIMITIVE TOKENS ==================== */
 
 :root {
-  --radius: 0.625rem;
-  --font-chinese-stack:
-    "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Source Han Sans SC",
-    "Noto Sans SC", "Noto Sans CJK SC", "WenQuanYi Micro Hei", sans-serif;
+  /* Graphite Scale (Hue 250) — The color of precision */
+  --graphite-50: oklch(0.98 0.005 250);
+  --graphite-100: oklch(0.94 0.01 250);
+  --graphite-200: oklch(0.88 0.015 250);
+  --graphite-300: oklch(0.75 0.015 250);
+  --graphite-400: oklch(0.6 0.015 250);
+  --graphite-500: oklch(0.45 0.015 250);
+  --graphite-600: oklch(0.35 0.015 250);
+  --graphite-700: oklch(0.28 0.015 250);
+  --graphite-800: oklch(0.2 0.015 250);
+  --graphite-900: oklch(0.15 0.01 250);
+  --graphite-950: oklch(0.1 0.008 250);
 
-  /* 基础颜色 - 优化对比度确保WCAG AA级合规 */
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-
-  /* 卡片和弹出层 */
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-
-  /* 主要颜色 */
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-
-  /* 次要颜色 */
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-
-  /* 静音颜色 */
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-
-  /* 强调颜色 */
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-
-  /* 破坏性颜色 */
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.985 0 0);
-
-  /* 边框和输入 */
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-
-  /* 语义化颜色 - 新增 */
-  --success: oklch(0.646 0.222 142.5);
-  --success-foreground: oklch(0.985 0 0);
-  --warning: oklch(0.828 0.189 84.429);
-  --warning-foreground: oklch(0.145 0 0);
-  --error: oklch(0.577 0.245 27.325);
-  --error-foreground: oklch(0.985 0 0);
-  --info: oklch(0.6 0.118 184.704);
-  --info-foreground: oklch(0.985 0 0);
-
-  /* 图表颜色 - 保持向后兼容 */
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-
-  /* 文本选择高亮 */
-  --selection-background: oklch(0.488 0.243 264.376 / 30%);
-  --selection-foreground: oklch(0.145 0 0);
-
-  /* 侧边栏颜色 */
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  /* Amber Scale (Hue 75) — Industrial safety & action */
+  --amber-50: oklch(0.98 0.02 75);
+  --amber-100: oklch(0.95 0.05 75);
+  --amber-200: oklch(0.9 0.1 75);
+  --amber-300: oklch(0.85 0.14 75);
+  --amber-400: oklch(0.8 0.16 75);
+  --amber-500: oklch(0.75 0.16 75);
+  --amber-600: oklch(0.65 0.15 75);
+  --amber-700: oklch(0.55 0.13 75);
+  --amber-800: oklch(0.45 0.1 75);
+  --amber-900: oklch(0.35 0.07 75);
+  --amber-950: oklch(0.25 0.04 75);
 }
 
+/* ==================== SEMANTIC TOKENS (Light Theme) ==================== */
+
+:root {
+  /* Border Radius — Precision machined */
+  --radius: 4px;
+  --radius-none: 0;
+  --radius-sharp: 2px;
+  --radius-base: 4px;
+  --radius-soft: 6px;
+  --radius-round: 9999px;
+
+  /* Foundation */
+  --background: oklch(0.98 0.005 250);
+  --foreground: oklch(0.15 0.01 250);
+
+  /* Surfaces */
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.15 0.01 250);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.15 0.01 250);
+
+  /* Brand Primary — Industrial Amber (CTA) */
+  --primary: oklch(0.75 0.16 75);
+  --primary-foreground: oklch(0.15 0.01 250);
+
+  /* Accent — Deep Graphite (secondary emphasis) */
+  --accent: oklch(0.2 0.015 250);
+  --accent-foreground: oklch(0.98 0.005 250);
+
+  /* Secondary */
+  --secondary: oklch(0.94 0.01 250);
+  --secondary-foreground: oklch(0.25 0.015 250);
+
+  /* Muted */
+  --muted: oklch(0.94 0.01 250);
+  --muted-foreground: oklch(0.45 0.015 250);
+
+  /* Destructive */
+  --destructive: oklch(0.55 0.2 25);
+  --destructive-foreground: oklch(0.98 0 0);
+
+  /* Borders & Inputs */
+  --border: oklch(0.88 0.015 250);
+  --input: oklch(0.88 0.015 250);
+  --ring: oklch(0.75 0.16 75);
+
+  /* Status Colors */
+  --success: oklch(0.65 0.18 145);
+  --success-foreground: oklch(0.98 0 0);
+  --warning: oklch(0.8 0.16 75);
+  --warning-foreground: oklch(0.15 0.01 250);
+  --error: oklch(0.55 0.2 25);
+  --error-foreground: oklch(0.98 0 0);
+  --info: oklch(0.6 0.1 250);
+  --info-foreground: oklch(0.98 0 0);
+
+  /* Charts — Amber first for primary data */
+  --chart-1: oklch(0.75 0.16 75);
+  --chart-2: oklch(0.2 0.015 250);
+  --chart-3: oklch(0.65 0.18 145);
+  --chart-4: oklch(0.6 0.1 250);
+  --chart-5: oklch(0.55 0.15 25);
+
+  /* Selection */
+  --selection-background: oklch(0.75 0.16 75 / 25%);
+  --selection-foreground: oklch(0.15 0.01 250);
+
+  /* Sidebar — Dark control panel */
+  --sidebar: oklch(0.15 0.01 250);
+  --sidebar-foreground: oklch(0.94 0.01 250);
+  --sidebar-primary: oklch(0.75 0.16 75);
+  --sidebar-primary-foreground: oklch(0.15 0.01 250);
+  --sidebar-accent: oklch(0.25 0.015 250);
+  --sidebar-accent-foreground: oklch(0.94 0.01 250);
+  --sidebar-border: oklch(0.28 0.015 250);
+  --sidebar-ring: oklch(0.75 0.16 75);
+
+  /* Shadows — Graphite-toned */
+  --shadow-color: 250 15% 10%;
+  --shadow-xs: 0 1px 2px hsl(var(--shadow-color) / 0.04);
+  --shadow-sm:
+    0 1px 3px hsl(var(--shadow-color) / 0.06),
+    0 1px 2px hsl(var(--shadow-color) / 0.04);
+  --shadow-md:
+    0 4px 6px hsl(var(--shadow-color) / 0.07),
+    0 2px 4px hsl(var(--shadow-color) / 0.04);
+  --shadow-lg:
+    0 10px 15px hsl(var(--shadow-color) / 0.08),
+    0 4px 6px hsl(var(--shadow-color) / 0.03);
+  --shadow-xl:
+    0 20px 25px hsl(var(--shadow-color) / 0.1),
+    0 8px 10px hsl(var(--shadow-color) / 0.04);
+  --shadow-inset: inset 0 1px 2px hsl(var(--shadow-color) / 0.06);
+  --shadow-accent: 0 0 0 3px oklch(0.75 0.16 75 / 0.25);
+
+  /* Animation — Mechanical precision */
+  --duration-instant: 50ms;
+  --duration-fast: 100ms;
+  --duration-normal: 150ms;
+  --duration-slow: 250ms;
+  --duration-slower: 350ms;
+
+  --ease-linear: linear;
+  --ease-snap: cubic-bezier(0, 0, 0.2, 1);
+  --ease-precise: cubic-bezier(0.25, 0, 0.25, 1);
+  --ease-mechanical: cubic-bezier(0.4, 0, 0.2, 1);
+
+  --transition-colors:
+    color var(--duration-fast) var(--ease-snap),
+    background-color var(--duration-fast) var(--ease-snap),
+    border-color var(--duration-fast) var(--ease-snap);
+  --transition-opacity: opacity var(--duration-normal) var(--ease-precise);
+  --transition-transform: transform var(--duration-normal)
+    var(--ease-mechanical);
+  --transition-shadow: box-shadow var(--duration-normal) var(--ease-precise);
+
+  /* Typography */
+  --font-sans:
+    var(--font-ibm-plex-sans), -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono:
+    ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono",
+    monospace;
+  --font-chinese:
+    "Source Han Sans SC", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+    "Microsoft YaHei", sans-serif;
+}
+
+/* ==================== SEMANTIC TOKENS (Dark Theme) ==================== */
+
 .dark {
-  /* 基础颜色 - 暗黑主题优化 */
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
+  /* Foundation */
+  --background: oklch(0.12 0.01 250);
+  --foreground: oklch(0.94 0.01 250);
 
-  /* 卡片和弹出层 */
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
+  /* Surfaces */
+  --card: oklch(0.16 0.01 250);
+  --card-foreground: oklch(0.94 0.01 250);
+  --popover: oklch(0.16 0.01 250);
+  --popover-foreground: oklch(0.94 0.01 250);
 
-  /* 主要颜色 */
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
+  /* Brand Primary — Industrial Amber (CTA) */
+  --primary: oklch(0.8 0.16 75);
+  --primary-foreground: oklch(0.12 0.01 250);
 
-  /* 次要颜色 */
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
+  /* Accent — Light Graphite (secondary emphasis) */
+  --accent: oklch(0.94 0.01 250);
+  --accent-foreground: oklch(0.12 0.01 250);
 
-  /* 静音颜色 */
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
+  /* Secondary */
+  --secondary: oklch(0.22 0.015 250);
+  --secondary-foreground: oklch(0.94 0.01 250);
 
-  /* 强调颜色 */
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
+  /* Muted */
+  --muted: oklch(0.22 0.015 250);
+  --muted-foreground: oklch(0.6 0.015 250);
 
-  /* 破坏性颜色 */
-  --destructive: oklch(0.704 0.191 22.216);
-  --destructive-foreground: oklch(0.985 0 0);
+  /* Destructive */
+  --destructive: oklch(0.6 0.18 25);
+  --destructive-foreground: oklch(0.98 0 0);
 
-  /* 边框和输入 */
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
+  /* Borders & Inputs */
+  --border: oklch(0.28 0.015 250);
+  --input: oklch(0.28 0.015 250);
+  --ring: oklch(0.8 0.16 75);
 
-  /* 语义化颜色 - 暗黑主题版本 */
-  --success: oklch(0.7 0.222 142.5);
-  --success-foreground: oklch(0.145 0 0);
-  --warning: oklch(0.85 0.189 84.429);
-  --warning-foreground: oklch(0.145 0 0);
-  --error: oklch(0.704 0.191 22.216);
-  --error-foreground: oklch(0.985 0 0);
-  --info: oklch(0.65 0.118 184.704);
-  --info-foreground: oklch(0.145 0 0);
+  /* Status Colors */
+  --success: oklch(0.7 0.18 145);
+  --success-foreground: oklch(0.12 0.01 250);
+  --warning: oklch(0.85 0.16 75);
+  --warning-foreground: oklch(0.12 0.01 250);
+  --error: oklch(0.6 0.18 25);
+  --error-foreground: oklch(0.98 0 0);
+  --info: oklch(0.65 0.1 250);
+  --info-foreground: oklch(0.12 0.01 250);
 
-  /* 图表颜色 - 暗黑主题版本 */
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
+  /* Charts — Amber first for primary data */
+  --chart-1: oklch(0.8 0.16 75);
+  --chart-2: oklch(0.94 0.01 250);
+  --chart-3: oklch(0.7 0.18 145);
+  --chart-4: oklch(0.65 0.1 250);
+  --chart-5: oklch(0.6 0.15 25);
 
-  /* 文本选择高亮 - 暗黑主题版本 */
-  --selection-background: oklch(0.488 0.243 264.376 / 40%);
-  --selection-foreground: oklch(0.985 0 0);
+  /* Selection */
+  --selection-background: oklch(0.8 0.16 75 / 30%);
+  --selection-foreground: oklch(0.94 0.01 250);
 
-  /* 侧边栏颜色 - 暗黑主题版本 */
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  /* Sidebar */
+  --sidebar: oklch(0.1 0.008 250);
+  --sidebar-foreground: oklch(0.94 0.01 250);
+  --sidebar-primary: oklch(0.8 0.16 75);
+  --sidebar-primary-foreground: oklch(0.12 0.01 250);
+  --sidebar-accent: oklch(0.18 0.012 250);
+  --sidebar-accent-foreground: oklch(0.94 0.01 250);
+  --sidebar-border: oklch(0.22 0.015 250);
+  --sidebar-ring: oklch(0.8 0.16 75);
+
+  /* Shadows — Stronger for dark */
+  --shadow-color: 250 10% 5%;
+  --shadow-xs: 0 1px 2px hsl(var(--shadow-color) / 0.2);
+  --shadow-sm:
+    0 1px 3px hsl(var(--shadow-color) / 0.3),
+    0 1px 2px hsl(var(--shadow-color) / 0.2);
+  --shadow-md:
+    0 4px 6px hsl(var(--shadow-color) / 0.35),
+    0 2px 4px hsl(var(--shadow-color) / 0.2);
+  --shadow-lg:
+    0 10px 15px hsl(var(--shadow-color) / 0.4),
+    0 4px 6px hsl(var(--shadow-color) / 0.15);
+  --shadow-xl:
+    0 20px 25px hsl(var(--shadow-color) / 0.45),
+    0 8px 10px hsl(var(--shadow-color) / 0.2);
+}
+
+/* ==================== COMPONENT TOKENS ==================== */
+
+:root {
+  /* Button */
+  --button-radius: var(--radius-sharp);
+  --button-font-weight: 600;
+
+  --button-primary-bg: var(--primary);
+  --button-primary-fg: var(--primary-foreground);
+  --button-primary-hover-bg: oklch(0.7 0.16 75);
+
+  --button-accent-bg: var(--accent);
+  --button-accent-fg: var(--accent-foreground);
+  --button-accent-hover-bg: oklch(0.25 0.015 250);
+
+  --button-secondary-bg: var(--secondary);
+  --button-secondary-fg: var(--secondary-foreground);
+  --button-secondary-border: var(--border);
+
+  --button-outline-bg: transparent;
+  --button-outline-fg: var(--foreground);
+  --button-outline-border: var(--border);
+  --button-outline-hover-bg: var(--secondary);
+
+  --button-ghost-bg: transparent;
+  --button-ghost-fg: var(--foreground);
+  --button-ghost-hover-bg: var(--secondary);
+
+  --button-destructive-bg: var(--destructive);
+  --button-destructive-fg: var(--destructive-foreground);
+
+  /* Card */
+  --card-radius: var(--radius-base);
+  --card-padding: 1.5rem;
+  --card-default-shadow: var(--shadow-xs);
+  --card-elevated-shadow: var(--shadow-md);
+
+  /* Input */
+  --input-height: 2.5rem;
+  --input-padding-x: 0.75rem;
+  --input-radius: var(--radius-sharp);
+
+  /* Table */
+  --table-radius: var(--radius-none);
+  --table-header-bg: oklch(0.94 0.01 250);
+  --table-row-hover-bg: oklch(0.75 0.16 75 / 0.08);
+
+  /* Badge */
+  --badge-radius: var(--radius-round);
+  --badge-padding-x: 0.625rem;
+  --badge-padding-y: 0.125rem;
+}
+
+/* ==================== MANUFACTURING VISUAL ELEMENTS ==================== */
+
+/* Precision Grid Background */
+.precision-grid {
+  background-image:
+    linear-gradient(oklch(0.88 0.015 250) 1px, transparent 1px),
+    linear-gradient(90deg, oklch(0.88 0.015 250) 1px, transparent 1px);
+  background-size: 24px 24px;
+  background-position: -1px -1px;
+}
+
+.dark .precision-grid {
+  background-image:
+    linear-gradient(oklch(0.22 0.015 250) 1px, transparent 1px),
+    linear-gradient(90deg, oklch(0.22 0.015 250) 1px, transparent 1px);
+}
+
+/* Fine Grid */
+.precision-grid-fine {
+  background-size: 12px 12px;
+}
+
+/* Technical Callout */
+.technical-callout {
+  border-left: 3px solid var(--accent);
+  padding-left: 1rem;
+  background: linear-gradient(
+    90deg,
+    oklch(0.75 0.16 75 / 0.08) 0%,
+    transparent 100%
+  );
+}
+
+/* Spec Box */
+.spec-box {
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--primary);
+  background: var(--card);
+  font-family: var(--font-mono);
+  border-radius: var(--radius-none);
+}
+
+/* Measurement Scale */
+.measurement-scale {
+  background-image: repeating-linear-gradient(
+    90deg,
+    var(--border) 0px,
+    var(--border) 1px,
+    transparent 1px,
+    transparent 10px
+  );
+  background-size: 100px 8px;
+  background-repeat: repeat-x;
+  background-position: bottom;
 }
 
 @layer base {
@@ -198,7 +408,7 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: var(--font-geist-sans), var(--font-chinese-stack);
+    font-family: var(--font-sans), var(--font-chinese);
   }
 
   /* 文本选择高亮样式 */
@@ -219,12 +429,12 @@
     font-display: swap;
     font-weight: 400;
     font-style: normal;
-    unicode-range: U+4E00-9FFF; /* 中文字符范围 */
+    unicode-range: U+4E00-9FFF;
   }
 
   /* 中文字体优化 */
   .font-chinese {
-    font-family: var(--font-chinese-stack);
+    font-family: var(--font-chinese);
     font-feature-settings: "kern" 1;
     text-rendering: optimizeLegibility;
     font-display: swap;
@@ -245,19 +455,16 @@
 
   /* View Transitions API 支持 */
   @supports (view-transition-name: none) {
-    /* 为根元素设置view-transition-name */
     :root {
       view-transition-name: root;
     }
 
-    /* 主题切换动画优化 */
     ::view-transition-old(root),
     ::view-transition-new(root) {
       animation-duration: 0.4s;
       animation-timing-function: ease-in-out;
     }
 
-    /* 减少动画偏好支持 */
     @media (prefers-reduced-motion: reduce) {
       ::view-transition-old(root),
       ::view-transition-new(root) {
@@ -265,7 +472,6 @@
       }
     }
 
-    /* 高对比度模式支持 */
     @media (prefers-contrast: high) {
       ::view-transition-old(root),
       ::view-transition-new(root) {
@@ -276,6 +482,14 @@
 
   /* 全局减少动画偏好支持 */
   @media (prefers-reduced-motion: reduce) {
+    :root {
+      --duration-instant: 0.01ms;
+      --duration-fast: 0.01ms;
+      --duration-normal: 0.01ms;
+      --duration-slow: 0.01ms;
+      --duration-slower: 0.01ms;
+    }
+
     *,
     *::before,
     *::after {
@@ -289,22 +503,20 @@
   /* 高对比度模式增强 */
   @media (prefers-contrast: high) {
     :root {
-      --border: oklch(0 0 0);
-      --ring: oklch(0 0 0);
+      --border: oklch(0.4 0.015 250);
+      --ring: oklch(0.65 0.16 75);
     }
 
     .dark {
-      --border: oklch(1 0 0);
-      --ring: oklch(1 0 0);
+      --border: oklch(0.85 0.02 250);
+      --ring: oklch(0.85 0.16 75);
     }
 
-    /* 增强焦点指示器 */
     *:focus-visible {
       outline: 3px solid var(--ring) !important;
       outline-offset: 2px !important;
     }
 
-    /* 增强按钮边框 */
     button,
     [role="button"] {
       border-width: 2px !important;
@@ -351,19 +563,14 @@
 
 /* ==================== CLS 优化配置 ==================== */
 
-/* 防止布局偏移的基础样式 */
 .cls-optimized {
-  /* 为动态内容预留空间 */
   min-height: 1rem;
-  /* 使用 contain 属性限制布局影响 */
   contain: layout style;
 }
 
-/* 图片容器防止布局偏移 */
 .image-container {
   position: relative;
   overflow: hidden;
-  /* 使用 aspect-ratio 维持宽高比 */
   aspect-ratio: 16 / 9;
 }
 
@@ -376,21 +583,14 @@
   object-fit: cover;
 }
 
-/* 动态组件容器 */
 .dynamic-component-container {
-  /* 为动态加载的组件预留最小空间 */
   min-height: 2rem;
-  /* 防止内容跳跃 */
   contain: layout;
 }
 
-/* 开发工具容器优化 */
 .dev-tools-container {
-  /* 使用 fixed 定位避免影响页面布局 */
   position: fixed;
-  /* 确保不影响文档流 */
   pointer-events: none;
-  /* 允许子元素交互 */
 }
 
 .dev-tools-container > * {
@@ -398,22 +598,16 @@
 }
 
 /* ==================== 渲染范围优化（content-visibility） ==================== */
-/* 对首屏以下的大块容器启用渲染范围控制，减少初始布局/绘制开销。
-   使用 auto 记忆尺寸（支持的浏览器）并提供长度后备值。*/
+
 .cv-auto {
   content-visibility: auto;
-  /* 后备：未记忆过尺寸时的占位高度，按需微调 */
   contain-intrinsic-size: 1px 800px;
-  /* 支持时使用 auto 记忆尺寸并指定后备高度 */
   contain-intrinsic-size: auto 800px;
 }
 
-/* 更精细的占位高度（仅用于首屏以下大容器），按区块估算选择 */
 .cv-600 {
   content-visibility: auto;
-  /* 后备占位高度 */
   contain-intrinsic-size: 1px 600px;
-  /* 记忆尺寸 + 后备 */
   contain-intrinsic-size: auto 600px;
 }
 
@@ -431,10 +625,9 @@
 
 /* ==================== 字体优化配置 ==================== */
 
-/* 优化的中文字体回退策略 */
 .font-chinese,
 [lang="zh"] {
-  font-family: var(--font-chinese-stack);
+  font-family: var(--font-chinese);
   font-feature-settings:
     "kern" 1,
     "liga" 1,
@@ -444,7 +637,6 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* 中文首帧标题优化：系统CJK栈 + 600 权重（A/B 控制） */
 .zh-firstframe-title {
   font-family:
     system-ui,
@@ -461,8 +653,6 @@
   font-weight: 600;
 }
 
-/* 属性选择器版本：当 html[lang="zh"] 且页面容器设置 data-fast-lcp-zh="1" 时，
-   自动对标记为 data-lcp-title="1" 的 H1 应用同样的系统字体与权重 */
 :root[lang="zh"] [data-fast-lcp-zh="1"] h1[data-lcp-title="1"] {
   font-family:
     system-ui,
@@ -479,13 +669,11 @@
   font-weight: 600;
 }
 
-/* 字体加载优化 */
 .font-loading {
   font-display: swap;
   font-synthesis: none;
 }
 
-/* 字体回退期间的样式优化 */
 .font-fallback {
   font-family: "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
   letter-spacing: 0.01em;
@@ -494,27 +682,20 @@
 
 /**
  * Vercel Line Design System
- *
- * Semantic utility classes for consistent border/divider usage.
- * Opacity range: /30 ~ /50 for subtle, non-intrusive visual hierarchy.
  */
 @layer utilities {
-  /* Section divider - horizontal separator between major sections */
   .section-divider {
     @apply border-t border-border/30;
   }
 
-  /* Column divider - vertical separator between columns */
   .column-divider {
     @apply divide-x divide-border/30;
   }
 
-  /* Card border - subtle frame for cards and hero sections */
   .card-border {
     @apply rounded-2xl border border-border/40;
   }
 
-  /* Responsive variants */
   @media (min-width: 768px) {
     .md\:section-divider {
       @apply border-t border-border/30;
@@ -524,15 +705,9 @@
 
 /**
  * Header Responsive Contract
- *
- * Single source of truth for header responsive behavior.
- * Avoid scattering breakpoint-specific classes across components.
  */
 @layer utilities {
-  /* Visibility helpers */
   .header-mobile-only {
-    /* Tailwind v4: avoid applying responsive variants directly via @apply */
-    /* Primary navigation becomes visible at 1024px; keep mobile controls below this breakpoint. */
     @apply block;
     @media (min-width: 1024px) {
       @apply hidden;
@@ -540,16 +715,13 @@
   }
 
   .header-desktop-only {
-    /* Tailwind v4: avoid applying responsive variants directly via @apply */
     @apply hidden;
     @media (min-width: 1024px) {
       @apply flex;
     }
   }
 
-  /* Desktop nav overflow handling (1024px-1279px) */
   .header-nav-more-only {
-    /* Visible at lg, hidden at xl+ */
     @apply hidden;
     @media (min-width: 1024px) {
       @apply block;
@@ -560,7 +732,6 @@
   }
 
   .header-nav-secondary-only {
-    /* Hidden below xl to prevent crowding; shown at xl+ */
     @apply hidden;
     @media (min-width: 1280px) {
       @apply block;
@@ -568,7 +739,6 @@
   }
 
   .header-cta-desktop-only {
-    /* Tailwind v4: avoid applying responsive variants directly via @apply */
     @apply hidden;
     @media (min-width: 1280px) {
       @apply inline-flex;
@@ -576,14 +746,12 @@
   }
 
   .header-logo-text-desktop-only {
-    /* Tailwind v4: avoid applying responsive variants directly via @apply */
     @apply hidden;
     @media (min-width: 1280px) {
       @apply block;
     }
   }
 
-  /* Layout helpers */
   .header-nav-layout {
     @apply grid h-16 grid-cols-[1fr_auto_1fr] items-center;
   }
