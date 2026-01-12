@@ -1,0 +1,69 @@
+{
+  "defaultLocale": "en",
+  "supportedLocales": ["en", "zh"],
+  "postsPerPage": 12,
+  "enableDrafts": false,
+  "enableSearch": true,
+  "autoGenerateExcerpt": true,
+  "excerptLength": 160,
+  "dateFormat": "YYYY-MM-DD",
+  "timeZone": "UTC",
+  "seo": {
+    "defaultTitle": "B2B Web Template",
+    "titleTemplate": "%s | B2B Web Template",
+    "defaultDescription": "Modern B2B enterprise website template with Next.js 16, React 19, TypeScript, and Tailwind CSS",
+    "defaultKeywords": [
+      "Next.js",
+      "React",
+      "TypeScript",
+      "Tailwind CSS",
+      "B2B",
+      "Enterprise"
+    ],
+    "defaultOgImage": "/images/og-image.jpg"
+  },
+  "content": {
+    "posts": {
+      "enableComments": false,
+      "enableRelatedPosts": true,
+      "maxRelatedPosts": 3,
+      "enableReadingTime": true,
+      "enableToc": true,
+      "enableSocialShare": true
+    },
+    "pages": {
+      "enableToc": true,
+      "enableLastModified": true,
+      "enableBreadcrumbs": true
+    },
+    "products": {
+      "enableRelatedProducts": true,
+      "maxRelatedProducts": 4,
+      "enableSpecs": true,
+      "enableCertifications": true
+    }
+  },
+  "validation": {
+    "strictMode": false,
+    "requireSlug": true,
+    "requireLocale": false,
+    "requireAuthor": true,
+    "requireDescription": true,
+    "requireTags": false,
+    "requireCategories": false,
+    "maxTitleLength": 100,
+    "maxDescriptionLength": 200,
+    "maxExcerptLength": 300,
+    "products": {
+      "requireCoverImage": true,
+      "requireCategory": true,
+      "requirePrice": false
+    }
+  },
+  "performance": {
+    "enableCache": true,
+    "cacheMaxAge": 3600,
+    "enableCompression": true,
+    "enableLazyLoading": true
+  }
+}

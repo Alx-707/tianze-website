@@ -1,0 +1,10 @@
+{
+  "extraKnownMarketplaces": {
+    "wshobson-agents": {
+      "source": {
+        "source": "github",
+        "repo": "wshobson/agents"
+      }
+    }
+  }
+}

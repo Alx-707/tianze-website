@@ -1,0 +1,492 @@
+{
+  "common": {
+    "success": "成功",
+    "cancel": "取消",
+    "confirm": "确认",
+    "save": "保存",
+    "edit": "编辑",
+    "delete": "删除",
+    "search": "搜索",
+    "filter": "筛选",
+    "sort": "排序",
+    "next": "下一页",
+    "previous": "上一页",
+    "open": "打开",
+    "toast": {
+      "form": {
+        "contact": {
+          "success": "消息发送成功！",
+          "successDescription": "感谢您的留言，我们会尽快回复您。",
+          "error": "消息发送失败",
+          "errorDescription": "请稍后重试或直接联系我们。",
+          "loading": "正在发送消息..."
+        },
+        "newsletter": {
+          "success": "订阅成功！",
+          "successDescription": "感谢您订阅我们的邮件通讯。",
+          "error": "订阅失败",
+          "errorDescription": "请检查您的邮箱地址并重试。",
+          "loading": "正在订阅..."
+        },
+        "feedback": {
+          "success": "反馈提交成功！",
+          "successDescription": "感谢您的宝贵反馈。",
+          "error": "反馈提交失败",
+          "errorDescription": "请稍后重试。",
+          "loading": "正在提交反馈..."
+        }
+      }
+    }
+  },
+  "errorBoundary": {
+    "title": "发生错误",
+    "description": "出现了一些问题，请尝试刷新页面。",
+    "tryAgain": "重试"
+  },
+  "home": {
+    "title": "天泽管业",
+    "subtitle": "专业管道制造商",
+    "description": "专业PVC管道与PETG气动传输管制造商，通过ISO 9001:2015认证。",
+    "getStarted": "开始使用",
+    "learnMore": "了解更多",
+    "welcome": "欢迎来到天泽管业",
+    "modernApp": "基于 Next.js 16 和 React 19 构建的现代化Web应用",
+    "features": {
+      "title": "特性",
+      "performance": {
+        "title": "高性能",
+        "description": "采用现代Web技术优化速度和效率"
+      },
+      "scalable": {
+        "title": "可扩展架构",
+        "description": "随着您的业务需求和要求而增长"
+      },
+      "secure": {
+        "title": "企业级安全",
+        "description": "行业标准的安全实践和合规性"
+      }
+    },
+    "modernStack": "现代化技术栈",
+    "modernStackDesc": "采用最新技术构建",
+    "internationalization": "国际化",
+    "internationalizationDesc": "基于 next-intl 的多语言支持",
+    "testingReady": "测试就绪",
+    "testingReadyDesc": "完整的端到端测试配置"
+  },
+  "themeDemo": {
+    "title": "主题系统演示",
+    "description": "测试主题切换和中英文字体混排效果",
+    "chineseTest": "中文字体测试",
+    "englishTest": "英文字体测试",
+    "chineseDescription": "这是中文字体测试内容，使用了PingFang SC字体回退策略。现代化B2B企业级设计风格展示。",
+    "englishDescription": "这是英文字体测试内容，使用Geist Sans字体。现代化B2B企业级设计风格展示。",
+    "chineseInput": "中文输入框",
+    "englishInput": "英文输入框",
+    "chinesePlaceholder": "请输入中文内容",
+    "englishPlaceholder": "请输入英文内容",
+    "primaryButton": "主要按钮",
+    "secondaryButton": "次要按钮",
+    "outlineButton": "轮廓按钮"
+  },
+  "instructions": {
+    "getStarted": "开始编辑",
+    "saveChanges": "保存并立即查看您的更改"
+  },
+  "actions": { "deployNow": "立即部署", "readDocs": "阅读文档" },
+  "formTemplate": {
+    "form": {
+      "success": "成功",
+      "error": "未知错误",
+      "submitting": "提交中...",
+      "submit": "提交",
+      "selectOption": "选择一个选项"
+    },
+    "example": {
+      "fields": {
+        "name": { "label": "姓名", "placeholder": "请输入您的姓名" },
+        "email": { "label": "邮箱", "placeholder": "请输入您的邮箱" },
+        "message": { "label": "留言", "placeholder": "请输入您的留言" }
+      }
+    }
+  },
+  "contact": {
+    "form": {
+      "title": "联系我们",
+      "description": "与我们取得联系，我们很乐意听到您的声音。",
+      "optional": "选填",
+      "firstName": "名字",
+      "lastName": "姓氏",
+      "email": "邮箱地址",
+      "company": "公司名称",
+      "phone": "电话号码",
+      "subject": "主题",
+      "message": "消息内容",
+      "firstNamePlaceholder": "请输入您的名字",
+      "lastNamePlaceholder": "请输入您的姓氏",
+      "emailPlaceholder": "your@email.com",
+      "companyPlaceholder": "您的公司名称",
+      "phonePlaceholder": "+86 138 0000 0000",
+      "subjectPlaceholder": "我们可以为您提供什么帮助？",
+      "messagePlaceholder": "请描述您的需求或问题...",
+      "acceptPrivacy": "我同意隐私政策和服务条款",
+      "marketingConsent": "我希望接收营销通讯",
+      "submit": "发送消息",
+      "submitting": "发送中...",
+      "submitSuccess": "消息已成功发送！",
+      "submitError": "消息发送失败，请稍后再试。",
+      "success": "谢谢！您的消息已成功发送。我们会尽快回复您。",
+      "error": "抱歉，发送消息时出现错误。请稍后重试。",
+      "rateLimitMessage": "您刚刚提交过表单，请稍候再尝试。",
+      "errors": {
+        "generic": "请检查标记的字段后再试一次。",
+        "firstName": {
+          "required": "名字为必填项",
+          "tooShort": "名字至少需要2个字符",
+          "tooLong": "名字长度需少于50个字符",
+          "invalid": "名字仅允许字母和空格"
+        },
+        "lastName": {
+          "required": "姓氏为必填项",
+          "tooShort": "姓氏至少需要2个字符",
+          "tooLong": "姓氏长度需少于50个字符",
+          "invalid": "姓氏仅允许字母和空格"
+        },
+        "email": {
+          "required": "邮箱地址为必填项",
+          "invalid": "请输入有效的邮箱地址",
+          "tooLong": "邮箱地址长度需少于100个字符"
+        },
+        "company": {
+          "tooShort": "公司名称至少需要2个字符",
+          "tooLong": "公司名称需少于100个字符",
+          "invalid": "公司名称包含无效字符"
+        },
+        "message": {
+          "required": "消息内容为必填项",
+          "tooShort": "消息内容至少需要10个字符",
+          "tooLong": "消息内容需少于1000个字符"
+        },
+        "phone": { "invalid": "请输入有效的电话号码" },
+        "subject": { "length": "主题长度需在5到100个字符之间" },
+        "acceptPrivacy": { "required": "必须同意隐私政策" },
+        "website": { "shouldBeEmpty": "该字段应保持为空" }
+      },
+      "validation": {
+        "firstNameRequired": "名字为必填项",
+        "firstNameTooShort": "名字至少需要2个字符",
+        "lastNameRequired": "姓氏为必填项",
+        "lastNameTooShort": "姓氏至少需要2个字符",
+        "emailRequired": "邮箱地址为必填项",
+        "emailInvalid": "请输入有效的邮箱地址",
+        "messageRequired": "消息内容为必填项",
+        "messageTooShort": "消息内容至少需要10个字符"
+      }
+    }
+  },
+  "footer": {
+    "learn": "学习",
+    "examples": "示例",
+    "goToNextjs": "访问nextjs.org",
+    "copyright": "(c) {year} 天泽管业。保留所有权利。",
+    "description": "专业PVC管道与PETG气动传输管制造商。"
+  },
+  "formatting": {
+    "date": {
+      "today": "今天",
+      "yesterday": "昨天",
+      "tomorrow": "明天",
+      "lastUpdated": "最后更新于 {date}",
+      "publishedOn": "发布于 {date}"
+    },
+    "number": {
+      "currency": "¥{amount}",
+      "percentage": "{value}％",
+      "fileSize": "{size}{unit}"
+    },
+    "plurals": {
+      "items": {
+        "zero": "暂无项目",
+        "one": "1个项目",
+        "other": "{count}个项目"
+      },
+      "users": {
+        "zero": "暂无在线用户",
+        "one": "1位用户在线",
+        "other": "{count}位用户在线"
+      },
+      "notifications": {
+        "zero": "暂无新通知",
+        "one": "1条新通知",
+        "other": "{count}条新通知"
+      }
+    }
+  },
+  "errors": {
+    "serverError": "服务器内部错误",
+    "networkError": "网络连接错误",
+    "validationError": "请检查您的输入",
+    "unauthorized": "您无权访问此页面",
+    "forbidden": "禁止访问此资源",
+    "timeout": "请求超时，请重试",
+    "generic": "出现了一些问题，请稍后重试",
+    "translationMissing": "翻译不可用",
+    "loadingFailed": "内容加载失败"
+  },
+  "progress": {
+    "title": "开发进度",
+    "status": "开发进度",
+    "nearCompletion": "即将完成",
+    "planning": "规划中",
+    "development": "开发中",
+    "testing": "测试中",
+    "launch": "即将发布",
+    "ariaLabel": "项目开发进度指示器",
+    "completed": "已完成",
+    "current": "当前步骤",
+    "upcoming": "即将开始"
+  },
+  "ReactScanDemo": {
+    "title": "React Scan 性能演示",
+    "description": "React Scan 性能监控功能的交互式演示",
+    "instructions": {
+      "title": "如何使用此演示",
+      "step1": "按 Ctrl+Shift+X 切换 React Scan 开启/关闭",
+      "step2": "点击下方按钮触发不同类型的渲染",
+      "step3": "观察红色高亮（不必要渲染）和绿色高亮（优化渲染）",
+      "step4": "使用右下角的 React Scan 工具栏进行详细分析"
+    }
+  },
+  "themes": {
+    "title": "主题系统",
+    "description": "支持明暗模式切换的动态主题系统。",
+    "toggle": "主题切换",
+    "language": "语言切换",
+    "colors": { "title": "色彩调色板" },
+    "typography": {
+      "title": "排版",
+      "bold": "加粗文本",
+      "medium": "中等粗细文本",
+      "normal": "正常文本",
+      "muted": "辅助文本"
+    }
+  },
+  "stats": {
+    "technologies": "项技术",
+    "typescript": "TypeScript 覆盖率",
+    "performance": "性能评分",
+    "languages": "语言数量"
+  },
+  "email": "邮箱地址",
+  "emailPlaceholder": "your@email.com",
+  "phone": "电话号码",
+  "organization": {
+    "name": "天泽管业",
+    "description": "专业PVC管道与PETG气动传输管制造商",
+    "phone": "+86-518-0000-0000",
+    "social": {
+      "twitter": "https://x.com/tianzepipe",
+      "linkedin": "https://www.linkedin.com/company/tianze-pipe",
+      "github": "https://github.com/tianze-pipe"
+    }
+  },
+  "website": {
+    "name": "天泽管业",
+    "description": "专业PVC管道与PETG气动传输管制造商"
+  },
+  "article": { "defaultAuthor": "天泽管业" },
+  "blog": {
+    "pageTitle": "博客",
+    "pageDescription": "探索我们关于技术、设计和企业解决方案的最新文章、见解和更新。",
+    "readingTime": "分钟阅读",
+    "emptyState": "暂无文章发布，敬请期待！",
+    "backToList": "返回博客列表",
+    "publishedOn": "发布于",
+    "updatedOn": "更新于",
+    "author": "作者",
+    "tags": "标签",
+    "categories": "分类",
+    "allCategories": "全部",
+    "relatedArticles": "相关文章",
+    "shareArticle": "分享文章",
+    "articleNotFound": "文章未找到",
+    "sidebar": { "mostPopular": "热门文章", "categories": "分类" },
+    "contentTypes": {
+      "article": "文章",
+      "case-study": "案例研究",
+      "guide": "指南",
+      "news": "新闻",
+      "whitepaper": "白皮书"
+    },
+    "newsletter": {
+      "title": "订阅我们的通讯",
+      "description": "获取最新的行业洞察、产品更新和贸易技巧。",
+      "placeholder": "请输入您的邮箱地址",
+      "submit": "订阅",
+      "submitting": "订阅中...",
+      "success": "感谢您的订阅！您将收到我们的最新动态。",
+      "error": "发生错误，请重试。",
+      "turnstileRequired": "请完成安全验证。"
+    }
+  },
+  "about": {
+    "pageTitle": "关于我们",
+    "pageDescription": "了解更多关于我们公司、使命和致力于提供优质产品的团队。",
+    "hero": {
+      "title": "关于我们",
+      "subtitle": "您值得信赖的全球贸易伙伴",
+      "description": "我们是一家专业从事高品质工业产品制造和出口的领先企业。凭借多年的国际贸易经验，我们致力于为全球客户提供卓越的产品和服务。"
+    },
+    "mission": {
+      "title": "我们的使命",
+      "content": "提供创新、高品质的产品，满足全球客户不断变化的需求，同时保持最高的服务和诚信标准。"
+    },
+    "values": {
+      "title": "核心价值观",
+      "quality": {
+        "title": "质量至上",
+        "description": "我们对质量绝不妥协。每件产品都经过严格的测试和质量控制。"
+      },
+      "innovation": {
+        "title": "持续创新",
+        "description": "我们投资研发，为市场带来前沿解决方案。"
+      },
+      "service": {
+        "title": "客户服务",
+        "description": "您的成功是我们的首要任务。我们提供全面的售前和售后支持。"
+      },
+      "integrity": {
+        "title": "诚信经营",
+        "description": "我们基于信任、透明和相互尊重建立长期合作关系。"
+      }
+    },
+    "stats": {
+      "yearsExperience": "年行业经验",
+      "countriesServed": "服务国家",
+      "happyClients": "满意客户",
+      "productsDelivered": "交付产品"
+    },
+    "cta": {
+      "title": "准备好与我们合作了吗？",
+      "description": "联系我们的团队，讨论您的需求，了解我们如何帮助您的业务增长。",
+      "button": "联系我们"
+    }
+  },
+  "products": {
+    "pageTitle": "产品中心",
+    "pageDescription": "探索我们为您的业务需求提供的全系列优质产品。",
+    "emptyState": "暂无产品，请稍后再来查看。",
+    "viewDetails": "查看详情",
+    "requestQuote": "询价",
+    "allCategories": "全部分类",
+    "allStandards": "全部标准",
+    "standardsFilterAriaLabel": "按标准筛选",
+    "featured": "精选",
+    "card": {
+      "moq": "起订量",
+      "leadTime": "交货期",
+      "supplyCapacity": "供货能力"
+    },
+    "detail": {
+      "specifications": "产品规格",
+      "tradeInfo": "贸易信息",
+      "certifications": "产品认证",
+      "relatedProducts": "相关产品",
+      "downloadPdf": "下载产品 PDF 资料",
+      "labels": {
+        "moq": "最小起订量",
+        "leadTime": "交货周期",
+        "supplyCapacity": "供货能力",
+        "packaging": "包装方式",
+        "portOfLoading": "装运港口"
+      }
+    },
+    "inquiry": {
+      "title": "产品询价",
+      "description": "对此产品感兴趣？发送询价获取报价和货期信息。",
+      "productName": "产品名称",
+      "quantity": "需求数量",
+      "quantityPlaceholder": "例如：500 件",
+      "targetPrice": "目标价格（选填）",
+      "targetPricePlaceholder": "例如：每件 10 美元",
+      "requirements": "特殊要求",
+      "requirementsPlaceholder": "请描述您的特殊需求，如定制、包装或认证要求...",
+      "submit": "发送询价",
+      "submitting": "发送中...",
+      "success": "询价已成功发送！我们将在 24 小时内回复您。",
+      "error": "询价发送失败，请稍后重试。",
+      "turnstileRequired": "请完成安全验证。"
+    }
+  },
+  "title": "天泽管业",
+  "trust": {
+    "testimonials": { "title": "客户评价", "subtitle": "受到全球企业的信赖" },
+    "partners": { "title": "合作伙伴", "subtitle": "与行业领导者携手合作" },
+    "certifications": { "title": "资质认证", "subtitle": "值得信赖的品质保证" },
+    "stats": {
+      "title": "数字见证",
+      "yearsInBusiness": "经营年限",
+      "countriesServed": "服务国家",
+      "satisfactionRate": "客户满意度",
+      "projectsCompleted": "交付项目"
+    }
+  },
+  "faq": {
+    "pageTitle": "常见问题",
+    "pageDescription": "查找关于订购、付款、运输和售后服务的常见问题解答。",
+    "categories": {
+      "ordering": "订购与采购",
+      "payment": "付款与结算",
+      "logistics": "物流与运输",
+      "quality": "质量与售后"
+    },
+    "noResults": "未找到匹配的问题。",
+    "searchPlaceholder": "搜索问题...",
+    "contactCta": {
+      "title": "还有其他问题？",
+      "description": "我们的支持团队随时为您提供帮助。",
+      "button": "联系我们"
+    }
+  },
+  "privacy": {
+    "pageTitle": "隐私政策",
+    "pageDescription": "了解我们如何收集、使用和保护您的个人信息。",
+    "lastUpdated": "最后更新",
+    "effectiveDate": "生效日期",
+    "tableOfContents": "目录",
+    "sections": {
+      "introduction": "引言",
+      "informationCollected": "我们收集的信息",
+      "howWeUse": "我们如何使用您的信息",
+      "sharing": "信息共享",
+      "security": "数据安全",
+      "retention": "数据保留",
+      "rights": "您的隐私权利",
+      "children": "儿童隐私",
+      "changes": "政策变更",
+      "contact": "联系我们"
+    }
+  },
+  "terms": {
+    "pageTitle": "服务条款",
+    "pageDescription": "阅读我们的服务使用条款和产品采购条件。",
+    "lastUpdated": "最后更新",
+    "effectiveDate": "生效日期",
+    "tableOfContents": "目录",
+    "sections": {
+      "introduction": "引言",
+      "acceptance": "条款接受",
+      "services": "服务说明",
+      "orders": "订单与合同",
+      "payment": "付款条款",
+      "shipping": "运输与交付",
+      "warranty": "保修与退换",
+      "liability": "责任限制",
+      "ip": "知识产权",
+      "confidentiality": "保密条款",
+      "termination": "终止条款",
+      "governing": "适用法律",
+      "disputes": "争议解决",
+      "contact": "联系方式"
+    }
+  }
+}

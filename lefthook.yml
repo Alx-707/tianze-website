@@ -1,0 +1,169 @@
+# Git Hooks管理配置
+# 自动化质量门禁系统 - 确保代码质量和安全性
+# 质量阈值统一由 scripts/quality-gate.js 管理
+pre-commit:
+  parallel: true
+  commands:
+    # 代码格式检查 (Prettier)
+    format-check:
+      run: |
+        FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(js|jsx|ts|tsx|json|md|mdx|yml|yaml|css|scss|html)$' || true)
+        if [ -z "$FILES" ]; then echo "✅ 格式检查通过 (无可格式化变更)"; exit 0; fi
+        pnpm exec prettier --check $FILES
+      fail_text: '代码格式检查失败 - 请运行 pnpm format:write 修复格式问题'
+      stage_fixed: true
+
+    # TypeScript类型检查
+    type-check:
+      run: pnpm type-check
+      fail_text: 'TypeScript类型检查失败 - 请修复类型错误后重新提交'
+      stage_fixed: true
+
+    # 代码质量检查 (ESLint) - 使用增量检查避免历史问题阻塞
+    quality-check:
+      run: pnpm quality:quick:staged
+      fail_text: '代码质量检查失败 - 发现新的质量问题，请修复后重新提交'
+      stage_fixed: true
+
+    # 架构守卫 - 仅检查已暂存的 JS/TS 变更（排除测试文件和脚本目录）
+    architecture-guard:
+      run: |
+        FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(ts|tsx|js|jsx)$' | grep -v '^tests/' | grep -v '__tests__' | grep -v '^scripts/' | grep -v '^src/test/' || true)
+        if [ -z "$FILES" ]; then echo "✅ 架构守卫检查通过 (无 JS/TS 变更)"; exit 0; fi
+        for f in $FILES; do
+          if git diff --cached -- "$f" | grep -E '^\+' | grep -v '^\+.*\/\/' | grep -qE 'export \* from'; then
+            echo "❌ 发现新增export *重新导出: $f"; echo "🚫 架构重构期间禁止新增 export * 重新导出";
+            echo "请使用命名导出：export { specificExport } from './module'"; exit 1; fi
+        done
+        for f in $FILES; do
+          # 例外：配置文件必须使用相对路径（TypeScript 路径别名在 Node.js 运行时不可用）
+          if [ "$f" = "src/config/security.ts" ] || [ "$f" = "next.config.ts" ] || [ "$f" = "middleware.ts" ]; then continue; fi
+          if git diff --cached -- "$f" | grep -qE "^\+.*from ['\"']\./|^\+.*from ['\"']\.\./"; then
+            echo "❌ 发现新增相对路径导入: $f"; echo "🚫 请使用 @/ 路径别名替代相对路径导入";
+            echo "例如：import { something } from '@/lib/module'"; exit 1; fi
+        done
+        echo "✅ 架构守卫检查通过"
+      fail_text: '架构守卫检查失败 - 发现违反架构重构规则的代码变更'
+      stage_fixed: false
+
+    # 别名一致性检查
+    config-check:
+      run: pnpm config:check
+      fail_text: '别名一致性检查失败 - 请修复 tsconfig/next.config/ESLint 配置一致性'
+      stage_fixed: false
+
+    # 多语言同步检查
+    i18n-sync:
+      run: |
+        if git diff --cached --name-only | grep -E '^(messages/|content/|i18n\.(json|ts)$|src/.+i18n|translation\.config\.js)' >/dev/null; then
+          pnpm i18n:full
+        else
+          echo "跳过 i18n 同步检查（无相关变更）"; exit 0;
+        fi
+      fail_text: '多语言同步检查失败 - 请同步 messages 与内容文件的中英版本'
+      stage_fixed: false
+
+    # 相关测试检查 - 确保组件/库变更后测试同步更新
+    # 使用 Vitest 4 的 `vitest related` 子命令
+    test-related:
+      run: |
+        FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '^src/.+\.(ts|tsx)$' | grep -v '\.test\.' | grep -v '\.spec\.' | grep -v '__tests__' || true)
+        if [ -z "$FILES" ]; then
+          echo "✅ 相关测试检查通过 (无源码变更)"; exit 0;
+        fi
+        echo "🧪 运行相关测试..."
+        pnpm vitest related $FILES --run --passWithNoTests --reporter=dot 2>/dev/null || {
+          echo ""; echo "❌ 相关测试失败 - 可能原因:";
+          echo "  1. 组件 DOM 结构变更，但测试中的 getByRole/getByText 未同步";
+          echo "  2. 接口属性变更，但 Mock 配置未更新";
+          echo "  3. 函数签名变更，但测试断言未更新";
+          echo ""; echo "💡 请检查并同步更新对应的测试文件";
+          exit 1;
+        }
+      fail_text: '相关测试失败 - 请确保源码变更后测试同步更新（参见 .claude/rules/testing.md Twin File Principle）'
+      stage_fixed: false
+
+commit-msg:
+  commands:
+    commitlint:
+      run: pnpm commitlint --edit {1}
+      fail_text:
+        '提交信息不符合规范 - 请使用约定式提交格式：type(scope): description'
+
+pre-push:
+  parallel: false  # 串行执行，确保构建先完成
+  commands:
+    # 构建成功验证（A+：默认执行；紧急场景可用 RUN_FAST_PUSH=1 跳过）
+    build-check:
+      run: |
+        if [ -n "$RUN_FAST_PUSH" ]; then
+          echo "⏭️  RUN_FAST_PUSH=1: 跳过构建验证（仅用于紧急推送）";
+        else
+          pnpm build:check
+        fi
+      fail_text: '构建验证失败 - 请修复构建错误后再推送'
+
+    # 翻译验证（保持执行，速度快）
+    translation-check:
+      run: pnpm validate:translations
+      fail_text: '翻译验证失败 - 请确保所有翻译文件同步'
+
+    # 质量门禁（单一权威源：scripts/quality-gate.js）
+    # - 本地: 使用 --mode=fast 跳过覆盖率和性能测试（<2分钟）
+    # - CI: 使用完整模式（由 CI 配置控制）
+    # - 紧急推送: 设置 RUN_FAST_PUSH=1 完全跳过
+    quality-gate:
+      run: |
+        if [ -n "$RUN_FAST_PUSH" ]; then
+          echo "⏭️  RUN_FAST_PUSH=1: 跳过质量门禁（仅用于紧急推送，CI 会兜底）";
+        elif [ -n "$CI" ]; then
+          echo "🤖 CI 环境: 运行完整质量门禁";
+          pnpm quality:gate
+        else
+          echo "💻 本地环境: 运行快速质量门禁（跳过覆盖率和性能测试）";
+          echo "   阈值统一由 scripts/quality-gate.js 管理";
+          pnpm quality:gate:fast
+        fi
+      fail_text: '质量门禁失败 - 阈值由 scripts/quality-gate.js 管理，请修复质量问题后再推送'
+
+    # 架构检查（A+：全量巡航 + 循环依赖；使用 err 报告减少噪音；可用 RUN_FAST_PUSH=1 跳过应急推送）
+    arch-check:
+      run: |
+        if [ -n "$RUN_FAST_PUSH" ]; then
+          echo "⏭️  RUN_FAST_PUSH=1: 跳过架构检查（仅用于紧急推送，CI/后续本地请补跑）";
+        else
+          pnpm exec dependency-cruiser src --config .dependency-cruiser.js -T err
+          pnpm circular:check
+        fi
+      fail_text: '架构检查失败 - 发现循环依赖或架构违规'
+
+    # E2E 布局回归检查（默认跳过；设置 RUN_E2E_LAYOUT=1 启用）
+    e2e-layout-check:
+      run: |
+        if [ -n "$RUN_E2E_LAYOUT" ]; then
+          echo "🧭 RUN_E2E_LAYOUT=1: 运行 header bbox 布局回归用例";
+          pnpm test:e2e -- tests/e2e/header-layout.bbox.spec.ts
+        else
+          echo "⏭️  跳过 E2E 布局回归 (设置 RUN_E2E_LAYOUT=1 启用)"
+        fi
+      fail_text: 'E2E 布局回归失败 - header 布局发生重叠/溢出'
+
+    # 性能测试 (仅 CI 环境运行,避免本地 headless Chrome 卡住)
+    performance-test:
+      run: |
+        if [ -n "$CI" ]; then
+          pnpm perf:check
+        else
+          echo "⏭️  跳过性能测试 (仅 CI 环境运行)"
+        fi
+      fail_text: '性能测试失败 - 包大小或性能指标超出限制'
+
+    # 安全检查（A+：本地执行；可用 RUN_FAST_PUSH=1 跳过应急推送）
+    security-check:
+      run: |
+        if [ -n "$RUN_FAST_PUSH" ]; then
+          echo "⏭️  RUN_FAST_PUSH=1: 跳过安全审计（仅用于紧急推送，CI 会兜底）";
+        else
+          pnpm security:audit
+        fi
+      fail_text: '安全检查失败 - 发现安全漏洞，请修复后推送'

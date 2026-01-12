@@ -1,0 +1,96 @@
+name: 深度安全扫描
+
+# ============================================================================
+# 职责：深度安全扫描（Semgrep full scan）
+# 触发：仅在 main 分支推送或定时任务运行，不阻塞 PR
+# 依赖：基础质量检查由 ci.yml 负责
+# ============================================================================
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    # 每日 UTC 02:00（北京时间 10:00）执行深度扫描
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+  security-events: write
+
+jobs:
+  semgrep-full-scan:
+    name: Semgrep 深度安全扫描
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+        with:
+          submodules: false
+          persist-credentials: false
+
+      - name: 安装 Semgrep CLI
+        run: |
+          python3 -m pip install --user "semgrep<2"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Semgrep 完整安全扫描
+        run: |
+          set -euo pipefail
+          echo "🔍 Running Semgrep full security scan..."
+
+          # ERROR 级规则：硬门禁
+          semgrep scan \
+            --config semgrep.yml \
+            --severity ERROR \
+            --error \
+            --sarif --sarif-output semgrep-error.sarif \
+            src/
+
+          # WARNING 级规则：仅记录，不阻塞
+          semgrep scan \
+            --config semgrep.yml \
+            --severity WARNING \
+            --sarif --sarif-output semgrep-warning.sarif \
+            src/ || true
+
+          echo "✅ Semgrep scan completed"
+
+      - name: 上传 SARIF 到 GitHub Security
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: semgrep-error.sarif
+          category: semgrep-security
+        continue-on-error: true
+
+      - name: 上传扫描报告
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: semgrep-reports
+          path: |
+            semgrep-error.sarif
+            semgrep-warning.sarif
+          retention-days: 30
+          if-no-files-found: ignore
+
+  scan-summary:
+    name: 扫描总结
+    runs-on: ubuntu-latest
+    needs: [semgrep-full-scan]
+    if: always()
+    timeout-minutes: 5
+
+    steps:
+      - name: 生成扫描总结
+        run: |
+          echo "## 🔒 深度安全扫描总结" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Semgrep 扫描**: ${{ needs.semgrep-full-scan.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "> **Note**: 基础质量检查（type-check, lint, test）由 ci.yml 统一处理" >> $GITHUB_STEP_SUMMARY
+          echo "> PR 级别的 Semgrep baseline 扫描已移至 ci.yml" >> $GITHUB_STEP_SUMMARY

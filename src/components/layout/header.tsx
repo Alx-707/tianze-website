@@ -1,0 +1,161 @@
+/**
+ * Header Component (Server)
+ *
+ * 服务端渲染的头部，交互部件以客户端小岛方式注入，减少首屏 JS 体积。
+ */
+import Link from "next/link";
+import { getTranslations } from "next-intl/server";
+import { cn } from "@/lib/utils";
+import {
+  LanguageToggleIsland,
+  MobileNavigationIsland,
+  NavSwitcherIsland,
+} from "@/components/layout/header-client";
+import { HeaderScrollChrome } from "@/components/layout/header-scroll-chrome";
+import { Logo } from "@/components/layout/logo";
+import { Idle } from "@/components/lazy/idle";
+import { Button } from "@/components/ui/button";
+
+/**
+ * Header Component
+ *
+ * Main navigation header with responsive design, logo, navigation menus,
+ * and utility controls (language switcher, theme toggle).
+ */
+
+// Simplified header props interface
+interface HeaderProps {
+  className?: string;
+  variant?: "default" | "minimal" | "transparent";
+  sticky?: boolean;
+  locale?: "en" | "zh";
+}
+
+export async function Header({
+  className,
+  variant = "default",
+  sticky = true,
+  locale,
+}: HeaderProps) {
+  // 透明头部不吸顶
+  const isSticky = variant === "transparent" ? false : sticky;
+  const isMinimal = variant === "minimal";
+  const isTransparent = variant === "transparent";
+
+  // Check if using Vercel navigation variant
+  const isVercelNav = process.env.NEXT_PUBLIC_NAV_VARIANT !== "legacy";
+
+  // A/B 支持：可通过 NEXT_PUBLIC_IDLE_ROOTMARGIN='200px 0px 200px 0px' 等调整
+  const VISIBLE_MARGIN =
+    process.env.NEXT_PUBLIC_IDLE_ROOTMARGIN ?? "400px 0px 400px 0px";
+
+  // Get translations for CTA button
+  const t = await getTranslations("navigation");
+
+  return (
+    <header
+      className={cn(
+        "w-full bg-background",
+        isSticky && "sticky top-0 z-50",
+        isTransparent && "border-transparent bg-transparent",
+        // Scroll shadow effect via data-scrolled attribute
+        isVercelNav
+          ? "border-b border-border/30 transition-all duration-200 data-[scrolled=true]:border-border/60 data-[scrolled=true]:shadow-sm"
+          : !isTransparent && "border-b border-border",
+        className,
+      )}
+    >
+      {/* Scroll detection client island */}
+      {isVercelNav && <HeaderScrollChrome />}
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="header-nav-layout">
+          {/* Left section: Logo */}
+          <div
+            className="header-nav-left"
+            {...(!locale ? { "data-testid": "mobile-navigation" } : {})}
+          >
+            <Logo locale={locale} />
+          </div>
+
+          {/* Center section: Main Navigation (Desktop) */}
+          <CenterNav
+            isMinimal={isMinimal}
+            locale={locale}
+            VISIBLE_MARGIN={VISIBLE_MARGIN}
+          />
+
+          {/* Right section: Utility Controls */}
+          <div
+            className="header-nav-right"
+            {...(!locale ? { "data-testid": "language-toggle-button" } : {})}
+          >
+            {/* Desktop: Language toggle */}
+            {locale ? (
+              <div className="header-desktop-only h-10 w-28 items-center justify-end">
+                <Idle strategy="visible" rootMargin={VISIBLE_MARGIN}>
+                  <LanguageToggleIsland locale={locale} />
+                </Idle>
+              </div>
+            ) : null}
+            {/* Desktop CTA Button */}
+            {locale && (
+              <Button
+                variant="default"
+                size="sm"
+                asChild
+                className="header-cta-desktop-only"
+              >
+                <Link
+                  href={`/${locale}/contact?source=header_cta`}
+                  data-testid="header-cta"
+                >
+                  {t("contactSales")}
+                </Link>
+              </Button>
+            )}
+            {/* Mobile: Hamburger menu (right side per UX best practices) */}
+            {locale ? (
+              <div className="header-mobile-only h-10 w-10">
+                <Idle strategy="visible" rootMargin={VISIBLE_MARGIN}>
+                  <MobileNavigationIsland />
+                </Idle>
+              </div>
+            ) : null}
+          </div>
+        </div>
+      </div>
+    </header>
+  );
+}
+
+function CenterNav({
+  isMinimal,
+  locale,
+  VISIBLE_MARGIN,
+}: {
+  isMinimal: boolean;
+  locale?: "en" | "zh" | undefined;
+  VISIBLE_MARGIN: string;
+}) {
+  if (isMinimal) return null;
+  return (
+    <div
+      className="header-nav-center"
+      {...(!locale ? { "data-testid": "nav-switcher" } : {})}
+    >
+      {/* 客户端：导航切换器（更晚加载，避免首屏竞争） */}
+      <Idle strategy="visible" rootMargin={VISIBLE_MARGIN}>
+        {locale ? <NavSwitcherIsland /> : null}
+      </Idle>
+    </div>
+  );
+}
+
+// Simplified convenience components (only keep the most commonly used ones)
+export function HeaderMinimal({ className }: { className?: string }) {
+  return <Header variant="minimal" {...(className && { className })} />;
+}
+
+export function HeaderTransparent({ className }: { className?: string }) {
+  return <Header variant="transparent" {...(className && { className })} />;
+}

@@ -1,0 +1,1215 @@
+{
+  "_comment": "⚠️ THIS FILE IS ONLY USED FOR VITEST MOCKS - DO NOT USE IN PRODUCTION CODE",
+  "_usage": "Referenced by vi.mock() in Vitest tests. Runtime translations are loaded from messages/[locale]/critical.json and messages/[locale]/deferred.json.",
+  "_last_updated": "2025-11-26",
+  "monitoring": {
+    "loadError": "Monitoring component failed to load"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "close": "Close",
+    "whatsapp": {
+      "greeting": "Need help?",
+      "responseTime": "Team typically replies within 5 minutes.",
+      "placeholder": "Type your message...",
+      "startChat": "Start WhatsApp Chat",
+      "defaultMessage": "Hi! I'm interested in your products.",
+      "buttonLabel": "Chat with us on WhatsApp"
+    },
+    "success": "Success",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "edit": "Edit",
+    "delete": "Delete",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort",
+    "next": "Next",
+    "previous": "Previous",
+    "open": "Open",
+    "toast": {
+      "form": {
+        "contact": {
+          "success": "Message sent successfully!",
+          "successDescription": "Thank you for your message. We'll get back to you soon.",
+          "error": "Failed to send message",
+          "errorDescription": "Please try again later or contact us directly.",
+          "loading": "Sending message..."
+        },
+        "newsletter": {
+          "success": "Successfully subscribed!",
+          "successDescription": "Thank you for subscribing to our newsletter.",
+          "error": "Subscription failed",
+          "errorDescription": "Please check your email and try again.",
+          "loading": "Subscribing..."
+        },
+        "feedback": {
+          "success": "Feedback submitted!",
+          "successDescription": "Thank you for your valuable feedback.",
+          "error": "Failed to submit feedback",
+          "errorDescription": "Please try again later.",
+          "loading": "Submitting feedback..."
+        }
+      }
+    }
+  },
+  "navigation": {
+    "home": "Home",
+    "more": "More",
+    "about": "About",
+    "contact": "Contact",
+    "contactSales": "Contact Sales",
+    "services": "Services",
+    "products": "Products",
+    "solutions": "Solutions",
+    "resources": "Resources",
+    "enterprise": "Enterprise",
+    "docs": "Docs",
+    "pricing": "Pricing",
+    "blog": "Blog",
+    "faq": "FAQ",
+    "privacy": "Privacy Policy",
+    "login": "Login",
+    "logout": "Logout",
+    "profile": "Profile",
+    "settings": "Settings",
+    "frameworks": "Frameworks",
+    "infrastructure": "Infrastructure",
+    "security": "Security",
+    "aiApps": "AI Apps",
+    "webApps": "Web Apps",
+    "ecommerce": "Ecommerce",
+    "guides": "Guides",
+    "frameworksDescription": "Build with the best frameworks",
+    "infrastructureDescription": "Scalable and reliable infrastructure",
+    "securityDescription": "Enterprise-grade security",
+    "aiAppsDescription": "Deploy AI applications at scale",
+    "webAppsDescription": "Modern web application platform",
+    "ecommerceDescription": "Power your online store",
+    "docsDescription": "Complete documentation and guides",
+    "guidesDescription": "Step-by-step tutorials",
+    "blogDescription": "Latest updates and insights"
+  },
+  "theme": {
+    "toggle": "Toggle theme",
+    "toggleLabel": "Theme toggle",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System",
+    "selectTheme": "Select display theme",
+    "selectDisplayTheme": "Select a display theme:",
+    "switchToLight": "Switch to light theme",
+    "switchToDark": "Switch to dark theme",
+    "switchToSystem": "Switch to system theme"
+  },
+  "language": {
+    "toggle": "Toggle language",
+    "selectLanguage": "Select Language",
+    "english": "English",
+    "chinese": "中文",
+    "switching": "Switching language...",
+    "switchSuccess": "Language switched successfully",
+    "switchError": "Failed to switch language",
+    "fallbackWarning": "Some content may not be available in your selected language",
+    "detectionInfo": "Detection Info",
+    "source": "Source",
+    "confidence": "Confidence",
+    "userPreference": "User preference saved",
+    "detector": {
+      "title": "Detection Info",
+      "source": "Source",
+      "confidence": "Confidence",
+      "userSaved": "✓ User preference saved",
+      "sources": {
+        "browser": "Browser",
+        "cookie": "Cookie",
+        "url": "URL",
+        "header": "Header",
+        "default": "Default",
+        "user": "User",
+        "stored": "Stored",
+        "geo": "Geo",
+        "timezone": "Timezone"
+      }
+    }
+  },
+  "home": {
+    "hero": {
+      "version": "v1.0.0 - Production Ready",
+      "title": {
+        "line1": "Modern B2B Enterprise",
+        "line2": "Web Platform"
+      },
+      "subtitle": "Built with Next.js 16, React 19, TypeScript 5.9.3, and Tailwind CSS 4. Features enterprise-grade security, internationalization, and performance optimization.",
+      "cta": {
+        "demo": "View Demo",
+        "github": "View on GitHub"
+      },
+      "stats": {
+        "technologies": "Technologies",
+        "typescript": "TypeScript",
+        "performance": "Performance",
+        "languages": "Languages"
+      }
+    },
+    "techStack": {
+      "title": "Technology Stack",
+      "subtitle": "Built with cutting-edge technologies for enterprise-grade performance and scalability.",
+      "learnMore": "Learn More",
+      "learnMoreLabel": "Learn more about {target}",
+      "categories": {
+        "core": "Core Frameworks",
+        "ui": "UI System",
+        "i18n": "Internationalization",
+        "tools": "Tooling",
+        "testing": "Testing",
+        "dev": "Dev Tools",
+        "performance": "Performance Monitoring",
+        "security": "Security",
+        "animation": "Animation",
+        "deployment": "Deployment",
+        "quality": "Code Quality",
+        "docs": "Documentation",
+        "data": "Data Fetching",
+        "state": "State Management"
+      },
+      "technologies": {
+        "nextjs": "React full-stack framework with SSR/SSG",
+        "react": "Modern user interface library",
+        "typescript": "Type-safe JavaScript superset",
+        "tailwindcss": "Utility-first CSS framework",
+        "shadcn-ui": "Copy-paste component library",
+        "radix-ui": "Unstyled, accessible component primitives",
+        "next-intl": "Next.js internationalization solution",
+        "eslint": "JavaScript/TypeScript code linter",
+        "prettier": "Code formatting tool",
+        "lefthook": "Git hooks management tool",
+        "vitest": "Fast unit testing framework",
+        "playwright": "End-to-end testing framework",
+        "husky": "Git hooks management tool",
+        "jest": "JavaScript testing framework",
+        "testing-library": "React component testing tool",
+        "pnpm": "Fast, disk space efficient package manager",
+        "turbo": "High-performance build system",
+        "lighthouse": "Web performance audit tool",
+        "semgrep": "Static code security analysis tool",
+        "embla-carousel": "Lightweight carousel component library",
+        "vercel": "Next.js application deployment platform",
+        "sonarqube": "Code quality and security analysis platform",
+        "storybook": "Component development and documentation tool",
+        "swr": "Data fetching and caching library",
+        "zustand": "Lightweight state management library"
+      },
+      "stats": {
+        "totalTech": "Total Technologies",
+        "categories": "Categories",
+        "modern": "Modern Stack",
+        "quality": "Quality Score"
+      }
+    },
+    "showcase": {
+      "title": "Component Showcase",
+      "subtitle": "Explore our comprehensive UI component library with live examples and interactive demos.",
+      "tabs": {
+        "components": "Components",
+        "themes": "Themes",
+        "responsive": "Responsive"
+      },
+      "components": {
+        "buttons": {
+          "title": "Button Components",
+          "description": "Various button styles and sizes for different use cases.",
+          "primary": "Primary",
+          "secondary": "Secondary",
+          "outline": "Outline",
+          "ghost": "Ghost",
+          "small": "Small",
+          "default": "Default",
+          "large": "Large"
+        },
+        "forms": {
+          "title": "Form Components",
+          "description": "Input fields and form controls with validation support.",
+          "name": "Full Name",
+          "namePlaceholder": "Enter your full name",
+          "email": "Email Address",
+          "emailPlaceholder": "Enter your email",
+          "submit": "Submit Form"
+        },
+        "interactive": {
+          "title": "Interactive Elements",
+          "description": "Buttons and controls with dynamic behavior and state management.",
+          "likes": "Likes",
+          "star": "Star",
+          "download": "Download",
+          "share": "Share"
+        },
+        "badges": {
+          "title": "Badge Components",
+          "description": "Status indicators and labels for various content types.",
+          "default": "Default",
+          "secondary": "Secondary",
+          "outline": "Outline",
+          "destructive": "Error",
+          "success": "Success",
+          "warning": "Warning",
+          "info": "Info"
+        }
+      },
+      "themes": {
+        "title": "Theme System",
+        "description": "Dynamic theme switching with light and dark mode support.",
+        "toggle": "Theme Toggle",
+        "language": "Language Switch",
+        "colors": {
+          "title": "Color Palette"
+        },
+        "typography": {
+          "title": "Typography",
+          "bold": "Bold Text",
+          "medium": "Medium Text",
+          "normal": "Normal Text",
+          "muted": "Muted Text"
+        }
+      },
+      "responsive": {
+        "title": "Responsive Design",
+        "description": "Optimized layouts for all device sizes and screen resolutions.",
+        "mobile": {
+          "title": "Mobile First",
+          "description": "Optimized for mobile devices with touch-friendly interfaces."
+        },
+        "tablet": {
+          "title": "Tablet Ready",
+          "description": "Perfect layout adaptation for tablet screens and orientations."
+        },
+        "desktop": {
+          "title": "Desktop Enhanced",
+          "description": "Full-featured desktop experience with advanced interactions."
+        }
+      }
+    },
+    "overview": {
+      "title": "Project Overview",
+      "subtitle": "A comprehensive enterprise web platform designed for modern B2B applications with cutting-edge technology stack.",
+      "features": {
+        "performance": {
+          "title": "High Performance",
+          "description": "Optimized for speed with SSR, SSG, and advanced caching strategies."
+        },
+        "security": {
+          "title": "Enterprise Security",
+          "description": "Built-in security features with industry-standard practices and compliance."
+        },
+        "i18n": {
+          "title": "Internationalization",
+          "description": "Full support for multiple languages with dynamic content switching.",
+          "languageUnit": "Languages"
+        },
+        "themes": {
+          "title": "Theme System",
+          "description": "Dynamic theme switching with light, dark, and custom theme support.",
+          "multiTheme": "Multi-theme"
+        },
+        "typescript": {
+          "title": "Type Safety",
+          "description": "100% TypeScript coverage for enhanced developer experience and reliability."
+        },
+        "deployment": {
+          "title": "Easy Deployment",
+          "description": "One-click deployment to Vercel with automatic CI/CD pipeline."
+        }
+      },
+      "highlights": {
+        "title": "Key Highlights",
+        "subtitle": "What makes this platform stand out from the competition.",
+        "modern": "Modern Architecture",
+        "scalable": "Scalable Design",
+        "accessible": "Accessibility First",
+        "performant": "High Performance",
+        "secure": "Security Focused",
+        "maintainable": "Easy Maintenance"
+      },
+      "architecture": {
+        "title": "Technical Architecture",
+        "frontend": {
+          "title": "Frontend Layer",
+          "description": "React-based frontend with Next.js for optimal performance and SEO."
+        },
+        "ui": {
+          "title": "UI System",
+          "description": "Comprehensive design system with reusable components and themes."
+        },
+        "tooling": {
+          "title": "Development Tools",
+          "description": "Modern development workflow with automated testing and quality checks."
+        }
+      },
+      "cta": {
+        "title": "Ready to Get Started?",
+        "description": "Join thousands of developers building amazing B2B applications with our platform.",
+        "getStarted": "Get Started Now",
+        "viewSource": "View Source Code"
+      }
+    },
+    "cta": {
+      "badge": "Open Source",
+      "title": "Start Building Today",
+      "subtitle": "Get started with our modern B2B enterprise platform and accelerate your development process.",
+      "primary": {
+        "github": "Star on GitHub",
+        "demo": "Live Demo"
+      },
+      "actions": {
+        "github": {
+          "title": "GitHub Repository",
+          "description": "Explore the source code and contribute to the project."
+        },
+        "download": {
+          "title": "Download Template",
+          "description": "Get the complete template and start building immediately."
+        },
+        "docs": {
+          "title": "Documentation",
+          "description": "Comprehensive guides and API documentation."
+        }
+      },
+      "buttons": {
+        "getStarted": "Get Started",
+        "learnMore": "Learn More"
+      },
+      "stats": {
+        "technologies": "Technologies",
+        "typescript": "TypeScript",
+        "performance": "Performance",
+        "languages": "Languages"
+      },
+      "community": {
+        "title": "Join Our Community",
+        "description": "Connect with other developers and get support from our community.",
+        "discussions": "GitHub Discussions",
+        "issues": "Report Issues"
+      }
+    },
+    "title": "Tianze Pipe",
+    "subtitle": "Modern B2B Enterprise Web Platform",
+    "description": "A cutting-edge web platform built with Next.js 16, React 19, and TypeScript for modern B2B enterprises.",
+    "getStarted": "Get Started",
+    "learnMore": "Learn More",
+    "welcome": "Welcome to Tianze Pipe",
+    "modernApp": "A modern web application built with Next.js 16 and React 19",
+    "features": {
+      "title": "Features",
+      "performance": {
+        "title": "High Performance",
+        "description": "Optimized for speed and efficiency with modern web technologies."
+      },
+      "scalable": {
+        "title": "Scalable Architecture",
+        "description": "Built to grow with your business needs and requirements."
+      },
+      "secure": {
+        "title": "Enterprise Security",
+        "description": "Industry-standard security practices and compliance."
+      }
+    },
+    "modernStack": "Modern Stack",
+    "modernStackDesc": "Built with the latest technologies",
+    "internationalization": "Internationalization",
+    "internationalizationDesc": "Multi-language support with next-intl",
+    "testingReady": "Testing Ready",
+    "testingReadyDesc": "Comprehensive E2E testing setup"
+  },
+  "footer": {
+    "systemStatus": "All systems normal.",
+    "sections": {
+      "product": {
+        "title": "Product",
+        "home": "Home",
+        "enterprise": "Enterprise",
+        "pricing": "Pricing"
+      },
+      "company": {
+        "title": "Company",
+        "terms": "Terms",
+        "aiPolicy": "AI Policy",
+        "privacy": "Privacy"
+      },
+      "resources": {
+        "title": "Resources",
+        "faqs": "FAQs",
+        "docs": "Docs",
+        "ambassadors": "Ambassadors",
+        "community": "Vercel Community",
+        "vercel": "Vercel"
+      },
+      "navigation": {
+        "title": "Navigation",
+        "home": "Home",
+        "about": "About",
+        "products": "Products",
+        "blog": "Blog",
+        "contact": "Contact"
+      },
+      "social": {
+        "title": "Social",
+        "twitter": "Twitter",
+        "linkedin": "LinkedIn",
+        "github": "GitHub"
+      },
+      "support": {
+        "title": "Support",
+        "faq": "FAQs",
+        "privacy": "Privacy Policy",
+        "terms": "Terms of Service"
+      }
+    },
+    "vercel": {
+      "products": {
+        "title": "Products",
+        "ai": "AI",
+        "enterprise": "Enterprise",
+        "fluidCompute": "Fluid Compute",
+        "nextjs": "Next.js",
+        "observability": "Observability",
+        "previews": "Previews",
+        "rendering": "Rendering",
+        "security": "Security",
+        "turbo": "Turbo",
+        "domains": "Domains",
+        "v0": "v0"
+      },
+      "resources": {
+        "title": "Resources",
+        "community": "Community",
+        "docs": "Docs",
+        "guides": "Guides",
+        "academy": "Academy",
+        "help": "Help",
+        "integrations": "Integrations",
+        "pricing": "Pricing",
+        "resources": "Resources",
+        "solutionPartners": "Solution Partners",
+        "startups": "Startups",
+        "templates": "Templates",
+        "sdks": "SDKs by Vercel"
+      },
+      "company": {
+        "title": "Company",
+        "about": "About",
+        "blog": "Blog",
+        "careers": "Careers",
+        "changelog": "Changelog",
+        "contact": "Contact Us",
+        "customers": "Customers",
+        "events": "Events",
+        "partners": "Partners",
+        "shipped": "Shipped",
+        "privacy": "Privacy Policy",
+        "legal": "Legal"
+      },
+      "social": {
+        "title": "Social",
+        "github": "GitHub",
+        "linkedin": "LinkedIn",
+        "twitter": "Twitter",
+        "youtube": "YouTube"
+      }
+    },
+    "learn": "Learn",
+    "examples": "Examples",
+    "goToNextjs": "Go to nextjs.org",
+    "copyright": "(c) {year} Tianze Pipe. All rights reserved.",
+    "description": "Modern B2B enterprise web solutions with cutting-edge technology."
+  },
+  "accessibility": {
+    "skipToContent": "Skip to main content",
+    "openMenu": "Open navigation menu",
+    "closeMenu": "Close navigation menu",
+    "loading": "Content is loading",
+    "error": "An error has occurred",
+    "languageSelector": "Select language",
+    "themeSelector": "Select theme"
+  },
+  "seo": {
+    "title": "Tianze Pipe",
+    "description": "Modern B2B Enterprise Web Platform with Next.js 16, React 19, and TypeScript",
+    "siteName": "Tianze Pipe",
+    "keywords": "Next.js, React, TypeScript, B2B, Enterprise, Web Platform",
+    "pages": {
+      "home": {
+        "title": "Tianze Pipe - Modern B2B Enterprise Platform",
+        "description": "Build modern B2B applications with Next.js 16, React 19, TypeScript, and enterprise-grade features."
+      },
+      "about": {
+        "title": "About Us - Tianze Pipe",
+        "description": "Learn about our mission to provide cutting-edge B2B enterprise web solutions."
+      },
+      "contact": {
+        "title": "Contact Us - Tianze Pipe",
+        "description": "Get in touch with our team for enterprise solutions and support."
+      },
+      "products": {
+        "title": "Products - Tianze Pipe",
+        "description": "Discover our enterprise-grade products and solutions for modern businesses."
+      },
+      "blog": {
+        "title": "Blog - Tianze Pipe",
+        "description": "Latest insights, tutorials, and updates from our development team."
+      }
+    }
+  },
+  "underConstruction": {
+    "title": "Under Construction",
+    "subtitle": "We're working hard to bring you something amazing",
+    "description": "This page is currently under development. We're building something great and will have it ready soon.",
+    "backToHome": "Back to Home",
+    "comingSoon": "Coming Soon",
+    "expectedCompletion": "Expected completion: {date}",
+    "expectedLaunch": "Expected launch: {date}",
+    "dates": {
+      "q2_2024": "Q2 2024",
+      "q3_2024": "Q3 2024"
+    },
+    "stayTuned": "Stay tuned for updates",
+    "contactUs": "Contact us for more information",
+    "progress": {
+      "title": "Development Progress"
+    },
+    "pages": {
+      "products": {
+        "title": "Products - Under Construction",
+        "description": "Our product showcase is being crafted with care. Discover innovative solutions that will transform your business.",
+        "features": "Product features and specifications coming soon"
+      },
+      "blog": {
+        "title": "Blog - Under Construction",
+        "description": "Our blog is being prepared with insightful content. Stay tuned for industry insights and company updates.",
+        "features": "Articles, tutorials, and industry insights coming soon"
+      },
+      "about": {
+        "title": "About Us - Under Construction",
+        "description": "Learn more about our story, mission, and the team behind our innovative solutions.",
+        "features": "Company story, team profiles, and mission statement coming soon"
+      },
+      "contact": {
+        "title": "Contact Us",
+        "description": "Get in touch with our team for inquiries, support, or partnership opportunities.",
+        "features": "Multiple ways to reach us and get the support you need",
+        "panel": {
+          "contactTitle": "Contact Methods",
+          "email": "Email",
+          "phone": "Phone",
+          "hoursTitle": "Business Hours",
+          "weekdays": "Mon - Fri",
+          "saturday": "Saturday",
+          "sunday": "Sunday",
+          "closed": "Closed"
+        }
+      }
+    },
+    "animation": {
+      "loading": "Loading animation",
+      "construction": "Construction in progress"
+    },
+    "status": {
+      "inProgress": "In Progress"
+    },
+    "features": {
+      "title": "Feature Preview",
+      "performance": "High Performance",
+      "performanceDesc": "Optimized performance and fast loading experience",
+      "collaboration": "Team Collaboration",
+      "collaborationDesc": "Powerful team collaboration and project management features",
+      "quality": "Quality Assurance",
+      "qualityDesc": "Strict quality control and testing processes"
+    },
+    "social": {
+      "followUs": "Follow us for the latest updates"
+    },
+    "subscription": {
+      "title": "Get Launch Notifications",
+      "description": "Be the first to know about our latest updates",
+      "placeholder": "Enter your email address",
+      "submit": "Subscribe",
+      "submitting": "Submitting...",
+      "success": "Successfully subscribed! We'll notify you soon"
+    },
+    "emailSubscription": {
+      "title": "Stay in the Loop",
+      "description": "Subscribe to receive updates about our launch timeline and new features.",
+      "success": "You're subscribed! We'll keep you posted.",
+      "placeholder": "Enter your email address",
+      "button": "Notify Me"
+    },
+    "contact": {
+      "title": "Need Assistance?",
+      "description": "Reach out to our team for tailored support and partnership opportunities.",
+      "button": "Contact Support"
+    }
+  },
+  "cookie": {
+    "title": "Cookie Preferences",
+    "description": "We use cookies to enhance your browsing experience and analyze site traffic.",
+    "learnMore": "Learn more",
+    "acceptAll": "Accept All",
+    "rejectAll": "Reject All",
+    "manage": "Manage",
+    "close": "Close",
+    "cancel": "Cancel",
+    "savePreferences": "Save Preferences",
+    "preferences": {
+      "title": "Cookie Preferences",
+      "description": "Choose which cookies you want to allow. Essential cookies are always enabled."
+    },
+    "categories": {
+      "necessary": "Essential",
+      "necessaryDesc": "Required for the website to function properly. Cannot be disabled.",
+      "analytics": "Analytics",
+      "analyticsDesc": "Help us understand how visitors interact with our website.",
+      "marketing": "Marketing",
+      "marketingDesc": "Used to deliver personalized content and advertisements."
+    }
+  },
+  "structured-data": {
+    "organization": {
+      "name": "Tianze Pipe",
+      "description": "Modern B2B Enterprise Web Platform",
+      "phone": "+1-555-0123",
+      "social": {
+        "twitter": "https://x.com/b2b-web-template",
+        "linkedin": "https://www.linkedin.com/company/b2b-web-template/",
+        "github": "https://github.com/Alx-707/b2b-web-template"
+      }
+    },
+    "website": {
+      "name": "Tianze Pipe",
+      "description": "Modern B2B Enterprise Web Platform with Next.js 16"
+    },
+    "article": {
+      "defaultTitle": "Article",
+      "defaultDescription": "Article description",
+      "defaultAuthor": "Tianze Pipe"
+    },
+    "product": {
+      "defaultName": "Product",
+      "defaultDescription": "Product description"
+    }
+  },
+  "errorBoundary": {
+    "title": "An error occurred",
+    "description": "Something went wrong. Please try refreshing the page.",
+    "tryAgain": "Try Again"
+  },
+  "themeDemo": {
+    "title": "Theme System Demo",
+    "description": "Testing theme switching and Chinese-English font mixing",
+    "chineseTest": "Chinese Font Test",
+    "englishTest": "English Font Test",
+    "chineseDescription": "This is Chinese font testing content, using PingFang SC font fallback strategy. Modern B2B enterprise design style showcase.",
+    "englishDescription": "This is English font testing content using Geist Sans font. Modern B2B enterprise design style showcase.",
+    "chineseInput": "Chinese Input",
+    "englishInput": "English Input",
+    "chinesePlaceholder": "Enter Chinese content",
+    "englishPlaceholder": "Enter English content",
+    "primaryButton": "Primary",
+    "secondaryButton": "Secondary",
+    "outlineButton": "Outline"
+  },
+  "instructions": {
+    "getStarted": "Get started by editing",
+    "saveChanges": "Save and see your changes instantly."
+  },
+  "actions": {
+    "deployNow": "Deploy now",
+    "readDocs": "Read our docs"
+  },
+  "formTemplate": {
+    "form": {
+      "success": "Success",
+      "error": "Unknown error",
+      "submitting": "Submitting...",
+      "submit": "Submit",
+      "selectOption": "Select an option"
+    },
+    "example": {
+      "fields": {
+        "name": {
+          "label": "Name",
+          "placeholder": "Enter your name"
+        },
+        "email": {
+          "label": "Email",
+          "placeholder": "Enter your email"
+        },
+        "message": {
+          "label": "Message",
+          "placeholder": "Enter your message"
+        }
+      }
+    }
+  },
+  "contact": {
+    "form": {
+      "title": "Contact Us",
+      "description": "Get in touch with us. We'd love to hear from you.",
+      "optional": "optional",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email Address",
+      "company": "Company Name",
+      "phone": "Phone Number",
+      "subject": "Subject",
+      "message": "Message",
+      "firstNamePlaceholder": "Enter your first name",
+      "lastNamePlaceholder": "Enter your last name",
+      "emailPlaceholder": "your@email.com",
+      "companyPlaceholder": "Your company name",
+      "phonePlaceholder": "+1 (555) 123-4567",
+      "subjectPlaceholder": "What can we help you with?",
+      "messagePlaceholder": "Please describe your needs or questions...",
+      "acceptPrivacy": "I agree to the privacy policy and terms of service",
+      "marketingConsent": "I would like to receive marketing communications",
+      "submit": "Send Message",
+      "submitting": "Sending...",
+      "submitSuccess": "Message sent successfully!",
+      "submitError": "We couldn't send your message. Please try again shortly.",
+      "success": "Thank you! Your message has been sent successfully. We will get back to you soon.",
+      "error": "Sorry, there was an error sending your message. Please try again later.",
+      "rateLimitMessage": "You've recently contacted us. Please wait a moment before sending another message.",
+      "errors": {
+        "generic": "Please review the highlighted fields and try again.",
+        "firstName": {
+          "required": "First name is required",
+          "tooShort": "First name must be at least 2 characters",
+          "tooLong": "First name must be less than 50 characters",
+          "invalid": "First name can only contain letters and spaces"
+        },
+        "lastName": {
+          "required": "Last name is required",
+          "tooShort": "Last name must be at least 2 characters",
+          "tooLong": "Last name must be less than 50 characters",
+          "invalid": "Last name can only contain letters and spaces"
+        },
+        "email": {
+          "required": "Email address is required",
+          "invalid": "Please enter a valid email address",
+          "tooLong": "Email must be less than 100 characters"
+        },
+        "company": {
+          "tooShort": "Company name must be at least 2 characters",
+          "tooLong": "Company name must be less than 100 characters",
+          "invalid": "Company name contains invalid characters"
+        },
+        "message": {
+          "required": "Message is required",
+          "tooShort": "Message must be at least 10 characters",
+          "tooLong": "Message must be less than 1000 characters"
+        },
+        "phone": {
+          "invalid": "Please enter a valid phone number"
+        },
+        "subject": {
+          "length": "Subject must be between 5 and 100 characters"
+        },
+        "acceptPrivacy": {
+          "required": "You must accept the privacy policy"
+        },
+        "website": {
+          "shouldBeEmpty": "This field should be empty"
+        }
+      },
+      "validation": {
+        "firstNameRequired": "First name is required",
+        "firstNameTooShort": "First name must be at least 2 characters",
+        "lastNameRequired": "Last name is required",
+        "lastNameTooShort": "Last name must be at least 2 characters",
+        "emailRequired": "Email address is required",
+        "emailInvalid": "Please enter a valid email address",
+        "messageRequired": "Message is required",
+        "messageTooShort": "Message must be at least 10 characters"
+      }
+    }
+  },
+  "formatting": {
+    "date": {
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "tomorrow": "Tomorrow",
+      "lastUpdated": "Last updated on {date}",
+      "publishedOn": "Published on {date}"
+    },
+    "number": {
+      "currency": "${amount}",
+      "percentage": "{value}%",
+      "fileSize": "{size} {unit}"
+    },
+    "plurals": {
+      "items": {
+        "zero": "No items",
+        "one": "One item",
+        "other": "{count} items"
+      },
+      "users": {
+        "zero": "No users online",
+        "one": "One user online",
+        "other": "{count} users online"
+      },
+      "notifications": {
+        "zero": "No new notifications",
+        "one": "One new notification",
+        "other": "{count} new notifications"
+      }
+    }
+  },
+  "errors": {
+    "global": {
+      "title": "Something went wrong!",
+      "description": "We apologize for the inconvenience. An unexpected error has occurred.",
+      "tryAgain": "Try again",
+      "goHome": "Go to homepage",
+      "devDetails": "Error Details (Development Only)"
+    },
+    "products": {
+      "title": "Failed to load product information",
+      "description": "We couldn't load the product details. Please try again or return to the homepage to browse other content.",
+      "tryAgain": "Try again",
+      "goHome": "Back to homepage"
+    },
+    "contact": {
+      "title": "Contact form temporarily unavailable",
+      "description": "Our team will look into this issue immediately. You can try again later or contact us through other channels.",
+      "tryAgain": "Try again",
+      "goHome": "Back to homepage"
+    },
+    "notFound": {
+      "title": "Page not found",
+      "description": "The page you're looking for doesn't exist or has been moved.",
+      "goHome": "Back to homepage"
+    },
+    "serverError": "Internal server error",
+    "networkError": "Network connection error",
+    "validationError": "Please check your input",
+    "unauthorized": "You are not authorized to access this page",
+    "forbidden": "Access to this resource is forbidden",
+    "timeout": "Request timeout - please try again",
+    "generic": "Something went wrong. Please try again later.",
+    "translationMissing": "Translation not available",
+    "loadingFailed": "Failed to load content"
+  },
+  "progress": {
+    "title": "Development Progress",
+    "status": "Development Progress",
+    "nearCompletion": "Nearly Complete",
+    "planning": "Planning",
+    "development": "Development",
+    "testing": "Testing",
+    "launch": "Launch",
+    "ariaLabel": "Project development progress indicator",
+    "completed": "Completed",
+    "current": "Current step",
+    "upcoming": "Upcoming"
+  },
+  "ReactScanDemo": {
+    "title": "React Scan Performance Demo",
+    "description": "Interactive demonstration of React Scan performance monitoring capabilities",
+    "instructions": {
+      "title": "How to Use This Demo",
+      "step1": "Press Ctrl+Shift+X to toggle React Scan on/off",
+      "step2": "Click the buttons below to trigger different types of renders",
+      "step3": "Watch for red highlights (unnecessary renders) and green highlights (optimized renders)",
+      "step4": "Use the React Scan toolbar in the bottom-right corner for detailed analysis"
+    }
+  },
+  "themes": {
+    "title": "Theme System",
+    "description": "Dynamic theme switching with light and dark mode support.",
+    "toggle": "Theme Toggle",
+    "language": "Language Switch",
+    "colors": {
+      "title": "Color Palette"
+    },
+    "typography": {
+      "title": "Typography",
+      "bold": "Bold Text",
+      "medium": "Medium Text",
+      "normal": "Normal Text",
+      "muted": "Muted Text"
+    }
+  },
+  "stats": {
+    "technologies": "Technologies",
+    "typescript": "TypeScript Coverage",
+    "performance": "Performance Score",
+    "languages": "Languages"
+  },
+  "email": "Email Address",
+  "emailPlaceholder": "your@email.com",
+  "phone": "Phone Number",
+  "organization": {
+    "name": "Tianze Pipe",
+    "description": "Modern B2B Enterprise Web Platform",
+    "phone": "+1-555-0123",
+    "social": {
+      "twitter": "https://x.com/b2b-web-template",
+      "linkedin": "https://www.linkedin.com/company/b2b-web-template/",
+      "github": "https://github.com/Alx-707/b2b-web-template"
+    }
+  },
+  "website": {
+    "name": "Tianze Pipe",
+    "description": "Modern B2B Enterprise Web Platform with Next.js 16"
+  },
+  "article": {
+    "defaultAuthor": "Tianze Pipe"
+  },
+  "blog": {
+    "pageTitle": "Blog",
+    "pageDescription": "Explore our latest articles, insights, and updates on technology, design, and enterprise solutions.",
+    "readingTime": "min read",
+    "emptyState": "No articles published yet. Check back soon!",
+    "backToList": "Back to Blog",
+    "publishedOn": "Published on",
+    "updatedOn": "Updated on",
+    "author": "By",
+    "tags": "Tags",
+    "categories": "Categories",
+    "allCategories": "All",
+    "relatedArticles": "Related Articles",
+    "shareArticle": "Share this article",
+    "articleNotFound": "Article not found",
+    "sidebar": {
+      "mostPopular": "Most Popular",
+      "categories": "Categories"
+    },
+    "contentTypes": {
+      "article": "Article",
+      "case-study": "Case Study",
+      "guide": "Guide",
+      "news": "News",
+      "whitepaper": "Whitepaper"
+    },
+    "newsletter": {
+      "title": "Subscribe to Our Newsletter",
+      "description": "Get the latest industry insights, product updates, and trade tips delivered to your inbox.",
+      "placeholder": "Enter your email address",
+      "submit": "Subscribe",
+      "submitting": "Subscribing...",
+      "success": "Thank you for subscribing! You will receive our latest updates.",
+      "error": "An error occurred. Please try again.",
+      "turnstileRequired": "Please complete the security verification."
+    }
+  },
+  "about": {
+    "pageTitle": "About Us",
+    "pageDescription": "Learn more about our company, mission, and the team dedicated to delivering quality products.",
+    "hero": {
+      "title": "About Our Company",
+      "subtitle": "Your Trusted Partner in Global Trade",
+      "description": "We are a leading manufacturer and exporter specializing in high-quality industrial products. With years of experience in international trade, we are committed to delivering excellence to clients worldwide."
+    },
+    "mission": {
+      "title": "Our Mission",
+      "content": "To provide innovative, high-quality products that meet the evolving needs of our global customers, while maintaining the highest standards of service and integrity."
+    },
+    "values": {
+      "title": "Our Values",
+      "quality": {
+        "title": "Quality First",
+        "description": "We never compromise on quality. Every product undergoes rigorous testing and quality control."
+      },
+      "innovation": {
+        "title": "Continuous Innovation",
+        "description": "We invest in R&D to bring cutting-edge solutions to market."
+      },
+      "service": {
+        "title": "Customer Service",
+        "description": "Your success is our priority. We provide comprehensive pre-sale and after-sale support."
+      },
+      "integrity": {
+        "title": "Business Integrity",
+        "description": "We build long-term relationships based on trust, transparency, and mutual respect."
+      }
+    },
+    "stats": {
+      "yearsExperience": "Years Experience",
+      "countriesServed": "Countries Served",
+      "happyClients": "Happy Clients",
+      "productsDelivered": "Products Delivered"
+    },
+    "cta": {
+      "title": "Ready to Work With Us?",
+      "description": "Contact our team to discuss your requirements and discover how we can help grow your business.",
+      "button": "Get in Touch"
+    }
+  },
+  "products": {
+    "pageTitle": "Products",
+    "pageDescription": "Explore our comprehensive range of high-quality products for your business needs.",
+    "emptyState": "No products available. Please check back later.",
+    "viewDetails": "View Details",
+    "requestQuote": "Request Quote",
+    "allCategories": "All Categories",
+    "featured": "Featured",
+    "card": {
+      "moq": "MOQ",
+      "leadTime": "Lead Time",
+      "supplyCapacity": "Capacity"
+    },
+    "detail": {
+      "specifications": "Specifications",
+      "tradeInfo": "Trade Information",
+      "certifications": "Certifications",
+      "relatedProducts": "Related Products",
+      "downloadPdf": "Download product PDF",
+      "labels": {
+        "moq": "Minimum Order",
+        "leadTime": "Lead Time",
+        "supplyCapacity": "Supply Capacity",
+        "packaging": "Packaging",
+        "portOfLoading": "Port of Loading"
+      }
+    },
+    "inquiry": {
+      "title": "Product Inquiry",
+      "description": "Interested in this product? Send us an inquiry for pricing and availability.",
+      "productName": "Product",
+      "quantity": "Quantity Required",
+      "quantityPlaceholder": "e.g., 500 pieces",
+      "targetPrice": "Target Price (optional)",
+      "targetPricePlaceholder": "e.g., $10 per unit",
+      "requirements": "Special Requirements",
+      "requirementsPlaceholder": "Please describe any special requirements such as customization, packaging, or certifications...",
+      "submit": "Send Inquiry",
+      "submitting": "Sending...",
+      "success": "Your inquiry has been sent successfully! We will get back to you within 24 hours.",
+      "error": "Failed to send inquiry. Please try again later.",
+      "turnstileRequired": "Please complete the security verification."
+    },
+    "allStandards": "All Standards",
+    "standardsFilterAriaLabel": "Filter by standards"
+  },
+  "title": "Tianze Pipe",
+  "trust": {
+    "testimonials": {
+      "title": "What Our Clients Say",
+      "subtitle": "Trusted by businesses worldwide"
+    },
+    "partners": {
+      "title": "Our Partners",
+      "subtitle": "Collaborating with industry leaders"
+    },
+    "certifications": {
+      "title": "Certifications & Standards",
+      "subtitle": "Quality you can trust"
+    },
+    "stats": {
+      "title": "By the Numbers",
+      "yearsInBusiness": "Years in Business",
+      "countriesServed": "Countries Served",
+      "satisfactionRate": "Client Satisfaction",
+      "projectsCompleted": "Projects Delivered"
+    }
+  },
+  "faq": {
+    "pageTitle": "Frequently Asked Questions",
+    "pageDescription": "Find answers to common questions about ordering, payment, shipping, and after-sales service.",
+    "categories": {
+      "ordering": "Ordering & Purchasing",
+      "payment": "Payment & Settlement",
+      "logistics": "Logistics & Shipping",
+      "quality": "Quality & After-Sales"
+    },
+    "noResults": "No questions found matching your search.",
+    "searchPlaceholder": "Search questions...",
+    "contactCta": {
+      "title": "Still have questions?",
+      "description": "Our support team is here to help you.",
+      "button": "Contact Us"
+    }
+  },
+  "privacy": {
+    "pageTitle": "Privacy Policy",
+    "pageDescription": "Learn how we collect, use, and protect your personal information.",
+    "lastUpdated": "Last Updated",
+    "effectiveDate": "Effective Date",
+    "tableOfContents": "Table of Contents",
+    "sections": {
+      "introduction": "Introduction",
+      "informationCollected": "Information We Collect",
+      "howWeUse": "How We Use Your Information",
+      "sharing": "Information Sharing",
+      "security": "Data Security",
+      "retention": "Data Retention",
+      "rights": "Your Privacy Rights",
+      "children": "Children's Privacy",
+      "changes": "Changes to This Policy",
+      "contact": "Contact Us"
+    }
+  },
+  "terms": {
+    "pageTitle": "Terms of Service",
+    "pageDescription": "Read our terms and conditions for using our services and purchasing products.",
+    "lastUpdated": "Last Updated",
+    "effectiveDate": "Effective Date",
+    "tableOfContents": "Table of Contents",
+    "sections": {
+      "introduction": "Introduction",
+      "acceptance": "Acceptance of Terms",
+      "services": "Services Description",
+      "orders": "Orders & Contracts",
+      "payment": "Payment Terms",
+      "shipping": "Shipping & Delivery",
+      "warranty": "Warranty & Returns",
+      "liability": "Limitation of Liability",
+      "ip": "Intellectual Property",
+      "confidentiality": "Confidentiality",
+      "termination": "Termination",
+      "governing": "Governing Law",
+      "disputes": "Dispute Resolution",
+      "contact": "Contact Information"
+    }
+  },
+  "apiErrors": {
+    "RATE_LIMIT_EXCEEDED": "Too many requests. Please try again later.",
+    "UNAUTHORIZED": "Unauthorized access.",
+    "INTERNAL_SERVER_ERROR": "An unexpected error occurred. Please try again later.",
+    "INVALID_JSON_BODY": "Invalid request format.",
+    "CONFIRMATION_REQUIRED": "Please add confirm=true parameter to confirm this action.",
+    "INVALID_LOCALE_PARAMETER": "Invalid locale parameter.",
+    "SUBSCRIBE_SUCCESS": "Successfully subscribed to notifications.",
+    "SUBSCRIBE_VALIDATION_EMAIL_REQUIRED": "Email is required.",
+    "SUBSCRIBE_VALIDATION_EMAIL_INVALID": "Invalid email address.",
+    "SUBSCRIBE_SECURITY_REQUIRED": "Security verification required.",
+    "SUBSCRIBE_SECURITY_FAILED": "Security verification failed. Please try again.",
+    "SUBSCRIBE_PROCESSING_ERROR": "An error occurred. Please try again.",
+    "WEB_VITALS_RECORDED": "Web Vitals data recorded successfully.",
+    "WEB_VITALS_INVALID_FORMAT": "The provided data does not match the expected Web Vitals format.",
+    "WEB_VITALS_PROCESS_FAILED": "Failed to process Web Vitals data.",
+    "WEB_VITALS_RETRIEVE_FAILED": "Failed to retrieve Web Vitals statistics.",
+    "WEB_VITALS_DELETED": "Web Vitals data deleted successfully.",
+    "WEB_VITALS_DELETE_FAILED": "Failed to delete Web Vitals data.",
+    "I18N_ANALYTICS_RECORDED": "i18n analytics data recorded successfully.",
+    "I18N_ANALYTICS_INVALID_FORMAT": "The provided data does not match the expected i18n analytics format.",
+    "I18N_ANALYTICS_PROCESS_FAILED": "Failed to process i18n analytics data.",
+    "I18N_ANALYTICS_RETRIEVE_FAILED": "Failed to retrieve i18n analytics statistics.",
+    "I18N_ANALYTICS_DELETED": "i18n analytics data deleted successfully.",
+    "I18N_ANALYTICS_DELETE_FAILED": "Failed to delete i18n analytics data.",
+    "MONITORING_DATA_RECEIVED": "Monitoring data received successfully.",
+    "MONITORING_INVALID_FORMAT": "Required fields: source, metrics, timestamp.",
+    "MONITORING_PROCESS_FAILED": "Failed to process monitoring dashboard data.",
+    "MONITORING_RETRIEVE_FAILED": "Failed to retrieve monitoring dashboard data.",
+    "MONITORING_DELETED": "Monitoring data deleted successfully.",
+    "MONITORING_DELETE_FAILED": "Failed to delete monitoring dashboard data.",
+    "MONITORING_CONFIG_UPDATED": "Monitoring configuration updated successfully.",
+    "MONITORING_CONFIG_INVALID": "Configuration object is required.",
+    "MONITORING_CONFIG_UPDATE_FAILED": "Failed to update monitoring configuration.",
+    "CACHE_INVALIDATED": "Cache invalidated successfully.",
+    "CACHE_LOCALE_REQUIRED": "Locale is required for this cache invalidation.",
+    "CACHE_INVALID_DOMAIN": "Invalid cache domain.",
+    "CACHE_INVALIDATION_FAILED": "Failed to invalidate cache.",
+    "UNKNOWN_ERROR": "An unknown error occurred."
+  }
+}

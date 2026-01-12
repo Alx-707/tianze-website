@@ -1,0 +1,583 @@
+name: Vercel 部署
+
+# ============================================================================
+# 职责：Vercel 部署 + MISSING_MESSAGE 检测 + 健康检查
+# 触发：main 分支推送、PR、手动触发
+# 依赖：质量检查由 ci.yml 统一负责，此 workflow 仅关注部署
+# ============================================================================
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  # 基于 Token 的 Vercel 部署
+  deploy-to-vercel:
+    name: 部署到 Vercel（token）
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    if: github.event_name != 'workflow_dispatch'
+
+    outputs:
+      preview_url: ${{ steps.vercel_cli_deploy.outputs.deployment-url }}
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+          submodules: false
+
+      # 确保先安装 pnpm，再启用 setup-node 的 pnpm 缓存，避免缓存阶段找不到 pnpm
+      - name: 设置 pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.13.1
+          run_install: false
+          standalone: true
+
+      - name: 设置 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: 安装 Vercel CLI
+        run: |
+          set -euo pipefail
+          # Pin 到最后一次成功部署版本（避免 vercel@latest 在发布窗口回归）
+          npm i -g vercel@50.0.0
+          vercel --version
+        env:
+          CI: true
+
+      - name: 拉取 Vercel 环境配置 (preview)
+        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+      - name: 诊断 Vercel 关联与版本
+        run: |
+          set -euo pipefail
+          vercel --version
+          node -v
+          pnpm -v
+          echo "项目关联文件 (.vercel/project.json):"
+          if [ -f .vercel/project.json ]; then
+            cat .vercel/project.json || true
+          else
+            echo "(缺失)"
+          fi
+          echo "预览环境变量文件 (.vercel/.env.preview.local) 存在性:"
+          if [ -f .vercel/.env.preview.local ]; then
+            head -n 20 .vercel/.env.preview.local || true
+          else
+            echo "(缺失)"
+          fi
+
+      - name: 安装项目依赖（显式）
+        run: pnpm install --frozen-lockfile
+
+      - name: 使用 Vercel CLI 构建（保存日志）
+        id: vercel_build
+        run: |
+          set -euo pipefail
+          # 将 stdout + stderr 一并保存，供后续质量拦截步骤使用
+          VERCEL_LOGS=1 VERCEL_BUILDER_DEBUG=1 vercel build --token=${{ secrets.VERCEL_TOKEN }} --debug --yes 2>&1 | tee vercel_build.log
+          echo "log-path=$(pwd)/vercel_build.log" >> "$GITHUB_OUTPUT"
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          CI: true
+
+      - name: 阻断：检测 next-intl MISSING_MESSAGE
+        run: |
+          set -euo pipefail
+          if grep -E -i "MISSING_MESSAGE" vercel_build.log; then
+            echo "❌ Detected next-intl MISSING_MESSAGE in Vercel build logs"
+            exit 1
+          else
+            echo "✅ No MISSING_MESSAGE found in Vercel build logs"
+          fi
+
+      - name: 上传 Vercel 构建日志
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vercel_build.log
+          path: vercel_build.log
+          if-no-files-found: ignore
+
+      - name: 通过 Token 部署预构建产物
+        id: vercel_cli_deploy
+        run: |
+          set -euo pipefail
+          # GitHub Actions 环境偶发 IPv6 连接问题时，优先使用 IPv4
+          export NODE_OPTIONS="--dns-result-order=ipv4first"
+
+          echo "预构建产物检查 (.vercel/output):"
+          if [ -d .vercel/output ]; then
+            ls -la .vercel/output || true
+            du -sh .vercel/output || true
+            find .vercel/output -type f | wc -l || true
+          else
+            echo "❌ .vercel/output 不存在（vercel build 可能未产出 Build Output API 目录）"
+            exit 1
+          fi
+
+          # 有限重试：仅失败时等待，不影响正常路径耗时
+          attempt=1
+          max_attempts=3
+          while true; do
+            echo "Vercel deploy attempt ${attempt}/${max_attempts}"
+            set +e
+            # 预构建部署建议使用 --archive=tgz 以减少文件上传数量，降低 upload/missing_files 类错误概率
+            DEPLOY_URL=$(vercel deploy --prebuilt --archive=tgz --token=${{ secrets.VERCEL_TOKEN }} --yes --debug)
+            status=$?
+            set -e
+            if [ $status -eq 0 ] && [ -n "${DEPLOY_URL}" ]; then
+              break
+            fi
+            if [ $attempt -ge $max_attempts ]; then
+              echo "❌ Vercel deploy failed after ${max_attempts} attempts"
+              exit 1
+            fi
+            sleep_seconds=$((attempt * 5))
+            echo "Retrying in ${sleep_seconds}s..."
+            sleep "${sleep_seconds}"
+            attempt=$((attempt + 1))
+          done
+          echo "deployment-url=${DEPLOY_URL}" >> "$GITHUB_OUTPUT"
+          echo "VERCEL_DEPLOYMENT_URL=${DEPLOY_URL}" >> "$GITHUB_ENV"
+          echo "部署 URL: ${DEPLOY_URL}"
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+      - name: 调试输出部署 URL（摘要）
+        if: always()
+        run: |
+          echo "preview_url=${{ steps.vercel_cli_deploy.outputs.deployment-url }}" >> $GITHUB_STEP_SUMMARY
+          echo "preview_url=${{ steps.vercel_cli_deploy.outputs.deployment-url }}"
+
+  # 基于 Token 的 Vercel 生产部署
+  deploy-to-vercel-prod:
+    name: 部署到 Production（--prod）
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    if: github.event_name == 'workflow_dispatch'
+
+    outputs:
+      prod_url: ${{ steps.vercel_cli_deploy_prod.outputs.deployment-url }}
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+        with:
+          submodules: false
+          persist-credentials: false
+
+      - name: 设置 pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.13.1
+          run_install: false
+          standalone: true
+
+      - name: 设置 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: 安装 Vercel CLI
+        run: |
+          set -euo pipefail
+          # Pin 到最后一次成功部署版本（避免 vercel@latest 在发布窗口回归）
+          npm i -g vercel@50.0.0
+          vercel --version
+        env:
+          CI: true
+
+      - name: 拉取 Vercel 环境配置 (production)
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+      - name: 安装项目依赖（显式）
+        run: pnpm install --frozen-lockfile
+
+      - name: 使用 Vercel CLI 构建（保存日志，prod）
+        id: vercel_build_prod
+        run: |
+          set -euo pipefail
+          VERCEL_LOGS=1 VERCEL_BUILDER_DEBUG=1 vercel build --prod --token=${{ secrets.VERCEL_TOKEN }} --debug --yes 2>&1 | tee vercel_build_prod.log
+          echo "log-path=$(pwd)/vercel_build_prod.log" >> "$GITHUB_OUTPUT"
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          CI: true
+
+      - name: 阻断：检测 next-intl MISSING_MESSAGE（prod）
+        run: |
+          set -euo pipefail
+          if grep -E -i "MISSING_MESSAGE" vercel_build_prod.log; then
+            echo "❌ Detected next-intl MISSING_MESSAGE in Vercel prod build logs"
+            exit 1
+          else
+            echo "✅ No MISSING_MESSAGE found in Vercel prod build logs"
+          fi
+
+      - name: 上传 Vercel 构建日志（prod）
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vercel_build_prod.log
+          path: vercel_build_prod.log
+          if-no-files-found: ignore
+
+      - name: 通过 Token 部署到 Production（--prod）
+        id: vercel_cli_deploy_prod
+        run: |
+          set -euo pipefail
+          export NODE_OPTIONS="--dns-result-order=ipv4first"
+
+          echo "预构建产物检查 (.vercel/output):"
+          if [ -d .vercel/output ]; then
+            ls -la .vercel/output || true
+            du -sh .vercel/output || true
+            find .vercel/output -type f | wc -l || true
+          else
+            echo "❌ .vercel/output 不存在（vercel build 可能未产出 Build Output API 目录）"
+            exit 1
+          fi
+
+          attempt=1
+          max_attempts=3
+          while true; do
+            echo "Vercel prod deploy attempt ${attempt}/${max_attempts}"
+            set +e
+            DEPLOY_URL=$(vercel deploy --prebuilt --archive=tgz --prod --token=${{ secrets.VERCEL_TOKEN }} --yes --debug)
+            status=$?
+            set -e
+            if [ $status -eq 0 ] && [ -n "${DEPLOY_URL}" ]; then
+              break
+            fi
+            if [ $attempt -ge $max_attempts ]; then
+              echo "❌ Vercel prod deploy failed after ${max_attempts} attempts"
+              exit 1
+            fi
+            sleep_seconds=$((attempt * 5))
+            echo "Retrying in ${sleep_seconds}s..."
+            sleep "${sleep_seconds}"
+            attempt=$((attempt + 1))
+          done
+          echo "deployment-url=${DEPLOY_URL}" >> "$GITHUB_OUTPUT"
+          echo "PROD_DEPLOYMENT_URL=${DEPLOY_URL}" >> "$GITHUB_ENV"
+          echo "生产部署 URL: ${DEPLOY_URL}"
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+  # 部署后验证 (仅在有部署 URL 时运行)
+  post-deployment-verification:
+    name: 部署后验证
+    runs-on: ubuntu-latest
+    needs: deploy-to-vercel
+    timeout-minutes: 15
+    if: needs.deploy-to-vercel.outputs.preview_url != ''
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+        with:
+          submodules: false
+          persist-credentials: false
+
+      - name: 等待部署就绪（增强版）
+        run: |
+          set -euo pipefail
+          url="${{ needs.deploy-to-vercel.outputs.preview_url }}"
+          echo "等待部署就绪: $url"
+
+          max_tries=60       # 最长 60 次探测
+          delay=5            # 初始等待 5 秒
+
+          for i in $(seq 1 $max_tries); do
+            # 先 HEAD（更轻量），失败再 GET - 添加 Protection Bypass header
+            status=$(curl -s -o /dev/null -w "%{http_code}" -H "x-vercel-protection-bypass: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}" -I "$url" || echo "000")
+            if [ "$status" = "000" ]; then
+              status=$(curl -s -o /dev/null -w "%{http_code}" -H "x-vercel-protection-bypass: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}" "$url" || echo "000")
+            fi
+
+            echo "第 $i 次探测: $status"
+            if [ "$status" -ge 200 ] && [ "$status" -lt 400 ]; then
+              echo "部署已就绪"
+              exit 0
+            fi
+
+            # 对常见冷启动/传播中的状态做退避
+            case "$status" in
+              000|404|425|429|500|502|503|504)
+                ;;
+              *)
+                ;;
+            esac
+
+            # 每 10 次加大等待 5 秒，上限 20 秒
+            if [ $((i % 10)) -eq 0 ] && [ "$delay" -lt 20 ]; then
+              delay=$((delay + 5))
+            fi
+            sleep "$delay"
+          done
+          echo "等待超时，部署未就绪" >&2
+          exit 1
+
+      - name: 验证部署健康状态
+        run: |
+          DEPLOYMENT_URL="${{ needs.deploy-to-vercel.outputs.preview_url }}"
+
+          # 检查根路径
+          echo "检查根路径..."
+          curl -f -s -o /dev/null -w "%{http_code}" -H "x-vercel-protection-bypass: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}" "$DEPLOYMENT_URL" || exit 1
+
+          # 检查英文路由
+          echo "检查英文路由..."
+          curl -f -s -o /dev/null -w "%{http_code}" -H "x-vercel-protection-bypass: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}" "$DEPLOYMENT_URL/en" || exit 1
+
+          # 检查中文路由
+          echo "检查中文路由..."
+          curl -f -s -o /dev/null -w "%{http_code}" -H "x-vercel-protection-bypass: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}" "$DEPLOYMENT_URL/zh" || exit 1
+
+          echo "✅ 所有路由验证通过"
+
+      - name: 验证 API 端点
+        run: |
+          set -euo pipefail
+          DEPLOYMENT_URL="${{ needs.deploy-to-vercel.outputs.preview_url }}"
+          BYPASS_SECRET="${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}"
+
+          # 带重试的 curl 函数 - 日志输出到 stderr，内容输出到 stdout
+          fetch_with_retry() {
+            local url="$1"
+            local max_retries=3
+            local retry_delay=5
+            local attempt=1
+
+            while [ $attempt -le $max_retries ]; do
+              echo "  尝试 $attempt/$max_retries: $url" >&2
+
+              # 获取 HTTP 状态码和内容
+              HTTP_RESPONSE=$(curl -s -w "\nHTTP_CODE:%{http_code}" \
+                -H "x-vercel-protection-bypass: $BYPASS_SECRET" \
+                "$url" 2>&1) || true
+
+              HTTP_CODE=$(echo "$HTTP_RESPONSE" | grep "HTTP_CODE:" | cut -d: -f2)
+              CONTENT=$(echo "$HTTP_RESPONSE" | sed '/HTTP_CODE:/d')
+
+              echo "  HTTP 状态码: $HTTP_CODE" >&2
+
+              if [ "$HTTP_CODE" = "200" ]; then
+                echo "$CONTENT"
+                return 0
+              fi
+
+              echo "  ⚠️ 请求失败 (HTTP $HTTP_CODE)，${retry_delay}s 后重试..." >&2
+              sleep $retry_delay
+              attempt=$((attempt + 1))
+              retry_delay=$((retry_delay * 2))
+            done
+
+            echo "  ❌ 所有重试均失败" >&2
+            return 1
+          }
+
+          # 检查 robots.txt
+          echo "检查 robots.txt..."
+          ROBOTS_CONTENT=$(fetch_with_retry "$DEPLOYMENT_URL/robots.txt") || {
+            echo "❌ 无法获取 robots.txt"
+            echo "请检查 VERCEL_AUTOMATION_BYPASS_SECRET 是否正确配置"
+            exit 1
+          }
+
+          # 使用大小写不敏感匹配 (robots.txt 可能返回 User-Agent 或 User-agent)
+          if echo "$ROBOTS_CONTENT" | grep -qi "User-agent"; then
+            echo "✓ robots.txt 验证通过"
+          else
+            echo "❌ robots.txt 格式无效"
+            echo "内容预览:"
+            echo "$ROBOTS_CONTENT" | head -n 10
+            exit 1
+          fi
+
+          # 检查 sitemap.xml
+          echo "检查 sitemap.xml..."
+          SITEMAP_CONTENT=$(fetch_with_retry "$DEPLOYMENT_URL/sitemap.xml") || {
+            echo "❌ 无法获取 sitemap.xml"
+            exit 1
+          }
+
+          # 检测 sitemap 格式
+          if echo "$SITEMAP_CONTENT" | grep -q '<sitemapindex'; then
+            echo "✓ Sitemap index format detected"
+            echo "Checking sitemap-0.xml..."
+
+            SITEMAP_0_CONTENT=$(fetch_with_retry "$DEPLOYMENT_URL/sitemap-0.xml") || {
+              echo "❌ 无法获取 sitemap-0.xml"
+              exit 1
+            }
+
+            if echo "$SITEMAP_0_CONTENT" | grep -q '<urlset'; then
+              URL_COUNT=$(echo "$SITEMAP_0_CONTENT" | grep -o '<loc>' | wc -l | tr -d ' ')
+              echo "✓ Found $URL_COUNT URLs in sitemap-0.xml"
+
+              if [ "$URL_COUNT" -lt 10 ]; then
+                echo "❌ URL count is too low: $URL_COUNT (expected >= 10)"
+                exit 1
+              fi
+            else
+              echo "❌ sitemap-0.xml does not contain urlset"
+              exit 1
+            fi
+          elif echo "$SITEMAP_CONTENT" | grep -q '<urlset'; then
+            echo "✓ Sitemap urlset format detected"
+
+            URL_COUNT=$(echo "$SITEMAP_CONTENT" | grep -o '<loc>' | wc -l | tr -d ' ')
+            echo "✓ Found $URL_COUNT URLs in sitemap.xml"
+
+            if [ "$URL_COUNT" -lt 10 ]; then
+              echo "❌ URL count is too low: $URL_COUNT (expected >= 10)"
+              exit 1
+            fi
+          else
+            echo "❌ Invalid sitemap format"
+            echo "Content preview:"
+            echo "$SITEMAP_CONTENT" | head -n 20
+            exit 1
+          fi
+
+          echo "✅ API 端点验证通过"
+
+  # 部署总结
+
+  # 生产环境验证 (仅在有生产 URL 时运行)
+  post-deployment-verification-prod:
+    name: 生产环境验证
+    runs-on: ubuntu-latest
+    needs: deploy-to-vercel-prod
+    timeout-minutes: 15
+    if: needs.deploy-to-vercel-prod.outputs.prod_url != ''
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+        with:
+          submodules: false
+          persist-credentials: false
+
+      - name: 等待生产部署就绪
+        run: |
+          set -euo pipefail
+          url="${{ needs.deploy-to-vercel-prod.outputs.prod_url }}"
+          echo "等待生产部署就绪: $url"
+
+          max_tries=60
+          delay=5
+
+          for i in $(seq 1 $max_tries); do
+            status=$(curl -s -o /dev/null -w "%{http_code}" -H "x-vercel-protection-bypass: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}" -I "$url" || echo "000")
+            if [ "$status" = "000" ]; then
+              status=$(curl -s -o /dev/null -w "%{http_code}" -H "x-vercel-protection-bypass: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}" "$url" || echo "000")
+            fi
+
+            echo "第 $i 次探测: $status"
+            if [ "$status" -ge 200 ] && [ "$status" -lt 400 ]; then
+              echo "部署已就绪"; exit 0
+            fi
+
+            if [ $((i % 10)) -eq 0 ] && [ "$delay" -lt 20 ]; then delay=$((delay+5)); fi
+            sleep "$delay"
+          done
+          echo "等待超时，部署未就绪" >&2; exit 1
+
+      - name: 健康检查 + 多语言抽样
+        run: |
+          set -euo pipefail
+          BASE="${{ needs.deploy-to-vercel-prod.outputs.prod_url }}"
+          BYPASS_SECRET="${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}"
+
+          # 带重试的请求函数
+          check_url() {
+            local url="$1"
+            local desc="$2"
+            local max_retries=3
+            local attempt=1
+
+            echo "检查 $desc..."
+            while [ $attempt -le $max_retries ]; do
+              HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+                -H "x-vercel-protection-bypass: $BYPASS_SECRET" "$url") || HTTP_CODE="000"
+
+              if [ "$HTTP_CODE" = "200" ]; then
+                echo "  ✓ $desc (HTTP $HTTP_CODE)"
+                return 0
+              fi
+
+              echo "  尝试 $attempt/$max_retries: HTTP $HTTP_CODE"
+              sleep $((attempt * 3))
+              attempt=$((attempt + 1))
+            done
+            echo "  ❌ $desc 失败"
+            return 1
+          }
+
+          check_url "$BASE" "根路径"
+          check_url "$BASE/en" "英文首页"
+          check_url "$BASE/zh" "中文首页"
+          check_url "$BASE/robots.txt" "robots.txt"
+          check_url "$BASE/sitemap.xml" "sitemap.xml"
+          echo "✅ 健康检查与多语言抽样通过"
+
+  deployment-summary:
+    name: 部署总结
+    runs-on: ubuntu-latest
+    needs: [deploy-to-vercel]
+    if: always()
+    timeout-minutes: 5
+
+    steps:
+      - name: 生成部署总结
+        run: |
+          echo "## 🚀 Vercel 部署总结" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **分支**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **提交**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **触发者**: ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **部署 URL**: ${{ needs.deploy-to-vercel.outputs.preview_url }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "> **Note**: 质量检查由 ci.yml 统一负责" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ needs.deploy-to-vercel.conclusion }}" == "success" ]; then
+            echo "✅ **状态**: 部署成功" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ **状态**: 部署失败" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### 📋 任务状态" >> $GITHUB_STEP_SUMMARY
+            echo "- Vercel 部署: ${{ needs.deploy-to-vercel.conclusion }}" >> $GITHUB_STEP_SUMMARY
+            if [ -n "${{ needs.deploy-to-vercel.outputs.preview_url }}" ]; then
+              echo "- 部署后验证: (参考运行记录)" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "- 部署后验证: skipped（无 preview_url）" >> $GITHUB_STEP_SUMMARY
+            fi
+          fi
