@@ -30,10 +30,9 @@ describe("Card Components", () => {
         "flex",
         "flex-col",
         "gap-6",
-        "rounded-xl",
+        "rounded-md",
         "border",
         "py-6",
-        "shadow-sm",
       );
     });
 

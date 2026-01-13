@@ -55,13 +55,13 @@ export async function Header({
   return (
     <header
       className={cn(
-        "w-full bg-background",
+        "w-full bg-background/80 backdrop-blur-md",
         isSticky && "sticky top-0 z-50",
-        isTransparent && "border-transparent bg-transparent",
-        // Scroll shadow effect via data-scrolled attribute
+        isTransparent && "border-transparent bg-transparent backdrop-blur-none",
+        // Scroll shadow effect via data-scrolled attribute (8-12% border opacity)
         isVercelNav
-          ? "border-b border-border/30 transition-all duration-200 data-[scrolled=true]:border-border/60 data-[scrolled=true]:shadow-sm"
-          : !isTransparent && "border-b border-border",
+          ? "border-b border-border/10 transition-all duration-200 data-[scrolled=true]:border-border/20 data-[scrolled=true]:bg-background/95 data-[scrolled=true]:shadow-sm"
+          : !isTransparent && "border-b border-border/10",
         className,
       )}
     >
