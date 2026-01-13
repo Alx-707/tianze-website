@@ -102,14 +102,14 @@ describe("Button Component", () => {
       render(<Button variant="ghost">Ghost</Button>);
 
       const button = screen.getByRole("button");
-      expect(button).toHaveClass("hover:bg-accent");
+      expect(button).toHaveClass("hover:bg-muted");
     });
 
     it("applies link variant styles", () => {
       render(<Button variant="link">Link</Button>);
 
       const button = screen.getByRole("button");
-      expect(button).toHaveClass("text-primary", "underline-offset-4");
+      expect(button).toHaveClass("text-accent", "underline-offset-4");
     });
   });
 

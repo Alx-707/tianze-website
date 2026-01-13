@@ -125,7 +125,7 @@ describe("Header Integration Tests", () => {
       await renderAsyncComponent(Header({ locale: "en" }));
 
       const header = screen.getByRole("banner");
-      expect(header).toHaveClass("bg-background");
+      expect(header).toHaveClass("backdrop-blur-md");
       expect(header).toHaveClass("w-full");
       expect(header).toHaveClass("border-b");
       expect(header).toHaveClass("sticky");
@@ -153,7 +153,7 @@ describe("Header Integration Tests", () => {
       const header = screen.getByRole("banner");
       expect(header).toHaveClass("sticky");
       expect(header).toHaveClass("border-b");
-      expect(header).toHaveClass("bg-background");
+      expect(header).toHaveClass("backdrop-blur-md");
     });
 
     it("should apply minimal variant styles", async () => {
@@ -162,7 +162,7 @@ describe("Header Integration Tests", () => {
       const header = screen.getByRole("banner");
       expect(header).toHaveClass("sticky");
       expect(header).toHaveClass("border-b");
-      expect(header).toHaveClass("bg-background");
+      expect(header).toHaveClass("backdrop-blur-md");
       // Minimal variant hides center nav
       expect(screen.queryByTestId("nav-switcher")).not.toBeInTheDocument();
     });
