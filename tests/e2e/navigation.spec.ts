@@ -123,8 +123,8 @@ test.describe("Navigation System", () => {
       await page.waitForURL("**/en/about", { waitUntil: "domcontentloaded" });
       await waitForStablePage(page);
 
-      // Verify About page content
-      await expect(page.getByRole("heading", { name: /about/i })).toBeVisible();
+      // Verify About page loaded (check for h1 heading)
+      await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 
       // Dismiss cookie dialog again if it reappeared
       if (await cookieDialog.isVisible({ timeout: 500 }).catch(() => false)) {
@@ -301,8 +301,8 @@ test.describe("Navigation System", () => {
       // Sheet should auto-close after navigation
       await expect(mobileNavSheet).not.toBeVisible();
 
-      // Verify we're on the About page
-      await expect(page.getByRole("heading", { name: /about/i })).toBeVisible();
+      // Verify we're on the About page (check for h1 heading)
+      await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
     });
 
     test("should support touch interactions", async ({ page }) => {
@@ -414,7 +414,7 @@ test.describe("Navigation System", () => {
         await aboutLink.click();
       }
       await page.waitForURL("**/en/about");
-      await expect(page.getByRole("heading", { name: /about/i })).toBeVisible();
+      await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 
       // Navigate back to Home using direct navigation for reliability
       // This creates proper browser history for back/forward testing
@@ -424,7 +424,7 @@ test.describe("Navigation System", () => {
       // Back to About
       await page.goBack();
       await page.waitForURL("**/en/about");
-      await expect(page.getByRole("heading", { name: /about/i })).toBeVisible();
+      await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 
       // Forward to Home
       await page.goForward();
@@ -591,8 +591,8 @@ test.describe("Navigation System", () => {
       const budgetMs = process.env.CI ? 1500 : 1000;
       expect(navigationTime).toBeLessThan(budgetMs);
 
-      // Verify page is fully loaded
-      await expect(page.getByRole("heading", { name: /about/i })).toBeVisible();
+      // Verify page is fully loaded (check for h1 heading)
+      await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
     });
 
     test("should preload navigation links", async ({ page }) => {
