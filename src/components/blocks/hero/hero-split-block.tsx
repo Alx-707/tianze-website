@@ -1,8 +1,7 @@
-import { ArrowRight, ExternalLink, Github } from "lucide-react";
+import { ArrowRight, Factory, Package } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { SITE_CONFIG } from "@/config/paths/site-config";
 
 export interface HeroSplitBlockMessages extends Record<string, unknown> {
   version?: string;
@@ -36,7 +35,7 @@ function HeroBadge({ version }: { version: string }) {
   return (
     <div className="mb-8 flex justify-center">
       <Badge className="bg-foreground px-4 py-2 text-sm font-medium text-background">
-        <span className="mr-2">🚀</span>
+        <span className="mr-2 inline-block h-2 w-2 rounded-full bg-green-400" />
         {version}
       </Badge>
     </div>
@@ -100,21 +99,17 @@ function HeroActionButtons({
         asChild
       >
         <a href={demoHref} className="flex items-center gap-2">
+          <Factory className="h-4 w-4" />
           {t("cta.demo")}
           <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
         </a>
       </Button>
 
       <Button variant="outline" size="lg" className="px-8 py-3 text-lg" asChild>
-        <a
-          href={githubHref}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center gap-2"
-        >
-          <Github className="h-4 w-4" />
+        <a href={githubHref} className="flex items-center gap-2">
+          <Package className="h-4 w-4" />
           {t("cta.github")}
-          <ExternalLink className="h-3 w-3" />
+          <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
         </a>
       </Button>
     </div>
@@ -143,25 +138,25 @@ function HeroStats({
   );
 }
 
-// Default values
+// Default values - Tianze Pipe Industry
 const DEFAULT_TECHNOLOGIES = [
-  "Next.js 16",
-  "React 19",
-  "TypeScript 5.9",
-  "Tailwind CSS 4",
-  "shadcn/ui",
-  "next-intl",
+  "Pipe Bending Machines",
+  "PVC Conduits",
+  "PETG Tubes",
+  "Custom Molds",
+  "Schedule 80",
+  "ASTM Certified",
 ];
 
 const DEFAULT_STATS = [
-  { value: "22+", labelKey: "technologies" },
-  { value: "100%", labelKey: "typescript" },
-  { value: "A+", labelKey: "performance" },
-  { value: "2", labelKey: "languages" },
+  { value: "100+", labelKey: "technologies" },
+  { value: "60+", labelKey: "typescript" },
+  { value: "98%", labelKey: "performance" },
+  { value: "6+", labelKey: "languages" },
 ];
 
-const DEFAULT_DEMO_HREF = "#demo";
-const DEFAULT_GITHUB_HREF = SITE_CONFIG.social.github;
+const DEFAULT_DEMO_HREF = "/products";
+const DEFAULT_GITHUB_HREF = "/products";
 
 function HeroSplitBlockBody({
   t,

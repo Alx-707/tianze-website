@@ -99,7 +99,7 @@ export const siteFacts: SiteFacts = {
     location: {
       country: "China",
       city: "Lianyungang, Jiangsu",
-      address: "江苏省连云港市灌云县东王集工业集中区玉龙路6号",
+      address: "No.6 Yulong Road, Dongwangji Industrial Zone, Guanyun County",
     },
   },
   contact: {
@@ -128,6 +128,5 @@ export const siteFacts: SiteFacts = {
   social: {
     linkedin: SITE_CONFIG.social.linkedin,
     twitter: SITE_CONFIG.social.twitter,
-    github: SITE_CONFIG.social.github,
   },
 };

@@ -3,27 +3,11 @@
 import dynamic from "next/dynamic";
 import {
   CallToActionSkeleton,
-  ComponentShowcaseSkeleton,
   ProjectOverviewSkeleton,
-  TechStackSkeleton,
 } from "@/components/home/below-the-fold-skeleton";
 
-// Dynamic imports use leaf module paths directly to ensure optimal code splitting
-// Importing from barrel (@/components/blocks) risks chunk size bloat
-const TechStackSection = dynamic(
-  () =>
-    import("@/components/blocks/tech/tech-tabs-block").then(
-      (m) => m.TechTabsBlock,
-    ),
-  { loading: () => <TechStackSkeleton />, ssr: false },
-);
-const ComponentShowcase = dynamic(
-  () =>
-    import("@/components/home/component-showcase").then(
-      (m) => m.ComponentShowcase,
-    ),
-  { loading: () => <ComponentShowcaseSkeleton />, ssr: false },
-);
+// Dynamic imports for below-the-fold content
+// Simplified for Tianze Pipe Industry - focus on capabilities and CTA
 const ProjectOverview = dynamic(
   () =>
     import("@/components/blocks/features/features-grid-block").then(
@@ -42,8 +26,6 @@ const CallToAction = dynamic(
 export function BelowTheFoldClient() {
   return (
     <>
-      <TechStackSection enableContentVisibility={true} />
-      <ComponentShowcase />
       <ProjectOverview />
       <CallToAction />
     </>

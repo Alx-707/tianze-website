@@ -97,15 +97,15 @@
   },
   "home": {
     "hero": {
-      "version": "v1.0.0 - 生产就绪",
-      "title": { "line1": "现代化B2B企业级", "line2": "Web平台" },
-      "subtitle": "基于Next.js 16、React 19、TypeScript 5.9.3和Tailwind CSS 4构建。具备企业级安全性、国际化和性能优化特性。",
-      "cta": { "demo": "查看演示", "github": "在GitHub上查看" },
+      "version": "ISO 9001:2015 认证企业",
+      "title": { "line1": "精准弯曲", "line2": "成就卓越" },
+      "subtitle": "弯管制造专家 — 设备+工艺+管件一体化解决方案。从半自动/全自动弯管机到精密管件，为全球B2B客户提供完整的制造能力。",
+      "cta": { "demo": "探索设备", "github": "查看产品目录" },
       "stats": {
-        "technologies": "项技术",
-        "typescript": "TypeScript",
-        "performance": "性能评级",
-        "languages": "种语言"
+        "technologies": "出口国家",
+        "typescript": "专业员工",
+        "performance": "准时交货率",
+        "languages": "年行业经验"
       }
     },
     "techStack": {
@@ -244,96 +244,99 @@
       }
     },
     "overview": {
-      "title": "项目概述",
-      "subtitle": "为现代B2B应用设计的综合企业级Web平台，采用前沿技术栈。",
+      "title": "制造能力",
+      "subtitle": "集弯管设备研发、精密模具、优质管件生产于一体的综合制造能力。",
       "features": {
         "performance": {
-          "title": "高性能",
-          "description": "通过SSR、SSG和高级缓存策略优化速度。"
+          "title": "弯管系统",
+          "description": "半自动/全自动弯管机，精密控制，高产能输出。"
         },
         "security": {
-          "title": "企业级安全",
-          "description": "内置安全功能，符合行业标准实践和合规要求。"
+          "title": "质量认证",
+          "description": "ISO 9001:2015认证，每个环节严格质量控制。"
         },
         "i18n": {
-          "title": "国际化",
-          "description": "全面支持多语言，具备动态内容切换功能。",
-          "languageUnit": "种语言"
+          "title": "全球出口",
+          "description": "服务100+国家客户，可靠的国际物流配送。",
+          "languageUnit": "个国家"
         },
         "themes": {
-          "title": "主题系统",
-          "description": "支持亮色、暗色和自定义主题的动态切换。",
-          "multiTheme": "多主题"
+          "title": "定制方案",
+          "description": "从标准规格到全定制模具和管件。",
+          "multiTheme": "灵活"
         },
         "typescript": {
-          "title": "类型安全",
-          "description": "100% TypeScript覆盖，提升开发体验和可靠性。"
+          "title": "标准合规",
+          "description": "产品符合ASTM、UL651、AS/NZS、GB等国际标准。"
         },
         "deployment": {
-          "title": "便捷部署",
-          "description": "一键部署到Vercel，自动CI/CD流水线。"
+          "title": "快速交付",
+          "description": "快速打样，高效生产，准时交货保证。"
         }
       },
       "highlights": {
-        "title": "核心亮点",
-        "subtitle": "让这个平台在竞争中脱颖而出的特色。",
-        "modern": "现代化架构",
-        "scalable": "可扩展设计",
-        "accessible": "无障碍优先",
-        "performant": "高性能",
-        "secure": "安全专注",
-        "maintainable": "易于维护"
+        "title": "核心能力",
+        "subtitle": "天泽管业的行业差异化优势。",
+        "modern": "自主模具研发",
+        "scalable": "可扩展生产线",
+        "accessible": "低起订量支持",
+        "performant": "98%准时交货",
+        "secure": "ISO 9001认证",
+        "maintainable": "OEM/ODM服务"
       },
       "architecture": {
-        "title": "技术架构",
+        "title": "产品线",
         "frontend": {
-          "title": "前端层",
-          "description": "基于React的前端，使用Next.js实现最佳性能和SEO。"
+          "title": "弯管设备",
+          "description": "半自动/全自动PVC弯管机，先进温控技术。"
         },
         "ui": {
-          "title": "UI系统",
-          "description": "全面的设计系统，包含可复用组件和主题。"
+          "title": "PVC管道系统",
+          "description": "Schedule 40/80电工管、弯管、弯头、扩口件。"
         },
         "tooling": {
-          "title": "开发工具",
-          "description": "现代化开发工作流，自动化测试和质量检查。"
+          "title": "气动物流管",
+          "description": "PETG/PMMA/PVC透明管，用于医院和工业物流系统。"
         }
       },
       "cta": {
-        "title": "准备开始了吗？",
-        "description": "加入数千名开发者，使用我们的平台构建出色的B2B应用。",
-        "getStarted": "立即开始",
-        "viewSource": "查看源代码"
+        "title": "准备合作了吗？",
+        "description": "联系我们的团队，讨论您的弯管和管道需求。",
+        "getStarted": "获取报价",
+        "viewSource": "查看产品"
       }
     },
     "cta": {
-      "badge": "开源项目",
-      "title": "今天就开始构建",
-      "subtitle": "使用我们的现代化B2B企业平台，加速您的开发流程。",
-      "primary": { "github": "在GitHub上加星", "demo": "在线演示" },
+      "badge": "合作伙伴",
+      "title": "获取定制报价",
+      "subtitle": "告诉我们您的项目需求，工程团队将在24小时内提供定制方案。",
+      "primary": { "github": "联系销售", "demo": "查看目录" },
       "actions": {
         "github": {
-          "title": "GitHub仓库",
-          "description": "探索源代码并为项目做出贡献。"
+          "title": "获取报价",
+          "description": "获取弯管机、管材或定制管件的价格。"
         },
         "download": {
-          "title": "下载模板",
-          "description": "获取完整模板，立即开始构建。"
+          "title": "下载目录",
+          "description": "查看完整产品规格和技术参数。"
         },
-        "docs": { "title": "文档", "description": "全面的指南和API文档。" }
+        "docs": {
+          "title": "技术支持",
+          "description": "获取规格和安装要求的专业指导。"
+        }
       },
-      "buttons": { "getStarted": "开始使用", "learnMore": "了解更多" },
+      "buttons": { "getStarted": "获取报价", "learnMore": "了解更多" },
       "stats": {
-        "technologies": "项技术",
-        "typescript": "TypeScript",
-        "performance": "性能评级",
-        "languages": "种语言"
+        "technologies": "出口国家",
+        "typescript": "专业员工",
+        "performance": "准时交货率",
+        "languages": "年行业经验"
       },
       "community": {
-        "title": "加入我们的社区",
-        "description": "与其他开发者联系，获得社区支持。",
-        "discussions": "GitHub讨论",
-        "issues": "报告问题"
+        "title": "全球支持网络",
+        "description": "联系我们的销售团队，获得您所在区域的支持。",
+        "discussions": "WhatsApp咨询",
+        "issues": "邮件支持"
       }
     }
   },
@@ -445,30 +448,30 @@
     "themeSelector": "选择主题"
   },
   "seo": {
-    "title": "天泽管业",
-    "description": "专业PVC管道与PETG气动传输管制造商",
+    "title": "天泽管业 - 弯管制造专家",
+    "description": "专业弯管设备与管件制造商。设备+工艺+管件一体化解决方案。",
     "siteName": "天泽管业",
-    "keywords": "PVC管道, PETG管, 气动传输管, 管道制造商, 工业管道",
+    "keywords": "弯管机, PVC弯管, 弯管设备, PVC电工管, PETG气动管, 管件, 工业管道",
     "pages": {
       "home": {
-        "title": "天泽管业 - 专业管道制造商",
-        "description": "专业PVC管道与PETG气动传输管制造商，通过ISO 9001:2015认证。"
+        "title": "天泽管业 - 弯管制造专家 | 设备与管件",
+        "description": "专业弯管设备与管件制造商。半自动/全自动弯管机、PVC电工管、PETG气动物流管。ISO 9001:2015认证企业。"
       },
       "about": {
-        "title": "关于我们 - 天泽管业",
-        "description": "了解天泽管业为客户提供高品质工业管道解决方案的使命。"
+        "title": "关于我们 - 天泽管业 | 制造能力",
+        "description": "了解天泽管业的一体化制造能力：弯管设备、精密模具、优质管件。创立于2018年。"
       },
       "contact": {
-        "title": "联系我们 - 天泽管业",
-        "description": "联系我们的团队获取产品咨询和技术支持。"
+        "title": "联系我们 - 天泽管业 | 获取报价",
+        "description": "咨询弯管设备、PVC管材或PETG气动管产品。产品出口100+国家和地区。"
       },
       "products": {
-        "title": "产品中心 - 天泽管业",
-        "description": "探索我们的PVC管道和PETG气动传输管系列产品。"
+        "title": "产品中心 - 天泽管业 | 设备与管件",
+        "description": "探索弯管机（半自动/全自动）、PVC电工管（美标Schedule 80）、PETG气动物流管产品线。"
       },
       "blog": {
         "title": "新闻动态 - 天泽管业",
-        "description": "天泽管业最新资讯和行业动态。"
+        "description": "天泽管业最新行业资讯、技术指南和公司动态。"
       }
     }
   },

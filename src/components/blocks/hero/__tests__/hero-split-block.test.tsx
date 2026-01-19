@@ -60,8 +60,8 @@ vi.mock("next-themes", () => ({
 // Mock Lucide React icons
 vi.mock("lucide-react", () => ({
   ArrowRight: () => <div data-testid="arrow-right-icon">ArrowRight</div>,
-  ExternalLink: () => <div data-testid="external-link-icon">ExternalLink</div>,
-  Github: () => <div data-testid="github-icon">Github</div>,
+  Factory: () => <div data-testid="factory-icon">Factory</div>,
+  Package: () => <div data-testid="package-icon">Package</div>,
 }));
 
 // Mock UI components
@@ -155,7 +155,7 @@ describe("HeroSplitBlock", () => {
       renderHero();
       const badges = screen.getAllByTestId("badge");
       const versionBadge = badges.find((badge) =>
-        badge.textContent?.includes("🚀"),
+        badge.textContent?.includes("v1.0.0"),
       );
       expect(versionBadge).toBeInTheDocument();
       expect(versionBadge).toHaveTextContent("v1.0.0");
@@ -225,8 +225,10 @@ describe("HeroSplitBlock", () => {
 
     it("should render button icons", () => {
       renderHero();
-      expect(screen.getByTestId("arrow-right-icon")).toBeInTheDocument();
-      expect(screen.getByTestId("github-icon")).toBeInTheDocument();
+      expect(screen.getAllByTestId("arrow-right-icon").length).toBeGreaterThan(
+        0,
+      );
+      expect(screen.getByTestId("package-icon")).toBeInTheDocument();
     });
   });
 

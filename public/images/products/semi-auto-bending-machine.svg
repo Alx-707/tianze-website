@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900" role="img" aria-label="Semi-Automatic PVC Pipe Bending Machine">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0b1220" />
+      <stop offset="100%" stop-color="#111827" />
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#7c3aed" />
+      <stop offset="100%" stop-color="#a78bfa" />
+    </linearGradient>
+    <linearGradient id="metal" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#475569" />
+      <stop offset="50%" stop-color="#334155" />
+      <stop offset="100%" stop-color="#1e293b" />
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="900" fill="url(#bg)" />
+
+  <circle cx="200" cy="200" r="200" fill="#1e1b4b" opacity="0.2" />
+  <circle cx="1000" cy="720" r="240" fill="#1e1b4b" opacity="0.15" />
+
+  <rect x="120" y="150" width="960" height="600" rx="28" fill="#0f3460" opacity="0.38" />
+  <rect x="160" y="190" width="880" height="520" rx="22" fill="#0b1220" opacity="0.55" />
+  <rect x="160" y="190" width="880" height="10" fill="url(#accent)" opacity="0.9" />
+
+  <!-- Machine base -->
+  <g transform="translate(600 380)">
+    <!-- Base platform -->
+    <rect x="-120" y="40" width="240" height="30" rx="4" fill="url(#metal)" />
+
+    <!-- Vertical support -->
+    <rect x="-100" y="-60" width="20" height="100" rx="2" fill="#475569" />
+    <rect x="80" y="-60" width="20" height="100" rx="2" fill="#475569" />
+
+    <!-- Pipe being bent (curved) -->
+    <path d="M-80 -20 Q0 -80 80 -20" stroke="#7c3aed" stroke-width="16" fill="none" stroke-linecap="round" opacity="0.9" />
+
+    <!-- Heating element indicator -->
+    <rect x="-40" y="-50" width="80" height="8" rx="4" fill="#f97316" opacity="0.8" />
+
+    <!-- Control panel -->
+    <rect x="-130" y="-80" width="50" height="70" rx="4" fill="#1e293b" stroke="#334155" stroke-width="2" />
+    <circle cx="-105" cy="-60" r="6" fill="#22c55e" />
+    <circle cx="-105" cy="-40" r="6" fill="#f97316" />
+  </g>
+
+  <text x="600" y="540" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="42" font-weight="700" fill="#e5e7eb" text-anchor="middle">
+    Semi-Automatic Bending Machine
+  </text>
+  <text x="600" y="590" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="22" fill="#94a3b8" text-anchor="middle">
+    Precision PVC Pipe Bending Equipment
+  </text>
+
+  <!-- Featured badge -->
+  <rect x="900" y="220" width="100" height="32" rx="16" fill="#7c3aed" />
+  <text x="950" y="242" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="14" font-weight="600" fill="#ffffff" text-anchor="middle">
+    FEATURED
+  </text>
+</svg>

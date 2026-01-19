@@ -97,15 +97,15 @@
   },
   "home": {
     "hero": {
-      "version": "v1.0.0 - Production Ready",
-      "title": { "line1": "Modern B2B Enterprise", "line2": "Web Platform" },
-      "subtitle": "Built with Next.js 16, React 19, TypeScript 5.9.3, and Tailwind CSS 4. Features enterprise-grade security, internationalization, and performance optimization.",
-      "cta": { "demo": "View Demo", "github": "View on GitHub" },
+      "version": "ISO 9001:2015 Certified",
+      "title": { "line1": "Engineering the", "line2": "Perfect Curve" },
+      "subtitle": "Pipe Bending Experts — Equipment, Process & Fittings integrated solutions. From semi-auto bending machines to precision pipe fittings, we deliver complete manufacturing capability for global B2B customers.",
+      "cta": { "demo": "Explore Machinery", "github": "View Pipe Catalog" },
       "stats": {
-        "technologies": "Technologies",
-        "typescript": "TypeScript",
-        "performance": "Performance",
-        "languages": "Languages"
+        "technologies": "Export Countries",
+        "typescript": "Employees",
+        "performance": "On-time Delivery",
+        "languages": "Years Experience"
       }
     },
     "techStack": {
@@ -244,99 +244,99 @@
       }
     },
     "overview": {
-      "title": "Project Overview",
-      "subtitle": "A comprehensive enterprise web platform designed for modern B2B applications with cutting-edge technology stack.",
+      "title": "Manufacturing Excellence",
+      "subtitle": "Integrated pipe bending capability with equipment development, precision molds, and quality fittings production.",
       "features": {
         "performance": {
-          "title": "High Performance",
-          "description": "Optimized for speed with SSR, SSG, and advanced caching strategies."
+          "title": "Pipe Bending Systems",
+          "description": "Semi-auto and full-auto bending machines with precision control and high throughput."
         },
         "security": {
-          "title": "Enterprise Security",
-          "description": "Built-in security features with industry-standard practices and compliance."
+          "title": "Quality Certified",
+          "description": "ISO 9001:2015 certified manufacturing with strict quality control at every stage."
         },
         "i18n": {
-          "title": "Internationalization",
-          "description": "Full support for multiple languages with dynamic content switching.",
-          "languageUnit": "Languages"
+          "title": "Global Export",
+          "description": "Serving customers in over 100 countries with reliable international shipping.",
+          "languageUnit": "Countries"
         },
         "themes": {
-          "title": "Theme System",
-          "description": "Dynamic theme switching with light, dark, and custom theme support.",
-          "multiTheme": "Multi-theme"
+          "title": "Custom Solutions",
+          "description": "From standard specifications to fully customized molds and fittings.",
+          "multiTheme": "Flexible"
         },
         "typescript": {
-          "title": "Type Safety",
-          "description": "100% TypeScript coverage for enhanced developer experience and reliability."
+          "title": "Standards Compliance",
+          "description": "Products meet ASTM, UL651, AS/NZS, and GB standards for global market access."
         },
         "deployment": {
-          "title": "Easy Deployment",
-          "description": "One-click deployment to Vercel with automatic CI/CD pipeline."
+          "title": "Fast Turnaround",
+          "description": "Quick prototyping and efficient production with on-time delivery guarantee."
         }
       },
       "highlights": {
-        "title": "Key Highlights",
-        "subtitle": "What makes this platform stand out from the competition.",
-        "modern": "Modern Architecture",
-        "scalable": "Scalable Design",
-        "accessible": "Accessibility First",
-        "performant": "High Performance",
-        "secure": "Security Focused",
-        "maintainable": "Easy Maintenance"
+        "title": "Core Capabilities",
+        "subtitle": "What sets Tianze Pipe apart in the industry.",
+        "modern": "In-house Mold Development",
+        "scalable": "Scalable Production Lines",
+        "accessible": "Low MOQ Support",
+        "performant": "98% On-time Delivery",
+        "secure": "ISO 9001 Certified",
+        "maintainable": "OEM/ODM Services"
       },
       "architecture": {
-        "title": "Technical Architecture",
+        "title": "Product Lines",
         "frontend": {
-          "title": "Frontend Layer",
-          "description": "React-based frontend with Next.js for optimal performance and SEO."
+          "title": "Bending Equipment",
+          "description": "Semi-auto and full-auto PVC pipe bending machines with advanced temperature control."
         },
         "ui": {
-          "title": "UI System",
-          "description": "Comprehensive design system with reusable components and themes."
+          "title": "PVC Conduit System",
+          "description": "Schedule 40/80 conduits, bends, elbows, and expansion fittings for electrical applications."
         },
         "tooling": {
-          "title": "Development Tools",
-          "description": "Modern development workflow with automated testing and quality checks."
+          "title": "Pneumatic Tubes",
+          "description": "PETG/PMMA/PVC transparent tubes for hospital and industrial logistics systems."
         }
       },
       "cta": {
-        "title": "Ready to Get Started?",
-        "description": "Join thousands of developers building amazing B2B applications with our platform.",
-        "getStarted": "Get Started Now",
-        "viewSource": "View Source Code"
+        "title": "Ready to Partner?",
+        "description": "Contact our team to discuss your pipe bending and conduit requirements.",
+        "getStarted": "Request Quote",
+        "viewSource": "View Products"
       }
     },
     "cta": {
-      "badge": "Open Source",
-      "title": "Start Building Today",
-      "subtitle": "Get started with our modern B2B enterprise platform and accelerate your development process.",
-      "primary": { "github": "Star on GitHub", "demo": "Live Demo" },
+      "badge": "Partner With Us",
+      "title": "Get Your Custom Quote",
+      "subtitle": "Tell us about your project requirements. Our engineering team will provide a tailored solution within 24 hours.",
+      "primary": { "github": "Contact Sales", "demo": "View Catalog" },
       "actions": {
         "github": {
-          "title": "GitHub Repository",
-          "description": "Explore the source code and contribute to the project."
+          "title": "Request Quote",
+          "description": "Get pricing for pipe bending machines, conduits, or custom fittings."
         },
         "download": {
-          "title": "Download Template",
-          "description": "Get the complete template and start building immediately."
+          "title": "Download Catalog",
+          "description": "View our complete product specifications and technical data sheets."
         },
         "docs": {
-          "title": "Documentation",
-          "description": "Comprehensive guides and API documentation."
+          "title": "Technical Support",
+          "description": "Get expert guidance on specifications and installation requirements."
         }
       },
-      "buttons": { "getStarted": "Get Started", "learnMore": "Learn More" },
+      "buttons": { "getStarted": "Get Quote", "learnMore": "Learn More" },
       "stats": {
-        "technologies": "Technologies",
-        "typescript": "TypeScript",
-        "performance": "Performance",
-        "languages": "Languages"
+        "technologies": "Export Countries",
+        "typescript": "Employees",
+        "performance": "On-time Rate",
+        "languages": "Years Experience"
       },
       "community": {
-        "title": "Join Our Community",
-        "description": "Connect with other developers and get support from our community.",
-        "discussions": "GitHub Discussions",
-        "issues": "Report Issues"
+        "title": "Global Support Network",
+        "description": "Connect with our sales team and get support for your region.",
+        "discussions": "WhatsApp Chat",
+        "issues": "Email Support"
       }
     }
   },
@@ -448,30 +448,30 @@
     "themeSelector": "Select theme"
   },
   "seo": {
-    "title": "Tianze Pipe",
-    "description": "Professional PVC conduit and PETG pneumatic tube manufacturer",
+    "title": "Tianze Pipe - Pipe Bending Experts",
+    "description": "Professional pipe bending machinery and fittings manufacturer. Equipment + Process + Fittings integrated solutions.",
     "siteName": "Tianze Pipe",
-    "keywords": "PVC conduit, PETG tube, pneumatic tube, pipe manufacturer, industrial pipes",
+    "keywords": "pipe bending machine, PVC pipe bending, pipe bending equipment, PVC conduit, PETG pneumatic tube, pipe fittings, industrial pipes",
     "pages": {
       "home": {
-        "title": "Tianze Pipe - Professional Pipe Manufacturer",
-        "description": "Professional PVC conduit and PETG pneumatic tube manufacturer with ISO 9001:2015 certification."
+        "title": "Tianze Pipe - Pipe Bending Experts | Equipment & Fittings",
+        "description": "Professional pipe bending machinery and fittings manufacturer. Semi-auto & full-auto bending machines, PVC conduits, PETG pneumatic tubes. ISO 9001:2015 certified."
       },
       "about": {
-        "title": "About Us - Tianze Pipe",
-        "description": "Learn about Tianze Pipe's mission to provide high-quality industrial pipe solutions."
+        "title": "About Us - Tianze Pipe | Manufacturing Excellence",
+        "description": "Discover Tianze Pipe's integrated manufacturing capability: pipe bending equipment, precision molds, and quality pipe fittings since 2018."
       },
       "contact": {
-        "title": "Contact Us - Tianze Pipe",
-        "description": "Get in touch with our team for product inquiries and support."
+        "title": "Contact Us - Tianze Pipe | Get a Quote",
+        "description": "Contact our team for pipe bending machinery, PVC conduits, or PETG pneumatic tube inquiries. Export to 100+ countries."
       },
       "products": {
-        "title": "Products - Tianze Pipe",
-        "description": "Discover our range of PVC conduits and PETG pneumatic tubes for industrial applications."
+        "title": "Products - Tianze Pipe | Machines & Pipe Fittings",
+        "description": "Explore our pipe bending machines (semi-auto/full-auto), PVC conduits (Schedule 80), and PETG pneumatic logistics tubes."
       },
       "blog": {
-        "title": "Blog - Tianze Pipe",
-        "description": "Latest insights and updates from Tianze Pipe."
+        "title": "News & Insights - Tianze Pipe",
+        "description": "Latest industry insights, technical guides, and company updates from Tianze Pipe."
       }
     }
   },
