@@ -3,10 +3,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import {
   ArrowRight,
-  Award,
+  BadgeCheck,
+  Crosshair,
   HeadphonesIcon,
-  Lightbulb,
-  ShieldCheck,
+  Wrench,
 } from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { generateMetadataForPath, type Locale } from "@/lib/seo-metadata";
@@ -158,10 +158,14 @@ function ValuesSection({ title, values }: ValuesSectionProps) {
   // and only used to render UI content (title/description/icons). It never
   // flows into persistence, command execution, or other sensitive sinks.
   const valueItems = [
-    { key: "quality", icon: <Award className="h-6 w-6" />, ...values.quality },
+    {
+      key: "quality",
+      icon: <Crosshair className="h-6 w-6" />,
+      ...values.quality,
+    },
     {
       key: "innovation",
-      icon: <Lightbulb className="h-6 w-6" />,
+      icon: <Wrench className="h-6 w-6" />,
       ...values.innovation,
     },
     {
@@ -171,7 +175,7 @@ function ValuesSection({ title, values }: ValuesSectionProps) {
     },
     {
       key: "integrity",
-      icon: <ShieldCheck className="h-6 w-6" />,
+      icon: <BadgeCheck className="h-6 w-6" />,
       ...values.integrity,
     },
   ];
@@ -208,9 +212,9 @@ interface StatsSectionProps {
 function StatsSection({ stats }: StatsSectionProps) {
   const statItems = [
     { key: "years", value: "15+", label: stats.yearsExperience },
-    { key: "countries", value: "50+", label: stats.countriesServed },
-    { key: "clients", value: "1000+", label: stats.happyClients },
-    { key: "products", value: "10M+", label: stats.productsDelivered },
+    { key: "countries", value: "100+", label: stats.countriesServed },
+    { key: "team", value: "60+", label: stats.happyClients },
+    { key: "factory", value: "100", label: stats.productsDelivered },
   ];
 
   return (

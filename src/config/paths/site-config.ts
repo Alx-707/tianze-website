@@ -29,22 +29,28 @@ export const SITE_CONFIG = {
   baseUrl:
     process.env["NEXT_PUBLIC_BASE_URL"] ||
     process.env["NEXT_PUBLIC_SITE_URL"] ||
-    "https://tianze-pipe.example",
+    "https://tianze-pipe.com",
   name: "Tianze Pipe",
-  description: "Professional PVC conduit and PETG pneumatic tube manufacturer",
+  description:
+    "Pipe Bending Experts - Equipment, Process & Fittings Integrated Solutions",
 
   // SEO配置
   seo: {
-    titleTemplate: "%s | Tianze Pipe",
-    defaultTitle: "Tianze Pipe",
+    titleTemplate: "%s | Tianze Pipe - Pipe Bending Experts",
+    defaultTitle: "Tianze Pipe - Pipe Bending Experts",
     defaultDescription:
-      "Professional PVC conduit and PETG pneumatic tube manufacturer",
+      "Professional PVC pipe bending machinery and pipe fittings manufacturer. Equipment + Process + Fittings integrated solutions for global B2B customers.",
     keywords: [
+      "pipe bending machine",
+      "PVC pipe bending",
+      "pipe bending equipment",
       "PVC conduit",
-      "PETG tube",
-      "pneumatic tube",
-      "pipe manufacturer",
+      "PETG pneumatic tube",
+      "pipe fittings",
+      "pipe manufacturer China",
       "industrial pipes",
+      "Schedule 80 conduit",
+      "hospital pneumatic tube system",
     ],
   },
 
@@ -58,7 +64,7 @@ export const SITE_CONFIG = {
   // 联系信息
   contact: {
     phone: "+86-518-0000-0000",
-    email: "contact@tianze-pipe.example",
+    email: "sales@tianze-pipe.com",
     whatsappNumber:
       process.env["NEXT_PUBLIC_WHATSAPP_NUMBER"] ?? "+86-518-0000-0000",
   },

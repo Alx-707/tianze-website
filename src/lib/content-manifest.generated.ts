@@ -108,10 +108,66 @@ export const CONTENT_MANIFEST: ContentManifest = {
   {
     "type": "products",
     "locale": "en",
+    "slug": "full-auto-bending-machine",
+    "extension": ".mdx",
+    "filePath": "/content/products/en/full-auto-bending-machine.mdx",
+    "relativePath": "content/products/en/full-auto-bending-machine.mdx"
+  },
+  {
+    "type": "products",
+    "locale": "en",
+    "slug": "petg-pneumatic-tube",
+    "extension": ".mdx",
+    "filePath": "/content/products/en/petg-pneumatic-tube.mdx",
+    "relativePath": "content/products/en/petg-pneumatic-tube.mdx"
+  },
+  {
+    "type": "products",
+    "locale": "en",
+    "slug": "pvc-conduit-bend",
+    "extension": ".mdx",
+    "filePath": "/content/products/en/pvc-conduit-bend.mdx",
+    "relativePath": "content/products/en/pvc-conduit-bend.mdx"
+  },
+  {
+    "type": "products",
+    "locale": "en",
     "slug": "sample-product",
     "extension": ".mdx",
     "filePath": "/content/products/en/sample-product.mdx",
     "relativePath": "content/products/en/sample-product.mdx"
+  },
+  {
+    "type": "products",
+    "locale": "en",
+    "slug": "semi-auto-bending-machine",
+    "extension": ".mdx",
+    "filePath": "/content/products/en/semi-auto-bending-machine.mdx",
+    "relativePath": "content/products/en/semi-auto-bending-machine.mdx"
+  },
+  {
+    "type": "products",
+    "locale": "zh",
+    "slug": "full-auto-bending-machine",
+    "extension": ".mdx",
+    "filePath": "/content/products/zh/full-auto-bending-machine.mdx",
+    "relativePath": "content/products/zh/full-auto-bending-machine.mdx"
+  },
+  {
+    "type": "products",
+    "locale": "zh",
+    "slug": "petg-pneumatic-tube",
+    "extension": ".mdx",
+    "filePath": "/content/products/zh/petg-pneumatic-tube.mdx",
+    "relativePath": "content/products/zh/petg-pneumatic-tube.mdx"
+  },
+  {
+    "type": "products",
+    "locale": "zh",
+    "slug": "pvc-conduit-bend",
+    "extension": ".mdx",
+    "filePath": "/content/products/zh/pvc-conduit-bend.mdx",
+    "relativePath": "content/products/zh/pvc-conduit-bend.mdx"
   },
   {
     "type": "products",
@@ -120,6 +176,14 @@ export const CONTENT_MANIFEST: ContentManifest = {
     "extension": ".mdx",
     "filePath": "/content/products/zh/sample-product.mdx",
     "relativePath": "content/products/zh/sample-product.mdx"
+  },
+  {
+    "type": "products",
+    "locale": "zh",
+    "slug": "semi-auto-bending-machine",
+    "extension": ".mdx",
+    "filePath": "/content/products/zh/semi-auto-bending-machine.mdx",
+    "relativePath": "content/products/zh/semi-auto-bending-machine.mdx"
   }
 ],
   byKey: {
@@ -203,6 +267,30 @@ export const CONTENT_MANIFEST: ContentManifest = {
     "filePath": "/content/pages/zh/terms.mdx",
     "relativePath": "content/pages/zh/terms.mdx"
   },
+  "products/en/full-auto-bending-machine": {
+    "type": "products",
+    "locale": "en",
+    "slug": "full-auto-bending-machine",
+    "extension": ".mdx",
+    "filePath": "/content/products/en/full-auto-bending-machine.mdx",
+    "relativePath": "content/products/en/full-auto-bending-machine.mdx"
+  },
+  "products/en/petg-pneumatic-tube": {
+    "type": "products",
+    "locale": "en",
+    "slug": "petg-pneumatic-tube",
+    "extension": ".mdx",
+    "filePath": "/content/products/en/petg-pneumatic-tube.mdx",
+    "relativePath": "content/products/en/petg-pneumatic-tube.mdx"
+  },
+  "products/en/pvc-conduit-bend": {
+    "type": "products",
+    "locale": "en",
+    "slug": "pvc-conduit-bend",
+    "extension": ".mdx",
+    "filePath": "/content/products/en/pvc-conduit-bend.mdx",
+    "relativePath": "content/products/en/pvc-conduit-bend.mdx"
+  },
   "products/en/sample-product": {
     "type": "products",
     "locale": "en",
@@ -211,6 +299,38 @@ export const CONTENT_MANIFEST: ContentManifest = {
     "filePath": "/content/products/en/sample-product.mdx",
     "relativePath": "content/products/en/sample-product.mdx"
   },
+  "products/en/semi-auto-bending-machine": {
+    "type": "products",
+    "locale": "en",
+    "slug": "semi-auto-bending-machine",
+    "extension": ".mdx",
+    "filePath": "/content/products/en/semi-auto-bending-machine.mdx",
+    "relativePath": "content/products/en/semi-auto-bending-machine.mdx"
+  },
+  "products/zh/full-auto-bending-machine": {
+    "type": "products",
+    "locale": "zh",
+    "slug": "full-auto-bending-machine",
+    "extension": ".mdx",
+    "filePath": "/content/products/zh/full-auto-bending-machine.mdx",
+    "relativePath": "content/products/zh/full-auto-bending-machine.mdx"
+  },
+  "products/zh/petg-pneumatic-tube": {
+    "type": "products",
+    "locale": "zh",
+    "slug": "petg-pneumatic-tube",
+    "extension": ".mdx",
+    "filePath": "/content/products/zh/petg-pneumatic-tube.mdx",
+    "relativePath": "content/products/zh/petg-pneumatic-tube.mdx"
+  },
+  "products/zh/pvc-conduit-bend": {
+    "type": "products",
+    "locale": "zh",
+    "slug": "pvc-conduit-bend",
+    "extension": ".mdx",
+    "filePath": "/content/products/zh/pvc-conduit-bend.mdx",
+    "relativePath": "content/products/zh/pvc-conduit-bend.mdx"
+  },
   "products/zh/sample-product": {
     "type": "products",
     "locale": "zh",
@@ -218,6 +338,14 @@ export const CONTENT_MANIFEST: ContentManifest = {
     "extension": ".mdx",
     "filePath": "/content/products/zh/sample-product.mdx",
     "relativePath": "content/products/zh/sample-product.mdx"
+  },
+  "products/zh/semi-auto-bending-machine": {
+    "type": "products",
+    "locale": "zh",
+    "slug": "semi-auto-bending-machine",
+    "extension": ".mdx",
+    "filePath": "/content/products/zh/semi-auto-bending-machine.mdx",
+    "relativePath": "content/products/zh/semi-auto-bending-machine.mdx"
   }
 },
 } as const;

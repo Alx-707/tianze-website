@@ -356,46 +356,46 @@
     }
   },
   "about": {
-    "pageTitle": "About Us",
-    "pageDescription": "Learn more about our company, mission, and the team dedicated to delivering quality products.",
+    "pageTitle": "About Tianze",
+    "pageDescription": "Discover Tianze Pipe Industry - pipe bending experts with integrated equipment, process, and fittings solutions. ISO 9001:2015 certified manufacturer.",
     "hero": {
-      "title": "About Our Company",
-      "subtitle": "Your Trusted Partner in Global Trade",
-      "description": "We are a leading manufacturer and exporter specializing in high-quality industrial products. With years of experience in international trade, we are committed to delivering excellence to clients worldwide."
+      "title": "Pipe Bending Experts",
+      "subtitle": "Equipment + Process + Fittings Integrated",
+      "description": "Lianyungang Tianze Pipe Industry Co., Ltd. is a specialized manufacturer of PVC electrical conduits and PETG pneumatic tubes. With proprietary bending equipment and in-house mold development, we deliver complete solutions from machinery to finished fittings."
     },
     "mission": {
       "title": "Our Mission",
-      "content": "To provide innovative, high-quality products that meet the evolving needs of our global customers, while maintaining the highest standards of service and integrity."
+      "content": "To be the world's most trusted pipe bending partner by providing integrated solutions that combine advanced machinery, precision processes, and high-quality fittings. We empower our clients with technology, not just products."
     },
     "values": {
-      "title": "Our Values",
+      "title": "Manufacturing Excellence",
       "quality": {
-        "title": "Quality First",
-        "description": "We never compromise on quality. Every product undergoes rigorous testing and quality control."
+        "title": "Precision Engineering",
+        "description": "Every bend is engineered for perfection. Our CNC-controlled equipment delivers consistent quality with tolerances measured in fractions of a millimeter."
       },
       "innovation": {
-        "title": "Continuous Innovation",
-        "description": "We invest in R&D to bring cutting-edge solutions to market."
+        "title": "In-House R&D",
+        "description": "From bending machines to custom molds, we develop our own technology. This vertical integration means faster innovation and better solutions."
       },
       "service": {
-        "title": "Customer Service",
-        "description": "Your success is our priority. We provide comprehensive pre-sale and after-sale support."
+        "title": "Technical Support",
+        "description": "We don't just sell products - we transfer knowledge. Complete technical training, installation support, and lifetime maintenance guidance included."
       },
       "integrity": {
-        "title": "Business Integrity",
-        "description": "We build long-term relationships based on trust, transparency, and mutual respect."
+        "title": "Certified Quality",
+        "description": "ISO 9001:2015 certified with UL, ASTM, and AS/NZS compliance. Every batch is traceable, every product is guaranteed."
       }
     },
     "stats": {
       "yearsExperience": "Years Experience",
-      "countriesServed": "Countries Served",
-      "happyClients": "Happy Clients",
-      "productsDelivered": "Products Delivered"
+      "countriesServed": "Export Countries",
+      "happyClients": "Team Members",
+      "productsDelivered": "Factory Area (Acres)"
     },
     "cta": {
-      "title": "Ready to Work With Us?",
-      "description": "Contact our team to discuss your requirements and discover how we can help grow your business.",
-      "button": "Get in Touch"
+      "title": "Partner With Pipe Bending Experts",
+      "description": "Whether you need bending machines, custom molds, or finished fittings, our team is ready to deliver. Get a free consultation and quote today.",
+      "button": "Request Quote"
     }
   },
   "products": {

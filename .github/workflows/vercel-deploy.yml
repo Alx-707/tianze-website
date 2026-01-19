@@ -23,7 +23,9 @@ jobs:
     name: 部署到 Vercel（token）
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    if: github.event_name != 'workflow_dispatch'
+    # Secrets are not available for fork PRs, and may be unset in template repos.
+    # Skip deploy jobs unless all required Vercel credentials are configured.
+    if: github.event_name != 'workflow_dispatch' && secrets.VERCEL_TOKEN != '' && secrets.VERCEL_ORG_ID != '' && secrets.VERCEL_PROJECT_ID != ''
 
     outputs:
       preview_url: ${{ steps.vercel_cli_deploy.outputs.deployment-url }}
@@ -174,7 +176,8 @@ jobs:
     name: 部署到 Production（--prod）
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    if: github.event_name == 'workflow_dispatch'
+    # Production deploy is manual, but still requires configured Vercel credentials.
+    if: github.event_name == 'workflow_dispatch' && secrets.VERCEL_TOKEN != '' && secrets.VERCEL_ORG_ID != '' && secrets.VERCEL_PROJECT_ID != ''
 
     outputs:
       prod_url: ${{ steps.vercel_cli_deploy_prod.outputs.deployment-url }}
@@ -552,7 +555,7 @@ jobs:
     name: 部署总结
     runs-on: ubuntu-latest
     needs: [deploy-to-vercel]
-    if: always()
+    if: always() && github.event_name != 'workflow_dispatch'
     timeout-minutes: 5
 
     steps:
@@ -568,16 +571,27 @@ jobs:
           echo "> **Note**: 质量检查由 ci.yml 统一负责" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
-          if [ "${{ needs.deploy-to-vercel.conclusion }}" == "success" ]; then
-            echo "✅ **状态**: 部署成功" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "❌ **状态**: 部署失败" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "### 📋 任务状态" >> $GITHUB_STEP_SUMMARY
-            echo "- Vercel 部署: ${{ needs.deploy-to-vercel.conclusion }}" >> $GITHUB_STEP_SUMMARY
-            if [ -n "${{ needs.deploy-to-vercel.outputs.preview_url }}" ]; then
-              echo "- 部署后验证: (参考运行记录)" >> $GITHUB_STEP_SUMMARY
-            else
-              echo "- 部署后验证: skipped（无 preview_url）" >> $GITHUB_STEP_SUMMARY
-            fi
-          fi
+          case "${{ needs.deploy-to-vercel.result }}" in
+            success)
+              echo "✅ **状态**: 部署成功" >> $GITHUB_STEP_SUMMARY
+              ;;
+            skipped)
+              echo "⏭️ **状态**: 已跳过（未配置 Vercel 凭据）" >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo '- 需要配置 secrets：`VERCEL_TOKEN`、`VERCEL_ORG_ID`、`VERCEL_PROJECT_ID`' >> $GITHUB_STEP_SUMMARY
+              ;;
+            cancelled)
+              echo "🛑 **状态**: 已取消" >> $GITHUB_STEP_SUMMARY
+              ;;
+            *)
+              echo "❌ **状态**: 部署失败" >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "### 📋 任务状态" >> $GITHUB_STEP_SUMMARY
+              echo "- Vercel 部署: ${{ needs.deploy-to-vercel.result }}" >> $GITHUB_STEP_SUMMARY
+              if [ -n "${{ needs.deploy-to-vercel.outputs.preview_url }}" ]; then
+                echo "- 部署后验证: (参考运行记录)" >> $GITHUB_STEP_SUMMARY
+              else
+                echo "- 部署后验证: skipped（无 preview_url）" >> $GITHUB_STEP_SUMMARY
+              fi
+              ;;
+          esac

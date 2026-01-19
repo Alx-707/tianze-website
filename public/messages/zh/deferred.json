@@ -329,46 +329,46 @@
     }
   },
   "about": {
-    "pageTitle": "关于我们",
-    "pageDescription": "了解更多关于我们公司、使命和致力于提供优质产品的团队。",
+    "pageTitle": "关于天泽",
+    "pageDescription": "了解天泽管业 — 弯管制造专家，设备+工艺+管件一体化解决方案。ISO 9001:2015 认证制造商。",
     "hero": {
-      "title": "关于我们",
-      "subtitle": "您值得信赖的全球贸易伙伴",
-      "description": "我们是一家专业从事高品质工业产品制造和出口的领先企业。凭借多年的国际贸易经验，我们致力于为全球客户提供卓越的产品和服务。"
+      "title": "弯管制造专家",
+      "subtitle": "设备 + 工艺 + 管件 一体化",
+      "description": "连云港天泽管业有限公司是专业的PVC电工套管和PETG气动物流管制造商。凭借自主研发的弯管设备和模具开发能力，我们为客户提供从设备到成品管件的完整解决方案。"
     },
     "mission": {
-      "title": "我们的使命",
-      "content": "提供创新、高品质的产品，满足全球客户不断变化的需求，同时保持最高的服务和诚信标准。"
+      "title": "企业使命",
+      "content": "致力于成为全球最值得信赖的弯管制造伙伴，通过整合先进设备、精密工艺和优质管件，为客户提供一体化解决方案。我们传递的不仅是产品，更是技术与能力。"
     },
     "values": {
-      "title": "核心价值观",
+      "title": "制造优势",
       "quality": {
-        "title": "质量至上",
-        "description": "我们对质量绝不妥协。每件产品都经过严格的测试和质量控制。"
+        "title": "精密工程",
+        "description": "每一道弯曲都追求完美。CNC数控设备确保产品质量稳定，公差精确到毫米级。"
       },
       "innovation": {
-        "title": "持续创新",
-        "description": "我们投资研发，为市场带来前沿解决方案。"
+        "title": "自主研发",
+        "description": "从弯管机到定制模具，全部自主开发。垂直整合意味着更快的创新和更优的方案。"
       },
       "service": {
-        "title": "客户服务",
-        "description": "您的成功是我们的首要任务。我们提供全面的售前和售后支持。"
+        "title": "技术支持",
+        "description": "不仅销售产品，更传授技术。提供完整的技术培训、安装指导和终身维护咨询。"
       },
       "integrity": {
-        "title": "诚信经营",
-        "description": "我们基于信任、透明和相互尊重建立长期合作关系。"
+        "title": "品质认证",
+        "description": "ISO 9001:2015 认证，符合 UL、ASTM、AS/NZS 标准。批次可追溯，品质有保障。"
       }
     },
     "stats": {
       "yearsExperience": "年行业经验",
-      "countriesServed": "服务国家",
-      "happyClients": "满意客户",
-      "productsDelivered": "交付产品"
+      "countriesServed": "出口国家",
+      "happyClients": "团队成员",
+      "productsDelivered": "工厂面积（亩）"
     },
     "cta": {
-      "title": "准备好与我们合作了吗？",
-      "description": "联系我们的团队，讨论您的需求，了解我们如何帮助您的业务增长。",
-      "button": "联系我们"
+      "title": "与弯管专家合作",
+      "description": "无论您需要弯管设备、定制模具还是成品管件，我们的团队都已准备就绪。立即获取免费咨询和报价。",
+      "button": "获取报价"
     }
   },
   "products": {

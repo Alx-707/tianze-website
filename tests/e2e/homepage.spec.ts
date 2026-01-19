@@ -373,27 +373,28 @@ test.describe("Homepage Core Functionality", () => {
       // 1. 在某些浏览器（如 Chromium）中，<a> 标签不能通过 JavaScript 的 .focus() 方法聚焦
       // 2. Tab 键导航更接近真实用户的键盘操作行为
       // 3. 这种方式在 Firefox/Chromium/WebKit 中都能稳定工作
-      const demoButton = page.getByRole("link", { name: /demo/i }).first();
-      await expect(demoButton).toBeVisible();
 
       // Use keyboard Tab navigation to reach interactive elements
       // First, press Tab to start from a known state
       await page.keyboard.press("Tab");
 
-      // Keep pressing Tab until we reach the demo button or hit a limit
+      // Keep pressing Tab until we reach an interactive element or hit a limit
+      let foundInteractiveElement = false;
       for (let i = 0; i < 20; i++) {
-        const activeElement = await page.evaluate(() => {
-          const el = document.activeElement;
-          return el ? el.getAttribute("href") : null;
-        });
-        if (activeElement === "#demo") {
+        const activeElementTag = await page.evaluate(
+          () => document.activeElement?.tagName,
+        );
+        if (["A", "BUTTON", "INPUT"].includes(activeElementTag ?? "")) {
+          foundInteractiveElement = true;
           break;
         }
         await page.keyboard.press("Tab");
       }
 
       // Verify we can reach interactive elements via keyboard
-      // Note: The exact element focused may vary, but keyboard navigation should work
+      expect(foundInteractiveElement).toBe(true);
+
+      // Verify the active element is interactive
       const activeElementTag = await page.evaluate(
         () => document.activeElement?.tagName,
       );

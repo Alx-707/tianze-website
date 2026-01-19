@@ -42,9 +42,17 @@ export const pageImporters: Record<string, Record<string, ContentImporter>> = {
 
 export const productImporters: Record<string, Record<string, ContentImporter>> = {
   en: {
+    'full-auto-bending-machine': () => import('@content/products/en/full-auto-bending-machine.mdx'),
+    'petg-pneumatic-tube': () => import('@content/products/en/petg-pneumatic-tube.mdx'),
+    'pvc-conduit-bend': () => import('@content/products/en/pvc-conduit-bend.mdx'),
     'sample-product': () => import('@content/products/en/sample-product.mdx'),
+    'semi-auto-bending-machine': () => import('@content/products/en/semi-auto-bending-machine.mdx'),
   },
   zh: {
+    'full-auto-bending-machine': () => import('@content/products/zh/full-auto-bending-machine.mdx'),
+    'petg-pneumatic-tube': () => import('@content/products/zh/petg-pneumatic-tube.mdx'),
+    'pvc-conduit-bend': () => import('@content/products/zh/pvc-conduit-bend.mdx'),
     'sample-product': () => import('@content/products/zh/sample-product.mdx'),
+    'semi-auto-bending-machine': () => import('@content/products/zh/semi-auto-bending-machine.mdx'),
   },
 };
