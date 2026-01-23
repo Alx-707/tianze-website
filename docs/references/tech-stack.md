@@ -3,7 +3,7 @@
 ## 1. 核心框架
 
 ### 前端框架
-- **Next.js 16.1.1** - React 全栈框架，App Router 架构
+- **Next.js 16.1.4** - React 全栈框架，App Router 架构
 - **React 19.2.3** - 用户界面库，支持服务器组件
 - **TypeScript 5.9.3** - 类型安全的 JavaScript 超集
 - **Tailwind CSS 4.1.18** - 原子化 CSS 框架
@@ -16,7 +16,7 @@
 ## 2. 内容管理系统
 
 ### MDX 内容管理
-- **@next/mdx 16.1.1** - Next.js 原生 MDX 支持
+- **@next/mdx 16.1.4** - Next.js 原生 MDX 支持
 - **@mdx-js/loader 3.1.1** - MDX 文件加载器
 - **@mdx-js/react 3.1.1** - React 组件嵌入支持
 - **gray-matter 4.0.3** - Front Matter 解析
@@ -43,7 +43,7 @@ content/
 
 ### 数据服务
 - **Airtable 0.12.2** - 联系表单数据存储
-- **Resend 6.6.0** - 邮件发送服务
+- **Resend 6.8.0** - 邮件发送服务
 
 ## 3. UI 设计系统
 
@@ -80,7 +80,7 @@ content/
   - useActionState - 表单状态管理，替代手动 useTransition + useState
   - useFormStatus - 表单子组件中访问提交状态
   - Server Actions - 服务端表单处理，类型安全的数据提交
-- **Zod 4.2.1** - TypeScript 模式验证和数据校验
+- **Zod 4.3.6** - TypeScript 模式验证和数据校验
 
 #### React 19 表单架构
 - **表单状态管理**：使用 useActionState Hook 替代传统表单库
@@ -94,37 +94,37 @@ content/
 - **eslint 9.39.2** - 代码质量检查（Flat Config）
   - @eslint/eslintrc 3.3.3 - ESLint 配置工具
   - @eslint/js 9.39.2 - ESLint JavaScript 配置
-- **typescript-eslint 8.50.0** - TypeScript 专用规则
+- **typescript-eslint 8.53.1** - TypeScript 专用规则
 - **eslint-plugin-react 7.37.5** - React 组件规则
 - **eslint-plugin-react-hooks 7.0.1** - React Hooks 最佳实践
-- **eslint-plugin-react-you-might-not-need-an-effect 0.8.1** - useEffect 优化
-- **@next/eslint-plugin-next 16.1.1** - Next.js 专用规则
+- **eslint-plugin-react-you-might-not-need-an-effect 0.8.5** - useEffect 优化
+- **@next/eslint-plugin-next 16.1.4** - Next.js 专用规则
 - **eslint-plugin-import 2.32.0** - 导入语句规则
 - **eslint-plugin-promise 7.2.1** - Promise 最佳实践
 - **eslint-config-prettier 10.1.8** - Prettier 冲突解决
 - **eslint-plugin-security 3.0.1** - 安全规则检查
 - **eslint-plugin-security-node 1.1.4** - Node.js 安全规则
-- **eslint-config-next 16.1.1** - Next.js ESLint 配置预设
+- **eslint-config-next 16.1.4** - Next.js ESLint 配置预设
 
 ### 代码格式化
-- **prettier 3.7.4** - 代码格式化核心
+- **prettier 3.8.1** - 代码格式化核心
 - **@ianvs/prettier-plugin-sort-imports 4.7.0** - 导入排序
 - **prettier-plugin-tailwindcss 0.7.2** - Tailwind CSS 类名排序
 
 ### 构建工具
-- **@next/bundle-analyzer 16.1.1** - 包大小分析
+- **@next/bundle-analyzer 16.1.4** - 包大小分析
 - **Turbopack** - 开发环境构建（`next dev --turbopack`）
 - **Webpack 5 + SWC** - 生产环境构建
 - **pnpm 10.13.1** - 包管理器
 - **Lighthouse CI** - 性能监控（替代 size-limit）
-- **dependency-cruiser 17.3.5** - 依赖分析
+- **dependency-cruiser 17.3.7** - 依赖分析
 - **madge 8.0.0** - 循环依赖检测
-- **knip 5.76.2** - 未使用代码检测
+- **knip 5.82.1** - 未使用代码检测
 
 ### AST 处理工具
-- **@babel/parser 7.28.5** - Babel AST 解析器
-- **@babel/traverse 7.28.5** - Babel AST 遍历工具
-- **@babel/generator 7.28.5** - Babel AST 生成器
+- **@babel/parser 7.28.6** - Babel AST 解析器
+- **@babel/traverse 7.28.6** - Babel AST 遍历工具
+- **@babel/generator 7.28.6** - Babel AST 生成器
 
 ### 开发工具链增强
 - **concurrently 9.2.1** - 并行执行多个命令
@@ -136,13 +136,13 @@ content/
 - **tsx 4.21.0** - TypeScript 执行工具
 
 ### Git 工作流
-- **lefthook 2.0.12** - Git hooks 管理
-- **@commitlint/cli 20.2.0** - 提交信息规范
-- **@commitlint/config-conventional 20.2.0** - 约定式提交
+- **lefthook 2.0.15** - Git hooks 管理
+- **@commitlint/cli 20.3.1** - 提交信息规范
+- **@commitlint/config-conventional 20.3.1** - 约定式提交
 
 ### TypeScript 类型定义
 - **@types/node 22.15.0** - Node.js 类型定义
-- **@types/react 19.2.7** - React 19 类型定义
+- **@types/react 19.2.9** - React 19 类型定义
 - **@types/react-dom 19.2.3** - React DOM 类型定义
 - **@types/js-yaml 4.0.9** - JS-YAML 类型定义
 
@@ -155,13 +155,13 @@ content/
 ## 5. 测试框架
 
 ### 核心测试工具
-- **vitest 4.0.16** - 现代化测试框架
-  - @vitest/browser-playwright 4.0.16 - Playwright 浏览器测试
-- **@vitest/coverage-v8 4.0.16** - V8 引擎覆盖率工具
-- **@vitest/ui 4.0.16** - 可视化测试界面
-- **jsdom 27.3.0** - 浏览器环境模拟
-- **happy-dom 20.0.11** - 轻量级 DOM 环境（性能优化）
-- **@testing-library/react 16.3.1** - React 组件测试
+- **vitest 4.0.18** - 现代化测试框架
+  - @vitest/browser-playwright 4.0.18 - Playwright 浏览器测试
+- **@vitest/coverage-v8 4.0.18** - V8 引擎覆盖率工具
+- **@vitest/ui 4.0.18** - 可视化测试界面
+- **jsdom 27.4.0** - 浏览器环境模拟
+- **happy-dom 20.3.7** - 轻量级 DOM 环境（性能优化）
+- **@testing-library/react 16.3.2** - React 组件测试
 - **@testing-library/dom 10.4.1** - DOM 测试工具
 - **@testing-library/jest-dom 6.9.1** - DOM 断言扩展
 - **@testing-library/user-event 14.6.1** - 用户交互模拟
@@ -172,7 +172,7 @@ content/
 
 ### 无障碍性和性能测试
 - **@axe-core/playwright 4.11.0** - 无障碍性测试
-- **axe-core 4.11.0** - 无障碍性测试核心
+- **axe-core 4.11.1** - 无障碍性测试核心
 - **@lhci/cli 0.15.1** - Lighthouse CI 性能监控
 - **lighthouse 12.8.2** - 性能和质量审计
 
@@ -193,7 +193,7 @@ content/
 ## 7. 安全与部署
 
 ### 安全防护
-- **@marsidev/react-turnstile 1.4.0** - Cloudflare Turnstile 机器人防护
+- **@marsidev/react-turnstile 1.4.1** - Cloudflare Turnstile 机器人防护
 - **Next.js 安全头配置** - CSP、X-Frame-Options 等
 - **Next.js Middleware** - 中间件安全防护
 - **@t3-oss/env-nextjs 0.13.10** - 类型安全环境变量
@@ -207,7 +207,7 @@ content/
 ## 8. 国际化与 SEO
 
 ### 国际化
-- **next-intl 4.6.1** - Next.js 国际化框架
+- **next-intl 4.7.0** - Next.js 国际化框架
 - **支持语言** - 英语(en) + 中文(zh)
 - **翻译管理** - 基于Git工作流的手动翻译管理
 - **类型安全** - strictMessageTypeSafety 确保翻译完整性
