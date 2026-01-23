@@ -1,22 +1,3 @@
-<!-- OPENSPEC:START -->
-# OpenSpec Instructions
-
-These instructions are for AI assistants working in this project.
-
-Always open `@/openspec/AGENTS.md` when the request:
-- Mentions planning or proposals (words like proposal, spec, change, plan)
-- Introduces new capabilities, breaking changes, architecture shifts, or big performance/security work
-- Sounds ambiguous and you need the authoritative spec before coding
-
-Use `@/openspec/AGENTS.md` to learn:
-- How to create and apply change proposals
-- Spec format and conventions
-- Project structure and guidelines
-
-Keep this managed block so 'openspec update' can refresh the instructions.
-
-<!-- OPENSPEC:END -->
-
 # CLAUDE.md
 
 ## 0. Global Protocols
@@ -160,7 +141,9 @@ This matrix defines **mandatory** resource dispatch strategies per phase. Claude
 
 **Philosophy**: Adopt latest stable tech stack versions, maximize new features for performance.
 
-**Purpose**: Enterprise website template with i18n (en/zh), SSR/SSG, and enterprise-grade quality gates.
+**Project**: Tianze (天泽管业) corporate website — a PVC conduit fittings manufacturer based in Lianyungang, Jiangsu, exporting to 100+ countries. This is a **production project** (not a template).
+
+**Development Model**: Solo development — user provides requirements, Claude implements. No team, no human code review. **Automated quality gates are the primary safeguard** — every change must pass type-check, lint, test, security scan, and Lighthouse CI before delivery.
 
 **Structure**:
 ```
