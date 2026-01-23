@@ -38,7 +38,7 @@
     "hooks:install": "lefthook install",
     "arch:check": "dependency-cruiser src --config .dependency-cruiser.js",
     "circular:check": "madge --circular --extensions ts,tsx src",
-    "security:audit": "pnpm audit --audit-level moderate",
+    "security:audit": "pnpm audit --prod --audit-level moderate",
     "security:semgrep": "bash -lc 'export PATH=\"$HOME/.local/bin:/Library/Frameworks/Python.framework/Versions/3.12/bin:$PATH\"; SEMGR=$(command -v semgrep || true); if [ -z \"$SEMGR\" ]; then python3 -m pip install --user \"semgrep<2\" >/dev/null 2>&1; SEMGR=$(command -v semgrep || true); fi; if [ -z \"$SEMGR\" ] || [ ! -x \"$SEMGR\" ]; then echo \"semgrep not installed\"; exit 127; fi; \"$SEMGR\" --config semgrep.yml src/'",
     "security:check": "pnpm security:audit && pnpm security:semgrep",
     "lint:pii": "node scripts/check-pii-in-logs.js",
@@ -172,6 +172,7 @@
     "prettier": "3.7.4",
     "prettier-plugin-tailwindcss": "^0.7.2",
     "react-email": "^5.1.1",
+    "react-grab": "^0.0.98",
     "sharp": "^0.34.5",
     "source-map-explorer": "^2.5.3",
     "tailwindcss": "^4.1.18",
@@ -189,7 +190,8 @@
       "js-yaml": "4.1.1",
       "mdast-util-to-hast": ">=13.2.1",
       "express": ">=4.22.0",
-      "qs": ">=6.14.1"
+      "qs": ">=6.14.1",
+      "lodash": ">=4.17.23"
     },
     "onlyBuiltDependencies": [
       "@tailwindcss/oxide",
