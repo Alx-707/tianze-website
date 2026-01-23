@@ -241,6 +241,7 @@ class QualityGate {
             "src/components/whatsapp/**", // WhatsApp components - validated via E2E
             "src/components/security/**", // Security components (Turnstile) - integration
             "src/components/seo/**", // SEO components - validated via E2E
+            "src/components/dev-tools/**", // Dev-only tools - not shipped to production
             "src/components/theme-provider.tsx", // Theme provider - wrapper pattern
             "src/components/language-toggle.tsx", // Language toggle - validated via E2E
             "src/components/ui/**", // UI primitives - shadcn/ui components validated via E2E
@@ -1370,7 +1371,8 @@ class QualityGate {
    */
   async runSecurityAudit() {
     try {
-      const output = execSync("pnpm audit --json", {
+      // Only audit production dependencies - dev dependencies don't affect production
+      const output = execSync("pnpm audit --prod --json", {
         encoding: "utf8",
         stdio: "pipe",
         maxBuffer: 10 * 1024 * 1024, // 10MB for audit results

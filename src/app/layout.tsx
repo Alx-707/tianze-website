@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import type { Metadata } from "next";
 import { getFontClassNames } from "@/app/[locale]/layout-fonts";
+import { ReactGrabLoader } from "@/components/dev-tools/ReactGrabLoader";
 import { SITE_CONFIG } from "@/config/paths/site-config";
 import { routing } from "@/i18n/routing";
 
@@ -34,6 +35,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
         className="flex min-h-screen flex-col antialiased"
         suppressHydrationWarning
       >
+        {process.env.NODE_ENV === "development" && <ReactGrabLoader />}
         {children}
       </body>
     </html>
