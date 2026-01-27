@@ -7,30 +7,24 @@ import { SITE_CONFIG } from "@/config/paths/site-config";
 
 // 项目统计数据
 export const PROJECT_STATS = {
-  // 技术栈统计
-  techStack: {
-    totalTechnologies: 22,
-    categories: 14,
-    modernScore: "100%",
-    qualityGrade: "A+",
+  // 业务统计
+  business: {
+    exportCountries: 100,
+    employees: 60,
+    onTimeDelivery: "98%",
+    yearsExperience: 6,
   },
 
-  // 性能指标
-  performance: {
-    grade: "A+",
-    securityScore: "100%",
-    languages: 2,
-    themes: "Multiple",
-    typescriptVersion: "TS 5.9.3",
-    deployment: "Vercel",
+  // 产品指标
+  products: {
+    certifications: ["ISO 9001", "ASTM", "UL651"],
+    productLines: 3,
+    customMolds: "500+",
   },
 
-  // 社区数据
+  // 社区数据（保留用于其他用途）
   community: {
     initialLikeCount: 42,
-    githubStars: "1.2k+",
-    contributors: "10+",
-    downloads: "5k+",
   },
 } as const;
 
@@ -44,19 +38,19 @@ export const PROJECT_LINKS = {
 
 // 技术架构配置
 export const TECH_ARCHITECTURE = {
-  frontend: {
-    title: "Frontend",
-    technologies: ["Next.js 16", "React 19", "TypeScript", "Tailwind CSS"],
+  equipment: {
+    title: "Bending Equipment",
+    description: "Semi-auto and full-auto PVC pipe bending machines",
     color: "blue",
   },
-  ui: {
-    title: "UI System",
-    technologies: ["shadcn/ui", "Radix UI", "Lucide Icons", "CSS Variables"],
+  conduit: {
+    title: "PVC Conduit System",
+    description: "Schedule 40/80 conduits, bends, and fittings",
     color: "green",
   },
-  tooling: {
-    title: "Development",
-    technologies: ["ESLint", "Prettier", "Lefthook", "Vitest"],
+  pneumatic: {
+    title: "Pneumatic Tubes",
+    description: "PETG/PMMA/PVC tubes for hospital logistics",
     color: "purple",
   },
 } as const;

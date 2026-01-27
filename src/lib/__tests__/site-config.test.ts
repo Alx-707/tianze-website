@@ -10,9 +10,10 @@ import {
 
 // 测试常量定义
 const TEST_STATS = {
-  TOTAL_TECHNOLOGIES: 22,
-  CATEGORIES: 14,
-  LANGUAGES: 2,
+  EXPORT_COUNTRIES: 100,
+  EMPLOYEES: 60,
+  YEARS_EXPERIENCE: 6,
+  PRODUCT_LINES: 3,
   INITIAL_LIKE_COUNT: 42,
   ANIMATION_STEPS: 4,
   OPACITY_VALUE: 0.2,
@@ -26,44 +27,44 @@ const isGithubUrl = (value: string) => /^https:\/\/github\.com\/.+/.test(value);
 
 describe("Site Configuration", () => {
   describe("PROJECT_STATS", () => {
-    it("should have valid tech stack statistics", () => {
-      expect(PROJECT_STATS.techStack.totalTechnologies).toBe(
-        TEST_STATS.TOTAL_TECHNOLOGIES,
+    it("should have valid business statistics", () => {
+      expect(PROJECT_STATS.business.exportCountries).toBe(
+        TEST_STATS.EXPORT_COUNTRIES,
       );
-      expect(PROJECT_STATS.techStack.categories).toBe(TEST_STATS.CATEGORIES);
-      expect(PROJECT_STATS.techStack.modernScore).toBe("100%");
-      expect(PROJECT_STATS.techStack.qualityGrade).toBe("A+");
+      expect(PROJECT_STATS.business.employees).toBe(TEST_STATS.EMPLOYEES);
+      expect(PROJECT_STATS.business.onTimeDelivery).toBe("98%");
+      expect(PROJECT_STATS.business.yearsExperience).toBe(
+        TEST_STATS.YEARS_EXPERIENCE,
+      );
     });
 
-    it("should have valid performance metrics", () => {
-      expect(PROJECT_STATS.performance.grade).toBe("A+");
-      expect(PROJECT_STATS.performance.securityScore).toBe("100%");
-      expect(PROJECT_STATS.performance.languages).toBe(TEST_STATS.LANGUAGES);
-      expect(PROJECT_STATS.performance.themes).toBe("Multiple");
-      expect(PROJECT_STATS.performance.typescriptVersion).toBe("TS 5.9.3");
-      expect(PROJECT_STATS.performance.deployment).toBe("Vercel");
+    it("should have valid product metrics", () => {
+      expect(PROJECT_STATS.products.certifications).toContain("ISO 9001");
+      expect(PROJECT_STATS.products.certifications).toContain("ASTM");
+      expect(PROJECT_STATS.products.certifications).toContain("UL651");
+      expect(PROJECT_STATS.products.productLines).toBe(
+        TEST_STATS.PRODUCT_LINES,
+      );
+      expect(PROJECT_STATS.products.customMolds).toBe("500+");
     });
 
     it("should have valid community data", () => {
       expect(PROJECT_STATS.community.initialLikeCount).toBe(
         TEST_STATS.INITIAL_LIKE_COUNT,
       );
-      expect(PROJECT_STATS.community.githubStars).toBe("1.2k+");
-      expect(PROJECT_STATS.community.contributors).toBe("10+");
-      expect(PROJECT_STATS.community.downloads).toBe("5k+");
     });
 
     it("should be immutable (readonly)", () => {
       // TypeScript const assertions make objects readonly at compile time
       // but don't prevent runtime modifications. We test the structure instead.
       expect(PROJECT_STATS).toBeDefined();
-      expect(typeof PROJECT_STATS.techStack.totalTechnologies).toBe("number");
+      expect(typeof PROJECT_STATS.business.exportCountries).toBe("number");
 
       // Verify the object structure is as expected
-      expect(PROJECT_STATS.techStack).toHaveProperty("totalTechnologies");
-      expect(PROJECT_STATS.techStack).toHaveProperty("categories");
-      expect(PROJECT_STATS.techStack).toHaveProperty("modernScore");
-      expect(PROJECT_STATS.techStack).toHaveProperty("qualityGrade");
+      expect(PROJECT_STATS.business).toHaveProperty("exportCountries");
+      expect(PROJECT_STATS.business).toHaveProperty("employees");
+      expect(PROJECT_STATS.business).toHaveProperty("onTimeDelivery");
+      expect(PROJECT_STATS.business).toHaveProperty("yearsExperience");
     });
   });
 
@@ -91,35 +92,37 @@ describe("Site Configuration", () => {
   });
 
   describe("TECH_ARCHITECTURE", () => {
-    it("should have frontend configuration", () => {
-      expect(TECH_ARCHITECTURE.frontend.title).toBe("Frontend");
-      expect(TECH_ARCHITECTURE.frontend.technologies).toContain("Next.js 16");
-      expect(TECH_ARCHITECTURE.frontend.technologies).toContain("React 19");
-      expect(TECH_ARCHITECTURE.frontend.technologies).toContain("TypeScript");
-      expect(TECH_ARCHITECTURE.frontend.color).toBe("blue");
+    it("should have bending equipment configuration", () => {
+      expect(TECH_ARCHITECTURE.equipment.title).toBe("Bending Equipment");
+      expect(TECH_ARCHITECTURE.equipment.description).toBe(
+        "Semi-auto and full-auto PVC pipe bending machines",
+      );
+      expect(TECH_ARCHITECTURE.equipment.color).toBe("blue");
     });
 
-    it("should have UI system configuration", () => {
-      expect(TECH_ARCHITECTURE.ui.title).toBe("UI System");
-      expect(TECH_ARCHITECTURE.ui.technologies).toContain("shadcn/ui");
-      expect(TECH_ARCHITECTURE.ui.technologies).toContain("Radix UI");
-      expect(TECH_ARCHITECTURE.ui.color).toBe("green");
+    it("should have PVC conduit system configuration", () => {
+      expect(TECH_ARCHITECTURE.conduit.title).toBe("PVC Conduit System");
+      expect(TECH_ARCHITECTURE.conduit.description).toBe(
+        "Schedule 40/80 conduits, bends, and fittings",
+      );
+      expect(TECH_ARCHITECTURE.conduit.color).toBe("green");
     });
 
-    it("should have development tooling configuration", () => {
-      expect(TECH_ARCHITECTURE.tooling.title).toBe("Development");
-      expect(TECH_ARCHITECTURE.tooling.technologies).toContain("ESLint");
-      expect(TECH_ARCHITECTURE.tooling.technologies).toContain("Prettier");
-      expect(TECH_ARCHITECTURE.tooling.color).toBe("purple");
+    it("should have pneumatic tubes configuration", () => {
+      expect(TECH_ARCHITECTURE.pneumatic.title).toBe("Pneumatic Tubes");
+      expect(TECH_ARCHITECTURE.pneumatic.description).toBe(
+        "PETG/PMMA/PVC tubes for hospital logistics",
+      );
+      expect(TECH_ARCHITECTURE.pneumatic.color).toBe("purple");
     });
 
     it("should have consistent structure across all categories", () => {
       Object.values(TECH_ARCHITECTURE).forEach((category) => {
         expect(category).toHaveProperty("title");
-        expect(category).toHaveProperty("technologies");
+        expect(category).toHaveProperty("description");
         expect(category).toHaveProperty("color");
-        expect(Array.isArray(category.technologies)).toBe(true);
-        expect(category.technologies.length).toBeGreaterThan(0);
+        expect(typeof category.title).toBe("string");
+        expect(typeof category.description).toBe("string");
       });
     });
   });
