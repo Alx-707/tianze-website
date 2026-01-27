@@ -4,16 +4,16 @@ import { ibmPlexSans, getFontClassNames } from "@/app/[locale]/layout-fonts";
 // 使用全局 setup 中的 next/font/google mock（src/test/setup.ts）
 // 该全局 mock 提供 variable/className/style，避免 ESM 目录导入问题
 //
-// Manufacturing-First Design v2.1 更新说明：
-// - 从 Geist Sans 迁移至 IBM Plex Sans（工业设计传承）
-// - IBM Plex 由 IBM 设计，适用于工程/制造业语境
-// - getFontClassNames() 返回 ibmPlexSans.variable
+// Twitter theme migration 更新说明：
+// - 从 IBM Plex Sans 迁移至 Open Sans
+// - Open Sans 更适合现代 Web 界面，提升可读性
+// - getFontClassNames() 返回 ibmPlexSans.variable（保持向后兼容的导出名称）
 
 describe("Layout Fonts Configuration", () => {
   describe("ibmPlexSans字体配置", () => {
-    it("应该正确配置IBM Plex Sans字体", () => {
+    it("应该正确配置Open Sans字体", () => {
       expect(ibmPlexSans).toBeDefined();
-      expect(ibmPlexSans.variable).toBe("--font-ibm-plex-sans");
+      expect(ibmPlexSans.variable).toBe("--font-open-sans");
     });
 
     it("应该包含正确的字体配置选项", () => {
@@ -24,16 +24,16 @@ describe("Layout Fonts Configuration", () => {
     });
 
     it("应该设置正确的CSS变量名", () => {
-      expect(ibmPlexSans.variable).toBe("--font-ibm-plex-sans");
+      expect(ibmPlexSans.variable).toBe("--font-open-sans");
     });
   });
 
-  describe("getFontClassNames函数 (Manufacturing-First Design v2.1)", () => {
-    it("应该只返回 IBM Plex Sans 变量", () => {
+  describe("getFontClassNames函数 (Twitter theme)", () => {
+    it("应该只返回 Open Sans 变量", () => {
       const classNames = getFontClassNames();
 
       expect(typeof classNames).toBe("string");
-      expect(classNames).toContain("--font-ibm-plex-sans");
+      expect(classNames).toContain("--font-open-sans");
       // 不包含其他字体变量
       expect(classNames).not.toContain("--font-geist");
     });
@@ -41,7 +41,7 @@ describe("Layout Fonts Configuration", () => {
     it("应该只包含一个字体变量", () => {
       const classNames = getFontClassNames();
 
-      // Manufacturing-First v2.1: 只有 IBM Plex Sans
+      // Twitter theme: 只有 Open Sans
       expect(classNames).toBe(ibmPlexSans.variable);
     });
 

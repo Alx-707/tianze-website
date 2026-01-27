@@ -26,13 +26,13 @@ describe("Input Component", () => {
       const input = screen.getByTestId("styled-input");
       expect(input).toHaveClass(
         "flex",
-        "h-9",
+        "h-10",
         "w-full",
         "min-w-0",
-        "rounded-md",
+        "rounded-xl",
         "border",
         "bg-transparent",
-        "px-3",
+        "px-4",
         "py-1",
         "text-base",
         "shadow-xs",
@@ -333,7 +333,7 @@ describe("Input Component", () => {
       render(<Input data-testid="height-input" />);
 
       const input = screen.getByTestId("height-input");
-      expect(input).toHaveClass("h-9");
+      expect(input).toHaveClass("h-10");
     });
   });
 

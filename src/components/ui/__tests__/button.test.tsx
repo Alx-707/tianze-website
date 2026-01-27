@@ -88,7 +88,11 @@ describe("Button Component", () => {
       render(<Button variant="outline">Outline</Button>);
 
       const button = screen.getByRole("button");
-      expect(button).toHaveClass("bg-background", "border");
+      expect(button).toHaveClass(
+        "bg-transparent",
+        "border-2",
+        "border-primary",
+      );
     });
 
     it("applies secondary variant styles", () => {
@@ -280,7 +284,11 @@ describe("Button Component", () => {
       );
 
       const button = screen.getByRole("button");
-      expect(button).toHaveClass("bg-background", "border"); // outline variant
+      expect(button).toHaveClass(
+        "bg-transparent",
+        "border-2",
+        "border-primary",
+      ); // outline variant
       expect(button).toHaveClass("h-10", "px-6"); // lg size
     });
 

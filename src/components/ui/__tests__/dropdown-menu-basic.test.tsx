@@ -218,7 +218,7 @@ describe("DropdownMenu - Basic Components", () => {
         "origin-[var(--radix-dropdown-menu-content-transform-origin)]",
         "overflow-x-hidden",
         "overflow-y-auto",
-        "rounded-md",
+        "rounded-xl",
         "border",
         "p-1",
         "shadow-md",

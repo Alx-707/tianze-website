@@ -22,14 +22,14 @@ describe("Input - Basic Rendering & Types", () => {
       const input = screen.getByTestId("input");
       expect(input).toHaveClass(
         "flex",
-        "h-9",
+        "h-10",
         "w-full",
         "min-w-0",
-        "rounded-md",
+        "rounded-xl",
         "border",
         "border-input",
         "bg-transparent",
-        "px-3",
+        "px-4",
         "py-1",
         "text-base",
         "shadow-xs",
@@ -252,7 +252,7 @@ describe("Input - Basic Rendering & Types", () => {
         );
 
         const input = screen.getByTestId(`${type}-input`);
-        expect(input).toHaveClass("flex", "h-9", "w-full", "rounded-md");
+        expect(input).toHaveClass("flex", "h-10", "w-full", "rounded-xl");
 
         unmount();
       });

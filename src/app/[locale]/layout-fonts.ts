@@ -1,48 +1,46 @@
 import localFont from "next/font/local";
 
 /**
- * IBM Plex Sans font configuration
- * Manufacturing-First Design System v2.1
+ * Open Sans - Twitter Theme Font
  *
- * Why IBM Plex over Geist:
- * - Industrial heritage (designed by IBM for engineering contexts)
- * - Excellent CJK compatibility
- * - Timeless design (2017) vs trendy (Geist 2024)
- * - Differentiates from "AI template" aesthetic
- *
- * Using local fonts for Turbopack compatibility
+ * 友好现代的无衬线字体，适合社交媒体风格
+ * Latin subset with 4 weights: 400, 500, 600, 700
  */
-export const ibmPlexSans = localFont({
+export const openSans = localFont({
   src: [
     {
-      path: "./ibm-plex-sans-latin-400-normal.woff2",
+      path: "./open-sans-latin-400-normal.woff2",
       weight: "400",
       style: "normal",
     },
     {
-      path: "./ibm-plex-sans-latin-500-normal.woff2",
+      path: "./open-sans-latin-500-normal.woff2",
       weight: "500",
       style: "normal",
     },
     {
-      path: "./ibm-plex-sans-latin-600-normal.woff2",
+      path: "./open-sans-latin-600-normal.woff2",
       weight: "600",
       style: "normal",
     },
     {
-      path: "./ibm-plex-sans-latin-700-normal.woff2",
+      path: "./open-sans-latin-700-normal.woff2",
       weight: "700",
       style: "normal",
     },
   ],
-  variable: "--font-ibm-plex-sans",
+  variable: "--font-open-sans",
   display: "swap",
+  preload: true,
 });
+
+// Re-export for backwards compatibility
+export const ibmPlexSans = openSans;
 
 /**
  * Get font class names string for body element
- * Returns CSS variable class for IBM Plex Sans
+ * Returns CSS variable class for Open Sans
  */
 export function getFontClassNames(): string {
-  return ibmPlexSans.variable;
+  return openSans.variable;
 }

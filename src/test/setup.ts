@@ -35,12 +35,12 @@ vi.mock("@/lib/mdx-importers.generated", () => ({
   },
 }));
 
-// Mock next/font/local for IBM Plex Sans (Manufacturing-First Design v2.1)
+// Mock next/font/local for Open Sans (Twitter theme migration)
 vi.mock("next/font/local", () => ({
   default: vi.fn(() => ({
-    variable: "--font-ibm-plex-sans",
-    className: "ibm-plex-sans",
-    style: { fontFamily: "IBM Plex Sans" },
+    variable: "--font-open-sans",
+    className: "open-sans",
+    style: { fontFamily: "Open Sans" },
   })),
 }));
 
