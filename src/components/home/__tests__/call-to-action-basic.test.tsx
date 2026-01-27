@@ -10,7 +10,6 @@
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { CallToAction } from "@/components/home/call-to-action";
-import { SITE_CONFIG } from "@/config/paths/site-config";
 
 // Mock配置 - 使用vi.hoisted确保Mock在模块导入前设置
 const { mockUseTranslations, mockUseIntersectionObserver } = vi.hoisted(() => ({
@@ -216,7 +215,7 @@ describe("CallToAction Component - Basic Tests", () => {
       });
       expect(communityLink).toHaveAttribute(
         "href",
-        `${SITE_CONFIG.social.github}/discussions`,
+        "https://wa.me/8618000000000",
       );
     });
 
@@ -228,7 +227,7 @@ describe("CallToAction Component - Basic Tests", () => {
       });
       expect(discussionsLink).toHaveAttribute(
         "href",
-        `${SITE_CONFIG.social.github}/discussions`,
+        "https://wa.me/8618000000000",
       );
       expect(discussionsLink).toHaveAttribute("target", "_blank");
     });
@@ -237,10 +236,7 @@ describe("CallToAction Component - Basic Tests", () => {
       render(<CallToAction />);
 
       const issuesLink = screen.getByRole("link", { name: /issues/i });
-      expect(issuesLink).toHaveAttribute(
-        "href",
-        `${SITE_CONFIG.social.github}/issues`,
-      );
+      expect(issuesLink).toHaveAttribute("href", "mailto:sales@tianzepipe.com");
       expect(issuesLink).toHaveAttribute("target", "_blank");
     });
   });

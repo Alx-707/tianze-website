@@ -20,7 +20,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { SITE_CONFIG } from "@/config/paths/site-config";
 import { COUNT_700 } from "@/constants/count";
 import { MAGIC_0_2 } from "@/constants/decimal";
 import { useIntersectionObserver } from "@/hooks/use-intersection-observer";
@@ -44,8 +43,6 @@ export interface CTABannerBlockProps {
   actions?: ActionItem[];
   stats?: StatItem[];
   i18nNamespace?: string;
-  discussionsHref?: string;
-  issuesHref?: string;
 }
 
 // UI Constants
@@ -54,10 +51,6 @@ const UI_CONSTANTS = {
   INTERSECTION_THRESHOLD: MAGIC_0_2,
   ANIMATION_DURATION: 200,
 } as const;
-
-const DEFAULT_GITHUB_HREF = SITE_CONFIG.social.github;
-const DEFAULT_GITHUB_DISCUSSIONS_HREF = `${DEFAULT_GITHUB_HREF}/discussions`;
-const DEFAULT_GITHUB_ISSUES_HREF = `${DEFAULT_GITHUB_HREF}/issues`;
 
 // Sub-components
 function StatsDisplay({ stats }: { stats: StatItem[] }) {
@@ -232,8 +225,6 @@ export function CTABannerBlock({
   actions,
   stats,
   i18nNamespace = "home.cta",
-  discussionsHref = DEFAULT_GITHUB_DISCUSSIONS_HREF,
-  issuesHref = DEFAULT_GITHUB_ISSUES_HREF,
 }: CTABannerBlockProps = {}) {
   const t = useTranslations(i18nNamespace);
 
@@ -310,8 +301,8 @@ export function CTABannerBlock({
 
           <CommunitySection
             t={t}
-            discussionsHref={discussionsHref}
-            issuesHref={issuesHref}
+            discussionsHref="https://wa.me/8618000000000"
+            issuesHref="mailto:sales@tianzepipe.com"
           />
         </div>
       </div>
