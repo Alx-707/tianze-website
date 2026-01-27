@@ -1,5 +1,6 @@
 ---
-paths: "src/components/**/*.tsx"
+paths:
+  - "src/components/**/*.tsx"
 ---
 
 # UI Design System
@@ -10,33 +11,54 @@ paths: "src/components/**/*.tsx"
 - **Location**: `src/components/ui/`
 - **Add component**: `pnpm dlx shadcn@latest add <component>`
 
-shadcn/ui is a **code distribution system** — you own the code completely and can customize freely.
+## Font Optimization
 
-## Component Organization
+**IMPORTANT**: Use `next/font/local` for self-hosted fonts, must set `display: 'swap'`.
 
+```typescript
+import localFont from 'next/font/local'
+
+const myFont = localFont({
+  src: './my-font.woff2',
+  display: 'swap',           // Required: prevents FOIT
+  variable: '--font-my-font', // Tailwind integration
+})
+
+// layout.tsx
+<html className={myFont.variable}>
 ```
-src/components/
-├── ui/              # Base primitives (button, card, input)
-├── layout/          # Header, footer, navigation
-├── forms/           # Form components
-├── home/            # Homepage sections
-├── products/        # Product-specific
-├── blog/            # Blog-specific
-└── shared/          # Cross-cutting
+
+### Tailwind v4 Font Integration
+
+Map CSS variables in `globals.css`:
+
+```css
+@theme inline {
+  --font-sans: var(--font-my-font);
+}
+```
+
+### Multiple Weights
+
+```typescript
+const roboto = localFont({
+  src: [
+    { path: './Roboto-Regular.woff2', weight: '400', style: 'normal' },
+    { path: './Roboto-Bold.woff2', weight: '700', style: 'normal' },
+  ],
+  display: 'swap',
+  variable: '--font-roboto',
+})
 ```
 
 ## Styling Rules
 
-### Tailwind CSS v4 (CSS-first)
+### Tailwind CSS v4
 
-This project uses **Tailwind CSS v4** with CSS-first configuration:
-- No `tailwind.config.ts` file — configuration is in `src/app/globals.css` via `@theme inline`
-- CSS variables for colors defined in `globals.css`
+- Config in `src/app/globals.css` via `@theme inline` (no `tailwind.config.ts`)
 - Use `cn()` to merge conditional classes
 
 ### The `cn()` Utility
-
-Combines `clsx` + `tailwind-merge` for smart class merging:
 
 ```typescript
 import { clsx, type ClassValue } from "clsx"
@@ -46,18 +68,18 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-// Usage examples
-cn("px-4", "px-6")                    // → "px-6" (merge conflicts)
+// Usage
+cn("px-4", "px-6")                         // → "px-6"
 cn("bg-red-500", isActive && "bg-blue-500")
-cn({ "opacity-50": isDisabled })      // Object syntax
+cn({ "opacity-50": isDisabled })
 ```
 
 ### Dynamic Class Names Forbidden
 
-**Never** build class names dynamically. Tailwind will purge them:
+**IMPORTANT**: Never build class names dynamically — Tailwind will purge them:
 
 ```typescript
-// ❌ Dangerous - gets purged
+// ❌ Gets purged
 <span className={`bg-${color}-100`} />
 
 // ✅ Use literal mapping
@@ -68,16 +90,12 @@ const colors = {
 <span className={colors[status]} />
 
 // ✅ For truly dynamic values, use inline styles
-<button
-  style={{ backgroundColor: dynamicColor }}
-  className="rounded-md px-3 py-1.5"
->
+<button style={{ backgroundColor: dynamicColor }} className="rounded-md px-3" />
 ```
 
 ## Responsive Design
 
-- Mobile-first approach
-- Breakpoints (rem-based in Tailwind v4):
+Mobile-first. Breakpoints (rem-based):
 
 | Prefix | Min-width | Pixels |
 |--------|-----------|--------|
@@ -87,43 +105,58 @@ const colors = {
 | `xl` | 80rem | 1280px |
 | `2xl` | 96rem | 1536px |
 
-### Range Variants
-```html
-<!-- Only between md and xl -->
-<div class="md:max-xl:flex">...</div>
-
-<!-- Custom breakpoint -->
-<div class="min-[320px]:text-center">...</div>
-```
+Range variant: `md:max-xl:flex`
 
 ## Accessibility
 
-- All interactive elements must be keyboard accessible
-- Use semantic HTML
+- Keyboard accessible interactive elements
+- Semantic HTML
 - Color contrast ≥ 4.5:1
-- Forms must have `label` + `aria-invalid` + `aria-describedby`
+- Forms: `label` + `aria-invalid` + `aria-describedby`
 
 ## Icons
 
-- Use Lucide React
-- Import individually: `import { ChevronRight } from 'lucide-react'`
+Use Lucide React: `import { ChevronRight } from 'lucide-react'`
 
 ## SEO & Metadata
 
-### generateMetadata
-- `params` must be `await`ed (Next.js 16 Async Request APIs)
-- Configure `alternates.languages` for multi-language support
-
-### OG Image
-- File: `opengraph-image.tsx`
-- Both `params` and `id` must be `await`ed
-
-### JSON-LD
-- Use `src/lib/structured-data.ts`
-- Inject in layout via `<script type="application/ld+json">`
+| Feature | Key Points |
+|---------|------------|
+| `generateMetadata` | `params` must be `await`ed |
+| OG Image | `opengraph-image.tsx`, `params` + `id` awaited |
+| JSON-LD | Use `src/lib/structured-data.ts` |
 
 ## Image Optimization
 
-- Use `next/image`
-- Set `priority` for above-fold images
-- Must set `sizes` attribute for responsive loading
+**Must use `next/image`**, native `<img>` forbidden.
+
+### fill Requires sizes
+
+**IMPORTANT**: `fill` without `sizes` downloads largest image:
+
+```typescript
+// ❌ Bad: fill without sizes
+<Image src="/hero.png" alt="Hero" fill />
+
+// ✅ Good: specify sizes
+<Image src="/hero.png" alt="Hero" fill sizes="100vw" />
+<Image src="/card.png" alt="Card" fill sizes="(max-width: 768px) 100vw, 33vw" />
+```
+
+### Key Attributes
+
+| Attribute | Purpose | Example |
+|-----------|---------|---------|
+| `priority` | Preload LCP images | Hero image |
+| `placeholder="blur"` | Prevent layout shift | Auto-generated for local images |
+| `sizes` | Responsive images | Required for `fill` |
+
+### Remote Images
+
+Remote domains must be configured in `next.config.ts` `images.remotePatterns`.
+
+### Project Images
+
+- Storage: `public/images/`
+- Reference: `/images/blog/cover.jpg` (absolute path)
+- Blur utility: `getBlurPlaceholder()` from `@/lib/image`

@@ -1,3 +1,10 @@
+---
+paths:
+  - "src/app/api/**/*"
+  - "src/lib/security/**/*"
+  - "src/lib/validations/**/*"
+---
+
 # Security Implementation
 
 ## Threat Modeling
