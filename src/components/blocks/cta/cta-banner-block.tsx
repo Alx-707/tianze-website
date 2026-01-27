@@ -5,12 +5,11 @@ import {
   ArrowRight,
   ExternalLink,
   FileText,
-  Github,
   MessageCircle,
   Phone,
-  Star,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -45,8 +44,6 @@ export interface CTABannerBlockProps {
   actions?: ActionItem[];
   stats?: StatItem[];
   i18nNamespace?: string;
-  githubHref?: string;
-  demoHref?: string;
   discussionsHref?: string;
   issuesHref?: string;
 }
@@ -235,8 +232,6 @@ export function CTABannerBlock({
   actions,
   stats,
   i18nNamespace = "home.cta",
-  githubHref = DEFAULT_GITHUB_HREF,
-  demoHref = "#demo",
   discussionsHref = DEFAULT_GITHUB_DISCUSSIONS_HREF,
   issuesHref = DEFAULT_GITHUB_ISSUES_HREF,
 }: CTABannerBlockProps = {}) {
@@ -271,7 +266,6 @@ export function CTABannerBlock({
           <div className="mb-16 text-center">
             <div className="mb-6">
               <Badge className="mb-4 px-4 py-2 text-sm font-medium">
-                <Star className="mr-2 h-4 w-4" />
                 {t("badge")}
               </Badge>
             </div>
@@ -287,16 +281,11 @@ export function CTABannerBlock({
             {/* Primary buttons */}
             <div className="mb-12 flex flex-col gap-4 sm:flex-row sm:justify-center">
               <Button size="lg" className="group px-8 py-4 text-lg" asChild>
-                <a
-                  href={githubHref}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2"
-                >
-                  <Github className="h-5 w-5" />
+                <Link href="/contact" className="flex items-center gap-2">
+                  <Phone className="h-5 w-5" />
                   {t("primary.github")}
                   <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                </a>
+                </Link>
               </Button>
 
               <Button
@@ -305,10 +294,10 @@ export function CTABannerBlock({
                 className="px-8 py-4 text-lg"
                 asChild
               >
-                <a href={demoHref} className="flex items-center gap-2">
+                <Link href="/products" className="flex items-center gap-2">
                   {t("primary.demo")}
-                  <ExternalLink className="h-4 w-4" />
-                </a>
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
               </Button>
             </div>
 

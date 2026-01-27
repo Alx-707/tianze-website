@@ -171,13 +171,15 @@ describe("CallToAction Component - Basic Tests", () => {
   });
 
   describe("链接地址验证", () => {
-    it("主要GitHub按钮应该有正确的链接", () => {
+    it("主要联系按钮应该有正确的链接", () => {
       render(<CallToAction />);
 
-      const githubLink = screen.getByRole("link", { name: /primary\.github/i });
-      expect(githubLink).toHaveAttribute("href", SITE_CONFIG.social.github);
-      expect(githubLink).toHaveAttribute("target", "_blank");
-      expect(githubLink).toHaveAttribute("rel", "noopener noreferrer");
+      const contactLink = screen.getByRole("link", {
+        name: /primary\.github/i,
+      });
+      expect(contactLink).toHaveAttribute("href", "/contact");
+      // Internal link, no target="_blank"
+      expect(contactLink).not.toHaveAttribute("target", "_blank");
     });
 
     it("主要行动按钮应该有正确的链接", () => {
@@ -247,19 +249,17 @@ describe("CallToAction Component - Basic Tests", () => {
     it("应该渲染所有必要的图标", () => {
       render(<CallToAction />);
 
-      // 主要按钮图标 - 1 github icon in primary button
-      const githubIcons = screen.getAllByTestId("github-icon");
-      expect(githubIcons).toHaveLength(1);
+      // Primary button now uses Phone icon (also used in action card)
+      const phoneIcons = screen.getAllByTestId("phone-icon");
+      expect(phoneIcons.length).toBeGreaterThanOrEqual(1);
 
-      // Action card icons - CTABannerBlock now uses Phone, FileText, and MessageCircle
-      expect(screen.getByTestId("phone-icon")).toBeInTheDocument();
+      // Action card icons - CTABannerBlock uses Phone, FileText, and MessageCircle
       expect(screen.getByTestId("file-text-icon")).toBeInTheDocument();
       const messageCircleIcons = screen.getAllByTestId("message-circle-icon");
       expect(messageCircleIcons.length).toBeGreaterThan(0);
 
-      // Star icon is used in badge
-      const starIcons = screen.getAllByTestId("star-icon");
-      expect(starIcons.length).toBeGreaterThan(0);
+      // Star icon is no longer used in badge
+      expect(screen.queryByTestId("star-icon")).not.toBeInTheDocument();
 
       const externalLinkIcons = screen.getAllByTestId("external-link-icon");
       expect(externalLinkIcons.length).toBeGreaterThan(0);
@@ -273,8 +273,8 @@ describe("CallToAction Component - Basic Tests", () => {
       render(<CallToAction />);
 
       // 验证每个图标都有正确的测试ID
-      const githubIcons = screen.getAllByTestId("github-icon");
-      githubIcons.forEach((icon) => {
+      const phoneIcons = screen.getAllByTestId("phone-icon");
+      phoneIcons.forEach((icon) => {
         expect(icon).toBeInTheDocument();
       });
 

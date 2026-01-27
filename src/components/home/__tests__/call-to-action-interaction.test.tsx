@@ -163,8 +163,10 @@ describe("CallToAction Component - Interaction Tests", () => {
     it("所有外部链接应该在新标签页打开", () => {
       render(<CallToAction />);
 
-      // GitHub链接 (primary button) and community links are external
-      const githubLink = screen.getByRole("link", { name: /primary\.github/i });
+      // Contact link (primary button) is now internal, community links are still external
+      const contactLink = screen.getByRole("link", {
+        name: /primary\.github/i,
+      });
       const discussionsLink = screen.getByRole("link", {
         name: /community\.discussions/i,
       });
@@ -172,12 +174,13 @@ describe("CallToAction Component - Interaction Tests", () => {
         name: /community\.issues/i,
       });
 
-      // 验证外部链接有正确的target属性
-      expect(githubLink).toHaveAttribute("target", "_blank");
+      // Contact link is now internal (no target="_blank")
+      expect(contactLink).not.toHaveAttribute("target", "_blank");
+      // Community links are still external
       expect(discussionsLink).toHaveAttribute("target", "_blank");
       expect(issuesLink).toHaveAttribute("target", "_blank");
 
-      // Action cards' getStarted button is now internal (no target="_blank")
+      // Action cards' getStarted button is internal (no target="_blank")
       const getStartedLink = screen.getByRole("link", {
         name: /buttons\.getStarted/i,
       });
@@ -226,13 +229,12 @@ describe("CallToAction Component - Interaction Tests", () => {
       render(<CallToAction />);
 
       // 验证图标有测试ID（用于可访问性测试）
-      // CTABannerBlock has 1 github icon in primary button (action cards now use Phone/FileText)
-      expect(screen.getAllByTestId("github-icon")).toHaveLength(1);
-      // CTABannerBlock uses Star in badge
-      const starIcons = screen.getAllByTestId("star-icon");
-      expect(starIcons.length).toBeGreaterThan(0);
+      // Primary button now uses Phone icon (also used in action card)
+      const phoneIcons = screen.getAllByTestId("phone-icon");
+      expect(phoneIcons.length).toBeGreaterThanOrEqual(1);
+      // Star icon is no longer used in badge
+      expect(screen.queryByTestId("star-icon")).not.toBeInTheDocument();
       // Action cards use Phone, FileText, and MessageCircle icons
-      expect(screen.getByTestId("phone-icon")).toBeInTheDocument();
       expect(screen.getByTestId("file-text-icon")).toBeInTheDocument();
       const messageCircleIcons = screen.getAllByTestId("message-circle-icon");
       expect(messageCircleIcons.length).toBeGreaterThan(0);
