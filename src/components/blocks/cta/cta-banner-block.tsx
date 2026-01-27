@@ -222,10 +222,10 @@ function getDefaultData(t: (key: string) => string) {
       },
     ],
     stats: [
-      { value: "22+", label: t("stats.technologies") },
-      { value: "100%", label: t("stats.typescript") },
-      { value: "A+", label: t("stats.performance") },
-      { value: "2", label: t("stats.languages") },
+      { value: "100+", label: t("stats.technologies") },
+      { value: "60+", label: t("stats.typescript") },
+      { value: "98%", label: t("stats.performance") },
+      { value: "6+", label: t("stats.languages") },
     ],
   };
 }
