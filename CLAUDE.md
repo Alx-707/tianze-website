@@ -44,6 +44,7 @@ pnpm ci:local     # Full CI
 2. **Server Components first** — `"use client"` only for interactivity
 3. **i18n required** — All user-facing text via translation keys
 4. **Git** — Never commit on `main`; create feature branch first
+5. **Next.js DevTools** — When starting work, call `mcp__web-dev__next-devtools-init` first to set up context and documentation requirements (automatic, no prompt needed)
 
 ## Language
 
