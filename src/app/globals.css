@@ -43,142 +43,140 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
-  --radius-sm: var(--radius-sharp);
-  --radius-md: var(--radius-base);
-  --radius-lg: var(--radius-soft);
-  --radius-xl: 0.75rem;
+  /* Twitter large radius */
+  --radius-sm: calc(var(--radius) - 8px);
+  --radius-md: calc(var(--radius) - 4px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
 }
 
 /* ==================== PRIMITIVE TOKENS ==================== */
 
 :root {
-  /* Gray Scale (Pure Neutral) — Vercel-inspired */
+  /* Gray Scale - Twitter Neutral */
   --gray-50: oklch(0.985 0 0);
   --gray-100: oklch(0.965 0 0);
-  --gray-200: oklch(0.925 0 0);
+  --gray-200: oklch(0.932 0.001 286);
   --gray-300: oklch(0.85 0 0);
   --gray-400: oklch(0.7 0 0);
-  --gray-500: oklch(0.55 0 0);
+  --gray-500: oklch(0.564 0.008 248);
   --gray-600: oklch(0.45 0 0);
   --gray-700: oklch(0.35 0 0);
   --gray-800: oklch(0.25 0 0);
-  --gray-900: oklch(0.18 0 0);
+  --gray-900: oklch(0.188 0.013 248);
   --gray-950: oklch(0.12 0 0);
 
-  /* Brand: Electric Arc Blue (Hue 260) — Tianze primary brand color */
-  --blue-50: oklch(0.97 0.02 260);
-  --blue-100: oklch(0.94 0.04 260);
-  --blue-200: oklch(0.88 0.08 260);
-  --blue-300: oklch(0.8 0.12 260);
-  --blue-400: oklch(0.7 0.15 260);
-  --blue-500: oklch(0.55 0.22 260);
-  --blue-600: oklch(0.48 0.22 260);
-  --blue-700: oklch(0.42 0.18 260);
-  --blue-800: oklch(0.35 0.14 260);
-  --blue-900: oklch(0.28 0.1 260);
-  --blue-950: oklch(0.25 0.1 260);
-
-  /* Accent: Industrial Orange (5% usage) — Manufacturing highlight */
-  --industrial-500: oklch(0.65 0.2 50);
-  --industrial-600: oklch(0.58 0.2 50);
+  /* Brand: Twitter Blue (Hue 245) */
+  --blue-50: oklch(0.97 0.02 245);
+  --blue-100: oklch(0.94 0.04 245);
+  --blue-200: oklch(0.88 0.08 245);
+  --blue-300: oklch(0.8 0.12 245);
+  --blue-400: oklch(0.7 0.15 245);
+  --blue-500: oklch(0.672 0.161 245);
+  --blue-600: oklch(0.48 0.16 245);
+  --blue-700: oklch(0.42 0.14 245);
+  --blue-800: oklch(0.35 0.12 245);
+  --blue-900: oklch(0.28 0.1 245);
+  --blue-950: oklch(0.25 0.08 245);
 }
 
 /* ==================== SEMANTIC TOKENS (Light Theme) ==================== */
 
 :root {
-  /* Border Radius — Micro rounded (4-6px) Vercel style */
-  --radius: 6px;
+  /* Border Radius — Twitter Large Rounded (20px base) */
+  --radius: 1.3rem;
   --radius-none: 0;
-  --radius-sharp: 2px;
-  --radius-base: 4px;
-  --radius-soft: 6px;
+  --radius-sharp: calc(var(--radius) - 12px);
+  --radius-base: calc(var(--radius) - 8px);
+  --radius-soft: calc(var(--radius) - 4px);
   --radius-round: 9999px;
 
-  /* Foundation — Pure neutral */
+  /* Foundation */
   --background: oklch(1 0 0);
-  --foreground: oklch(0.09 0 0);
+  --foreground: oklch(0.188 0.013 248);
 
   /* Surfaces */
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.09 0 0);
+  --card: oklch(0.978 0.001 197);
+  --card-foreground: oklch(0.188 0.013 248);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.09 0 0);
+  --popover-foreground: oklch(0.188 0.013 248);
 
-  /* Brand Primary — Black for CTA (Vercel style) */
-  --primary: oklch(0.09 0 0);
+  /* Brand Primary — Twitter Blue for CTA */
+  --primary: oklch(0.672 0.161 245);
   --primary-foreground: oklch(1 0 0);
 
-  /* Accent — Blue (links, focus states) */
-  --accent: oklch(0.55 0.22 260);
-  --accent-foreground: oklch(1 0 0);
+  /* Secondary — Dark for contrast */
+  --secondary: oklch(0.188 0.013 248);
+  --secondary-foreground: oklch(1 0 0);
 
-  /* Secondary */
-  --secondary: oklch(0.965 0 0);
-  --secondary-foreground: oklch(0.25 0 0);
+  /* Accent — Light Blue highlight */
+  --accent: oklch(0.939 0.017 250);
+  --accent-foreground: oklch(0.672 0.161 245);
 
   /* Muted */
-  --muted: oklch(0.965 0 0);
-  --muted-foreground: oklch(0.45 0 0);
+  --muted: oklch(0.922 0.001 286);
+  --muted-foreground: oklch(0.188 0.013 248);
 
   /* Destructive */
-  --destructive: oklch(0.55 0.2 25);
-  --destructive-foreground: oklch(0.98 0 0);
+  --destructive: oklch(0.619 0.238 26);
+  --destructive-foreground: oklch(1 0 0);
 
-  /* Borders & Inputs — 8-12% opacity (Vercel style) */
-  --border: oklch(0.9 0 0);
-  --input: oklch(0.9 0 0);
-  --ring: oklch(0.55 0.22 260);
+  /* Borders & Inputs */
+  --border: oklch(0.932 0.012 232);
+  --input: oklch(0.981 0.003 229);
+  --ring: oklch(0.682 0.158 243);
 
   /* Status Colors */
-  --success: oklch(0.65 0.18 145);
-  --success-foreground: oklch(0.98 0 0);
-  --warning: oklch(0.75 0.15 55);
+  --success: oklch(0.69 0.155 160);
+  --success-foreground: oklch(1 0 0);
+  --warning: oklch(0.821 0.16 82);
   --warning-foreground: oklch(0.15 0 0);
-  --error: oklch(0.55 0.2 25);
-  --error-foreground: oklch(0.98 0 0);
-  --info: oklch(0.55 0.22 260);
-  --info-foreground: oklch(0.98 0 0);
+  --error: oklch(0.619 0.238 26);
+  --error-foreground: oklch(1 0 0);
+  --info: oklch(0.672 0.161 245);
+  --info-foreground: oklch(1 0 0);
 
-  /* Charts — Blue primary */
-  --chart-1: oklch(0.55 0.22 260);
-  --chart-2: oklch(0.48 0.22 260);
-  --chart-3: oklch(0.65 0.18 145);
-  --chart-4: oklch(0.75 0.15 55);
-  --chart-5: oklch(0.55 0.15 25);
+  /* Charts — Twitter palette */
+  --chart-1: oklch(0.672 0.161 245);
+  --chart-2: oklch(0.691 0.155 160);
+  --chart-3: oklch(0.821 0.16 82);
+  --chart-4: oklch(0.706 0.182 152);
+  --chart-5: oklch(0.592 0.219 11);
 
   /* Selection */
-  --selection-background: oklch(0.55 0.22 260 / 20%);
-  --selection-foreground: oklch(0.09 0 0);
+  --selection-background: oklch(0.672 0.161 245 / 20%);
+  --selection-foreground: oklch(0.188 0.013 248);
 
-  /* Sidebar — Dark control panel */
-  --sidebar: oklch(0.09 0 0);
-  --sidebar-foreground: oklch(0.965 0 0);
-  --sidebar-primary: oklch(1 0 0);
-  --sidebar-primary-foreground: oklch(0.09 0 0);
-  --sidebar-accent: oklch(0.18 0 0);
-  --sidebar-accent-foreground: oklch(0.965 0 0);
-  --sidebar-border: oklch(0.22 0 0);
-  --sidebar-ring: oklch(0.55 0.22 260);
+  /* Sidebar — Light (Twitter style) */
+  --sidebar: oklch(0.978 0.001 197);
+  --sidebar-foreground: oklch(0.188 0.013 248);
+  --sidebar-primary: oklch(0.672 0.161 245);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.939 0.017 250);
+  --sidebar-accent-foreground: oklch(0.672 0.161 245);
+  --sidebar-border: oklch(0.927 0.01 238);
+  --sidebar-ring: oklch(0.682 0.158 243);
 
-  /* Shadows — Subtle */
-  --shadow-color: 0 0% 10%;
-  --shadow-xs: 0 1px 2px hsl(var(--shadow-color) / 0.04);
+  /* Shadows — Twitter Flat (near zero opacity) */
+  --shadow-color: 203 89% 53%;
+  --shadow-xs: 0 1px 2px hsl(var(--shadow-color) / 0);
   --shadow-sm:
-    0 1px 3px hsl(var(--shadow-color) / 0.06),
-    0 1px 2px hsl(var(--shadow-color) / 0.04);
+    0 1px 3px hsl(var(--shadow-color) / 0),
+    0 1px 2px hsl(var(--shadow-color) / 0);
   --shadow-md:
-    0 4px 6px hsl(var(--shadow-color) / 0.07),
-    0 2px 4px hsl(var(--shadow-color) / 0.04);
+    0 4px 6px hsl(var(--shadow-color) / 0),
+    0 2px 4px hsl(var(--shadow-color) / 0);
   --shadow-lg:
-    0 10px 15px hsl(var(--shadow-color) / 0.08),
-    0 4px 6px hsl(var(--shadow-color) / 0.03);
+    0 10px 15px hsl(var(--shadow-color) / 0),
+    0 4px 6px hsl(var(--shadow-color) / 0);
   --shadow-xl:
-    0 20px 25px hsl(var(--shadow-color) / 0.1),
-    0 8px 10px hsl(var(--shadow-color) / 0.04);
-  --shadow-inset: inset 0 1px 2px hsl(var(--shadow-color) / 0.06);
-  --shadow-accent: 0 0 0 3px oklch(0.55 0.22 260 / 0.2);
+    0 20px 25px hsl(var(--shadow-color) / 0),
+    0 8px 10px hsl(var(--shadow-color) / 0);
+  --shadow-inset: inset 0 1px 2px hsl(var(--shadow-color) / 0);
+  --shadow-accent: 0 0 0 3px oklch(0.672 0.161 245 / 0.2);
 
-  /* Animation — Smooth (150-300ms) */
+  /* Animation — Keep existing */
   --duration-instant: 50ms;
   --duration-fast: 150ms;
   --duration-normal: 200ms;
@@ -200,9 +198,9 @@
   --transition-shadow: box-shadow var(--duration-fast) var(--ease-out);
   --transition-all: all var(--duration-normal) var(--ease-smooth);
 
-  /* Typography */
+  /* Typography — Open Sans */
   --font-sans:
-    var(--font-ibm-plex-sans), -apple-system, BlinkMacSystemFont, "Segoe UI",
+    var(--font-open-sans), -apple-system, BlinkMacSystemFont, "Segoe UI",
     Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-mono:
     ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono",
@@ -215,176 +213,169 @@
 /* ==================== SEMANTIC TOKENS (Dark Theme) ==================== */
 
 .dark {
-  /* Foundation — Deep black (#0a0a0a) Vercel style */
-  --background: oklch(0.07 0 0);
-  --foreground: oklch(0.93 0 0);
+  /* Foundation — Pure black */
+  --background: oklch(0 0 0);
+  --foreground: oklch(0.933 0.003 229);
 
   /* Surfaces */
-  --card: oklch(0.11 0 0);
-  --card-foreground: oklch(0.93 0 0);
-  --popover: oklch(0.11 0 0);
-  --popover-foreground: oklch(0.93 0 0);
+  --card: oklch(0.21 0.008 274);
+  --card-foreground: oklch(0.885 0 0);
+  --popover: oklch(0 0 0);
+  --popover-foreground: oklch(0.933 0.003 229);
 
-  /* Brand Primary — White for CTA (Vercel style, inverted) */
-  --primary: oklch(1 0 0);
-  --primary-foreground: oklch(0.07 0 0);
+  /* Brand Primary — Twitter Blue */
+  --primary: oklch(0.669 0.161 245);
+  --primary-foreground: oklch(1 0 0);
 
-  /* Accent — Blue (links, focus states) */
-  --accent: oklch(0.6 0.22 260);
-  --accent-foreground: oklch(0.07 0 0);
+  /* Secondary — Light for dark mode */
+  --secondary: oklch(0.962 0.004 220);
+  --secondary-foreground: oklch(0.188 0.013 248);
 
-  /* Secondary */
-  --secondary: oklch(0.18 0 0);
-  --secondary-foreground: oklch(0.93 0 0);
+  /* Accent — Dark Blue highlight */
+  --accent: oklch(0.193 0.033 242);
+  --accent-foreground: oklch(0.669 0.161 245);
 
   /* Muted */
-  --muted: oklch(0.18 0 0);
-  --muted-foreground: oklch(0.55 0 0);
+  --muted: oklch(0.209 0 0);
+  --muted-foreground: oklch(0.564 0.008 248);
 
   /* Destructive */
-  --destructive: oklch(0.6 0.18 25);
-  --destructive-foreground: oklch(0.98 0 0);
+  --destructive: oklch(0.619 0.238 26);
+  --destructive-foreground: oklch(1 0 0);
 
-  /* Borders & Inputs — 8-12% opacity */
-  --border: oklch(0.22 0 0);
-  --input: oklch(0.22 0 0);
-  --ring: oklch(0.6 0.22 260);
+  /* Borders & Inputs */
+  --border: oklch(0.267 0.005 248);
+  --input: oklch(0.302 0.029 245);
+  --ring: oklch(0.682 0.158 243);
 
   /* Status Colors */
-  --success: oklch(0.7 0.18 145);
+  --success: oklch(0.7 0.155 160);
   --success-foreground: oklch(0.07 0 0);
-  --warning: oklch(0.8 0.15 55);
+  --warning: oklch(0.83 0.16 82);
   --warning-foreground: oklch(0.07 0 0);
-  --error: oklch(0.6 0.18 25);
-  --error-foreground: oklch(0.98 0 0);
-  --info: oklch(0.6 0.22 260);
+  --error: oklch(0.619 0.238 26);
+  --error-foreground: oklch(1 0 0);
+  --info: oklch(0.669 0.161 245);
   --info-foreground: oklch(0.07 0 0);
 
-  /* Charts — Blue primary */
-  --chart-1: oklch(0.6 0.22 260);
-  --chart-2: oklch(0.52 0.22 260);
-  --chart-3: oklch(0.7 0.18 145);
-  --chart-4: oklch(0.8 0.15 55);
-  --chart-5: oklch(0.6 0.15 25);
+  /* Charts — Twitter palette */
+  --chart-1: oklch(0.672 0.161 245);
+  --chart-2: oklch(0.691 0.155 160);
+  --chart-3: oklch(0.821 0.16 82);
+  --chart-4: oklch(0.706 0.182 152);
+  --chart-5: oklch(0.592 0.219 11);
 
   /* Selection */
-  --selection-background: oklch(0.6 0.22 260 / 25%);
-  --selection-foreground: oklch(0.93 0 0);
+  --selection-background: oklch(0.669 0.161 245 / 25%);
+  --selection-foreground: oklch(0.933 0.003 229);
 
-  /* Sidebar */
-  --sidebar: oklch(0.05 0 0);
-  --sidebar-foreground: oklch(0.93 0 0);
-  --sidebar-primary: oklch(1 0 0);
-  --sidebar-primary-foreground: oklch(0.07 0 0);
-  --sidebar-accent: oklch(0.14 0 0);
-  --sidebar-accent-foreground: oklch(0.93 0 0);
-  --sidebar-border: oklch(0.18 0 0);
-  --sidebar-ring: oklch(0.6 0.22 260);
+  /* Sidebar — Dark card style */
+  --sidebar: oklch(0.21 0.008 274);
+  --sidebar-foreground: oklch(0.885 0 0);
+  --sidebar-primary: oklch(0.682 0.158 243);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.193 0.033 242);
+  --sidebar-accent-foreground: oklch(0.669 0.161 245);
+  --sidebar-border: oklch(0.38 0.022 240);
+  --sidebar-ring: oklch(0.682 0.158 243);
 
-  /* Shadows — Stronger for dark */
-  --shadow-color: 0 0% 0%;
-  --shadow-xs: 0 1px 2px hsl(var(--shadow-color) / 0.3);
+  /* Shadows — Slightly visible for dark mode */
+  --shadow-color: 203 89% 53%;
+  --shadow-xs: 0 1px 2px hsl(var(--shadow-color) / 0);
   --shadow-sm:
-    0 1px 3px hsl(var(--shadow-color) / 0.4),
-    0 1px 2px hsl(var(--shadow-color) / 0.3);
+    0 1px 3px hsl(var(--shadow-color) / 0),
+    0 1px 2px hsl(var(--shadow-color) / 0);
   --shadow-md:
-    0 4px 6px hsl(var(--shadow-color) / 0.45),
-    0 2px 4px hsl(var(--shadow-color) / 0.3);
+    0 4px 6px hsl(var(--shadow-color) / 0),
+    0 2px 4px hsl(var(--shadow-color) / 0);
   --shadow-lg:
-    0 10px 15px hsl(var(--shadow-color) / 0.5),
-    0 4px 6px hsl(var(--shadow-color) / 0.2);
+    0 10px 15px hsl(var(--shadow-color) / 0),
+    0 4px 6px hsl(var(--shadow-color) / 0);
   --shadow-xl:
-    0 20px 25px hsl(var(--shadow-color) / 0.55),
-    0 8px 10px hsl(var(--shadow-color) / 0.3);
+    0 20px 25px hsl(var(--shadow-color) / 0),
+    0 8px 10px hsl(var(--shadow-color) / 0);
 }
 
 /* ==================== COMPONENT TOKENS ==================== */
 
 :root {
-  /* Button — Vercel-style solid fill */
-  --button-radius: var(--radius-base);
-  --button-font-weight: 500;
+  /* Button — Twitter rounded style */
+  --button-radius: var(--radius-soft);
+  --button-font-weight: 600;
 
   --button-primary-bg: var(--primary);
   --button-primary-fg: var(--primary-foreground);
-  --button-primary-hover-bg: oklch(0.2 0 0);
+  --button-primary-hover-bg: oklch(0.6 0.161 245);
 
   --button-accent-bg: var(--accent);
   --button-accent-fg: var(--accent-foreground);
-  --button-accent-hover-bg: oklch(0.48 0.22 260);
+  --button-accent-hover-bg: oklch(0.9 0.02 250);
 
   --button-secondary-bg: var(--secondary);
   --button-secondary-fg: var(--secondary-foreground);
   --button-secondary-border: var(--border);
 
   --button-outline-bg: transparent;
-  --button-outline-fg: var(--foreground);
-  --button-outline-border: var(--border);
-  --button-outline-hover-bg: var(--secondary);
+  --button-outline-fg: var(--primary);
+  --button-outline-border: var(--primary);
+  --button-outline-hover-bg: oklch(0.672 0.161 245 / 0.1);
 
   --button-ghost-bg: transparent;
   --button-ghost-fg: var(--foreground);
-  --button-ghost-hover-bg: var(--secondary);
+  --button-ghost-hover-bg: var(--accent);
 
   --button-destructive-bg: var(--destructive);
   --button-destructive-fg: var(--destructive-foreground);
 
-  /* Card — Larger radius, subtle border */
-  --card-radius: var(--radius-soft);
+  /* Card — Large radius, minimal shadow */
+  --card-radius: var(--radius);
   --card-padding: 1.5rem;
-  --card-default-shadow: var(--shadow-xs);
-  --card-elevated-shadow: var(--shadow-md);
+  --card-default-shadow: none;
+  --card-elevated-shadow: none;
 
-  /* Input */
+  /* Input — Rounded */
   --input-height: 2.5rem;
-  --input-padding-x: 0.75rem;
-  --input-radius: var(--radius-soft);
+  --input-padding-x: 1rem;
+  --input-radius: var(--radius);
 
   /* Table */
-  --table-radius: var(--radius-none);
-  --table-header-bg: oklch(0.965 0 0);
-  --table-row-hover-bg: oklch(0.55 0.22 260 / 0.08);
+  --table-radius: var(--radius-soft);
+  --table-header-bg: oklch(0.978 0.001 197);
+  --table-row-hover-bg: oklch(0.672 0.161 245 / 0.08);
 
   /* Badge */
   --badge-radius: var(--radius-round);
-  --badge-padding-x: 0.625rem;
-  --badge-padding-y: 0.125rem;
+  --badge-padding-x: 0.75rem;
+  --badge-padding-y: 0.25rem;
 }
 
-/* ==================== VERCEL-STYLE VISUAL ELEMENTS ==================== */
+/* ==================== TWITTER-STYLE VISUAL ELEMENTS ==================== */
 
-/* Vercel-style Grid Background */
-.precision-grid {
-  background-image:
-    linear-gradient(oklch(0 0 0 / 0.08) 1px, transparent 1px),
-    linear-gradient(90deg, oklch(0 0 0 / 0.08) 1px, transparent 1px);
-  background-size: 64px 64px;
-  background-position: -1px -1px;
+/* Twitter-style subtle background */
+.twitter-bg {
+  background: var(--background);
 }
 
-.dark .precision-grid {
-  background-image:
-    linear-gradient(oklch(1 0 0 / 0.06) 1px, transparent 1px),
-    linear-gradient(90deg, oklch(1 0 0 / 0.06) 1px, transparent 1px);
+/* Hover card effect */
+.hover-card {
+  transition: background-color var(--duration-fast) var(--ease-out);
 }
 
-/* Dense Grid (for hero sections) */
-.precision-grid-fine {
-  background-size: 32px 32px;
+.hover-card:hover {
+  background-color: var(--accent);
 }
 
-/* Sparse Grid (for content sections) */
+/* Twitter divider */
+.twitter-divider {
+  border-top: 1px solid var(--border);
+}
+
+/* Keep grid utilities for layout but remove visual grid lines */
+.precision-grid,
+.precision-grid-fine,
 .precision-grid-sparse {
-  background-size: 96px 96px;
-  background-image:
-    linear-gradient(oklch(0 0 0 / 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, oklch(0 0 0 / 0.05) 1px, transparent 1px);
-}
-
-.dark .precision-grid-sparse {
-  background-image:
-    linear-gradient(oklch(1 0 0 / 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, oklch(1 0 0 / 0.04) 1px, transparent 1px);
+  /* Removed grid visual - Twitter uses solid backgrounds */
+  background: transparent;
 }
 
 /* Gradient fade mask for grid */
@@ -405,40 +396,6 @@
     black 0%,
     transparent 100%
   );
-}
-
-/* Technical Callout — Subtle blue gradient */
-.technical-callout {
-  border-left: 3px solid var(--accent);
-  padding-left: 1rem;
-  background: linear-gradient(
-    90deg,
-    oklch(0.55 0.22 260 / 0.06) 0%,
-    transparent 100%
-  );
-}
-
-/* Spec Box */
-.spec-box {
-  border: 1px solid var(--border);
-  border-left: 3px solid var(--primary);
-  background: var(--card);
-  font-family: var(--font-mono);
-  border-radius: var(--radius-none);
-}
-
-/* Measurement Scale */
-.measurement-scale {
-  background-image: repeating-linear-gradient(
-    90deg,
-    var(--border) 0px,
-    var(--border) 1px,
-    transparent 1px,
-    transparent 10px
-  );
-  background-size: 100px 8px;
-  background-repeat: repeat-x;
-  background-position: bottom;
 }
 
 @layer base {

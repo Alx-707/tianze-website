@@ -66,7 +66,7 @@ export const SITE_CONFIG = {
     phone: "+86-518-0000-0000",
     email: "sales@tianze-pipe.com",
     whatsappNumber:
-      process.env["NEXT_PUBLIC_WHATSAPP_NUMBER"] ?? "+86-518-0000-0000",
+      process.env["NEXT_PUBLIC_WHATSAPP_NUMBER"] || "+86-518-0000-0000",
   },
 } as const satisfies SiteConfig;
 
