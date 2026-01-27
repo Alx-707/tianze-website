@@ -1,49 +1,85 @@
-# Dependency Upgrade（分阶段升级策略）
+# Dependency Upgrade Protocol
 
-升级依赖像“换发动机”：最怕一次把所有零件都换了，结果不知道是哪一颗螺丝出的问题。本项目 Next.js/React/TypeScript 版本偏前沿，且有 webhook/安全头/测试门禁，建议采用**小步升级 + 强验证**。
+## Core Dependencies
 
-## 什么时候需要这份流程
-- 升级 `next` / `react` / `typescript` 等核心依赖
-- 发现 `pnpm audit` / Semgrep 告警需要升级
-- CI 出现依赖冲突、lockfile 漂移、或 bundle/性能回归
+These require full validation:
+- `next` — Framework
+- `react` / `react-dom` — Runtime
+- `typescript` — Type system
+- `next-intl` — i18n
+- `tailwindcss` — Styling
 
-## 升级策略（推荐）
+## Upgrade Checklist
 
-### A) 先定升级类型（影响评估）
-- **Patch**：通常低风险，但仍要跑 `pnpm ci:local:quick`
-- **Minor**：关注行为变化与 deprecations
-- **Major**：必须分阶段，保留可回滚路径
-
-### B) 分阶段升级（避免“全家桶一起升”）
-1. 单次只升级 1 个“核心轴”（例如先 `typescript`，再 `next`，再其他）
-2. 每步都通过门禁后再继续下一步
-
-### C) 依赖树与冲突排查
-
+### Pre-Upgrade
 ```bash
-pnpm why <pkg>
-pnpm list <pkg>
-pnpm outdated
+git checkout -b chore/upgrade-[package]-[version]
+git stash  # Save uncommitted work
 ```
 
-## 升级后必须通过的验证（与本项目门禁对齐）
+### Validation Steps
 
+| Step | Command | Must Pass |
+|------|---------|-----------|
+| 1. Install | `pnpm install` | ✓ |
+| 2. Types | `pnpm type-check` | ✓ |
+| 3. Lint | `pnpm lint:check` | ✓ |
+| 4. Tests | `pnpm test` | ✓ |
+| 5. Build | `pnpm build` | ✓ |
+| 6. E2E | `pnpm test:e2e` | Recommended |
+| 7. Lighthouse | `pnpm perf:lighthouse` | Recommended |
+
+### Quick Validation (Minor/Patch)
 ```bash
-pnpm type-check
-pnpm lint:check
-pnpm test
-pnpm build
-pnpm quality:gate:fast
+pnpm ci:local:quick && pnpm build
 ```
 
-变更涉及路由/渲染/国际化/安全头时，建议额外跑：
-
+### Full Validation (Major)
 ```bash
-pnpm test:e2e
-pnpm perf:lighthouse
+pnpm ci:local
 ```
 
-## 常见风险提示（本项目特有）
-- **Next.js 16 / Cache Components**：缓存与 runtime API 的约束更严格，升级后要重点关注 `cookies()`/`headers()` 与 `"use cache"` 的组合（见 `/.claude/rules/architecture.md`）。
-- **CSP/第三方脚本域名**：升级可能改变内联脚本/样式注入方式，需验证响应头是否仍包含预期 CSP（见 `src/config/security.ts` 与 `middleware.ts`）。
+## Security Patches
 
+For vulnerabilities (`pnpm audit`):
+
+1. Check if patch exists: `pnpm audit --fix`
+2. If no patch, add override in `package.json`:
+   ```json
+   "pnpm": {
+     "overrides": {
+       "vulnerable-package": ">=safe-version"
+     }
+   }
+   ```
+3. Document in commit message
+
+## Breaking Changes
+
+### Next.js Major Upgrades
+1. Read migration guide: `https://nextjs.org/docs/app/guides/upgrading`
+2. Run codemods: `npx @next/codemod@latest [codemod-name] .`
+3. Check `docs/known-issue/` for project-specific issues
+
+### React Major Upgrades
+1. Check compatibility with UI libraries (Radix, shadcn)
+2. Verify server component boundaries
+3. Test hydration behavior
+
+## Rollback
+
+If validation fails:
+```bash
+git checkout package.json pnpm-lock.yaml
+pnpm install
+```
+
+## Commit Convention
+
+```
+chore(deps): upgrade [package] to [version]
+
+- [Breaking change handled]
+- [Migration step applied]
+- Closes #[issue] (if applicable)
+```

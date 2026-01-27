@@ -1,85 +1,67 @@
-# Debugging（系统化排障）
+# Debugging & Troubleshooting
 
-把 Debug 当成"做实验"：先复现，再提出假设，再用最小成本的实验去证伪。比起"改一把试试"，这套流程更适合你们这种有 `quality:gate`、E2E、CSP、外部服务集成的工程。
+## Build Errors
 
-## 铁律
+### "Module not found"
+1. Check import path (`@/` alias vs relative)
+2. Verify file extension in `next.config.ts` pageExtensions
+3. Run `pnpm type-check` for TypeScript resolution issues
 
-**未完成根因分析（步骤 1-2），禁止提出修复方案。**
+### Hydration Mismatch
+See `architecture.md` → Hydration Risk Checklist
 
-症状级修复是失败的表现——随机尝试浪费时间并引入新 bug。
+Common causes:
+- Browser APIs in SSR (`window`, `localStorage`)
+- Date/time rendering without client-side `useEffect`
+- Radix UI + `dynamic()` without `ssr: false`
 
-## 触发场景（什么时候用这套流程）
-- CI 失败但本地偶现/难复现
-- 只在 production build（`next build` / `next start`）出问题
-- API route / webhook 行为异常（401/403/429/500）
-- CSP / 第三方脚本导致的前端报错、资源被拦截
-- 性能回归（Lighthouse / Web Vitals 指标变差）
+### Cache Components Errors
+- `headers()`/`cookies()` in `"use cache"` → Move to Suspense boundary
+- Missing `setRequestLocale()` → Add in page/layout before any hooks
 
-## 三步法（最小可执行）
+## Runtime Errors
 
-### 1) 复现（先稳定复现，再谈修）
-- 记录：触发步骤、期望 vs 实际、环境（Node/pnpm）、报错原文
-- 优先在 production 模式复现：`pnpm build && pnpm start`（很多 hydration/CSP/缓存问题只在这里出现）
+### API Route 500
+1. Check server logs: `pnpm dev` terminal output
+2. Validate request body with Zod schema
+3. Verify env vars: `src/env.ts` validation
 
-### 2) 定位层级（选对工具层）
-- **Type/ESLint**：先跑 `pnpm type-check`、`pnpm lint:check`
-- **Unit/Integration**：`pnpm test`
-- **E2E/SSR 行为**：`pnpm test:e2e`（你们 E2E 已按生产模式运行）
-- **综合门禁**：`pnpm ci:local:quick` 或 `pnpm ci:local`
+### i18n "Missing message"
+1. Run `pnpm validate:translations`
+2. Check namespace in `messages/[locale]/`
+3. Verify key path in `getTranslations()` call
 
-### 3) 用“最小实验”证伪假设
-- 每次只改一个变量：输入/环境变量/依赖版本/一段逻辑
-- 缩小范围：从最相关的 1–2 个文件/路由开始，不要全局改
+## Performance Issues
 
-## 推荐命令顺序（高性价比）
-
+### Slow Build
 ```bash
-pnpm ci:local:quick
-pnpm test
-pnpm build
-pnpm test:e2e
+ANALYZE=true pnpm build  # Bundle analyzer
 ```
 
-## 扩展流程（复杂问题适用）
+### Slow Dev Server
+- Turbopack: `pnpm dev` (default)
+- Webpack fallback: `pnpm dev:webpack`
 
-当三步法无法解决时，使用完整四阶段流程：
+## Useful Commands
 
-### Phase 2：模式分析
+| Issue | Command |
+|-------|---------|
+| Type errors | `pnpm type-check` |
+| Lint issues | `pnpm lint:fix` |
+| i18n validation | `pnpm i18n:full` |
+| Full CI locally | `pnpm ci:local` |
+| Bundle analysis | `ANALYZE=true pnpm build` |
 
-在定位层级后、提出假设前：
-- 在代码库中找到**类似的正常工作代码**
-- 完整阅读参考实现（不要略读）
-- 逐项对比差异：依赖、配置、调用方式、环境假设
-- 理解隐含约束（Next.js 16 Cache Components、async APIs 等）
+## Logging
 
-### Phase 4：架构质疑
+Use `src/lib/logger.ts` for structured logs:
 
-**如果 3+ 次修复尝试失败，立即停止修复。**
+```typescript
+import { logger } from '@/lib/logger';
 
-这表明问题可能是设计缺陷而非 bug：
-- 重新审视组件/模块边界
-- 检查数据流是否合理
-- 考虑是否需要重构而非修补
+logger.error('API failed', { endpoint, statusCode, userId });
+logger.warn('Rate limit approaching', { remaining, ip });
+```
 
-## 红旗信号
-
-出现以下情况时，返回 Phase 1 重新调查：
-
-| 信号 | 含义 |
-|------|------|
-| 想着"先快速修一下" | 症状级修复的前兆 |
-| 还没调查就提修复方案 | 违反铁律 |
-| 同时改多处代码 | 无法判断哪个修复生效 |
-| 每次修复暴露新问题 | 根因未找到 |
-| 修复后"感觉"好了但没验证 | 缺乏证据 |
-
-## 证据要求（避免"感觉修好了"）
-- 结论必须附：**命令** + **关键输出片段** 或明确标记 "未验证（需要运行：…）"
-
-## 效能对比
-
-| 方法 | 修复时间 | 首次成功率 | 引入新 bug |
-|------|---------|-----------|-----------|
-| 系统化流程 | 15-30 分钟 | ~95% | 接近零 |
-| 随机尝试 | 2-3 小时 | ~40% | 常见 |
-
+**Allowed in production**: `logger.error()`, `logger.warn()`
+**Dev only**: `logger.info()`, `logger.debug()`

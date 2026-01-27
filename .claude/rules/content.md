@@ -1,5 +1,6 @@
 ---
-paths: "content/**/*.mdx"
+paths:
+  - "content/**/*.mdx"
 ---
 
 # MDX Content System
@@ -8,148 +9,69 @@ paths: "content/**/*.mdx"
 
 ```
 content/
-├── config/content.json    # Global content settings
+├── config/content.json    # Global settings
 ├── posts/{locale}/*.mdx   # Blog posts
 ├── pages/{locale}/*.mdx   # Static pages
-└── products/{locale}/*.mdx # Product details (B2B)
+└── products/{locale}/*.mdx # Products (B2B)
 ```
 
-**Rule**: Every content file must exist in both `en/` and `zh/` with identical `slug`.
+**Rule**: Every file must exist in both `en/` and `zh/` with **identical `slug`**.
 
-## Frontmatter Schemas
+## Frontmatter
 
-### Posts (Blog)
+### Required Fields (All Types)
 
-```yaml
----
-locale: 'en'                    # Required: 'en' | 'zh'
-title: 'Post Title'             # Required
-slug: 'post-slug'               # Required: URL path
-description: 'Summary text'     # Required
-publishedAt: '2024-01-15'       # Required: YYYY-MM-DD
-updatedAt: '2024-01-15'         # Optional
-author: 'Author Name'           # Required
-tags: ['Tag1', 'Tag2']          # Optional
-categories: ['Category']        # Optional
-featured: true                  # Optional: homepage display
-draft: false                    # Optional: hide from production
-excerpt: 'Preview text...'      # Optional: custom excerpt
-readingTime: 5                  # Optional: minutes
-coverImage: '/images/...'       # Optional
-seo:                            # Optional: override defaults
-  title: 'SEO Title'
-  description: 'SEO description'
-  keywords: ['keyword1']
-  ogImage: '/images/og.jpg'
----
-```
+| Field | Type | Notes |
+|-------|------|-------|
+| `locale` | `'en' \| 'zh'` | Must match directory |
+| `title` | string | |
+| `slug` | string | URL path, identical across locales |
+| `description` | string | |
+| `publishedAt` | `YYYY-MM-DD` | |
 
-### Pages (Static)
+### Posts Additional
 
-```yaml
----
-locale: 'en'
-title: 'Page Title'
-slug: 'page-slug'
-description: 'Page description'
-publishedAt: '2024-01-10'
-updatedAt: '2024-01-15'
-author: 'Author Name'
-layout: 'default'               # Optional: page layout variant
-showToc: true                   # Optional: table of contents
-lastReviewed: '2024-01-15'      # Optional
-draft: false
-seo:
-  title: 'SEO Title'
-  description: 'SEO description'
-  keywords: ['keyword1']
-  ogImage: '/images/og.jpg'
----
-```
+| Field | Required | Notes |
+|-------|----------|-------|
+| `author` | ✅ | |
+| `featured` | - | Homepage display |
+| `draft` | - | Hide from production |
+| `tags`, `categories` | - | |
+| `seo.title`, `seo.description` | - | Override defaults |
 
-### Products (B2B-specific)
+### Products (B2B)
 
-```yaml
----
-locale: 'en'                    # Required: 'en' | 'zh'
-title: 'Product Name'           # Required
-slug: 'product-slug'            # Required
-description: 'Product summary'  # Required
-publishedAt: '2024-01-10'       # Required: for sitemap
-coverImage: '/images/products/cover.jpg'
-images:                         # Product gallery
-  - '/images/products/1.jpg'
-  - '/images/products/2.jpg'
-category: 'Category Name'
-tags: ['Tag1', 'Tag2']
-featured: true                  # Homepage display
-
-# B2B Trade Fields (Optional but recommended)
-moq: '5 units'                  # Minimum Order Quantity
-leadTime: '15-20 days'          # Production/shipping time
-supplyCapacity: '500 units/month'
-certifications:                 # Quality certifications
-  - 'CE'
-  - 'ISO 9001'
-packaging: 'Packaging description'
-portOfLoading: 'Shanghai, China'
-
-# Technical Specifications
-specs:
-  'Spec Name': 'Spec Value'
-  'Voltage': 'AC 380V'
-  'Weight': '45 kg'
-
-# Relations
-relatedProducts:                # Other product slugs
-  - 'related-product-slug'
-
-seo:
-  title: 'Product SEO Title'
-  description: 'Product SEO description'
-  keywords: ['keyword1']
----
-```
+| Field | Purpose |
+|-------|---------|
+| `coverImage`, `images[]` | Gallery |
+| `category`, `tags` | Classification |
+| `moq` | Minimum Order Quantity |
+| `leadTime` | Production/shipping time |
+| `supplyCapacity` | Monthly capacity |
+| `certifications[]` | CE, ISO, etc. |
+| `specs` | Technical specifications (key-value) |
+| `relatedProducts[]` | Other product slugs |
 
 ## Creating Content
 
-### New Blog Post
+1. Create `content/{type}/en/my-slug.mdx`
+2. Create `content/{type}/zh/my-slug.mdx` (same slug)
+3. Set `draft: true` for WIP content
 
-1. Create file: `content/posts/en/my-post.mdx`
-2. Create translation: `content/posts/zh/my-post.mdx`
-3. Use identical `slug` in both files
-4. Body supports full MDX (React components in markdown)
-
-### New Product
-
-1. Create file: `content/products/en/my-product.mdx`
-2. Create translation: `content/products/zh/my-product.mdx`
-3. Include B2B fields for complete product info
-4. Add to related products in other files if needed
-
-### Draft Mode
-
-- Set `draft: true` to hide from production
-- Preview drafts via Next.js Draft Mode API
-
-## Querying Content
+## Querying
 
 ```typescript
 import { getAllPosts, getPostBySlug } from '@/lib/content-query/queries';
 
-// Get all posts for locale (synchronous)
 const posts = getAllPosts('en');
-
-// Get single post by slug (note: slug first, then locale)
-const post = getPostBySlug('my-post', 'en');
+const post = getPostBySlug('my-post', 'en'); // slug first, then locale
 ```
 
-## Image Paths
+## Images
 
-- Store in `public/images/` directory
-- Reference with absolute paths: `/images/blog/cover.jpg`
-- Use descriptive names: `product-name-angle.jpg`
+- Store: `public/images/`
+- Reference: `/images/blog/cover.jpg` (absolute path)
 
 ## Validation
 
-Frontmatter is validated at build time via TypeScript types in `src/types/content.ts`.
+Frontmatter validated at build time via `src/types/content.ts`.

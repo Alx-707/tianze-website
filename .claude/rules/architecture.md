@@ -7,40 +7,28 @@
 Project has `cacheComponents: true` enabled (`next.config.ts`).
 
 - Pages are cacheable by default
-- Use `cacheLife()` for cache duration: `'seconds' | 'minutes' | 'hours' | 'days' | 'weeks' | 'max'`
+- Use `cacheLife()` for duration: `'seconds' | 'minutes' | 'hours' | 'days' | 'weeks' | 'max'`
 
-**Optional Cache APIs** (not yet used in this project):
-- `cacheTag()` — Tag caches for selective invalidation
-- `revalidateTag()` — Stale-while-revalidate pattern
-- `updateTag()` — Immediate cache refresh
+**Optional Cache APIs** (not yet used): `cacheTag()`, `revalidateTag()`, `updateTag()`
 
 ### Cache Components Constraints
 
-**Runtime API restrictions in cached segments**:
-- `headers()`, `cookies()`, `searchParams` **cannot** be accessed inside `"use cache"` functions
-- If a cached page needs runtime data, wrap the dynamic part in `<Suspense>`
+**IMPORTANT**: `headers()`, `cookies()`, `searchParams` **cannot** be accessed inside `"use cache"` functions.
 
 ```typescript
 // ❌ Error: runtime API in cached segment
 async function getCachedData() {
   'use cache';
-  const h = await headers(); // Will throw error
+  const h = await headers(); // Will throw!
 }
 
 // ✅ Correct: separate cached and dynamic parts
-async function getCachedStaticData() {
-  'use cache';
-  cacheLife('days');
-  return loadStaticContent();
-}
-
-// Dynamic part wrapped in Suspense (in page/layout)
 <Suspense fallback={<Loading />}>
-  <DynamicComponent /> {/* Can use headers/cookies here */}
+  <DynamicComponent /> {/* headers/cookies allowed here */}
 </Suspense>
 ```
 
-**PPR / dynamicIO**: Not enabled. See `docs/known-issue/nextjs-i18n-future-upgrade-checklist.md` for upgrade path.
+**PPR / dynamicIO**: Not enabled. See `docs/known-issue/nextjs-i18n-future-upgrade-checklist.md`.
 
 ### Async Request APIs (Breaking Change)
 
@@ -52,9 +40,8 @@ Next.js 16 removed sync compatibility layer. These APIs **must be awaited**:
 | `searchParams` | `const { query } = await searchParams` |
 | `cookies()` | `await cookies()` |
 | `headers()` | `await headers()` |
-| `draftMode()` | `await draftMode()` |
 
-**Client Components** use React 19 `use()` hook to unwrap Promises.
+**Client Components**: Use React 19 `use()` hook to unwrap Promises.
 
 ### Page Props Pattern
 
@@ -65,27 +52,12 @@ interface PageProps {
 }
 ```
 
-## Routing
+## Routing & Layout
 
-- Locale-based: `/[locale]/page-name`
-- Supported: `en`, `zh` (defined in `src/i18n/routing.ts`)
-- Middleware handles locale detection and redirects
-
-## Layout Hierarchy
-
-```
-src/app/
-├── layout.tsx              # Root (minimal)
-└── [locale]/
-    ├── layout.tsx          # Locale (fonts, metadata, providers)
-    ├── page.tsx            # Home
-    ├── about/page.tsx
-    ├── blog/page.tsx
-    ├── contact/page.tsx
-    └── products/
-        ├── page.tsx        # Listing
-        └── [slug]/page.tsx # Detail
-```
+- **Locale-based**: `/[locale]/page-name` (en, zh)
+- **Root layout**: Minimal wrapper
+- **Locale layout**: Fonts, metadata, providers
+- **Rule**: Push Client boundaries as low as possible in component tree
 
 ## Server vs Client Components
 
@@ -95,23 +67,41 @@ src/app/
 | async/await | useState, useEffect |
 | Direct API/DB access | onClick, onChange |
 
-**Rule**: Push Client boundaries as low as possible in component tree.
+### Data Serialization (RSC Boundaries)
 
-### Data Serialization
+Server → Client props must be JSON-serializable.
 
-Server → Client props must be serializable:
-- ✅ string, number, boolean, plain objects, arrays
-- ❌ functions, class instances, Date objects
+| ❌ Non-serializable | ✅ Fix |
+|---------------------|--------|
+| Functions | Define in Client or use Server Action |
+| Date objects | `.toISOString()` |
+| Map / Set | `Object.fromEntries()` / `Array.from()` |
+| Class instances | Convert to plain object |
+
+```typescript
+// ❌ Bad: Date object
+<ClientCard createdAt={post.createdAt} />
+
+// ✅ Good: ISO string
+<ClientCard createdAt={post.createdAt.toISOString()} />
+```
 
 ## Data Fetching
 
-- Use `async/await` directly in Server Components
-- Cached functions in `src/lib/content/`
-- Example: `getAllProductsCached()`, `getProductBySlugCached(slug)`
+| Scenario | Solution |
+|----------|----------|
+| Server Component read | Direct fetch / database call |
+| Client Component mutation | Server Action |
+| Client Component read | Pass from Server Component |
+| External API / webhooks | Route Handler |
+
+**Avoid Waterfall**: Use `Promise.all()` or `<Suspense>` for parallel loading.
+
+**Project data**: Cached functions in `src/lib/content/` (e.g., `getAllProductsCached()`)
 
 ## Dynamic Import + Radix UI
 
-When using `next/dynamic` with Radix UI components (Tabs, Dialog, Accordion, Select, DropdownMenu, Popover), **always add `ssr: false`** to prevent hydration mismatch caused by `useId()` generating different IDs between server and client:
+**IMPORTANT**: Radix UI + `next/dynamic` **must** use `ssr: false` to prevent hydration mismatch:
 
 ```typescript
 // ✅ Correct
@@ -121,7 +111,41 @@ const Tabs = dynamic(() => import('./tabs'), { ssr: false });
 const Tabs = dynamic(() => import('./tabs'));
 ```
 
-For LCP-critical content, avoid `dynamic` and use direct import instead.
+Applies to: Tabs, Dialog, Accordion, Select, DropdownMenu, Popover.
+
+For LCP-critical content, avoid `dynamic` and use direct import.
+
+## Hydration Risk Checklist
+
+Error signal: "Hydration failed because the initial UI does not match"
+
+| Cause | Fix |
+|-------|-----|
+| Browser APIs (window, localStorage) | Client Component + `useEffect` mounted check |
+| Date/Time rendering | Use `useEffect` in Client Component |
+| Random values / dynamic IDs | Use `useId()` hook |
+| Invalid HTML nesting (div inside p) | Fix DOM structure |
+| Third-party scripts modifying DOM | `next/script` + `afterInteractive` |
+| Radix UI + dynamic | `ssr: false` (see above) |
+
+```typescript
+// ❌ Bad: Browser API
+<div>{window.innerWidth}</div>
+
+// ✅ Good: mounted check
+const [mounted, setMounted] = useState(false)
+useEffect(() => setMounted(true), [])
+return mounted ? <div>{window.innerWidth}</div> : null
+```
+
+## Middleware / Proxy
+
+Project uses `middleware.ts`:
+- ✅ Locale detection and redirect (next-intl)
+- ✅ Security headers injection (CSP nonce)
+- ❌ **No authentication**
+
+**Proxy migration**: See `docs/known-issue/middleware-to-proxy-migration.md`
 
 ## Key Files
 

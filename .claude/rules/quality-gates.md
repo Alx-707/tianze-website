@@ -56,11 +56,11 @@ pnpm ci:local  # One-command local CI
 
 Flow: type-check → lint → format → test → security → build → lighthouse
 
-## Dependency Upgrade Gate（核心依赖升级必跑）
+## Dependency Upgrade Gate
 
-当升级 `next` / `react` / `typescript` 或引入有安全告警的依赖更新时，至少跑一轮升级验证流程：
-- 规则：`/.claude/rules/dependency-upgrade.md`
-- 最小验证：`pnpm ci:local:quick` + `pnpm build`
+When upgrading `next` / `react` / `typescript` or dependencies with security alerts, run validation:
+- Rules: `/.claude/rules/dependency-upgrade.md`
+- Minimum validation: `pnpm ci:local:quick` + `pnpm build`
 
 ## Zero Tolerance
 
@@ -99,7 +99,7 @@ Lighthouse CI enforces progressive thresholds:
 | Metric | Current CI Threshold | Good Target |
 |--------|---------------------|-------------|
 | LCP | ≤ 4500ms | < 2500ms |
-| TBT (替代 FID) | ≤ 250ms | < 100ms |
+| TBT (replaces FID) | ≤ 250ms | < 100ms |
 | CLS | ≤ 0.15 | < 0.1 |
 | FCP | ≤ 2000ms | < 1800ms |
 
