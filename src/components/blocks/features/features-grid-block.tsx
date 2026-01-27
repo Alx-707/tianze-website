@@ -22,7 +22,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { SITE_CONFIG } from "@/config/paths/site-config";
 import { MAGIC_0_2 } from "@/constants/decimal";
 import { useIntersectionObserver } from "@/hooks/use-intersection-observer";
 
@@ -143,7 +142,7 @@ const DEFAULT_CTA: CTAConfig = {
   descriptionKey: "cta.description",
   primaryButtonKey: "cta.getStarted",
   secondaryButtonKey: "cta.viewSource",
-  secondaryButtonHref: SITE_CONFIG.social.github,
+  secondaryButtonHref: "/products",
 };
 
 // Color mapping for architecture cards
