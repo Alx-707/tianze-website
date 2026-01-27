@@ -52,6 +52,11 @@ vi.mock("lucide-react", () => ({
       🔗
     </span>
   ),
+  FileText: ({ className }: { className?: string }) => (
+    <span className={className} data-testid="file-text-icon">
+      📄
+    </span>
+  ),
   Github: ({ className }: { className?: string }) => (
     <span className={className} data-testid="github-icon">
       🐙
@@ -60,6 +65,11 @@ vi.mock("lucide-react", () => ({
   MessageCircle: ({ className }: { className?: string }) => (
     <span className={className} data-testid="message-circle-icon">
       💬
+    </span>
+  ),
+  Phone: ({ className }: { className?: string }) => (
+    <span className={className} data-testid="phone-icon">
+      📞
     </span>
   ),
   Star: ({ className }: { className?: string }) => (
@@ -132,13 +142,13 @@ describe("CallToAction Component - Integration Tests", () => {
         screen.getByRole("link", { name: /primary\.demo/i }),
       ).toBeInTheDocument();
 
-      // 验证行动卡片链接
+      // 验证行动卡片链接 - all internal now (use arrows, not external links)
       expect(
         screen.getByRole("link", { name: /buttons\.getStarted/i }),
       ).toBeInTheDocument();
       expect(
-        screen.getByRole("link", { name: /buttons\.learnMore.*🔗/i }),
-      ).toBeInTheDocument();
+        screen.getAllByRole("link", { name: /buttons\.learnMore.*→/i }).length,
+      ).toBeGreaterThan(0);
     });
 
     it("应该正确配置外部链接", () => {
@@ -153,11 +163,14 @@ describe("CallToAction Component - Integration Tests", () => {
       render(<CallToAction />);
 
       // 验证主要图标存在
-      // CTABannerBlock has 2 github icons (primary button and action card)
-      expect(screen.getAllByTestId("github-icon")).toHaveLength(2);
-      // CTABannerBlock uses Star and MessageCircle icons instead of BookOpen/Download
+      // CTABannerBlock has 1 github icon in primary button (action cards now use Phone/FileText)
+      expect(screen.getAllByTestId("github-icon")).toHaveLength(1);
+      // CTABannerBlock uses Star in badge
       const starIcons = screen.getAllByTestId("star-icon");
       expect(starIcons.length).toBeGreaterThan(0);
+      // Action cards use Phone, FileText, and MessageCircle icons
+      expect(screen.getByTestId("phone-icon")).toBeInTheDocument();
+      expect(screen.getByTestId("file-text-icon")).toBeInTheDocument();
       const messageCircleIcons = screen.getAllByTestId("message-circle-icon");
       expect(messageCircleIcons.length).toBeGreaterThan(0);
     });
@@ -261,12 +274,13 @@ describe("CallToAction Component - Integration Tests", () => {
     it("应该正确处理多个相同图标", () => {
       render(<CallToAction />);
 
-      // 验证有多个GitHub图标和箭头图标
-      const githubIcons = screen.getAllByTestId("github-icon");
+      // 验证有多个箭头图标（各action card和primary button都有）
       const arrowIcons = screen.getAllByTestId("arrow-right-icon");
-
-      expect(githubIcons.length).toBeGreaterThan(1);
       expect(arrowIcons.length).toBeGreaterThan(1);
+
+      // 验证有多个MessageCircle图标（action card和community section）
+      const messageCircleIcons = screen.getAllByTestId("message-circle-icon");
+      expect(messageCircleIcons.length).toBeGreaterThan(1);
     });
 
     it("应该支持组件重新渲染", () => {

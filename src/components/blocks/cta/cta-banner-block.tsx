@@ -4,8 +4,10 @@ import type React from "react";
 import {
   ArrowRight,
   ExternalLink,
+  FileText,
   Github,
   MessageCircle,
+  Phone,
   Star,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -57,7 +59,6 @@ const UI_CONSTANTS = {
 } as const;
 
 const DEFAULT_GITHUB_HREF = SITE_CONFIG.social.github;
-const DEFAULT_GITHUB_DOWNLOAD_HREF = `${DEFAULT_GITHUB_HREF}/archive/main.zip`;
 const DEFAULT_GITHUB_DISCUSSIONS_HREF = `${DEFAULT_GITHUB_HREF}/discussions`;
 const DEFAULT_GITHUB_ISSUES_HREF = `${DEFAULT_GITHUB_HREF}/issues`;
 
@@ -197,26 +198,26 @@ function getDefaultData(t: (key: string) => string) {
   return {
     actions: [
       {
-        icon: Github,
+        icon: Phone,
         title: t("actions.github.title"),
         description: t("actions.github.description"),
-        href: DEFAULT_GITHUB_HREF,
+        href: "/contact",
         primary: true,
-        external: true,
+        external: false,
       },
       {
-        icon: Star, // Using Star as placeholder for Download
+        icon: FileText,
         title: t("actions.download.title"),
         description: t("actions.download.description"),
-        href: DEFAULT_GITHUB_DOWNLOAD_HREF,
+        href: "/products",
         primary: false,
-        external: true,
+        external: false,
       },
       {
-        icon: MessageCircle, // Using MessageCircle as placeholder for BookOpen
+        icon: MessageCircle,
         title: t("actions.docs.title"),
         description: t("actions.docs.description"),
-        href: "/docs",
+        href: "/support",
         primary: false,
         external: false,
       },

@@ -49,6 +49,11 @@ vi.mock("lucide-react", () => ({
       🔗
     </span>
   ),
+  FileText: ({ className }: { className?: string }) => (
+    <span className={className} data-testid="file-text-icon">
+      📄
+    </span>
+  ),
   Github: ({ className }: { className?: string }) => (
     <span className={className} data-testid="github-icon">
       🐙
@@ -57,6 +62,11 @@ vi.mock("lucide-react", () => ({
   MessageCircle: ({ className }: { className?: string }) => (
     <span className={className} data-testid="message-circle-icon">
       💬
+    </span>
+  ),
+  Phone: ({ className }: { className?: string }) => (
+    <span className={className} data-testid="phone-icon">
+      📞
     </span>
   ),
   Star: ({ className }: { className?: string }) => (
@@ -153,11 +163,8 @@ describe("CallToAction Component - Interaction Tests", () => {
     it("所有外部链接应该在新标签页打开", () => {
       render(<CallToAction />);
 
-      // GitHub链接
+      // GitHub链接 (primary button) and community links are external
       const githubLink = screen.getByRole("link", { name: /primary\.github/i });
-      const getStartedLink = screen.getByRole("link", {
-        name: /buttons\.getStarted/i,
-      });
       const discussionsLink = screen.getByRole("link", {
         name: /community\.discussions/i,
       });
@@ -167,22 +174,30 @@ describe("CallToAction Component - Interaction Tests", () => {
 
       // 验证外部链接有正确的target属性
       expect(githubLink).toHaveAttribute("target", "_blank");
-      expect(getStartedLink).toHaveAttribute("target", "_blank");
       expect(discussionsLink).toHaveAttribute("target", "_blank");
       expect(issuesLink).toHaveAttribute("target", "_blank");
+
+      // Action cards' getStarted button is now internal (no target="_blank")
+      const getStartedLink = screen.getByRole("link", {
+        name: /buttons\.getStarted/i,
+      });
+      expect(getStartedLink).not.toHaveAttribute("target", "_blank");
     });
 
     it("内部链接应该在同一标签页打开", () => {
       render(<CallToAction />);
 
       const demoLink = screen.getByRole("link", { name: /primary\.demo/i });
-      const docsLink = screen.getByRole("link", {
+      // Now there are multiple learnMore links (action cards), all internal
+      const internalLinks = screen.getAllByRole("link", {
         name: /buttons\.learnMore.*→/i,
       });
 
       // 验证内部链接没有target="_blank"
       expect(demoLink).not.toHaveAttribute("target", "_blank");
-      expect(docsLink).not.toHaveAttribute("target", "_blank");
+      internalLinks.forEach((link) => {
+        expect(link).not.toHaveAttribute("target", "_blank");
+      });
     });
   });
 
@@ -211,11 +226,14 @@ describe("CallToAction Component - Interaction Tests", () => {
       render(<CallToAction />);
 
       // 验证图标有测试ID（用于可访问性测试）
-      // CTABannerBlock has 2 github icons (primary button and action card)
-      expect(screen.getAllByTestId("github-icon")).toHaveLength(2);
-      // CTABannerBlock uses Star and MessageCircle icons instead of BookOpen/Download
+      // CTABannerBlock has 1 github icon in primary button (action cards now use Phone/FileText)
+      expect(screen.getAllByTestId("github-icon")).toHaveLength(1);
+      // CTABannerBlock uses Star in badge
       const starIcons = screen.getAllByTestId("star-icon");
       expect(starIcons.length).toBeGreaterThan(0);
+      // Action cards use Phone, FileText, and MessageCircle icons
+      expect(screen.getByTestId("phone-icon")).toBeInTheDocument();
+      expect(screen.getByTestId("file-text-icon")).toBeInTheDocument();
       const messageCircleIcons = screen.getAllByTestId("message-circle-icon");
       expect(messageCircleIcons.length).toBeGreaterThan(0);
     });
@@ -233,9 +251,10 @@ describe("CallToAction Component - Interaction Tests", () => {
       expect(
         screen.getByRole("link", { name: /buttons\.getStarted/i }),
       ).toBeInTheDocument();
+      // Action cards now use internal links (arrows) instead of external links
       expect(
-        screen.getByRole("link", { name: /buttons\.learnMore.*🔗/i }),
-      ).toBeInTheDocument();
+        screen.getAllByRole("link", { name: /buttons\.learnMore.*→/i }).length,
+      ).toBeGreaterThan(0);
     });
 
     it("应该支持屏幕阅读器", () => {

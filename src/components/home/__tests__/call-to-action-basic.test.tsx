@@ -49,6 +49,11 @@ vi.mock("lucide-react", () => ({
       🔗
     </span>
   ),
+  FileText: ({ className }: { className?: string }) => (
+    <span className={className} data-testid="file-text-icon">
+      📄
+    </span>
+  ),
   Github: ({ className }: { className?: string }) => (
     <span className={className} data-testid="github-icon">
       🐙
@@ -57,6 +62,11 @@ vi.mock("lucide-react", () => ({
   MessageCircle: ({ className }: { className?: string }) => (
     <span className={className} data-testid="message-circle-icon">
       💬
+    </span>
+  ),
+  Phone: ({ className }: { className?: string }) => (
+    <span className={className} data-testid="phone-icon">
+      📞
     </span>
   ),
   Star: ({ className }: { className?: string }) => (
@@ -170,24 +180,30 @@ describe("CallToAction Component - Basic Tests", () => {
       expect(githubLink).toHaveAttribute("rel", "noopener noreferrer");
     });
 
-    it("Star GitHub按钮应该有正确的链接", () => {
+    it("主要行动按钮应该有正确的链接", () => {
       render(<CallToAction />);
 
-      const starLink = screen.getByRole("link", {
+      const contactLink = screen.getByRole("link", {
         name: /buttons\.getStarted/i,
       });
-      expect(starLink).toHaveAttribute("href", SITE_CONFIG.social.github);
-      expect(starLink).toHaveAttribute("target", "_blank");
-      expect(starLink).toHaveAttribute("rel", "noopener noreferrer");
+      // Action cards now use internal links
+      expect(contactLink).toHaveAttribute("href", "/contact");
+      expect(contactLink).not.toHaveAttribute("target", "_blank");
     });
 
     it("文档链接应该有正确的地址", () => {
       render(<CallToAction />);
 
-      const docsLink = screen.getByRole("link", {
+      // Now there are multiple learnMore links (action cards)
+      const learnMoreLinks = screen.getAllByRole("link", {
         name: /buttons\.learnMore.*→/i,
       });
-      expect(docsLink).toHaveAttribute("href", "/docs");
+      // Verify we have two learnMore links (products and support)
+      expect(learnMoreLinks).toHaveLength(2);
+      // Check that the expected hrefs are present
+      const hrefs = learnMoreLinks.map((link) => link.getAttribute("href"));
+      expect(hrefs).toContain("/products");
+      expect(hrefs).toContain("/support");
     });
 
     it("社区链接应该有正确的地址", () => {
@@ -231,20 +247,24 @@ describe("CallToAction Component - Basic Tests", () => {
     it("应该渲染所有必要的图标", () => {
       render(<CallToAction />);
 
-      // 主要按钮图标 - 使用getAllBy因为有多个相同图标
+      // 主要按钮图标 - 1 github icon in primary button
       const githubIcons = screen.getAllByTestId("github-icon");
-      expect(githubIcons.length).toBeGreaterThanOrEqual(1);
+      expect(githubIcons).toHaveLength(1);
 
-      // Action card icons - CTABannerBlock uses Star and MessageCircle
-      const starIcons = screen.getAllByTestId("star-icon");
-      expect(starIcons.length).toBeGreaterThan(0);
+      // Action card icons - CTABannerBlock now uses Phone, FileText, and MessageCircle
+      expect(screen.getByTestId("phone-icon")).toBeInTheDocument();
+      expect(screen.getByTestId("file-text-icon")).toBeInTheDocument();
       const messageCircleIcons = screen.getAllByTestId("message-circle-icon");
       expect(messageCircleIcons.length).toBeGreaterThan(0);
+
+      // Star icon is used in badge
+      const starIcons = screen.getAllByTestId("star-icon");
+      expect(starIcons.length).toBeGreaterThan(0);
 
       const externalLinkIcons = screen.getAllByTestId("external-link-icon");
       expect(externalLinkIcons.length).toBeGreaterThan(0);
 
-      // 箭头图标 - 有多个箭头图标
+      // 箭头图标 - 有多个箭头图标 (action cards use arrows for internal links)
       const arrowIcons = screen.getAllByTestId("arrow-right-icon");
       expect(arrowIcons.length).toBeGreaterThanOrEqual(1);
     });
