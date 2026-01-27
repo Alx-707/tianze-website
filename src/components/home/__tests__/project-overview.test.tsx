@@ -193,9 +193,9 @@ describe("ProjectOverview", () => {
       expect(badges.length).toBeGreaterThan(0);
 
       // Check for specific badge content from FeaturesGridBlock DEFAULT_FEATURES
-      // Badges: 'A+', '100%', '2', 'Multiple', 'TS 5.9.3', 'Vercel'
-      expect(screen.getByText("A+")).toBeInTheDocument();
-      expect(screen.getByText("100%")).toBeInTheDocument();
+      // Badges: 'High Output', 'ISO 9001', '100+', 'Custom', 'ASTM', '48h'
+      expect(screen.getByText("ISO 9001")).toBeInTheDocument();
+      expect(screen.getByText("100+")).toBeInTheDocument();
     });
   });
 

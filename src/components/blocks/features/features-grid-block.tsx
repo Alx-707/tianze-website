@@ -71,37 +71,37 @@ const DEFAULT_FEATURES: FeatureItem[] = [
     icon: Zap,
     titleKey: "features.performance.title",
     descriptionKey: "features.performance.description",
-    badge: "A+",
+    badge: "High Output",
   },
   {
     icon: Shield,
     titleKey: "features.security.title",
     descriptionKey: "features.security.description",
-    badge: "100%",
+    badge: "ISO 9001",
   },
   {
     icon: Globe,
     titleKey: "features.i18n.title",
     descriptionKey: "features.i18n.description",
-    badge: "2",
+    badge: "100+",
   },
   {
     icon: Palette,
     titleKey: "features.themes.title",
     descriptionKey: "features.themes.description",
-    badge: "Multiple",
+    badge: "Custom",
   },
   {
     icon: Code,
     titleKey: "features.typescript.title",
     descriptionKey: "features.typescript.description",
-    badge: "TS 5.9.3",
+    badge: "ASTM",
   },
   {
     icon: Rocket,
     titleKey: "features.deployment.title",
     descriptionKey: "features.deployment.description",
-    badge: "Vercel",
+    badge: "48h",
   },
 ];
 
