@@ -203,27 +203,17 @@ describe("ProjectOverview", () => {
     it("should render architecture section", () => {
       render(<ProjectOverview />);
 
-      // Check if architecture section exists by looking for technology items
-      expect(screen.getByText("Next.js 16")).toBeInTheDocument();
+      // Check if architecture section exists by looking for architecture title
+      expect(mockT).toHaveBeenCalledWith("architecture.title");
     });
 
     it("should render architecture categories", () => {
       render(<ProjectOverview />);
 
-      // Check for technology items instead of category titles
-      expect(screen.getByText("Next.js 16")).toBeInTheDocument();
-      expect(screen.getByText("shadcn/ui")).toBeInTheDocument();
-      expect(screen.getByText("ESLint")).toBeInTheDocument();
-    });
-
-    it("should render technology items", () => {
-      render(<ProjectOverview />);
-
-      expect(screen.getByText("Next.js 16")).toBeInTheDocument();
-      expect(screen.getByText("React 19")).toBeInTheDocument();
-      expect(screen.getByText("TypeScript")).toBeInTheDocument();
-      expect(screen.getByText("shadcn/ui")).toBeInTheDocument();
-      expect(screen.getByText("ESLint")).toBeInTheDocument();
+      // Check for architecture category descriptions
+      expect(mockT).toHaveBeenCalledWith("architecture.frontend.description");
+      expect(mockT).toHaveBeenCalledWith("architecture.ui.description");
+      expect(mockT).toHaveBeenCalledWith("architecture.tooling.description");
     });
   });
 

@@ -120,19 +120,19 @@ const DEFAULT_ARCHITECTURE = {
   frontend: {
     titleKey: "architecture.frontend.title",
     descriptionKey: "architecture.frontend.description",
-    technologies: ["Next.js 16", "React 19", "TypeScript", "Tailwind CSS"],
+    technologies: [],
     color: "blue" as const,
   },
   ui: {
     titleKey: "architecture.ui.title",
     descriptionKey: "architecture.ui.description",
-    technologies: ["shadcn/ui", "Radix UI", "Lucide Icons", "CSS Variables"],
+    technologies: [],
     color: "green" as const,
   },
   tooling: {
     titleKey: "architecture.tooling.title",
     descriptionKey: "architecture.tooling.description",
-    technologies: ["ESLint", "Prettier", "Lefthook", "Vitest"],
+    technologies: [],
     color: "purple" as const,
   },
 };
@@ -245,13 +245,6 @@ function TechnicalArchitecture({
             <CardContent className="space-y-2">
               <div className="text-sm text-foreground/85">
                 {t(layer.descriptionKey)}
-              </div>
-              <div className="flex flex-wrap gap-1">
-                {layer.technologies.map((tech) => (
-                  <Badge key={tech} variant="outline" className="text-xs">
-                    {tech}
-                  </Badge>
-                ))}
               </div>
             </CardContent>
           </Card>
