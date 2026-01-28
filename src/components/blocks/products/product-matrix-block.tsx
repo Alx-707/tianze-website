@@ -23,7 +23,7 @@ interface ProductConfig {
 const PRODUCTS: readonly ProductConfig[] = [
   {
     image: {
-      src: "/images/products/bending-machine.jpg",
+      src: "/images/products/full-auto-bending-machine.svg",
       altKey: "machines.image",
     },
     titleKey: "machines.title",
@@ -36,7 +36,10 @@ const PRODUCTS: readonly ProductConfig[] = [
     href: "/products/machines",
   },
   {
-    image: { src: "/images/products/pvc-bends.jpg", altKey: "pvc.image" },
+    image: {
+      src: "/images/products/pvc-conduit-bend.svg",
+      altKey: "pvc.image",
+    },
     titleKey: "pvc.title",
     featureKeys: ["pvc.feature1", "pvc.feature2", "pvc.feature3"],
     buttonKey: "pvc.button",
@@ -44,7 +47,7 @@ const PRODUCTS: readonly ProductConfig[] = [
   },
   {
     image: {
-      src: "/images/products/pneumatic-tubes.jpg",
+      src: "/images/products/petg-pneumatic-tube.svg",
       altKey: "pneumatic.image",
     },
     titleKey: "pneumatic.title",
@@ -57,7 +60,10 @@ const PRODUCTS: readonly ProductConfig[] = [
     href: "/products/pneumatic-tubes",
   },
   {
-    image: { src: "/images/products/custom.jpg", altKey: "custom.image" },
+    image: {
+      src: "/images/products/sample-product.svg",
+      altKey: "custom.image",
+    },
     titleKey: "custom.title",
     featureKeys: ["custom.feature1", "custom.feature2", "custom.feature3"],
     buttonKey: "custom.button",
