@@ -80,9 +80,7 @@ test.describe("Homepage Core Functionality", () => {
     }
 
     // Verify hero content - equipment + fittings manufacturer messaging
-    // Check for key business messaging in hero section
-    const heroTitle = heroSection.getByRole("heading", { level: 1 });
-    await expect(heroTitle).toBeVisible();
+    // heroTitle is already verified above
 
     // Verify stat bar is present with business metrics
     const statBar = heroSection.locator('[class*="stat"], [class*="flex"]');
