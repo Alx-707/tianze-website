@@ -193,9 +193,9 @@ describe("ProjectOverview", () => {
       expect(badges.length).toBeGreaterThan(0);
 
       // Check for specific badge content from FeaturesGridBlock DEFAULT_FEATURES
-      // Badges: 'A+', '100%', '2', 'Multiple', 'TS 5.9.3', 'Vercel'
-      expect(screen.getByText("A+")).toBeInTheDocument();
-      expect(screen.getByText("100%")).toBeInTheDocument();
+      // Badges: 'High Output', 'ISO 9001', '100+', 'Custom', 'ASTM', '48h'
+      expect(screen.getByText("ISO 9001")).toBeInTheDocument();
+      expect(screen.getByText("100+")).toBeInTheDocument();
     });
   });
 
@@ -203,27 +203,17 @@ describe("ProjectOverview", () => {
     it("should render architecture section", () => {
       render(<ProjectOverview />);
 
-      // Check if architecture section exists by looking for technology items
-      expect(screen.getByText("Next.js 16")).toBeInTheDocument();
+      // Check if architecture section exists by looking for architecture title
+      expect(mockT).toHaveBeenCalledWith("architecture.title");
     });
 
     it("should render architecture categories", () => {
       render(<ProjectOverview />);
 
-      // Check for technology items instead of category titles
-      expect(screen.getByText("Next.js 16")).toBeInTheDocument();
-      expect(screen.getByText("shadcn/ui")).toBeInTheDocument();
-      expect(screen.getByText("ESLint")).toBeInTheDocument();
-    });
-
-    it("should render technology items", () => {
-      render(<ProjectOverview />);
-
-      expect(screen.getByText("Next.js 16")).toBeInTheDocument();
-      expect(screen.getByText("React 19")).toBeInTheDocument();
-      expect(screen.getByText("TypeScript")).toBeInTheDocument();
-      expect(screen.getByText("shadcn/ui")).toBeInTheDocument();
-      expect(screen.getByText("ESLint")).toBeInTheDocument();
+      // Check for architecture category descriptions
+      expect(mockT).toHaveBeenCalledWith("architecture.frontend.description");
+      expect(mockT).toHaveBeenCalledWith("architecture.ui.description");
+      expect(mockT).toHaveBeenCalledWith("architecture.tooling.description");
     });
   });
 

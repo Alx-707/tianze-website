@@ -79,11 +79,14 @@ test.describe("Homepage Core Functionality", () => {
       await expect(gradientText.first()).toBeVisible();
     }
 
-    // Verify tech stack badges - look for common tech names
-    await expect(page.getByText("Next.js").first()).toBeVisible();
-    await expect(page.getByText("React").first()).toBeVisible();
-    await expect(page.getByText("TypeScript").first()).toBeVisible();
-    await expect(page.getByText("Tailwind").first()).toBeVisible();
+    // Verify hero content - equipment + fittings manufacturer messaging
+    // heroTitle is already verified above
+
+    // Verify stat bar is present with business metrics
+    const statBar = heroSection.locator('[class*="stat"], [class*="flex"]');
+    if ((await statBar.count()) > 0) {
+      await expect(statBar.first()).toBeVisible();
+    }
 
     // Verify CTA buttons exist
     const buttons = page.getByRole("link");

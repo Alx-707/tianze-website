@@ -1,384 +1,266 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-// 导入被测试的组件（静态变体，避免在测试中直接渲染 Server Component）
+// Import the re-exported static variant to avoid rendering Server Component in tests
 
 import {
   HeroSectionStatic,
   type HeroSectionMessages,
 } from "@/components/home/hero-section";
 
-// 测试用静态翻译消息，覆盖 HeroSection 所需 key
+// Test static translation messages covering all HeroSectionStatic keys
+// (now re-exports HeroSplitBlockStatic with new interface)
 const mockMessages: HeroSectionMessages = {
-  version: "v1.0.0",
-  title: { line1: "Modern B2B", line2: "Enterprise Solution" },
-  subtitle: "Build powerful business applications with our modern tech stack",
-  cta: { demo: "View Demo", github: "View on GitHub" },
+  badge: "About Us →",
+  title: { line1: "Equipment + Fittings", line2: "Integrated Manufacturer" },
+  subtitle:
+    "Self-developed bending machines, self-produced precision fittings. From equipment to finished products, full chain control.",
+  scrollCta: "Learn More",
   stats: {
-    technologies: "22+ Technologies",
-    typescript: "100% TypeScript",
-    performance: "A+ Performance",
-    languages: "2 Languages",
+    factory: "Factory Direct",
+    material: "100% Virgin Material",
+    production: "Fully Automated",
+    repurchase: "60% Repurchase Rate",
+  },
+  images: {
+    bender: "Pipe Bending Machine",
+    expander: "Pipe Expander",
+    line: "Production Line",
   },
 };
 
-const renderHero = () => render(<HeroSectionStatic messages={mockMessages} />);
+const renderHero = (props?: Partial<Parameters<typeof HeroSectionStatic>[0]>) =>
+  render(<HeroSectionStatic messages={mockMessages} {...props} />);
 
-// Mock配置 - 使用vi.hoisted确保Mock在模块导入前设置
-const {
-  mockUseTranslations,
-  mockUseIntersectionObserver,
-  mockUseRouter,
-  mockUseTheme,
-} = vi.hoisted(() => ({
-  mockUseTranslations: vi.fn(),
-  mockUseIntersectionObserver: vi.fn(),
-  mockUseRouter: vi.fn(),
-  mockUseTheme: vi.fn(),
+// Mock next/link
+vi.mock("next/link", () => ({
+  default: ({
+    children,
+    href,
+    ...props
+  }: {
+    children: React.ReactNode;
+    href: string;
+  }) => (
+    <a href={href} {...props}>
+      {children}
+    </a>
+  ),
 }));
 
-// Mock next-intl
-vi.mock("next-intl", () => ({
-  useTranslations: mockUseTranslations,
-}));
-
-// Mock intersection observer hook
-vi.mock("@/hooks/use-intersection-observer", () => ({
-  useIntersectionObserver: mockUseIntersectionObserver,
-}));
-
-// Mock next/navigation
-vi.mock("next/navigation", () => ({
-  useRouter: mockUseRouter,
-}));
-
-// Mock next-themes
-vi.mock("next-themes", () => ({
-  useTheme: mockUseTheme,
+// Mock next/image for ImageCarousel
+vi.mock("next/image", () => ({
+  default: ({
+    src,
+    alt,
+    fill,
+    sizes,
+    ...props
+  }: {
+    src: string;
+    alt: string;
+    fill?: boolean;
+    sizes?: string;
+  }) => (
+    <img
+      src={src}
+      alt={alt}
+      data-fill={fill?.toString()}
+      data-sizes={sizes}
+      {...props}
+    />
+  ),
 }));
 
 // Mock Lucide React icons
 vi.mock("lucide-react", () => ({
-  ArrowRight: () => <div data-testid="arrow-right-icon">ArrowRight</div>,
-  Factory: () => <div data-testid="factory-icon">Factory</div>,
-  Package: () => <div data-testid="package-icon">Package</div>,
+  ChevronDown: () => <div data-testid="chevron-down-icon">ChevronDown</div>,
 }));
 
 // Mock UI components
 vi.mock("@/components/ui/badge", () => ({
-  Badge: ({ children, className, ...props }: React.ComponentProps<"div">) => (
+  Badge: ({ children, className, ...props }: React.ComponentProps<"span">) => (
     <span data-testid="badge" className={className} {...props}>
       {children}
     </span>
   ),
 }));
 
-vi.mock("@/components/ui/button", () => ({
-  Button: ({
-    children,
-    className,
-    asChild,
-    onClick,
-    ...props
-  }: React.ComponentProps<"button"> & { asChild?: boolean }) => {
-    if (asChild && React.isValidElement(children)) {
-      const childElement = children as React.ReactElement<
-        Record<string, unknown>
-      >;
-      const existingClass =
-        (childElement.props as { className?: string })?.className ?? "";
-      return React.cloneElement(childElement, {
-        ...props,
-        onClick,
-        className: [existingClass, className].filter(Boolean).join(" "),
-        "data-testid": "button-link",
-      });
-    }
+// Mock ImageCarousel
+vi.mock("@/components/blocks/shared/image-carousel", () => ({
+  ImageCarousel: ({
+    images,
+  }: {
+    images: Array<{ src: string; alt: string }>;
+  }) => (
+    <div data-testid="image-carousel">
+      {images.map((img) => (
+        <img key={img.src} src={img.src} alt={img.alt} />
+      ))}
+    </div>
+  ),
+}));
 
-    return (
-      <button
-        data-testid="button"
-        className={className}
-        onClick={onClick}
-        {...props}
-      >
-        {children}
-      </button>
-    );
-  },
+// Mock StatBar
+vi.mock("@/components/blocks/shared/stat-bar", () => ({
+  StatBar: ({ stats }: { stats: Array<{ label: string }> }) => (
+    <div data-testid="stat-bar">
+      {stats.map((stat) => (
+        <span key={stat.label}>{stat.label}</span>
+      ))}
+    </div>
+  ),
 }));
 
 describe("HeroSection", () => {
-  // Mock翻译函数
-  const mockT = vi.fn((key: string) => {
-    const translations: Record<string, string> = {
-      version: "v1.0.0",
-      "title.line1": "Modern B2B",
-      "title.line2": "Enterprise Solution",
-      subtitle:
-        "Build powerful business applications with our modern tech stack",
-      "cta.demo": "View Demo",
-      "cta.github": "View on GitHub",
-      "stats.technologies": "22+ Technologies",
-      "stats.typescript": "100% TypeScript",
-      "stats.performance": "A+ Performance",
-      "stats.languages": "2 Languages",
-    };
-    return translations[key] || key; // key 来自测试数据，安全
-  });
-
   beforeEach(() => {
     vi.clearAllMocks();
-
-    // 设置Mock的默认行为
-    mockUseTranslations.mockReturnValue(mockT);
-
-    // Mock intersection observer hook
-    mockUseIntersectionObserver.mockReturnValue({
-      ref: vi.fn(),
-      isVisible: true,
-    });
-
-    // Mock router
-    mockUseRouter.mockReturnValue({
-      push: vi.fn(),
-      replace: vi.fn(),
-      prefetch: vi.fn(),
-    });
-
-    // Mock theme
-    mockUseTheme.mockReturnValue({
-      theme: "light",
-      setTheme: vi.fn(),
-      resolvedTheme: "light",
-    });
   });
 
   describe("Basic Rendering", () => {
     it("should render hero section without errors", () => {
       renderHero();
-
-      // Hero section uses <section> element, not <header>, so check for main heading instead
       expect(screen.getByRole("heading", { level: 1 })).toBeInTheDocument();
     });
 
-    it("should render version badge", () => {
+    it("should render badge with link to about page", () => {
       renderHero();
-
-      // Get all badges and find the version badge (first one with rocket emoji)
-      const badges = screen.getAllByTestId("badge");
-      const versionBadge = badges.find((badge) =>
-        badge.textContent?.includes("v1.0.0"),
-      );
-
-      expect(versionBadge).toBeInTheDocument();
-
-      expect(versionBadge).toHaveTextContent("v1.0.0");
+      const badge = screen.getByTestId("badge");
+      expect(badge).toBeInTheDocument();
+      expect(badge).toHaveTextContent("About Us →");
+      // Badge is wrapped in a Link
+      const link = screen.getByRole("link", { name: /about us/i });
+      expect(link).toHaveAttribute("href", "/about");
     });
 
     it("should render hero title with both lines", () => {
       renderHero();
-
-      // Check for the main heading that contains both title lines
       const heading = screen.getByRole("heading", { level: 1 });
       expect(heading).toBeInTheDocument();
-      expect(heading).toHaveTextContent("Modern B2B");
-      expect(heading).toHaveTextContent("Enterprise Solution");
+      expect(heading).toHaveTextContent("Equipment + Fittings");
+      expect(heading).toHaveTextContent("Integrated Manufacturer");
     });
 
     it("should render subtitle", () => {
       renderHero();
-
       expect(
         screen.getByText(
-          "Build powerful business applications with our modern tech stack",
+          "Self-developed bending machines, self-produced precision fittings. From equipment to finished products, full chain control.",
         ),
       ).toBeInTheDocument();
     });
-  });
 
-  describe("Action Buttons", () => {
-    it("should render demo and github buttons", () => {
+    it("should render image carousel", () => {
       renderHero();
-
-      const demoLink = screen.getByRole("link", { name: /view demo/i });
-      const githubLink = screen.getByRole("link", { name: /view on github/i });
-
-      expect(demoLink).toBeInTheDocument();
-      expect(githubLink).toBeInTheDocument();
+      expect(screen.getByTestId("image-carousel")).toBeInTheDocument();
     });
 
-    it("should render button icons", () => {
+    it("should render stat bar", () => {
       renderHero();
+      expect(screen.getByTestId("stat-bar")).toBeInTheDocument();
+    });
 
-      expect(screen.getAllByTestId("arrow-right-icon").length).toBeGreaterThan(
-        0,
-      );
-      expect(screen.getByTestId("package-icon")).toBeInTheDocument();
+    it("should render scroll CTA with chevron icon", () => {
+      renderHero();
+      expect(screen.getByText("Learn More")).toBeInTheDocument();
+      expect(screen.getByTestId("chevron-down-icon")).toBeInTheDocument();
+    });
+  });
+
+  describe("Props Customization", () => {
+    it("should accept custom className", () => {
+      renderHero({ className: "custom-class" });
+      const section = screen.getByTestId("hero-section");
+      expect(section).toHaveClass("custom-class");
     });
   });
 
   describe("Statistics Section", () => {
-    it("should render project statistics", () => {
+    it("should render all stats", () => {
       renderHero();
-
-      expect(screen.getByText("22+ Technologies")).toBeInTheDocument();
-      expect(screen.getByText("100% TypeScript")).toBeInTheDocument();
-      expect(screen.getByText("A+ Performance")).toBeInTheDocument();
-      expect(screen.getByText("2 Languages")).toBeInTheDocument();
+      expect(screen.getByText("Factory Direct")).toBeInTheDocument();
+      expect(screen.getByText("100% Virgin Material")).toBeInTheDocument();
+      expect(screen.getByText("Fully Automated")).toBeInTheDocument();
+      expect(screen.getByText("60% Repurchase Rate")).toBeInTheDocument();
     });
   });
 
-  describe("Animation Integration", () => {
-    it("should use intersection observer for animations", () => {
+  describe("Images Section", () => {
+    it("should render all carousel images with correct alt text", () => {
       renderHero();
-
-      // 静态变体不依赖 intersection observer；验证核心 UI 元素存在
-      const heading = screen.getByRole("heading", { level: 1 });
-      expect(heading).toBeInTheDocument();
-      const badges = screen.getAllByTestId("badge");
-      expect(badges.length).toBeGreaterThan(0);
-      const demoLink = screen.getByRole("link", { name: /view demo/i });
-      const githubLink = screen.getByRole("link", { name: /view on github/i });
-      expect(demoLink).toBeInTheDocument();
-      expect(githubLink).toBeInTheDocument();
-    });
-
-    it("should apply animation classes when visible", () => {
-      renderHero();
-
-      // Check for section element with animation classes
-      const heading = screen.getByRole("heading", { level: 1 });
-      expect(heading).toBeInTheDocument();
-
-      // 静态变体：验证关键徽章已渲染，代表可见态
-      const badges = screen.getAllByTestId("badge");
-      expect(badges.length).toBeGreaterThan(0);
-    });
-
-    it("should handle invisible state", () => {
-      // Mock intersection observer to return invisible state
-      mockUseIntersectionObserver.mockReturnValue({
-        ref: vi.fn(),
-        isVisible: false,
-      });
-
-      renderHero();
-
-      // Check for section element
-      const heading = screen.getByRole("heading", { level: 1 });
-      expect(heading).toBeInTheDocument();
-
-      // 静态变体：即使模拟不可见也应正常渲染基本结构
-      const section = screen.getByTestId("hero-section");
-      expect(section).toBeInTheDocument();
+      expect(
+        screen.getByRole("img", { name: "Pipe Bending Machine" }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("img", { name: "Pipe Expander" }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("img", { name: "Production Line" }),
+      ).toBeInTheDocument();
     });
   });
 
   describe("Internationalization", () => {
     it("should use translations for all text content", () => {
       renderHero();
-
-      // 静态变体：验证最终文案已正确渲染（不依赖 useTranslations）
-      expect(screen.getByText("v1.0.0")).toBeInTheDocument();
-      const headingIntl = screen.getByRole("heading", { level: 1 });
-      expect(headingIntl).toHaveTextContent("Modern B2B");
-      expect(headingIntl).toHaveTextContent("Enterprise Solution");
-      expect(
-        screen.getByText(
-          "Build powerful business applications with our modern tech stack",
-        ),
-      ).toBeInTheDocument();
-      expect(
-        screen.getByRole("link", { name: /view demo/i }),
-      ).toBeInTheDocument();
-      expect(
-        screen.getByRole("link", { name: /view on github/i }),
-      ).toBeInTheDocument();
-      expect(screen.getByText("22+ Technologies")).toBeInTheDocument();
-      expect(screen.getByText("100% TypeScript")).toBeInTheDocument();
-      expect(screen.getByText("A+ Performance")).toBeInTheDocument();
-      expect(screen.getByText("2 Languages")).toBeInTheDocument();
+      expect(screen.getByText("About Us →")).toBeInTheDocument();
+      const heading = screen.getByRole("heading", { level: 1 });
+      expect(heading).toHaveTextContent("Equipment + Fittings");
+      expect(heading).toHaveTextContent("Integrated Manufacturer");
     });
 
-    it("should handle missing translations gracefully", () => {
-      // 使用静态 messages 的变体：即使部分字段为空也应稳定渲染
-      const renderHeroWithMessages = (
-        overrides: Partial<HeroSectionMessages>,
-      ) =>
-        render(
-          <HeroSectionStatic messages={{ ...mockMessages, ...overrides }} />,
-        );
-
+    it("should handle missing translations gracefully with defaults", () => {
       expect(() =>
-        renderHeroWithMessages({
-          title: { line1: "", line2: "" },
-          subtitle: "",
-        }),
+        render(
+          <HeroSectionStatic messages={{ title: { line1: "", line2: "" } }} />,
+        ),
       ).not.toThrow();
-
-      // 仍应渲染出核心结构
       expect(screen.getByTestId("hero-section")).toBeInTheDocument();
-      expect(screen.getByText("v1.0.0")).toBeInTheDocument();
+      // Should fall back to default values
+      expect(screen.getByText("About Us →")).toBeInTheDocument();
     });
   });
 
   describe("Responsive Behavior", () => {
     it("should render with responsive classes", () => {
       renderHero();
-
-      // Check for responsive classes on the main heading
       const heading = screen.getByRole("heading", { level: 1 });
-      expect(heading).toHaveClass("text-4xl", "sm:text-6xl", "lg:text-7xl");
+      expect(heading).toHaveClass("text-4xl", "sm:text-5xl", "lg:text-6xl");
     });
   });
 
   describe("Accessibility", () => {
     it("should have proper semantic structure", () => {
       renderHero();
-
-      // Hero section uses <section> element, not <header>
-      const heading = screen.getByRole("heading", { level: 1 });
-      expect(heading).toBeInTheDocument();
-
-      // Check for descriptive text
-      expect(
-        screen.getByText(
-          "Build powerful business applications with our modern tech stack",
-        ),
-      ).toBeInTheDocument();
+      expect(screen.getByRole("heading", { level: 1 })).toBeInTheDocument();
+      const section = screen.getByTestId("hero-section");
+      expect(section).toHaveAttribute("aria-labelledby", "hero-heading");
     });
 
-    it("should have accessible button elements", () => {
+    it("should have accessible link for badge", () => {
       renderHero();
+      const link = screen.getByRole("link", { name: /about us/i });
+      expect(link).toHaveAttribute("href", "/about");
+    });
 
-      const demoLink = screen.getByRole("link", { name: /view demo/i });
-      const githubLink = screen.getByRole("link", { name: /view on github/i });
-
-      expect(demoLink).toBeInTheDocument();
-      expect(githubLink).toBeInTheDocument();
+    it("should have scroll CTA link to products section", () => {
+      renderHero();
+      const scrollLink = screen.getByRole("link", { name: /learn more/i });
+      expect(scrollLink).toHaveAttribute("href", "#products");
     });
   });
 
   describe("Edge Cases", () => {
-    it("should handle intersection observer errors gracefully", () => {
-      // Mock intersection observer to return a safe fallback
-      mockUseIntersectionObserver.mockReturnValue({
-        ref: vi.fn(),
-        isVisible: true, // Safe fallback
-      });
-
-      expect(() => renderHero()).not.toThrow();
+    it("should render with empty messages", () => {
+      expect(() => render(<HeroSectionStatic messages={{}} />)).not.toThrow();
+      expect(screen.getByTestId("hero-section")).toBeInTheDocument();
     });
 
-    it("should handle translation errors gracefully", () => {
-      // Mock translation function to return fallback values
-      mockT.mockImplementation((key: string) => key);
-
-      expect(() => renderHero()).not.toThrow();
-
-      // Component should still render with fallback keys
-      expect(screen.getByText("v1.0.0")).toBeInTheDocument();
+    it("should use default values when messages are missing", () => {
+      render(<HeroSectionStatic messages={{}} />);
+      // Should show default title
+      expect(screen.getByText("Equipment + Fittings")).toBeInTheDocument();
+      expect(screen.getByText("Integrated Manufacturer")).toBeInTheDocument();
     });
   });
 });

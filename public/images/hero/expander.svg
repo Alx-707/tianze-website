@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900" role="img" aria-label="Pipe expander placeholder">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0b1220" />
+      <stop offset="100%" stop-color="#111827" />
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#10b981" />
+      <stop offset="100%" stop-color="#22d3ee" />
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="900" fill="url(#bg)" />
+
+  <circle cx="220" cy="220" r="220" fill="#0f3460" opacity="0.25" />
+  <circle cx="1040" cy="700" r="260" fill="#0f3460" opacity="0.18" />
+
+  <rect x="120" y="150" width="960" height="600" rx="28" fill="#0f3460" opacity="0.38" />
+  <rect x="160" y="190" width="880" height="520" rx="22" fill="#0b1220" opacity="0.55" />
+
+  <rect x="160" y="190" width="880" height="10" fill="url(#accent)" opacity="0.9" />
+
+  <!-- Expander icon -->
+  <g transform="translate(600 380)">
+    <rect x="-80" y="-50" width="160" height="100" rx="8" fill="#1f2937" stroke="#10b981" stroke-width="3" />
+    <path d="M-60 0 L-30 -30 L30 -30 L60 0 L30 30 L-30 30 Z" fill="#0f3460" stroke="#334155" stroke-width="2" />
+    <circle cx="0" cy="0" r="15" fill="#10b981" opacity="0.6" />
+    <rect x="-100" y="40" width="200" height="16" rx="4" fill="#334155" />
+  </g>
+
+  <text x="600" y="560" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="48" font-weight="700" fill="#e5e7eb" text-anchor="middle">
+    Pipe Expander
+  </text>
+  <text x="600" y="620" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="22" fill="#94a3b8" text-anchor="middle">
+    Precision pipe expansion equipment
+  </text>
+</svg>

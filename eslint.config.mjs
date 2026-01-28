@@ -58,26 +58,14 @@ export default [
     },
   },
 
-  // React You Might Not Need An Effect configuration
+  // React You Might Not Need An Effect - strict preset (all 10 rules as error)
+  // Includes: no-empty-effect, no-adjust-state-on-prop-change, no-reset-all-state-on-prop-change,
+  // no-event-handler, no-pass-live-state-to-parent, no-pass-data-to-parent, no-pass-ref-to-parent,
+  // no-initialize-state, no-chain-state-updates, no-derived-state
   {
     name: "react-you-might-not-need-an-effect-config",
     files: ["**/*.{js,jsx,ts,tsx}"],
-    plugins: {
-      "react-you-might-not-need-an-effect": reactYouMightNotNeedAnEffect,
-    },
-    rules: {
-      // 🔴 Enabled as error - Detects unnecessary useEffect patterns
-      "react-you-might-not-need-an-effect/no-empty-effect": "error",
-      "react-you-might-not-need-an-effect/no-reset-all-state-on-prop-change":
-        "error",
-      "react-you-might-not-need-an-effect/no-event-handler": "error",
-      "react-you-might-not-need-an-effect/no-pass-live-state-to-parent":
-        "error",
-      "react-you-might-not-need-an-effect/no-pass-data-to-parent": "error",
-      "react-you-might-not-need-an-effect/no-initialize-state": "error",
-      "react-you-might-not-need-an-effect/no-chain-state-updates": "error",
-      "react-you-might-not-need-an-effect/no-derived-state": "error",
-    },
+    ...reactYouMightNotNeedAnEffect.configs.strict,
   },
 
   // Theme switcher exception for SSR hydration pattern
@@ -125,6 +113,20 @@ export default [
       "react-you-might-not-need-an-effect/no-initialize-state": "off",
       // Web Vitals 诊断需要在 useEffect 中初始化历史数据
       "react-you-might-not-need-an-effect/no-pass-data-to-parent": "off",
+    },
+  },
+
+  // Accessibility: prefersReducedMotion is a system media query, not a component prop
+  // When user preference changes, updating visibility state is a valid a11y pattern
+  {
+    name: "intersection-observer-a11y-exception",
+    files: ["**/use-intersection-observer.ts"],
+    plugins: {
+      "react-you-might-not-need-an-effect": reactYouMightNotNeedAnEffect,
+    },
+    rules: {
+      "react-you-might-not-need-an-effect/no-adjust-state-on-prop-change":
+        "off",
     },
   },
 

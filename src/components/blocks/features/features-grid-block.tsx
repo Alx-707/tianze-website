@@ -22,11 +22,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { SITE_CONFIG } from "@/config/paths/site-config";
 import { MAGIC_0_2 } from "@/constants/decimal";
 import { useIntersectionObserver } from "@/hooks/use-intersection-observer";
 
-// Types for props
 export interface FeatureItem {
   icon: LucideIcon;
   titleKey: string;
@@ -34,15 +32,13 @@ export interface FeatureItem {
   badge: string;
 }
 
-export interface HighlightItem {
-  key: string;
-}
+type ArchitectureColor = "blue" | "green" | "purple";
 
 export interface ArchitectureLayer {
   titleKey: string;
   descriptionKey: string;
   technologies: string[];
-  color: "blue" | "green" | "purple";
+  color: ArchitectureColor;
 }
 
 export interface CTAConfig {
@@ -55,7 +51,7 @@ export interface CTAConfig {
 
 export interface FeaturesGridBlockProps {
   features?: FeatureItem[];
-  highlights?: HighlightItem[];
+  highlights?: string[];
   architecture?: {
     frontend: ArchitectureLayer;
     ui: ArchitectureLayer;
@@ -65,99 +61,98 @@ export interface FeaturesGridBlockProps {
   i18nNamespace?: string;
 }
 
-// Default features
 const DEFAULT_FEATURES: FeatureItem[] = [
   {
     icon: Zap,
     titleKey: "features.performance.title",
     descriptionKey: "features.performance.description",
-    badge: "A+",
+    badge: "High Output",
   },
   {
     icon: Shield,
     titleKey: "features.security.title",
     descriptionKey: "features.security.description",
-    badge: "100%",
+    badge: "ISO 9001",
   },
   {
     icon: Globe,
     titleKey: "features.i18n.title",
     descriptionKey: "features.i18n.description",
-    badge: "2",
+    badge: "100+",
   },
   {
     icon: Palette,
     titleKey: "features.themes.title",
     descriptionKey: "features.themes.description",
-    badge: "Multiple",
+    badge: "Custom",
   },
   {
     icon: Code,
     titleKey: "features.typescript.title",
     descriptionKey: "features.typescript.description",
-    badge: "TS 5.9.3",
+    badge: "ASTM",
   },
   {
     icon: Rocket,
     titleKey: "features.deployment.title",
     descriptionKey: "features.deployment.description",
-    badge: "Vercel",
+    badge: "48h",
   },
 ];
 
-// Default highlights
-const DEFAULT_HIGHLIGHTS: HighlightItem[] = [
-  { key: "highlights.modern" },
-  { key: "highlights.scalable" },
-  { key: "highlights.accessible" },
-  { key: "highlights.performant" },
-  { key: "highlights.secure" },
-  { key: "highlights.maintainable" },
+const DEFAULT_HIGHLIGHTS: string[] = [
+  "highlights.modern",
+  "highlights.scalable",
+  "highlights.accessible",
+  "highlights.performant",
+  "highlights.secure",
+  "highlights.maintainable",
 ];
 
-// Default architecture
 const DEFAULT_ARCHITECTURE = {
   frontend: {
     titleKey: "architecture.frontend.title",
     descriptionKey: "architecture.frontend.description",
-    technologies: ["Next.js 16", "React 19", "TypeScript", "Tailwind CSS"],
+    technologies: [],
     color: "blue" as const,
   },
   ui: {
     titleKey: "architecture.ui.title",
     descriptionKey: "architecture.ui.description",
-    technologies: ["shadcn/ui", "Radix UI", "Lucide Icons", "CSS Variables"],
+    technologies: [],
     color: "green" as const,
   },
   tooling: {
     titleKey: "architecture.tooling.title",
     descriptionKey: "architecture.tooling.description",
-    technologies: ["ESLint", "Prettier", "Lefthook", "Vitest"],
+    technologies: [],
     color: "purple" as const,
   },
 };
 
-// Default CTA
 const DEFAULT_CTA: CTAConfig = {
   titleKey: "cta.title",
   descriptionKey: "cta.description",
   primaryButtonKey: "cta.getStarted",
   secondaryButtonKey: "cta.viewSource",
-  secondaryButtonHref: SITE_CONFIG.social.github,
+  secondaryButtonHref: "/products",
 };
 
-// Color mapping for architecture cards
-const COLOR_CLASSES: Record<string, string> = {
+const COLOR_CLASSES: Record<ArchitectureColor, string> = {
   blue: "bg-blue-500",
   green: "bg-green-500",
   purple: "bg-purple-500",
 };
 
+interface TranslationFn {
+  (key: string): string;
+}
+
 function FeatureGrid({
   t,
   features,
 }: {
-  t: (key: string) => string;
+  t: TranslationFn;
   features: FeatureItem[];
 }) {
   return (
@@ -188,8 +183,8 @@ function ProjectHighlights({
   t,
   highlights,
 }: {
-  t: (key: string) => string;
-  highlights: HighlightItem[];
+  t: TranslationFn;
+  highlights: string[];
 }) {
   return (
     <div className="mb-16">
@@ -202,10 +197,10 @@ function ProjectHighlights({
         </CardHeader>
         <CardContent>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {highlights.map((highlight, index) => (
+            {highlights.map((key, index) => (
               <div key={index} className="flex items-center gap-2">
                 <CheckCircle className="h-5 w-5 text-green-500" />
-                <span className="text-sm font-medium">{t(highlight.key)}</span>
+                <span className="text-sm font-medium">{t(key)}</span>
               </div>
             ))}
           </div>
@@ -219,7 +214,7 @@ function TechnicalArchitecture({
   t,
   architecture,
 }: {
-  t: (key: string) => string;
+  t: TranslationFn;
   architecture: FeaturesGridBlockProps["architecture"];
 }) {
   if (!architecture) return null;
@@ -246,13 +241,6 @@ function TechnicalArchitecture({
               <div className="text-sm text-foreground/85">
                 {t(layer.descriptionKey)}
               </div>
-              <div className="flex flex-wrap gap-1">
-                {layer.technologies.map((tech) => (
-                  <Badge key={tech} variant="outline" className="text-xs">
-                    {tech}
-                  </Badge>
-                ))}
-              </div>
             </CardContent>
           </Card>
         ))}
@@ -261,13 +249,7 @@ function TechnicalArchitecture({
   );
 }
 
-function CTASection({
-  t,
-  cta,
-}: {
-  t: (key: string) => string;
-  cta: CTAConfig;
-}) {
+function CTASection({ t, cta }: { t: TranslationFn; cta: CTAConfig }) {
   return (
     <div className="text-center">
       <Card className="mx-auto max-w-2xl bg-gradient-to-r from-primary/10 to-secondary/10">
@@ -310,7 +292,6 @@ export function FeaturesGridBlock({
 }: FeaturesGridBlockProps = {}) {
   const t = useTranslations(i18nNamespace);
 
-  // Animation hook
   const { ref, isVisible } = useIntersectionObserver<HTMLDivElement>({
     threshold: MAGIC_0_2,
     triggerOnce: true,
@@ -325,7 +306,6 @@ export function FeaturesGridBlock({
             isVisible ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
           }`}
         >
-          {/* Title */}
           <div className="mb-12 text-center">
             <h2 className="mb-4 text-3xl font-bold tracking-tight sm:text-4xl">
               {t("title")}

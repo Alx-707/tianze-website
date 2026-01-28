@@ -96,22 +96,60 @@
     }
   },
   "home": {
+    "products": {
+      "eyebrow": "产品中心",
+      "title": "设备与管件 一站式供应",
+      "machines": {
+        "image": "弯管设备",
+        "title": "弯管设备",
+        "feature1": "自主设计研发制造",
+        "feature2": "半自动/全自动弯管机",
+        "feature3": "服务国内一线品牌",
+        "button": "了解更多"
+      },
+      "pvc": {
+        "image": "PVC弯管",
+        "title": "PVC弯管",
+        "feature1": "符合国际标准",
+        "feature2": "喇叭口/双承口弯管",
+        "feature3": "UL651/AS/NZS/GB",
+        "button": "了解更多"
+      },
+      "pneumatic": {
+        "image": "气动物流管",
+        "title": "气动物流管",
+        "feature1": "高透明静音防漏",
+        "feature2": "PVC/PMMA/PETG",
+        "feature3": "医院/实验室/工业物流",
+        "button": "了解更多"
+      },
+      "custom": {
+        "image": "定制方案",
+        "title": "定制方案",
+        "feature1": "低MOQ快速打样",
+        "feature2": "非标规格/OEM",
+        "feature3": "澳标/美标/国标",
+        "button": "获取报价"
+      }
+    },
     "hero": {
-      "version": "ISO 9001:2015 认证企业",
+      "badge": "关于我们 →",
       "title": {
-        "line1": "精准弯曲",
-        "line2": "成就卓越"
+        "line1": "设备 + 管件",
+        "line2": "一体化制造商"
       },
-      "subtitle": "弯管制造专家 — 设备+工艺+管件一体化解决方案。从半自动/全自动弯管机到精密管件，为全球B2B客户提供完整的制造能力。",
-      "cta": {
-        "demo": "探索设备",
-        "github": "查看产品目录"
-      },
+      "subtitle": "自研弯管设备，自产精密管件。从设备到成品，全链路可控。",
+      "scrollCta": "了解更多",
       "stats": {
-        "technologies": "出口国家",
-        "typescript": "专业员工",
-        "performance": "准时交货率",
-        "languages": "年行业经验"
+        "factory": "工厂直供",
+        "material": "100% 新料",
+        "production": "全自动生产",
+        "repurchase": "60% 复购率"
+      },
+      "images": {
+        "bender": "弯管机",
+        "expander": "扩管机",
+        "line": "生产线"
       }
     },
     "techStack": {
@@ -315,43 +353,8 @@
       }
     },
     "cta": {
-      "badge": "合作伙伴",
-      "title": "获取定制报价",
-      "subtitle": "告诉我们您的项目需求，工程团队将在24小时内提供定制方案。",
-      "primary": {
-        "github": "联系销售",
-        "demo": "查看目录"
-      },
-      "actions": {
-        "github": {
-          "title": "获取报价",
-          "description": "获取弯管机、管材或定制管件的价格。"
-        },
-        "download": {
-          "title": "下载目录",
-          "description": "查看完整产品规格和技术参数。"
-        },
-        "docs": {
-          "title": "技术支持",
-          "description": "获取规格和安装要求的专业指导。"
-        }
-      },
-      "buttons": {
-        "getStarted": "获取报价",
-        "learnMore": "了解更多"
-      },
-      "stats": {
-        "technologies": "出口国家",
-        "typescript": "专业员工",
-        "performance": "准时交货率",
-        "languages": "年行业经验"
-      },
-      "community": {
-        "title": "全球支持网络",
-        "description": "联系我们的销售团队，获得您所在区域的支持。",
-        "discussions": "WhatsApp咨询",
-        "issues": "邮件支持"
-      }
+      "message": "联系我们，获取样品或技术支持",
+      "button": "获取报价"
     }
   },
   "monitoring": {
