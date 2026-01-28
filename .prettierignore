@@ -120,6 +120,9 @@ content/
 # Claude Code local settings
 .claude/
 
+# Next.js docs (third-party, do not format)
+.next-docs/
+
 # Semgrep generated reports
 semgrep-*.json
 

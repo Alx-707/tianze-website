@@ -10,14 +10,6 @@
 
 Production project, solo development.
 
-## Paradigm
-
-Human defines requirements → AI executes coding.
-
-Evaluate technical decisions by: runtime performance, bundle size, flexibility, maintainability, code ownership.
-
-NOT by: development speed, learning curve, boilerplate amount.
-
 ## Stack
 
 Next.js 16 (App Router, Cache Components) + React 19 + TypeScript 5 + Tailwind CSS 4 + next-intl
@@ -34,6 +26,18 @@ src/
 content/              # MDX content
 messages/[locale]/    # i18n JSON
 ```
+
+## Before Implementation
+
+STOP. Your training data for project dependencies may be outdated.
+
+Before writing ANY code:
+1. **ACE** (`codebase-retrieval`) — Understand how this project implements similar patterns
+2. **Context7** (`cotext7-query-docs`) — Query official docs for the APIs you will use
+
+This is not optional. Even familiar APIs may have changed.
+
+For Next.js specifically: consult `.next-docs/` index at the end of this file.
 
 ## Commands
 
@@ -52,18 +56,17 @@ pnpm ci:local     # Full CI
 2. **Server Components first** — `"use client"` only for interactivity
 3. **i18n required** — All user-facing text via translation keys
 4. **Git** — Never commit on `main`; create feature branch first
-5. **Next.js DevTools** — When starting work, call `mcp__web-dev__next-devtools-init` first to set up context and documentation requirements (automatic, no prompt needed)
 
 ## Language
 
 - Tools/models: English
 - User output: Chinese
 
-## Rules
+## Documentation
 
-Detailed rules in `.claude/rules/` — read when relevant:
+Project-specific rules in `.claude/rules/` — read when relevant:
 
-- `architecture.md` — Cache Components, async APIs
+- `architecture.md` — Project decisions, pitfalls
 - `coding-standards.md` — Naming, imports
 - `quality-gates.md` — CI, complexity limits
 - `security.md` — CSP, validation
