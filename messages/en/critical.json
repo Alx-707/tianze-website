@@ -96,22 +96,60 @@
     }
   },
   "home": {
+    "products": {
+      "eyebrow": "Product Center",
+      "title": "Equipment & Fittings One-Stop Supply",
+      "machines": {
+        "image": "Pipe Bending Machine",
+        "title": "Bending Machines",
+        "feature1": "Self-designed & Manufactured",
+        "feature2": "Semi-auto / Full-auto",
+        "feature3": "Serving Top Domestic Brands",
+        "button": "Learn More"
+      },
+      "pvc": {
+        "image": "PVC Conduit Bends",
+        "title": "PVC Conduits",
+        "feature1": "International Standards",
+        "feature2": "Bell-end / Socket Bends",
+        "feature3": "UL651 / AS / NZS / GB",
+        "button": "Learn More"
+      },
+      "pneumatic": {
+        "image": "Pneumatic Tubes",
+        "title": "Pneumatic Tubes",
+        "feature1": "High Transparency & Quiet",
+        "feature2": "PVC / PMMA / PETG",
+        "feature3": "Hospital / Lab / Industrial",
+        "button": "Learn More"
+      },
+      "custom": {
+        "image": "Custom Solutions",
+        "title": "Custom Solutions",
+        "feature1": "Low MOQ Fast Sampling",
+        "feature2": "Non-standard Specs / OEM",
+        "feature3": "AU / US / GB Standards",
+        "button": "Get Quote"
+      }
+    },
     "hero": {
-      "version": "ISO 9001:2015 Certified",
+      "badge": "About Us →",
       "title": {
-        "line1": "Engineering the",
-        "line2": "Perfect Curve"
+        "line1": "Equipment + Fittings",
+        "line2": "Integrated Manufacturer"
       },
-      "subtitle": "Pipe Bending Experts — Equipment, Process & Fittings integrated solutions. From semi-auto bending machines to precision pipe fittings, we deliver complete manufacturing capability for global B2B customers.",
-      "cta": {
-        "demo": "Explore Machinery",
-        "github": "View Pipe Catalog"
-      },
+      "subtitle": "Self-developed bending machines, self-produced precision fittings. From equipment to finished products, full chain control.",
+      "scrollCta": "Learn More",
       "stats": {
-        "technologies": "Export Countries",
-        "typescript": "Employees",
-        "performance": "On-time Delivery",
-        "languages": "Years Experience"
+        "factory": "Factory Direct",
+        "material": "100% Virgin Material",
+        "production": "Fully Automated",
+        "repurchase": "60% Repurchase Rate"
+      },
+      "images": {
+        "bender": "Pipe Bending Machine",
+        "expander": "Pipe Expander",
+        "line": "Production Line"
       }
     },
     "techStack": {
@@ -315,43 +353,8 @@
       }
     },
     "cta": {
-      "badge": "Partner With Us",
-      "title": "Get Your Custom Quote",
-      "subtitle": "Tell us about your project requirements. Our engineering team will provide a tailored solution within 24 hours.",
-      "primary": {
-        "github": "Contact Sales",
-        "demo": "View Catalog"
-      },
-      "actions": {
-        "github": {
-          "title": "Request Quote",
-          "description": "Get pricing for pipe bending machines, conduits, or custom fittings."
-        },
-        "download": {
-          "title": "Download Catalog",
-          "description": "View our complete product specifications and technical data sheets."
-        },
-        "docs": {
-          "title": "Technical Support",
-          "description": "Get expert guidance on specifications and installation requirements."
-        }
-      },
-      "buttons": {
-        "getStarted": "Get Quote",
-        "learnMore": "Learn More"
-      },
-      "stats": {
-        "technologies": "Export Countries",
-        "typescript": "Employees",
-        "performance": "On-time Rate",
-        "languages": "Years Experience"
-      },
-      "community": {
-        "title": "Global Support Network",
-        "description": "Connect with our sales team and get support for your region.",
-        "discussions": "WhatsApp Chat",
-        "issues": "Email Support"
-      }
+      "message": "Contact us for samples or technical support",
+      "button": "Get Quote"
     }
   },
   "monitoring": {
