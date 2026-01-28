@@ -32,19 +32,33 @@ const DEFAULT_IMAGES = [
   { src: "/images/hero/production-line.jpg", altKey: "line" },
 ];
 
+// Safe property access helper using iteration to avoid object injection vulnerability
+function getNestedValue(obj: unknown, path: string): string {
+  const parts = path.split(".");
+  let cur: unknown = obj;
+  for (const p of parts) {
+    if (typeof cur !== "object" || cur === null) return "";
+    const record = cur as Record<string, unknown>;
+    let found = false;
+    let next: unknown;
+    for (const [key, value] of Object.entries(record)) {
+      if (key === p) {
+        next = value;
+        found = true;
+        break;
+      }
+    }
+    if (!found) return "";
+    cur = next;
+  }
+  return typeof cur === "string" ? cur : "";
+}
+
 export function HeroSplitBlockStatic({
   messages,
   className,
 }: HeroSplitBlockProps) {
-  const t = (key: string): string => {
-    const parts = key.split(".");
-    let cur: unknown = messages;
-    for (const p of parts) {
-      if (typeof cur !== "object" || cur === null) return "";
-      cur = (cur as Record<string, unknown>)[p];
-    }
-    return typeof cur === "string" ? cur : "";
-  };
+  const t = (key: string): string => getNestedValue(messages, key);
 
   const stats = [
     { label: t("stats.factory") || "Factory Direct" },
