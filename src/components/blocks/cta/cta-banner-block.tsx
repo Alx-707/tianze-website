@@ -1,6 +1,6 @@
 "use client";
 
-import type React from "react";
+import type { ComponentType } from "react";
 import {
   ArrowRight,
   ExternalLink,
@@ -24,9 +24,8 @@ import { COUNT_700 } from "@/constants/count";
 import { MAGIC_0_2 } from "@/constants/decimal";
 import { useIntersectionObserver } from "@/hooks/use-intersection-observer";
 
-// Types
 export interface ActionItem {
-  icon: React.ComponentType<{ className?: string }>;
+  icon: ComponentType<{ className?: string }>;
   title: string;
   description: string;
   href: string;
@@ -45,14 +44,8 @@ export interface CTABannerBlockProps {
   i18nNamespace?: string;
 }
 
-// UI Constants
-const UI_CONSTANTS = {
-  LONG_ANIMATION_DURATION: COUNT_700,
-  INTERSECTION_THRESHOLD: MAGIC_0_2,
-  ANIMATION_DURATION: 200,
-} as const;
+const ANIMATION_DURATION_CARD = 200;
 
-// Sub-components
 function StatsDisplay({ stats }: { stats: StatItem[] }) {
   return (
     <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
@@ -68,17 +61,25 @@ function StatsDisplay({ stats }: { stats: StatItem[] }) {
   );
 }
 
+interface TranslationFn {
+  (key: string): string;
+}
+
 function ActionCards({
   t,
   actions,
 }: {
-  t: (key: string) => string;
+  t: TranslationFn;
   actions: ActionItem[];
 }) {
   return (
     <div className="grid gap-6 sm:grid-cols-3">
       {actions.map((action, index) => {
         const Icon = action.icon;
+        const externalProps = action.external
+          ? { target: "_blank" as const, rel: "noopener noreferrer" }
+          : {};
+
         return (
           <Card
             key={index}
@@ -88,9 +89,7 @@ function ActionCards({
                 ? "border-primary/20 bg-primary/5 hover:shadow-primary/10"
                 : "hover:shadow-primary/5",
             )}
-            style={{
-              transitionDuration: `${UI_CONSTANTS.ANIMATION_DURATION}ms`,
-            }}
+            style={{ transitionDuration: `${ANIMATION_DURATION_CARD}ms` }}
           >
             <CardHeader className="text-center">
               <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
@@ -107,10 +106,7 @@ function ActionCards({
               >
                 <a
                   href={action.href}
-                  {...(action.external && {
-                    target: "_blank",
-                    rel: "noopener noreferrer",
-                  })}
+                  {...externalProps}
                   className="flex items-center justify-center gap-2"
                 >
                   {action.primary
@@ -131,15 +127,12 @@ function ActionCards({
   );
 }
 
-function CommunitySection({
-  t,
-  discussionsHref,
-  issuesHref,
-}: {
-  t: (key: string) => string;
-  discussionsHref: string;
-  issuesHref: string;
-}) {
+const COMMUNITY_LINKS = {
+  discussions: "https://wa.me/8618000000000",
+  issues: "mailto:sales@tianzepipe.com",
+} as const;
+
+function CommunitySection({ t }: { t: TranslationFn }) {
   return (
     <div className="mt-16 text-center">
       <Card className="bg-muted/50">
@@ -156,7 +149,7 @@ function CommunitySection({
           <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
             <Button variant="outline" asChild>
               <a
-                href={discussionsHref}
+                href={COMMUNITY_LINKS.discussions}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2"
@@ -167,7 +160,7 @@ function CommunitySection({
             </Button>
             <Button variant="outline" asChild>
               <a
-                href={issuesHref}
+                href={COMMUNITY_LINKS.issues}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2"
@@ -183,8 +176,8 @@ function CommunitySection({
   );
 }
 
-// Default data factory (kept internal for block defaults)
-function getDefaultData(t: (key: string) => string) {
+// Default data factory
+function getDefaultData(t: TranslationFn) {
   return {
     actions: [
       {
@@ -228,13 +221,11 @@ export function CTABannerBlock({
 }: CTABannerBlockProps = {}) {
   const t = useTranslations(i18nNamespace);
 
-  // Animation Hook
   const { ref, isVisible } = useIntersectionObserver<HTMLDivElement>({
-    threshold: UI_CONSTANTS.INTERSECTION_THRESHOLD,
+    threshold: MAGIC_0_2,
     triggerOnce: true,
   });
 
-  // Use provided data or defaults
   const defaultData = getDefaultData(t);
   const resolvedActions = actions ?? defaultData.actions;
   const resolvedStats = stats ?? defaultData.stats;
@@ -245,13 +236,10 @@ export function CTABannerBlock({
         <div
           ref={ref}
           className={cn(
-            "mx-auto max-w-4xl",
-            "transition-all ease-out",
+            "mx-auto max-w-4xl transition-all ease-out",
             isVisible ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0",
           )}
-          style={{
-            transitionDuration: `${UI_CONSTANTS.LONG_ANIMATION_DURATION}ms`,
-          }}
+          style={{ transitionDuration: `${COUNT_700}ms` }}
         >
           {/* Main CTA */}
           <div className="mb-16 text-center">
@@ -292,18 +280,11 @@ export function CTABannerBlock({
               </Button>
             </div>
 
-            {/* Stats */}
             <StatsDisplay stats={resolvedStats} />
           </div>
 
-          {/* Action cards */}
           <ActionCards t={t} actions={resolvedActions} />
-
-          <CommunitySection
-            t={t}
-            discussionsHref="https://wa.me/8618000000000"
-            issuesHref="mailto:sales@tianzepipe.com"
-          />
+          <CommunitySection t={t} />
         </div>
       </div>
     </section>

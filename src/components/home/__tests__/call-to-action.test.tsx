@@ -13,7 +13,6 @@
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { CallToAction } from "@/components/home/call-to-action";
-import { SITE_CONFIG } from "@/config/paths/site-config";
 
 // Mock配置 - 使用vi.hoisted确保Mock在模块导入前设置
 const { mockUseTranslations, mockUseIntersectionObserver } = vi.hoisted(() => ({
@@ -151,25 +150,31 @@ describe("CallToAction Component - Integration Tests", () => {
       ).toBeGreaterThan(0);
     });
 
-    it("应该正确配置外部链接", () => {
+    it("应该正确配置内部链接", () => {
       render(<CallToAction />);
 
-      const githubLink = screen.getByRole("link", { name: /primary\.github/i });
-      expect(githubLink).toHaveAttribute("target", "_blank");
-      expect(githubLink).toHaveAttribute("rel", "noopener noreferrer");
+      // Primary buttons are now internal links (no target="_blank")
+      const contactLink = screen.getByRole("link", {
+        name: /primary\.github/i,
+      });
+      expect(contactLink).toHaveAttribute("href", "/contact");
+      expect(contactLink).not.toHaveAttribute("target");
+
+      const productsLink = screen.getByRole("link", { name: /primary\.demo/i });
+      expect(productsLink).toHaveAttribute("href", "/products");
+      expect(productsLink).not.toHaveAttribute("target");
     });
 
     it("应该渲染必要的图标", () => {
       render(<CallToAction />);
 
       // 验证主要图标存在
-      // CTABannerBlock has 1 github icon in primary button (action cards now use Phone/FileText)
-      expect(screen.getAllByTestId("github-icon")).toHaveLength(1);
-      // CTABannerBlock uses Star in badge
-      const starIcons = screen.getAllByTestId("star-icon");
-      expect(starIcons.length).toBeGreaterThan(0);
+      // Primary button now uses Phone icon (contact link)
+      const phoneIcons = screen.getAllByTestId("phone-icon");
+      expect(phoneIcons.length).toBeGreaterThanOrEqual(1);
+      // Star icon was removed from badge
+      expect(screen.queryByTestId("star-icon")).not.toBeInTheDocument();
       // Action cards use Phone, FileText, and MessageCircle icons
-      expect(screen.getByTestId("phone-icon")).toBeInTheDocument();
       expect(screen.getByTestId("file-text-icon")).toBeInTheDocument();
       const messageCircleIcons = screen.getAllByTestId("message-circle-icon");
       expect(messageCircleIcons.length).toBeGreaterThan(0);
@@ -234,11 +239,15 @@ describe("CallToAction Component - Integration Tests", () => {
     it("应该有正确的链接地址", () => {
       render(<CallToAction />);
 
-      const githubLink = screen.getByRole("link", { name: /primary\.github/i });
-      expect(githubLink).toHaveAttribute("href", SITE_CONFIG.social.github);
+      // Primary button now links to /contact (internal)
+      const contactLink = screen.getByRole("link", {
+        name: /primary\.github/i,
+      });
+      expect(contactLink).toHaveAttribute("href", "/contact");
 
-      const demoLink = screen.getByRole("link", { name: /primary\.demo/i });
-      expect(demoLink).toHaveAttribute("href", "#demo");
+      // Demo button now links to /products (internal)
+      const productsLink = screen.getByRole("link", { name: /primary\.demo/i });
+      expect(productsLink).toHaveAttribute("href", "/products");
     });
 
     it("应该正确处理组件生命周期", () => {

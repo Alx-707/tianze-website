@@ -1,34 +1,26 @@
 /**
- * 网站配置常量
- * 集中管理所有硬编码的数值和配置
+ * Site configuration constants for Tianze website
  */
 
 import { SITE_CONFIG } from "@/config/paths/site-config";
 
-// 项目统计数据
 export const PROJECT_STATS = {
-  // 业务统计
   business: {
     exportCountries: 100,
     employees: 60,
     onTimeDelivery: "98%",
     yearsExperience: 6,
   },
-
-  // 产品指标
   products: {
     certifications: ["ISO 9001", "ASTM", "UL651"],
     productLines: 3,
     customMolds: "500+",
   },
-
-  // 社区数据（保留用于其他用途）
   community: {
     initialLikeCount: 42,
   },
 } as const;
 
-// 项目链接
 export const PROJECT_LINKS = {
   github: SITE_CONFIG.social.github,
   documentation: "/docs",
@@ -36,7 +28,6 @@ export const PROJECT_LINKS = {
   discussions: `${SITE_CONFIG.social.github}/discussions`,
 } as const;
 
-// 技术架构配置
 export const TECH_ARCHITECTURE = {
   equipment: {
     title: "Bending Equipment",
@@ -55,7 +46,6 @@ export const TECH_ARCHITECTURE = {
   },
 } as const;
 
-// 响应式断点配置
 export const RESPONSIVE_BREAKPOINTS = {
   mobile: {
     title: "Mobile First",
@@ -74,7 +64,6 @@ export const RESPONSIVE_BREAKPOINTS = {
   },
 } as const;
 
-// 主题配置
 export const THEME_CONFIG = {
   colors: {
     primary: "hsl(var(--primary))",
@@ -87,7 +76,6 @@ export const THEME_CONFIG = {
   },
 } as const;
 
-// 动画配置
 export const ANIMATION_CONFIG = {
   intersection: {
     threshold: 0.2,
