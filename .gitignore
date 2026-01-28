@@ -50,3 +50,4 @@ pnpm-debug.log*
 
 # Local MCP config (may contain secrets)
 .mcp.json
+.lighthouseci/
