@@ -14,7 +14,7 @@ export function StatBar({ stats, className }: StatBarProps) {
     <div
       className={cn(
         "flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground",
-        className
+        className,
       )}
     >
       {stats.map((stat, index) => (
