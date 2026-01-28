@@ -355,43 +355,8 @@
       }
     },
     "cta": {
-      "badge": "开源项目",
-      "title": "今天就开始构建",
-      "subtitle": "使用我们的现代化B2B企业平台，加速您的开发流程。",
-      "primary": {
-        "github": "在GitHub上加星",
-        "demo": "在线演示"
-      },
-      "actions": {
-        "github": {
-          "title": "GitHub仓库",
-          "description": "探索源代码并为项目做出贡献。"
-        },
-        "download": {
-          "title": "下载模板",
-          "description": "获取完整模板，立即开始构建。"
-        },
-        "docs": {
-          "title": "文档",
-          "description": "全面的指南和API文档。"
-        }
-      },
-      "buttons": {
-        "getStarted": "开始使用",
-        "learnMore": "了解更多"
-      },
-      "stats": {
-        "technologies": "项技术",
-        "typescript": "TypeScript",
-        "performance": "性能评级",
-        "languages": "种语言"
-      },
-      "community": {
-        "title": "加入我们的社区",
-        "description": "与其他开发者联系，获得社区支持。",
-        "discussions": "GitHub讨论",
-        "issues": "报告问题"
-      }
+      "message": "联系我们，获取样品或技术支持",
+      "button": "获取报价"
     },
     "title": "天泽管业",
     "subtitle": "现代化B2B企业级Web平台",

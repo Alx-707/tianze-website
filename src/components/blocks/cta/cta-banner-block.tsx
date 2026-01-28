@@ -1,290 +1,45 @@
 "use client";
 
-import type { ComponentType } from "react";
-import {
-  ArrowRight,
-  ExternalLink,
-  FileText,
-  MessageCircle,
-  Phone,
-} from "lucide-react";
-import { useTranslations } from "next-intl";
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { COUNT_700 } from "@/constants/count";
-import { MAGIC_0_2 } from "@/constants/decimal";
-import { useIntersectionObserver } from "@/hooks/use-intersection-observer";
-
-export interface ActionItem {
-  icon: ComponentType<{ className?: string }>;
-  title: string;
-  description: string;
-  href: string;
-  primary: boolean;
-  external: boolean;
-}
-
-export interface StatItem {
-  value: string;
-  label: string;
-}
 
 export interface CTABannerBlockProps {
-  actions?: ActionItem[];
-  stats?: StatItem[];
+  className?: string;
   i18nNamespace?: string;
 }
 
-const ANIMATION_DURATION_CARD = 200;
-
-function StatsDisplay({ stats }: { stats: StatItem[] }) {
-  return (
-    <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
-      {stats.map((stat, index) => (
-        <div key={index} className="text-center">
-          <div className="text-2xl font-bold text-foreground sm:text-3xl">
-            {stat.value}
-          </div>
-          <div className="text-sm text-muted-foreground">{stat.label}</div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-interface TranslationFn {
-  (key: string): string;
-}
-
-function ActionCards({
-  t,
-  actions,
-}: {
-  t: TranslationFn;
-  actions: ActionItem[];
-}) {
-  return (
-    <div className="grid gap-6 sm:grid-cols-3">
-      {actions.map((action, index) => {
-        const Icon = action.icon;
-        const externalProps = action.external
-          ? { target: "_blank" as const, rel: "noopener noreferrer" }
-          : {};
-
-        return (
-          <Card
-            key={index}
-            className={cn(
-              "group transition-all hover:shadow-lg",
-              action.primary
-                ? "border-primary/20 bg-primary/5 hover:shadow-primary/10"
-                : "hover:shadow-primary/5",
-            )}
-            style={{ transitionDuration: `${ANIMATION_DURATION_CARD}ms` }}
-          >
-            <CardHeader className="text-center">
-              <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-                <Icon className="h-6 w-6 text-primary" />
-              </div>
-              <CardTitle className="text-lg">{action.title}</CardTitle>
-              <CardDescription>{action.description}</CardDescription>
-            </CardHeader>
-            <CardContent className="text-center">
-              <Button
-                variant={action.primary ? "default" : "outline"}
-                className="w-full group-hover:shadow-sm"
-                asChild
-              >
-                <a
-                  href={action.href}
-                  {...externalProps}
-                  className="flex items-center justify-center gap-2"
-                >
-                  {action.primary
-                    ? t("buttons.getStarted")
-                    : t("buttons.learnMore")}
-                  {action.external ? (
-                    <ExternalLink className="h-4 w-4" />
-                  ) : (
-                    <ArrowRight className="h-4 w-4" />
-                  )}
-                </a>
-              </Button>
-            </CardContent>
-          </Card>
-        );
-      })}
-    </div>
-  );
-}
-
-const COMMUNITY_LINKS = {
-  discussions: "https://wa.me/8618000000000",
-  issues: "mailto:sales@tianzepipe.com",
-} as const;
-
-function CommunitySection({ t }: { t: TranslationFn }) {
-  return (
-    <div className="mt-16 text-center">
-      <Card className="bg-muted/50">
-        <CardHeader>
-          <CardTitle className="flex items-center justify-center gap-2">
-            <MessageCircle className="h-5 w-5" />
-            {t("community.title")}
-          </CardTitle>
-          <CardDescription className="text-base">
-            {t("community.description")}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
-            <Button variant="outline" asChild>
-              <a
-                href={COMMUNITY_LINKS.discussions}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2"
-              >
-                {t("community.discussions")}
-                <ExternalLink className="h-4 w-4" />
-              </a>
-            </Button>
-            <Button variant="outline" asChild>
-              <a
-                href={COMMUNITY_LINKS.issues}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2"
-              >
-                {t("community.issues")}
-                <ExternalLink className="h-4 w-4" />
-              </a>
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
-}
-
-// Default data factory
-function getDefaultData(t: TranslationFn) {
-  return {
-    actions: [
-      {
-        icon: Phone,
-        title: t("actions.github.title"),
-        description: t("actions.github.description"),
-        href: "/contact",
-        primary: true,
-        external: false,
-      },
-      {
-        icon: FileText,
-        title: t("actions.download.title"),
-        description: t("actions.download.description"),
-        href: "/products",
-        primary: false,
-        external: false,
-      },
-      {
-        icon: MessageCircle,
-        title: t("actions.docs.title"),
-        description: t("actions.docs.description"),
-        href: "/support",
-        primary: false,
-        external: false,
-      },
-    ],
-    stats: [
-      { value: "100+", label: t("stats.technologies") },
-      { value: "60+", label: t("stats.typescript") },
-      { value: "98%", label: t("stats.performance") },
-      { value: "6+", label: t("stats.languages") },
-    ],
-  };
-}
-
 export function CTABannerBlock({
-  actions,
-  stats,
+  className,
   i18nNamespace = "home.cta",
-}: CTABannerBlockProps = {}) {
+}: CTABannerBlockProps) {
   const t = useTranslations(i18nNamespace);
 
-  const { ref, isVisible } = useIntersectionObserver<HTMLDivElement>({
-    threshold: MAGIC_0_2,
-    triggerOnce: true,
-  });
-
-  const defaultData = getDefaultData(t);
-  const resolvedActions = actions ?? defaultData.actions;
-  const resolvedStats = stats ?? defaultData.stats;
-
   return (
-    <section className="cv-600 bg-gradient-to-br from-primary/5 via-background to-secondary/5 py-20">
+    <section
+      className={cn(
+        "bg-gradient-to-r from-primary to-primary/80 py-16 sm:py-20",
+        className,
+      )}
+    >
       <div className="container mx-auto px-4">
-        <div
-          ref={ref}
-          className={cn(
-            "mx-auto max-w-4xl transition-all ease-out",
-            isVisible ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0",
-          )}
-          style={{ transitionDuration: `${COUNT_700}ms` }}
-        >
-          {/* Main CTA */}
-          <div className="mb-16 text-center">
-            <div className="mb-6">
-              <Badge className="mb-4 px-4 py-2 text-sm font-medium">
-                {t("badge")}
-              </Badge>
-            </div>
-
-            <h2 className="mb-6 text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
-              {t("title")}
-            </h2>
-
-            <p className="mx-auto mb-8 max-w-2xl text-lg text-foreground/85 sm:text-xl">
-              {t("subtitle")}
-            </p>
-
-            {/* Primary buttons */}
-            <div className="mb-12 flex flex-col gap-4 sm:flex-row sm:justify-center">
-              <Button size="lg" className="group px-8 py-4 text-lg" asChild>
-                <Link href="/contact" className="flex items-center gap-2">
-                  <Phone className="h-5 w-5" />
-                  {t("primary.github")}
-                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                </Link>
-              </Button>
-
-              <Button
-                variant="outline"
-                size="lg"
-                className="px-8 py-4 text-lg"
-                asChild
-              >
-                <Link href="/products" className="flex items-center gap-2">
-                  {t("primary.demo")}
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-              </Button>
-            </div>
-
-            <StatsDisplay stats={resolvedStats} />
-          </div>
-
-          <ActionCards t={t} actions={resolvedActions} />
-          <CommunitySection t={t} />
+        <div className="flex flex-col items-center justify-center gap-6 text-center sm:flex-row sm:gap-8">
+          <p className="text-lg font-medium text-primary-foreground sm:text-xl">
+            {t("message")}
+          </p>
+          <Button
+            size="lg"
+            variant="secondary"
+            className="bg-white text-primary hover:bg-white/90"
+            asChild
+          >
+            <Link href="/contact" className="flex items-center gap-2">
+              {t("button")}
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </Button>
         </div>
       </div>
     </section>

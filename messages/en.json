@@ -355,43 +355,8 @@
       }
     },
     "cta": {
-      "badge": "Open Source",
-      "title": "Start Building Today",
-      "subtitle": "Get started with our modern B2B enterprise platform and accelerate your development process.",
-      "primary": {
-        "github": "Star on GitHub",
-        "demo": "Live Demo"
-      },
-      "actions": {
-        "github": {
-          "title": "GitHub Repository",
-          "description": "Explore the source code and contribute to the project."
-        },
-        "download": {
-          "title": "Download Template",
-          "description": "Get the complete template and start building immediately."
-        },
-        "docs": {
-          "title": "Documentation",
-          "description": "Comprehensive guides and API documentation."
-        }
-      },
-      "buttons": {
-        "getStarted": "Get Started",
-        "learnMore": "Learn More"
-      },
-      "stats": {
-        "technologies": "Technologies",
-        "typescript": "TypeScript",
-        "performance": "Performance",
-        "languages": "Languages"
-      },
-      "community": {
-        "title": "Join Our Community",
-        "description": "Connect with other developers and get support from our community.",
-        "discussions": "GitHub Discussions",
-        "issues": "Report Issues"
-      }
+      "message": "Contact us for samples or technical support",
+      "button": "Get Quote"
     },
     "title": "Tianze Pipe",
     "subtitle": "Modern B2B Enterprise Web Platform",

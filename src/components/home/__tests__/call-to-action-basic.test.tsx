@@ -12,18 +12,13 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { CallToAction } from "@/components/home/call-to-action";
 
 // Mock配置 - 使用vi.hoisted确保Mock在模块导入前设置
-const { mockUseTranslations, mockUseIntersectionObserver } = vi.hoisted(() => ({
+const { mockUseTranslations } = vi.hoisted(() => ({
   mockUseTranslations: vi.fn(),
-  mockUseIntersectionObserver: vi.fn(),
 }));
 
 // Mock外部依赖
 vi.mock("next-intl", () => ({
   useTranslations: mockUseTranslations,
-}));
-
-vi.mock("@/hooks/use-intersection-observer", () => ({
-  useIntersectionObserver: mockUseIntersectionObserver,
 }));
 
 // Mock Lucide React图标
@@ -33,67 +28,13 @@ vi.mock("lucide-react", () => ({
       →
     </span>
   ),
-  BookOpen: ({ className }: { className?: string }) => (
-    <span className={className} data-testid="book-open-icon">
-      📖
-    </span>
-  ),
-  Download: ({ className }: { className?: string }) => (
-    <span className={className} data-testid="download-icon">
-      ⬇️
-    </span>
-  ),
-  ExternalLink: ({ className }: { className?: string }) => (
-    <span className={className} data-testid="external-link-icon">
-      🔗
-    </span>
-  ),
-  FileText: ({ className }: { className?: string }) => (
-    <span className={className} data-testid="file-text-icon">
-      📄
-    </span>
-  ),
-  Github: ({ className }: { className?: string }) => (
-    <span className={className} data-testid="github-icon">
-      🐙
-    </span>
-  ),
-  MessageCircle: ({ className }: { className?: string }) => (
-    <span className={className} data-testid="message-circle-icon">
-      💬
-    </span>
-  ),
-  Phone: ({ className }: { className?: string }) => (
-    <span className={className} data-testid="phone-icon">
-      📞
-    </span>
-  ),
-  Star: ({ className }: { className?: string }) => (
-    <span className={className} data-testid="star-icon">
-      ⭐
-    </span>
-  ),
 }));
 
 describe("CallToAction Component - Basic Tests", () => {
   // 默认翻译Mock
   const defaultTranslations = {
-    badge: "Open Source",
-    title: "Ready to Get Started?",
-    subtitle:
-      "Join thousands of developers building amazing projects with our tools.",
-    "github.primary.text": "View on GitHub",
-    "github.primary.description": "Explore the source code",
-    "github.secondary.text": "Star on GitHub",
-    "github.secondary.description": "Show your support",
-    "docs.text": "Documentation",
-    "docs.description": "Learn how to use our tools",
-    "community.text": "Join Community",
-    "community.description": "Connect with other developers",
-    "discussions.text": "Discussions",
-    "discussions.description": "Ask questions and share ideas",
-    "issues.text": "Report Issues",
-    "issues.description": "Help us improve",
+    message: "Contact us for samples or technical support",
+    button: "Get Quote",
   };
 
   beforeEach(() => {
@@ -105,12 +46,6 @@ describe("CallToAction Component - Basic Tests", () => {
         defaultTranslations[key as keyof typeof defaultTranslations] || key,
     );
     mockUseTranslations.mockReturnValue(mockT);
-
-    // 设置默认的Intersection Observer Mock
-    mockUseIntersectionObserver.mockReturnValue({
-      ref: vi.fn(),
-      isVisible: true,
-    });
   });
 
   describe("基础渲染", () => {
@@ -118,41 +53,10 @@ describe("CallToAction Component - Basic Tests", () => {
       render(<CallToAction />);
 
       // 验证主要元素存在
-      expect(screen.getByText("Ready to Get Started?")).toBeInTheDocument();
       expect(
-        screen.getByText(
-          "Join thousands of developers building amazing projects with our tools.",
-        ),
+        screen.getByText("Contact us for samples or technical support"),
       ).toBeInTheDocument();
-      expect(screen.getByText("Open Source")).toBeInTheDocument();
-    });
-
-    it("应该渲染所有行动按钮", () => {
-      render(<CallToAction />);
-
-      // 验证主要GitHub按钮
-      expect(
-        screen.getByRole("link", { name: /primary\.github/i }),
-      ).toBeInTheDocument();
-      expect(
-        screen.getByRole("link", { name: /primary\.demo/i }),
-      ).toBeInTheDocument();
-
-      // 验证文档和社区链接
-      expect(
-        screen.getByRole("link", { name: /buttons\.getStarted/i }),
-      ).toBeInTheDocument();
-      expect(
-        screen.getAllByRole("link", { name: /buttons\.learnMore/i }),
-      ).toHaveLength(2);
-
-      // 验证GitHub相关链接
-      expect(
-        screen.getByRole("link", { name: /community\.discussions/i }),
-      ).toBeInTheDocument();
-      expect(
-        screen.getByRole("link", { name: /community\.issues/i }),
-      ).toBeInTheDocument();
+      expect(screen.getByText("Get Quote")).toBeInTheDocument();
     });
 
     it("应该渲染正确的结构元素", () => {
@@ -162,122 +66,37 @@ describe("CallToAction Component - Basic Tests", () => {
       const section = document.querySelector("section");
       expect(section).toBeInTheDocument();
 
-      // 验证标题层次结构
-      const title = screen.getByRole("heading", { level: 2 });
-      expect(title).toBeInTheDocument();
-      expect(title).toHaveTextContent("Ready to Get Started?");
+      // 验证gradient背景类
+      expect(section).toHaveClass("bg-gradient-to-r");
+      expect(section).toHaveClass("from-primary");
+    });
+
+    it("应该渲染CTA按钮", () => {
+      render(<CallToAction />);
+
+      const ctaButton = screen.getByRole("link", { name: /Get Quote/i });
+      expect(ctaButton).toBeInTheDocument();
+      expect(ctaButton).toHaveAttribute("href", "/contact");
     });
   });
 
   describe("链接地址验证", () => {
-    it("主要联系按钮应该有正确的链接", () => {
+    it("CTA按钮应该链接到联系页面", () => {
       render(<CallToAction />);
 
-      const contactLink = screen.getByRole("link", {
-        name: /primary\.github/i,
-      });
+      const contactLink = screen.getByRole("link", { name: /Get Quote/i });
       expect(contactLink).toHaveAttribute("href", "/contact");
       // Internal link, no target="_blank"
       expect(contactLink).not.toHaveAttribute("target", "_blank");
     });
-
-    it("主要行动按钮应该有正确的链接", () => {
-      render(<CallToAction />);
-
-      const contactLink = screen.getByRole("link", {
-        name: /buttons\.getStarted/i,
-      });
-      // Action cards now use internal links
-      expect(contactLink).toHaveAttribute("href", "/contact");
-      expect(contactLink).not.toHaveAttribute("target", "_blank");
-    });
-
-    it("文档链接应该有正确的地址", () => {
-      render(<CallToAction />);
-
-      // Now there are multiple learnMore links (action cards)
-      const learnMoreLinks = screen.getAllByRole("link", {
-        name: /buttons\.learnMore.*→/i,
-      });
-      // Verify we have two learnMore links (products and support)
-      expect(learnMoreLinks).toHaveLength(2);
-      // Check that the expected hrefs are present
-      const hrefs = learnMoreLinks.map((link) => link.getAttribute("href"));
-      expect(hrefs).toContain("/products");
-      expect(hrefs).toContain("/support");
-    });
-
-    it("社区链接应该有正确的地址", () => {
-      render(<CallToAction />);
-
-      const communityLink = screen.getByRole("link", {
-        name: /community\.discussions/i,
-      });
-      expect(communityLink).toHaveAttribute(
-        "href",
-        "https://wa.me/8618000000000",
-      );
-    });
-
-    it("Discussions链接应该有正确的地址", () => {
-      render(<CallToAction />);
-
-      const discussionsLink = screen.getByRole("link", {
-        name: /discussions/i,
-      });
-      expect(discussionsLink).toHaveAttribute(
-        "href",
-        "https://wa.me/8618000000000",
-      );
-      expect(discussionsLink).toHaveAttribute("target", "_blank");
-    });
-
-    it("Issues链接应该有正确的地址", () => {
-      render(<CallToAction />);
-
-      const issuesLink = screen.getByRole("link", { name: /issues/i });
-      expect(issuesLink).toHaveAttribute("href", "mailto:sales@tianzepipe.com");
-      expect(issuesLink).toHaveAttribute("target", "_blank");
-    });
   });
 
   describe("图标渲染", () => {
-    it("应该渲染所有必要的图标", () => {
+    it("应该渲染箭头图标", () => {
       render(<CallToAction />);
 
-      // Primary button now uses Phone icon (also used in action card)
-      const phoneIcons = screen.getAllByTestId("phone-icon");
-      expect(phoneIcons.length).toBeGreaterThanOrEqual(1);
-
-      // Action card icons - CTABannerBlock uses Phone, FileText, and MessageCircle
-      expect(screen.getByTestId("file-text-icon")).toBeInTheDocument();
-      const messageCircleIcons = screen.getAllByTestId("message-circle-icon");
-      expect(messageCircleIcons.length).toBeGreaterThan(0);
-
-      // Star icon is no longer used in badge
-      expect(screen.queryByTestId("star-icon")).not.toBeInTheDocument();
-
-      const externalLinkIcons = screen.getAllByTestId("external-link-icon");
-      expect(externalLinkIcons.length).toBeGreaterThan(0);
-
-      // 箭头图标 - 有多个箭头图标 (action cards use arrows for internal links)
-      const arrowIcons = screen.getAllByTestId("arrow-right-icon");
-      expect(arrowIcons.length).toBeGreaterThanOrEqual(1);
-    });
-
-    it("图标应该有正确的测试ID", () => {
-      render(<CallToAction />);
-
-      // 验证每个图标都有正确的测试ID
-      const phoneIcons = screen.getAllByTestId("phone-icon");
-      phoneIcons.forEach((icon) => {
-        expect(icon).toBeInTheDocument();
-      });
-
-      const arrowIcons = screen.getAllByTestId("arrow-right-icon");
-      arrowIcons.forEach((icon) => {
-        expect(icon).toBeInTheDocument();
-      });
+      const arrowIcon = screen.getByTestId("arrow-right-icon");
+      expect(arrowIcon).toBeInTheDocument();
     });
   });
 
@@ -298,9 +117,8 @@ describe("CallToAction Component - Basic Tests", () => {
       render(<CallToAction />);
 
       // 验证主要翻译键被调用
-      expect(mockT).toHaveBeenCalledWith("title");
-      expect(mockT).toHaveBeenCalledWith("subtitle");
-      expect(mockT).toHaveBeenCalledWith("badge");
+      expect(mockT).toHaveBeenCalledWith("message");
+      expect(mockT).toHaveBeenCalledWith("button");
     });
 
     it("应该处理缺失的翻译", () => {
@@ -310,32 +128,23 @@ describe("CallToAction Component - Basic Tests", () => {
       render(<CallToAction />);
 
       // 组件应该仍然渲染，即使翻译缺失
-      expect(screen.getByText("title")).toBeInTheDocument();
-      expect(screen.getByText("subtitle")).toBeInTheDocument();
+      expect(screen.getByText("message")).toBeInTheDocument();
+      expect(screen.getByText("button")).toBeInTheDocument();
     });
   });
 
-  describe("条件渲染", () => {
-    it("应该在有翻译时渲染内容", () => {
-      render(<CallToAction />);
+  describe("自定义属性", () => {
+    it("应该接受自定义className", () => {
+      render(<CallToAction className="custom-class" />);
 
-      expect(screen.getByText("Ready to Get Started?")).toBeInTheDocument();
-      expect(screen.getByText("Open Source")).toBeInTheDocument();
+      const section = document.querySelector("section");
+      expect(section).toHaveClass("custom-class");
     });
 
-    it("应该处理空翻译值", () => {
-      const mockT = vi.fn((key: string) => {
-        if (key === "badge") return "";
-        return (
-          defaultTranslations[key as keyof typeof defaultTranslations] || key
-        );
-      });
-      mockUseTranslations.mockReturnValue(mockT);
+    it("应该接受自定义i18nNamespace", () => {
+      render(<CallToAction i18nNamespace="custom.namespace" />);
 
-      render(<CallToAction />);
-
-      // 主要内容应该仍然存在
-      expect(screen.getByText("Ready to Get Started?")).toBeInTheDocument();
+      expect(mockUseTranslations).toHaveBeenCalledWith("custom.namespace");
     });
   });
 });
