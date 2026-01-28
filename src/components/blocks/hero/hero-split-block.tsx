@@ -27,9 +27,9 @@ export interface HeroSplitBlockProps {
 }
 
 const DEFAULT_IMAGES = [
-  { src: "/images/hero/bending-machine.jpg", altKey: "bender" },
-  { src: "/images/hero/expander.jpg", altKey: "expander" },
-  { src: "/images/hero/production-line.jpg", altKey: "line" },
+  { src: "/images/hero/bending-machine.svg", altKey: "bender" },
+  { src: "/images/hero/expander.svg", altKey: "expander" },
+  { src: "/images/hero/production-line.svg", altKey: "line" },
 ];
 
 // Safe property access helper using iteration to avoid object injection vulnerability

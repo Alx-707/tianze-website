@@ -10,6 +10,14 @@
 
 Production project, solo development.
 
+## Paradigm
+
+Human defines requirements → AI executes coding.
+
+Evaluate technical decisions by: runtime performance, bundle size, flexibility, maintainability, code ownership.
+
+NOT by: development speed, learning curve, boilerplate amount.
+
 ## Stack
 
 Next.js 16 (App Router, Cache Components) + React 19 + TypeScript 5 + Tailwind CSS 4 + next-intl
