@@ -7,14 +7,16 @@ import {
 } from "@/components/home/below-the-fold-skeleton";
 
 // Dynamic imports for below-the-fold content
-// Simplified for Tianze Pipe Industry - focus on capabilities and CTA
-const ProjectOverview = dynamic(
+// ProductMatrix: 4-column product grid with category cards
+const ProductMatrix = dynamic(
   () =>
-    import("@/components/blocks/features/features-grid-block").then(
-      (m) => m.FeaturesGridBlock,
+    import("@/components/blocks/products/product-matrix-block").then(
+      (m) => m.ProductMatrixBlock,
     ),
   { loading: () => <ProjectOverviewSkeleton /> },
 );
+
+// CTA: simplified gradient banner
 const CallToAction = dynamic(
   () =>
     import("@/components/blocks/cta/cta-banner-block").then(
@@ -26,7 +28,7 @@ const CallToAction = dynamic(
 export function BelowTheFoldClient() {
   return (
     <>
-      <ProjectOverview />
+      <ProductMatrix />
       <CallToAction />
     </>
   );

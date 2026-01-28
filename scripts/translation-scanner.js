@@ -40,7 +40,7 @@ const CONFIG = {
 
   // 允许多命名空间匹配的键（这些键在多个命名空间中重复存在，scanner 无法确定具体使用哪个）
   // 当代码中使用短键名且存在多个完整路径匹配时，跳过缺失检测
-  ALLOW_MULTI_NAMESPACE_KEYS: ["submitting"],
+  ALLOW_MULTI_NAMESPACE_KEYS: ["submitting", "message", "subtitle", "button"],
 };
 
 const scanResults = {
