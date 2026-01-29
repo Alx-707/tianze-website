@@ -3,8 +3,6 @@
  *
  * Provides consistent tag naming and generation for selective cache invalidation.
  * Tags follow the schema: `domain:entity:identifier[:locale]`
- *
- * @see openspec/changes/p1-cache-tag-invalidation/proposal.md
  */
 
 import type { Locale } from "@/types/content.types";

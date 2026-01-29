@@ -6,8 +6,6 @@
  *
  * Note: In Next.js 16, revalidateTag requires a second 'profile' parameter.
  * We use 'max' for stale-while-revalidate semantics (recommended).
- *
- * @see openspec/changes/p1-cache-tag-invalidation/proposal.md
  */
 
 import { revalidatePath, revalidateTag } from "next/cache";

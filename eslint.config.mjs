@@ -264,7 +264,7 @@ export default [
               message:
                 "⚠️ CSS-First Responsive: Prefer Tailwind responsive classes (sm:, md:, lg:) for layout. " +
                 "useBreakpoint is approved only for: (1) interaction logic requiring width detection, " +
-                "(2) analytics/tracking. See openspec/changes/p2-responsive-css-first for details.",
+                "(2) analytics/tracking.",
             },
           ],
         },

@@ -16,8 +16,6 @@ import { cn } from "@/lib/utils";
  * - Touch/mouse event handlers (onTouchStart, onMouseEnter, etc.)
  * - Layout change callbacks for analytics/tracking
  * - Accessibility attributes
- *
- * @see openspec/changes/p2-responsive-css-first for full specification
  */
 
 interface ResponsiveLayoutProps {
