@@ -56,6 +56,7 @@ pnpm ci:local     # Full CI
 2. **Server Components first** — `"use client"` only for interactivity
 3. **i18n required** — All user-facing text via translation keys
 4. **Git** — Never commit on `main`; create feature branch first
+5. **Complexity** — Function ≤120 lines, File ≤500 lines
 
 ## Language
 

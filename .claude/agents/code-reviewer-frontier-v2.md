@@ -265,7 +265,7 @@ key output snippet
 
 ---
 
-## 6) Project-Specific Rules (b2b-web-template)
+## 6) Project-Specific Rules (tianze-website)
 
 ### Authentication Patterns to Look For
 ```typescript
@@ -276,12 +276,17 @@ validateApiKey(request)
 ```
 
 ### Known Sensitive APIs
-| Endpoint | Required Protection |
-|----------|-------------------|
-| `/api/whatsapp/send` | Auth + Rate Limit |
-| `/api/contact` | Turnstile + Rate Limit |
-| `/api/subscribe` | Rate Limit |
-| `/api/cache/invalidate` | Internal Only / Auth |
+| Endpoint | Required Protection | Current Status |
+|----------|---------------------|----------------|
+| `/api/whatsapp/send` | API Key Auth + Rate Limit | ✅ |
+| `/api/whatsapp/webhook` | Signature Verify + Rate Limit | ✅ |
+| `/api/contact` | Rate Limit | ✅ |
+| `/api/inquiry` | Turnstile + Rate Limit | ✅ |
+| `/api/subscribe` | Rate Limit | ✅ |
+| `/api/cache/invalidate` | Secret Auth + Pre/Post Rate Limit | ✅ |
+| `/api/csp-report` | Rate Limit | ✅ |
+| `/api/verify-turnstile` | (Verification endpoint) | - |
+| `/api/health` | (Public healthcheck) | - |
 
 ### i18n Check
 ```bash
