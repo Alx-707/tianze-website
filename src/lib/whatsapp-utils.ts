@@ -5,14 +5,14 @@ import {
   COUNT_TRIPLE,
   HOURS_PER_DAY,
   HTTP_OK,
+  MAX_WA_BUTTON_ID_LENGTH,
+  MAX_WA_MESSAGE_LENGTH,
   MAGIC_9,
   MAGIC_20,
   MAGIC_36,
   MAGIC_72,
-  MAGIC_256,
   ZERO,
 } from "@/constants";
-import { MAGIC_4096 } from "@/constants/count";
 
 /**
  * WhatsApp Business API 工具函数
@@ -28,7 +28,7 @@ export class WhatsAppUtils {
    */
   static validatePhoneNumber(phoneNumber: string): boolean {
     // 基本验证：应该包含国家代码，只包含数字
-    const phoneRegex = /^\d{COUNT_TEN,15}$/;
+    const phoneRegex = /^\d{10,15}$/;
     return phoneRegex.test(phoneNumber.replace(/\D/g, ""));
   }
 
@@ -44,7 +44,7 @@ export class WhatsAppUtils {
    */
   static validateMessageLength(
     message: string,
-    maxLength: number = MAGIC_4096,
+    maxLength: number = MAX_WA_MESSAGE_LENGTH,
   ): boolean {
     return message.length <= maxLength;
   }
@@ -76,7 +76,7 @@ export class WhatsAppUtils {
         typeof button.id === "string" &&
         typeof button.title === "string" &&
         button.id.length > ZERO &&
-        button.id.length <= MAGIC_256 &&
+        button.id.length <= MAX_WA_BUTTON_ID_LENGTH &&
         button.title.length > ZERO &&
         button.title.length <= MAGIC_20,
     );

@@ -9,12 +9,12 @@ import type {
 } from "@/types/whatsapp-api-config/interfaces";
 import type { ErrorCode } from "@/types/whatsapp-api-config/types";
 import {
-  MAGIC_131,
-  MAGIC_131000,
-  MAGIC_131014,
-  MAGIC_131016,
-  MAGIC_131052,
-  MAGIC_131053,
+  WA_ERR_TEMPORARY,
+  WA_ERR_API_TEMPORARY,
+  WA_ERR_API_TIMEOUT,
+  WA_ERR_API_UNAVAILABLE,
+  WA_ERR_MEDIA_DOWNLOAD,
+  WA_ERR_MEDIA_UPLOAD,
 } from "@/constants";
 
 /**
@@ -48,12 +48,12 @@ export const ERROR_CODE_MESSAGES: Record<ErrorCode, string> = {
  * Retryable error codes
  */
 export const RETRYABLE_ERROR_CODES: ErrorCode[] = [
-  MAGIC_131, // Generic temporary error
-  MAGIC_131000, // Generic temporary error
-  MAGIC_131014, // Request timeout
-  MAGIC_131016, // Service temporarily unavailable
-  MAGIC_131052, // Media download error
-  MAGIC_131053, // Media upload error
+  WA_ERR_TEMPORARY, // Generic temporary error
+  WA_ERR_API_TEMPORARY, // Generic temporary error
+  WA_ERR_API_TIMEOUT, // Request timeout
+  WA_ERR_API_UNAVAILABLE, // Service temporarily unavailable
+  WA_ERR_MEDIA_DOWNLOAD, // Media download error
+  WA_ERR_MEDIA_UPLOAD, // Media upload error
 ];
 
 /**

@@ -3,29 +3,36 @@ import { WhatsAppUtils } from "../whatsapp-utils";
 
 describe("WhatsAppUtils", () => {
   describe("validatePhoneNumber", () => {
-    // Note: Current implementation has a regex bug where COUNT_TEN is literal string
-    // instead of interpolated. Tests reflect actual implementation behavior.
-    // The regex /^\d{COUNT_TEN,15}$/ always returns false due to literal COUNT_TEN.
-
-    it("should return false for any input due to regex bug", () => {
-      // Due to regex using literal 'COUNT_TEN' instead of interpolated value
-      expect(WhatsAppUtils.validatePhoneNumber("1234567890")).toBe(false);
-      expect(WhatsAppUtils.validatePhoneNumber("123456789012345")).toBe(false);
-      expect(WhatsAppUtils.validatePhoneNumber("+1234567890")).toBe(false);
-      expect(WhatsAppUtils.validatePhoneNumber("123-456-7890")).toBe(false);
+    it("should return true for valid 10-digit phone number", () => {
+      expect(WhatsAppUtils.validatePhoneNumber("1234567890")).toBe(true);
     });
 
-    it("should return false for too few digits", () => {
+    it("should return true for valid 15-digit phone number", () => {
+      expect(WhatsAppUtils.validatePhoneNumber("123456789012345")).toBe(true);
+    });
+
+    it("should return true for phone number with country code prefix", () => {
+      expect(WhatsAppUtils.validatePhoneNumber("+1234567890")).toBe(true);
+    });
+
+    it("should return true for phone number with formatting", () => {
+      expect(WhatsAppUtils.validatePhoneNumber("123-456-7890")).toBe(true);
+    });
+
+    it("should return false for 9 digits (too few)", () => {
       expect(WhatsAppUtils.validatePhoneNumber("123456789")).toBe(false);
-      expect(WhatsAppUtils.validatePhoneNumber("12345")).toBe(false);
     });
 
-    it("should return false for too many digits", () => {
+    it("should return false for 16 digits (too many)", () => {
       expect(WhatsAppUtils.validatePhoneNumber("1234567890123456")).toBe(false);
     });
 
     it("should return false for empty string", () => {
       expect(WhatsAppUtils.validatePhoneNumber("")).toBe(false);
+    });
+
+    it("should return false for non-digit only string", () => {
+      expect(WhatsAppUtils.validatePhoneNumber("abcdefghij")).toBe(false);
     });
   });
 

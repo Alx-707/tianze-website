@@ -2,7 +2,7 @@ import {
   ANIMATION_DURATION_VERY_SLOW,
   HTTP_BAD_REQUEST,
   HTTP_UNAUTHORIZED,
-  MAGIC_429,
+  WA_ERR_RATE_LIMIT,
   SECONDS_PER_MINUTE,
 } from "@/constants";
 
@@ -70,7 +70,7 @@ export class WhatsAppError extends Error {
    */
   isRetryable(): boolean {
     // Rate limit errors are retryable
-    if (this.code === MAGIC_429) return true;
+    if (this.code === WA_ERR_RATE_LIMIT) return true;
 
     // Network errors are retryable
     if (this.code >= 500) return true;
@@ -238,7 +238,7 @@ export class WhatsAppRateLimitError extends WhatsAppError {
     message: string,
     options?: { retryAfter?: number; limit?: number; remaining?: number },
   ) {
-    super(message, MAGIC_429, { type: "RateLimitError" });
+    super(message, WA_ERR_RATE_LIMIT, { type: "RateLimitError" });
     this.name = "WhatsAppRateLimitError";
     if (options?.retryAfter !== undefined) this.retryAfter = options.retryAfter;
     if (options?.limit !== undefined) this.limit = options.limit;
@@ -481,7 +481,7 @@ function handleRateLimitError(
   status: number,
   data?: Record<string, unknown>,
 ): WhatsAppError | null {
-  if (status !== MAGIC_429) return null;
+  if (status !== WA_ERR_RATE_LIMIT) return null;
 
   const errorData = data as Record<string, unknown>;
   const retryAfter =

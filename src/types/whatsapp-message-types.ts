@@ -11,7 +11,7 @@ import {
   COUNT_TEN,
   COUNT_TRIPLE,
   MAGIC_20,
-  MAGIC_4096,
+  MAX_WA_MESSAGE_LENGTH,
   ONE,
   ZERO,
 } from "@/constants";
@@ -339,8 +339,10 @@ export function validateTextMessage(
     errors.push("Text message body cannot be empty");
   }
 
-  if (message.text.body && message.text.body.length > MAGIC_4096) {
-    errors.push("Text message body cannot exceed MAGIC_4096 characters");
+  if (message.text.body && message.text.body.length > MAX_WA_MESSAGE_LENGTH) {
+    errors.push(
+      `Text message body cannot exceed ${MAX_WA_MESSAGE_LENGTH} characters`,
+    );
   }
 
   return { isValid: errors.length === ZERO, errors, warnings };

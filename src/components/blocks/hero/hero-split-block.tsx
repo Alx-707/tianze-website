@@ -32,24 +32,14 @@ const DEFAULT_IMAGES = [
   { src: "/images/hero/production-line.svg", altKey: "line" },
 ];
 
-// Safe property access helper using iteration to avoid object injection vulnerability
-function getNestedValue(obj: unknown, path: string): string {
+// 安全的嵌套属性访问 - 数据来自开发者维护的 messages 对象，无外部攻击面
+function getNestedValue(obj: HeroSplitBlockMessages, path: string): string {
   const parts = path.split(".");
   let cur: unknown = obj;
   for (const p of parts) {
     if (typeof cur !== "object" || cur === null) return "";
-    const record = cur as Record<string, unknown>;
-    let found = false;
-    let next: unknown;
-    for (const [key, value] of Object.entries(record)) {
-      if (key === p) {
-        next = value;
-        found = true;
-        break;
-      }
-    }
-    if (!found) return "";
-    cur = next;
+    // eslint-disable-next-line security/detect-object-injection -- 内部 i18n messages，路径由开发者硬编码
+    cur = (cur as Record<string, unknown>)[p];
   }
   return typeof cur === "string" ? cur : "";
 }
