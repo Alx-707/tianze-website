@@ -38,6 +38,8 @@ pre-commit:
         for f in $FILES; do
           # 例外：配置文件必须使用相对路径（TypeScript 路径别名在 Node.js 运行时不可用）
           if [ "$f" = "src/config/security.ts" ] || [ "$f" = "next.config.ts" ] || [ "$f" = "middleware.ts" ]; then continue; fi
+          # 例外：barrel files (index.ts) 从子模块导入必须使用相对路径
+          if [[ "$f" == *"/index.ts" ]]; then continue; fi
           if git diff --cached -- "$f" | grep -qE "^\+.*from ['\"']\./|^\+.*from ['\"']\.\./"; then
             echo "❌ 发现新增相对路径导入: $f"; echo "🚫 请使用 @/ 路径别名替代相对路径导入";
             echo "例如：import { something } from '@/lib/module'"; exit 1; fi

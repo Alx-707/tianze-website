@@ -4,13 +4,13 @@ import {
   COUNT_PAIR,
   COUNT_TEN,
   COUNT_TRIPLE,
-  MAGIC_300000,
+  FIVE_MINUTES_MS,
+  MINUTE_MS,
   PERCENTAGE_FULL,
   TEN_SECONDS_MS,
   THIRTY_SECONDS_MS,
   ZERO,
 } from "@/constants";
-import { MINUTE_MS } from "@/constants/time";
 
 /**
  * WhatsApp Service Configuration Types
@@ -306,7 +306,7 @@ export const DEFAULT_CIRCUIT_BREAKER_CONFIG: CircuitBreakerConfig = {
  * Sensible defaults for caching
  */
 export const DEFAULT_CACHE_CONFIG: CacheConfig = {
-  ttl: MAGIC_300000, // 5 minutes
+  ttl: FIVE_MINUTES_MS, // 5 minutes
   maxSize: ANIMATION_DURATION_VERY_SLOW,
   strategy: "lru",
 };
@@ -340,7 +340,7 @@ export function validateServiceOptions(
   if (
     options.timeout &&
     (options.timeout < ANIMATION_DURATION_VERY_SLOW ||
-      options.timeout > MAGIC_300000)
+      options.timeout > FIVE_MINUTES_MS)
   ) {
     return false; // Timeout should be between 1s and 5min
   }

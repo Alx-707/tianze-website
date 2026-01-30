@@ -1,5 +1,11 @@
-import { COUNT_PAIR, MAGIC_12, MAGIC_16, ZERO } from "@/constants";
-import { COUNT_256, COUNT_100000 } from "@/constants/count";
+import {
+  AES_KEY_LENGTH_BITS,
+  COUNT_PAIR,
+  MAGIC_12,
+  MAGIC_16,
+  PBKDF2_ITERATIONS,
+  ZERO,
+} from "@/constants";
 
 /**
  * 加密和密码哈希工具
@@ -220,11 +226,11 @@ export async function encryptData(
     {
       name: "PBKDF2",
       salt,
-      iterations: COUNT_100000,
+      iterations: PBKDF2_ITERATIONS,
       hash: "SHA-256",
     },
     passwordKey,
-    { name: "AES-GCM", length: COUNT_256 },
+    { name: "AES-GCM", length: AES_KEY_LENGTH_BITS },
     false,
     ["encrypt"],
   );
@@ -306,11 +312,11 @@ export async function decryptData(params: {
     {
       name: "PBKDF2",
       salt,
-      iterations: COUNT_100000,
+      iterations: PBKDF2_ITERATIONS,
       hash: "SHA-256",
     },
     passwordKey,
-    { name: "AES-GCM", length: COUNT_256 },
+    { name: "AES-GCM", length: AES_KEY_LENGTH_BITS },
     false,
     ["decrypt"],
   );
@@ -330,7 +336,7 @@ export async function decryptData(params: {
  */
 export function generateEncryptionKey(): Promise<CryptoKey> {
   return crypto.subtle.generateKey(
-    { name: "AES-GCM", length: COUNT_256 },
+    { name: "AES-GCM", length: AES_KEY_LENGTH_BITS },
     true,
     ["encrypt", "decrypt"],
   );
