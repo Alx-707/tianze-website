@@ -65,6 +65,7 @@ function createNetworkErrorResponse(verifyError: Error, clientIP: string) {
  */
 function checkTurnstileConfigured(): NextResponse | null {
   if (!env.TURNSTILE_SECRET_KEY) {
+    logger.error("Turnstile not configured - TURNSTILE_SECRET_KEY missing");
     return createApiErrorResponse(
       API_ERROR_CODES.TURNSTILE_NOT_CONFIGURED,
       HTTP_INTERNAL_ERROR,

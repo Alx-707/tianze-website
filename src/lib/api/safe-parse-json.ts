@@ -31,6 +31,10 @@ export async function safeParseJson<T>(
     const raw = await req.json();
 
     if (raw === null || typeof raw !== "object" || Array.isArray(raw)) {
+      logger.warn("Invalid JSON structure - expected object", {
+        route: options?.route,
+        receivedType: Array.isArray(raw) ? "array" : typeof raw,
+      });
       return { ok: false, errorCode: API_ERROR_CODES.INVALID_JSON_BODY };
     }
 
