@@ -24,8 +24,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     # Secrets are not available for fork PRs, and may be unset in template repos.
-    # Skip deploy jobs unless all required Vercel credentials are configured.
-    if: github.event_name != 'workflow_dispatch' && secrets.VERCEL_TOKEN != '' && secrets.VERCEL_ORG_ID != '' && secrets.VERCEL_PROJECT_ID != ''
+    # If secrets are missing, subsequent steps will fail naturally.
+    if: github.event_name != 'workflow_dispatch'
 
     outputs:
       preview_url: ${{ steps.vercel_cli_deploy.outputs.deployment-url }}
@@ -176,8 +176,8 @@ jobs:
     name: 部署到 Production（--prod）
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    # Production deploy is manual, but still requires configured Vercel credentials.
-    if: github.event_name == 'workflow_dispatch' && secrets.VERCEL_TOKEN != '' && secrets.VERCEL_ORG_ID != '' && secrets.VERCEL_PROJECT_ID != ''
+    # Production deploy is manual. If secrets are missing, steps will fail naturally.
+    if: github.event_name == 'workflow_dispatch'
 
     outputs:
       prod_url: ${{ steps.vercel_cli_deploy_prod.outputs.deployment-url }}
