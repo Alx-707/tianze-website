@@ -1,0 +1,151 @@
+# Tianze Products Catalog
+# Structured product data for AI retrieval
+
+categories:
+
+  # ============================================
+  # Category A: Equipment (设备类)
+  # ============================================
+  equipment:
+    name_cn: 设备类
+    name_en: Pipe Processing Equipment
+    description: In-house developed machinery for pipe processing
+    strategic_role: Upstream capability - differentiator from pure traders
+    items:
+      - id: EQ-001
+        name_en: PVC Semi-automatic Bending Machine
+        name_cn: PVC半自动弯管机
+      - id: EQ-002
+        name_en: PVC Fully-automatic Bending Machine
+        name_cn: PVC全自动弯管机
+      - id: EQ-003
+        name_en: Pipe Expander
+        name_cn: 扩管机
+      - id: EQ-004
+        name_en: Pipe Cutter
+        name_cn: 切管机
+      - id: EQ-005
+        name_en: Custom Molds
+        name_cn: 定制模具
+
+  # ============================================
+  # Category B: Electrical Conduit System (电工套管系统)
+  # ============================================
+  electrical_conduit:
+    name_cn: 电工套管系统
+    name_en: Electrical Conduit System
+    description: PVC conduits for electrical wiring protection
+    applications:
+      - Building electrical engineering
+      - Pre-embedded construction
+      - Wire conduit installation
+    standards:
+      - Schedule 40 (US)
+      - Schedule 80 (US)
+      - ASTM
+    properties:
+      material: Rigid PVC
+      features:
+        - Corrosion-resistant
+        - Flame-retardant
+        - High insulation
+        - Expand mouth processing available
+        - Pre-fabricated bends (45°, 90°)
+    lifespan_years: 30
+
+    subcategories:
+      straight_pipes:
+        name_cn: PVC直管
+        name_en: PVC Straight Pipes
+        items:
+          - id: SC-001
+            name: WG-A15 PVC Straight Pipe
+            length_range: 0.3m - 1m
+          - id: SC-002
+            name: ASTM Standard PVC Hard Plastic Wire Pipe
+
+      bends_fittings:
+        name_cn: PVC弯管与配件
+        name_en: PVC Bends & Fittings
+        items:
+          - id: BF-001
+            name: Rigid PVC Conduit Bend
+            specs: 1-1/2 inch x 45-degree
+          - id: BF-002
+            name: Crescent Moon Rigid PVC Electrical Conduit Pipe Fittings
+            diameter_range: DN40-160mm
+          - id: BF-003
+            name: Bell End / Socket (喇叭口弯管)
+          - id: BF-004
+            name: Double Socket Pipe (双承口弯管)
+          - id: BF-005
+            name: PVC Elbow / Sweep
+
+  # ============================================
+  # Category C: Pneumatic Tube System (气动传输管系统)
+  # ============================================
+  pneumatic_tube:
+    name_cn: 气动传输管系统
+    name_en: Pneumatic Tube System
+    description: High-transparency tubes for hospital/lab logistics
+    strategic_role: High-margin differentiated product (第一梯队)
+    applications:
+      - Hospital pharmacy dispensing
+      - Laboratory sample transport
+      - Bank document transfer
+      - Industrial logistics
+    materials:
+      - PETG (primary)
+      - PVC
+      - PMMA
+    properties:
+      - High transparency (可视化)
+      - Impact-resistant
+      - Leak-proof (防漏)
+      - Quiet operation (静音)
+      - Airtight seal
+    common_diameter_mm: 110
+    common_spec: "110*2.3 R800/R650"
+
+    subcategories:
+      straight_tubes:
+        name_cn: PETG透明直管
+        name_en: PETG Straight Transparent Pipes
+        items:
+          - id: PT-001
+            name: Hospital Pneumatic Tube Straight Transparent PETG Pipe System
+
+      system_bends:
+        name_cn: 传输系统弯管
+        name_en: System Bends
+        items:
+          - id: PB-001
+            name: "110*2.3 R800 Pneumatic Tube Bend"
+
+  # ============================================
+  # Category D: Water Supply Pipes (给水管)
+  # ============================================
+  water_supply:
+    name_cn: 给水管
+    name_en: Water Supply Pipes
+    applications:
+      - Municipal water supply
+      - Building drainage
+      - Agricultural irrigation
+    properties:
+      material: PVC
+      features:
+        - Corrosion-resistant
+        - UV-resistant (for outdoor use)
+        - Chemical-resistant
+    standards:
+      - ASTM
+
+# Strategic product tiers
+product_strategy:
+  tier_1_differentiated:
+    name: PETG Pneumatic Tube System
+    reason: Special material (PETG), professional application (hospital/lab), high margin
+  tier_2_volume:
+    name: PVC Electrical Conduit (US Standard)
+    reason: Complete specs (Schedule 80), mainstream standard compliance, suitable for bulk engineering orders

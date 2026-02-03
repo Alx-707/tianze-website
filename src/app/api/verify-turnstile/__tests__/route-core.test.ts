@@ -27,6 +27,7 @@ describe("Verify Turnstile API Route - Core Tests", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockFetch.mockClear();
+    vi.stubEnv("VERCEL", "1");
   });
 
   describe("POST /api/verify-turnstile - Basic Functionality", () => {

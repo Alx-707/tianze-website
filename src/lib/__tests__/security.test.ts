@@ -1,7 +1,6 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { validateFileUpload } from "@/lib/security-file-upload";
 import { checkSecurityConfig } from "@/lib/security-headers";
-import { rateLimit } from "@/lib/security-rate-limit";
 import { generateSecureToken } from "@/lib/security-tokens";
 import {
   isValidEmail,
@@ -92,36 +91,6 @@ describe("Security Utils", () => {
 
     it("should use default length", () => {
       expect(generateSecureToken()).toHaveLength(32);
-    });
-  });
-
-  describe("rateLimit", () => {
-    beforeEach(() => {
-      // Clear rate limit store before each test
-      vi.clearAllMocks();
-    });
-
-    it("should allow requests within limit", () => {
-      expect(rateLimit("test-user", 5, 60000)).toBe(true);
-      expect(rateLimit("test-user", 5, 60000)).toBe(true);
-      expect(rateLimit("test-user", 5, 60000)).toBe(true);
-    });
-
-    it("should block requests exceeding limit", () => {
-      // Make 5 requests (should all pass)
-      for (let i = 0; i < 5; i++) {
-        expect(rateLimit("test-user-2", 5, 60000)).toBe(true);
-      }
-
-      // 6th request should be blocked
-      expect(rateLimit("test-user-2", 5, 60000)).toBe(false);
-    });
-
-    it("should handle different identifiers separately", () => {
-      expect(rateLimit("user1", 2, 60000)).toBe(true);
-      expect(rateLimit("user2", 2, 60000)).toBe(true);
-      expect(rateLimit("user1", 2, 60000)).toBe(true);
-      expect(rateLimit("user2", 2, 60000)).toBe(true);
     });
   });
 

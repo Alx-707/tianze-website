@@ -156,6 +156,7 @@ function toContentQueryOptions(options?: PostListOptions): ContentQueryOptions {
  * Cache tags enable selective invalidation:
  * - `content:list:blog:{locale}` - Invalidate blog list for this locale
  */
+/* eslint-disable require-await -- Next.js "use cache" functions must be async even if implementation is sync */
 export const getAllPostsCached: GetAllPostsCachedFn = async (
   locale,
   options,
@@ -166,10 +167,11 @@ export const getAllPostsCached: GetAllPostsCachedFn = async (
 
   const normalizedOptions = toContentQueryOptions(options);
 
-  const posts = await Promise.resolve(getAllPosts(locale, normalizedOptions));
+  const posts = getAllPosts(locale, normalizedOptions);
 
   return posts.map((post) => mapBlogPostToSummary(post, locale));
 };
+/* eslint-enable require-await */
 
 /**
  * Get a single blog post by slug as a PostDetail model.
@@ -181,6 +183,7 @@ export const getAllPostsCached: GetAllPostsCachedFn = async (
  * - `content:blog:{slug}:{locale}` - Invalidate this specific post
  * - `content:list:blog:{locale}` - Also tagged for list invalidation cascade
  */
+/* eslint-disable require-await -- Next.js "use cache" functions must be async even if implementation is sync */
 export const getPostBySlugCached: GetPostBySlugCachedFn = async (
   locale,
   slug,
@@ -190,7 +193,8 @@ export const getPostBySlugCached: GetPostBySlugCachedFn = async (
   cacheTag(contentTags.blogPost(slug, locale));
   cacheTag(contentTags.blogList(locale));
 
-  const post = await Promise.resolve(getPostBySlug(slug, locale));
+  const post = getPostBySlug(slug, locale);
 
   return mapBlogPostToDetail(post, locale);
 };
+/* eslint-enable require-await */

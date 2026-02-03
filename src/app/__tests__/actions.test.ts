@@ -56,6 +56,7 @@ describe("actions.ts", () => {
     vi.clearAllMocks();
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2024-06-15T12:00:00Z"));
+    vi.stubEnv("VERCEL", "1");
     // Reset mockHeadersGet to default behavior
     mockHeadersGet.mockImplementation((key: string) => {
       if (key === "x-forwarded-for") return "192.168.1.100";
@@ -257,36 +258,13 @@ describe("actions.ts", () => {
         await contactFormAction(null, formData);
 
         expect(checkDistributedRateLimit).toHaveBeenCalledWith(
-          "192.168.1.100",
+          expect.stringMatching(/^ip:[0-9a-f]{16}$/),
           "contact",
         );
-      });
 
-      it("should use x-real-ip when x-forwarded-for is not available", async () => {
-        mockHeadersGet.mockImplementation((key: string) => {
-          if (key === "x-real-ip") return "10.0.0.50";
-          return null;
-        });
-
-        const formData = createFormData(getValidFormData());
-        await contactFormAction(null, formData);
-
-        expect(checkDistributedRateLimit).toHaveBeenCalledWith(
-          "10.0.0.50",
-          "contact",
-        );
-      });
-
-      it('should use "unknown" when no IP headers available', async () => {
-        mockHeadersGet.mockReturnValue(null);
-
-        const formData = createFormData(getValidFormData());
-        await contactFormAction(null, formData);
-
-        expect(checkDistributedRateLimit).toHaveBeenCalledWith(
-          "unknown",
-          "contact",
-        );
+        const [identifier] = vi.mocked(checkDistributedRateLimit).mock
+          .calls[0] ?? [""];
+        expect(String(identifier)).not.toContain("192.168.1.100");
       });
     });
 
@@ -342,9 +320,13 @@ describe("actions.ts", () => {
         await contactFormAction(null, formData);
 
         expect(checkDistributedRateLimit).toHaveBeenCalledWith(
-          "203.0.113.50",
+          expect.stringMatching(/^ip:[0-9a-f]{16}$/),
           "contact",
         );
+
+        const [identifier] = vi.mocked(checkDistributedRateLimit).mock
+          .calls[0] ?? [""];
+        expect(String(identifier)).not.toContain("203.0.113.50");
       });
 
       it("should pass client IP to Turnstile verification", async () => {

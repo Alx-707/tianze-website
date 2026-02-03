@@ -66,7 +66,6 @@ vi.mock("@/lib/security/distributed-rate-limit", () => ({
 
 // Mock contact API utils
 vi.mock("@/app/api/contact/contact-api-utils", () => ({
-  getClientIP: vi.fn().mockReturnValue("127.0.0.1"),
   verifyTurnstile: vi.fn().mockResolvedValue(true),
 }));
 
@@ -88,15 +87,6 @@ vi.mock("@/app/api/contact/contact-api-validation", async () => {
     getContactFormStats: vi.fn(),
   };
 });
-
-// Mock environment variables
-vi.mock("../../../../env.mjs", () => ({
-  env: {
-    NODE_ENV: "test",
-    ADMIN_API_TOKEN: "test-admin-token",
-    TURNSTILE_SECRET_KEY: "test-turnstile-key",
-  },
-}));
 
 // Mock process.env for Turnstile verification
 Object.defineProperty(process, "env", {
@@ -120,7 +110,6 @@ describe("Contact API Route", () => {
 
     // Reset contact-api-utils mocks
     const contactApiUtils = await import("@/app/api/contact/contact-api-utils");
-    vi.mocked(contactApiUtils.getClientIP).mockReturnValue("127.0.0.1");
     vi.mocked(contactApiUtils.verifyTurnstile).mockResolvedValue(true);
   });
 

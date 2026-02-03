@@ -27,6 +27,7 @@ describe("Verify Turnstile API Route", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockFetch.mockClear();
+    vi.stubEnv("VERCEL", "1");
   });
 
   describe("POST /api/verify-turnstile", () => {
@@ -240,11 +241,11 @@ describe("Verify Turnstile API Route", () => {
 
       await POST(request);
 
-      // 验证fetch调用中包含了正确的IP地址（完整的x-forwarded-for值）
+      // 验证 fetch 调用中包含了正确的 IP 地址（只取 x-forwarded-for 的第一个 IP）
       const fetchCall = mockFetch.mock.calls[0];
       const formData = fetchCall?.[1]?.body;
       const formDataString = formData?.toString();
-      expect(formDataString).toContain("remoteip=192.168.1.1%2C+10.0.0.1"); // URL encoded "192.168.1.1, 10.0.0.1"
+      expect(formDataString).toContain("remoteip=192.168.1.1");
     });
 
     it("应该忽略客户端提供的remoteip参数（安全措施）", async () => {

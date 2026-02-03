@@ -284,3 +284,55 @@ export function getIPChain(request: NextRequest): string[] {
 
   return chain;
 }
+
+type HeadersLike = Pick<Headers, "get">;
+
+function getIPFromTrustedHeadersLike(
+  headers: HeadersLike,
+  config: TrustedProxyConfig,
+): string | null {
+  for (const headerName of config.trustedHeaders) {
+    const headerValue = headers.get(headerName);
+    if (headerValue) {
+      const ip = parseFirstIP(headerValue);
+      if (isValidIP(ip)) return ip;
+    }
+  }
+  return null;
+}
+
+/**
+ * Extract client IP from headers (Server Actions / non-NextRequest contexts)
+ *
+ * This uses the same trusted proxy model as getClientIP(request), but since
+ * we don't have access to request.ip, the fallback behavior differs:
+ * - No platform configured: returns FALLBACK_IP (does NOT trust proxy headers)
+ * - Platform configured: trusts only the platform's trusted headers
+ *
+ * @example
+ * ```ts
+ * const h = await headers();
+ * const clientIP = getClientIPFromHeaders(h);
+ * ```
+ */
+export function getClientIPFromHeaders(headers: HeadersLike): string {
+  const platform = getDeploymentPlatform();
+
+  // If no platform configured, don't trust proxy headers (security)
+  if (!platform) {
+    return FALLBACK_IP;
+  }
+
+  const config = getPlatformConfig(platform);
+  if (!config) {
+    return FALLBACK_IP;
+  }
+
+  const headerIP = getIPFromTrustedHeadersLike(headers, config);
+  if (headerIP) return headerIP;
+
+  // Development localhost fallback
+  if (platform === "development") return LOCALHOST_IP;
+
+  return FALLBACK_IP;
+}

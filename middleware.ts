@@ -4,7 +4,7 @@ import { generateNonce, getSecurityHeaders } from "@/config/security";
 import { routing } from "@/i18n/routing-config";
 
 const intlMiddleware = createMiddleware(routing);
-const SUPPORTED_LOCALES = new Set(["en", "zh"]);
+const SUPPORTED_LOCALES = new Set(routing.locales);
 
 function addSecurityHeaders(response: NextResponse, nonce: string): void {
   const securityHeaders = getSecurityHeaders(nonce);
@@ -22,16 +22,14 @@ function extractLocaleCandidate(pathname: string): string | undefined {
 function setLocaleCookie(resp: NextResponse, locale: string): void {
   try {
     const isProduction = process.env.NODE_ENV === "production";
+    const maxAge = routing.localeCookie?.maxAge;
     resp.cookies.set("NEXT_LOCALE", locale, {
       path: "/",
       httpOnly: true,
       sameSite: "lax",
       secure: isProduction,
+      ...(typeof maxAge === "number" ? { maxAge } : {}),
     });
-    resp.headers.append(
-      "set-cookie",
-      `NEXT_LOCALE=${locale}; Path=/; SameSite=Lax; HttpOnly${isProduction ? "; Secure" : ""}`,
-    );
   } catch {
     // ignore cookie errors
   }

@@ -152,9 +152,9 @@ export function getContentConfig(): ContentConfig {
     // Validate config file path for security
     const validatedConfigPath = validateFilePath(configPath, CONTENT_DIR);
 
-    // eslint-disable-next-line security/detect-non-literal-fs-filename
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- validatedConfigPath is validated by validateFilePath (no path traversal)
     if (fs.existsSync(validatedConfigPath)) {
-      // eslint-disable-next-line security/detect-non-literal-fs-filename
+      // eslint-disable-next-line security/detect-non-literal-fs-filename -- validatedConfigPath is validated by validateFilePath (no path traversal)
       const configContent = fs.readFileSync(validatedConfigPath, "utf-8");
       const config = JSON.parse(configContent) as Partial<ContentConfig>;
 
@@ -242,10 +242,10 @@ export function getValidationConfig(): ValidationConfig {
     const configPath = path.join(CONFIG_DIR, "content.json");
     const validatedConfigPath = validateFilePath(configPath, CONTENT_DIR);
 
-    // eslint-disable-next-line security/detect-non-literal-fs-filename
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- validatedConfigPath is validated by validateFilePath (no path traversal)
     if (!fs.existsSync(validatedConfigPath)) return fallback;
 
-    // eslint-disable-next-line security/detect-non-literal-fs-filename
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- validatedConfigPath is validated by validateFilePath (no path traversal)
     const configContent = fs.readFileSync(validatedConfigPath, "utf-8");
     const config = JSON.parse(configContent) as Record<string, unknown>;
     const validation = config["validation"] as

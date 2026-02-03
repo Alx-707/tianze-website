@@ -58,8 +58,8 @@ describe("CSP Report API Route - 集成测试", () => {
 
       expect(response.status).toBe(200);
       expect(console.warn).toHaveBeenCalledWith(
-        "CSP Violation Report:",
-        expect.any(String),
+        "CSP Violation Report",
+        expect.any(Object),
       );
     });
 
@@ -101,7 +101,13 @@ describe("CSP Report API Route - 集成测试", () => {
         expect(response.status).toBe(200);
       }
 
-      expect(console.warn).toHaveBeenCalledTimes(3);
+      const warnMock = console.warn as unknown as {
+        mock: { calls: unknown[][] };
+      };
+      const cspWarnCalls = warnMock.mock.calls.filter(
+        (call) => call[0] === "CSP Violation Report",
+      );
+      expect(cspWarnCalls).toHaveLength(3);
     });
   });
 });

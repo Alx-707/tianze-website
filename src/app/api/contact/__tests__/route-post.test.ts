@@ -23,7 +23,6 @@ const {
   mockExtendedSchema,
   mockCheckDistributedRateLimit,
   mockCreateRateLimitHeaders,
-  mockGetClientIP,
   mockVerifyTurnstile,
   mockValidateFormData,
   mockProcessFormSubmission,
@@ -69,7 +68,6 @@ const {
       retryAfter: null,
     })),
     mockCreateRateLimitHeaders: vi.fn(() => new Headers()),
-    mockGetClientIP: vi.fn(() => "127.0.0.1"),
     mockVerifyTurnstile: vi.fn(() => Promise.resolve(true)),
     mockValidateFormData: vi.fn(),
     mockProcessFormSubmission: vi.fn(),
@@ -105,7 +103,6 @@ vi.mock("@/lib/security/distributed-rate-limit", () => ({
 
 // Mock contact API utils
 vi.mock("@/app/api/contact/contact-api-utils", () => ({
-  getClientIP: mockGetClientIP,
   verifyTurnstile: mockVerifyTurnstile,
 }));
 
@@ -209,7 +206,6 @@ describe("Contact API Route - POST Tests", () => {
       resetTime: Date.now() + 60000,
       retryAfter: null,
     });
-    mockGetClientIP.mockReturnValue("127.0.0.1");
     mockVerifyTurnstile.mockResolvedValue(true);
 
     // Setup validation mocks

@@ -1,9 +1,23 @@
 import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { GET, OPTIONS, POST } from "@/app/api/csp-report/route";
 
 // Unmock zod to use real validation in this test file
 vi.unmock("zod");
+
+async function callPOST(request: NextRequest) {
+  const { POST } = await import("../route");
+  return POST(request);
+}
+
+async function callGET() {
+  const { GET } = await import("../route");
+  return GET();
+}
+
+async function callOPTIONS() {
+  const { OPTIONS } = await import("../route");
+  return OPTIONS();
+}
 
 describe("CSP Report API Route", () => {
   beforeEach(() => {
@@ -45,15 +59,15 @@ describe("CSP Report API Route", () => {
         },
       });
 
-      const response = await POST(request);
+      const response = await callPOST(request);
       const data = await response.json();
 
       expect(response.status).toBe(200);
       expect(data.status).toBe("received");
       expect(data.timestamp).toBeDefined();
       expect(console.warn).toHaveBeenCalledWith(
-        "CSP Violation Report:",
-        expect.any(String),
+        "CSP Violation Report",
+        expect.any(Object),
       );
     });
 
@@ -66,7 +80,7 @@ describe("CSP Report API Route", () => {
         },
       });
 
-      const response = await POST(request);
+      const response = await callPOST(request);
       const data = await response.json();
 
       expect(response.status).toBe(400);
@@ -79,7 +93,7 @@ describe("CSP Report API Route", () => {
         body: JSON.stringify(validCSPReport),
       });
 
-      const response = await POST(request);
+      const response = await callPOST(request);
       const data = await response.json();
 
       expect(response.status).toBe(400);
@@ -95,7 +109,7 @@ describe("CSP Report API Route", () => {
         },
       });
 
-      const response = await POST(request);
+      const response = await callPOST(request);
       const data = await response.json();
 
       expect(response.status).toBe(400);
@@ -115,7 +129,7 @@ describe("CSP Report API Route", () => {
         },
       });
 
-      const response = await POST(request);
+      const response = await callPOST(request);
       const data = await response.json();
 
       expect(response.status).toBe(400);
@@ -140,13 +154,13 @@ describe("CSP Report API Route", () => {
         },
       });
 
-      const response = await POST(request);
+      const response = await callPOST(request);
 
       expect(response.status).toBe(200);
       expect(console.error).toHaveBeenCalledWith(
-        "SUSPICIOUS CSP VIOLATION DETECTED:",
+        "SUSPICIOUS CSP VIOLATION DETECTED",
         expect.objectContaining({
-          ip: "192.168.1.100",
+          ip: "[REDACTED_IP]",
           userAgent: null, // 测试环境中user-agent为null
           timestamp: expect.any(String),
           blockedUri: 'data:text/html,<script>eval("malicious")</script>',
@@ -156,16 +170,13 @@ describe("CSP Report API Route", () => {
     });
 
     it("应该在开发环境中忽略报告（当CSP_REPORT_URI未设置时）", async () => {
-      // Mock the env module to return development environment
-      vi.doMock("../../../../env.mjs", () => ({
+      vi.doMock("@/lib/env", () => ({
         env: {
           NODE_ENV: "development",
           CSP_REPORT_URI: undefined,
         },
       }));
-
-      // Re-import the route module to get the mocked env
-      const { POST: MockedPOST } = await import("../route");
+      vi.resetModules();
 
       const request = new NextRequest("http://localhost:3000/api/csp-report", {
         method: "POST",
@@ -175,13 +186,14 @@ describe("CSP Report API Route", () => {
         },
       });
 
-      const response = await MockedPOST(request);
+      const response = await callPOST(request);
       const data = await response.json();
 
       expect(response.status).toBe(200);
-      expect(data.status).toBe("received");
+      expect(data.status).toBe("ignored");
 
-      vi.doUnmock("../../../../env.mjs");
+      vi.doUnmock("@/lib/env");
+      vi.resetModules();
     });
 
     it("应该正确提取客户端信息", async () => {
@@ -196,25 +208,26 @@ describe("CSP Report API Route", () => {
         },
       });
 
-      await POST(request);
+      await callPOST(request);
 
       expect(console.warn).toHaveBeenCalledWith(
-        "CSP Violation Report:",
-        expect.stringContaining('"ip": "203.0.113.1, 192.168.1.1"'),
+        "CSP Violation Report",
+        expect.objectContaining({
+          // PII should be redacted in logs
+          ip: "[REDACTED_IP]",
+          userAgent: "Mozilla/5.0 (Test Browser)",
+        }),
       );
     });
 
     it("应该处理生产环境的特殊日志记录", async () => {
-      // Mock the env module to return production environment
-      vi.doMock("../../../../env.mjs", () => ({
+      vi.doMock("@/lib/env", () => ({
         env: {
           NODE_ENV: "production",
           CSP_REPORT_URI: "https://example.com/csp-report",
         },
       }));
-
-      // Re-import the route module to get the mocked env
-      const { POST: MockedPOST } = await import("../route");
+      vi.resetModules();
 
       const request = new NextRequest("http://localhost:3000/api/csp-report", {
         method: "POST",
@@ -224,15 +237,16 @@ describe("CSP Report API Route", () => {
         },
       });
 
-      await MockedPOST(request);
+      await callPOST(request);
 
       // 在生产环境中应该记录到console.error (因为validCSPReport包含可疑内容)
       expect(console.error).toHaveBeenCalledWith(
-        "SUSPICIOUS CSP VIOLATION DETECTED:",
+        "SUSPICIOUS CSP VIOLATION DETECTED",
         expect.any(Object),
       );
 
-      vi.doUnmock("../../../../env.mjs");
+      vi.doUnmock("@/lib/env");
+      vi.resetModules();
     });
 
     it("应该检测多种可疑模式", async () => {
@@ -263,10 +277,10 @@ describe("CSP Report API Route", () => {
           },
         );
 
-        await POST(request);
+        await callPOST(request);
 
         expect(console.error).toHaveBeenCalledWith(
-          "SUSPICIOUS CSP VIOLATION DETECTED:",
+          "SUSPICIOUS CSP VIOLATION DETECTED",
           expect.any(Object),
         );
 
@@ -280,7 +294,7 @@ describe("CSP Report API Route", () => {
 
   describe("GET /api/csp-report", () => {
     it("应该返回健康检查信息", async () => {
-      const response = await GET();
+      const response = await callGET();
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -291,7 +305,7 @@ describe("CSP Report API Route", () => {
 
   describe("OPTIONS /api/csp-report", () => {
     it("应该返回正确的CORS headers", async () => {
-      const response = await OPTIONS();
+      const response = await callOPTIONS();
 
       expect(response.status).toBe(200);
       expect(response.headers.get("Allow")).toBe("POST, GET, OPTIONS");
@@ -314,7 +328,7 @@ describe("CSP Report API Route", () => {
         },
       });
 
-      const response = await POST(request);
+      const response = await callPOST(request);
       const data = await response.json();
 
       expect(response.status).toBe(400);
@@ -332,7 +346,7 @@ describe("CSP Report API Route", () => {
         },
       });
 
-      const response = await POST(request);
+      const response = await callPOST(request);
       const data = await response.json();
 
       expect(response.status).toBe(400);

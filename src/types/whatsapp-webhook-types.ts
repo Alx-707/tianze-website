@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/ban-ts-comment */
+/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/ban-ts-comment -- Full webhook type surface kept for completeness; some declarations are intentionally unused */
 // @ts-nocheck
 /**
  * WhatsApp Webhook 完整类型定义文件

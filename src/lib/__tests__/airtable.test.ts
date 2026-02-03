@@ -49,7 +49,7 @@ vi.mock("airtable", () => ({
 }));
 
 // Use TypeScript Mock modules to bypass Vite's special handling
-vi.mock("@/../env.mjs", async () => {
+vi.mock("@/lib/env", async () => {
   const mockEnv = await import("./mocks/airtable-env");
   return mockEnv;
 });
@@ -92,7 +92,7 @@ describe("Airtable Tests - Index", () => {
 
   describe("Basic Configuration", () => {
     it("should configure Airtable with valid environment variables", async () => {
-      vi.doMock("@/../env.mjs", () => ({
+      vi.doMock("@/lib/env", () => ({
         env: {
           AIRTABLE_API_KEY: "test-api-key",
           AIRTABLE_BASE_ID: "test-base-id",
@@ -107,7 +107,7 @@ describe("Airtable Tests - Index", () => {
     });
 
     it("should use default table name when not provided", async () => {
-      vi.doMock("@/../env.mjs", () => ({
+      vi.doMock("@/lib/env", () => ({
         env: {
           AIRTABLE_API_KEY: "test-api-key",
           AIRTABLE_BASE_ID: "test-base-id",

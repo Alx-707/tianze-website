@@ -51,7 +51,7 @@ vi.mock("airtable", () => ({
 }));
 
 // Use TypeScript Mock modules to bypass Vite's special handling
-vi.mock("@/../env.mjs", async () => {
+vi.mock("@/lib/env", async () => {
   const mockEnv = await import("./mocks/airtable-env");
   return mockEnv;
 });
@@ -90,7 +90,7 @@ describe("Airtable Service - Configuration Tests", () => {
 
   describe("环境变量配置", () => {
     it("should configure Airtable with valid environment variables", async () => {
-      vi.doMock("@/../env.mjs", () => ({
+      vi.doMock("@/lib/env", () => ({
         env: {
           AIRTABLE_API_KEY: "test-api-key",
           AIRTABLE_BASE_ID: "test-base-id",
@@ -105,7 +105,7 @@ describe("Airtable Service - Configuration Tests", () => {
     });
 
     it("should use default table name when not provided", async () => {
-      vi.doMock("@/../env.mjs", () => ({
+      vi.doMock("@/lib/env", () => ({
         env: {
           AIRTABLE_API_KEY: "test-api-key",
           AIRTABLE_BASE_ID: "test-base-id",
@@ -120,7 +120,7 @@ describe("Airtable Service - Configuration Tests", () => {
     });
 
     it("should handle missing API key gracefully", async () => {
-      vi.doMock("@/../env.mjs", () => ({
+      vi.doMock("@/lib/env", () => ({
         env: {
           // Missing AIRTABLE_API_KEY
           AIRTABLE_BASE_ID: "test-base-id",
@@ -135,7 +135,7 @@ describe("Airtable Service - Configuration Tests", () => {
     });
 
     it("should handle missing base ID gracefully", async () => {
-      vi.doMock("@/../env.mjs", () => ({
+      vi.doMock("@/lib/env", () => ({
         env: {
           AIRTABLE_API_KEY: "test-api-key",
           // Missing AIRTABLE_BASE_ID
@@ -150,7 +150,7 @@ describe("Airtable Service - Configuration Tests", () => {
     });
 
     it("should handle empty environment variables", async () => {
-      vi.doMock("@/../env.mjs", () => ({
+      vi.doMock("@/lib/env", () => ({
         env: {
           AIRTABLE_API_KEY: "",
           AIRTABLE_BASE_ID: "",
@@ -167,7 +167,7 @@ describe("Airtable Service - Configuration Tests", () => {
 
   describe("服务初始化", () => {
     it("should initialize service with proper configuration", async () => {
-      vi.doMock("@/../env.mjs", () => ({
+      vi.doMock("@/lib/env", () => ({
         env: {
           AIRTABLE_API_KEY: "test-api-key",
           AIRTABLE_BASE_ID: "test-base-id",
@@ -184,7 +184,7 @@ describe("Airtable Service - Configuration Tests", () => {
     });
 
     it("should create base instance correctly", async () => {
-      vi.doMock("@/../env.mjs", () => ({
+      vi.doMock("@/lib/env", () => ({
         env: {
           AIRTABLE_API_KEY: "test-api-key",
           AIRTABLE_BASE_ID: "test-base-id",
@@ -206,7 +206,7 @@ describe("Airtable Service - Configuration Tests", () => {
         throw new Error("Configuration failed");
       });
 
-      vi.doMock("@/../env.mjs", () => ({
+      vi.doMock("@/lib/env", () => ({
         env: {
           AIRTABLE_API_KEY: "test-api-key",
           AIRTABLE_BASE_ID: "test-base-id",
@@ -261,7 +261,7 @@ describe("Airtable Service - Configuration Tests", () => {
 
   describe("默认值处理", () => {
     it("should use default table name when not specified", async () => {
-      vi.doMock("@/../env.mjs", () => ({
+      vi.doMock("@/lib/env", () => ({
         env: {
           AIRTABLE_API_KEY: "test-api-key",
           AIRTABLE_BASE_ID: "test-base-id",
@@ -277,7 +277,7 @@ describe("Airtable Service - Configuration Tests", () => {
     });
 
     it("should handle undefined environment variables", async () => {
-      vi.doMock("@/../env.mjs", () => ({
+      vi.doMock("@/lib/env", () => ({
         env: {
           AIRTABLE_API_KEY: undefined,
           AIRTABLE_BASE_ID: undefined,
@@ -292,7 +292,7 @@ describe("Airtable Service - Configuration Tests", () => {
     });
 
     it("should handle null environment variables", async () => {
-      vi.doMock("@/../env.mjs", () => ({
+      vi.doMock("@/lib/env", () => ({
         env: {
           AIRTABLE_API_KEY: null,
           AIRTABLE_BASE_ID: null,

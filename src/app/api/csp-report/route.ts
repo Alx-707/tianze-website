@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { env } from "@/lib/env";
-import { logger } from "@/lib/logger";
+import { logger, sanitizeIP, sanitizeLogContext } from "@/lib/logger";
 import {
-  checkDistributedRateLimit,
-  createRateLimitHeaders,
-} from "@/lib/security/distributed-rate-limit";
+  withRateLimit,
+  type RateLimitContext,
+} from "@/lib/api/with-rate-limit";
 import type { CSPReport } from "@/config/security";
 
 /** Zod schema for CSP report validation (all fields optional per browser behavior) */
@@ -38,13 +38,10 @@ const isDevIgnored = () =>
   env.NODE_ENV === "development" && !env.CSP_REPORT_URI;
 const isContentTypeValid = (ct: string | null) =>
   Boolean(ct && ct.includes("application/csp-report"));
-const getClientIp = (request: NextRequest) =>
-  request.headers.get("x-forwarded-for") ||
-  request.headers.get("x-real-ip") ||
-  "unknown";
 const buildViolationData = (
   request: NextRequest,
   cspReport: CSPReport["csp-report"],
+  clientIP: string,
 ) => ({
   timestamp: new Date().toISOString(),
   documentUri: cspReport["document-uri"],
@@ -60,7 +57,7 @@ const buildViolationData = (
   scriptSample: cspReport["script-sample"],
   disposition: cspReport.disposition,
   userAgent: request.headers.get("user-agent"),
-  ip: getClientIp(request),
+  ip: clientIP,
 });
 const isSuspiciousReport = (csp: CSPReport["csp-report"]) => {
   const patterns = [
@@ -116,35 +113,43 @@ async function parseAndValidateCSPReport(
 function logCSPViolation(
   request: NextRequest,
   cspReport: CSPReport["csp-report"],
+  clientIP: string,
 ): void {
-  const violationData = buildViolationData(request, cspReport);
-  logger.warn("CSP Violation Report:", JSON.stringify(violationData, null, 2));
+  const violationData = buildViolationData(request, cspReport, clientIP);
+  logger.warn(
+    "CSP Violation Report",
+    sanitizeLogContext({
+      ...violationData,
+      // normalize before sanitization to avoid leaking multi-hop proxy chains
+      ip: sanitizeIP(String(violationData.ip ?? "unknown")),
+    }),
+  );
 
   if (env.NODE_ENV === "production") {
-    logger.error("Production CSP Violation:", violationData);
+    logger.error(
+      "Production CSP Violation",
+      sanitizeLogContext({
+        ...violationData,
+        ip: sanitizeIP(String(violationData.ip ?? "unknown")),
+      }),
+    );
   }
 
   if (isSuspiciousReport(cspReport)) {
-    logger.error("SUSPICIOUS CSP VIOLATION DETECTED:", violationData);
-  }
-}
-
-async function checkRateLimit(
-  request: NextRequest,
-): Promise<NextResponse | null> {
-  const clientIP = getClientIp(request);
-  const rateLimitResult = await checkDistributedRateLimit(clientIP, "csp");
-  if (!rateLimitResult.allowed) {
-    const headers = createRateLimitHeaders(rateLimitResult);
-    return NextResponse.json(
-      { error: "Too many requests" },
-      { status: 429, headers },
+    logger.error(
+      "SUSPICIOUS CSP VIOLATION DETECTED",
+      sanitizeLogContext({
+        ...violationData,
+        ip: sanitizeIP(String(violationData.ip ?? "unknown")),
+      }),
     );
   }
-  return null;
 }
 
-async function processReport(request: NextRequest): Promise<NextResponse> {
+async function processReport(
+  request: NextRequest,
+  clientIP: string,
+): Promise<NextResponse> {
   const contentType = request.headers.get("content-type");
   if (!isContentTypeValid(contentType)) {
     return NextResponse.json(
@@ -159,34 +164,36 @@ async function processReport(request: NextRequest): Promise<NextResponse> {
   }
 
   const cspReport = report["csp-report"];
-  logCSPViolation(request, cspReport);
+  logCSPViolation(request, cspReport, clientIP);
 
-  const violationData = buildViolationData(request, cspReport);
+  const violationData = buildViolationData(request, cspReport, clientIP);
   return NextResponse.json(
     { status: "received", timestamp: violationData.timestamp },
     { status: 200 },
   );
 }
 
-export async function POST(request: NextRequest) {
-  try {
-    if (isDevIgnored()) {
-      return NextResponse.json({ status: "ignored" }, { status: 200 });
+const POST_RATE_LIMITED = withRateLimit(
+  "csp",
+  async (request: NextRequest, { clientIP }: RateLimitContext) => {
+    try {
+      return await processReport(request, clientIP);
+    } catch (error) {
+      logger.error("Error processing CSP report:", error as unknown);
+      return NextResponse.json(
+        { error: "Internal server error" },
+        { status: 500 },
+      );
     }
+  },
+);
 
-    const rateLimitResponse = await checkRateLimit(request);
-    if (rateLimitResponse) {
-      return rateLimitResponse;
-    }
-
-    return await processReport(request);
-  } catch (error) {
-    logger.error("Error processing CSP report:", error as unknown);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+export function POST(request: NextRequest) {
+  if (isDevIgnored()) {
+    return NextResponse.json({ status: "ignored" }, { status: 200 });
   }
+
+  return POST_RATE_LIMITED(request);
 }
 
 /**

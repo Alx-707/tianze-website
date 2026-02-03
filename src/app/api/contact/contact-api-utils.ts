@@ -3,7 +3,6 @@
  * Contact form API utility functions
  */
 
-import { NextRequest } from "next/server";
 import { env } from "@/lib/env";
 import { logger, sanitizeIP } from "@/lib/logger";
 import {
@@ -12,27 +11,7 @@ import {
   isAllowedTurnstileAction,
   isAllowedTurnstileHostname,
 } from "@/lib/security/turnstile-config";
-import {
-  COUNT_FIVE,
-  COUNT_PAIR,
-  MAGIC_9,
-  MAGIC_36,
-  ONE,
-  ZERO,
-} from "@/constants";
-import { MINUTE_MS } from "@/constants/time";
-
-// 常量定义
-export const RATE_LIMIT_CONFIG = {
-  MAX_REQUESTS: COUNT_FIVE,
-  WINDOW_MS: MINUTE_MS,
-} as const;
-
-/**
- * 速率限制存储
- * Rate limiting storage (in production, use Redis or database)
- */
-const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
+import { COUNT_PAIR, MAGIC_9, MAGIC_36, ZERO } from "@/constants";
 
 interface TurnstileVerificationResult {
   success: boolean;
@@ -112,34 +91,6 @@ function validateTurnstileActionResponse(
     ip: sanitizeIP(ip),
   });
   return false;
-}
-
-/**
- * 检查速率限制
- * Check rate limiting
- */
-export function checkRateLimit(
-  ip: string,
-  maxRequests: number = RATE_LIMIT_CONFIG.MAX_REQUESTS,
-  windowMs: number = RATE_LIMIT_CONFIG.WINDOW_MS,
-): boolean {
-  const now = Date.now();
-  const key = ip;
-
-  const current = rateLimitStore.get(key);
-
-  if (!current || now > current.resetTime) {
-    rateLimitStore.set(key, { count: ONE, resetTime: now + windowMs });
-    return true;
-  }
-
-  if (current.count >= maxRequests) {
-    return false;
-  }
-
-  current.count += ONE;
-  rateLimitStore.set(key, current);
-  return true;
 }
 
 /**
@@ -232,90 +183,6 @@ export async function verifyTurnstileDetailed(
     logger.error("Turnstile verification error", { error, ip: sanitizeIP(ip) });
     throw error; // Re-throw to let caller handle 500 errors
   }
-}
-
-/**
- * 获取客户端IP地址
- * Get client IP address
- */
-export function getClientIP(request: NextRequest): string {
-  const forwarded = request.headers.get("x-forwarded-for");
-  const realIP = request.headers.get("x-real-ip");
-
-  if (forwarded) {
-    const first = forwarded.split(",").shift()?.trim();
-    return first || "unknown";
-  }
-
-  if (realIP) {
-    return realIP;
-  }
-
-  return "unknown";
-}
-
-/**
- * 获取完整的客户端IP链（用于 Turnstile）
- * Get full client IP chain for Turnstile verification
- */
-export function getFullClientIPChain(request: NextRequest): string {
-  const forwarded = request.headers.get("x-forwarded-for");
-  const realIP = request.headers.get("x-real-ip");
-
-  if (forwarded) {
-    // Return the full chain for Turnstile to analyze
-    return forwarded.trim();
-  }
-
-  if (realIP) {
-    return realIP;
-  }
-
-  return "unknown";
-}
-
-/**
- * 清理过期的速率限制记录
- * Clean up expired rate limit records
- */
-export function cleanupRateLimitStore(): void {
-  const now = Date.now();
-  for (const [key, value] of rateLimitStore.entries()) {
-    if (now > value.resetTime) {
-      rateLimitStore.delete(key);
-    }
-  }
-}
-
-/**
- * 获取速率限制状态
- * Get rate limit status
- */
-export function getRateLimitStatus(ip: string): {
-  remaining: number;
-  resetTime: number;
-  isLimited: boolean;
-} {
-  const current = rateLimitStore.get(ip);
-  const now = Date.now();
-
-  if (!current || now > current.resetTime) {
-    return {
-      remaining: RATE_LIMIT_CONFIG.MAX_REQUESTS - ONE,
-      resetTime: now + RATE_LIMIT_CONFIG.WINDOW_MS,
-      isLimited: false,
-    };
-  }
-
-  const remaining = Math.max(
-    ZERO,
-    RATE_LIMIT_CONFIG.MAX_REQUESTS - current.count,
-  );
-  return {
-    remaining,
-    resetTime: current.resetTime,
-    isLimited: remaining === ZERO,
-  };
 }
 
 /**

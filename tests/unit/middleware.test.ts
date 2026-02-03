@@ -123,7 +123,7 @@ describe("Middleware Cookie Security", () => {
 
       if (response) {
         const setCookieHeader = response.headers.get("set-cookie");
-        expect(setCookieHeader).toContain("SameSite=Lax");
+        expect(setCookieHeader).toMatch(/SameSite=Lax/i);
       }
     });
 
@@ -170,7 +170,7 @@ describe("Middleware Cookie Security", () => {
         if (setCookieHeader) {
           expect(setCookieHeader).toContain("NEXT_LOCALE=zh");
           expect(setCookieHeader).toContain("HttpOnly");
-          expect(setCookieHeader).toContain("SameSite=Lax");
+          expect(setCookieHeader).toMatch(/SameSite=Lax/i);
         }
       }
     });
@@ -205,7 +205,7 @@ describe("Middleware Cookie Security", () => {
         const setCookieHeader = response.headers.get("set-cookie");
         if (setCookieHeader) {
           expect(setCookieHeader).toContain("HttpOnly");
-          expect(setCookieHeader).toContain("SameSite=Lax");
+          expect(setCookieHeader).toMatch(/SameSite=Lax/i);
         }
       }
     });

@@ -242,9 +242,12 @@ async function BlogDetailContent({
 
   const t = await getTranslations({ locale, namespace: "blog" });
 
-  const post = await getPostBySlugCached(localeTyped, slug).catch(() =>
-    notFound(),
-  );
+  let post: Awaited<ReturnType<typeof getPostBySlugCached>>;
+  try {
+    post = await getPostBySlugCached(localeTyped, slug);
+  } catch {
+    notFound();
+  }
   const articleSchema = await buildArticleSchema(localeTyped, slug, post);
 
   return (

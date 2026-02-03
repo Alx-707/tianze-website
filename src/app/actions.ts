@@ -12,6 +12,8 @@ import { contactFieldValidators } from "@/lib/form-schema/contact-field-validato
 import { type ContactFormData } from "@/lib/form-schema/contact-form-schema";
 import { logger } from "@/lib/logger";
 import { checkDistributedRateLimit } from "@/lib/security/distributed-rate-limit";
+import { getClientIPFromHeaders } from "@/lib/security/client-ip";
+import { hmacKey } from "@/lib/security/rate-limit-key-strategies";
 import {
   createErrorResultWithLogging,
   createSuccessResultWithLogging,
@@ -57,16 +59,6 @@ const contactFormSchema = createContactFormSchemaFromConfig(
   CONTACT_FORM_CONFIG,
   contactFieldValidators,
 );
-
-/**
- * Extract client IP from request headers
- */
-async function getClientIPFromHeaders(): Promise<string> {
-  const headersList = await headers();
-  const forwardedFor = headersList.get("x-forwarded-for");
-  const realIP = headersList.get("x-real-ip");
-  return forwardedFor?.split(",")[0]?.trim() || realIP || "unknown";
-}
 
 /**
  * 验证联系表单数据（包含Turnstile验证）
@@ -169,7 +161,11 @@ async function performSecurityChecks(
   formData: FormData,
   clientIP: string,
 ): Promise<ServerActionResult<ContactFormResult> | null> {
-  const rateLimitResult = await checkDistributedRateLimit(clientIP, "contact");
+  const rateLimitKey = `ip:${hmacKey(clientIP)}`;
+  const rateLimitResult = await checkDistributedRateLimit(
+    rateLimitKey,
+    "contact",
+  );
   if (!rateLimitResult.allowed) {
     return createErrorResultWithLogging("Too many requests", undefined, logger);
   }
@@ -218,7 +214,8 @@ export const contactFormAction: ServerAction<FormData, ContactFormResult> =
 
     try {
       // Extract client IP for rate limiting and Turnstile verification
-      const clientIP = await getClientIPFromHeaders();
+      const headersList = await headers();
+      const clientIP = getClientIPFromHeaders(headersList);
 
       // Perform security checks (rate limiting + honeypot)
       const securityResult = await performSecurityChecks(formData, clientIP);

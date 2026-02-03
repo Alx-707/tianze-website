@@ -79,7 +79,7 @@ function createSuccessResponse({
     process.env.NEXT_PHASE === "phase-production-build"
   ) {
     const topLevelKeys = Object.keys(messages);
-    // eslint-disable-next-line no-console
+    // eslint-disable-next-line no-console -- build-only debug snapshot guarded by I18N_DEBUG_BUILD and NEXT_PHASE
     console.error("[i18n-debug] createSuccessResponse snapshot", {
       locale,
       loadTime,
@@ -110,7 +110,7 @@ async function createFallbackResponse(locale: string, startTime: number) {
     process.env.I18N_DEBUG_BUILD === "1" &&
     process.env.NEXT_PHASE === "phase-production-build"
   ) {
-    // eslint-disable-next-line no-console
+    // eslint-disable-next-line no-console -- build-only debug snapshot guarded by I18N_DEBUG_BUILD and NEXT_PHASE
     console.error("[i18n-debug] createFallbackResponse triggered", {
       locale,
       phase: process.env.NEXT_PHASE,

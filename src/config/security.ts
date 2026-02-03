@@ -125,7 +125,7 @@ export function getSecurityHeaders(
   testMode = false,
 ): SecurityHeader[] {
   // Use process.env here to keep this module safe for Next config evaluation.
-  // Runtime env validation lives in env.mjs, but importing it here would break next.config load.
+  // Runtime env validation lives in `@/lib/env`, but importing it here would break next.config load.
   if (!isSecurityHeadersEnabled(testMode)) {
     return [];
   }

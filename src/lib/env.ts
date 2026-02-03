@@ -1,8 +1,7 @@
 /**
- * 环境变量代理模块
+ * 环境变量模块（单一真相源）
  *
- * 解决架构违规问题：避免src目录内文件直接导入根目录的env.mjs
- * 提供统一的环境变量访问接口
+ * 约束：生产/测试代码统一从 `@/lib/env` 导入，避免出现多套 schema/mock 分叉。
  */
 
 import { createEnv } from "@t3-oss/env-nextjs";
@@ -357,13 +356,13 @@ export const env = createEnv({
 export function getEnvVar(
   key: keyof typeof env,
 ): string | boolean | number | undefined {
-  // eslint-disable-next-line security/detect-object-injection
+  // eslint-disable-next-line security/detect-object-injection -- key is constrained to keyof env (internal whitelist), not user input
   return env[key];
 }
 
 // 提供必需环境变量检查（仅用于字符串类型的环境变量）
 export function requireEnvVar(key: keyof typeof env): string {
-  // eslint-disable-next-line security/detect-object-injection
+  // eslint-disable-next-line security/detect-object-injection -- key is constrained to keyof env (internal whitelist), not user input
   const value = env[key];
   if (!value || typeof value === "boolean" || typeof value === "number") {
     throw new Error(
