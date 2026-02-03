@@ -38,6 +38,8 @@ export const ONE = 1;
 export const HTTP_OK = 200;
 export const HTTP_BAD_REQUEST = 400;
 export const HTTP_UNAUTHORIZED = 401;
+export const HTTP_TOO_MANY_REQUESTS = 429;
+export const HTTP_INTERNAL_ERROR = 500;
 
 // HTTP状态码别名 (兼容历史命名)
 export const HTTP_OK_CONST = HTTP_OK;
