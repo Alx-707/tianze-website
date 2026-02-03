@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import createMiddleware from "next-intl/middleware";
 import { generateNonce, getSecurityHeaders } from "@/config/security";
-import { routing } from "@/i18n/routing-config";
+import { routing, type Locale } from "@/i18n/routing-config";
 
 const intlMiddleware = createMiddleware(routing);
-const SUPPORTED_LOCALES = new Set(routing.locales);
+const SUPPORTED_LOCALES = new Set<string>(routing.locales);
+
+function isValidLocale(candidate: string): candidate is Locale {
+  return SUPPORTED_LOCALES.has(candidate);
+}
 
 function addSecurityHeaders(response: NextResponse, nonce: string): void {
   const securityHeaders = getSecurityHeaders(nonce);
@@ -13,16 +17,20 @@ function addSecurityHeaders(response: NextResponse, nonce: string): void {
   });
 }
 
-function extractLocaleCandidate(pathname: string): string | undefined {
+function extractLocaleCandidate(pathname: string): Locale | undefined {
   const segments = pathname.split("/").filter(Boolean);
   const candidate = segments[0];
-  return candidate && SUPPORTED_LOCALES.has(candidate) ? candidate : undefined;
+  return candidate && isValidLocale(candidate) ? candidate : undefined;
 }
 
-function setLocaleCookie(resp: NextResponse, locale: string): void {
+function setLocaleCookie(resp: NextResponse, locale: Locale): void {
   try {
     const isProduction = process.env.NODE_ENV === "production";
-    const maxAge = routing.localeCookie?.maxAge;
+    const { localeCookie } = routing;
+    const maxAge =
+      typeof localeCookie === "object" && localeCookie !== null
+        ? localeCookie.maxAge
+        : undefined;
     resp.cookies.set("NEXT_LOCALE", locale, {
       path: "/",
       httpOnly: true,
