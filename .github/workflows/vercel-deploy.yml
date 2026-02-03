@@ -25,11 +25,7 @@ jobs:
     timeout-minutes: 15
     # Secrets are not available for fork PRs, and may be unset in template repos.
     # When secrets are missing, skip this job to avoid failing the PR check.
-    if: |
-      github.event_name != 'workflow_dispatch' &&
-      secrets.VERCEL_TOKEN != '' &&
-      secrets.VERCEL_ORG_ID != '' &&
-      secrets.VERCEL_PROJECT_ID != ''
+    if: ${{ github.event_name != 'workflow_dispatch' && secrets.VERCEL_TOKEN != '' && secrets.VERCEL_ORG_ID != '' && secrets.VERCEL_PROJECT_ID != '' }}
 
     outputs:
       preview_url: ${{ steps.vercel_cli_deploy.outputs.deployment-url }}
