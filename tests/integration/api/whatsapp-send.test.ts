@@ -63,7 +63,7 @@ describe("api/whatsapp/send", () => {
     const res = await route.POST(req);
     const body = await res.json();
     expect(res.status).toBe(400);
-    expect(body.error).toBe("INVALID_JSON");
+    expect(body.error).toBe("INVALID_JSON_BODY");
   });
 
   it("returns 401 without authorization", async () => {

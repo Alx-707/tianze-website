@@ -177,9 +177,13 @@ vi.mock("@/components/ui/button", () => ({
   Button: ({
     children,
     asChild: _asChild,
+    variant: _variant,
+    size: _size,
     ...props
   }: React.PropsWithChildren<{
     asChild?: boolean;
+    variant?: string;
+    size?: string;
     [key: string]: unknown;
   }>) => (
     <button data-testid="button" {...props}>

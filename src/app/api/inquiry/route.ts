@@ -4,8 +4,11 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
+import {
+  createApiErrorResponse,
+  createApiSuccessResponse,
+} from "@/lib/api/api-response";
 import { createCorsPreflightResponse } from "@/lib/api/cors-utils";
-import { getApiMessages, type ApiMessages } from "@/lib/api/get-request-locale";
 import { safeParseJson } from "@/lib/api/safe-parse-json";
 import {
   withRateLimit,
@@ -15,20 +18,20 @@ import { processLead, type LeadResult } from "@/lib/lead-pipeline";
 import { LEAD_TYPES } from "@/lib/lead-pipeline/lead-schema";
 import { logger, sanitizeIP } from "@/lib/logger";
 import { verifyTurnstile } from "@/app/api/contact/contact-api-utils";
+import { API_ERROR_CODES } from "@/constants/api-error-codes";
 import { HTTP_BAD_REQUEST, HTTP_INTERNAL_ERROR } from "@/constants";
 
 interface SuccessResponseOptions {
   result: LeadResult;
   clientIP: string;
   processingTime: number;
-  successMessage: string;
 }
 
 /**
  * Create success response for product inquiry
  */
 function createSuccessResponse(options: SuccessResponseOptions): NextResponse {
-  const { result, clientIP, processingTime, successMessage } = options;
+  const { result, clientIP, processingTime } = options;
   logger.info("Product inquiry submitted successfully", {
     referenceId: result.referenceId,
     ip: sanitizeIP(clientIP),
@@ -37,9 +40,7 @@ function createSuccessResponse(options: SuccessResponseOptions): NextResponse {
     recordCreated: result.recordCreated,
   });
 
-  return NextResponse.json({
-    success: true,
-    message: successMessage,
+  return createApiSuccessResponse({
     referenceId: result.referenceId,
   });
 }
@@ -48,14 +49,13 @@ interface ErrorResponseOptions {
   result: LeadResult;
   clientIP: string;
   processingTime: number;
-  messages: ApiMessages;
 }
 
 /**
  * Create error response for failed inquiry
  */
 function createErrorResponse(options: ErrorResponseOptions): NextResponse {
-  const { result, clientIP, processingTime, messages } = options;
+  const { result, clientIP, processingTime } = options;
   logger.warn("Product inquiry submission failed", {
     error: result.error,
     ip: sanitizeIP(clientIP),
@@ -63,21 +63,17 @@ function createErrorResponse(options: ErrorResponseOptions): NextResponse {
   });
 
   const isValidationError = result.error === "VALIDATION_ERROR";
-  return NextResponse.json(
-    {
-      success: false,
-      error: isValidationError
-        ? messages.validationError
-        : messages.inquiry.processingError,
-    },
-    { status: isValidationError ? HTTP_BAD_REQUEST : HTTP_INTERNAL_ERROR },
+  return createApiErrorResponse(
+    isValidationError
+      ? API_ERROR_CODES.INQUIRY_VALIDATION_FAILED
+      : API_ERROR_CODES.INQUIRY_PROCESSING_ERROR,
+    isValidationError ? HTTP_BAD_REQUEST : HTTP_INTERNAL_ERROR,
   );
 }
 
 interface TurnstileValidationOptions {
   token: string | undefined;
   clientIP: string;
-  messages: ApiMessages;
 }
 
 /**
@@ -86,15 +82,15 @@ interface TurnstileValidationOptions {
 async function validateTurnstile(
   options: TurnstileValidationOptions,
 ): Promise<NextResponse | null> {
-  const { token, clientIP, messages } = options;
+  const { token, clientIP } = options;
 
   if (!token) {
     logger.warn("Product inquiry missing Turnstile token", {
       ip: sanitizeIP(clientIP),
     });
-    return NextResponse.json(
-      { success: false, error: messages.inquiry.securityRequired },
-      { status: HTTP_BAD_REQUEST },
+    return createApiErrorResponse(
+      API_ERROR_CODES.INQUIRY_SECURITY_REQUIRED,
+      HTTP_BAD_REQUEST,
     );
   }
 
@@ -103,12 +99,9 @@ async function validateTurnstile(
     logger.warn("Product inquiry Turnstile verification failed", {
       ip: sanitizeIP(clientIP),
     });
-    return NextResponse.json(
-      {
-        success: false,
-        error: messages.inquiry.securityFailed,
-      },
-      { status: HTTP_BAD_REQUEST },
+    return createApiErrorResponse(
+      API_ERROR_CODES.INQUIRY_SECURITY_FAILED,
+      HTTP_BAD_REQUEST,
     );
   }
 
@@ -123,7 +116,6 @@ export const POST = withRateLimit(
   "inquiry",
   async (request: NextRequest, { clientIP }: RateLimitContext) => {
     const startTime = Date.now();
-    const messages = getApiMessages(request);
 
     try {
       const parsedBody = await safeParseJson<{
@@ -132,16 +124,15 @@ export const POST = withRateLimit(
       }>(request, { route: "/api/inquiry" });
 
       if (!parsedBody.ok) {
-        return NextResponse.json(
-          { success: false, error: parsedBody.error },
-          { status: HTTP_BAD_REQUEST },
+        return createApiErrorResponse(
+          API_ERROR_CODES.INVALID_JSON_BODY,
+          HTTP_BAD_REQUEST,
         );
       }
 
       const turnstileError = await validateTurnstile({
         token: parsedBody.data?.turnstileToken,
         clientIP,
-        messages,
       });
       if (turnstileError) return turnstileError;
 
@@ -157,9 +148,8 @@ export const POST = withRateLimit(
             result,
             clientIP,
             processingTime,
-            successMessage: messages.inquiry.success,
           })
-        : createErrorResponse({ result, clientIP, processingTime, messages });
+        : createErrorResponse({ result, clientIP, processingTime });
     } catch (error) {
       logger.error("Product inquiry submission failed unexpectedly", {
         error: error instanceof Error ? error.message : "Unknown error",
@@ -168,9 +158,9 @@ export const POST = withRateLimit(
         processingTime: Date.now() - startTime,
       });
 
-      return NextResponse.json(
-        { success: false, error: messages.serverError },
-        { status: HTTP_INTERNAL_ERROR },
+      return createApiErrorResponse(
+        API_ERROR_CODES.INQUIRY_PROCESSING_ERROR,
+        HTTP_INTERNAL_ERROR,
       );
     }
   },

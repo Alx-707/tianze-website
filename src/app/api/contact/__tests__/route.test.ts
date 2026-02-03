@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { API_ERROR_CODES } from "@/constants/api-error-codes";
 import { GET, POST } from "@/app/api/contact/route";
 
 // Mock配置 - 使用vi.hoisted确保Mock在模块导入前设置
@@ -177,7 +178,7 @@ describe("Contact API Route", () => {
 
       expect(response.status).toBe(200);
       expect(data.success).toBe(true);
-      expect(data.message).toContain("Thank you for your message");
+      expect(data.data.messageId).toBe("email-123");
     });
 
     it("应该处理无效的表单数据", async () => {
@@ -204,8 +205,7 @@ describe("Contact API Route", () => {
 
       expect(response.status).toBe(400);
       expect(data.success).toBe(false);
-      expect(data.error).toBe("Invalid form data");
-      expect(data.details).toBeDefined();
+      expect(data.errorCode).toBe(API_ERROR_CODES.CONTACT_VALIDATION_FAILED);
     });
 
     it("应该处理速率限制", async () => {
@@ -256,7 +256,7 @@ describe("Contact API Route", () => {
       if (response.status === 429) {
         const data = await response.json();
         expect(data.success).toBe(false);
-        expect(data.error).toContain("Too many requests");
+        expect(data.errorCode).toBe(API_ERROR_CODES.RATE_LIMIT_EXCEEDED);
       }
     });
 
@@ -294,9 +294,7 @@ describe("Contact API Route", () => {
 
       expect(response.status).toBe(400);
       expect(data.success).toBe(false);
-      expect(data.error).toBe(
-        "Security verification failed. Please try again.",
-      );
+      expect(data.errorCode).toBe(API_ERROR_CODES.CONTACT_VALIDATION_FAILED);
     });
 
     it("应该处理服务不可用的情况", async () => {
@@ -358,10 +356,10 @@ describe("Contact API Route", () => {
       const response = await POST(request);
       const data = await response.json();
 
-      // 使用 safeParseJson 后，JSON 解析错误应返回 400 + INVALID_JSON
+      // 使用 safeParseJson 后，JSON 解析错误应返回 400 + INVALID_JSON_BODY
       expect(response.status).toBe(400);
       expect(data.success).toBe(false);
-      expect(data.error).toBe("INVALID_JSON");
+      expect(data.errorCode).toBe(API_ERROR_CODES.INVALID_JSON_BODY);
     });
   });
 
@@ -397,7 +395,7 @@ describe("Contact API Route", () => {
 
       expect(response.status).toBe(200);
       expect(data.success).toBe(true);
-      expect(data.data).toEqual(mockStats);
+      expect(data.data.data).toEqual(mockStats);
     });
 
     it("应该拒绝无效的管理员token", async () => {
@@ -412,7 +410,7 @@ describe("Contact API Route", () => {
       const data = await response.json();
 
       expect(response.status).toBe(401);
-      expect(data.error).toBe("Unauthorized");
+      expect(data.errorCode).toBe(API_ERROR_CODES.UNAUTHORIZED);
     });
 
     it("应该处理缺少authorization header的情况", async () => {
@@ -424,7 +422,7 @@ describe("Contact API Route", () => {
       const data = await response.json();
 
       expect(response.status).toBe(401);
-      expect(data.error).toBe("Unauthorized");
+      expect(data.errorCode).toBe(API_ERROR_CODES.UNAUTHORIZED);
     });
 
     it("应该处理Airtable服务不可用的情况", async () => {
@@ -456,7 +454,7 @@ describe("Contact API Route", () => {
 
       expect(response.status).toBe(200);
       expect(data.success).toBe(true);
-      expect(data.data).toEqual({
+      expect(data.data.data).toEqual({
         totalContacts: 0,
         newContacts: 0,
         completedContacts: 0,

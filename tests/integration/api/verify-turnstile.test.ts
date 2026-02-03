@@ -46,7 +46,7 @@ describe("api/verify-turnstile", () => {
     const body = await res.json();
     expect(res.status).toBe(400);
     expect(body.success).toBe(false);
-    expect(body.error).toBe("INVALID_JSON");
+    expect(body.errorCode).toBe("INVALID_JSON_BODY");
   });
 
   it("verifies successfully with Cloudflare", async () => {

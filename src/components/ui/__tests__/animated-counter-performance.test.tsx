@@ -264,17 +264,19 @@ describe("AnimatedCounter - Performance & Refs", () => {
     it("handles high-frequency updates efficiently", () => {
       const { rerender } = render(<AnimatedCounter to={0} duration={100} />);
 
+      const initialScheduleFrameCalls = mockScheduleFrame.mock.calls.length;
+
       // Simulate high-frequency updates
-      const _startTime = performance.now();
       for (let i = 0; i < 100; i++) {
         rerender(<AnimatedCounter to={i} duration={100} />);
       }
-      const endTime = performance.now();
 
-      // Should complete quickly
-      // CI environment has performance variability, use more lenient threshold
-      const threshold = process.env.CI ? 250 : 150;
-      expect(endTime - _startTime).toBeLessThan(threshold);
+      // 避免基于 wall-clock 的断言（不同机器/负载下会抖动）。这里用更稳定的信号：
+      // 在短时间内频繁更新 props 时，不应该持续堆积新的 animation frame 任务。
+      const deltaScheduleFrameCalls =
+        mockScheduleFrame.mock.calls.length - initialScheduleFrameCalls;
+      expect(deltaScheduleFrameCalls).toBeLessThan(3);
+      expect(animationFrameCallbacks.length).toBeLessThan(3);
     });
 
     it("cleans up properly on component unmount", () => {

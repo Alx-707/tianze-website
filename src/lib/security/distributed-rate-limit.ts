@@ -61,7 +61,10 @@ interface RateLimitStore {
  * In-memory rate limit store (fallback for local development)
  */
 class MemoryRateLimitStore implements RateLimitStore {
-  private store = new Map<string, RateLimitEntry>();
+  private store = new Map<
+    string,
+    { entry: RateLimitEntry; expiresAt: number }
+  >();
   private warned = false;
 
   constructor() {
@@ -78,49 +81,50 @@ class MemoryRateLimitStore implements RateLimitStore {
     }
   }
 
-  get(key: string): Promise<RateLimitEntry | null> {
-    const entry = this.store.get(key);
-    if (!entry) return Promise.resolve(null);
+  // eslint-disable-next-line require-await -- Interface requires async for distributed store compatibility
+  async get(key: string): Promise<RateLimitEntry | null> {
+    const stored = this.store.get(key);
+    if (!stored) return null;
 
     const now = Date.now();
-    if (now > entry.resetTime) {
+    if (now > stored.expiresAt) {
       this.store.delete(key);
-      return Promise.resolve(null);
+      return null;
     }
 
-    return Promise.resolve(entry);
+    return stored.entry;
   }
 
-  set(key: string, entry: RateLimitEntry): Promise<void> {
-    this.store.set(key, entry);
-    return Promise.resolve();
+  // eslint-disable-next-line require-await -- Interface requires async for distributed store compatibility
+  async set(key: string, entry: RateLimitEntry, ttlMs: number): Promise<void> {
+    const expiresAt = Date.now() + ttlMs;
+    this.store.set(key, { entry, expiresAt });
   }
 
-  increment(
+  async increment(
     key: string,
     windowMs: number,
   ): Promise<{ count: number; resetTime: number }> {
     const now = Date.now();
-    const existing = this.store.get(key);
+    const stored = this.store.get(key);
 
-    if (!existing || now > existing.resetTime) {
+    if (!stored || now > stored.expiresAt) {
       const newEntry: RateLimitEntry = {
         count: ONE,
         resetTime: now + windowMs,
       };
-      this.store.set(key, newEntry);
-      return Promise.resolve(newEntry);
+      await this.set(key, newEntry, windowMs);
+      return newEntry;
     }
 
-    existing.count += ONE;
-    this.store.set(key, existing);
-    return Promise.resolve(existing);
+    stored.entry.count += ONE;
+    return stored.entry;
   }
 
   cleanup(): void {
     const now = Date.now();
-    for (const [key, entry] of this.store.entries()) {
-      if (now > entry.resetTime) {
+    for (const [key, stored] of this.store.entries()) {
+      if (now > stored.expiresAt) {
         this.store.delete(key);
       }
     }

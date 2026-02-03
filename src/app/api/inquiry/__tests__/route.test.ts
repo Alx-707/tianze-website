@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { API_ERROR_CODES } from "@/constants/api-error-codes";
 import { processLead } from "@/lib/lead-pipeline";
 import { verifyTurnstile } from "@/app/api/contact/contact-api-utils";
 import { OPTIONS, POST } from "../route";
@@ -103,7 +104,7 @@ describe("/api/inquiry route", () => {
 
       expect(response.status).toBe(200);
       expect(data.success).toBe(true);
-      expect(data.referenceId).toBe("ref-123");
+      expect(data.data.referenceId).toBe("ref-123");
       expect(processLead).toHaveBeenCalled();
     });
 
@@ -127,7 +128,9 @@ describe("/api/inquiry route", () => {
 
       expect(response.status).toBe(429);
       expect(data.success).toBe(false);
-      expect(data.error).toContain("Too many requests");
+      // Note: Rate limiting is handled by withRateLimit middleware which hasn't been
+      // migrated to errorCode pattern yet. It returns { error: "Too many requests" }
+      expect(data.error).toBe("Too many requests");
     });
 
     it("should return 400 for invalid JSON", async () => {
@@ -159,7 +162,7 @@ describe("/api/inquiry route", () => {
 
       expect(response.status).toBe(400);
       expect(data.success).toBe(false);
-      expect(data.error).toContain("Security verification required");
+      expect(data.errorCode).toBe(API_ERROR_CODES.INQUIRY_SECURITY_REQUIRED);
     });
 
     it("should return 400 when turnstile verification fails", async () => {
@@ -176,7 +179,7 @@ describe("/api/inquiry route", () => {
 
       expect(response.status).toBe(400);
       expect(data.success).toBe(false);
-      expect(data.error).toContain("Security verification failed");
+      expect(data.errorCode).toBe(API_ERROR_CODES.INQUIRY_SECURITY_FAILED);
     });
 
     it("should handle processLead failure", async () => {
@@ -198,6 +201,7 @@ describe("/api/inquiry route", () => {
 
       expect(response.status).toBe(500);
       expect(data.success).toBe(false);
+      expect(data.errorCode).toBe(API_ERROR_CODES.INQUIRY_PROCESSING_ERROR);
     });
 
     it("should handle validation error from processLead", async () => {
@@ -219,7 +223,7 @@ describe("/api/inquiry route", () => {
 
       expect(response.status).toBe(400);
       expect(data.success).toBe(false);
-      expect(data.error).toContain("check your form inputs");
+      expect(data.errorCode).toBe(API_ERROR_CODES.INQUIRY_VALIDATION_FAILED);
     });
 
     it("should handle unexpected errors", async () => {
@@ -238,7 +242,7 @@ describe("/api/inquiry route", () => {
 
       expect(response.status).toBe(500);
       expect(data.success).toBe(false);
-      expect(data.error).toContain("unexpected error");
+      expect(data.errorCode).toBe(API_ERROR_CODES.INQUIRY_PROCESSING_ERROR);
     });
 
     it("should pass lead type PRODUCT to processLead", async () => {

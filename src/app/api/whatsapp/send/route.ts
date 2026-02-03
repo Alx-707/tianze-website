@@ -257,7 +257,10 @@ async function parseSendMessageRequest(
   });
   if (!parsedBody.ok) {
     return {
-      error: NextResponse.json({ error: parsedBody.error }, { status: 400 }),
+      error: NextResponse.json(
+        { error: parsedBody.errorCode },
+        { status: 400 },
+      ),
     };
   }
   const body = parsedBody.data;

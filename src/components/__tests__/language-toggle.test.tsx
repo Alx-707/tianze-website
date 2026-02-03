@@ -155,7 +155,17 @@ vi.mock("@/components/ui/dropdown-menu", () => ({
 }));
 
 vi.mock("@/components/ui/button", () => ({
-  Button: ({ children, ...props }: React.ComponentProps<"button">) => (
+  Button: ({
+    children,
+    asChild: _asChild,
+    variant: _variant,
+    size: _size,
+    ...props
+  }: React.ComponentProps<"button"> & {
+    asChild?: boolean;
+    variant?: string;
+    size?: string;
+  }) => (
     <button data-testid="language-toggle-button" {...props}>
       {children}
     </button>

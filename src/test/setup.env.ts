@@ -19,6 +19,9 @@ vi.stubEnv("NODE_ENV", "test");
 vi.stubEnv("NEXT_PUBLIC_BASE_URL", "https://example.com");
 vi.stubEnv("NEXT_PUBLIC_VERCEL_URL", "example.vercel.app");
 
+// Suppress info/debug logs in tests - only warn and error are output
+vi.stubEnv("LOG_LEVEL", "warn");
+
 // Mock server-side environment variables for API testing
 vi.stubEnv("TURNSTILE_SECRET_KEY", "test-secret-key");
 vi.stubEnv("RESEND_API_KEY", "test-resend-key");

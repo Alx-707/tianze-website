@@ -2,10 +2,10 @@
 
 import dynamic from "next/dynamic";
 
-const WhatsAppButtonWithTranslations = dynamic(
+const WhatsAppFloatingButton = dynamic(
   () =>
-    import("@/components/whatsapp/whatsapp-button-with-translations").then(
-      (mod) => mod.WhatsAppButtonWithTranslations,
+    import("@/components/whatsapp/whatsapp-floating-button").then(
+      (mod) => mod.WhatsAppFloatingButton,
     ),
   {
     ssr: false,
@@ -22,5 +22,5 @@ interface LazyWhatsAppButtonProps {
  * Uses ssr: false to avoid MISSING_MESSAGE errors during SSG
  */
 export function LazyWhatsAppButton({ number }: LazyWhatsAppButtonProps) {
-  return <WhatsAppButtonWithTranslations number={number} />;
+  return <WhatsAppFloatingButton number={number} />;
 }
