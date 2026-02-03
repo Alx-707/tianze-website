@@ -208,66 +208,6 @@ class QualityGate {
             "**/__tests__/**",
             "src/test/**",
             "src/testing/**",
-            // Next.js App Router - validated via E2E tests, not unit tests
-            "src/app/**/page.tsx",
-            "src/app/**/layout.tsx",
-            "src/app/**/error.tsx", // Error boundaries
-            "src/app/**/loading.tsx", // Loading states
-            "src/app/**/not-found.tsx", // 404 pages
-            "src/app/**/head.tsx", // Head components
-            "src/app/**/generate-static-params.ts", // Static generation
-            "src/app/**/layout-*.tsx", // Layout utilities
-            "src/app/**/layout-*.ts",
-            "src/app/actions.ts", // Server actions - tested via integration
-            "src/app/api/**", // API routes - validated via E2E and integration tests
-            "src/app/[locale]/**/*.tsx", // Page-specific components - validated via E2E
-            "src/lib/content/**", // Content loaders - covered by integration tests
-            "src/templates/**", // Template files - development patterns, not production code
-            "src/types/**", // Type definition files - pure TypeScript types, no runtime code
-            "src/components/**/_templates/**", // Component templates - development patterns
-            "src/components/blocks/**", // Block components - UI compositions validated via E2E
-            "src/components/**/error-boundary.tsx", // Error boundaries - React patterns
-            "src/components/forms/**", // Form components - validated via E2E interaction tests
-            "src/components/contact/**", // Contact components - validated via E2E
-            "src/components/home/**", // Homepage components - validated via E2E
-            "src/components/lazy/**", // Lazy-loaded components - wrapper patterns
-            "src/components/i18n/**", // i18n components - validated via E2E
-            "src/components/layout/**", // Layout components - validated via E2E
-            "src/components/cookie/**", // Cookie components - validated via E2E
-            "src/components/mdx/**", // MDX components - content rendering
-            "src/components/monitoring/**", // Monitoring components - analytics
-            "src/components/products/**", // Product components - validated via E2E
-            "src/components/blog/**", // Blog components - validated via E2E
-            "src/components/whatsapp/**", // WhatsApp components - validated via E2E
-            "src/components/security/**", // Security components (Turnstile) - integration
-            "src/components/seo/**", // SEO components - validated via E2E
-            "src/components/dev-tools/**", // Dev-only tools - not shipped to production
-            "src/components/theme-provider.tsx", // Theme provider - wrapper pattern
-            "src/components/language-toggle.tsx", // Language toggle - validated via E2E
-            "src/components/ui/**", // UI primitives - shadcn/ui components validated via E2E
-            "src/components/trust/**", // Trust components - display only
-            "src/components/emails/**", // Email templates - tested via integration
-            "src/components/footer/**", // Footer components - validated via E2E
-            "src/components/shared/**", // Shared components - validated via E2E
-            "src/constants/test-*.ts", // Test constants - testing infrastructure
-            "src/config/**", // Config files - validated via integration tests
-            "src/hooks/**", // React hooks - validated via E2E and component tests
-            "src/i18n/**", // i18n configuration - validated via integration tests
-            "src/lib/airtable/**", // Airtable integration - validated via integration tests
-            "src/lib/api/**", // API utilities - validated via integration tests
-            "src/lib/accessibility*.ts", // Accessibility utilities - validated via E2E
-            "src/lib/api-cache-utils.ts", // Cache utilities - integration
-            "src/lib/cache/**", // Cache utilities - integration tests
-            "src/lib/content-manifest.ts", // Content manifest - build-time
-            "src/lib/content-validation.ts", // Content validation - integration
-            "src/lib/cookie-consent/**", // Cookie consent library - E2E
-            "src/lib/env.ts", // Environment config - validated at runtime
-            "src/lib/i18n-performance.ts", // i18n performance - integration
-            "src/lib/i18n/**", // i18n utilities - validated via E2E
-            "src/lib/idempotency.ts", // Idempotency - integration
-            "src/lib/idle-callback.ts", // Idle callback - browser API wrapper
-            "src/lib/load-messages.ts", // Message loading - integration
-            "src/lib/locale-constants.ts", // Locale constants - config
           ],
         },
         codeQuality: {
