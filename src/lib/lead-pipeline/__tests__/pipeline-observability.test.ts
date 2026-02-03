@@ -260,7 +260,7 @@ describe("pipeline-observability", () => {
 
       // Verify resend does NOT have errorType when success
       const callArg = vi.mocked(leadPipelineMetrics.logPipelineSummary).mock
-        .calls[0][0];
+        .calls[0]![0];
       expect(callArg.resend).not.toHaveProperty("errorType");
     });
 
@@ -285,7 +285,7 @@ describe("pipeline-observability", () => {
       });
 
       const callArg = vi.mocked(leadPipelineMetrics.logPipelineSummary).mock
-        .calls[0][0];
+        .calls[0]![0];
 
       expect(callArg.resend).not.toHaveProperty("errorType");
       expect(callArg.airtable).not.toHaveProperty("errorType");

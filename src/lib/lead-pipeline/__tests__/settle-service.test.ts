@@ -5,6 +5,7 @@
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { settleService } from "../settle-service";
+import { isServiceFailure } from "../service-result";
 
 // Mock dependencies
 vi.mock("@/lib/lead-pipeline/metrics", () => ({
@@ -108,8 +109,11 @@ describe("settleService", () => {
       });
 
       expect(result.success).toBe(false);
-      expect(result.error).toBeInstanceOf(Error);
-      expect(result.error?.message).toBe("string error");
+      expect(isServiceFailure(result)).toBe(true);
+      if (isServiceFailure(result)) {
+        expect(result.error).toBeInstanceOf(Error);
+        expect(result.error.message).toBe("string error");
+      }
       expect(result.latencyMs).toBe(expectedLatency);
     });
   });

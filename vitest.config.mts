@@ -167,9 +167,6 @@ export default defineConfig({
     logHeapUsage: true,
     isolate: true,
 
-    // 缓存目录 - 使用 Vite 标准配置
-    cacheDir: "node_modules/.vitest",
-
     // 依赖优化 - 提高模块解析性能
     deps: {
       optimizer: {
