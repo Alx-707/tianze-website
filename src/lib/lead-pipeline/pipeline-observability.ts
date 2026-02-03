@@ -4,7 +4,10 @@ import {
   METRIC_SERVICES,
   type PipelineSummary,
 } from "@/lib/lead-pipeline/metrics";
-import type { ServiceResult } from "@/lib/lead-pipeline/service-result";
+import {
+  isServiceFailure,
+  type ServiceResult,
+} from "@/lib/lead-pipeline/service-result";
 
 export function emitServiceMetrics(
   emailResult: ServiceResult,
@@ -68,14 +71,14 @@ export function logPipelineSummary(params: LogPipelineSummaryParams): void {
     resend: {
       success: emailResult.success,
       latencyMs: emailResult.latencyMs,
-      ...(emailResult.error
+      ...(isServiceFailure(emailResult)
         ? { errorType: categorizeError(emailResult.error) }
         : {}),
     },
     airtable: {
       success: crmResult.success,
       latencyMs: crmResult.latencyMs,
-      ...(crmResult.error
+      ...(isServiceFailure(crmResult)
         ? { errorType: categorizeError(crmResult.error) }
         : {}),
     },

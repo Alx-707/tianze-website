@@ -1,5 +1,9 @@
 import { createLatencyTimer } from "@/lib/lead-pipeline/metrics";
-import type { ServiceResult } from "@/lib/lead-pipeline/service-result";
+import {
+  createFailure,
+  createSuccess,
+  type ServiceResult,
+} from "@/lib/lead-pipeline/service-result";
 import {
   OPERATION_TIMEOUT_MS,
   withTimeout,
@@ -25,16 +29,9 @@ export async function settleService<T>(
 
   try {
     const result = await withTimeout(promise, timeoutMs, options.operationName);
-    return {
-      success: true,
-      id: options.mapId ? options.mapId(result) : undefined,
-      latencyMs: timer.stop(),
-    };
+    const id = options.mapId ? options.mapId(result) : undefined;
+    return createSuccess(id, timer.stop());
   } catch (error) {
-    return {
-      success: false,
-      error: normalizeError(error),
-      latencyMs: timer.stop(),
-    };
+    return createFailure(normalizeError(error), timer.stop());
   }
 }
