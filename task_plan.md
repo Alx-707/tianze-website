@@ -21,7 +21,7 @@
 - 审查以“可复现证据”为准：引用具体文件与行号；对命令输出给出摘要并记录运行命令。
 
 ## Errors Encountered
-- (none)
+- 将 `jsdom.VirtualConsole` 实例直接塞进 `vitest.config.mts -> environmentOptions` 会导致 threads worker 无法启动（对象不可结构化克隆），已改为在测试 setup 中过滤 `process.stderr.write` 的固定噪音字符串。
 
 ## Status
 **Completed** - 已生成审查报告 `code_quality_review.md`，证据记录在 `notes.md`。
@@ -82,3 +82,61 @@
 
 ## Status
 **Completed** - Semgrep WARNING=0，规则文档与实现已对齐，已完成回归验证。
+
+---
+
+# Task Plan: P2 测试 stderr/log 降噪（保持断言力度不变）
+
+## Goal
+在不降低断言能力的前提下，降低 `pnpm test` 在本地/CI 的 stderr/log 噪音：默认不把业务侧 `console.*`/`logger.*` 直接喷到输出；需要调试时可显式开启。
+
+## Phases
+- [x] Phase 1: 现状定位（噪音来源、触发路径、当前 test setup 行为）
+- [x] Phase 2: 方案落地（全局 console 处理/logger 策略/可开关机制）
+- [x] Phase 3: 回归验证（pnpm test + coverage/门禁相关命令）
+- [x] Phase 4: 证据补全（notes.md “整改后”段落：命令 + 输出摘要）
+
+## Key Questions
+1. 当前噪音主要来自 `logger.warn/error` 还是直接 `console.*`（或第三方库）？
+2. 如何在“不影响测试断言”的前提下静默输出（默认静默 + 需要时可开启）？
+3. 是否存在依赖 console 输出进行断言的测试（需要兼容/调整）？
+
+## Decisions Made
+- 默认静默业务侧 `console.*` 输出（不改业务调用语义），通过测试侧捕获/断言维持验证能力；需要时用 `VITEST_SHOW_LOGS=1` 显式恢复。
+- 对 jsdom 固定噪音（navigation not implemented）在测试侧做 stderr 过滤，避免污染 CI 输出。
+- 对 `setTimeout` 的 `delay` 做上限 clamp（32-bit signed 上限），从根源消除 `TimeoutOverflowWarning`。
+
+## Errors Encountered
+- (none)
+
+## Status
+**Completed** - 已落地 console/stderr 降噪与 setTimeout delay clamp，并通过 `pnpm test` 回归验证；证据已写入 `notes.md`。
+
+---
+
+# Task Plan: P3 工具链噪音/一致性（knip + madge）
+
+## Goal
+将 “unused deps/circular deps” 这类工具链检查从“噪音/矛盾输出”拉回到“可执行信号”：同一套配置在本地/CI 输出一致、可解释，且默认不刷屏。
+
+## Phases
+- [x] Phase 1: 现状复现与归因（对比 knip 两个命令的差异；定位 madge warnings 来源）
+- [x] Phase 2: 配置与脚本收敛（knip entry/ignore 策略；madge 解析/tsconfig 对齐）
+- [x] Phase 3: 回归验证（pnpm unused:* / circular:check / 相关 gate）
+- [x] Phase 4: 证据补全（notes.md：整改后命令 + 输出摘要）
+
+## Key Questions
+1. `pnpm unused:check` vs `pnpm unused:production` 的差异是否来自 entry/扫描范围（还是工具能力边界）？
+2. madge 的 “warnings” 是解析失败还是实际可执行问题？能否通过 `--ts-config`/alias 解决？
+3. 哪些检查应进入 gate（阻断），哪些仅作信息提示（避免为工具而工程）？
+
+## Decisions Made
+- knip 的 “production 源文件集合” 以 TypeScript 编译单元为权威边界（`--use-tsconfig-files -t tsconfig.knip.json`），避免测试/脚本把依赖“伪装成生产使用”或导致大规模误报。
+- 对 knip 自动识别/插件已覆盖的入口文件不手动重复声明（移除冗余 entry pattern），把 config hints 从“噪音”降到 0。
+- madge 加 `--ts-config tsconfig.json`，用 TS alias/解析规则把 warnings 从“不可执行的计数”降到可接受水平。
+
+## Errors Encountered
+- (none)
+
+## Status
+**Completed** - knip（unused:check/unused:production）与 madge（circular:check）输出已收敛且可执行；证据已写入 `notes.md`。

@@ -136,6 +136,16 @@ Next.js `headers().source` 使用的是 path-to-regexp 风格的 matcher，不�
 - `pnpm circular:check` 显示 “358 warnings” 但没给明细，工具输出不可执行
   - 证据：`notes.md` 命令摘要（madge 输出只有计数，没有具体告警列表）
 
+### 整改后更新（2026-02-03）
+
+- knip 输出已收敛为“可执行信号”：
+  - `pnpm unused:check` exit=0（0 issues + 0 config hints）
+  - `pnpm unused:production` exit=0（使用 `--use-tsconfig-files -t tsconfig.knip.json` 以 TS 编译单元定义“生产源文件集合”）
+  - 证据：`notes.md` 的 “P3 整改落地” 段落；配置：`knip.jsonc`、`tsconfig.knip.json`、`package.json` scripts
+- madge warnings 从 358 降到 2：
+  - `pnpm circular:check` 通过 `--ts-config tsconfig.json` 对齐 TS path alias/解析规则
+  - 证据：`notes.md` 的 “P3 整改落地” 段落；脚本：`package.json`
+
 ---
 
 ## 8) 做得对的地方（别误会，我不是只会骂）
@@ -165,4 +175,3 @@ Next.js `headers().source` 使用的是 path-to-regexp 风格的 matcher，不�
    - 证据依据：`src/i18n/routing-config.ts#L23`~`#L34` + `src/config/paths/utils.ts#L43`~`#L55` + `src/i18n/routing.ts#L14`~`#L15`
 5. 清理“常量狂热”：允许小数字字面量，保留语义常量；把 `COUNT_PAIR/MAGIC_*` 这种东西当成技术债处理。
    - 证据依据：`src/constants/index.ts#L135`~`#L187`
-

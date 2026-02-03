@@ -52,6 +52,24 @@
   - `pnpm security:check`（audit 0；Semgrep ERROR=0，WARNING=0）
   - `pnpm quality:gate:fast`
 
+### P2 整改落地（2026-02-03）——测试 stderr/log 降噪（保持断言力度不变）
+- 目标：默认不把业务侧 `console.*`/`logger.*` 直接喷到 stdout/stderr；测试仍可通过 `vi.spyOn(console, ...)` 捕获并断言；需要调试时可显式开启日志。
+- 变更点：
+  - 全局测试 setup 增加 console/stderr 降噪：
+    - `src/test/setup.console.ts`：默认将 `console.debug/info/log/warn/error` 置为 noop；并过滤 jsdom 固定噪音 `"Not implemented: navigation to another Document"`（该噪音会绕过普通 console mock 直接写 stderr）。
+    - `src/test/setup.ts`：新增 `import "./setup.console";`，确保在其它 setup 前生效。
+  - 修复一个会触发 Node.js `TimeoutOverflowWarning` 的真实代码路径：
+    - `src/components/ui/animated-counter.tsx`：对 `delay` 做上限 clamp（`MAX_SET_TIMEOUT_DELAY_MS`），避免 `setTimeout(delay=Number.MAX_SAFE_INTEGER)` 被 Node 截断并报警。
+    - `src/constants/time.ts`：新增 `MAX_SET_TIMEOUT_DELAY_MS`（JS timers 的 32-bit signed 上限）。
+- 复核命令（均 exit=0，且无上述 stderr 噪音）：
+  - `pnpm vitest run src/components/ui/__tests__/navigation-menu.test.tsx`（此前会在末尾输出 jsdom navigation 噪音；整改后不再出现）
+  - `pnpm vitest run src/components/ui/__tests__/animated-counter-accessibility.test.tsx`（此前会出现 `TimeoutOverflowWarning`；整改后不再出现）
+  - `pnpm test`（全量回归通过）
+  - `pnpm lint:check`
+  - `pnpm type-check`
+- 调试开关：
+  - `VITEST_SHOW_LOGS=1 pnpm test`：恢复 console 输出 + 不过滤 jsdom navigation 噪音（用于本地排查）。
+
 ### Architecture & module boundaries
 - (pending)
 
@@ -69,3 +87,26 @@
 
 ### DX (developer experience)
 - (pending)
+
+### P3 整改落地（2026-02-03）——工具链噪音/一致性（knip + madge）
+- knip（整改前问题复现）：
+  - `pnpm unused:check`：Unused devDependencies (2) + Configuration hints (4)（冗余 entry pattern），exit=1
+  - `pnpm unused:production`：Unused dependencies (27)，exit=1（与实际使用严重不符）
+- knip（整改策略）：
+  - `knip.jsonc`：
+    - 移除 knip 自动识别/插件已覆盖的冗余 entry（避免 config hints）
+    - 将 Prettier 自动加载的插件依赖加入 `ignoreDependencies`（避免误报 unused devDependencies）
+  - `package.json`：
+    - `unused:production` 改为使用 `--use-tsconfig-files -t tsconfig.knip.json`（用 TS 编译单元的 include/exclude 做“生产源文件集合”的权威边界，避免把测试/脚本消费当成生产依赖使用）
+  - 新增 `tsconfig.knip.json`：
+    - 生产侧需要纳入 `next.config.ts` 等“构建期入口”的依赖使用（例如 MDX），但不希望污染主 `tsconfig.json` 的 type-check 范围
+- madge（整改前问题复现）：
+  - `pnpm circular:check`：`Processed 742 files ... (358 warnings)`，但不输出明细（warnings 不可执行）
+- madge（整改策略）：
+  - `package.json`：`circular:check` 增加 `--ts-config tsconfig.json`，让 madge 按 TS path alias/解析规则工作，减少 “skipped file” 类 warnings
+- 回归命令（均 exit=0）：
+  - `pnpm unused:check`（整改后无输出，代表 0 issues + 0 config hints）
+  - `pnpm unused:production`（整改后无输出，代表 0 issues）
+  - `pnpm circular:check`（warnings 从 358 降到 2，且无循环依赖）
+  - `pnpm lint:check`
+  - `pnpm type-check`
