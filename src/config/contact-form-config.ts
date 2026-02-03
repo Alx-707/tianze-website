@@ -10,8 +10,6 @@ import {
 } from "@/constants";
 import { MAGIC_15 } from "@/constants/count";
 
-/* eslint-disable security/detect-object-injection -- Field access keys are constrained to CONTACT_FORM_FIELD_KEYS union, not user input */
-
 /**
  * 表单字段枚举键值
  */
@@ -355,5 +353,3 @@ export function createContactFormSchemaFromConfig(
 
   return z.object(shape);
 }
-
-/* eslint-enable security/detect-object-injection */

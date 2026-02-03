@@ -292,6 +292,7 @@ class QualityGate {
           thresholds: {
             vulnerabilities: 0,
             highSeverity: 0,
+            semgrepErrors: 0,
           },
           blocking: true,
         },
@@ -1227,19 +1228,56 @@ class QualityGate {
       // npm audit 检查
       gate.checks.audit = await this.runSecurityAudit();
 
+      // Semgrep（本地门禁可见；CI 由 .github/workflows/ci.yml 的 security job 执行）
+      const shouldRunSemgrep =
+        !this.config.ciGateMode || process.env.QUALITY_FORCE_SEMGREP === "true";
+
+      if (shouldRunSemgrep) {
+        gate.checks.semgrep = await this.runSemgrepScan();
+      } else {
+        gate.checks.semgrep = {
+          status: "skipped",
+          reason: "CI pipeline runs Semgrep in a dedicated security job",
+          errors: 0,
+          warnings: 0,
+        };
+      }
+
       // 检查安全阈值
       const vulnerabilities = gate.checks.audit.vulnerabilities || 0;
       const highSeverity = gate.checks.audit.high || 0;
+      const semgrepErrors = gate.checks.semgrep?.errors || 0;
+      const semgrepStatus = gate.checks.semgrep?.status;
 
+      const issues = [];
+      const warningIssues = [];
       if (
         vulnerabilities >
           this.config.gates.security.thresholds.vulnerabilities ||
         highSeverity > this.config.gates.security.thresholds.highSeverity
       ) {
-        gate.status = "failed";
-        gate.issues.push(
+        issues.push(
           `发现 ${vulnerabilities} 个安全漏洞，其中 ${highSeverity} 个高危`,
         );
+      }
+
+      if (
+        semgrepErrors >
+        (this.config.gates.security.thresholds.semgrepErrors ?? 0)
+      ) {
+        issues.push(`Semgrep ERROR 发现 ${semgrepErrors} 个问题`);
+      }
+
+      if (semgrepStatus === "failed") {
+        warningIssues.push("Semgrep 扫描执行失败（仅告警，不阻塞）");
+      }
+
+      if (issues.length > 0) {
+        gate.status = "failed";
+        gate.issues.push(...issues, ...warningIssues);
+      } else if (warningIssues.length > 0) {
+        gate.status = "warning";
+        gate.issues.push(...warningIssues);
       } else {
         gate.status = "passed";
       }
@@ -1410,6 +1448,73 @@ class QualityGate {
         error: error.message,
       };
     }
+  }
+
+  /**
+   * 运行 Semgrep 扫描（仅统计 ERROR/WARNING 数量）
+   *
+   * 注意：CI 中 Semgrep 由 .github/workflows/ci.yml 的 security job 负责，
+   * quality gate 默认不重复执行（除非 QUALITY_FORCE_SEMGREP=true）。
+   */
+  async runSemgrepScan() {
+    const reportDir = path.join(process.cwd(), "reports");
+    const errorLatest = path.join(reportDir, "semgrep-error-latest.json");
+    const warningLatest = path.join(reportDir, "semgrep-warning-latest.json");
+
+    let exitCode = 0;
+    let status = "completed";
+    let output = "";
+
+    try {
+      output = execSync("pnpm security:semgrep", {
+        encoding: "utf8",
+        stdio: "pipe",
+        maxBuffer: 10 * 1024 * 1024,
+      });
+    } catch (error) {
+      exitCode = typeof error.status === "number" ? error.status : 1;
+      output = (error.stdout || error.stderr || "").toString();
+
+      // exitCode=1 通常表示存在 ERROR findings（扫描本身成功）
+      status = exitCode === 1 ? "completed" : "failed";
+    }
+
+    let errors = 0;
+    let warnings = 0;
+
+    try {
+      if (fs.existsSync(errorLatest)) {
+        const json = JSON.parse(fs.readFileSync(errorLatest, "utf8"));
+        errors = Array.isArray(json?.results) ? json.results.length : 0;
+      }
+    } catch {
+      // ignore
+    }
+
+    try {
+      if (fs.existsSync(warningLatest)) {
+        const json = JSON.parse(fs.readFileSync(warningLatest, "utf8"));
+        warnings = Array.isArray(json?.results) ? json.results.length : 0;
+      }
+    } catch {
+      // ignore
+    }
+
+    return {
+      errors,
+      warnings,
+      exitCode,
+      status,
+      reports: {
+        error: fs.existsSync(errorLatest)
+          ? path.relative(process.cwd(), errorLatest)
+          : null,
+        warning: fs.existsSync(warningLatest)
+          ? path.relative(process.cwd(), warningLatest)
+          : null,
+      },
+      output: typeof output === "string" ? output.trim() : "",
+    };
   }
 
   /**

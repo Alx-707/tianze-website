@@ -197,6 +197,5 @@ const API_MESSAGES: Record<SupportedLocale, ApiMessages> = {
 export function getApiMessages(request: NextRequest): ApiMessages {
   const locale = getRequestLocale(request);
   // locale is type-safe (only 'en' | 'zh'), not user-controlled input
-  // eslint-disable-next-line security/detect-object-injection -- locale validated by getRequestLocale
   return API_MESSAGES[locale];
 }

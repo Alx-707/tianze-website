@@ -356,13 +356,11 @@ export const env = createEnv({
 export function getEnvVar(
   key: keyof typeof env,
 ): string | boolean | number | undefined {
-  // eslint-disable-next-line security/detect-object-injection -- key is constrained to keyof env (internal whitelist), not user input
   return env[key];
 }
 
 // 提供必需环境变量检查（仅用于字符串类型的环境变量）
 export function requireEnvVar(key: keyof typeof env): string {
-  // eslint-disable-next-line security/detect-object-injection -- key is constrained to keyof env (internal whitelist), not user input
   const value = env[key];
   if (!value || typeof value === "boolean" || typeof value === "number") {
     throw new Error(

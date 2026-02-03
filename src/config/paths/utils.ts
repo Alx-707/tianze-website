@@ -2,8 +2,6 @@
  * 路径配置工具函数
  */
 
-/* eslint-disable security/detect-object-injection -- 路径配置工具需要动态访问配置对象，所有访问都通过hasOwnProperty安全检查 */
-
 import { LOCALES_CONFIG } from "@/config/paths/locales-config";
 import {
   DYNAMIC_PATHS_CONFIG,

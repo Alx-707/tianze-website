@@ -169,7 +169,8 @@ export default [
     },
     rules: {
       ...security.configs.recommended.rules,
-      "security/detect-object-injection": "error",
+      // 噪音过大且 TS 无法表达上下文：由 Semgrep（ERROR gate）承担代码级对象注入扫描
+      "security/detect-object-injection": "off",
       "security/detect-non-literal-regexp": "error",
       "security/detect-unsafe-regex": "error",
       "security/detect-buffer-noassert": "error",

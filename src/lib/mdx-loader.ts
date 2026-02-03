@@ -46,14 +46,12 @@ export async function loadMDXContent(
   }
 
   const importers = getImportersForType(type);
-  // eslint-disable-next-line security/detect-object-injection -- locale is validated by ContentType constraint
   const localeImporters = importers[locale];
 
   if (localeImporters === undefined) {
     return null;
   }
 
-  // eslint-disable-next-line security/detect-object-injection -- slug validated by getContentEntry manifest lookup
   const importer = localeImporters[slug];
 
   if (importer === undefined) {

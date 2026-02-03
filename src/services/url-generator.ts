@@ -3,8 +3,6 @@
  * 统一管理所有URL生成逻辑，确保一致性和类型安全
  */
 
-/* eslint-disable security/detect-object-injection -- URL generation uses controlled config objects (PATHS_CONFIG/LOCALES_CONFIG) with internal keys */
-
 import {
   getLocalizedPath,
   LOCALES_CONFIG,

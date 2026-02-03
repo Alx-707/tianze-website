@@ -13,12 +13,14 @@ export function mergeObjects<T extends Record<string, unknown>>(
   // nosemgrep: object-injection-sink-spread-operator -- 仅复制受控 target 对象
   const result = { ...target };
 
+  // Prevent prototype pollution by dropping known dangerous keys
+  const blockedKeys = new Set(["__proto__", "constructor", "prototype"]);
+
   for (const key in source) {
     if (!hasOwn(source, key)) continue;
-    // eslint-disable-next-line security/detect-object-injection -- hasOwn 已校验 key 来自 source 自身属性
+    if (blockedKeys.has(key)) continue;
     const sourceValue = source[key];
     if (sourceValue === undefined) continue;
-    // eslint-disable-next-line security/detect-object-injection -- hasOwn 已校验，result 由 target 浅拷贝
     const targetValue = result[key];
 
     const isSourcePlain =
@@ -31,7 +33,6 @@ export function mergeObjects<T extends Record<string, unknown>>(
       !Array.isArray(targetValue);
 
     if (isSourcePlain && isTargetPlain) {
-      // eslint-disable-next-line security/detect-object-injection -- 递归合并已校验的嵌套对象
       result[key] = mergeObjects(
         targetValue as Record<string, unknown>,
         sourceValue as Record<string, unknown>,
@@ -39,7 +40,6 @@ export function mergeObjects<T extends Record<string, unknown>>(
       continue;
     }
 
-    // eslint-disable-next-line security/detect-object-injection -- hasOwn 已校验 key
     result[key] = sourceValue as T[Extract<keyof T, string>];
   }
 
