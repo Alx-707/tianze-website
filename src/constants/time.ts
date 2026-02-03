@@ -41,6 +41,12 @@ export const SECONDS_PER_HOUR = COUNT_3600;
 export const MILLISECONDS_PER_MINUTE = 60000;
 export const MILLISECONDS_PER_HOUR = 3600000 as const;
 
+/**
+ * JS timers (setTimeout/setInterval) 在 Node.js 和部分浏览器实现里会被限制为 32-bit signed int。
+ * 超过该上限会触发 TimeoutOverflowWarning（Node.js）或被截断，导致行为不可预测。
+ */
+export const MAX_SET_TIMEOUT_DELAY_MS = 2147483647 as const;
+
 // ============================================================================
 // 常用时间间隔 (毫秒)
 // ============================================================================
