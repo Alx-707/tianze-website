@@ -163,6 +163,7 @@ export const POST = withRateLimit(
     } catch (error) {
       logger.error("Product inquiry submission failed unexpectedly", {
         error: error instanceof Error ? error.message : "Unknown error",
+        stack: error instanceof Error ? error.stack : undefined,
         ip: sanitizeIP(clientIP),
         processingTime: Date.now() - startTime,
       });

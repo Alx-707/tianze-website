@@ -114,6 +114,8 @@ export function parsePathnameForLink(currentPathname: string): LinkHref {
   }
 
   // Static routes - cast required because usePathname returns runtime string
-  // Safe because usePathname only returns valid configured pathnames
+  // while LinkHref expects typed route literals. This cast relies on the
+  // assumption that users navigate through app routes; invalid URLs will
+  // still work but won't have type checking benefits.
   return pathname as LinkHref;
 }
