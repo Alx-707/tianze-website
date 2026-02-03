@@ -200,6 +200,8 @@ export async function isDuplicateEmailAddress(params: {
     logger.error("Failed to check duplicate email", {
       error: error instanceof Error ? error.message : "Unknown error",
     });
-    return false;
+    // Re-throw to let callers decide how to handle the failure
+    // instead of silently returning false (which masks API/network errors)
+    throw new Error("Failed to check duplicate email");
   }
 }

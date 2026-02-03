@@ -39,6 +39,7 @@ export class AirtableService {
   private tableName: string;
   private isConfigured: boolean = false;
   private airtableModule: unknown = null;
+  private initializationError: Error | null = null;
 
   constructor() {
     this.tableName = env.AIRTABLE_TABLE_NAME || "Contacts";
@@ -84,8 +85,10 @@ export class AirtableService {
         tableName: this.tableName,
       });
     } catch (error) {
+      this.initializationError =
+        error instanceof Error ? error : new Error(String(error));
       logger.error("Failed to initialize Airtable service", {
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: this.initializationError.message,
       });
     }
   }
@@ -109,6 +112,11 @@ export class AirtableService {
   private async requireBase(): Promise<AirtableNS.Base> {
     await this.ensureReady();
     if (!this.isReady()) {
+      if (this.initializationError) {
+        throw new Error(
+          `Airtable service initialization failed: ${this.initializationError.message}`,
+        );
+      }
       throw new Error("Airtable service is not configured");
     }
     return this.base as AirtableNS.Base;
@@ -186,16 +194,30 @@ export class AirtableService {
   /**
    * 检查重复邮箱
    * Check for duplicate email addresses
+   *
+   * Returns false if service is not configured (graceful degradation).
+   * Logs warning and returns false if the check fails (e.g., API error),
+   * allowing form submission to proceed rather than blocking users.
    */
   public async isDuplicateEmail(email: string): Promise<boolean> {
     const base = await this.getBaseIfReady();
     if (!base) return false;
 
-    return isDuplicateEmailAddress({
-      base,
-      tableName: this.tableName,
-      email,
-    });
+    try {
+      return await isDuplicateEmailAddress({
+        base,
+        tableName: this.tableName,
+        email,
+      });
+    } catch (error) {
+      // Log warning but allow submission to proceed - duplicate check is
+      // a nice-to-have, not a hard requirement. Better to accept potential
+      // duplicates than block legitimate submissions due to transient errors.
+      logger.warn("Duplicate email check failed, proceeding with submission", {
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
+      return false;
+    }
   }
 
   /**

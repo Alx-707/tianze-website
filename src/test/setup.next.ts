@@ -73,7 +73,6 @@ try {
 }
 
 // Anchor click: dispatch click event without performing navigation
-const _anchorClick = HTMLAnchorElement.prototype.click;
 vi.spyOn(HTMLAnchorElement.prototype as any, "click").mockImplementation(
   function anchorClickMock(this: HTMLAnchorElement) {
     const evt = new MouseEvent("click", { bubbles: true, cancelable: true });

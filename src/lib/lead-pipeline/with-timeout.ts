@@ -14,7 +14,8 @@ export function withTimeout<T>(
 ): Promise<T> {
   const timeoutPromise = new Promise<never>((_, reject) => {
     setTimeout(
-      () => reject(new Error(`${operationName} timed out`)),
+      () =>
+        reject(new Error(`${operationName} timed out after ${timeoutMs}ms`)),
       timeoutMs,
     );
   });
