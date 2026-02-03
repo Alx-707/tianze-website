@@ -6,22 +6,15 @@
 import { z } from "zod";
 import { sanitizePlainText } from "@/lib/security-validation";
 import {
-  COUNT_TEN,
-  MAGIC_255,
-  MAGIC_2000,
-  MAGIC_2500,
+  MAX_LEAD_COMPANY_LENGTH,
+  MAX_LEAD_EMAIL_LENGTH,
+  MAX_LEAD_MESSAGE_LENGTH,
+  MAX_LEAD_NAME_LENGTH,
+  MAX_LEAD_PRODUCT_NAME_LENGTH,
+  MAX_LEAD_REQUIREMENTS_LENGTH,
+  MIN_LEAD_MESSAGE_LENGTH,
   ONE,
-  PERCENTAGE_FULL,
 } from "@/constants";
-
-// Validation limits for lead fields - using named constants from project constants
-const EMAIL_MAX_LENGTH = MAGIC_255 - 1; // 254 (RFC 5321)
-const COMPANY_MAX_LENGTH = PERCENTAGE_FULL + PERCENTAGE_FULL; // 200
-const NAME_MAX_LENGTH = PERCENTAGE_FULL; // 100
-const MESSAGE_MIN_LENGTH = COUNT_TEN; // 10
-const MESSAGE_MAX_LENGTH = MAGIC_2500 + MAGIC_2500; // 5000
-const PRODUCT_NAME_MAX_LENGTH = COMPANY_MAX_LENGTH;
-const REQUIREMENTS_MAX_LENGTH = MAGIC_2000;
 
 /**
  * Lead type discriminator
@@ -57,8 +50,8 @@ const sanitizedString = () => z.string().overwrite(sanitizePlainText);
  * Base lead fields shared across all lead types
  */
 const baseLeadFields = {
-  email: z.string().email().max(EMAIL_MAX_LENGTH),
-  company: sanitizedString().max(COMPANY_MAX_LENGTH).optional(),
+  email: z.string().email().max(MAX_LEAD_EMAIL_LENGTH),
+  company: sanitizedString().max(MAX_LEAD_COMPANY_LENGTH).optional(),
   marketingConsent: z.boolean().optional().default(false),
 };
 
@@ -68,14 +61,16 @@ const baseLeadFields = {
  */
 export const contactLeadSchema = z.object({
   type: z.literal(LEAD_TYPES.CONTACT),
-  fullName: sanitizedString().min(ONE).max(NAME_MAX_LENGTH),
+  fullName: sanitizedString().min(ONE).max(MAX_LEAD_NAME_LENGTH),
   subject: z.enum([
     CONTACT_SUBJECTS.PRODUCT_INQUIRY,
     CONTACT_SUBJECTS.DISTRIBUTOR,
     CONTACT_SUBJECTS.OEM_ODM,
     CONTACT_SUBJECTS.OTHER,
   ]),
-  message: sanitizedString().min(MESSAGE_MIN_LENGTH).max(MESSAGE_MAX_LENGTH),
+  message: sanitizedString()
+    .min(MIN_LEAD_MESSAGE_LENGTH)
+    .max(MAX_LEAD_MESSAGE_LENGTH),
   turnstileToken: z.string().min(ONE),
   submittedAt: z.string().optional(),
   ...baseLeadFields,
@@ -87,11 +82,11 @@ export const contactLeadSchema = z.object({
  */
 export const productLeadSchema = z.object({
   type: z.literal(LEAD_TYPES.PRODUCT),
-  fullName: sanitizedString().min(ONE).max(NAME_MAX_LENGTH),
+  fullName: sanitizedString().min(ONE).max(MAX_LEAD_NAME_LENGTH),
   productSlug: z.string().trim().min(ONE),
-  productName: sanitizedString().min(ONE).max(PRODUCT_NAME_MAX_LENGTH),
+  productName: sanitizedString().min(ONE).max(MAX_LEAD_PRODUCT_NAME_LENGTH),
   quantity: z.union([z.string().trim().min(ONE), z.coerce.number().positive()]),
-  requirements: sanitizedString().max(REQUIREMENTS_MAX_LENGTH).optional(),
+  requirements: sanitizedString().max(MAX_LEAD_REQUIREMENTS_LENGTH).optional(),
   ...baseLeadFields,
 });
 
@@ -101,7 +96,7 @@ export const productLeadSchema = z.object({
  */
 export const newsletterLeadSchema = z.object({
   type: z.literal(LEAD_TYPES.NEWSLETTER),
-  email: z.string().email().max(EMAIL_MAX_LENGTH),
+  email: z.string().email().max(MAX_LEAD_EMAIL_LENGTH),
 });
 
 /**

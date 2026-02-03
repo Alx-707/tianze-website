@@ -51,7 +51,7 @@ export function getContentLastModified(
   // Priority 3: File system mtime
   if (filePath !== undefined) {
     try {
-      // eslint-disable-next-line security/detect-non-literal-fs-filename
+      // eslint-disable-next-line security/detect-non-literal-fs-filename -- filePath comes from content manifest/parser, not user input
       const stats = fs.statSync(filePath);
       return stats.mtime;
     } catch {

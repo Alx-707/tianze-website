@@ -225,8 +225,8 @@ describe("CSP Report API Route - 高级功能测试", () => {
       await POST(request);
 
       expect(console.warn).toHaveBeenCalledWith(
-        "CSP Violation Report:",
-        expect.any(String),
+        "CSP Violation Report",
+        expect.any(Object),
       );
     });
 

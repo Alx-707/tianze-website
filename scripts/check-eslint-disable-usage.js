@@ -1,168 +1,212 @@
 #!/usr/bin/env node
 
 /**
- * ESLint 禁用注释使用检查脚本
+ * ESLint disable usage guard
  *
- * 用途：检查项目中 ESLint 禁用注释的使用是否符合准则
- * 运行：node scripts/check-eslint-disable-usage.js
+ * 目标：让“eslint-disable”变成可审计的例外，而不是噪音门禁。
+ *
+ * 规则（默认）：
+ * - 所有 eslint-disable 必须指定 rule 名称（禁止裸 disable）
+ * - 生产代码必须带理由（`-- reason`）
+ * - 测试代码允许缺少理由（但仍要求指定 rule 名称）
+ *
+ * 推荐格式：
+ * - `// eslint-disable-next-line <rule> -- <reason>`
+ * - `/* eslint-disable <rule> -- <reason> *\/`
  */
 
 const fs = require("fs");
 const path = require("path");
 const { execSync } = require("child_process");
 
-// 允许使用 ESLint 禁用注释的目录和文件模式
-const ALLOWED_PATTERNS = [
-  // API 类型定义文件
-  /^src\/types\/.*-api-.*\.ts$/,
-  /^src\/types\/whatsapp-.*\.ts$/,
-  /^src\/types\/.*-types\.ts$/,
-  /^src\/types\/test-types\.ts$/,
+const REPO_ROOT = process.cwd();
 
-  // 开发工具文件
-  /^src\/components\/dev-tools\/.*\.(ts|tsx)$/,
-
-  // 脚本文件
-  /^scripts\/.*\.js$/,
-
-  // 测试文件（限制性允许）
-  /^tests\/.*\.(ts|tsx)$/,
-  /^.*\.test\.(ts|tsx)$/,
-  /^.*\.spec\.(ts|tsx)$/,
-];
-
-// 业务逻辑代码目录（严格禁止）
-const FORBIDDEN_PATTERNS = [
-  /^src\/components\/(?!dev-tools).*\.(ts|tsx)$/,
-  /^src\/lib\/.*\.ts$/,
-  /^src\/app\/.*\.(ts|tsx)$/,
-  /^src\/hooks\/.*\.ts$/,
-];
-
-function findFilesWithEslintDisable() {
+function getRepoFiles() {
   try {
-    const result = execSync(
-      'find src -name "*.ts" -o -name "*.tsx" | xargs grep -l "eslint-disable" 2>/dev/null || true',
-      { encoding: "utf8" },
-    );
-
-    return result
-      .trim()
+    const output = execSync("git ls-files", {
+      encoding: "utf8",
+      cwd: REPO_ROOT,
+      stdio: ["ignore", "pipe", "ignore"],
+    });
+    return output
       .split("\n")
-      .filter((file) => file.length > 0);
+      .map((line) => line.trim())
+      .filter(Boolean);
   } catch (error) {
-    console.error("查找文件时出错:", error.message);
-    return [];
+    console.error("[eslint-disable-check] Failed to list git files:", error);
+    process.exit(1);
   }
 }
 
-function isFileAllowed(filePath) {
-  // 检查是否匹配允许的模式
-  const isAllowed = ALLOWED_PATTERNS.some((pattern) => pattern.test(filePath));
+function isSourceFile(filePath) {
+  if (
+    !(
+      filePath.startsWith("src/") ||
+      filePath.startsWith("tests/") ||
+      filePath.startsWith("scripts/")
+    )
+  ) {
+    return false;
+  }
 
-  // 检查是否匹配禁止的模式
-  const isForbidden = FORBIDDEN_PATTERNS.some((pattern) =>
-    pattern.test(filePath),
-  );
+  const ext = path.extname(filePath);
+  return [".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs"].includes(ext);
+}
 
-  return isAllowed && !isForbidden;
+function isTestFile(filePath) {
+  if (filePath.startsWith("tests/")) return true;
+  if (filePath.startsWith("src/test/")) return true;
+  if (filePath.includes("/__tests__/")) return true;
+  if (/\.(test|spec)\.(ts|tsx|js|jsx)$/.test(filePath)) return true;
+
+  // test-only typing/constants (kept under src/ for convenience)
+  if (filePath.startsWith("src/types/test-")) return true;
+  if (filePath.startsWith("src/constants/test-")) return true;
+
+  return false;
+}
+
+function isValidRuleName(rule) {
+  // Examples:
+  // - no-console
+  // - max-lines-per-function
+  // - security/detect-object-injection
+  // - @typescript-eslint/no-explicit-any
+  return /^[@\w/-]+$/.test(rule);
+}
+
+function stripTrailingCommentEnd(text) {
+  return text.replace(/\*\/\s*\}?$/, "").trim();
+}
+
+function parseDisableDirective(line, directive) {
+  const idx = line.indexOf(directive);
+  if (idx === -1) return null;
+
+  const rawRest = stripTrailingCommentEnd(line.slice(idx + directive.length));
+  const rest = rawRest.trim();
+
+  const reasonIdx = rest.indexOf("--");
+  const rulesText = (reasonIdx === -1 ? rest : rest.slice(0, reasonIdx)).trim();
+  const reason = (reasonIdx === -1 ? "" : rest.slice(reasonIdx + 2)).trim();
+
+  const rules = rulesText
+    .split(",")
+    .map((r) => r.trim())
+    .filter(Boolean);
+
+  return { rules, reason };
 }
 
 function analyzeFile(filePath) {
+  const absolute = path.join(REPO_ROOT, filePath);
+  let content = "";
   try {
-    const content = fs.readFileSync(filePath, "utf8");
-    const lines = content.split("\n");
-
-    const disableComments = [];
-    lines.forEach((line, index) => {
-      if (line.includes("eslint-disable")) {
-        disableComments.push({
-          line: index + 1,
-          content: line.trim(),
-          hasDocumentation:
-            lines[index + 1] && lines[index + 1].includes("/**"),
-        });
-      }
-    });
-
-    return disableComments;
+    content = fs.readFileSync(absolute, "utf8");
   } catch (error) {
-    console.error(`读取文件 ${filePath} 时出错:`, error.message);
-    return [];
+    // Worktree may be dirty; skip missing files instead of crashing.
+    if (error && typeof error === "object" && error.code === "ENOENT") {
+      return [];
+    }
+    throw error;
   }
+  const lines = content.split("\n");
+
+  const findings = [];
+  const testFile = isTestFile(filePath);
+
+  function extractDirectiveText(trimmed) {
+    if (trimmed.startsWith("//")) return trimmed.slice(2).trim();
+    if (trimmed.startsWith("/*")) return trimmed.slice(2).trim();
+    if (trimmed.startsWith("*")) return trimmed.slice(1).trim();
+
+    const jsxBlockIdx = trimmed.indexOf("{/*");
+    if (jsxBlockIdx !== -1) {
+      return trimmed.slice(jsxBlockIdx + 3).trim();
+    }
+
+    return null;
+  }
+
+  for (let i = 0; i < lines.length; i += 1) {
+    const rawLine = lines[i] ?? "";
+    if (!rawLine.includes("eslint-disable")) continue;
+    if (rawLine.includes("eslint-enable")) continue;
+
+    const trimmed = rawLine.trim();
+    const directiveText = extractDirectiveText(trimmed);
+    if (!directiveText || !directiveText.startsWith("eslint-disable")) {
+      continue;
+    }
+
+    const directive = directiveText.includes("eslint-disable-next-line")
+      ? "eslint-disable-next-line"
+      : directiveText.includes("eslint-disable-line")
+        ? "eslint-disable-line"
+        : "eslint-disable";
+
+    const parsed = parseDisableDirective(directiveText, directive);
+    if (!parsed) continue;
+
+    const { rules, reason } = parsed;
+    const requireReason = !testFile;
+
+    const violations = [];
+
+    if (rules.length === 0) {
+      violations.push("missing rule names");
+    } else {
+      const invalidRules = rules.filter((r) => !isValidRuleName(r));
+      if (invalidRules.length > 0) {
+        violations.push(`invalid rule name(s): ${invalidRules.join(", ")}`);
+      }
+    }
+
+    if (requireReason && reason.length === 0) {
+      violations.push("missing reason (use `-- reason`)");
+    }
+
+    if (violations.length > 0) {
+      findings.push({
+        filePath,
+        line: i + 1,
+        directive,
+        content: trimmed,
+        violations,
+      });
+    }
+  }
+
+  return findings;
 }
 
 function main() {
-  console.log("🔍 检查 ESLint 禁用注释使用情况...\n");
+  const files = getRepoFiles().filter(isSourceFile);
 
-  const filesWithDisable = findFilesWithEslintDisable();
+  const allFindings = [];
+  for (const file of files) {
+    allFindings.push(...analyzeFile(file));
+  }
 
-  if (filesWithDisable.length === 0) {
-    console.log("✅ 未发现使用 ESLint 禁用注释的文件");
+  if (allFindings.length === 0) {
+    console.log("[eslint-disable-check] OK (no violations)");
     return;
   }
 
-  let hasViolations = false;
-  let allowedFiles = 0;
-  let violationFiles = 0;
+  console.log(`[eslint-disable-check] Violations: ${allFindings.length}\n`);
 
-  console.log(
-    `📋 发现 ${filesWithDisable.length} 个文件使用了 ESLint 禁用注释:\n`,
-  );
-
-  filesWithDisable.forEach((filePath) => {
-    const isAllowed = isFileAllowed(filePath);
-    const disableComments = analyzeFile(filePath);
-
-    if (isAllowed) {
-      allowedFiles++;
-      console.log(`✅ ${filePath}`);
-      console.log(`   📝 禁用注释数量: ${disableComments.length}`);
-
-      // 检查是否有文档说明
-      const undocumented = disableComments.filter(
-        (comment) => !comment.hasDocumentation,
-      );
-      if (undocumented.length > 0) {
-        console.log(`   ⚠️  缺少文档说明的禁用注释: ${undocumented.length}`);
-      }
-    } else {
-      violationFiles++;
-      hasViolations = true;
-      console.log(`❌ ${filePath}`);
-      console.log(`   🚫 此文件不允许使用 ESLint 禁用注释`);
-      console.log(`   📝 发现的禁用注释:`);
-
-      disableComments.forEach((comment) => {
-        console.log(`      第${comment.line}行: ${comment.content}`);
-      });
-    }
-    console.log("");
-  });
-
-  // 总结报告
-  console.log("📊 检查结果总结:");
-  console.log(`   ✅ 符合准则的文件: ${allowedFiles}`);
-  console.log(`   ❌ 违规文件: ${violationFiles}`);
-  console.log(`   📋 总文件数: ${filesWithDisable.length}`);
-
-  if (hasViolations) {
+  for (const finding of allFindings) {
     console.log(
-      "\n🚨 发现违规使用！请参考 docs/development/eslint-disable-guidelines.md",
+      `- ${finding.filePath}:${finding.line} ${finding.directive}: ${finding.violations.join(
+        "; ",
+      )}`,
     );
-    console.log("   建议：优先修复 ESLint 错误而非禁用规则");
-    process.exit(1);
-  } else {
-    console.log("\n🎉 所有 ESLint 禁用注释的使用都符合准则！");
+    console.log(`  ${finding.content}`);
   }
+
+  process.exit(1);
 }
 
 if (require.main === module) {
   main();
 }
-
-module.exports = {
-  findFilesWithEslintDisable,
-  isFileAllowed,
-  analyzeFile,
-};

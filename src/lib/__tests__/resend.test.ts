@@ -26,8 +26,7 @@ vi.mock("resend", () => ({
   Resend: ResendCtorMock,
 }));
 
-// Use TypeScript Mock modules to bypass Vite's special handling
-vi.mock("@/../env.mjs", () => {
+vi.mock("@/lib/env", () => {
   return {
     env: {
       RESEND_API_KEY: "test-resend-key",

@@ -5,7 +5,6 @@ import { API_ERROR_CODES } from "@/constants/api-error-codes";
 
 const {
   mockLogger,
-  mockGetClientIP,
   mockCheckDistributedRateLimit,
   mockCreateRateLimitHeaders,
   mockInvalidateI18n,
@@ -20,7 +19,6 @@ const {
       warn: vi.fn(),
       error: vi.fn(),
     },
-    mockGetClientIP: vi.fn(() => "127.0.0.1"),
     mockCheckDistributedRateLimit: vi.fn(async () => ({
       allowed: true,
       remaining: 10,
@@ -104,10 +102,6 @@ const {
 
 vi.mock("@/lib/logger", () => ({
   logger: mockLogger,
-}));
-
-vi.mock("@/app/api/contact/contact-api-utils", () => ({
-  getClientIP: mockGetClientIP,
 }));
 
 vi.mock("@/lib/security/distributed-rate-limit", () => ({

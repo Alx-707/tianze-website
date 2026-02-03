@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { getClientIP, getIPChain } from "../client-ip";
+import { getClientIP, getClientIPFromHeaders, getIPChain } from "../client-ip";
 
 /**
  * Type-safe environment variable helper for tests.
@@ -267,6 +267,31 @@ describe("client-ip", () => {
         const ip = getClientIP(request);
         expect(ip).toBe("203.0.113.50");
       });
+    });
+  });
+
+  describe("getClientIPFromHeaders", () => {
+    it("should return fallback IP when no platform configured", () => {
+      const ip = getClientIPFromHeaders(
+        new Headers({ "x-real-ip": "1.2.3.4" }),
+      );
+      expect(ip).toBe("0.0.0.0");
+    });
+
+    it("should extract IP from x-real-ip on Vercel platform", () => {
+      setEnv("VERCEL", "1");
+      const ip = getClientIPFromHeaders(
+        new Headers({ "x-real-ip": "203.0.113.50" }),
+      );
+      expect(ip).toBe("203.0.113.50");
+    });
+
+    it("should extract first IP from x-forwarded-for on Vercel platform", () => {
+      setEnv("VERCEL", "1");
+      const ip = getClientIPFromHeaders(
+        new Headers({ "x-forwarded-for": "203.0.113.50, 10.0.0.1" }),
+      );
+      expect(ip).toBe("203.0.113.50");
     });
   });
 

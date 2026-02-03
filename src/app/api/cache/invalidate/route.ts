@@ -37,7 +37,10 @@ import {
   checkDistributedRateLimit,
   createRateLimitHeaders,
 } from "@/lib/security/distributed-rate-limit";
-import { getClientIP } from "@/app/api/contact/contact-api-utils";
+import {
+  getApiKeyPriorityKey,
+  getIPKey,
+} from "@/lib/security/rate-limit-key-strategies";
 import { API_ERROR_CODES } from "@/constants/api-error-codes";
 
 const VALID_LOCALES = ["en", "zh"] as const;
@@ -153,14 +156,14 @@ function handleAllInvalidation(locale: Locale | undefined): InvalidationResult {
 type RateLimitPresetType = "cacheInvalidatePreAuth" | "cacheInvalidate";
 
 async function checkRateLimitAndRespond(
-  clientIP: string,
+  identifier: string,
   preset: RateLimitPresetType,
   logContext: string,
 ): Promise<NextResponse | null> {
-  const rateLimitResult = await checkDistributedRateLimit(clientIP, preset);
+  const rateLimitResult = await checkDistributedRateLimit(identifier, preset);
   if (!rateLimitResult.allowed) {
     logger.warn(`Cache invalidation ${logContext} rate limit exceeded`, {
-      ip: clientIP,
+      keyPrefix: identifier.slice(0, 8),
       retryAfter: rateLimitResult.retryAfter,
     });
     return NextResponse.json(
@@ -237,11 +240,10 @@ async function handleCacheInvalidation(
 }
 
 export async function POST(request: NextRequest) {
-  const clientIP = getClientIP(request);
-
   // 1. Pre-auth rate limit (brute force protection)
+  const preAuthRateLimitKey = getIPKey(request);
   const preAuthBlock = await checkRateLimitAndRespond(
-    clientIP,
+    preAuthRateLimitKey,
     "cacheInvalidatePreAuth",
     "pre-auth",
   );
@@ -256,8 +258,9 @@ export async function POST(request: NextRequest) {
   }
 
   // 3. Post-auth rate limit (defense in depth)
+  const postAuthRateLimitKey = getApiKeyPriorityKey(request);
   const postAuthBlock = await checkRateLimitAndRespond(
-    clientIP,
+    postAuthRateLimitKey,
     "cacheInvalidate",
     "post-auth",
   );

@@ -115,11 +115,7 @@ const nextConfig: NextConfig = {
     return config;
   },
 
-  async headers() {
-    // Note: This function is async to comply with Next.js API requirements
-    // even though we're returning static configuration
-    await Promise.resolve(); // Satisfy require-await ESLint rule
-
+  headers() {
     const securityHeaders = getSecurityHeaders();
     // Prefer CSP from middleware (with nonce). Remove CSP here to avoid duplication/conflicts.
     const headersNoCSP = securityHeaders.filter(

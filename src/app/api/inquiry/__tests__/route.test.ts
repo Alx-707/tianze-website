@@ -50,7 +50,6 @@ vi.mock("@/lib/lead-pipeline/lead-schema", () => ({
 }));
 
 vi.mock("@/app/api/contact/contact-api-utils", () => ({
-  getClientIP: vi.fn(() => "192.168.1.1"),
   verifyTurnstile: vi.fn(() => Promise.resolve(true)),
 }));
 

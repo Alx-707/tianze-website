@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { requestIdleCallback } from "@/lib/idle-callback";
 
@@ -27,68 +27,55 @@ interface LazyTurnstileProps {
 }
 
 /**
- * 使用 useSyncExternalStore 管理延迟渲染状态
- * 避免在 effect 中初始化状态
+ * 延迟渲染逻辑
+ * - 优先：进入视口（IntersectionObserver）
+ * - 退化：空闲时加载（requestIdleCallback timeout）
  */
 function useLazyRender(containerRef: React.RefObject<HTMLDivElement | null>) {
-  const shouldRenderRef = useRef(false);
-  const subscribersRef = useRef(new Set<() => void>());
+  const [shouldRender, setShouldRender] = useState(false);
 
-  const subscribe = useCallback(
-    (callback: () => void) => {
-      subscribersRef.current.add(callback);
+  useEffect(() => {
+    let io: IntersectionObserver | null = null;
+    let cancelled = false;
+    let cleanupIdle: () => void = () => undefined;
 
-      // 设置观察器
+    const enableRender = () => {
+      if (cancelled) return;
+      setShouldRender(true);
+      io?.disconnect();
+      io = null;
+    };
+
+    if (!shouldRender) {
       const el = containerRef.current;
-      if (
-        typeof IntersectionObserver !== "undefined" &&
-        el &&
-        !shouldRenderRef.current
-      ) {
-        const io = new IntersectionObserver(
+
+      if (typeof IntersectionObserver !== "undefined" && el) {
+        io = new IntersectionObserver(
           (entries) => {
             for (const entry of entries) {
-              if (entry.isIntersecting && !shouldRenderRef.current) {
-                shouldRenderRef.current = true;
-                io.disconnect();
-                subscribersRef.current.forEach((cb) => cb());
+              if (entry.isIntersecting) {
+                enableRender();
                 break;
               }
             }
           },
           { rootMargin: "200px" },
         );
-        io.observe(el);
 
-        return () => {
-          subscribersRef.current.delete(callback);
-          io.disconnect();
-        };
+        io.observe(el);
       }
 
-      // 退化：空闲时加载
-      const cleanup = requestIdleCallback(
-        () => {
-          if (!shouldRenderRef.current) {
-            shouldRenderRef.current = true;
-            subscribersRef.current.forEach((cb) => cb());
-          }
-        },
-        { timeout: 1500 },
-      );
+      cleanupIdle = requestIdleCallback(enableRender, { timeout: 1500 });
+    }
 
-      return () => {
-        subscribersRef.current.delete(callback);
-        cleanup();
-      };
-    },
-    [containerRef],
-  );
+    return () => {
+      cancelled = true;
+      cleanupIdle();
+      io?.disconnect();
+    };
+  }, [containerRef, shouldRender]);
 
-  const getSnapshot = useCallback(() => shouldRenderRef.current, []);
-  const getServerSnapshot = useCallback(() => false, []);
-
-  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  return shouldRender;
 }
 
 /**

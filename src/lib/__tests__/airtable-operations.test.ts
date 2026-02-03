@@ -71,7 +71,7 @@ vi.mock("airtable", () => ({
 }));
 
 // Use TypeScript Mock modules to bypass Vite's special handling
-vi.mock("@/../env.mjs", async () => {
+vi.mock("@/lib/env", async () => {
   const mockEnv = await import("./mocks/airtable-env");
   return mockEnv;
 });

@@ -1,4 +1,4 @@
-import { ANIMATION_DURATION_VERY_SLOW, ZERO } from "@/constants";
+import { ZERO } from "@/constants";
 import { INPUT_VALIDATION_CONSTANTS } from "@/constants/security-constants";
 
 /**
@@ -138,7 +138,7 @@ export function sanitizeFilePath(filePath: string): string {
 export function validateInputLength(
   input: string,
   minLength: number = ZERO,
-  maxLength: number = ANIMATION_DURATION_VERY_SLOW,
+  maxLength: number = INPUT_VALIDATION_CONSTANTS.TEXT_MAX_LENGTH,
 ): { valid: boolean; error?: string } {
   if (typeof input !== "string") {
     return { valid: false, error: "Input must be a string" };

@@ -2,6 +2,7 @@ import {
   COUNT_4,
   COUNT_3600,
   COUNT_300000,
+  COUNT_TEN,
   MAGIC_12,
   MAGIC_2000,
 } from "./count";
@@ -59,6 +60,7 @@ export const TEN_SECONDS_MS = 10000;
 export const THIRTY_SECONDS_MS = 30000;
 export const MINUTE_MS = 60000;
 export const FIVE_MINUTES_MS = COUNT_300000;
+export const TEN_MINUTES_MS = COUNT_TEN * MINUTE_MS;
 
 // ============================================================================
 // 性能优化相关时间常量

@@ -4,6 +4,7 @@ import {
   checkDistributedRateLimit,
   createRateLimitHeaders,
 } from "@/lib/security/distributed-rate-limit";
+import { getIPKey } from "@/lib/security/rate-limit-key-strategies";
 import {
   handleIncomingMessage,
   verifyWebhook,
@@ -73,12 +74,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Rate limiting (only for valid signatures)
-    const clientIP =
-      request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-      request.headers.get("x-real-ip") ||
-      "unknown";
+    const rateLimitKey = getIPKey(request);
     const rateLimitResult = await checkDistributedRateLimit(
-      clientIP,
+      rateLimitKey,
       "whatsapp",
     );
     if (!rateLimitResult.allowed) {

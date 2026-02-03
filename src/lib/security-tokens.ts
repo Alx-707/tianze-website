@@ -1,6 +1,4 @@
 import {
-  ANIMATION_DURATION_VERY_SLOW,
-  COUNT_PAIR,
   HEX_MASK_6_BITS,
   HEX_MASK_BIT_6,
   HEX_MASK_HIGH_BIT,
@@ -12,10 +10,10 @@ import {
   MAGIC_32,
   MAGIC_48,
   MAGIC_64,
-  SECONDS_PER_MINUTE,
   ZERO,
 } from "@/constants";
-import { MAGIC_6 } from "@/constants/count";
+import { COUNT_TWO, MAGIC_6 } from "@/constants/count";
+import { MINUTES_PER_HOUR, MINUTE_MS } from "@/constants/time";
 
 const getCrypto = (): Crypto | null => {
   if (typeof globalThis === "undefined") {
@@ -56,7 +54,7 @@ function secureRandomUUID(): string {
   dv.setUint8(MAGIC_8, (b8 & HEX_MASK_6_BITS) | HEX_MASK_HIGH_BIT);
 
   const hex = Array.from(array, (byte) =>
-    byte.toString(MAGIC_16).padStart(COUNT_PAIR, "0"),
+    byte.toString(MAGIC_16).padStart(COUNT_TWO, "0"),
   ).join("");
 
   return [
@@ -79,8 +77,8 @@ function secureRandomUUID(): string {
 const TOKEN_CONSTANTS = {
   // Token generation
   DEFAULT_TOKEN_LENGTH: MAGIC_32,
-  HEX_RADIX: COUNT_PAIR,
-  HEX_PAD_LENGTH: COUNT_PAIR,
+  HEX_RADIX: COUNT_TWO,
+  HEX_PAD_LENGTH: COUNT_TWO,
   HEX_BASE: MAGIC_16,
 } as const;
 
@@ -90,7 +88,7 @@ const TOKEN_CONSTANTS = {
 export function generateSecureToken(
   length: number = TOKEN_CONSTANTS.DEFAULT_TOKEN_LENGTH,
 ): string {
-  // Generate half the length in bytes since each byte becomes COUNT_PAIR hex characters
+  // Generate half the length in bytes since each byte becomes 2 hex characters
   const byteLength = Math.ceil(length / TOKEN_CONSTANTS.HEX_RADIX);
   const array = secureRandomBytes(byteLength);
   const hex = Array.from(array, (byte) =>
@@ -216,7 +214,7 @@ export function isValidUUID(uuid: string): boolean {
  * Generate a secure random salt for password hashing
  */
 export function generateSalt(length: number = MAGIC_16): string {
-  return generateSecureToken(length * COUNT_PAIR); // Double length for hex representation
+  return generateSecureToken(length * COUNT_TWO); // Double length for hex representation
 }
 
 /**
@@ -232,13 +230,11 @@ export interface TokenWithExpiry {
  */
 export function createTokenWithExpiry(
   tokenLength: number = MAGIC_32,
-  expiryMinutes: number = SECONDS_PER_MINUTE,
+  expiryMinutes: number = MINUTES_PER_HOUR,
 ): TokenWithExpiry {
   return {
     token: generateSecureToken(tokenLength),
-    expiresAt:
-      Date.now() +
-      expiryMinutes * SECONDS_PER_MINUTE * ANIMATION_DURATION_VERY_SLOW,
+    expiresAt: Date.now() + expiryMinutes * MINUTE_MS,
   };
 }
 

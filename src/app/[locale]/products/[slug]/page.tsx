@@ -296,9 +296,12 @@ async function ProductDetailContent({
 
   const t = await getTranslations({ locale, namespace: "products" });
 
-  const product = await getProductBySlugCached(localeTyped, slug).catch(() =>
-    notFound(),
-  );
+  let product: Awaited<ReturnType<typeof getProductBySlugCached>>;
+  try {
+    product = await getProductBySlugCached(localeTyped, slug);
+  } catch {
+    notFound();
+  }
 
   const images = [product.coverImage, ...(product.images ?? [])];
   const downloadPdfHref = getSafePdfHref(product);

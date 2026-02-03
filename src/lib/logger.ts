@@ -1,4 +1,4 @@
-/* eslint-disable no-console */
+/* eslint-disable no-console -- logger intentionally wraps console.* with env-based filtering */
 /**
  * Lightweight logger utility with production-safe behavior.
  * - error/warn: Always output (critical for production debugging)

@@ -3,10 +3,8 @@ import { getApiMessages, type ApiMessages } from "@/lib/api/get-request-locale";
 import { safeParseJson } from "@/lib/api/safe-parse-json";
 import { env } from "@/lib/env";
 import { logger, sanitizeIP } from "@/lib/logger";
-import {
-  getFullClientIPChain,
-  verifyTurnstileDetailed,
-} from "@/app/api/contact/contact-api-utils";
+import { getClientIP } from "@/lib/security/client-ip";
+import { verifyTurnstileDetailed } from "@/app/api/contact/contact-api-utils";
 
 /**
  * Request body interface for Turnstile verification.
@@ -131,7 +129,7 @@ export async function POST(request: NextRequest) {
     if (validationError) return validationError;
 
     // SECURITY: Always use server-derived IP - never trust client-provided IP
-    const clientIP = getFullClientIPChain(request);
+    const clientIP = getClientIP(request);
 
     let verificationResult: { success: boolean; errorCodes?: string[] };
     try {

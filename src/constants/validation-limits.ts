@@ -8,6 +8,34 @@
  */
 
 // ============================================================================
+// Lead Pipeline Limits (contact / product inquiry / newsletter)
+// ============================================================================
+
+/**
+ * Max email length (RFC 5321 / 5322 practical limit).
+ * Commonly validated as 254 characters.
+ */
+export const MAX_LEAD_EMAIL_LENGTH = 254 as const;
+
+/** Max company name length for lead forms. */
+export const MAX_LEAD_COMPANY_LENGTH = 200 as const;
+
+/** Max full name length for lead forms. */
+export const MAX_LEAD_NAME_LENGTH = 100 as const;
+
+/** Min message length for contact leads. */
+export const MIN_LEAD_MESSAGE_LENGTH = 10 as const;
+
+/** Max message length for contact leads. */
+export const MAX_LEAD_MESSAGE_LENGTH = 5000 as const;
+
+/** Max product name length for product inquiry leads. */
+export const MAX_LEAD_PRODUCT_NAME_LENGTH = MAX_LEAD_COMPANY_LENGTH;
+
+/** Max requirements length for product inquiry leads. */
+export const MAX_LEAD_REQUIREMENTS_LENGTH = 2000 as const;
+
+// ============================================================================
 // WhatsApp Message Limits
 // ============================================================================
 

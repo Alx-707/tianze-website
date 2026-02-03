@@ -161,7 +161,7 @@ export function ProductActions({
     });
 
     // Observe is a valid pattern for IntersectionObserver - not initializing from props
-    // eslint-disable-next-line react-you-might-not-need-an-effect/no-initialize-state
+    // eslint-disable-next-line react-you-might-not-need-an-effect/no-initialize-state -- IntersectionObserver wiring needs a ref-bound DOM side effect
     observer.observe(ctaElement);
 
     return () => {

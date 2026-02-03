@@ -22,7 +22,7 @@
     "type-check": "tsc --noEmit",
     "validate:translations": "node scripts/validate-translations.js",
     "type-check:tests": "tsc --noEmit -p tsconfig.test.json",
-    "lint:check": "eslint . --ext .js,.jsx,.ts,.tsx --config eslint.config.mjs --cache --cache-location .eslintcache",
+    "lint:check": "eslint . --ext .js,.jsx,.ts,.tsx --config eslint.config.mjs --cache --cache-location .eslintcache --max-warnings 0",
     "format:check": "prettier --check .",
     "format:write": "prettier --write .",
     "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --config eslint.config.mjs --fix --cache --cache-location .eslintcache",

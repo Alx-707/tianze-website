@@ -1,98 +1,83 @@
-# Findings: 代码质量问题验证
+# Findings & Decisions
 
-## Overview
+## Requirements
 
-4 个并行子代理完成验证。**审查结论全部得到确认**，问题属实。
+从代码审查确定的 5 项重构任务（优先级排序）：
 
----
+1. **验证器工厂函数** — `firstName/lastName` 95% 重复代码
+2. **API routes 统一** — 采用 `withRateLimit` HOF + HTTP 常量
+3. **language-toggle 提取** — 路由解析逻辑移至 lib
+4. **processLead 拆分** — 消除 `eslint-disable complexity`
+5. **cookie-banner 状态** — 整合 useState (最低优先级)
 
-## 1. 常量文件分析 ✅ 确认
+## Research Findings
 
-### 统计结果
-- `MAGIC_*` 常量数量: **75**
-- `COUNT_*` 常量数量: **41**
-- 总使用次数: **350+**
-- **未使用常量: ~25 个**
+### 验证器重复分析
 
-### 关键发现
+`src/lib/form-schema/contact-field-validators.ts`:
 
-| 问题 | 严重程度 | 示例 |
-|------|----------|------|
-| 命名无语义 | 高 | `MAGIC_131008` = WhatsApp 错误码，应为 `WHATSAPP_ERR_MISSING_PARAM` |
-| 重复定义 | 中 | `MAGIC_256` 与 `COUNT_256` 同值 |
-| 死代码 | 中 | 25+ 个常量定义但从未使用 |
-| 过度工程 | 中 | `COUNT_ZERO = 0` 无实际价值 |
+```typescript
+// firstName (L14-32) 和 lastName (L34-52) 几乎一致
+// 唯一差异：错误消息中的 "First name" vs "Last name"
+// 代码重复率：~95%
 
-### 问题严重程度: **中-高**
+// 工厂函数模式：
+const createNameValidator = (fieldLabel: string) => ({ field }) => {
+  const { NAME_MIN_LENGTH, NAME_MAX_LENGTH } = CONTACT_FORM_VALIDATION_CONSTANTS;
+  const schema = z.string()
+    .min(NAME_MIN_LENGTH, `${fieldLabel} must be at least ${NAME_MIN_LENGTH} characters`)
+    .max(NAME_MAX_LENGTH, `${fieldLabel} must be less than ${NAME_MAX_LENGTH} characters`)
+    .regex(/^[a-zA-Z\s\u4e00-\u9fff]+$/, `${fieldLabel} can only contain letters and spaces`);
+  return applyOptionality(schema, field);
+};
 
----
+export const firstName = createNameValidator("First name");
+export const lastName = createNameValidator("Last name");
+```
 
-## 2. 安全防护分析 ✅ 确认
+### API Routes 现状
 
-### 调用统计
-- `safeGetProperty` 调用: **5 次** (生产代码)
-- `safeSetProperty` 调用: **2 次** (生产代码)
+| Route | withRateLimit | HTTP 常量 | 需修改 |
+|-------|--------------|-----------|--------|
+| `/api/contact` | ❌ 手动实现 | 魔法数字 429/500 | ✅ |
+| `/api/inquiry` | ❌ 手动实现 | 本地常量 400/429/500 | ✅ |
+| `/api/subscribe` | ❌ 手动实现 | 混合使用 | ✅ |
+| 其他 routes | 待审计 | 待审计 | TBD |
 
-### 关键发现
+### 现有抽象
 
-| 指标 | 数值 |
-|------|------|
-| 内部数据防护比例 | **100%** |
-| 外部输入防护比例 | **0%** |
-| 未使用的安全函数 | **7 个** |
+- `withRateLimit` HOF: `src/lib/api/with-rate-limit.ts` — 完整实现，消除 10-15 行样板
+- `safeParseJson`: `src/lib/api/safe-parse-json.ts` — 已被使用
+- `HTTP_BAD_REQUEST_CONST`: `src/constants/magic-numbers.ts` — 已存在
 
-所有调用场景的数据来源都是**开发者维护的内部 JSON 文件**，不存在外部攻击面。
+### 缺失常量
 
-真正处理外部输入的 API 路由使用 **Zod + 白名单**（正确方案），不依赖这套工具。
+`magic-numbers.ts` 缺少：
+- `HTTP_TOO_MANY_REQUESTS = 429`
+- `HTTP_INTERNAL_ERROR = 500`
 
-### 问题严重程度: **中**
+## Technical Decisions
 
----
+| Decision | Rationale |
+|----------|-----------|
+| 工厂函数命名 `createNameValidator` | 清晰表达创建 validator 的意图 |
+| 保持 `fieldLabel` 参数 | 允许自定义错误消息前缀 |
+| 扩展 `magic-numbers.ts` | 不新建文件，保持单一入口 |
+| 使用 `withRateLimit` 包装整个 handler | 最小改动，最大收益 |
 
-## 3. load-messages.ts 分析 ✅ 确认
+## Issues Encountered
 
-### 代码分布
+| Issue | Resolution |
+|-------|------------|
+| 暂无 | |
 
-| 部分 | 行数 | 必要性 |
-|------|------|--------|
-| Critical/Deferred 重复代码 | ~50 | **冗余** — 应用泛型参数合并 |
-| 过度 JSDoc | ~50 | **冗余** — 函数命名已自解释 |
-| Preload 函数 | 10 | **无效** — 当前实现不起作用 |
-| Fallback 处理 | 57 | **部分冗余** |
-| 核心逻辑 | ~60 | 必要 |
+## Resources
 
-### 复杂度评估
-- 实际代码: **346 行**
-- 核心功能所需: **60-80 行**
-- 膨胀比例: **4.3 - 5.8 倍**
+- `src/lib/api/with-rate-limit.ts` — withRateLimit HOF 实现
+- `src/lib/form-schema/contact-field-validators.ts` — 验证器目标文件
+- `src/constants/magic-numbers.ts` — HTTP 常量聚合文件
+- `src/lib/lead-pipeline/process-lead.ts` — 编排函数（有 eslint-disable）
 
-### 问题严重程度: **中-高**
+## Visual/Browser Findings
 
----
-
-## 4. hero-section getNestedValue 分析 ✅ 确认
-
-### 安全威胁评估
-- 攻击者能控制 messages？**否**
-- 原型污染风险存在？**否**
-- 数据来源：本地静态 JSON 文件，完全由开发者控制
-
-### 性能影响
-- 当前实现: **O(n)** 每层
-- 标准实现: **O(1)** 每层
-- 实际影响: **可忽略** — 数据集极小（~5 个键）
-
-### 问题严重程度: **低**
-
----
-
-## Summary
-
-| 问题 | 验证结果 | 严重程度 | 建议优先级 |
-|------|----------|----------|------------|
-| 常量文件膨胀 | ✅ 确认 | 中-高 | **P0** |
-| 安全防护过度 | ✅ 确认 | 中 | **P1** |
-| load-messages 复杂度 | ✅ 确认 | 中-高 | **P1** |
-| getNestedValue 过度防护 | ✅ 确认 | 低 | **P2** |
-
-**结论**: 4 个审查发现全部属实，可以进入修复规划阶段。
+N/A — 纯代码重构任务

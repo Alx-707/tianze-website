@@ -27,40 +27,6 @@ vi.mock("@marsidev/react-turnstile", () => ({
   Turnstile: mockTurnstile,
 }));
 
-// 专家级解决方案：直接Mock env.mjs导出，绕过@t3-oss/env-nextjs的模块缓存
-vi.mock("../../../../env.mjs", () => ({
-  env: {
-    // 服务器端环境变量
-    NODE_ENV: "test",
-    TURNSTILE_SECRET_KEY: "test-secret-key",
-    RESEND_API_KEY: "test-resend-key",
-    AIRTABLE_API_KEY: "test-airtable-key",
-    AIRTABLE_BASE_ID: "test-base-id",
-    AIRTABLE_TABLE_NAME: "test-table",
-    EMAIL_FROM: "test@example.com",
-    EMAIL_REPLY_TO: "reply@example.com",
-    CSP_REPORT_URI: "https://example.com/csp-report",
-    ADMIN_TOKEN: "test-admin-token",
-
-    // 客户端环境变量 - 关键修复！
-    NEXT_PUBLIC_TURNSTILE_SITE_KEY: "test-site-key-12345",
-    NEXT_PUBLIC_TEST_MODE: false, // 确保组件正常渲染，不使用测试模式
-    NEXT_PUBLIC_SITE_URL: "https://example.com",
-    NEXT_PUBLIC_VERCEL_URL: "example.vercel.app",
-    NEXT_PUBLIC_BASE_URL: "http://localhost:3000",
-    NEXT_PUBLIC_APP_NAME: "[PROJECT_NAME]",
-    NEXT_PUBLIC_APP_VERSION: "1.0.0",
-    NEXT_PUBLIC_ENABLE_ANALYTICS: true,
-    NEXT_PUBLIC_ENABLE_ERROR_REPORTING: true,
-    NEXT_PUBLIC_ENABLE_PERFORMANCE_MONITORING: true,
-    NEXT_PUBLIC_DISABLE_REACT_SCAN: false,
-    NEXT_PUBLIC_DISABLE_DEV_TOOLS: false,
-    NEXT_PUBLIC_DEFAULT_LOCALE: "en",
-    NEXT_PUBLIC_SUPPORTED_LOCALES: "en,zh",
-    NEXT_PUBLIC_SECURITY_MODE: "strict",
-  },
-}));
-
 // 获取Mock组件的引用
 const getMockTurnstile = () => mockTurnstile;
 

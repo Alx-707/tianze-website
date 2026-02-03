@@ -11,7 +11,13 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { logger } from "@/lib/logger";
-import { HTTP_BAD_REQUEST, HTTP_OK } from "@/constants";
+import {
+  HOURS_PER_DAY,
+  HTTP_BAD_REQUEST,
+  HTTP_OK,
+  MILLISECONDS_PER_HOUR,
+  MILLISECONDS_PER_MINUTE,
+} from "@/constants";
 
 /**
  * 幂等键缓存接口
@@ -26,6 +32,7 @@ import { HTTP_BAD_REQUEST, HTTP_OK } from "@/constants";
 interface IdempotencyCache {
   result: unknown;
   timestamp: number;
+  expiresAt: number;
   statusCode: number;
 }
 
@@ -36,26 +43,37 @@ interface IdempotencyCache {
 const idempotencyCache = new Map<string, IdempotencyCache>();
 
 /**
- * 缓存过期时间（24小时）
+ * 缓存过期时间（默认：24小时）
  */
-const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+const DEFAULT_CACHE_TTL_MS = HOURS_PER_DAY * MILLISECONDS_PER_HOUR;
+
+/**
+ * 清理频率上限（避免每次访问都扫全量 Map）
+ */
+const CLEANUP_THROTTLE_MS = MILLISECONDS_PER_MINUTE;
+
+let lastCleanupAt = 0;
 
 /**
  * 清理过期缓存
  */
-function cleanExpiredCache() {
-  const now = Date.now();
+function cleanExpiredCache(now: number) {
   for (const [key, value] of idempotencyCache.entries()) {
-    if (now - value.timestamp > CACHE_TTL_MS) {
+    if (now >= value.expiresAt) {
       idempotencyCache.delete(key);
     }
   }
 }
 
 /**
- * 定期清理过期缓存（每小时）
+ * 访问时顺便清理（节流）
  */
-setInterval(cleanExpiredCache, 60 * 60 * 1000);
+function maybeCleanExpiredCache(): void {
+  const now = Date.now();
+  if (now - lastCleanupAt < CLEANUP_THROTTLE_MS) return;
+  lastCleanupAt = now;
+  cleanExpiredCache(now);
+}
 
 /**
  * 从请求中提取幂等键
@@ -68,10 +86,11 @@ export function getIdempotencyKey(request: NextRequest): string | null {
  * 检查幂等键是否已存在
  */
 export function checkIdempotencyKey(key: string): IdempotencyCache | undefined {
+  maybeCleanExpiredCache();
   const cached = idempotencyCache.get(key);
   if (cached) {
     // 检查是否过期
-    if (Date.now() - cached.timestamp > CACHE_TTL_MS) {
+    if (Date.now() >= cached.expiresAt) {
       idempotencyCache.delete(key);
       return undefined;
     }
@@ -86,11 +105,16 @@ export function checkIdempotencyKey(key: string): IdempotencyCache | undefined {
 export function saveIdempotencyKey(
   key: string,
   result: unknown,
-  statusCode: number = HTTP_OK,
+  options: { statusCode?: number; ttlMs?: number } = {},
 ): void {
+  maybeCleanExpiredCache();
+  const now = Date.now();
+  const statusCode = options.statusCode ?? HTTP_OK;
+  const ttlMs = options.ttlMs ?? DEFAULT_CACHE_TTL_MS;
   idempotencyCache.set(key, {
     result,
-    timestamp: Date.now(),
+    timestamp: now,
+    expiresAt: now + ttlMs,
     statusCode,
   });
 }
@@ -115,6 +139,7 @@ export function saveIdempotencyKey(
 async function handleWithIdempotencyKey<T>(
   idempotencyKey: string,
   handler: () => Promise<T>,
+  ttlMs: number,
 ): Promise<NextResponse> {
   // 检查缓存
   const cached = checkIdempotencyKey(idempotencyKey);
@@ -133,7 +158,7 @@ async function handleWithIdempotencyKey<T>(
     if (result instanceof NextResponse) {
       return result;
     }
-    saveIdempotencyKey(idempotencyKey, result, HTTP_OK);
+    saveIdempotencyKey(idempotencyKey, result, { statusCode: HTTP_OK, ttlMs });
     return NextResponse.json(result, { status: HTTP_OK });
   } catch (error) {
     logger.error("Request handler failed", {
@@ -207,6 +232,10 @@ export function withIdempotency<T>(
 ): Promise<NextResponse> {
   const { required = false } = options;
   const idempotencyKey = getIdempotencyKey(request);
+  const ttlMs =
+    typeof options.ttl === "number" && options.ttl > 0
+      ? options.ttl
+      : DEFAULT_CACHE_TTL_MS;
 
   // 检查是否必须提供幂等键
   if (required && !idempotencyKey) {
@@ -225,7 +254,7 @@ export function withIdempotency<T>(
 
   // 根据是否有幂等键选择处理方式
   return idempotencyKey
-    ? handleWithIdempotencyKey(idempotencyKey, handler)
+    ? handleWithIdempotencyKey(idempotencyKey, handler, ttlMs)
     : handleWithoutIdempotencyKey(handler);
 }
 

@@ -19,13 +19,8 @@ import {
   createContactFormSchemaFromConfig,
   type ContactFormFieldValues,
 } from "@/config/contact-form-config";
-import {
-  ANIMATION_DURATION_VERY_SLOW,
-  COUNT_TEN,
-  ONE,
-  SECONDS_PER_MINUTE,
-  ZERO,
-} from "@/constants";
+import { ONE, ZERO } from "@/constants";
+import { TEN_MINUTES_MS } from "@/constants/time";
 
 const contactFormSchema = createContactFormSchemaFromConfig(
   CONTACT_FORM_CONFIG,
@@ -77,7 +72,7 @@ export async function validateFormData(body: unknown, clientIP: string) {
   const submittedAt = new Date(formData.submittedAt);
   const now = new Date();
   const timeDiff = now.getTime() - submittedAt.getTime();
-  const maxAge = COUNT_TEN * SECONDS_PER_MINUTE * ANIMATION_DURATION_VERY_SLOW; // COUNT_TEN分钟
+  const maxAge = TEN_MINUTES_MS;
 
   if (timeDiff > maxAge || timeDiff < ZERO) {
     logger.warn("Form submission time validation failed", {

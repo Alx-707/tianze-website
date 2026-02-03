@@ -30,11 +30,6 @@ vi.mock("@/lib/security/distributed-rate-limit", () => ({
   createRateLimitHeaders: vi.fn(() => new Headers()),
 }));
 
-// Mock getClientIP
-vi.mock("@/app/api/contact/contact-api-utils", () => ({
-  getClientIP: vi.fn(() => "127.0.0.1"),
-}));
-
 function createMockRequest(
   method: string,
   body?: Record<string, unknown>,

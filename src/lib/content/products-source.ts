@@ -19,12 +19,12 @@ import { routing } from '@/i18n/routing';
 function getProductFilesInLocale(locale: Locale): string[] {
   const localeDir = path.join(PRODUCTS_DIR, locale);
 
-  // eslint-disable-next-line security/detect-non-literal-fs-filename
+  // eslint-disable-next-line security/detect-non-literal-fs-filename -- localeDir is derived from PRODUCTS_DIR + Locale union, not user input
   if (!fs.existsSync(localeDir)) {
     return [];
   }
 
-  // eslint-disable-next-line security/detect-non-literal-fs-filename
+  // eslint-disable-next-line security/detect-non-literal-fs-filename -- localeDir is derived from PRODUCTS_DIR + Locale union, not user input
   const files = fs.readdirSync(localeDir);
   return files
     .filter((file) => ['.md', '.mdx'].includes(path.extname(file)))
