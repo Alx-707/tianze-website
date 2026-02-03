@@ -8,10 +8,10 @@ import {
   useRef,
   useState,
   useTransition,
-  type ComponentProps,
 } from "react";
 import { Check, Globe, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { parsePathnameForLink } from "@/lib/i18n/route-parsing";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -24,63 +24,6 @@ import { MAGIC_2000 } from "@/constants/count";
 import { Link, usePathname } from "@/i18n/routing";
 
 const TRANSITION_TIMEOUT = ANIMATION_DURATION_VERY_SLOW; // 1 second timeout for language switch
-
-// Extract href type from Link component
-type LinkProps = ComponentProps<typeof Link>;
-type LinkHref = LinkProps["href"];
-
-// Dynamic route patterns for matching actual URLs to route patterns
-const DYNAMIC_ROUTE_PATTERNS = [
-  {
-    pattern: /^\/blog\/([^/]+)$/,
-    buildHref: (slug: string): LinkHref => ({
-      pathname: "/blog/[slug]",
-      params: { slug },
-    }),
-  },
-  {
-    pattern: /^\/products\/([^/]+)$/,
-    buildHref: (slug: string): LinkHref => ({
-      pathname: "/products/[slug]",
-      params: { slug },
-    }),
-  },
-] as const;
-
-// NOTE: When adding new locales, update this regex pattern to include them
-const LOCALE_PREFIX_RE = /^\/(en|zh)(?=\/|$)/;
-
-/**
- * Normalizes pathname by stripping locale prefix and handling edge cases
- * Ensures consistent pathname format for Link href construction
- *
- * @param pathname - Pathname from usePathname() (no query/hash, may have locale prefix)
- * @returns Normalized pathname without locale prefix (guaranteed to start with '/' or be '/')
- */
-function normalizePathnameForLink(pathname: string): string {
-  const normalized = pathname === "" ? "/" : pathname;
-  const stripped = normalized.replace(LOCALE_PREFIX_RE, "");
-  return stripped === "" ? "/" : stripped;
-}
-
-/**
- * Parses current pathname to build the appropriate href for Link
- * Handles both static routes (returns pathname string) and dynamic routes
- * (returns object with pathname pattern and params)
- */
-function parsePathnameForLink(currentPathname: string): LinkHref {
-  const pathname = normalizePathnameForLink(currentPathname);
-  for (const { pattern, buildHref } of DYNAMIC_ROUTE_PATTERNS) {
-    const match = pathname.match(pattern);
-    if (match?.[1]) {
-      return buildHref(match[1]);
-    }
-  }
-
-  // Static routes - cast required because usePathname returns runtime string
-  // Safe because usePathname only returns valid configured pathnames
-  return pathname as LinkHref;
-}
 
 // Custom hook for language switching logic
 const useLanguageSwitch = () => {

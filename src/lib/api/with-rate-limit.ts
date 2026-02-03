@@ -22,6 +22,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
+import { HTTP_TOO_MANY_REQUESTS } from "@/constants";
 import { logger } from "@/lib/logger";
 import { getClientIP as getTrustedClientIP } from "@/lib/security/client-ip";
 import {
@@ -37,9 +38,6 @@ import {
 // Re-export types for convenience
 export type { RateLimitPreset } from "@/lib/security/distributed-rate-limit";
 export type { KeyStrategy } from "@/lib/security/rate-limit-key-strategies";
-
-/** HTTP status codes */
-const HTTP_TOO_MANY_REQUESTS = 429;
 
 /** Header for degraded mode indication */
 const RATE_LIMIT_DEGRADED_HEADER = "X-RateLimit-Degraded";

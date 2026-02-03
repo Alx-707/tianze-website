@@ -11,47 +11,35 @@ const applyOptionality = (
   field: ContactFormFieldConfig,
 ): z.ZodTypeAny => (field.required ? schema : schema.optional());
 
-export function firstName({ field }: ContactFormFieldValidatorContext) {
-  const { NAME_MIN_LENGTH, NAME_MAX_LENGTH } =
-    CONTACT_FORM_VALIDATION_CONSTANTS;
-  const schema = z
-    .string()
-    .min(
-      NAME_MIN_LENGTH,
-      `First name must be at least ${NAME_MIN_LENGTH} characters`,
-    )
-    .max(
-      NAME_MAX_LENGTH,
-      `First name must be less than ${NAME_MAX_LENGTH} characters`,
-    )
-    .regex(
-      /^[a-zA-Z\s\u4e00-\u9fff]+$/,
-      "First name can only contain letters and spaces",
-    );
+/**
+ * Factory function for creating name field validators (firstName, lastName)
+ * Eliminates code duplication by parameterizing the field label
+ */
+const createNameValidator = (fieldLabel: string) => {
+  return ({ field }: ContactFormFieldValidatorContext) => {
+    const { NAME_MIN_LENGTH, NAME_MAX_LENGTH } =
+      CONTACT_FORM_VALIDATION_CONSTANTS;
+    const schema = z
+      .string()
+      .min(
+        NAME_MIN_LENGTH,
+        `${fieldLabel} must be at least ${NAME_MIN_LENGTH} characters`,
+      )
+      .max(
+        NAME_MAX_LENGTH,
+        `${fieldLabel} must be less than ${NAME_MAX_LENGTH} characters`,
+      )
+      .regex(
+        /^[a-zA-Z\s\u4e00-\u9fff]+$/,
+        `${fieldLabel} can only contain letters and spaces`,
+      );
 
-  return applyOptionality(schema, field);
-}
+    return applyOptionality(schema, field);
+  };
+};
 
-export function lastName({ field }: ContactFormFieldValidatorContext) {
-  const { NAME_MIN_LENGTH, NAME_MAX_LENGTH } =
-    CONTACT_FORM_VALIDATION_CONSTANTS;
-  const schema = z
-    .string()
-    .min(
-      NAME_MIN_LENGTH,
-      `Last name must be at least ${NAME_MIN_LENGTH} characters`,
-    )
-    .max(
-      NAME_MAX_LENGTH,
-      `Last name must be less than ${NAME_MAX_LENGTH} characters`,
-    )
-    .regex(
-      /^[a-zA-Z\s\u4e00-\u9fff]+$/,
-      "Last name can only contain letters and spaces",
-    );
-
-  return applyOptionality(schema, field);
-}
+export const firstName = createNameValidator("First name");
+export const lastName = createNameValidator("Last name");
 
 export function email({ field, config }: ContactFormFieldValidatorContext) {
   let schema = z
