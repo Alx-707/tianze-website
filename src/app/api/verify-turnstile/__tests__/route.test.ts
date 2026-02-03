@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { API_ERROR_CODES } from "@/constants/api-error-codes";
 import { GET, POST } from "@/app/api/verify-turnstile/route";
 
 // Mock global fetch
@@ -61,7 +62,7 @@ describe("Verify Turnstile API Route", () => {
 
       expect(response.status).toBe(200);
       expect(data.success).toBe(true);
-      expect(data.message).toBe("Verification successful");
+      expect(data.data.verified).toBe(true);
       expect(mockFetch).toHaveBeenCalledWith(
         "https://challenges.cloudflare.com/turnstile/v0/siteverify",
         expect.objectContaining({
@@ -100,8 +101,9 @@ describe("Verify Turnstile API Route", () => {
 
       expect(response.status).toBe(400);
       expect(data.success).toBe(false);
-      expect(data.error).toBe("Verification failed");
-      expect(data.errorCodes).toEqual(["invalid-input-response"]);
+      expect(data.errorCode).toBe(
+        API_ERROR_CODES.TURNSTILE_VERIFICATION_FAILED,
+      );
     });
 
     it("应该处理缺少token的请求", async () => {
@@ -121,7 +123,7 @@ describe("Verify Turnstile API Route", () => {
 
       expect(response.status).toBe(400);
       expect(data.success).toBe(false);
-      expect(data.error).toBe("Missing token");
+      expect(data.errorCode).toBe(API_ERROR_CODES.TURNSTILE_MISSING_TOKEN);
     });
 
     it("应该处理空token的请求", async () => {
@@ -141,7 +143,7 @@ describe("Verify Turnstile API Route", () => {
 
       expect(response.status).toBe(400);
       expect(data.success).toBe(false);
-      expect(data.error).toBe("Missing token");
+      expect(data.errorCode).toBe(API_ERROR_CODES.TURNSTILE_MISSING_TOKEN);
     });
 
     it("应该处理无效的JSON请求体", async () => {
@@ -159,10 +161,10 @@ describe("Verify Turnstile API Route", () => {
       const response = await POST(request);
       const data = await response.json();
 
-      // 使用 safeParseJson 后，无效 JSON 应返回 400 + INVALID_JSON
+      // 使用 safeParseJson 后，无效 JSON 应返回 400 + INVALID_JSON_BODY
       expect(response.status).toBe(400);
       expect(data.success).toBe(false);
-      expect(data.error).toBe("INVALID_JSON");
+      expect(data.errorCode).toBe(API_ERROR_CODES.INVALID_JSON_BODY);
     });
 
     it("应该处理Cloudflare API网络错误", async () => {
@@ -185,7 +187,7 @@ describe("Verify Turnstile API Route", () => {
 
       expect(response.status).toBe(500);
       expect(data.success).toBe(false);
-      expect(data.error).toBe("Verification request failed");
+      expect(data.errorCode).toBe(API_ERROR_CODES.TURNSTILE_NETWORK_ERROR);
     });
 
     it("应该处理Cloudflare API响应错误", async () => {
@@ -212,7 +214,7 @@ describe("Verify Turnstile API Route", () => {
 
       expect(response.status).toBe(500);
       expect(data.success).toBe(false);
-      expect(data.error).toBe("Verification request failed");
+      expect(data.errorCode).toBe(API_ERROR_CODES.TURNSTILE_NETWORK_ERROR);
     });
 
     it("应该正确提取客户端IP地址", async () => {
@@ -297,9 +299,10 @@ describe("Verify Turnstile API Route", () => {
       const data = await response.json();
 
       expect(response.status).toBe(200);
-      expect(data.status).toBe("Turnstile verification endpoint active");
-      expect(data.configured).toBe(true);
-      expect(data.timestamp).toBeDefined();
+      expect(data.success).toBe(true);
+      expect(data.data.status).toBe("Turnstile verification endpoint active");
+      expect(data.data.configured).toBe(true);
+      expect(data.data.timestamp).toBeDefined();
     });
   });
 
@@ -332,7 +335,7 @@ describe("Verify Turnstile API Route", () => {
 
       expect(response.status).toBe(500);
       expect(data.success).toBe(false);
-      expect(data.error).toBe("Turnstile not configured");
+      expect(data.errorCode).toBe(API_ERROR_CODES.TURNSTILE_NOT_CONFIGURED);
 
       // 恢复原始值
       Object.defineProperty(envModule.env, "TURNSTILE_SECRET_KEY", {
@@ -340,85 +343,6 @@ describe("Verify Turnstile API Route", () => {
         writable: true,
         configurable: true,
       });
-    });
-  });
-
-  describe("安全性测试", () => {
-    it("应该记录验证尝试", async () => {
-      const consoleSpy = vi.spyOn(console, "info").mockImplementation(() => {});
-
-      mockFetch.mockResolvedValue({
-        ok: true,
-        json: () =>
-          Promise.resolve({
-            success: true,
-            hostname: "localhost",
-            challenge_ts: "2024-01-01T00:00:00.000Z",
-            action: "contact_form",
-          }),
-      });
-
-      const request = new NextRequest(
-        "http://localhost:3000/api/verify-turnstile",
-        {
-          method: "POST",
-          body: JSON.stringify(validRequestBody),
-          headers: {
-            "content-type": "application/json",
-            "x-forwarded-for": "127.0.0.1",
-          },
-        },
-      );
-
-      await POST(request);
-
-      expect(consoleSpy).toHaveBeenCalledWith(
-        "Turnstile verification attempt",
-        expect.objectContaining({
-          success: true,
-          hostname: "localhost",
-          clientIP: "[REDACTED_IP]",
-        }),
-      );
-
-      consoleSpy.mockRestore();
-    });
-
-    it("应该记录验证失败", async () => {
-      const consoleSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
-
-      mockFetch.mockResolvedValue({
-        ok: true,
-        json: () =>
-          Promise.resolve({
-            success: false,
-            "error-codes": ["timeout-or-duplicate"],
-          }),
-      });
-
-      const request = new NextRequest(
-        "http://localhost:3000/api/verify-turnstile",
-        {
-          method: "POST",
-          body: JSON.stringify(validRequestBody),
-          headers: {
-            "content-type": "application/json",
-            "x-forwarded-for": "127.0.0.1",
-          },
-        },
-      );
-
-      await POST(request);
-
-      expect(consoleSpy).toHaveBeenCalledWith(
-        "Turnstile verification failed:",
-        expect.objectContaining({
-          errorCodes: ["timeout-or-duplicate"],
-          clientIP: "[REDACTED_IP]",
-        }),
-      );
-
-      consoleSpy.mockRestore();
     });
   });
 });

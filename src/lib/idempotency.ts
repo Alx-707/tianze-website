@@ -222,7 +222,8 @@ async function handleWithoutIdempotencyKey<T>(
  * }
  * ```
  */
-export function withIdempotency<T>(
+// eslint-disable-next-line require-await -- Returns Promise for API consistency; actual async work is in handleWithIdempotencyKey
+export async function withIdempotency<T>(
   request: NextRequest,
   handler: () => Promise<T>,
   options: {
@@ -240,15 +241,13 @@ export function withIdempotency<T>(
   // 检查是否必须提供幂等键
   if (required && !idempotencyKey) {
     logger.warn("Missing required Idempotency-Key header");
-    return Promise.resolve(
-      NextResponse.json(
-        {
-          error: "Missing Idempotency-Key header",
-          message:
-            "This endpoint requires an Idempotency-Key header to prevent duplicate requests",
-        },
-        { status: HTTP_BAD_REQUEST },
-      ),
+    return NextResponse.json(
+      {
+        error: "Missing Idempotency-Key header",
+        message:
+          "This endpoint requires an Idempotency-Key header to prevent duplicate requests",
+      },
+      { status: HTTP_BAD_REQUEST },
     );
   }
 

@@ -4,8 +4,11 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
+import {
+  createApiErrorResponse,
+  createApiSuccessResponse,
+} from "@/lib/api/api-response";
 import { createCorsPreflightResponse } from "@/lib/api/cors-utils";
-import { getApiMessages } from "@/lib/api/get-request-locale";
 import { safeParseJson } from "@/lib/api/safe-parse-json";
 import {
   withRateLimit,
@@ -18,6 +21,7 @@ import {
   validateAdminAccess,
   validateFormData,
 } from "@/app/api/contact/contact-api-validation";
+import { API_ERROR_CODES } from "@/constants/api-error-codes";
 import {
   HTTP_BAD_REQUEST,
   HTTP_INTERNAL_ERROR,
@@ -36,22 +40,24 @@ export const POST = withRateLimit(
     { clientIP }: RateLimitContext,
   ): Promise<NextResponse> => {
     const startTime = Date.now();
-    const messages = getApiMessages(request);
 
     try {
       const parsedBody = await safeParseJson<unknown>(request, {
         route: "/api/contact",
       });
       if (!parsedBody.ok) {
-        return NextResponse.json(
-          { success: false, error: parsedBody.error },
-          { status: HTTP_BAD_REQUEST },
+        return createApiErrorResponse(
+          API_ERROR_CODES.INVALID_JSON_BODY,
+          HTTP_BAD_REQUEST,
         );
       }
 
       const validation = await validateFormData(parsedBody.data, clientIP);
       if (!validation.success || !validation.data) {
-        return NextResponse.json(validation, { status: HTTP_BAD_REQUEST });
+        return createApiErrorResponse(
+          API_ERROR_CODES.CONTACT_VALIDATION_FAILED,
+          HTTP_BAD_REQUEST,
+        );
       }
 
       const submissionResult = await processFormSubmission(validation.data);
@@ -69,9 +75,7 @@ export const POST = withRateLimit(
         }),
       );
 
-      return NextResponse.json({
-        success: true,
-        message: messages.contact.success,
+      return createApiSuccessResponse({
         messageId: submissionResult.emailMessageId,
         recordId: submissionResult.airtableRecordId,
       });
@@ -83,12 +87,9 @@ export const POST = withRateLimit(
         processingTime: Date.now() - startTime,
       });
 
-      return NextResponse.json(
-        {
-          success: false,
-          error: messages.serverError,
-        },
-        { status: HTTP_INTERNAL_ERROR },
+      return createApiErrorResponse(
+        API_ERROR_CODES.CONTACT_PROCESSING_ERROR,
+        HTTP_INTERNAL_ERROR,
       );
     }
   },
@@ -100,32 +101,30 @@ export const POST = withRateLimit(
  * Get contact form statistics (admin only)
  */
 export async function GET(request: NextRequest) {
-  const messages = getApiMessages(request);
-
   try {
     // 验证管理员权限
     const authHeader = request.headers.get("authorization");
 
     if (!validateAdminAccess(authHeader)) {
       logger.warn("Unauthorized access attempt to contact statistics");
-      return NextResponse.json(
-        { success: false, error: messages.unauthorized },
-        { status: HTTP_UNAUTHORIZED },
+      return createApiErrorResponse(
+        API_ERROR_CODES.UNAUTHORIZED,
+        HTTP_UNAUTHORIZED,
       );
     }
 
     // 获取统计信息
     const statsResult = await getContactFormStats();
 
-    return NextResponse.json(statsResult);
+    return createApiSuccessResponse(statsResult);
   } catch (error) {
     logger.error("Failed to get contact statistics", {
       error: error instanceof Error ? error.message : "Unknown error",
     });
 
-    return NextResponse.json(
-      { success: false, error: messages.contact.statsError },
-      { status: HTTP_INTERNAL_ERROR },
+    return createApiErrorResponse(
+      API_ERROR_CODES.CONTACT_STATS_ERROR,
+      HTTP_INTERNAL_ERROR,
     );
   }
 }

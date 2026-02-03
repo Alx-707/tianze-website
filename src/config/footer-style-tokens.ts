@@ -106,3 +106,5 @@ export const WHATSAPP_STYLE_TOKENS = {
     shadow: "dark:shadow-[0_14px_40px_-12px_rgba(0,0,0,0.55)]",
   },
 };
+
+export type WhatsAppStyleTokens = typeof WHATSAPP_STYLE_TOKENS;

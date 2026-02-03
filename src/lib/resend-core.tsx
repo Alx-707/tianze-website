@@ -255,18 +255,11 @@ export class ResendService {
   /**
    * 检查API连接状态
    * Check API connection status
+   *
+   * Note: This is a synchronous check that only verifies configuration state.
+   * For actual API connectivity testing, use an async health check endpoint.
    */
   public checkConnection(): boolean {
-    if (!this.isReady()) {
-      return false;
-    }
-
-    let ok = true;
-    try {
-      ok = true;
-    } catch {
-      ok = false;
-    }
-    return ok;
+    return this.isReady();
   }
 }

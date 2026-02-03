@@ -12,7 +12,8 @@
       "placeholder": "输入您的消息...",
       "startChat": "开始 WhatsApp 聊天",
       "defaultMessage": "您好！我对贵公司的产品感兴趣。",
-      "buttonLabel": "通过 WhatsApp 联系我们"
+      "buttonLabel": "通过 WhatsApp 联系我们",
+      "supportChat": "在线支持"
     },
     "success": "成功",
     "cancel": "取消",

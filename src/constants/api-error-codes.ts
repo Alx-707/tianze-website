@@ -79,6 +79,32 @@ export const API_ERROR_CODES = {
   CACHE_INVALIDATION_FAILED: "CACHE_INVALIDATION_FAILED",
 
   // ============================================
+  // Contact API
+  // ============================================
+  CONTACT_SUCCESS: "CONTACT_SUCCESS",
+  CONTACT_VALIDATION_FAILED: "CONTACT_VALIDATION_FAILED",
+  CONTACT_PROCESSING_ERROR: "CONTACT_PROCESSING_ERROR",
+  CONTACT_STATS_ERROR: "CONTACT_STATS_ERROR",
+
+  // ============================================
+  // Inquiry API
+  // ============================================
+  INQUIRY_SUCCESS: "INQUIRY_SUCCESS",
+  INQUIRY_SECURITY_REQUIRED: "INQUIRY_SECURITY_REQUIRED",
+  INQUIRY_SECURITY_FAILED: "INQUIRY_SECURITY_FAILED",
+  INQUIRY_VALIDATION_FAILED: "INQUIRY_VALIDATION_FAILED",
+  INQUIRY_PROCESSING_ERROR: "INQUIRY_PROCESSING_ERROR",
+
+  // ============================================
+  // Turnstile Verification API
+  // ============================================
+  TURNSTILE_SUCCESS: "TURNSTILE_SUCCESS",
+  TURNSTILE_MISSING_TOKEN: "TURNSTILE_MISSING_TOKEN",
+  TURNSTILE_VERIFICATION_FAILED: "TURNSTILE_VERIFICATION_FAILED",
+  TURNSTILE_NETWORK_ERROR: "TURNSTILE_NETWORK_ERROR",
+  TURNSTILE_NOT_CONFIGURED: "TURNSTILE_NOT_CONFIGURED",
+
+  // ============================================
   // Generic Error (fallback)
   // ============================================
   UNKNOWN_ERROR: "UNKNOWN_ERROR",

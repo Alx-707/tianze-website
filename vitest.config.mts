@@ -1,122 +1,6 @@
 /// <reference types="vitest" />
-import { createServer, Server, type AddressInfo } from "node:net";
 import { resolve } from "path";
 import { defineConfig } from "vitest/config";
-
-const shouldBypassLocalListen = await detectListenRestriction();
-
-if (shouldBypassLocalListen) {
-  patchServerListen();
-}
-
-async function detectListenRestriction(): Promise<boolean> {
-  if (process.env.VITEST_FORCE_REAL_LISTEN === "true") {
-    return false;
-  }
-
-  if (process.env.VITEST_BYPASS_NET_LISTEN === "true") {
-    return true;
-  }
-
-  return await new Promise<boolean>((resolvePromise) => {
-    const tester = createServer();
-    let finished = false;
-
-    const finish = (result: boolean) => {
-      if (finished) {
-        return;
-      }
-      finished = true;
-      tester.removeAllListeners();
-      resolvePromise(result);
-    };
-
-    tester.once(
-      "error",
-      (error: Error & { code?: string; syscall?: string }) => {
-        finish(error?.code === "EPERM" && error?.syscall === "listen");
-      },
-    );
-
-    tester.listen(0, "127.0.0.1", () => {
-      tester.close(() => finish(false));
-    });
-
-    setTimeout(() => finish(false), 1000);
-  });
-}
-
-function patchServerListen() {
-  const proto = Server.prototype as Server & {
-    isTemplateListenPatched?: boolean;
-  };
-
-  if (proto.isTemplateListenPatched) {
-    return;
-  }
-
-  proto.isTemplateListenPatched = true;
-
-  const fallbackAddress: AddressInfo = {
-    address: "127.0.0.1",
-    family: "IPv4",
-    port: 0,
-  };
-
-  const originalAddress = proto.address;
-  proto.address = function patchedAddress() {
-    return originalAddress.call(this) ?? fallbackAddress;
-  };
-
-  proto.listen = function patchedListen(this: Server, ...args: unknown[]) {
-    const callback =
-      typeof args[args.length - 1] === "function"
-        ? (args[args.length - 1] as () => void)
-        : undefined;
-
-    setListeningState(this, true);
-
-    queueMicrotask(() => {
-      callback?.call(this);
-      this.emit("listening");
-    });
-
-    return this;
-  };
-
-  type ServerCloseCallback = Parameters<Server["close"]>[0];
-
-  proto.close = function patchedClose(
-    this: Server,
-    callback?: ServerCloseCallback,
-  ) {
-    setListeningState(this, false);
-
-    queueMicrotask(() => {
-      callback?.call(this);
-      this.emit("close");
-    });
-
-    return this;
-  };
-
-  console.warn(
-    "[vitest] 检测到沙箱禁止监听 127.0.0.1，已模拟 net.Server.listen 以确保测试流程可继续。",
-  );
-}
-
-function setListeningState(server: Server, value: boolean) {
-  try {
-    Object.defineProperty(server, "listening", {
-      configurable: true,
-      enumerable: false,
-      value,
-      writable: true,
-    });
-  } catch {
-    // Node.js 20 在沙箱下禁止覆写该属性，静默忽略即可。
-  }
-}
 
 export default defineConfig({
   test: {
@@ -264,8 +148,8 @@ export default defineConfig({
     // 并发设置 - 优化 CI 环境性能
     pool: "threads",
 
-    // 添加测试重试机制 - 处理间歇性失败
-    retry: 2, // 失败后重试 2 次
+    // 添加测试重试机制 - 仅用于已知 flaky 测试，应在具体测试上使用 test.retry()
+    // retry: 2, // 已移除全局 retry，遇到 flaky 测试应修复根因或局部声明
 
     // 报告器配置
     reporters: ["verbose", "json", "html"],
@@ -283,11 +167,6 @@ export default defineConfig({
     logHeapUsage: true,
     isolate: true,
 
-    // 缓存配置 - 智能缓存策略
-    cache: {
-      dir: "node_modules/.vitest", // 缓存目录
-    },
-
     // 依赖优化 - 提高模块解析性能
     deps: {
       optimizer: {
@@ -300,8 +179,8 @@ export default defineConfig({
       },
     },
 
-    // UI配置
-    ui: true,
+    // UI配置 - 默认关闭以避免端口监听需求
+    ui: false,
     open: false,
   },
 

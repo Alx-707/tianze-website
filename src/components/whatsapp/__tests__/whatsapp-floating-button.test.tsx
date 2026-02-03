@@ -5,20 +5,39 @@ import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { WhatsAppFloatingButton } from "@/components/whatsapp/whatsapp-floating-button";
 
-// 局部 Mock lucide-react，避免集中 Mock/真实包体在极端环境下的解析开销
-vi.mock("lucide-react", () => ({
-  MessageCircle: ({ className, ...props }: React.ComponentProps<"svg">) => (
-    <svg
-      data-testid="mock-message-circle-icon"
-      className={className}
-      {...props}
+// Mock WhatsAppFabButton
+vi.mock("@/components/whatsapp/whatsapp-fab-button", () => ({
+  WhatsAppFabButton: ({
+    buttonLabel,
+    isChatOpen,
+    className,
+    onClick,
+  }: {
+    buttonLabel: string;
+    isChatOpen: boolean;
+    className?: string;
+    onClick: () => void;
+  }) => (
+    <button
+      type="button"
+      aria-label={buttonLabel}
+      aria-expanded={isChatOpen}
+      className={`text-emerald-600 ${className}`}
+      onClick={onClick}
+      style={{
+        width: "52px",
+        height: "52px",
+        borderRadius: "16px",
+        borderWidth: "1px",
+      }}
+      data-testid="mock-fab-button"
     >
-      <circle cx="12" cy="12" r="10" />
-    </svg>
+      {isChatOpen ? "Close" : "Open"}
+    </button>
   ),
 }));
 
-// Mock react-draggable 以简化测试
+// Mock react-draggable
 vi.mock("react-draggable", () => ({
   default: ({
     children,
@@ -29,9 +48,43 @@ vi.mock("react-draggable", () => ({
   }) => <div data-testid="draggable-wrapper">{children}</div>,
 }));
 
+// Mock useWhatsAppPosition hook
+vi.mock("@/hooks/use-whatsapp-position", () => ({
+  useWhatsAppPosition: vi.fn(() => ({
+    position: { x: 0, y: 0 },
+    setLocalPosition: vi.fn(),
+    persistPosition: vi.fn(),
+  })),
+}));
+
+// Mock useContextualMessage hook
+vi.mock("@/hooks/use-contextual-message", () => ({
+  useContextualMessage: vi.fn((msg: string) => msg),
+}));
+
+// Mock next-intl
+vi.mock("next-intl", () => ({
+  useTranslations: vi.fn((namespace: string) => {
+    const translations: Record<string, Record<string, string>> = {
+      "common.whatsapp": {
+        greeting: "Need help?",
+        responseTime: "Team typically replies within 5 minutes.",
+        placeholder: "Type your message...",
+        startChat: "Start WhatsApp Chat",
+        defaultMessage: "Hi! I'm interested in your products.",
+        buttonLabel: "Chat with us on WhatsApp",
+        supportChat: "Support chat",
+      },
+      common: {
+        close: "Close",
+      },
+    };
+    return (key: string) => translations[namespace]?.[key] ?? key;
+  }),
+}));
+
 describe("WhatsAppFloatingButton", () => {
   beforeEach(() => {
-    // 清理 localStorage
     localStorage.clear();
   });
 
@@ -73,10 +126,19 @@ describe("WhatsAppFloatingButton", () => {
     expect(button).toHaveClass("text-emerald-600");
   });
 
-  it("renders MessageCircle icon", () => {
+  it("renders FAB button component", () => {
     render(<WhatsAppFloatingButton number="+1 (555) 123-4567" />);
 
-    const icon = screen.getByTestId("mock-message-circle-icon");
-    expect(icon).toBeInTheDocument();
+    const fabButton = screen.getByTestId("mock-fab-button");
+    expect(fabButton).toBeInTheDocument();
+  });
+
+  it("renders with complementary role and support chat aria-label", () => {
+    render(<WhatsAppFloatingButton number="+1 (555) 123-4567" />);
+
+    const container = screen.getByRole("complementary", {
+      name: /support chat/i,
+    });
+    expect(container).toBeInTheDocument();
   });
 });

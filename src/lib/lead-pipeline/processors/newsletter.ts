@@ -4,6 +4,7 @@ import {
 } from "@/lib/lead-pipeline/lead-schema";
 import { settleService } from "@/lib/lead-pipeline/settle-service";
 import {
+  createFailure,
   DEFAULT_LATENCY,
   type ServiceResult,
 } from "@/lib/lead-pipeline/service-result";
@@ -27,7 +28,8 @@ export async function processNewsletterLead(
   );
 
   return {
-    emailResult: { success: false, latencyMs: DEFAULT_LATENCY },
+    // Newsletter leads don't send email - use failure placeholder
+    emailResult: createFailure(new Error("Not applicable"), DEFAULT_LATENCY),
     crmResult,
   };
 }

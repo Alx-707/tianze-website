@@ -11,6 +11,7 @@ import {
 import { SITE_CONFIG } from "@/config/paths/site-config";
 
 export { FOOTER_STYLE_TOKENS, WHATSAPP_STYLE_TOKENS };
+export type { WhatsAppStyleTokens } from "@/config/footer-style-tokens";
 
 export interface FooterLinkItem {
   key: string;
@@ -115,7 +116,11 @@ interface ThemedSurfaceTokens {
   shadow: string;
 }
 
-export interface WhatsAppStyleTokens {
+/**
+ * @deprecated Use `WhatsAppStyleTokens` from `@/config/footer-style-tokens` instead.
+ * This interface is kept for backwards compatibility.
+ */
+export interface WhatsAppStyleTokensLegacy {
   sizePx: number;
   iconSizePx: number;
   borderRadiusPx: number;

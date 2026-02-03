@@ -11,6 +11,7 @@
 
 import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { API_ERROR_CODES } from "@/constants/api-error-codes";
 import { POST } from "@/app/api/contact/route";
 
 // Mock配置 - 使用vi.hoisted确保Mock在模块导入前设置
@@ -251,7 +252,7 @@ describe("Contact API Route - POST Tests", () => {
 
       expect(response.status).toBe(200);
       expect(data.success).toBe(true);
-      expect(data.message).toContain("Thank you");
+      expect(data.data.messageId).toBeDefined();
     });
 
     it("应该处理无效的表单数据", async () => {
@@ -276,8 +277,7 @@ describe("Contact API Route - POST Tests", () => {
 
       expect(response.status).toBe(400);
       expect(data.success).toBe(false);
-      expect(data.error).toBe("Validation failed");
-      expect(data.details).toBeDefined();
+      expect(data.errorCode).toBe(API_ERROR_CODES.CONTACT_VALIDATION_FAILED);
     });
 
     it("应该处理JSON解析错误", async () => {
@@ -292,10 +292,10 @@ describe("Contact API Route - POST Tests", () => {
       const response = await POST(request);
       const data = await response.json();
 
-      // 使用 safeParseJson 后，JSON 解析错误应返回 400 + INVALID_JSON
+      // 使用 safeParseJson 后，JSON 解析错误应返回 400 + INVALID_JSON_BODY
       expect(response.status).toBe(400);
       expect(data.success).toBe(false);
-      expect(data.error).toBe("INVALID_JSON");
+      expect(data.errorCode).toBe(API_ERROR_CODES.INVALID_JSON_BODY);
     });
   });
 
@@ -322,7 +322,7 @@ describe("Contact API Route - POST Tests", () => {
 
       expect(response.status).toBe(400);
       expect(data.success).toBe(false);
-      expect(data.error).toBe("Security verification failed");
+      expect(data.errorCode).toBe(API_ERROR_CODES.CONTACT_VALIDATION_FAILED);
     });
 
     it("应该处理Turnstile服务不可用", async () => {
@@ -342,9 +342,7 @@ describe("Contact API Route - POST Tests", () => {
 
       expect(response.status).toBe(500);
       expect(data.success).toBe(false);
-      expect(data.error).toBe(
-        "An unexpected error occurred. Please try again later.",
-      );
+      expect(data.errorCode).toBe(API_ERROR_CODES.CONTACT_PROCESSING_ERROR);
     });
   });
 

@@ -10,6 +10,7 @@
 
 import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { API_ERROR_CODES } from "@/constants/api-error-codes";
 import { GET } from "@/app/api/contact/route";
 
 // Mock配置 - 使用vi.hoisted确保Mock在模块导入前设置
@@ -77,7 +78,7 @@ describe("Contact API Route - GET Tests", () => {
 
       expect(response.status).toBe(200);
       expect(data.success).toBe(true);
-      expect(data.data).toEqual(mockStats);
+      expect(data.data.data).toEqual(mockStats);
     });
 
     it("应该拒绝无效的管理员token", async () => {
@@ -92,7 +93,7 @@ describe("Contact API Route - GET Tests", () => {
       const data = await response.json();
 
       expect(response.status).toBe(401);
-      expect(data.error).toBe("Unauthorized");
+      expect(data.errorCode).toBe(API_ERROR_CODES.UNAUTHORIZED);
     });
 
     it("应该处理缺少authorization header的情况", async () => {
@@ -104,7 +105,7 @@ describe("Contact API Route - GET Tests", () => {
       const data = await response.json();
 
       expect(response.status).toBe(401);
-      expect(data.error).toBe("Unauthorized");
+      expect(data.errorCode).toBe(API_ERROR_CODES.UNAUTHORIZED);
     });
 
     it("应该处理malformed authorization header", async () => {
@@ -119,7 +120,7 @@ describe("Contact API Route - GET Tests", () => {
       const data = await response.json();
 
       expect(response.status).toBe(401);
-      expect(data.error).toBe("Unauthorized");
+      expect(data.errorCode).toBe(API_ERROR_CODES.UNAUTHORIZED);
     });
 
     it("应该处理空的Bearer token", async () => {
@@ -134,7 +135,7 @@ describe("Contact API Route - GET Tests", () => {
       const data = await response.json();
 
       expect(response.status).toBe(401);
-      expect(data.error).toBe("Unauthorized");
+      expect(data.errorCode).toBe(API_ERROR_CODES.UNAUTHORIZED);
     });
   });
 
@@ -154,7 +155,7 @@ describe("Contact API Route - GET Tests", () => {
 
       expect(response.status).toBe(200);
       expect(data.success).toBe(true);
-      expect(data.data).toEqual({
+      expect(data.data.data).toEqual({
         totalContacts: 0,
         newContacts: 0,
         completedContacts: 0,
@@ -179,7 +180,7 @@ describe("Contact API Route - GET Tests", () => {
 
       expect(response.status).toBe(500);
       expect(data.success).toBe(false);
-      expect(data.error).toBe("Failed to fetch statistics");
+      expect(data.errorCode).toBe(API_ERROR_CODES.CONTACT_STATS_ERROR);
       expect(mockLogger.error).toHaveBeenCalled();
     });
 
@@ -198,7 +199,7 @@ describe("Contact API Route - GET Tests", () => {
 
       expect(response.status).toBe(200);
       expect(data.success).toBe(true);
-      expect(data.data).toEqual({
+      expect(data.data.data).toEqual({
         totalContacts: 0,
         newContacts: 0,
         completedContacts: 0,
@@ -226,11 +227,11 @@ describe("Contact API Route - GET Tests", () => {
 
       expect(response.status).toBe(200);
       expect(data.success).toBe(true);
-      expect(data.data.totalContacts).toBe(50);
+      expect(data.data.data.totalContacts).toBe(50);
       // Should have default values for missing fields
-      expect(data.data.newContacts).toBeDefined();
-      expect(data.data.completedContacts).toBeDefined();
-      expect(data.data.recentContacts).toBeDefined();
+      expect(data.data.data.newContacts).toBeDefined();
+      expect(data.data.data.completedContacts).toBeDefined();
+      expect(data.data.data.recentContacts).toBeDefined();
     });
   });
 
@@ -262,7 +263,7 @@ describe("Contact API Route - GET Tests", () => {
       const data = await response.json();
 
       expect(response.status).toBe(401);
-      expect(data.error).toBe("Unauthorized");
+      expect(data.errorCode).toBe(API_ERROR_CODES.UNAUTHORIZED);
     });
 
     it("应该处理多个空格的authorization header", async () => {
@@ -277,7 +278,7 @@ describe("Contact API Route - GET Tests", () => {
       const data = await response.json();
 
       expect(response.status).toBe(401);
-      expect(data.error).toBe("Unauthorized");
+      expect(data.errorCode).toBe(API_ERROR_CODES.UNAUTHORIZED);
     });
   });
 
@@ -300,7 +301,7 @@ describe("Contact API Route - GET Tests", () => {
 
       expect(response.status).toBe(500);
       expect(data.success).toBe(false);
-      expect(data.error).toBe("Failed to fetch statistics");
+      expect(data.errorCode).toBe(API_ERROR_CODES.CONTACT_STATS_ERROR);
       expect(mockLogger.error).toHaveBeenCalled();
     });
 
@@ -324,7 +325,7 @@ describe("Contact API Route - GET Tests", () => {
 
       expect(response.status).toBe(500);
       expect(data.success).toBe(false);
-      expect(data.error).toBe("Failed to fetch statistics");
+      expect(data.errorCode).toBe(API_ERROR_CODES.CONTACT_STATS_ERROR);
     });
   });
 });

@@ -87,10 +87,14 @@ vi.mock("@/components/ui/button", () => ({
   Button: ({
     children,
     asChild,
+    variant: _variant,
+    size: _size,
     ...props
   }: {
     children: React.ReactNode;
     asChild?: boolean;
+    variant?: string;
+    size?: string;
   }) => (asChild ? <>{children}</> : <button {...props}>{children}</button>),
 }));
 

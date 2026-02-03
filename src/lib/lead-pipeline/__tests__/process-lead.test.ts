@@ -14,6 +14,7 @@ vi.unmock("zod");
 const mockSendContactFormEmail = vi.hoisted(() => vi.fn());
 const mockSendProductInquiryEmail = vi.hoisted(() => vi.fn());
 const mockCreateLead = vi.hoisted(() => vi.fn());
+const mockProcessContactLead = vi.hoisted(() => vi.fn());
 
 // Mock external services with hoisted functions
 vi.mock("@/lib/resend", () => ({
@@ -28,6 +29,34 @@ vi.mock("@/lib/airtable", () => ({
     createLead: mockCreateLead,
   },
 }));
+
+// Mock contact processor for testing unexpected error handling
+// Uses a proxy to allow per-test behavior override
+const originalProcessContactLead = vi.hoisted(() => {
+  // Will be set after import
+  let original: typeof import("@/lib/lead-pipeline/processors/contact").processContactLead;
+  return {
+    set: (
+      fn: typeof import("@/lib/lead-pipeline/processors/contact").processContactLead,
+    ) => {
+      original = fn;
+    },
+    get: () => original,
+  };
+});
+
+vi.mock("@/lib/lead-pipeline/processors/contact", async (importOriginal) => {
+  const original =
+    await importOriginal<
+      typeof import("@/lib/lead-pipeline/processors/contact")
+    >();
+  // Store original for restoration in tests
+  originalProcessContactLead.set(original.processContactLead);
+  return {
+    ...original,
+    processContactLead: mockProcessContactLead,
+  };
+});
 
 vi.mock("@/lib/logger", () => ({
   logger: {
@@ -46,6 +75,11 @@ vi.mock("@/lib/logger", () => ({
 describe("processLead", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Restore original processContactLead implementation for each test
+    const original = originalProcessContactLead.get();
+    if (original) {
+      mockProcessContactLead.mockImplementation(original);
+    }
   });
 
   describe("Validation", () => {
@@ -157,6 +191,23 @@ describe("processLead", () => {
           lastName: "Doe",
         }),
       );
+    });
+
+    it("should handle unexpected errors during processing", async () => {
+      // Mock processor to throw unexpected error - this triggers the catch block
+      mockProcessContactLead.mockRejectedValue(
+        new Error("Unexpected processor error"),
+      );
+
+      const result = await processLead(validContactLead);
+
+      expect(result.success).toBe(false);
+      expect(result.error).toBe("PROCESSING_FAILED");
+      expect(result.emailSent).toBe(false);
+      expect(result.recordCreated).toBe(false);
+      // referenceId should still be set in catch block
+      expect(result.referenceId).toBeDefined();
+      expect(result.referenceId?.startsWith("CON-")).toBe(true);
     });
   });
 

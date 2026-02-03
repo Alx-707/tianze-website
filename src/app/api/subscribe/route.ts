@@ -14,12 +14,12 @@ import { HTTP_BAD_REQUEST, HTTP_INTERNAL_ERROR } from "@/constants";
 import { API_ERROR_CODES } from "@/constants/api-error-codes";
 
 type SafeParseSuccess<T> = { ok: true; data: T };
-type SafeParseFailure = { ok: false; error: string };
+type SafeParseFailure = { ok: false; errorCode: string };
 
 function safeParseJson<T>(
   req: NextRequest,
 ): Promise<SafeParseSuccess<T> | SafeParseFailure> {
-  // 复用通用 safeParseJson helper，统一 JSON 解析行为和 INVALID_JSON 语义
+  // 复用通用 safeParseJson helper，统一 JSON 解析行为和 errorCode 语义
   return safeParseJsonHelper<T>(req, { route: "/api/subscribe" });
 }
 

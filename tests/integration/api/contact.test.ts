@@ -52,7 +52,7 @@ describe("api/contact", () => {
     const json = await res.json();
     expect(res.status).toBe(200);
     expect(json.success).toBe(true);
-    expect(json.messageId).toBe("msg-1");
+    expect(json.data.messageId).toBe("msg-1");
   });
 
   it("returns 400 for invalid JSON body", async () => {
@@ -67,7 +67,7 @@ describe("api/contact", () => {
     const json = await res.json();
     expect(res.status).toBe(400);
     expect(json.success).toBe(false);
-    expect(json.error).toBe("INVALID_JSON");
+    expect(json.errorCode).toBe("INVALID_JSON_BODY");
   });
 
   it("returns 429 when rate limited", async () => {
@@ -118,6 +118,8 @@ describe("api/contact", () => {
       ),
     );
     expect(authorized.status).toBe(200);
-    expect(await authorized.json()).toEqual({ total: 10 });
+    const authorizedJson = await authorized.json();
+    expect(authorizedJson.success).toBe(true);
+    expect(authorizedJson.data).toEqual({ total: 10 });
   });
 });
