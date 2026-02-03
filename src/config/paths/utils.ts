@@ -38,19 +38,21 @@ export function getLocalizedPath(pageType: PageType, locale: Locale): string {
  * 使用标准路径方案，所有语言使用相同路径
  * 包含静态路径和动态路由模式
  */
-export function getPathnames(): Record<string, string> {
-  return {
-    "/": "/",
-    "/about": "/about",
-    "/contact": "/contact",
-    "/blog": "/blog",
-    "/blog/[slug]": "/blog/[slug]",
-    "/products": "/products",
-    "/products/[slug]": "/products/[slug]",
-    "/faq": "/faq",
-    "/privacy": "/privacy",
-    "/terms": "/terms",
-  };
+export const PATHNAMES = {
+  "/": "/",
+  "/about": "/about",
+  "/contact": "/contact",
+  "/blog": "/blog",
+  "/blog/[slug]": "/blog/[slug]",
+  "/products": "/products",
+  "/products/[slug]": "/products/[slug]",
+  "/faq": "/faq",
+  "/privacy": "/privacy",
+  "/terms": "/terms",
+} as const;
+
+export function getPathnames(): typeof PATHNAMES {
+  return PATHNAMES;
 }
 
 /**

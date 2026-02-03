@@ -1,4 +1,5 @@
 import { defineRouting } from "next-intl/routing";
+import { PATHNAMES } from "@/config/paths/utils";
 
 /**
  * Core routing configuration for next-intl.
@@ -20,18 +21,7 @@ export const routing = defineRouting({
 
   // Shared Pathnames - 所有语言使用相同路径，简单可靠
   // 注意：仅包含已实现的页面路径，避免 404 错误
-  pathnames: {
-    "/": "/",
-    "/about": "/about",
-    "/contact": "/contact",
-    "/products": "/products",
-    "/products/[slug]": "/products/[slug]",
-    "/blog": "/blog",
-    "/blog/[slug]": "/blog/[slug]",
-    "/faq": "/faq",
-    "/privacy": "/privacy",
-    "/terms": "/terms",
-  },
+  pathnames: PATHNAMES,
 
   // 启用hreflang链接
   alternateLinks: true,
