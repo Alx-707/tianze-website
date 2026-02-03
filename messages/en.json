@@ -12,7 +12,8 @@
       "placeholder": "Type your message...",
       "startChat": "Start WhatsApp Chat",
       "defaultMessage": "Hi! I'm interested in your products.",
-      "buttonLabel": "Chat with us on WhatsApp"
+      "buttonLabel": "Chat with us on WhatsApp",
+      "supportChat": "Support chat"
     },
     "success": "Success",
     "cancel": "Cancel",
