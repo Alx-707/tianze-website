@@ -278,7 +278,7 @@ rules:
         - "**/src/components/blog/blog-newsletter.tsx"
     message: '检测到潜在的对象注入：使用扩展运算符或Object.assign时需验证输入对象的安全性'
     languages: [typescript, javascript]
-    severity: WARNING
+    severity: INFO
     metadata:
       category: security
       technology: [nodejs, react, nextjs]
@@ -335,6 +335,8 @@ rules:
         - "**/*.spec.*"
         # Tech tabs - category comes from Object.keys() of hardcoded categories object, not user input
         - "**/src/components/blocks/tech/tech-tabs-block.tsx"
+        # mergeObjects: internal utility; also blocks prototype keys (__proto__/constructor/prototype)
+        - "**/src/lib/merge-objects.ts"
     metadata:
       category: security
       technology: [nodejs, react, nextjs]

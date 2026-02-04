@@ -328,7 +328,6 @@ async function sendMessageWithRetry(
 
     // Wait before next retry (if not last attempt)
     if (attempt < MAX_RETRIES) {
-      // eslint-disable-next-line security/detect-object-injection -- attempt is loop-controlled integer
       const delay = RETRY_DELAYS[attempt] ?? FIVE_SECONDS_MS;
       logger.info(
         `[WhatsAppSend] Retry ${attempt + 1}/${MAX_RETRIES} after ${delay}ms`,

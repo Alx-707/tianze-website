@@ -271,7 +271,6 @@ function TechStackTabs({
             className="mt-0"
           >
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {/* eslint-disable-next-line security/detect-object-injection -- category comes from Object.keys(categories), not user input */}
               {(categorizedTech[category] || []).map((tech, techIndex) => (
                 <Card
                   key={`tech-${techIndex}`}
@@ -348,7 +347,6 @@ export function TechTabsBlock({
   const categorizedTech = useMemo(() => {
     const result: Record<string, TechItem[]> = {};
     for (const category of Object.keys(categories)) {
-      // eslint-disable-next-line security/detect-object-injection -- category comes from Object.keys(categories), not user input
       result[category] = techData.filter((tech) => tech.category === category);
     }
     return result;

@@ -1,12 +1,9 @@
 /**
  * 安全对象属性访问守卫工具
- * 解决 security/detect-object-injection ESLint 错误
  * 提供类型安全的对象属性访问方法
  */
 
 // nosemgrep: object-injection-sink-dynamic-property,object-injection-sink-spread-operator,object-injection-sink-reflect-api,object-injection-sink-for-in-loop -- 本文件仅提供受控的安全访问封装，所有动态访问均经过 hasOwn 检查或键白名单控制
-
-/* eslint-disable security/detect-object-injection -- 此文件是安全守卫工具，内部使用受控的动态属性访问是安全的，所有访问都经过hasOwn检查 */
 
 /**
  * 安全检查对象是否拥有指定属性

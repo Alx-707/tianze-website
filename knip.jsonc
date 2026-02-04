@@ -8,16 +8,12 @@
   "entry": [
     "src/app/**/{page,layout,template,loading,error,not-found,route,head}.{ts,tsx}",
     "src/app/api/**/*.{ts,tsx}",
-    "middleware.ts",
     "src/constants/index.ts",
     "src/components/**/*.{ts,tsx}",
     "src/lib/**/*.{ts,tsx}",
     "scripts/**/*.{ts,tsx,js}",
     "tests/**/*.{ts,tsx}",
-    "playwright.config.ts",
-    "vitest.config.mts",
     "vitest.config.browser.ts",
-    "next.config.ts",
   ],
   // 项目扫描范围：聚焦源代码、脚本与测试，不扫描生成物/文档。
   "project": [
@@ -41,6 +37,8 @@
   "ignoreBinaries": ["open", "du"],
   // 工具型依赖由 CI/lint/分析脚本消费，标记为已使用以便聚焦业务未用项。
   "ignoreDependencies": [
+    // Prettier plugins are auto-loaded by Prettier when installed; knip may not detect usage reliably.
+    "@ianvs/prettier-plugin-sort-imports",
     "@react-email/preview-server",
     "@tailwindcss/typography",
     "@next/eslint-plugin-next",
@@ -51,6 +49,7 @@
     "eslint-plugin-react",
     "eslint-plugin-react-hooks",
     "lighthouse",
+    "prettier-plugin-tailwindcss",
     "sharp",
     "source-map-explorer",
     "tailwindcss",

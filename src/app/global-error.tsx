@@ -45,7 +45,6 @@ function getLocaleFromBrowser(): "en" | "zh" {
 export default function GlobalError({ error, reset }: GlobalErrorProps) {
   const locale = getLocaleFromBrowser();
   // Safe: locale is strictly typed as 'en' | 'zh' from getLocaleFromBrowser()
-  // eslint-disable-next-line security/detect-object-injection -- locale is a controlled enum value
   const t = translations[locale];
 
   useEffect(() => {

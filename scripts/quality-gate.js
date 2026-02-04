@@ -208,66 +208,6 @@ class QualityGate {
             "**/__tests__/**",
             "src/test/**",
             "src/testing/**",
-            // Next.js App Router - validated via E2E tests, not unit tests
-            "src/app/**/page.tsx",
-            "src/app/**/layout.tsx",
-            "src/app/**/error.tsx", // Error boundaries
-            "src/app/**/loading.tsx", // Loading states
-            "src/app/**/not-found.tsx", // 404 pages
-            "src/app/**/head.tsx", // Head components
-            "src/app/**/generate-static-params.ts", // Static generation
-            "src/app/**/layout-*.tsx", // Layout utilities
-            "src/app/**/layout-*.ts",
-            "src/app/actions.ts", // Server actions - tested via integration
-            "src/app/api/**", // API routes - validated via E2E and integration tests
-            "src/app/[locale]/**/*.tsx", // Page-specific components - validated via E2E
-            "src/lib/content/**", // Content loaders - covered by integration tests
-            "src/templates/**", // Template files - development patterns, not production code
-            "src/types/**", // Type definition files - pure TypeScript types, no runtime code
-            "src/components/**/_templates/**", // Component templates - development patterns
-            "src/components/blocks/**", // Block components - UI compositions validated via E2E
-            "src/components/**/error-boundary.tsx", // Error boundaries - React patterns
-            "src/components/forms/**", // Form components - validated via E2E interaction tests
-            "src/components/contact/**", // Contact components - validated via E2E
-            "src/components/home/**", // Homepage components - validated via E2E
-            "src/components/lazy/**", // Lazy-loaded components - wrapper patterns
-            "src/components/i18n/**", // i18n components - validated via E2E
-            "src/components/layout/**", // Layout components - validated via E2E
-            "src/components/cookie/**", // Cookie components - validated via E2E
-            "src/components/mdx/**", // MDX components - content rendering
-            "src/components/monitoring/**", // Monitoring components - analytics
-            "src/components/products/**", // Product components - validated via E2E
-            "src/components/blog/**", // Blog components - validated via E2E
-            "src/components/whatsapp/**", // WhatsApp components - validated via E2E
-            "src/components/security/**", // Security components (Turnstile) - integration
-            "src/components/seo/**", // SEO components - validated via E2E
-            "src/components/dev-tools/**", // Dev-only tools - not shipped to production
-            "src/components/theme-provider.tsx", // Theme provider - wrapper pattern
-            "src/components/language-toggle.tsx", // Language toggle - validated via E2E
-            "src/components/ui/**", // UI primitives - shadcn/ui components validated via E2E
-            "src/components/trust/**", // Trust components - display only
-            "src/components/emails/**", // Email templates - tested via integration
-            "src/components/footer/**", // Footer components - validated via E2E
-            "src/components/shared/**", // Shared components - validated via E2E
-            "src/constants/test-*.ts", // Test constants - testing infrastructure
-            "src/config/**", // Config files - validated via integration tests
-            "src/hooks/**", // React hooks - validated via E2E and component tests
-            "src/i18n/**", // i18n configuration - validated via integration tests
-            "src/lib/airtable/**", // Airtable integration - validated via integration tests
-            "src/lib/api/**", // API utilities - validated via integration tests
-            "src/lib/accessibility*.ts", // Accessibility utilities - validated via E2E
-            "src/lib/api-cache-utils.ts", // Cache utilities - integration
-            "src/lib/cache/**", // Cache utilities - integration tests
-            "src/lib/content-manifest.ts", // Content manifest - build-time
-            "src/lib/content-validation.ts", // Content validation - integration
-            "src/lib/cookie-consent/**", // Cookie consent library - E2E
-            "src/lib/env.ts", // Environment config - validated at runtime
-            "src/lib/i18n-performance.ts", // i18n performance - integration
-            "src/lib/i18n/**", // i18n utilities - validated via E2E
-            "src/lib/idempotency.ts", // Idempotency - integration
-            "src/lib/idle-callback.ts", // Idle callback - browser API wrapper
-            "src/lib/load-messages.ts", // Message loading - integration
-            "src/lib/locale-constants.ts", // Locale constants - config
           ],
         },
         codeQuality: {
@@ -292,6 +232,7 @@ class QualityGate {
           thresholds: {
             vulnerabilities: 0,
             highSeverity: 0,
+            semgrepErrors: 0,
           },
           blocking: true,
         },
@@ -1227,19 +1168,56 @@ class QualityGate {
       // npm audit 检查
       gate.checks.audit = await this.runSecurityAudit();
 
+      // Semgrep（本地门禁可见；CI 由 .github/workflows/ci.yml 的 security job 执行）
+      const shouldRunSemgrep =
+        !this.config.ciGateMode || process.env.QUALITY_FORCE_SEMGREP === "true";
+
+      if (shouldRunSemgrep) {
+        gate.checks.semgrep = await this.runSemgrepScan();
+      } else {
+        gate.checks.semgrep = {
+          status: "skipped",
+          reason: "CI pipeline runs Semgrep in a dedicated security job",
+          errors: 0,
+          warnings: 0,
+        };
+      }
+
       // 检查安全阈值
       const vulnerabilities = gate.checks.audit.vulnerabilities || 0;
       const highSeverity = gate.checks.audit.high || 0;
+      const semgrepErrors = gate.checks.semgrep?.errors || 0;
+      const semgrepStatus = gate.checks.semgrep?.status;
 
+      const issues = [];
+      const warningIssues = [];
       if (
         vulnerabilities >
           this.config.gates.security.thresholds.vulnerabilities ||
         highSeverity > this.config.gates.security.thresholds.highSeverity
       ) {
-        gate.status = "failed";
-        gate.issues.push(
+        issues.push(
           `发现 ${vulnerabilities} 个安全漏洞，其中 ${highSeverity} 个高危`,
         );
+      }
+
+      if (
+        semgrepErrors >
+        (this.config.gates.security.thresholds.semgrepErrors ?? 0)
+      ) {
+        issues.push(`Semgrep ERROR 发现 ${semgrepErrors} 个问题`);
+      }
+
+      if (semgrepStatus === "failed") {
+        warningIssues.push("Semgrep 扫描执行失败（仅告警，不阻塞）");
+      }
+
+      if (issues.length > 0) {
+        gate.status = "failed";
+        gate.issues.push(...issues, ...warningIssues);
+      } else if (warningIssues.length > 0) {
+        gate.status = "warning";
+        gate.issues.push(...warningIssues);
       } else {
         gate.status = "passed";
       }
@@ -1410,6 +1388,73 @@ class QualityGate {
         error: error.message,
       };
     }
+  }
+
+  /**
+   * 运行 Semgrep 扫描（仅统计 ERROR/WARNING 数量）
+   *
+   * 注意：CI 中 Semgrep 由 .github/workflows/ci.yml 的 security job 负责，
+   * quality gate 默认不重复执行（除非 QUALITY_FORCE_SEMGREP=true）。
+   */
+  async runSemgrepScan() {
+    const reportDir = path.join(process.cwd(), "reports");
+    const errorLatest = path.join(reportDir, "semgrep-error-latest.json");
+    const warningLatest = path.join(reportDir, "semgrep-warning-latest.json");
+
+    let exitCode = 0;
+    let status = "completed";
+    let output = "";
+
+    try {
+      output = execSync("pnpm security:semgrep", {
+        encoding: "utf8",
+        stdio: "pipe",
+        maxBuffer: 10 * 1024 * 1024,
+      });
+    } catch (error) {
+      exitCode = typeof error.status === "number" ? error.status : 1;
+      output = (error.stdout || error.stderr || "").toString();
+
+      // exitCode=1 通常表示存在 ERROR findings（扫描本身成功）
+      status = exitCode === 1 ? "completed" : "failed";
+    }
+
+    let errors = 0;
+    let warnings = 0;
+
+    try {
+      if (fs.existsSync(errorLatest)) {
+        const json = JSON.parse(fs.readFileSync(errorLatest, "utf8"));
+        errors = Array.isArray(json?.results) ? json.results.length : 0;
+      }
+    } catch {
+      // ignore
+    }
+
+    try {
+      if (fs.existsSync(warningLatest)) {
+        const json = JSON.parse(fs.readFileSync(warningLatest, "utf8"));
+        warnings = Array.isArray(json?.results) ? json.results.length : 0;
+      }
+    } catch {
+      // ignore
+    }
+
+    return {
+      errors,
+      warnings,
+      exitCode,
+      status,
+      reports: {
+        error: fs.existsSync(errorLatest)
+          ? path.relative(process.cwd(), errorLatest)
+          : null,
+        warning: fs.existsSync(warningLatest)
+          ? path.relative(process.cwd(), warningLatest)
+          : null,
+      },
+      output: typeof output === "string" ? output.trim() : "",
+    };
   }
 
   /**

@@ -38,7 +38,6 @@ function getNestedValue(obj: HeroSplitBlockMessages, path: string): string {
   let cur: unknown = obj;
   for (const p of parts) {
     if (typeof cur !== "object" || cur === null) return "";
-    // eslint-disable-next-line security/detect-object-injection -- 内部 i18n messages，路径由开发者硬编码
     cur = (cur as Record<string, unknown>)[p];
   }
   return typeof cur === "string" ? cur : "";

@@ -53,4 +53,36 @@ describe("mergeObjects", () => {
 
     expect(merged).toEqual({ own: "ok" });
   });
+
+  it("drops prototype-pollution keys from source", () => {
+    const source = Object.create(null) as Record<string, unknown>;
+
+    Object.defineProperty(source, "__proto__", {
+      value: { polluted: true },
+      enumerable: true,
+    });
+    Object.defineProperty(source, "constructor", {
+      value: { polluted: true },
+      enumerable: true,
+    });
+    Object.defineProperty(source, "prototype", {
+      value: { polluted: true },
+      enumerable: true,
+    });
+    source.safe = "ok";
+
+    const merged = mergeObjects<Record<string, unknown>>({}, source);
+
+    expect(merged).toEqual({ safe: "ok" });
+    expect(Object.getPrototypeOf(merged)).toBe(Object.prototype);
+    expect(Object.prototype.hasOwnProperty.call(merged, "__proto__")).toBe(
+      false,
+    );
+    expect(Object.prototype.hasOwnProperty.call(merged, "constructor")).toBe(
+      false,
+    );
+    expect(Object.prototype.hasOwnProperty.call(merged, "prototype")).toBe(
+      false,
+    );
+  });
 });

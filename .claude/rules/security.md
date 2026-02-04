@@ -29,6 +29,11 @@ See `/.claude/rules/threat-modeling.md` for STRIDE analysis on new/changed API r
 - Query params: explicitly validate type (may be string/array/object)
 - File paths: use allowlist or `path.resolve()` + prefix check (symlinks may escape)
 
+## Static Analysis (Semgrep)
+
+- 代码级安全扫描以 Semgrep 为准（`semgrep.yml`），CI 会在 `.github/workflows/ci.yml` 的 `security` job 执行 baseline 扫描。
+- `eslint-plugin-security` 的 `security/detect-object-injection` 在本项目中默认关闭：该规则无法理解 TypeScript 的类型约束，误报会迫使代码为工具服务；对象注入相关检查由 Semgrep 的 object-injection 规则承担。
+
 ## API Security
 
 | Measure | Config |

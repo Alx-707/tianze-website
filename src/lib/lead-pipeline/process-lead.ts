@@ -7,7 +7,6 @@ import {
   isContactLead,
   isNewsletterLead,
   isProductLead,
-  LEAD_TYPES,
   leadSchema,
   type LeadInput,
   type LeadType,
@@ -37,9 +36,9 @@ interface LeadHandlerConfig {
  * Maps each lead type to its processing behavior
  */
 const LEAD_HANDLER_CONFIG = {
-  [LEAD_TYPES.CONTACT]: { hasEmailOperation: true },
-  [LEAD_TYPES.PRODUCT]: { hasEmailOperation: true },
-  [LEAD_TYPES.NEWSLETTER]: { hasEmailOperation: false },
+  contact: { hasEmailOperation: true },
+  product: { hasEmailOperation: true },
+  newsletter: { hasEmailOperation: false },
 } as const satisfies Record<LeadType, LeadHandlerConfig>;
 
 /**

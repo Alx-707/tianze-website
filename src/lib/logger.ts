@@ -48,7 +48,6 @@ function shouldLog(level: LogLevel): boolean {
     return false;
   }
   // info respects LOG_LEVEL
-  // eslint-disable-next-line security/detect-object-injection -- level is typed as LogLevel union, keys are constrained to 'error'|'warn'|'info'|'debug'
   return LOG_LEVELS[level] <= LOG_LEVELS[getLogLevel()];
 }
 

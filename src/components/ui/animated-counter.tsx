@@ -11,6 +11,7 @@ import { COUNT_PAIR, COUNT_TRIPLE, ONE, ZERO } from "@/constants";
 import { COUNT_4 } from "@/constants/count";
 import { MAGIC_0_3, MAGIC_0_5 } from "@/constants/decimal";
 import { ANIMATION_DURATIONS } from "@/constants/performance-constants";
+import { MAX_SET_TIMEOUT_DELAY_MS } from "@/constants/time";
 import { useIntersectionObserver } from "@/hooks/use-intersection-observer";
 
 /**
@@ -207,8 +208,13 @@ function useAnimatedCounter({
     const shouldAnimate = autoStart || (triggerOnVisible && isVisible);
 
     if (shouldAnimate && !isAnimating) {
-      if (delay > ZERO) {
-        const timer = setTimeout(animate, delay);
+      const safeDelay = Math.min(
+        Math.max(delay, ZERO),
+        MAX_SET_TIMEOUT_DELAY_MS,
+      );
+
+      if (safeDelay > ZERO) {
+        const timer = setTimeout(animate, safeDelay);
         return () => clearTimeout(timer);
       }
       queueMicrotask(() => animate());

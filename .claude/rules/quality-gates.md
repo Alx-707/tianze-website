@@ -111,6 +111,12 @@ Lighthouse CI enforces progressive thresholds:
 - No bypasses allowed
 - Must fix before proceeding
 
+## Security Gate Clarification
+
+- 依赖漏洞：`pnpm audit --prod`（阻断）。
+- 代码级安全：Semgrep 的 `ERROR` 级规则（阻断，PR 使用 baseline 仅检测新增问题）。
+- `scripts/quality-gate.js --mode=ci` 默认不重复执行 Semgrep（CI 已在独立 `security` job 运行）；本地 `quality:gate` 会纳入 Semgrep(ERROR) 统计以保持反馈闭环。
+
 ## ESLint Disable Usage
 
 When using `eslint-disable`:

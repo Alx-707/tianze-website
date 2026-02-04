@@ -24,7 +24,6 @@ export function getContentEntry(
   slug: string,
 ): ContentEntry | undefined {
   const key = buildKey(type, locale, slug);
-  // eslint-disable-next-line security/detect-object-injection -- key is derived from validated ContentType/Locale/slug
   return CONTENT_MANIFEST.byKey[key];
 }
 

@@ -63,7 +63,6 @@ export function ProductStandardsFilter({
       {standards.map((standard) => {
         const nextSelection = toggleStandard(currentStandards, standard);
         const isSelected = currentStandards?.includes(standard) === true;
-        // eslint-disable-next-line security/detect-object-injection -- standard is ProductStandardId union type from PRODUCT_STANDARDS keys
         const { label } = PRODUCT_STANDARDS[standard];
 
         return (
