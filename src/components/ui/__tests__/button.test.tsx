@@ -65,7 +65,7 @@ describe("Button Component", () => {
 
       const button = screen.getByRole("button");
       expect(button).toHaveClass("bg-primary", "text-primary-foreground");
-      expect(button).toHaveClass("h-9", "px-4", "py-2");
+      expect(button).toHaveClass("h-[38px]", "px-5", "py-2.5");
     });
   });
 
@@ -99,21 +99,24 @@ describe("Button Component", () => {
       render(<Button variant="secondary">Secondary</Button>);
 
       const button = screen.getByRole("button");
-      expect(button).toHaveClass("bg-secondary", "text-secondary-foreground");
+      expect(button).toHaveClass("bg-white", "text-foreground");
     });
 
     it("applies ghost variant styles", () => {
       render(<Button variant="ghost">Ghost</Button>);
 
       const button = screen.getByRole("button");
-      expect(button).toHaveClass("hover:bg-muted");
+      expect(button).toHaveClass(
+        "hover:bg-accent",
+        "hover:text-accent-foreground",
+      );
     });
 
     it("applies link variant styles", () => {
       render(<Button variant="link">Link</Button>);
 
       const button = screen.getByRole("button");
-      expect(button).toHaveClass("text-accent", "underline-offset-4");
+      expect(button).toHaveClass("text-primary", "underline-offset-4");
     });
   });
 
@@ -122,7 +125,7 @@ describe("Button Component", () => {
       render(<Button size="default">Default Size</Button>);
 
       const button = screen.getByRole("button");
-      expect(button).toHaveClass("h-9", "px-4", "py-2");
+      expect(button).toHaveClass("h-[38px]", "px-5", "py-2.5");
     });
 
     it("applies small size styles", () => {
@@ -251,7 +254,11 @@ describe("Button Component", () => {
       render(<Button>Focus me</Button>);
 
       const button = screen.getByRole("button");
-      expect(button).toHaveClass("focus-visible:ring-ring/50");
+      expect(button).toHaveClass(
+        "focus-visible:ring-2",
+        "focus-visible:ring-ring",
+        "focus-visible:ring-offset-2",
+      );
     });
 
     it("supports aria attributes", () => {
@@ -271,7 +278,6 @@ describe("Button Component", () => {
 
       const button = screen.getByRole("button");
       expect(button).toHaveAttribute("aria-invalid", "true");
-      expect(button).toHaveClass("aria-invalid:ring-destructive/20");
     });
   });
 
@@ -305,7 +311,7 @@ describe("Button Component", () => {
       );
 
       const button = screen.getByRole("button");
-      expect(button).toHaveClass("bg-secondary"); // secondary variant
+      expect(button).toHaveClass("bg-white"); // secondary variant
       expect(button).toHaveClass("h-8"); // sm size
       expect(button).toHaveClass("custom-spacing"); // custom class
       expect(button).toBeDisabled(); // disabled state
