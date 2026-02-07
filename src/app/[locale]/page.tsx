@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { generateMetadataForPath, type Locale } from "@/lib/seo-metadata";
+import { GridFrame } from "@/components/grid";
 import { HeroSection } from "@/components/sections/hero-section";
 import { ChainSection } from "@/components/sections/chain-section";
 import { ProductsSection } from "@/components/sections/products-section";
@@ -35,13 +36,20 @@ export default async function Home({ params }: HomePageProps) {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <HeroSection />
-      <ChainSection />
-      <ProductsSection />
-      <ResourcesSection />
-      <SampleCTA />
-      <ScenariosSection />
-      <QualitySection />
+      <GridFrame
+        crosshairs={[
+          { top: 0, left: 0 },
+          { bottom: 0, right: 0 },
+        ]}
+      >
+        <HeroSection />
+        <ChainSection />
+        <ProductsSection />
+        <ResourcesSection />
+        <SampleCTA />
+        <ScenariosSection />
+        <QualitySection />
+      </GridFrame>
       <FinalCTA />
     </div>
   );

@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
+import { HeroGuideOverlay } from "@/components/grid";
 
 const PROOF_ITEMS = [
   { valueKey: "hero.proof.countries", labelKey: "hero.proof.countriesLabel" },
@@ -51,8 +52,9 @@ export function HeroSection() {
   const t = useTranslations("home");
 
   return (
-    <section className="px-6 py-10 pb-14 md:py-16 md:pb-[72px]">
-      <div className="mx-auto grid max-w-[1080px] grid-cols-1 items-center gap-12 md:grid-cols-2">
+    <section className="relative px-6 py-10 pb-14 md:py-16 md:pb-[72px]">
+      <HeroGuideOverlay />
+      <div className="relative z-[1] mx-auto grid max-w-[1080px] grid-cols-1 items-center gap-12 md:grid-cols-2">
         {/* Left column — Copy */}
         <div className="flex flex-col">
           <HeroEyebrow text={t("hero.eyebrow")} />

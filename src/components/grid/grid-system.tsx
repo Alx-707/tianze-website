@@ -7,7 +7,7 @@ const CROSSHAIR_SIZE = 21;
  * L-corner crosshair mark at structural anchor points.
  * Two bars (21px each) sharing top-left origin, using border rendering.
  */
-function Crosshair({ style }: { style: CSSProperties }) {
+export function Crosshair({ style }: { style: CSSProperties }) {
   return (
     <div
       className="pointer-events-none absolute z-[2]"
