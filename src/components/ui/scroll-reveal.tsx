@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import {
   useIntersectionObserver,
   useIntersectionObserverWithDelay,
@@ -8,7 +8,7 @@ import {
 import { cn } from "@/lib/utils";
 import { ZERO } from "@/constants";
 
-const DEFAULT_STAGGER_INTERVAL = 80;
+const DEFAULT_STAGGER_INTERVAL = 100;
 const DEFAULT_THRESHOLD = 0.15;
 
 interface ScrollRevealProps {
@@ -22,19 +22,38 @@ interface ScrollRevealProps {
   className?: string;
 }
 
-const HIDDEN_CLASSES: Record<string, string> = {
-  up: "opacity-0 translate-y-5",
-  down: "opacity-0 -translate-y-5",
-  fade: "opacity-0",
-  scale: "opacity-0 scale-[0.97]",
-};
+/**
+ * Hidden/visible transforms per direction.
+ * "up"/"down" use CSS variable --scroll-reveal-distance for translateY.
+ * "scale" uses a noticeable scale(0.92) start.
+ */
+function getTransformStyle(
+  direction: string,
+  isVisible: boolean,
+): CSSProperties {
+  if (isVisible) {
+    return { opacity: 1, transform: "translateY(0) scale(1)" };
+  }
 
-const VISIBLE_CLASSES: Record<string, string> = {
-  up: "opacity-100 translate-y-0",
-  down: "opacity-100 translate-y-0",
-  fade: "opacity-100",
-  scale: "opacity-100 scale-100",
-};
+  switch (direction) {
+    case "down":
+      return {
+        opacity: 0,
+        transform:
+          "translateY(calc(-1 * var(--scroll-reveal-distance, 24px))) scale(1)",
+      };
+    case "fade":
+      return { opacity: 0, transform: "translateY(0) scale(1)" };
+    case "scale":
+      return { opacity: 0, transform: "translateY(0) scale(0.92)" };
+    case "up":
+    default:
+      return {
+        opacity: 0,
+        transform: "translateY(var(--scroll-reveal-distance, 24px)) scale(1)",
+      };
+  }
+}
 
 export function ScrollReveal({
   children,
@@ -59,14 +78,16 @@ export function ScrollReveal({
       : useIntersectionObserver(observerOptions);
   /* eslint-enable react-hooks/rules-of-hooks */
 
+  const transformStyle = getTransformStyle(direction, isVisible);
+
   return (
     <Tag
       ref={ref}
       className={cn(
-        "transition-[opacity,transform] duration-[600ms] ease-out",
-        isVisible ? VISIBLE_CLASSES[direction] : HIDDEN_CLASSES[direction],
+        "transition-[opacity,transform] duration-[var(--scroll-reveal-duration,700ms)] ease-[var(--ease-spring)]",
         className,
       )}
+      style={transformStyle}
     >
       {children}
     </Tag>

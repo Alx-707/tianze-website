@@ -33,30 +33,30 @@ describe("ScrollReveal", () => {
     expect(screen.getByText("Hello World")).toBeInTheDocument();
   });
 
-  it("applies hidden state classes when not visible", () => {
+  it("applies hidden state via inline style when not visible", () => {
     setupMock(false);
     const { container } = render(<ScrollReveal>Content</ScrollReveal>);
     const wrapper = container.firstChild as HTMLElement;
-    expect(wrapper).toHaveClass("opacity-0");
-    expect(wrapper).toHaveClass("translate-y-5");
+    expect(wrapper.style.opacity).toBe("0");
+    expect(wrapper.style.transform).toContain("translateY");
   });
 
-  it("applies visible state classes when visible", () => {
+  it("applies visible state via inline style when visible", () => {
     setupMock(true);
     const { container } = render(<ScrollReveal>Content</ScrollReveal>);
     const wrapper = container.firstChild as HTMLElement;
-    expect(wrapper).toHaveClass("opacity-100");
-    expect(wrapper).toHaveClass("translate-y-0");
+    expect(wrapper.style.opacity).toBe("1");
+    expect(wrapper.style.transform).toContain("translateY(0)");
   });
 
-  it("supports direction=fade (no translate)", () => {
+  it("supports direction=fade (no translateY offset)", () => {
     setupMock(false);
     const { container } = render(
       <ScrollReveal direction="fade">Content</ScrollReveal>,
     );
     const wrapper = container.firstChild as HTMLElement;
-    expect(wrapper).toHaveClass("opacity-0");
-    expect(wrapper).not.toHaveClass("translate-y-5");
+    expect(wrapper.style.opacity).toBe("0");
+    expect(wrapper.style.transform).toContain("translateY(0)");
   });
 
   it("supports direction=scale", () => {
@@ -65,7 +65,7 @@ describe("ScrollReveal", () => {
       <ScrollReveal direction="scale">Content</ScrollReveal>,
     );
     const wrapper = container.firstChild as HTMLElement;
-    expect(wrapper).toHaveClass("scale-[0.97]");
+    expect(wrapper.style.transform).toContain("scale(0.92)");
   });
 
   it("uses delay hook when delay > 0", () => {
@@ -74,12 +74,12 @@ describe("ScrollReveal", () => {
     expect(mockUseIntersectionObserverWithDelay).toHaveBeenCalled();
   });
 
-  it("computes delay from staggerIndex", () => {
+  it("computes delay from staggerIndex (default interval 100ms)", () => {
     setupMock(false);
     render(<ScrollReveal staggerIndex={2}>Content</ScrollReveal>);
     expect(mockUseIntersectionObserverWithDelay).toHaveBeenCalledWith(
       expect.any(Object),
-      160,
+      200,
     );
   });
 
