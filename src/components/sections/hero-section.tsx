@@ -52,7 +52,10 @@ export function HeroSection() {
   const t = useTranslations("home");
 
   return (
-    <section className="relative px-6 py-10 pb-14 md:py-16 md:pb-[72px]">
+    <section
+      data-testid="hero-section"
+      className="relative px-6 py-10 pb-14 md:py-16 md:pb-[72px]"
+    >
       <HeroGuideOverlay />
       <div className="relative z-[1] mx-auto grid max-w-[1080px] grid-cols-1 items-center gap-12 md:grid-cols-2">
         {/* Left column — Copy */}
