@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@source not "../../.claude";
+@source not "../../.agents";
 
 /* Tailwind v4 Plugins (order: animate before typography)
    - tailwindcss-animate: UI animation keyframes (animate-in, fade-in, slide-in-*)
@@ -9,125 +11,135 @@
 @custom-variant dark (&:is(.dark *));
 
 /* ==================== PRIMITIVE TOKENS ==================== */
+/* Design System: Swagelok structure + Vercel craft
+   Primary: #004D9E — Source: docs/S/tokens.md */
 
 :root {
-  /* Gray Scale - Twitter Neutral */
-  --gray-50: oklch(0.985 0 0);
-  --gray-100: oklch(0.965 0 0);
-  --gray-200: oklch(0.932 0.001 286);
-  --gray-300: oklch(0.85 0 0);
-  --gray-400: oklch(0.7 0 0);
-  --gray-500: oklch(0.564 0.008 248);
-  --gray-600: oklch(0.45 0 0);
-  --gray-700: oklch(0.35 0 0);
-  --gray-800: oklch(0.25 0 0);
-  --gray-900: oklch(0.188 0.013 248);
-  --gray-950: oklch(0.12 0 0);
+  /* Gray Scale — Neutral */
+  --gray-50: #fafafa;
+  --gray-100: #f0f1f3;
+  --gray-200: #e2e5e9;
+  --gray-300: #c8cdd2;
+  --gray-400: #8d969d;
+  --gray-500: #5f6b73;
+  --gray-600: #4a545b;
+  --gray-700: #36424a;
+  --gray-800: #2c353b;
+  --gray-900: #1e2529;
+  --gray-950: #141a1e;
 
-  /* Brand: Twitter Blue (Hue 245) */
-  --blue-50: oklch(0.97 0.02 245);
-  --blue-100: oklch(0.94 0.04 245);
-  --blue-200: oklch(0.88 0.08 245);
-  --blue-300: oklch(0.8 0.12 245);
-  --blue-400: oklch(0.7 0.15 245);
-  --blue-500: oklch(0.672 0.161 245);
-  --blue-600: oklch(0.48 0.16 245);
-  --blue-700: oklch(0.42 0.14 245);
-  --blue-800: oklch(0.35 0.12 245);
-  --blue-900: oklch(0.28 0.1 245);
-  --blue-950: oklch(0.25 0.08 245);
+  /* Brand: Tianze Blue (#004D9E) */
+  --blue-50: #f0f6ff;
+  --blue-100: #e8f0fe;
+  --blue-200: #bfdbfe;
+  --blue-300: #7bb5f5;
+  --blue-400: #3b8fe8;
+  --blue-500: #004d9e;
+  --blue-600: #003b7a;
+  --blue-700: #002f63;
+  --blue-800: #00234a;
+  --blue-900: #001833;
+  --blue-950: #001025;
 
-  /* Border Radius — Twitter Large Rounded (20px base) */
-  --radius: 1.3rem;
+  /* Border Radius — 8px base (Vercel precision) */
+  --radius: 0.5rem;
   --radius-none: 0;
-  --radius-sharp: calc(var(--radius) - 12px);
-  --radius-base: calc(var(--radius) - 8px);
-  --radius-soft: calc(var(--radius) - 4px);
+  --radius-sharp: 0.125rem;
+  --radius-base: 0.25rem;
+  --radius-soft: 0.375rem;
   --radius-round: 9999px;
 
   /* Foundation */
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.188 0.013 248);
+  --background: #fafafa;
+  --foreground: #36424a;
 
   /* Surfaces */
-  --card: oklch(0.978 0.001 197);
-  --card-foreground: oklch(0.188 0.013 248);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.188 0.013 248);
+  --card: #ffffff;
+  --card-foreground: #36424a;
+  --popover: #ffffff;
+  --popover-foreground: #36424a;
 
-  /* Brand Primary — Twitter Blue for CTA */
-  --primary: oklch(0.672 0.161 245);
-  --primary-foreground: oklch(1 0 0);
+  /* Brand Primary — #004D9E */
+  --primary: #004d9e;
+  --primary-foreground: #ffffff;
+  --primary-dark: #003b7a;
+  --primary-light: #e8f0fe;
+  --primary-50: #f0f6ff;
 
-  /* Secondary — Dark for contrast */
-  --secondary: oklch(0.188 0.013 248);
-  --secondary-foreground: oklch(1 0 0);
+  /* Secondary — Outlined/bordered */
+  --secondary: #ffffff;
+  --secondary-foreground: #36424a;
 
-  /* Accent — Light Blue highlight */
-  --accent: oklch(0.939 0.017 250);
-  --accent-foreground: oklch(0.672 0.161 245);
+  /* Accent */
+  --accent: #f0f6ff;
+  --accent-foreground: #004d9e;
 
   /* Muted */
-  --muted: oklch(0.922 0.001 286);
-  --muted-foreground: oklch(0.188 0.013 248);
+  --muted: #f0f1f3;
+  --muted-foreground: #5f6b73;
 
   /* Destructive */
-  --destructive: oklch(0.619 0.238 26);
-  --destructive-foreground: oklch(1 0 0);
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
 
   /* Borders & Inputs */
-  --border: oklch(0.932 0.012 232);
-  --input: oklch(0.981 0.003 229);
-  --ring: oklch(0.682 0.158 243);
+  --border: #e2e5e9;
+  --border-light: #f0f1f3;
+  --input: #ffffff;
+  --ring: #004d9e;
 
   /* Status Colors */
-  --success: oklch(0.69 0.155 160);
-  --success-foreground: oklch(1 0 0);
-  --warning: oklch(0.821 0.16 82);
-  --warning-foreground: oklch(0.15 0 0);
-  --error: oklch(0.619 0.238 26);
-  --error-foreground: oklch(1 0 0);
-  --info: oklch(0.672 0.161 245);
-  --info-foreground: oklch(1 0 0);
+  --success: #0f7b5f;
+  --success-foreground: #ffffff;
+  --success-light: #eefbf4;
+  --warning: #d97706;
+  --warning-foreground: #1e2529;
+  --error: #dc2626;
+  --error-foreground: #ffffff;
+  --info: #004d9e;
+  --info-foreground: #ffffff;
 
-  /* Charts — Twitter palette */
-  --chart-1: oklch(0.672 0.161 245);
-  --chart-2: oklch(0.691 0.155 160);
-  --chart-3: oklch(0.821 0.16 82);
-  --chart-4: oklch(0.706 0.182 152);
-  --chart-5: oklch(0.592 0.219 11);
+  /* Charts */
+  --chart-1: #004d9e;
+  --chart-2: #0f7b5f;
+  --chart-3: #d97706;
+  --chart-4: #7c3aed;
+  --chart-5: #dc2626;
 
   /* Selection */
-  --selection-background: oklch(0.672 0.161 245 / 20%);
-  --selection-foreground: oklch(0.188 0.013 248);
+  --selection-background: rgba(0, 77, 158, 0.2);
+  --selection-foreground: #36424a;
 
-  /* Sidebar — Light (Twitter style) */
-  --sidebar: oklch(0.978 0.001 197);
-  --sidebar-foreground: oklch(0.188 0.013 248);
-  --sidebar-primary: oklch(0.672 0.161 245);
-  --sidebar-primary-foreground: oklch(1 0 0);
-  --sidebar-accent: oklch(0.939 0.017 250);
-  --sidebar-accent-foreground: oklch(0.672 0.161 245);
-  --sidebar-border: oklch(0.927 0.01 238);
-  --sidebar-ring: oklch(0.682 0.158 243);
+  /* Sidebar */
+  --sidebar: #ffffff;
+  --sidebar-foreground: #36424a;
+  --sidebar-primary: #004d9e;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f0f6ff;
+  --sidebar-accent-foreground: #004d9e;
+  --sidebar-border: #e2e5e9;
+  --sidebar-ring: #004d9e;
 
-  /* Shadows — Twitter Flat (near zero opacity) */
-  --shadow-color: 203 89% 53%;
-  --shadow-xs: 0 1px 2px hsl(var(--shadow-color) / 0);
-  --shadow-sm:
-    0 1px 3px hsl(var(--shadow-color) / 0),
-    0 1px 2px hsl(var(--shadow-color) / 0);
-  --shadow-md:
-    0 4px 6px hsl(var(--shadow-color) / 0),
-    0 2px 4px hsl(var(--shadow-color) / 0);
-  --shadow-lg:
-    0 10px 15px hsl(var(--shadow-color) / 0),
-    0 4px 6px hsl(var(--shadow-color) / 0);
-  --shadow-xl:
-    0 20px 25px hsl(var(--shadow-color) / 0),
-    0 8px 10px hsl(var(--shadow-color) / 0);
-  --shadow-inset: inset 0 1px 2px hsl(var(--shadow-color) / 0);
-  --shadow-accent: 0 0 0 3px oklch(0.672 0.161 245 / 0.2);
+  /* Shadows — Visible, subtle */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.03);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.06), 0 2px 4px rgba(0, 0, 0, 0.03);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.06), 0 4px 6px rgba(0, 0, 0, 0.03);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.06), 0 8px 10px rgba(0, 0, 0, 0.03);
+  --shadow-inset: inset 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-accent: 0 0 0 3px rgba(0, 77, 158, 0.2);
+
+  /* Shadow-Border (Vercel technique: shadow as border for smooth transitions) */
+  --shadow-card-active:
+    0 0 0 1px var(--primary), 0 0 0 4px rgba(0, 77, 158, 0.12);
+
+  /* Section Divider (Vercel-style) */
+  --divider: #ebebeb;
+
+  /* Grid System (component phase — Task 9) */
+  --grid-guide: rgba(0, 0, 0, 0.05);
+  --grid-divider: rgb(235, 235, 235);
+  --grid-crosshair: rgb(168, 168, 168);
 
   /* Animation */
   --duration-instant: 50ms;
@@ -142,6 +154,11 @@
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
   --ease-smooth: cubic-bezier(0.25, 0.1, 0.25, 1);
 
+  /* Scroll reveal */
+  --scroll-reveal-distance: 20px;
+  --scroll-reveal-duration: 600ms;
+  --scroll-reveal-stagger: 80ms;
+
   --transition-colors:
     color var(--duration-fast) var(--ease-out),
     background-color var(--duration-fast) var(--ease-out),
@@ -151,103 +168,83 @@
   --transition-shadow: box-shadow var(--duration-fast) var(--ease-out);
   --transition-all: all var(--duration-normal) var(--ease-smooth);
 
-  /* Typography — Open Sans */
+  /* Typography — Figtree + JetBrains Mono */
   --font-sans:
-    var(--font-open-sans), -apple-system, BlinkMacSystemFont, "Segoe UI",
-    Roboto, "Helvetica Neue", Arial, sans-serif;
+    var(--font-figtree), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
   --font-mono:
-    ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono",
-    monospace;
+    var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, "SF Mono", Menlo,
+    Consolas, "Liberation Mono", monospace;
   --font-chinese:
     "Source Han Sans SC", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
     "Microsoft YaHei", sans-serif;
+
+  /* Container */
+  --container-max: 1080px;
+  --nav-h: 56px;
+
+  /* Footer Dark Surface */
+  --footer-bg: #2c353b;
+  --footer-text: #c1cad0;
+  --footer-heading: #8a969e;
+  --footer-link: #b4bec6;
+  --footer-divider: rgba(255, 255, 255, 0.08);
 }
 
-/* ==================== SEMANTIC TOKENS (Dark Theme) ==================== */
+/* ==================== COMPONENT TOKENS ==================== */
 
-.dark {
-  /* Foundation — Pure black */
-  --background: oklch(0 0 0);
-  --foreground: oklch(0.933 0.003 229);
+:root {
+  /* Button — 6px radius, 150ms */
+  --button-radius: 6px;
+  --button-font-weight: 600;
 
-  /* Surfaces */
-  --card: oklch(0.21 0.008 274);
-  --card-foreground: oklch(0.885 0 0);
-  --popover: oklch(0 0 0);
-  --popover-foreground: oklch(0.933 0.003 229);
+  --button-primary-bg: var(--primary);
+  --button-primary-fg: var(--primary-foreground);
+  --button-primary-hover-bg: var(--primary-dark);
 
-  /* Brand Primary — Twitter Blue */
-  --primary: oklch(0.669 0.161 245);
-  --primary-foreground: oklch(1 0 0);
+  --button-accent-bg: var(--accent);
+  --button-accent-fg: var(--accent-foreground);
+  --button-accent-hover-bg: #e0ecfd;
 
-  /* Secondary — Light for dark mode */
-  --secondary: oklch(0.962 0.004 220);
-  --secondary-foreground: oklch(0.188 0.013 248);
+  --button-secondary-bg: var(--secondary);
+  --button-secondary-fg: var(--secondary-foreground);
+  --button-secondary-border: var(--border);
 
-  /* Accent — Dark Blue highlight */
-  --accent: oklch(0.193 0.033 242);
-  --accent-foreground: oklch(0.669 0.161 245);
+  --button-outline-bg: transparent;
+  --button-outline-fg: var(--primary);
+  --button-outline-border: var(--primary);
+  --button-outline-hover-bg: rgba(0, 77, 158, 0.1);
 
-  /* Muted */
-  --muted: oklch(0.209 0 0);
-  --muted-foreground: oklch(0.564 0.008 248);
+  --button-ghost-bg: transparent;
+  --button-ghost-fg: var(--foreground);
+  --button-ghost-hover-bg: var(--accent);
 
-  /* Destructive */
-  --destructive: oklch(0.619 0.238 26);
-  --destructive-foreground: oklch(1 0 0);
+  --button-destructive-bg: var(--destructive);
+  --button-destructive-fg: var(--destructive-foreground);
 
-  /* Borders & Inputs */
-  --border: oklch(0.267 0.005 248);
-  --input: oklch(0.302 0.029 245);
-  --ring: oklch(0.682 0.158 243);
+  /* Card — 8px radius */
+  --card-radius: var(--radius);
+  --card-padding: 1.5rem;
+  --card-default-shadow: none;
+  --card-elevated-shadow: var(--shadow-md);
 
-  /* Status Colors */
-  --success: oklch(0.7 0.155 160);
-  --success-foreground: oklch(0.07 0 0);
-  --warning: oklch(0.83 0.16 82);
-  --warning-foreground: oklch(0.07 0 0);
-  --error: oklch(0.619 0.238 26);
-  --error-foreground: oklch(1 0 0);
-  --info: oklch(0.669 0.161 245);
-  --info-foreground: oklch(0.07 0 0);
+  /* Input */
+  --input-height: 2.5rem;
+  --input-padding-x: 1rem;
+  --input-radius: var(--radius);
 
-  /* Charts — Twitter palette */
-  --chart-1: oklch(0.672 0.161 245);
-  --chart-2: oklch(0.691 0.155 160);
-  --chart-3: oklch(0.821 0.16 82);
-  --chart-4: oklch(0.706 0.182 152);
-  --chart-5: oklch(0.592 0.219 11);
+  /* Table */
+  --table-radius: var(--radius-soft);
+  --table-header-bg: #f0f1f3;
+  --table-row-hover-bg: rgba(0, 77, 158, 0.08);
 
-  /* Selection */
-  --selection-background: oklch(0.669 0.161 245 / 25%);
-  --selection-foreground: oklch(0.933 0.003 229);
-
-  /* Sidebar — Dark card style */
-  --sidebar: oklch(0.21 0.008 274);
-  --sidebar-foreground: oklch(0.885 0 0);
-  --sidebar-primary: oklch(0.682 0.158 243);
-  --sidebar-primary-foreground: oklch(1 0 0);
-  --sidebar-accent: oklch(0.193 0.033 242);
-  --sidebar-accent-foreground: oklch(0.669 0.161 245);
-  --sidebar-border: oklch(0.38 0.022 240);
-  --sidebar-ring: oklch(0.682 0.158 243);
-
-  /* Shadows — Slightly visible for dark mode */
-  --shadow-color: 203 89% 53%;
-  --shadow-xs: 0 1px 2px hsl(var(--shadow-color) / 0);
-  --shadow-sm:
-    0 1px 3px hsl(var(--shadow-color) / 0),
-    0 1px 2px hsl(var(--shadow-color) / 0);
-  --shadow-md:
-    0 4px 6px hsl(var(--shadow-color) / 0),
-    0 2px 4px hsl(var(--shadow-color) / 0);
-  --shadow-lg:
-    0 10px 15px hsl(var(--shadow-color) / 0),
-    0 4px 6px hsl(var(--shadow-color) / 0);
-  --shadow-xl:
-    0 20px 25px hsl(var(--shadow-color) / 0),
-    0 8px 10px hsl(var(--shadow-color) / 0);
+  /* Badge */
+  --badge-radius: var(--radius-round);
+  --badge-padding-x: 0.75rem;
+  --badge-padding-y: 0.25rem;
 }
+
+/* ==================== TAILWIND THEME BINDINGS ==================== */
 
 @theme inline {
   --color-background: var(--background);
@@ -284,115 +281,24 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
-  /* Twitter large radius */
-  --radius-sm: calc(var(--radius) - 8px);
-  --radius-md: calc(var(--radius) - 4px);
+  /* 8px base radius */
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
   --radius-2xl: calc(var(--radius) + 8px);
+
+  /* Shadow-Border System (Vercel technique: box-shadow as border for smooth transitions) */
+  --shadow-border: 0 0 0 1px rgba(0, 0, 0, 0.08);
+  --shadow-card:
+    0 0 0 1px rgba(0, 0, 0, 0.08), 0px 1px 1px rgba(0, 0, 0, 0.02),
+    0px 4px 8px rgba(0, 0, 0, 0.04);
+  --shadow-card-hover:
+    0 0 0 1px rgba(0, 0, 0, 0.12), 0px 2px 4px rgba(0, 0, 0, 0.04),
+    0px 8px 16px -4px rgba(0, 0, 0, 0.06);
 }
 
-/* ==================== COMPONENT TOKENS ==================== */
-
-:root {
-  /* Button — Twitter rounded style */
-  --button-radius: var(--radius-soft);
-  --button-font-weight: 600;
-
-  --button-primary-bg: var(--primary);
-  --button-primary-fg: var(--primary-foreground);
-  --button-primary-hover-bg: oklch(0.6 0.161 245);
-
-  --button-accent-bg: var(--accent);
-  --button-accent-fg: var(--accent-foreground);
-  --button-accent-hover-bg: oklch(0.9 0.02 250);
-
-  --button-secondary-bg: var(--secondary);
-  --button-secondary-fg: var(--secondary-foreground);
-  --button-secondary-border: var(--border);
-
-  --button-outline-bg: transparent;
-  --button-outline-fg: var(--primary);
-  --button-outline-border: var(--primary);
-  --button-outline-hover-bg: oklch(0.672 0.161 245 / 0.1);
-
-  --button-ghost-bg: transparent;
-  --button-ghost-fg: var(--foreground);
-  --button-ghost-hover-bg: var(--accent);
-
-  --button-destructive-bg: var(--destructive);
-  --button-destructive-fg: var(--destructive-foreground);
-
-  /* Card — Large radius, minimal shadow */
-  --card-radius: var(--radius);
-  --card-padding: 1.5rem;
-  --card-default-shadow: none;
-  --card-elevated-shadow: none;
-
-  /* Input — Rounded */
-  --input-height: 2.5rem;
-  --input-padding-x: 1rem;
-  --input-radius: var(--radius);
-
-  /* Table */
-  --table-radius: var(--radius-soft);
-  --table-header-bg: oklch(0.978 0.001 197);
-  --table-row-hover-bg: oklch(0.672 0.161 245 / 0.08);
-
-  /* Badge */
-  --badge-radius: var(--radius-round);
-  --badge-padding-x: 0.75rem;
-  --badge-padding-y: 0.25rem;
-}
-
-/* ==================== TWITTER-STYLE VISUAL ELEMENTS ==================== */
-
-/* Twitter-style subtle background */
-.twitter-bg {
-  background: var(--background);
-}
-
-/* Hover card effect */
-.hover-card {
-  transition: background-color var(--duration-fast) var(--ease-out);
-}
-
-.hover-card:hover {
-  background-color: var(--accent);
-}
-
-/* Twitter divider */
-.twitter-divider {
-  border-top: 1px solid var(--border);
-}
-
-/* Keep grid utilities for layout but remove visual grid lines */
-.precision-grid,
-.precision-grid-fine,
-.precision-grid-sparse {
-  /* Removed grid visual - Twitter uses solid backgrounds */
-  background: transparent;
-}
-
-/* Gradient fade mask for grid */
-.precision-grid-fade {
-  mask-image: linear-gradient(
-    to bottom,
-    transparent 0%,
-    black 20%,
-    black 80%,
-    transparent 100%
-  );
-}
-
-/* Radial fade for footer */
-.precision-grid-radial {
-  mask-image: radial-gradient(
-    ellipse 80% 50% at 50% 50%,
-    black 0%,
-    transparent 100%
-  );
-}
+/* ==================== BASE LAYER ==================== */
 
 @layer base {
   * {
@@ -403,7 +309,7 @@
     font-family: var(--font-sans), var(--font-chinese);
   }
 
-  /* 文本选择高亮样式 */
+  /* Text selection */
   ::selection {
     background-color: var(--selection-background);
     color: var(--selection-foreground);
@@ -414,7 +320,7 @@
     color: var(--selection-foreground);
   }
 
-  /* 系统字体优化 */
+  /* System font: PingFang SC */
   @font-face {
     font-family: "PingFang SC";
     src: local("PingFang SC Regular"), local("PingFangSC-Regular");
@@ -424,7 +330,7 @@
     unicode-range: U+4E00-9FFF;
   }
 
-  /* 中文字体优化 */
+  /* Chinese font optimization */
   .font-chinese {
     font-family: var(--font-chinese);
     font-feature-settings: "kern" 1;
@@ -432,20 +338,7 @@
     font-display: swap;
   }
 
-  /* B2B企业级设计风格 */
-  .enterprise-card {
-    @apply rounded-lg border border-border bg-card shadow-sm;
-  }
-
-  .enterprise-header {
-    @apply mb-4 text-2xl font-semibold text-foreground;
-  }
-
-  .enterprise-text {
-    @apply leading-relaxed text-muted-foreground;
-  }
-
-  /* View Transitions API 支持 */
+  /* View Transitions API */
   @supports (view-transition-name: none) {
     :root {
       view-transition-name: root;
@@ -472,7 +365,7 @@
     }
   }
 
-  /* 全局减少动画偏好支持 */
+  /* Reduced motion */
   @media (prefers-reduced-motion: reduce) {
     :root {
       --duration-instant: 0.01ms;
@@ -492,16 +385,11 @@
     }
   }
 
-  /* 高对比度模式增强 */
+  /* High contrast mode */
   @media (prefers-contrast: high) {
     :root {
-      --border: oklch(0.4 0 0);
-      --ring: oklch(0.48 0.22 260);
-    }
-
-    .dark {
-      --border: oklch(0.85 0 0);
-      --ring: oklch(0.65 0.22 260);
+      --border: #4a545b;
+      --ring: #003b7a;
     }
 
     *:focus-visible {
@@ -515,7 +403,7 @@
     }
   }
 
-  /* 无障碍性增强 */
+  /* Screen reader only */
   .sr-only {
     position: absolute;
     width: 1px;
@@ -528,13 +416,13 @@
     border: 0;
   }
 
-  /* 焦点管理 */
+  /* Focus management */
   *:focus-visible {
     outline: 2px solid var(--ring);
     outline-offset: 2px;
   }
 
-  /* 跳过链接 */
+  /* Skip link */
   .skip-link {
     position: absolute;
     top: -40px;
@@ -553,7 +441,7 @@
   }
 }
 
-/* ==================== CLS 优化配置 ==================== */
+/* ==================== CLS OPTIMIZATION ==================== */
 
 .cls-optimized {
   min-height: 1rem;
@@ -589,7 +477,7 @@
   pointer-events: auto;
 }
 
-/* ==================== 渲染范围优化（content-visibility） ==================== */
+/* ==================== CONTENT VISIBILITY ==================== */
 
 .cv-auto {
   content-visibility: auto;
@@ -615,7 +503,7 @@
   contain-intrinsic-size: auto 1000px;
 }
 
-/* ==================== 字体优化配置 ==================== */
+/* ==================== FONT OPTIMIZATION ==================== */
 
 .font-chinese,
 [lang="zh"] {
@@ -672,12 +560,13 @@
   line-height: 1.6;
 }
 
-/**
- * Vercel Line Design System
- */
+/* ==================== UTILITY CLASSES ==================== */
+
 @layer utilities {
+  /* Section divider — Vercel style */
   .section-divider {
-    @apply border-t border-border/30;
+    @apply border-t;
+    border-color: var(--divider);
   }
 
   .column-divider {
@@ -685,32 +574,26 @@
   }
 
   .card-border {
-    @apply rounded-md border border-border/40;
+    @apply border border-border;
+    border-radius: var(--radius);
   }
 
   @media (min-width: 768px) {
     .md\:section-divider {
-      @apply border-t border-border/30;
+      @apply border-t;
+      border-color: var(--divider);
     }
   }
 
   /* Line separator utilities */
   .line-divider {
     @apply border-t;
-    border-color: oklch(0 0 0 / 0.08);
-  }
-
-  .dark .line-divider {
-    border-color: oklch(1 0 0 / 0.08);
+    border-color: var(--divider);
   }
 
   .line-divider-vertical {
     @apply border-l;
-    border-color: oklch(0 0 0 / 0.08);
-  }
-
-  .dark .line-divider-vertical {
-    border-color: oklch(1 0 0 / 0.08);
+    border-color: var(--divider);
   }
 
   /* Gradient line (fades at edges) */
@@ -718,27 +601,16 @@
     background: linear-gradient(
       90deg,
       transparent 0%,
-      oklch(0 0 0 / 0.1) 20%,
-      oklch(0 0 0 / 0.1) 80%,
+      var(--divider) 20%,
+      var(--divider) 80%,
       transparent 100%
     );
     height: 1px;
   }
-
-  .dark .line-gradient {
-    background: linear-gradient(
-      90deg,
-      transparent 0%,
-      oklch(1 0 0 / 0.08) 20%,
-      oklch(1 0 0 / 0.08) 80%,
-      transparent 100%
-    );
-  }
 }
 
-/**
- * Animation Utilities
- */
+/* ==================== ANIMATION UTILITIES ==================== */
+
 @layer utilities {
   /* Hover lift effect (subtle) */
   .hover-lift {
@@ -749,27 +621,7 @@
 
   .hover-lift:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px oklch(0 0 0 / 0.08);
-  }
-
-  .dark .hover-lift:hover {
-    box-shadow: 0 4px 12px oklch(0 0 0 / 0.3);
-  }
-
-  /* Gradient color shift on hover */
-  .hover-gradient {
-    background: linear-gradient(
-      135deg,
-      var(--blue-500) 0%,
-      var(--blue-600) 100%
-    );
-    background-size: 200% 200%;
-    background-position: 0% 50%;
-    transition: background-position var(--duration-slow) var(--ease-smooth);
-  }
-
-  .hover-gradient:hover {
-    background-position: 100% 50%;
+    box-shadow: var(--shadow-md);
   }
 
   /* Fade in animation */
@@ -790,6 +642,26 @@
   /* Scale in animation */
   .animate-scale-in {
     animation: scaleIn var(--duration-normal) var(--ease-spring) forwards;
+  }
+
+  /* Hero stagger — mount-triggered entrance sequence */
+  .hero-stagger-1 {
+    animation: slideUp 500ms var(--ease-out) 0ms both;
+  }
+  .hero-stagger-2 {
+    animation: slideUp 500ms var(--ease-out) 80ms both;
+  }
+  .hero-stagger-3 {
+    animation: slideUp 500ms var(--ease-out) 160ms both;
+  }
+  .hero-stagger-4 {
+    animation: slideUp 500ms var(--ease-out) 240ms both;
+  }
+  .hero-stagger-5 {
+    animation: slideUp 500ms var(--ease-out) 320ms both;
+  }
+  .hero-stagger-6 {
+    animation: slideUp 600ms var(--ease-out) 200ms both;
   }
 }
 
@@ -835,9 +707,9 @@
   }
 }
 
-/**
- * Header Responsive Contract
- */
+/* ==================== HEADER RESPONSIVE CONTRACT ==================== */
+/* Retained for existing layout components — will be refactored with nav redesign */
+
 @layer utilities {
   .header-mobile-only {
     @apply block;
@@ -902,11 +774,11 @@
 
   /* Hide scrollbar for horizontal scroll containers */
   .scrollbar-hide {
-    -ms-overflow-style: none; /* IE and Edge */
-    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 
   .scrollbar-hide::-webkit-scrollbar {
-    display: none; /* Chrome, Safari and Opera */
+    display: none;
   }
 }

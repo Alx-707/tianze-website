@@ -134,61 +134,215 @@
     }
   },
   "home": {
-    "products": {
-      "eyebrow": "产品中心",
-      "title": "设备与管件 一站式供应",
-      "machines": {
-        "image": "弯管设备",
-        "title": "弯管设备",
-        "feature1": "自主设计研发制造",
-        "feature2": "半自动/全自动弯管机",
-        "feature3": "服务国内一线品牌",
-        "button": "了解更多"
+    "hero": {
+      "eyebrow": "ISO 9001 认证制造商",
+      "title": "PVC电工弯管与管件，工厂直供。",
+      "subtitle": "来自自主设计制造弯管设备的制造商。从设备研发到成品交付，全链路垂直整合。",
+      "cta": {
+        "primary": "获取报价",
+        "secondary": "查看产品目录"
       },
-      "pvc": {
-        "image": "PVC弯管",
-        "title": "PVC弯管",
-        "feature1": "符合国际标准",
-        "feature2": "喇叭口/双承口弯管",
-        "feature3": "UL651/AS/NZS/GB",
-        "button": "了解更多"
-      },
-      "pneumatic": {
-        "image": "气动物流管",
-        "title": "气动物流管",
-        "feature1": "高透明静音防漏",
-        "feature2": "PVC/PMMA/PETG",
-        "feature3": "医院/实验室/工业物流",
-        "button": "了解更多"
-      },
-      "custom": {
-        "image": "定制方案",
-        "title": "定制方案",
-        "feature1": "低MOQ快速打样",
-        "feature2": "非标规格/OEM",
-        "feature3": "澳标/美标/国标",
-        "button": "获取报价"
+      "proof": {
+        "countries": "20+",
+        "countriesLabel": "出口国家",
+        "range": "16-168",
+        "rangeLabel": "mm 口径",
+        "production": "24/7",
+        "productionLabel": "不间断生产",
+        "est": "2006",
+        "estLabel": "年创立"
       }
     },
-    "hero": {
-      "badge": "关于我们 →",
-      "title": {
-        "line1": "设备 + 管件",
-        "line2": "一体化制造商"
+    "chain": {
+      "title": "全链路管控，全部自主完成。",
+      "subtitle": "我们自主设计制造弯管设备。这种上游控制力是我们从原材料到成品管件始终保持品质一致的核心。",
+      "step1": {
+        "title": "弯管设备研发",
+        "desc": "自主设备设计与工程开发"
       },
-      "subtitle": "自研弯管设备，自产精密管件。从设备到成品，全链路可控。",
-      "scrollCta": "了解更多",
-      "stats": {
-        "factory": "工厂直供",
-        "material": "100% 新料",
-        "production": "全自动生产",
-        "repurchase": "60% 复购率"
+      "step2": {
+        "title": "设备制造",
+        "desc": "自主组装与精密校准"
       },
-      "images": {
-        "bender": "弯管机",
-        "expander": "扩管机",
-        "line": "生产线"
+      "step3": {
+        "title": "模具制造",
+        "desc": "定制模具，快速交付"
+      },
+      "step4": {
+        "title": "管件生产",
+        "desc": "24/7 挤出弯管作业"
+      },
+      "step5": {
+        "title": "质量控制",
+        "desc": "批次文档化与可追溯管理"
+      },
+      "stat1": "专利弯管技术",
+      "stat2": "5步垂直整合",
+      "stat3": "自有模具制造"
+    },
+    "products": {
+      "title": "产品线",
+      "subtitle": "四大品类覆盖16mm至168mm口径。可定制外径、壁厚和长度。",
+      "cta": "完整目录",
+      "item1": {
+        "tag": "核心产品",
+        "title": "标准PVC电工弯管",
+        "spec1": "90°、45°及自定义弯曲角度",
+        "spec2": "Schedule 40 & Schedule 80 壁厚",
+        "spec3": "16mm至168mm外径范围",
+        "standard": "ASTM · UL651",
+        "link": "/products/standard-bends"
+      },
+      "item2": {
+        "tag": "免胶设计",
+        "title": "喇叭口与扩口接头",
+        "spec1": "双承口一体化设计",
+        "spec2": "无需额外连接件",
+        "spec3": "现场安装提速30%",
+        "standard": "ASTM · SCH40/80",
+        "link": "/products/bell-end"
+      },
+      "item3": {
+        "tag": "澳标",
+        "title": "扩口管件",
+        "spec1": "符合AS/NZS 2053扩口标准",
+        "spec2": "降低穿线时电缆磨损",
+        "spec3": "内壁光滑处理",
+        "standard": "AS/NZS 2053",
+        "link": "/products/flared"
+      },
+      "item4": {
+        "tag": "低起订量",
+        "title": "定制与OEM项目",
+        "spec1": "定制角度、外径和壁厚",
+        "spec2": "贴牌包装服务",
+        "spec3": "从打样到量产全程支持",
+        "standard": "按您的规格",
+        "link": "/contact"
       }
+    },
+    "resources": {
+      "title": "产品资源",
+      "subtitle": "面向工程和采购团队的技术文档、CAD文件和认证资料。",
+      "item1": {
+        "title": "产品目录",
+        "desc": "完整的产品列表，含尺寸、材料和订购编码。",
+        "link": "/resources/catalog"
+      },
+      "item2": {
+        "title": "技术规格",
+        "desc": "详细数据表，含公差、材料等级和测试报告。",
+        "link": "/resources/specs"
+      },
+      "item3": {
+        "title": "CAD下载",
+        "desc": "DWG、STEP和IGES格式的2D和3D图纸。",
+        "link": "/resources/cad"
+      },
+      "item4": {
+        "title": "认证文件",
+        "desc": "ISO 9001、测试报告及合规文档。",
+        "link": "/resources/certs"
+      }
+    },
+    "sample": {
+      "title": "先试再决定。",
+      "description": "亲自验证品质。免费样品3个工作日内发出——您只需承担运费。",
+      "cta": "申请免费样品"
+    },
+    "scenarios": {
+      "title": "我们的管件在哪里使用",
+      "subtitle": "在20+国家的建筑、基础设施和工业安装中经过实地验证。",
+      "item1": {
+        "title": "地下预埋",
+        "desc": "直埋式预弯管件。一致的弯曲半径消除了土壤压力下的现场开裂问题。",
+        "quote": "\"弯管到货即可安装，节省了2天工期。\" — 项目经理，阿联酋"
+      },
+      "item2": {
+        "title": "商业与数据中心",
+        "desc": "面向多层项目高密度电气基础设施的完整管道解决方案。",
+        "quote": "\"3个数据中心项目，品质始终如一。\" — 项目总监，阿联酋"
+      },
+      "item3": {
+        "title": "市政基础设施",
+        "desc": "最大168mm口径，用于配电和电信网络的地下电缆保护。",
+        "quote": "\"大口径，严公差，如期交付。\" — 市政工程师，东南亚"
+      }
+    },
+    "quality": {
+      "title": "我们的承诺",
+      "subtitle": "以流程控制和文档化为支撑的书面保证。",
+      "commitment1": {
+        "title": "48小时出图",
+        "desc": "规格确认后2个工作日内交付技术图纸。"
+      },
+      "commitment2": {
+        "title": "批次可追溯",
+        "desc": "每批货物附带材料来源和质检记录文档。"
+      },
+      "commitment3": {
+        "title": "出口级包装",
+        "desc": "托盘化、贴标签，优化集装箱装载。"
+      },
+      "commitment4": {
+        "title": "专属对接人",
+        "desc": "从报价到交付及售后，一人全程对接。"
+      },
+      "commitment5": {
+        "title": "灵活起订量",
+        "desc": "首单低起订量，随项目规模灵活扩量。"
+      },
+      "cert1": "ISO 9001:2015",
+      "cert2": "UL651 / SCH40-80",
+      "cert3": "AS/NZS 2053",
+      "cert4": "ASTM标准",
+      "logoWall": "客户与合作伙伴 Logo 展位"
+    },
+    "finalCta": {
+      "title": "准备开始了吗？",
+      "description": "获取报价、申请样品或预约技术咨询。我们24小时内响应。",
+      "primary": "获取工厂直供报价",
+      "secondary": "预约技术咨询",
+      "trust": "24小时响应 · 工厂直供 · 出口20+国家"
+    },
+    "footer": {
+      "about": {
+        "title": "天泽管业",
+        "desc": "PVC电工弯管与管件制造商，位于江苏省连云港市。自2006年起设计制造弯管设备。"
+      },
+      "products": {
+        "title": "产品",
+        "items": {
+          "item1": "标准弯管",
+          "item2": "喇叭口接头",
+          "item3": "扩口管件",
+          "item4": "定制与OEM"
+        }
+      },
+      "resources": {
+        "title": "资源",
+        "items": {
+          "item1": "产品目录",
+          "item2": "技术规格",
+          "item3": "CAD下载",
+          "item4": "认证文件"
+        }
+      },
+      "contact": {
+        "title": "联系方式",
+        "items": {
+          "item1": "获取报价",
+          "item2": "免费样品申请",
+          "item3": "技术支持",
+          "item4": "工厂参观"
+        }
+      },
+      "copyright": "© 2024 天泽管业有限公司 版权所有",
+      "location": "江苏省连云港市"
+    },
+    "cta": {
+      "message": "联系我们，获取样品或技术支持",
+      "button": "获取报价"
     },
     "techStack": {
       "title": "技术栈",
@@ -389,10 +543,6 @@
         "getStarted": "获取报价",
         "viewSource": "查看产品"
       }
-    },
-    "cta": {
-      "message": "联系我们，获取样品或技术支持",
-      "button": "获取报价"
     },
     "title": "天泽管业",
     "subtitle": "专业管道制造商",

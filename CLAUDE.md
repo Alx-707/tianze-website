@@ -72,6 +72,7 @@ Project-specific rules in `.claude/rules/` — read when relevant:
 - `quality-gates.md` — CI, complexity limits
 - `security.md` — CSP, validation
 - `debugging.md` — Troubleshooting
+- `page-patterns.md` — Page-level design patterns (→ `docs/design/system/PAGE-PATTERNS.md`)
 
 ## Error-Driven Rules
 
