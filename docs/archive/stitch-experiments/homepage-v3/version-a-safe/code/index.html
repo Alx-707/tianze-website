@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Tianze Pipe | Engineering Command Center - Industrial B2B</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#3d618a",
+                        "background-light": "#f6f7f7",
+                        "background-dark": "#15191d",
+                        "industrial-blue": "oklch(0.45 0.090 230)",
+                        "blueprint-white": "oklch(0.99 0.005 230)",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Space Grotesk', sans-serif; }
+        .blueprint-grid {
+            background-image: radial-gradient(circle, #3d618a22 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .gradient-overlay {
+            background: linear-gradient(135deg, #3d618a 0%, #15191d 100%);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display">
+<!-- Navigation -->
+<header class="sticky top-0 z-50 w-full border-b border-solid border-primary/10 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md px-6 md:px-20 py-3">
+<div class="max-w-[1280px] mx-auto flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="bg-primary p-1 rounded-sm">
+<span class="material-symbols-outlined text-white text-2xl">precision_manufacturing</span>
+</div>
+<h2 class="text-xl font-bold leading-tight tracking-tight text-primary dark:text-white uppercase">Tianze Pipe</h2>
+</div>
+<nav class="hidden md:flex items-center gap-8">
+<a class="text-sm font-medium hover:text-primary transition-colors" href="#products">Products</a>
+<a class="text-sm font-medium hover:text-primary transition-colors" href="#why-us">Why Factory Direct</a>
+<a class="text-sm font-medium hover:text-primary transition-colors" href="#cases">Case Studies</a>
+<a class="text-sm font-medium hover:text-primary transition-colors" href="#resources">Resources</a>
+</nav>
+<div class="flex gap-3">
+<button class="flex items-center justify-center rounded bg-primary text-white text-xs md:text-sm font-bold h-10 px-4 hover:bg-primary/90 transition-all uppercase tracking-wider">
+                    Get Quote
+                </button>
+<button class="hidden md:flex items-center justify-center rounded border border-primary/20 bg-transparent text-primary dark:text-white text-sm font-bold h-10 px-4 hover:bg-primary/5 transition-all">
+                    Catalog
+                </button>
+</div>
+</div>
+</header>
+<!-- Hero Section -->
+<section class="relative overflow-hidden blueprint-grid border-b border-primary/10">
+<div class="max-w-[1280px] mx-auto px-6 md:px-20 py-16 md:py-24 grid md:grid-cols-2 gap-12 items-center">
+<div class="flex flex-col gap-8">
+<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-widest">
+<span class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+</span>
+                    Direct Factory Control
+                </div>
+<div class="flex flex-col gap-4">
+<h1 class="text-4xl md:text-6xl font-bold leading-tight tracking-tight text-slate-900 dark:text-white">
+                        Engineering <span class="text-primary">Command Center</span> for Industrial Conduit
+                    </h1>
+<p class="text-lg text-slate-600 dark:text-slate-400 max-w-lg">
+                        Direct-factory precision manufacturing. We don't just trade pipes—we engineer high-precision conduit systems and equipment for global infrastructure.
+                    </p>
+</div>
+<div class="flex flex-wrap gap-4">
+<button class="flex items-center gap-2 bg-primary text-white px-8 py-4 rounded font-bold uppercase tracking-widest hover:shadow-lg transition-all">
+                        Get Quote + Tech Specs
+                        <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+<button class="flex items-center gap-2 border border-slate-300 dark:border-slate-700 px-8 py-4 rounded font-bold uppercase tracking-widest hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
+                        Download Catalog
+                    </button>
+</div>
+<div class="flex items-center gap-6 mt-4 border-t border-primary/10 pt-6">
+<div class="flex flex-col">
+<span class="text-2xl font-bold text-primary">ISO 9001</span>
+<span class="text-xs text-slate-500 uppercase">Certified Facility</span>
+</div>
+<div class="w-px h-10 bg-primary/10"></div>
+<div class="flex flex-col">
+<span class="text-2xl font-bold text-primary">CE</span>
+<span class="text-xs text-slate-500 uppercase">EU Standards</span>
+</div>
+<div class="w-px h-10 bg-primary/10"></div>
+<div class="flex flex-col">
+<span class="text-2xl font-bold text-primary">20+</span>
+<span class="text-xs text-slate-500 uppercase">Patent Holders</span>
+</div>
+</div>
+</div>
+<div class="relative">
+<div class="grid grid-cols-2 gap-4">
+<div class="w-full h-64 bg-center bg-cover rounded border-2 border-primary/20 shadow-xl" data-alt="Industrial pipe bending machine close up" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAm78WF7w6TPQHy9iXGm0vMApl8-RORKdl3SMYmKK37mBGwcEcX2wl7SGndfe_vTNqRYgx-320X2zC1ZOpzUGPZDaZtqTQLOogwd-Av454SAzaRoy6lA4oTSqq7EubAXHM4IYvs-ifpMqKj4nZumVhuN10WNeN6WFXGbB2dUZzh0nSFAF5eoITMOBSD69ef0JNbHy73CHhFC5-xhfPM8wiZv33jxLKN5NtVnW5tFUPtfhPSm-IaqsnL-9-AE7VM7yCLg9N5OEFvnIg");'></div>
+<div class="w-full h-64 bg-center bg-cover rounded mt-8 border-2 border-primary/20 shadow-xl" data-alt="Automated production line overview" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuClabLM1eMD9rwZ_T55TL8rinEC5Xwou_bJZwWZCQZXv_nQBUbYlEIk-ikjwul8ln5hzC1LaLkIDn3Quk1cTCvVxuUKrwK2odOeEQDnof6JeHdgEx9l_nyjb7HB2zbdzlQlsVEj2a4ATAka3DR6BNTgW9r6QVjwWEtKW-g8cVtO2nQl4oE3iSMGogYbQQfGuyrZXyfAmhGCIOSwQW1OZp--OcWXBdIoGvc3D-RtHvMvQgkissC6lseDcyi3_Zdn0KgmlKMXKub--jM");'></div>
+<div class="w-full h-64 bg-center bg-cover rounded -mt-8 border-2 border-primary/20 shadow-xl" data-alt="Technical blueprint of conduit machinery" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuB9Hyu_fEVLkT14GtLIYfimiz8EqudLk7Lpn5AxfpEoCWNqUzn44De8gFVghscbpA10CzhKS-ipCQ558bv50wUcLCEyNyTWuNqSfOZSPVRm4hUlp5OTzKnTCe7XXdvuLV_6HgnV3afoBq7ZFxkx4cHR272seBJe4-6AvYAJbgvFjqgCoI_vj2tae_xey2oM6rooUqldmIk3WW7ApTZOkyGdYIyBHFP8hHvkiiV99jswXHcilzLrNDgCj7zmNumhelPKBim4z0t5qTI");'></div>
+<div class="w-full h-64 bg-center bg-cover rounded border-2 border-primary/20 shadow-xl" data-alt="Rows of finished PVC conduits" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuD-0Y_xYUIZY5FqePxhXLU8d9XgBBD1vFKm0ZO1HevhMQ3AJaZzAiGhvPSNBoA9PAbH5f3HOmSIi1I2-mGXM1540Fw_p2TmRnzdWBPWif-sGFNh5ZKg4reSeunaAi0ioYR_dGXIhmIGh6W7axrxbSPqh00HR02x4OzsPN0B0MWh2bF2FJhQU2ybB1jukLo69Xu2UkSJx8DnD7V59OFwfsqiJRCkTQf98QEk2tBy0uld_HqVw-n99yOMv23bmgcdYY6t7TCuCf-xbp0");'></div>
+</div>
+<div class="absolute -z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-primary/5 rounded-full blur-3xl"></div>
+</div>
+</div>
+</section>
+<!-- Pain Points Section -->
+<section class="py-20 bg-white dark:bg-background-dark">
+<div class="max-w-[1280px] mx-auto px-6 md:px-20">
+<h2 class="text-2xl md:text-3xl font-bold text-center mb-16 uppercase tracking-tight">The Cost of Trading: <span class="text-red-600">Why Traders Fail Your Project</span></h2>
+<div class="grid md:grid-cols-4 gap-6">
+<div class="p-8 border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 rounded flex flex-col gap-4">
+<span class="material-symbols-outlined text-red-500 text-4xl">cancel</span>
+<h3 class="font-bold text-lg">Hidden Markups</h3>
+<p class="text-sm text-slate-600 dark:text-slate-400">Traders add 15-30% margin without adding value to the engineering chain.</p>
+</div>
+<div class="p-8 border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 rounded flex flex-col gap-4">
+<span class="material-symbols-outlined text-red-500 text-4xl">block</span>
+<h3 class="font-bold text-lg">Rigid Specs</h3>
+<p class="text-sm text-slate-600 dark:text-slate-400">Limited to standard catalogs. No custom molding or material modifications allowed.</p>
+</div>
+<div class="p-8 border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 rounded flex flex-col gap-4">
+<span class="material-symbols-outlined text-red-500 text-4xl">schedule</span>
+<h3 class="font-bold text-lg">Lead Time Volatility</h3>
+<p class="text-sm text-slate-600 dark:text-slate-400">Middlemen cannot control production slots, leading to unexpected job-site delays.</p>
+</div>
+<div class="p-8 border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 rounded flex flex-col gap-4">
+<span class="material-symbols-outlined text-red-500 text-4xl">error</span>
+<h3 class="font-bold text-lg">Quality Blindness</h3>
+<p class="text-sm text-slate-600 dark:text-slate-400">Varying raw material sources make batch consistency impossible to guarantee.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Comparison Section -->
+<section class="py-20 bg-background-light dark:bg-background-dark/50" id="why-us">
+<div class="max-w-[1280px] mx-auto px-6 md:px-20">
+<div class="grid md:grid-cols-2 gap-16 items-start">
+<div>
+<h2 class="text-3xl font-bold mb-6 uppercase">Factory Reality vs. Trader Promise</h2>
+<p class="text-slate-600 dark:text-slate-400 mb-8">Industrial projects require precision, not communication layers. See why Tier-1 contractors choose Tianze Direct.</p>
+<div class="space-y-4">
+<div class="bg-white dark:bg-slate-900 p-6 rounded border border-primary/10 shadow-sm flex items-start gap-4">
+<div class="bg-primary/10 p-2 rounded">
+<span class="material-symbols-outlined text-primary">engineering</span>
+</div>
+<div>
+<h4 class="font-bold mb-1">Upstream Equipment Ownership</h4>
+<p class="text-sm text-slate-500">We build the machines that build the pipes. Total vertical control.</p>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-900 p-6 rounded border border-primary/10 shadow-sm flex items-start gap-4">
+<div class="bg-primary/10 p-2 rounded">
+<span class="material-symbols-outlined text-primary">link</span>
+</div>
+<div>
+<h4 class="font-bold mb-1">Full Value Chain</h4>
+<p class="text-sm text-slate-500">From raw polymer sourcing to final QC and logistical export.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden shadow-2xl">
+<table class="w-full text-left">
+<thead class="bg-primary text-white">
+<tr>
+<th class="p-4 text-sm uppercase tracking-widest">Feature</th>
+<th class="p-4 text-sm uppercase tracking-widest">Middleman</th>
+<th class="p-4 text-sm uppercase tracking-widest">Tianze Direct</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+<tr>
+<td class="p-4 font-bold text-sm">Pricing</td>
+<td class="p-4 text-sm text-red-500">Markup + Fee</td>
+<td class="p-4 text-sm text-green-600 font-bold">Factory Net</td>
+</tr>
+<tr>
+<td class="p-4 font-bold text-sm">Custom Tooling</td>
+<td class="p-4 text-sm">Not Available</td>
+<td class="p-4 text-sm text-green-600 font-bold">In-house Shop</td>
+</tr>
+<tr>
+<td class="p-4 font-bold text-sm">Response Time</td>
+<td class="p-4 text-sm">24-48 Hours</td>
+<td class="p-4 text-sm text-green-600 font-bold">&lt; 4 Hours</td>
+</tr>
+<tr>
+<td class="p-4 font-bold text-sm">MOQ</td>
+<td class="p-4 text-sm">Strict High</td>
+<td class="p-4 text-sm text-green-600 font-bold">Flexible/Low</td>
+</tr>
+<tr>
+<td class="p-4 font-bold text-sm">Material Certs</td>
+<td class="p-4 text-sm">Third-party</td>
+<td class="p-4 text-sm text-green-600 font-bold">Direct Original</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</section>
+<!-- Mid-Page CTA 1 -->
+<section class="py-12 bg-primary text-white">
+<div class="max-w-[1280px] mx-auto px-6 md:px-20 flex flex-col md:flex-row items-center justify-between gap-8">
+<div class="flex flex-col gap-2">
+<h2 class="text-2xl font-bold uppercase tracking-tight">Need a custom engineering solution?</h2>
+<p class="text-primary/10 text-slate-200">Talk directly to our manufacturing lead, not a sales representative.</p>
+</div>
+<button class="bg-white text-primary px-8 py-4 rounded font-bold uppercase tracking-widest hover:bg-slate-100 transition-all flex items-center gap-2">
+                Book Engineer Consult
+                <span class="material-symbols-outlined">support_agent</span>
+</button>
+</div>
+</section>
+<!-- Case Studies -->
+<section class="py-20 bg-white dark:bg-background-dark" id="cases">
+<div class="max-w-[1280px] mx-auto px-6 md:px-20">
+<div class="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
+<div class="max-w-xl">
+<h2 class="text-3xl font-bold uppercase mb-4">Industrial Case Studies</h2>
+<p class="text-slate-600 dark:text-slate-400">Proven performance across high-stakes infrastructure projects from PETG hospital lines to commercial data centers.</p>
+</div>
+<div class="flex gap-12">
+<div class="text-center">
+<p class="text-4xl font-bold text-primary">500+</p>
+<p class="text-xs uppercase text-slate-500 tracking-widest">Global Projects</p>
+</div>
+<div class="text-center">
+<p class="text-4xl font-bold text-primary">12M+</p>
+<p class="text-xs uppercase text-slate-500 tracking-widest">Meters Yearly</p>
+</div>
+</div>
+</div>
+<div class="grid md:grid-cols-3 gap-8">
+<div class="group border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden hover:shadow-xl transition-all">
+<div class="h-56 bg-center bg-cover" data-alt="Modern hospital facility exterior" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCm77rlBUWo7FKn2f24T_dylzratiYiXShxxzeMvWptAKiHsCLKXK9p8zoEHnlFpYhaTDw9o4QdwuESgQNE96BpUrf7x4lHaZj_2vC_g1__v2LOJFw6mK5KMoATbTjkG3glbXGLCYqdLfyAcHGuuhzHfT46F4VYC5BodSLs6Zk88VJsR5R13FTEdwBFjB1GO0UxX07vbhOOHRsynX3TWvmu_9RDqgVE-E16eX7b8VwgQnnaUzlLiqBCVnBxhwUbXrOFK9BLF53X-9g");'></div>
+<div class="p-6">
+<span class="text-xs font-bold text-primary uppercase tracking-widest">Medical Grade</span>
+<h3 class="text-xl font-bold mt-2 mb-4">PETG Tubes for Smart Hospital</h3>
+<p class="text-sm text-slate-600 dark:text-slate-400 mb-6">Supply of 25,000m medical-grade PETG for internal pneumatic transit systems.</p>
+<a class="text-primary font-bold text-sm uppercase flex items-center gap-2 hover:gap-3 transition-all" href="#">View Specs <span class="material-symbols-outlined text-sm">chevron_right</span></a>
+</div>
+</div>
+<div class="group border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden hover:shadow-xl transition-all">
+<div class="h-56 bg-center bg-cover" data-alt="High-rise construction site" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDCw5ORRrVf4gzuzxg4Cco3-cBWI9583eoq3VEaO2gCDKk-rXiCNZF0EPdPalGszXPqhHsYqGEhw119OkD8xNvMtGcNvJZIK6IoUNLcHiSYWwgPtweB6M8Qa9neDimLxtp-RecwQztxsJ2QmdeEqZBlcWK757XQ-JbI0K71RN0UTUsNmcULvZvHHlEgrOD_zLKXIbipBlRDFdaHXAYYUZC0vyJpAIWqaS1LvLb11S-l2YR0YDo-OmMNf75T0uBGNZXAcb-Wyf2mlUw");'></div>
+<div class="p-6">
+<span class="text-xs font-bold text-primary uppercase tracking-widest">Commercial</span>
+<h3 class="text-xl font-bold mt-2 mb-4">UL-Certified PVC Conduit</h3>
+<p class="text-sm text-slate-600 dark:text-slate-400 mb-6">Bulk delivery for 50-story commercial tower wiring protection. 0% defect rate reported.</p>
+<a class="text-primary font-bold text-sm uppercase flex items-center gap-2 hover:gap-3 transition-all" href="#">View Specs <span class="material-symbols-outlined text-sm">chevron_right</span></a>
+</div>
+</div>
+<div class="group border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden hover:shadow-xl transition-all">
+<div class="h-56 bg-center bg-cover" data-alt="Industrial robot assembling parts" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCWNlSLm_2QotdGjzW0Zv8qXQ9dgMVP3dZTXbzfmOIwpFE8tV4RIddVL5O-gYlGK11rHLjsvY6j_MBqqzUCIZ71tkeRLZuP4-CfEhCaOm7D2mIqNBYPvQfNMAl4MmHew8M7eon3a3SQZ63DiQPeCRqxDwUD9m5SFbO5Qi9zQ4Kcayv5ekGaOfuSAPgAoVDYfUuvgk0gN5Ce7scEIWj16nGMAfJ1eijhM8cUvqbei6tu2rMEePO_3ftVkOiYJWLm8M3MNzM7NRSFcLY");'></div>
+<div class="p-6">
+<span class="text-xs font-bold text-primary uppercase tracking-widest">OEM Solutions</span>
+<h3 class="text-xl font-bold mt-2 mb-4">Custom Bending Equipment</h3>
+<p class="text-sm text-slate-600 dark:text-slate-400 mb-6">Engineered and delivered 12 units of automated expander systems for EU client.</p>
+<a class="text-primary font-bold text-sm uppercase flex items-center gap-2 hover:gap-3 transition-all" href="#">View Specs <span class="material-symbols-outlined text-sm">chevron_right</span></a>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Product Lines Section -->
+<section class="py-20 bg-background-light dark:bg-background-dark/50 blueprint-grid" id="products">
+<div class="max-w-[1280px] mx-auto px-6 md:px-20">
+<div class="text-center mb-16">
+<h2 class="text-3xl font-bold uppercase tracking-tight mb-4">Production Capabilities</h2>
+<div class="w-20 h-1 bg-primary mx-auto"></div>
+</div>
+<div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+<!-- Product 1 -->
+<div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded p-6 hover:border-primary transition-all">
+<div class="aspect-square bg-slate-100 dark:bg-slate-800 rounded mb-6 flex items-center justify-center overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Pipe bending machine close up" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA_54UYIuMbTME5aGM3EBFtkTmXmrNwiQWwj9ViX1wRqn6v_q-P7lW-BwtINETIKxFpUygRk18nAO2rhDVd6vCyej6c7B1YxjvzuZYHjFDTzAomXuwc_F2piEYJOGEJU65T63RQ47HAwfDikmthiYuS4sF4LfCDkBSZ_0dQnFkh9yVAIrvStZqhjResnuDqh55Sc0wF-1C9DwAu4FhtfBQnxJc0XV3xG20WP4B4DVuXDqwRs5hlH7uDXruiAXy5xUN32f-w3dc9Jw4"/>
+</div>
+<h3 class="font-bold text-lg mb-2 uppercase">Bending Equipment</h3>
+<div class="space-y-2 mb-6">
+<div class="flex justify-between text-xs border-b border-slate-100 dark:border-slate-800 pb-1">
+<span class="text-slate-500">Precision</span>
+<span class="font-bold">±0.05mm</span>
+</div>
+<div class="flex justify-between text-xs border-b border-slate-100 dark:border-slate-800 pb-1">
+<span class="text-slate-500">Capacity</span>
+<span class="font-bold">1200 Units/Hr</span>
+</div>
+</div>
+<button class="w-full border border-primary text-primary font-bold text-xs py-3 rounded uppercase hover:bg-primary hover:text-white transition-all">Technical Data</button>
+</div>
+<!-- Product 2 -->
+<div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded p-6 hover:border-primary transition-all">
+<div class="aspect-square bg-slate-100 dark:bg-slate-800 rounded mb-6 flex items-center justify-center overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Stack of orange conduit pipes" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD-7IrceNsiMzolaMplXSYdUpy51DIn-rSwPPyqJMsy0vIDNfcoRjraykVuxNx6YhE4VVkJo6cqb6MlKadFYBnuQ0XwLFe6z9suxGVxn5PJL0itE1jGcQBk6QCJcKbBYJIBPsQOGGYf4GjPkzBvUBVRkH6EwD0KhoBUk0o6gj39DCKHSVZH2qebn_suax01oAX-Qz1PijRav9RbWSCVC12sgxzvW-y6Y9AfytZHHlvWA3PW8P8PtKlRGlwPw6YmFJvzPV7EcksnDyU"/>
+</div>
+<h3 class="font-bold text-lg mb-2 uppercase">PVC Conduit</h3>
+<div class="space-y-2 mb-6">
+<div class="flex justify-between text-xs border-b border-slate-100 dark:border-slate-800 pb-1">
+<span class="text-slate-500">Standard</span>
+<span class="font-bold">AS/NZS 2053</span>
+</div>
+<div class="flex justify-between text-xs border-b border-slate-100 dark:border-slate-800 pb-1">
+<span class="text-slate-500">Fire Rating</span>
+<span class="font-bold">V-0 UL94</span>
+</div>
+</div>
+<button class="w-full border border-primary text-primary font-bold text-xs py-3 rounded uppercase hover:bg-primary hover:text-white transition-all">Technical Data</button>
+</div>
+<!-- Product 3 -->
+<div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded p-6 hover:border-primary transition-all">
+<div class="aspect-square bg-slate-100 dark:bg-slate-800 rounded mb-6 flex items-center justify-center overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Transparent plastic tubes" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAwbH-vbJh1KVrsKv_nxoPNkmRyuD6n6YXYpJBQvAZjA9b3Ma0uikuDuV0-p7CN1EtPG_ehl9yVxojUf1zFvPm4Nd8tB86dLewuNbbqVgE-8grYJEc3AUpnveB97HdKcKeMuencOFzMO2pW2QTtYl2Ri_lbX6Wh5-uk6yYFHTUqFDJZjDqHjp6jCIrQ5oKhSzrpyvd3lr8kJYZlXInmKJWKN3PhOhZCuczvOQ7cuqMEvlHGnL4kCylNjts7-7sdkGlj0A_7BVdWkKU"/>
+</div>
+<h3 class="font-bold text-lg mb-2 uppercase">PETG Tubes</h3>
+<div class="space-y-2 mb-6">
+<div class="flex justify-between text-xs border-b border-slate-100 dark:border-slate-800 pb-1">
+<span class="text-slate-500">Material</span>
+<span class="font-bold">Medical PETG</span>
+</div>
+<div class="flex justify-between text-xs border-b border-slate-100 dark:border-slate-800 pb-1">
+<span class="text-slate-500">Transparency</span>
+<span class="font-bold">92% High-Clear</span>
+</div>
+</div>
+<button class="w-full border border-primary text-primary font-bold text-xs py-3 rounded uppercase hover:bg-primary hover:text-white transition-all">Technical Data</button>
+</div>
+<!-- Product 4 -->
+<div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded p-6 hover:border-primary transition-all">
+<div class="aspect-square bg-slate-100 dark:bg-slate-800 rounded mb-6 flex items-center justify-center overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Custom mechanical part" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDwL4oECRxF2dfvxMmXYLUy_eDLuvRHArB0NgWPXT9hcEb9xkobscoxS_770RH2GJ7shsr5-j7CO1J2BTe4Tu4ih2XoRgw0jljyBo72hG6-0rv0o_gIzjOo_kRxiADOlfWyTq6C7Ago_7mJvO6X934rFPT6U5wNnQB-lmB22whMltjNoPfYrWt5317EQE3T84b61hMvSbugYo5TtkxIW3N5ignnbmnhk6k5OilVauTdcfPrsKA3SdH3WiUSVlDSVzpiNzLuS2ivF0E"/>
+</div>
+<h3 class="font-bold text-lg mb-2 uppercase">Custom Molds</h3>
+<div class="space-y-2 mb-6">
+<div class="flex justify-between text-xs border-b border-slate-100 dark:border-slate-800 pb-1">
+<span class="text-slate-500">Cycle Time</span>
+<span class="font-bold">15-21 Days</span>
+</div>
+<div class="flex justify-between text-xs border-b border-slate-100 dark:border-slate-800 pb-1">
+<span class="text-slate-500">Material</span>
+<span class="font-bold">P20/S136 Steel</span>
+</div>
+</div>
+<button class="w-full border border-primary text-primary font-bold text-xs py-3 rounded uppercase hover:bg-primary hover:text-white transition-all">Technical Data</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Trust Data Grid -->
+<section class="py-20 bg-slate-900 text-white relative overflow-hidden">
+<div class="blueprint-grid absolute inset-0 opacity-10"></div>
+<div class="max-w-[1280px] mx-auto px-6 md:px-20 relative z-10">
+<div class="grid md:grid-cols-4 gap-12 text-center">
+<div>
+<div class="text-5xl font-bold mb-2 text-primary">15,000㎡</div>
+<div class="text-xs uppercase tracking-[0.2em] text-slate-400">Facility Size</div>
+</div>
+<div>
+<div class="text-5xl font-bold mb-2 text-primary">24/7</div>
+<div class="text-xs uppercase tracking-[0.2em] text-slate-400">Production Cycles</div>
+</div>
+<div>
+<div class="text-5xl font-bold mb-2 text-primary">0.02mm</div>
+<div class="text-xs uppercase tracking-[0.2em] text-slate-400">Extrusion Precision</div>
+</div>
+<div>
+<div class="text-5xl font-bold mb-2 text-primary">45+</div>
+<div class="text-xs uppercase tracking-[0.2em] text-slate-400">Country Exports</div>
+</div>
+</div>
+<div class="mt-20 flex flex-wrap justify-center gap-12 opacity-50 grayscale hover:grayscale-0 transition-all">
+<span class="text-xl font-bold">UL CERTIFIED</span>
+<span class="text-xl font-bold">ISO 14001</span>
+<span class="text-xl font-bold">AS/NZS STANDARDS</span>
+<span class="text-xl font-bold">RoHS COMPLIANT</span>
+</div>
+</div>
+</section>
+<!-- Risk Reversal -->
+<section class="py-20 bg-white dark:bg-background-dark">
+<div class="max-w-[1280px] mx-auto px-6 md:px-20">
+<h2 class="text-2xl font-bold mb-12 uppercase tracking-tight text-center">Industrial Quality Guarantee</h2>
+<div class="grid md:grid-cols-5 gap-6">
+<div class="flex flex-col items-center text-center gap-4">
+<div class="w-12 h-12 rounded-full bg-green-500/10 flex items-center justify-center text-green-600">
+<span class="material-symbols-outlined">verified</span>
+</div>
+<p class="text-sm font-bold uppercase">100% Virgin Material</p>
+</div>
+<div class="flex flex-col items-center text-center gap-4">
+<div class="w-12 h-12 rounded-full bg-green-500/10 flex items-center justify-center text-green-600">
+<span class="material-symbols-outlined">schedule</span>
+</div>
+<p class="text-sm font-bold uppercase">On-Time Shipping</p>
+</div>
+<div class="flex flex-col items-center text-center gap-4">
+<div class="w-12 h-12 rounded-full bg-green-500/10 flex items-center justify-center text-green-600">
+<span class="material-symbols-outlined">biotech</span>
+</div>
+<p class="text-sm font-bold uppercase">Lab Batch Testing</p>
+</div>
+<div class="flex flex-col items-center text-center gap-4">
+<div class="w-12 h-12 rounded-full bg-green-500/10 flex items-center justify-center text-green-600">
+<span class="material-symbols-outlined">account_balance_wallet</span>
+</div>
+<p class="text-sm font-bold uppercase">No Hidden Fees</p>
+</div>
+<div class="flex flex-col items-center text-center gap-4">
+<div class="w-12 h-12 rounded-full bg-green-500/10 flex items-center justify-center text-green-600">
+<span class="material-symbols-outlined">published_with_changes</span>
+</div>
+<p class="text-sm font-bold uppercase">Replacement Warranty</p>
+</div>
+</div>
+</div>
+</section>
+<!-- FAQ Accordion -->
+<section class="py-20 bg-background-light dark:bg-slate-900/50">
+<div class="max-w-[800px] mx-auto px-6 md:px-0">
+<h2 class="text-3xl font-bold mb-12 text-center uppercase">Technical Support &amp; FAQ</h2>
+<div class="space-y-4">
+<div class="border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded p-5">
+<div class="flex justify-between items-center cursor-pointer">
+<span class="font-bold">What is your standard production lead time for bulk orders?</span>
+<span class="material-symbols-outlined">add</span>
+</div>
+</div>
+<div class="border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded p-5">
+<div class="flex justify-between items-center cursor-pointer">
+<span class="font-bold">Can you manufacture conduits to specific regional fire codes?</span>
+<span class="material-symbols-outlined text-primary">remove</span>
+</div>
+<p class="mt-4 text-sm text-slate-500">Yes, we customize polymer additives for specific fire ratings (UL94 V-0, LSZH) depending on your local building regulations and project safety requirements.</p>
+</div>
+<div class="border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded p-5">
+<div class="flex justify-between items-center cursor-pointer">
+<span class="font-bold">Do you support private labeling (OEM) for regional distributors?</span>
+<span class="material-symbols-outlined">add</span>
+</div>
+</div>
+<div class="border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded p-5">
+<div class="flex justify-between items-center cursor-pointer">
+<span class="font-bold">What is the tolerance range for your precision extrusion lines?</span>
+<span class="material-symbols-outlined">add</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Resources -->
+<section class="py-20 bg-white dark:bg-background-dark" id="resources">
+<div class="max-w-[1280px] mx-auto px-6 md:px-20">
+<h2 class="text-2xl font-bold mb-12 uppercase tracking-tight">Engineering Resources</h2>
+<div class="grid md:grid-cols-3 gap-8">
+<div class="p-8 border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 rounded flex flex-col items-start gap-4">
+<span class="material-symbols-outlined text-primary text-4xl">description</span>
+<h3 class="font-bold text-lg">2024 Product Catalog</h3>
+<p class="text-sm text-slate-500 mb-4">Complete specs for all PVC, PETG, and equipment lines.</p>
+<button class="text-primary font-bold text-sm uppercase flex items-center gap-2">Download PDF <span class="material-symbols-outlined text-sm">download</span></button>
+</div>
+<div class="p-8 border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 rounded flex flex-col items-start gap-4">
+<span class="material-symbols-outlined text-primary text-4xl">verified_user</span>
+<h3 class="font-bold text-lg">Compliance Certifications</h3>
+<p class="text-sm text-slate-500 mb-4">ISO, CE, and UL documentation for your procurement team.</p>
+<button class="text-primary font-bold text-sm uppercase flex items-center gap-2">Access Portal <span class="material-symbols-outlined text-sm">download</span></button>
+</div>
+<div class="p-8 border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 rounded flex flex-col items-start gap-4">
+<span class="material-symbols-outlined text-primary text-4xl">mail</span>
+<h3 class="font-bold text-lg">Tech Updates</h3>
+<p class="text-sm text-slate-500">Get manufacturing updates and market pricing reports.</p>
+<div class="flex w-full">
+<input class="w-full text-sm border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-2 rounded-l outline-none focus:border-primary" placeholder="Your Work Email" type="email"/>
+<button class="bg-primary text-white px-4 py-2 rounded-r font-bold text-xs uppercase">Join</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Final CTA / Inquiry Form -->
+<section class="py-20 blueprint-grid border-t border-primary/10 bg-slate-50 dark:bg-slate-950">
+<div class="max-w-[1280px] mx-auto px-6 md:px-20 grid md:grid-cols-2 gap-16">
+<div>
+<h2 class="text-4xl font-bold uppercase mb-6 leading-tight">Ready to <span class="text-primary">Optimize</span> Your Supply Chain?</h2>
+<p class="text-lg text-slate-600 dark:text-slate-400 mb-10">Stop paying trader margins. Get factory-direct pricing and engineering support for your next industrial project.</p>
+<div class="space-y-6">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">call</span>
+</div>
+<div>
+<p class="text-xs uppercase text-slate-500">Industrial Sales Line</p>
+<p class="font-bold">+86-551-XXXX-XXXX</p>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">location_on</span>
+</div>
+<div data-location="Hefei, China" style="">
+<p class="text-xs uppercase text-slate-500">Factory Headquarters</p>
+<p class="font-bold">No. 128 Manufacturing Blvd, High-Tech Zone</p>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-900 p-8 rounded-lg shadow-2xl border border-slate-200 dark:border-slate-800">
+<form class="space-y-4">
+<div class="grid grid-cols-2 gap-4">
+<div class="space-y-1">
+<label class="text-xs font-bold uppercase text-slate-500">Full Name</label>
+<input class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded p-3 text-sm focus:ring-2 focus:ring-primary" type="text"/>
+</div>
+<div class="space-y-1">
+<label class="text-xs font-bold uppercase text-slate-500">Company</label>
+<input class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded p-3 text-sm focus:ring-2 focus:ring-primary" type="text"/>
+</div>
+</div>
+<div class="space-y-1">
+<label class="text-xs font-bold uppercase text-slate-500">Work Email</label>
+<input class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded p-3 text-sm focus:ring-2 focus:ring-primary" type="email"/>
+</div>
+<div class="space-y-1">
+<label class="text-xs font-bold uppercase text-slate-500">Primary Product Interest</label>
+<select class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded p-3 text-sm focus:ring-2 focus:ring-primary">
+<option>PVC Conduit &amp; Accessories</option>
+<option>PETG Pneumatic Tubes</option>
+<option>Pipe Bending Machinery</option>
+<option>Custom OEM Solution</option>
+</select>
+</div>
+<div class="space-y-1">
+<label class="text-xs font-bold uppercase text-slate-500">Message / Tech Specs</label>
+<textarea class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded p-3 text-sm focus:ring-2 focus:ring-primary" rows="4"></textarea>
+</div>
+<button class="w-full bg-primary text-white py-4 rounded font-bold uppercase tracking-widest hover:bg-primary/90 transition-all shadow-lg">Submit Request for Quote</button>
+<p class="text-[10px] text-center text-slate-400 mt-4 uppercase">Direct response within 4 factory hours guaranteed.</p>
+</form>
+</div>
+</div>
+</section>
+<!-- Footer -->
+<footer class="bg-slate-900 text-slate-500 py-12 border-t border-white/5">
+<div class="max-w-[1280px] mx-auto px-6 md:px-20">
+<div class="flex flex-col md:flex-row justify-between items-center gap-8 mb-12">
+<div class="flex items-center gap-3">
+<div class="bg-primary/20 p-1 rounded-sm">
+<span class="material-symbols-outlined text-primary text-xl">precision_manufacturing</span>
+</div>
+<h2 class="text-lg font-bold text-white uppercase tracking-tight">Tianze Pipe</h2>
+</div>
+<div class="flex gap-8 text-sm uppercase tracking-widest font-bold">
+<a class="hover:text-white transition-all" href="#">Products</a>
+<a class="hover:text-white transition-all" href="#">Sitemap</a>
+<a class="hover:text-white transition-all" href="#">Privacy</a>
+<a class="hover:text-white transition-all" href="#">Quality Control</a>
+</div>
+</div>
+<div class="text-center text-xs uppercase tracking-widest border-t border-white/5 pt-8">
+                © 2024 Tianze Industrial Pipe Manufacturing Ltd. All Rights Reserved. Precision Engineering Since 2008.
+            </div>
+</div>
+</footer>
+</body></html>

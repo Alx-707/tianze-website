@@ -1,0 +1,78 @@
+commit 79887b2b1a13e0e196c62931adfc26ab7a41a376
+Author: Alx-707 <134922845+Alx-707@users.noreply.github.com>
+Date:   Wed Feb 4 08:10:56 2026 +0800
+
+    fix: security gates + reduce CI/tooling noise (#18)
+    
+    * fix(security): move next to deps and make semgrep gate usable
+    
+    * fix(test): reduce vitest stderr noise
+    
+    - Silence console output by default in vitest setup (toggle via VITEST_SHOW_LOGS=1)
+    
+    - Filter jsdom navigation noise from stderr
+    
+    - Clamp AnimatedCounter delay to avoid TimeoutOverflowWarning
+    
+    * chore(tools): align knip/madge checks
+    
+    - Remove knip config hints and ignore Prettier auto-loaded plugins
+    
+    - Define production scan boundary via tsconfig.knip.json
+    
+    - Use madge --ts-config to reduce warning noise
+    
+    - Quiet dotenv load in Playwright config
+    
+    * refactor(i18n): centralize next-intl pathnames
+    
+    * test(lib): cover merge-objects prototype pollution keys
+    
+    * refactor(i18n): derive locale prefix regex from routing locales
+    
+    * fix(ci): skip vercel deploy when secrets missing
+    
+    Prevent PR check failures when Vercel credentials are not configured.
+    
+    * chore(quality-gate): tighten diff coverage exclude globs
+    
+    * fix(ci): guard vercel deploy with secrets
+    
+    Use a single-line job if expression to avoid workflow parse failures.
+    
+    * chore(deps): update baseline-browser-mapping
+    
+    * refactor(constants): simplify time constants
+    
+    * fix(ci): skip vercel deploy without secrets
+    
+    Gate deploy steps behind a secrets preflight.
+    
+    Prevents PR check failures when Vercel credentials are not configured.
+    
+    ---------
+    
+    Co-authored-by: Flood Control Developer <developer@flood-control.com>
+
+diff --git a/semgrep.yml b/semgrep.yml
+index 46bc88f..21b1a1d 100644
+--- a/semgrep.yml
++++ b/semgrep.yml
+@@ -278,7 +278,7 @@ rules:
+         - "**/src/components/blog/blog-newsletter.tsx"
+     message: '检测到潜在的对象注入：使用扩展运算符或Object.assign时需验证输入对象的安全性'
+     languages: [typescript, javascript]
+-    severity: WARNING
++    severity: INFO
+     metadata:
+       category: security
+       technology: [nodejs, react, nextjs]
+@@ -335,6 +335,8 @@ rules:
+         - "**/*.spec.*"
+         # Tech tabs - category comes from Object.keys() of hardcoded categories object, not user input
+         - "**/src/components/blocks/tech/tech-tabs-block.tsx"
++        # mergeObjects: internal utility; also blocks prototype keys (__proto__/constructor/prototype)
++        - "**/src/lib/merge-objects.ts"
+     metadata:
+       category: security
+       technology: [nodejs, react, nextjs]

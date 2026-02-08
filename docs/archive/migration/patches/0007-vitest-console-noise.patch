@@ -1,0 +1,155 @@
+commit 79887b2b1a13e0e196c62931adfc26ab7a41a376
+Author: Alx-707 <134922845+Alx-707@users.noreply.github.com>
+Date:   Wed Feb 4 08:10:56 2026 +0800
+
+    fix: security gates + reduce CI/tooling noise (#18)
+    
+    * fix(security): move next to deps and make semgrep gate usable
+    
+    * fix(test): reduce vitest stderr noise
+    
+    - Silence console output by default in vitest setup (toggle via VITEST_SHOW_LOGS=1)
+    
+    - Filter jsdom navigation noise from stderr
+    
+    - Clamp AnimatedCounter delay to avoid TimeoutOverflowWarning
+    
+    * chore(tools): align knip/madge checks
+    
+    - Remove knip config hints and ignore Prettier auto-loaded plugins
+    
+    - Define production scan boundary via tsconfig.knip.json
+    
+    - Use madge --ts-config to reduce warning noise
+    
+    - Quiet dotenv load in Playwright config
+    
+    * refactor(i18n): centralize next-intl pathnames
+    
+    * test(lib): cover merge-objects prototype pollution keys
+    
+    * refactor(i18n): derive locale prefix regex from routing locales
+    
+    * fix(ci): skip vercel deploy when secrets missing
+    
+    Prevent PR check failures when Vercel credentials are not configured.
+    
+    * chore(quality-gate): tighten diff coverage exclude globs
+    
+    * fix(ci): guard vercel deploy with secrets
+    
+    Use a single-line job if expression to avoid workflow parse failures.
+    
+    * chore(deps): update baseline-browser-mapping
+    
+    * refactor(constants): simplify time constants
+    
+    * fix(ci): skip vercel deploy without secrets
+    
+    Gate deploy steps behind a secrets preflight.
+    
+    Prevents PR check failures when Vercel credentials are not configured.
+    
+    ---------
+    
+    Co-authored-by: Flood Control Developer <developer@flood-control.com>
+
+diff --git a/src/test/setup.console.ts b/src/test/setup.console.ts
+new file mode 100644
+index 0000000..22253bb
+--- /dev/null
++++ b/src/test/setup.console.ts
+@@ -0,0 +1,80 @@
++/**
++ * 测试输出降噪：默认静默业务侧 console 输出，避免污染 CI 可观察性。
++ *
++ * 设计目标：
++ * - 不改变业务代码的 logger/console 调用路径（测试仍可通过 spy/断言验证是否打日志）
++ * - 默认不把日志写到 stdout/stderr（CI 更干净）
++ * - 需要调试时允许显式开启（VITEST_SHOW_LOGS=1）
++ */
++
++function isTruthyEnv(value: string | undefined): boolean {
++  return value === "1" || value === "true" || value === "TRUE";
++}
++
++const SHOULD_SHOW_LOGS = isTruthyEnv(process.env.VITEST_SHOW_LOGS);
++
++if (!SHOULD_SHOW_LOGS) {
++  const noop = (): void => {};
++
++  // 使用 defineProperty：保证属性可写/可配置，便于测试文件里 vi.spyOn / mockImplementation。
++  Object.defineProperty(console, "debug", {
++    value: noop,
++    writable: true,
++    configurable: true,
++  });
++  Object.defineProperty(console, "info", {
++    value: noop,
++    writable: true,
++    configurable: true,
++  });
++  Object.defineProperty(console, "log", {
++    value: noop,
++    writable: true,
++    configurable: true,
++  });
++  Object.defineProperty(console, "warn", {
++    value: noop,
++    writable: true,
++    configurable: true,
++  });
++  Object.defineProperty(console, "error", {
++    value: noop,
++    writable: true,
++    configurable: true,
++  });
++
++  // 过滤 jsdom 的固定噪音（它会绕过 console mock，直接写到 stderr）。
++  // 典型表现：测试全部通过后仍输出 "Not implemented: navigation to another Document"。
++  const JSDOM_NAVIGATION_NOISE =
++    "Not implemented: navigation to another Document";
++
++  const originalStderrWrite = process.stderr.write.bind(process.stderr);
++  const stderrWrite = originalStderrWrite as unknown as (
++    chunk: unknown,
++    encoding?: unknown,
++    cb?: unknown,
++  ) => boolean;
++  Object.defineProperty(process.stderr, "write", {
++    value: (chunk: unknown, encoding?: unknown, cb?: unknown) => {
++      const text =
++        typeof chunk === "string"
++          ? chunk
++          : chunk instanceof Uint8Array
++            ? Buffer.from(chunk).toString("utf8")
++            : String(chunk);
++
++      if (text.includes(JSDOM_NAVIGATION_NOISE)) {
++        const cleaned = text.replaceAll(JSDOM_NAVIGATION_NOISE, "");
++        if (cleaned.trim().length === 0) {
++          if (typeof cb === "function") cb();
++          return true;
++        }
++        return stderrWrite(cleaned);
++      }
++
++      return stderrWrite(chunk, encoding, cb);
++    },
++    writable: true,
++    configurable: true,
++  });
++}
+diff --git a/src/test/setup.ts b/src/test/setup.ts
+index 92fd06e..8980fd6 100644
+--- a/src/test/setup.ts
++++ b/src/test/setup.ts
+@@ -6,6 +6,8 @@
+ import "@testing-library/jest-dom/vitest";
+ import type { TestingLibraryMatchers } from "@testing-library/jest-dom/matchers";
+ 
++import "./setup.console";
++
+ declare module "vitest" {
+   // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+   interface Assertion<T = any> extends TestingLibraryMatchers<T, void> {}
