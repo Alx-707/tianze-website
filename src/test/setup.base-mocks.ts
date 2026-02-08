@@ -24,11 +24,16 @@ vi.mock("@/lib/mdx-importers.generated", () => ({
   },
 }));
 
-// Mock next/font/local for Open Sans (Twitter theme migration)
-vi.mock("next/font/local", () => ({
-  default: vi.fn(() => ({
-    variable: "--font-open-sans",
-    className: "open-sans",
-    style: { fontFamily: "Open Sans" },
+// Mock next/font/google for Figtree + JetBrains Mono
+vi.mock("next/font/google", () => ({
+  Figtree: vi.fn(() => ({
+    variable: "--font-figtree",
+    className: "figtree",
+    style: { fontFamily: "Figtree" },
+  })),
+  JetBrains_Mono: vi.fn(() => ({
+    variable: "--font-jetbrains-mono",
+    className: "jetbrains-mono",
+    style: { fontFamily: "JetBrains Mono" },
   })),
 }));

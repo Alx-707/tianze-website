@@ -362,8 +362,12 @@ describe("Mobile Navigation - Advanced Integration Tests", () => {
       render(<MobileNavigation />);
 
       const trigger = screen.getByRole("button");
-      // Check for actual focus-visible classes used in the component
-      expect(trigger).toHaveClass("focus-visible:ring-[3px]", "outline-none");
+      // Check for actual focus-visible classes used in the Button component
+      expect(trigger).toHaveClass(
+        "focus-visible:ring-2",
+        "focus-visible:ring-ring",
+        "outline-none",
+      );
     });
 
     it("supports high contrast mode", () => {

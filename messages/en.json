@@ -134,61 +134,215 @@
     }
   },
   "home": {
-    "products": {
-      "eyebrow": "Product Center",
-      "title": "Equipment & Fittings One-Stop Supply",
-      "machines": {
-        "image": "Pipe Bending Machine",
-        "title": "Bending Machines",
-        "feature1": "Self-designed & Manufactured",
-        "feature2": "Semi-auto / Full-auto",
-        "feature3": "Serving Top Domestic Brands",
-        "button": "Learn More"
+    "hero": {
+      "eyebrow": "ISO 9001 Certified Manufacturer",
+      "title": "PVC Conduit Bends & Fittings. Factory Direct.",
+      "subtitle": "From the manufacturer that designs and builds its own bending machines. Full vertical integration from equipment R&D to finished product.",
+      "cta": {
+        "primary": "Get a Quote",
+        "secondary": "View Product Catalog"
       },
-      "pvc": {
-        "image": "PVC Conduit Bends",
-        "title": "PVC Conduits",
-        "feature1": "International Standards",
-        "feature2": "Bell-end / Socket Bends",
-        "feature3": "UL651 / AS / NZS / GB",
-        "button": "Learn More"
-      },
-      "pneumatic": {
-        "image": "Pneumatic Tubes",
-        "title": "Pneumatic Tubes",
-        "feature1": "High Transparency & Quiet",
-        "feature2": "PVC / PMMA / PETG",
-        "feature3": "Hospital / Lab / Industrial",
-        "button": "Learn More"
-      },
-      "custom": {
-        "image": "Custom Solutions",
-        "title": "Custom Solutions",
-        "feature1": "Low MOQ Fast Sampling",
-        "feature2": "Non-standard Specs / OEM",
-        "feature3": "AU / US / GB Standards",
-        "button": "Get Quote"
+      "proof": {
+        "countries": "20+",
+        "countriesLabel": "Countries",
+        "range": "16-168",
+        "rangeLabel": "mm Range",
+        "production": "24/7",
+        "productionLabel": "Production",
+        "est": "2006",
+        "estLabel": "Est."
       }
     },
-    "hero": {
-      "badge": "About Us →",
-      "title": {
-        "line1": "Equipment + Fittings",
-        "line2": "Integrated Manufacturer"
+    "chain": {
+      "title": "Full-Chain Control. All In-House.",
+      "subtitle": "We design and build our own bending machines. That upstream control is how we maintain consistent quality from raw material to finished conduit.",
+      "step1": {
+        "title": "Bending Machine R&D",
+        "desc": "Proprietary equipment design and engineering"
       },
-      "subtitle": "Self-developed bending machines, self-produced precision fittings. From equipment to finished products, full chain control.",
-      "scrollCta": "Learn More",
-      "stats": {
-        "factory": "Factory Direct",
-        "material": "100% Virgin Material",
-        "production": "Fully Automated",
-        "repurchase": "60% Repurchase Rate"
+      "step2": {
+        "title": "Equipment Manufacturing",
+        "desc": "In-house assembly and precision calibration"
       },
-      "images": {
-        "bender": "Pipe Bending Machine",
-        "expander": "Pipe Expander",
-        "line": "Production Line"
+      "step3": {
+        "title": "Mold Fabrication",
+        "desc": "Custom tooling with rapid turnaround"
+      },
+      "step4": {
+        "title": "Conduit Production",
+        "desc": "24/7 extrusion and bending operations"
+      },
+      "step5": {
+        "title": "Quality Control",
+        "desc": "Batch documentation and traceability"
+      },
+      "stat1": "Patented bending technology",
+      "stat2": "5-step vertical integration",
+      "stat3": "In-house mold manufacturing"
+    },
+    "products": {
+      "title": "Product Lines",
+      "subtitle": "Four categories covering 16mm to 168mm diameter. Custom OD, wall thickness, and length available.",
+      "cta": "Full Catalog",
+      "item1": {
+        "tag": "Core Product",
+        "title": "Standard PVC Conduit Bends",
+        "spec1": "90°, 45°, and custom bend angles",
+        "spec2": "Schedule 40 & Schedule 80 wall thickness",
+        "spec3": "16mm to 168mm outer diameter range",
+        "standard": "ASTM · UL651",
+        "link": "/products/standard-bends"
+      },
+      "item2": {
+        "tag": "Push-Fit Design",
+        "title": "Bell End & Expansion Joints",
+        "spec1": "Double-socket integrated design",
+        "spec2": "No separate couplings required",
+        "spec3": "30% faster field installation",
+        "standard": "ASTM · SCH40/80",
+        "link": "/products/bell-end"
+      },
+      "item3": {
+        "tag": "AU Standard",
+        "title": "Flared Fittings",
+        "spec1": "AS/NZS 2053 aligned flared entry",
+        "spec2": "Reduces cable abrasion during pull",
+        "spec3": "Smooth internal surface finish",
+        "standard": "AS/NZS 2053",
+        "link": "/products/flared"
+      },
+      "item4": {
+        "tag": "Low MOQ",
+        "title": "Custom & OEM Projects",
+        "spec1": "Custom angles, OD, and wall thickness",
+        "spec2": "Private labeling and packaging",
+        "spec3": "Prototype to mass production support",
+        "standard": "Per your spec",
+        "link": "/contact"
       }
+    },
+    "resources": {
+      "title": "Product Resources",
+      "subtitle": "Technical documentation, CAD files, and certification details for engineering and procurement teams.",
+      "item1": {
+        "title": "Product Catalog",
+        "desc": "Complete product listings with dimensions, materials, and ordering codes.",
+        "link": "/resources/catalog"
+      },
+      "item2": {
+        "title": "Technical Specifications",
+        "desc": "Detailed datasheets with tolerances, material grades, and test reports.",
+        "link": "/resources/specs"
+      },
+      "item3": {
+        "title": "CAD Downloads",
+        "desc": "2D and 3D drawings in DWG, STEP, and IGES formats for your engineering team.",
+        "link": "/resources/cad"
+      },
+      "item4": {
+        "title": "Certifications",
+        "desc": "ISO 9001, test reports, and compliance documentation for your procurement files.",
+        "link": "/resources/certs"
+      }
+    },
+    "sample": {
+      "title": "Test Before You Commit.",
+      "description": "Verify the quality yourself. Free samples ship within 3 business days — you only pay freight.",
+      "cta": "Request Free Samples"
+    },
+    "scenarios": {
+      "title": "Where Our Conduits Work",
+      "subtitle": "Field-proven in construction, infrastructure, and industrial installations across 20+ countries.",
+      "item1": {
+        "title": "Underground Pre-Burial",
+        "desc": "Pre-bent conduits for direct burial. Consistent bend radius eliminates field cracking under soil pressure.",
+        "quote": "\"The bends arrived ready to install. Saved us 2 days on site.\" — Project Manager, UAE"
+      },
+      "item2": {
+        "title": "Commercial & Data Center",
+        "desc": "Complete conduit solutions for high-density electrical infrastructure across multi-story projects.",
+        "quote": "\"Consistent quality across 3 data center builds.\" — Project Director, UAE"
+      },
+      "item3": {
+        "title": "Municipal Infrastructure",
+        "desc": "Up to 168mm diameter for underground cable protection in power distribution and telecom networks.",
+        "quote": "\"Big pipes, tight tolerances. They delivered.\" — City Engineer, Southeast Asia"
+      }
+    },
+    "quality": {
+      "title": "Our Commitments",
+      "subtitle": "Written guarantees backed by process control and documentation.",
+      "commitment1": {
+        "title": "48-Hour Drawings",
+        "desc": "Technical drawings delivered within 2 business days of spec confirmation."
+      },
+      "commitment2": {
+        "title": "Batch Traceability",
+        "desc": "Every shipment documented with material source and QC test records."
+      },
+      "commitment3": {
+        "title": "Export-Ready Packaging",
+        "desc": "Palletized, labeled, and optimized for container loading."
+      },
+      "commitment4": {
+        "title": "Dedicated Contact",
+        "desc": "Single point of contact from quotation through delivery and after-sales."
+      },
+      "commitment5": {
+        "title": "Flexible MOQ",
+        "desc": "Low minimums for first orders. Scale volumes as your projects grow."
+      },
+      "cert1": "ISO 9001:2015",
+      "cert2": "UL651 / SCH40-80",
+      "cert3": "AS/NZS 2053",
+      "cert4": "ASTM Standards",
+      "logoWall": "Customer and partner logo placeholders"
+    },
+    "finalCta": {
+      "title": "Ready to Get Started?",
+      "description": "Get a quote, request samples, or book a technical consultation. We respond within 24 hours.",
+      "primary": "Get Factory-Direct Quote",
+      "secondary": "Book Technical Consultation",
+      "trust": "24-hour response · Factory direct · 20+ countries served"
+    },
+    "footer": {
+      "about": {
+        "title": "Tianze Pipe Industry",
+        "desc": "PVC conduit bends and fittings manufacturer based in Lianyungang, Jiangsu, China. Designing and manufacturing bending equipment since 2006."
+      },
+      "products": {
+        "title": "Products",
+        "items": {
+          "item1": "Standard Bends",
+          "item2": "Bell End Joints",
+          "item3": "Flared Fittings",
+          "item4": "Custom & OEM"
+        }
+      },
+      "resources": {
+        "title": "Resources",
+        "items": {
+          "item1": "Product Catalog",
+          "item2": "Technical Specs",
+          "item3": "CAD Downloads",
+          "item4": "Certifications"
+        }
+      },
+      "contact": {
+        "title": "Contact",
+        "items": {
+          "item1": "Request a Quote",
+          "item2": "Free Sample Request",
+          "item3": "Technical Support",
+          "item4": "Factory Visit"
+        }
+      },
+      "copyright": "© 2024 Tianze Pipe Industry Co., Ltd. All rights reserved.",
+      "location": "Lianyungang, Jiangsu, China"
+    },
+    "cta": {
+      "message": "Contact us for samples or technical support",
+      "button": "Get Quote"
     },
     "techStack": {
       "title": "Technology Stack",
@@ -389,10 +543,6 @@
         "getStarted": "Request Quote",
         "viewSource": "View Products"
       }
-    },
-    "cta": {
-      "message": "Contact us for samples or technical support",
-      "button": "Get Quote"
     },
     "title": "Tianze Pipe",
     "subtitle": "Professional Pipe Manufacturer",
