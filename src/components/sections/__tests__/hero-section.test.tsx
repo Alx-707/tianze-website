@@ -33,13 +33,15 @@ describe("HeroSection", () => {
 
   it("renders 4 proof bar items with values and labels", () => {
     render(<HeroSection />);
-    expect(screen.getByText("hero.proof.countries")).toBeInTheDocument();
+    // CountUp items render via AnimatedCounter with aria-label
+    expect(screen.getByLabelText("hero.proof.countries")).toBeInTheDocument();
     expect(screen.getByText("hero.proof.countriesLabel")).toBeInTheDocument();
+    // Static items render as text
     expect(screen.getByText("hero.proof.range")).toBeInTheDocument();
     expect(screen.getByText("hero.proof.rangeLabel")).toBeInTheDocument();
     expect(screen.getByText("hero.proof.production")).toBeInTheDocument();
     expect(screen.getByText("hero.proof.productionLabel")).toBeInTheDocument();
-    expect(screen.getByText("hero.proof.est")).toBeInTheDocument();
+    expect(screen.getByLabelText("hero.proof.est")).toBeInTheDocument();
     expect(screen.getByText("hero.proof.estLabel")).toBeInTheDocument();
   });
 });

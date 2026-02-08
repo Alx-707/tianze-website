@@ -2,15 +2,34 @@
 
 import { useTranslations } from "next-intl";
 
+import { AnimatedCounter, formatters } from "@/components/ui/animated-counter";
 import { Button } from "@/components/ui/button";
 import { HeroGuideOverlay } from "@/components/grid";
 
-const PROOF_ITEMS = [
-  { valueKey: "hero.proof.countries", labelKey: "hero.proof.countriesLabel" },
+const COUNTUP_DURATION = 1200;
+const PROOF_COUNTRIES_END = 20;
+const PROOF_EST_END = 2006;
+
+interface ProofItemConfig {
+  valueKey: string;
+  labelKey: string;
+  countUp?: { end: number; suffix?: string };
+}
+
+const PROOF_ITEMS: ProofItemConfig[] = [
+  {
+    valueKey: "hero.proof.countries",
+    labelKey: "hero.proof.countriesLabel",
+    countUp: { end: PROOF_COUNTRIES_END, suffix: "+" },
+  },
   { valueKey: "hero.proof.range", labelKey: "hero.proof.rangeLabel" },
   { valueKey: "hero.proof.production", labelKey: "hero.proof.productionLabel" },
-  { valueKey: "hero.proof.est", labelKey: "hero.proof.estLabel" },
-] as const;
+  {
+    valueKey: "hero.proof.est",
+    labelKey: "hero.proof.estLabel",
+    countUp: { end: PROOF_EST_END },
+  },
+];
 
 function HeroEyebrow({ text }: { text: string }) {
   return (
@@ -26,9 +45,26 @@ function HeroEyebrow({ text }: { text: string }) {
 function ProofBar({ t }: { t: ReturnType<typeof useTranslations<"home">> }) {
   return (
     <div className="hero-stagger-5 mt-7 flex flex-wrap gap-6 border-t border-border-light pt-6 md:gap-8">
-      {PROOF_ITEMS.map(({ valueKey, labelKey }) => (
+      {PROOF_ITEMS.map(({ valueKey, labelKey, countUp }) => (
         <div key={valueKey} className="flex flex-col gap-1.5">
-          <span className="font-mono text-xl font-medium">{t(valueKey)}</span>
+          <span className="font-mono text-xl font-medium">
+            {countUp ? (
+              <AnimatedCounter
+                to={countUp.end}
+                duration={COUNTUP_DURATION}
+                formatter={
+                  countUp.suffix
+                    ? (v: number) => `${formatters.default(v)}${countUp.suffix}`
+                    : formatters.default
+                }
+                triggerOnVisible
+                role="text"
+                aria-label={t(valueKey)}
+              />
+            ) : (
+              t(valueKey)
+            )}
+          </span>
           <span className="text-[13px] text-muted-foreground">
             {t(labelKey)}
           </span>

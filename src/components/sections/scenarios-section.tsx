@@ -16,7 +16,7 @@ export function ScenariosSection() {
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           {SCENARIO_KEYS.map((key, index) => (
-            <ScrollReveal key={key} staggerIndex={index}>
+            <ScrollReveal key={key} staggerIndex={index} staggerInterval={120}>
               <div className="group overflow-hidden rounded-lg bg-white shadow-card transition-shadow hover:shadow-card-hover">
                 {/* Image placeholder */}
                 <div className="h-40 bg-gradient-to-br from-muted to-muted/60" />

@@ -86,7 +86,11 @@ export function ProductsSection() {
         />
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {products.map((product, index) => (
-            <ScrollReveal key={product.tag} staggerIndex={index}>
+            <ScrollReveal
+              key={product.tag}
+              direction="scale"
+              staggerIndex={index}
+            >
               <ProductCard {...product} />
             </ScrollReveal>
           ))}

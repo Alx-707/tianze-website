@@ -155,7 +155,7 @@
   --ease-smooth: cubic-bezier(0.25, 0.1, 0.25, 1);
 
   /* Scroll reveal */
-  --scroll-reveal-distance: 20px;
+  --scroll-reveal-distance: 12px;
   --scroll-reveal-duration: 600ms;
   --scroll-reveal-stagger: 80ms;
 

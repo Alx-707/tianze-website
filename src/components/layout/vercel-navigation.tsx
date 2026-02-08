@@ -120,7 +120,7 @@ function renderDropdownItem({
           "hover:bg-muted/40 data-[state=open]:bg-muted/60",
           "dark:hover:bg-foreground/10 dark:data-[state=open]:bg-foreground/15",
           "shadow-none",
-          "transition-colors duration-150 ease-out",
+          "transition-colors duration-100 ease-out",
         )}
         onClick={() => hoverState.handleClick(item.key)}
         aria-expanded={isOpen}
@@ -151,7 +151,7 @@ function renderLinkItem(
             "hover:bg-muted/40 data-[state=open]:bg-muted/60",
             "dark:hover:bg-foreground/10 dark:data-[state=open]:bg-foreground/15",
             "shadow-none",
-            "transition-colors duration-150 ease-out",
+            "transition-colors duration-100 ease-out",
           )}
         >
           {t(item.translationKey)}
