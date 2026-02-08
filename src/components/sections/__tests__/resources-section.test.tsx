@@ -32,9 +32,12 @@ describe("ResourcesSection", () => {
     expect(headings).toHaveLength(4);
   });
 
-  it("renders 4 resource links", () => {
+  it("renders 4 resource cards as navigable links", () => {
     render(<ResourcesSection />);
     const links = screen.getAllByRole("link");
     expect(links).toHaveLength(4);
+    for (const link of links) {
+      expect(link).toHaveAttribute("href");
+    }
   });
 });

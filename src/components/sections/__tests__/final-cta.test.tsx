@@ -16,10 +16,16 @@ describe("FinalCTA", () => {
     expect(screen.getByText("description")).toBeInTheDocument();
   });
 
-  it("renders primary and secondary buttons", () => {
+  it("renders primary CTA as a link to /contact", () => {
     render(<FinalCTA />);
-    expect(screen.getByText("primary")).toBeInTheDocument();
-    expect(screen.getByText("secondary")).toBeInTheDocument();
+    const primaryLink = screen.getByText("primary").closest("a");
+    expect(primaryLink).toHaveAttribute("href", "/contact");
+  });
+
+  it("renders secondary CTA as a link to /products", () => {
+    render(<FinalCTA />);
+    const secondaryLink = screen.getByText("secondary").closest("a");
+    expect(secondaryLink).toHaveAttribute("href", "/products");
   });
 
   it("renders trust text", () => {

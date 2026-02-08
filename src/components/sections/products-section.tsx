@@ -1,7 +1,8 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
+import type { LinkHref } from "@/lib/i18n/route-parsing";
 import { Button } from "@/components/ui/button";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { SectionHead } from "@/components/ui/section-head";
@@ -20,7 +21,7 @@ function ProductCard({
   title: string;
   specs: string[];
   standard: string;
-  link: string;
+  link: LinkHref;
 }) {
   return (
     <div className="group rounded-lg bg-background p-6 shadow-card transition-[box-shadow,transform] duration-150 hover:-translate-y-0.5 hover:shadow-[var(--shadow-card-active)]">
@@ -66,7 +67,7 @@ export function ProductsSection() {
         t(`products.${key}.spec${String(j + 1)}`),
       ),
       standard: t(`products.${key}.standard`),
-      link: t(`products.${key}.link`),
+      link: t(`products.${key}.link`) as LinkHref,
     };
   });
 

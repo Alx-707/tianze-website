@@ -1,6 +1,8 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/routing";
+import type { LinkHref } from "@/lib/i18n/route-parsing";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { SectionHead } from "@/components/ui/section-head";
 
@@ -102,10 +104,10 @@ function ResourceCard({
   icon: React.ReactNode;
   title: string;
   desc: string;
-  link: string;
+  link: LinkHref;
 }) {
   return (
-    <a
+    <Link
       href={link}
       className="group flex flex-col gap-3 bg-background p-6 transition-colors hover:bg-[var(--primary-50)]"
     >
@@ -117,7 +119,7 @@ function ResourceCard({
       <span className="mt-auto inline-block text-sm font-medium text-primary transition-transform duration-150 group-hover:translate-x-1">
         &rarr;
       </span>
-    </a>
+    </Link>
   );
 }
 
@@ -130,7 +132,7 @@ export function ResourcesSection() {
       icon: ICONS[i],
       title: t(`resources.${key}.title`),
       desc: t(`resources.${key}.desc`),
-      link: t(`resources.${key}.link`),
+      link: t(`resources.${key}.link`) as LinkHref,
     };
   });
 

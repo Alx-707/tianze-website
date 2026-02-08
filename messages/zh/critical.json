@@ -154,7 +154,7 @@
         "spec2": "Schedule 40 & Schedule 80 壁厚",
         "spec3": "16mm至168mm外径范围",
         "standard": "ASTM · UL651",
-        "link": "/products/standard-bends"
+        "link": "/products"
       },
       "item2": {
         "tag": "免胶设计",
@@ -163,7 +163,7 @@
         "spec2": "无需额外连接件",
         "spec3": "现场安装提速30%",
         "standard": "ASTM · SCH40/80",
-        "link": "/products/bell-end"
+        "link": "/products"
       },
       "item3": {
         "tag": "澳标",
@@ -172,7 +172,7 @@
         "spec2": "降低穿线时电缆磨损",
         "spec3": "内壁光滑处理",
         "standard": "AS/NZS 2053",
-        "link": "/products/flared"
+        "link": "/products"
       },
       "item4": {
         "tag": "低起订量",
@@ -190,22 +190,22 @@
       "item1": {
         "title": "产品目录",
         "desc": "完整的产品列表，含尺寸、材料和订购编码。",
-        "link": "/resources/catalog"
+        "link": "/contact"
       },
       "item2": {
         "title": "技术规格",
         "desc": "详细数据表，含公差、材料等级和测试报告。",
-        "link": "/resources/specs"
+        "link": "/contact"
       },
       "item3": {
         "title": "CAD下载",
         "desc": "DWG、STEP和IGES格式的2D和3D图纸。",
-        "link": "/resources/cad"
+        "link": "/contact"
       },
       "item4": {
         "title": "认证文件",
         "desc": "ISO 9001、测试报告及合规文档。",
-        "link": "/resources/certs"
+        "link": "/contact"
       }
     },
     "sample": {

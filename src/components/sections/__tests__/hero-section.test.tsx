@@ -25,10 +25,16 @@ describe("HeroSection", () => {
     expect(screen.getByText("hero.subtitle")).toBeInTheDocument();
   });
 
-  it("renders primary and secondary CTA buttons", () => {
+  it("renders primary CTA as a link to /contact", () => {
     render(<HeroSection />);
-    expect(screen.getByText("hero.cta.primary")).toBeInTheDocument();
-    expect(screen.getByText("hero.cta.secondary")).toBeInTheDocument();
+    const primaryLink = screen.getByText("hero.cta.primary").closest("a");
+    expect(primaryLink).toHaveAttribute("href", "/contact");
+  });
+
+  it("renders secondary CTA as a link to /products", () => {
+    render(<HeroSection />);
+    const secondaryLink = screen.getByText("hero.cta.secondary").closest("a");
+    expect(secondaryLink).toHaveAttribute("href", "/products");
   });
 
   it("renders 4 proof bar items with values and labels", () => {

@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
+import { Link } from "@/i18n/routing";
 
 export function FinalCTA() {
   const t = useTranslations("home.finalCta");
@@ -22,11 +23,11 @@ export function FinalCTA() {
         </p>
 
         <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-          <Button variant="on-dark" size="lg">
-            {t("primary")}
+          <Button variant="on-dark" size="lg" asChild>
+            <Link href="/contact">{t("primary")}</Link>
           </Button>
-          <Button variant="ghost-dark" size="lg">
-            {t("secondary")}
+          <Button variant="ghost-dark" size="lg" asChild>
+            <Link href="/products">{t("secondary")}</Link>
           </Button>
         </div>
 

@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { AnimatedCounter, formatters } from "@/components/ui/animated-counter";
 import { Button } from "@/components/ui/button";
 import { HeroGuideOverlay } from "@/components/grid";
+import { Link } from "@/i18n/routing";
 
 const COUNTUP_DURATION = 1200;
 const PROOF_COUNTRIES_END = 20;
@@ -107,8 +108,12 @@ export function HeroSection() {
           </p>
 
           <div className="hero-stagger-4 mt-7 flex flex-wrap gap-3">
-            <Button>{t("hero.cta.primary")}</Button>
-            <Button variant="secondary">{t("hero.cta.secondary")}</Button>
+            <Button asChild>
+              <Link href="/contact">{t("hero.cta.primary")}</Link>
+            </Button>
+            <Button variant="secondary" asChild>
+              <Link href="/products">{t("hero.cta.secondary")}</Link>
+            </Button>
           </div>
 
           <ProofBar t={t} />

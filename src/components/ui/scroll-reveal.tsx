@@ -1,10 +1,7 @@
 "use client";
 
 import type { CSSProperties, ReactNode } from "react";
-import {
-  useIntersectionObserver,
-  useIntersectionObserverWithDelay,
-} from "@/hooks/use-intersection-observer";
+import { useIntersectionObserverWithDelay } from "@/hooks/use-intersection-observer";
 import { cn } from "@/lib/utils";
 import { ZERO } from "@/constants";
 
@@ -71,12 +68,10 @@ export function ScrollReveal({
 
   const observerOptions = { threshold, triggerOnce: true };
 
-  /* eslint-disable react-hooks/rules-of-hooks -- branch is stable per render (computedDelay is derived from props) */
-  const { ref, isVisible } =
-    computedDelay > ZERO
-      ? useIntersectionObserverWithDelay(observerOptions, computedDelay)
-      : useIntersectionObserver(observerOptions);
-  /* eslint-enable react-hooks/rules-of-hooks */
+  const { ref, isVisible } = useIntersectionObserverWithDelay(
+    observerOptions,
+    computedDelay,
+  );
 
   const transformStyle = getTransformStyle(direction, isVisible);
 

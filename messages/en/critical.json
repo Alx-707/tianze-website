@@ -154,7 +154,7 @@
         "spec2": "Schedule 40 & Schedule 80 wall thickness",
         "spec3": "16mm to 168mm outer diameter range",
         "standard": "ASTM · UL651",
-        "link": "/products/standard-bends"
+        "link": "/products"
       },
       "item2": {
         "tag": "Push-Fit Design",
@@ -163,7 +163,7 @@
         "spec2": "No separate couplings required",
         "spec3": "30% faster field installation",
         "standard": "ASTM · SCH40/80",
-        "link": "/products/bell-end"
+        "link": "/products"
       },
       "item3": {
         "tag": "AU Standard",
@@ -172,7 +172,7 @@
         "spec2": "Reduces cable abrasion during pull",
         "spec3": "Smooth internal surface finish",
         "standard": "AS/NZS 2053",
-        "link": "/products/flared"
+        "link": "/products"
       },
       "item4": {
         "tag": "Low MOQ",
@@ -190,22 +190,22 @@
       "item1": {
         "title": "Product Catalog",
         "desc": "Complete product listings with dimensions, materials, and ordering codes.",
-        "link": "/resources/catalog"
+        "link": "/contact"
       },
       "item2": {
         "title": "Technical Specifications",
         "desc": "Detailed datasheets with tolerances, material grades, and test reports.",
-        "link": "/resources/specs"
+        "link": "/contact"
       },
       "item3": {
         "title": "CAD Downloads",
         "desc": "2D and 3D drawings in DWG, STEP, and IGES formats for your engineering team.",
-        "link": "/resources/cad"
+        "link": "/contact"
       },
       "item4": {
         "title": "Certifications",
         "desc": "ISO 9001, test reports, and compliance documentation for your procurement files.",
-        "link": "/resources/certs"
+        "link": "/contact"
       }
     },
     "sample": {
