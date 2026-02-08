@@ -41,9 +41,9 @@ function ProofBar({ t }: { t: ReturnType<typeof useTranslations<"home">> }) {
 function HeroVisual() {
   return (
     <div className="grid grid-cols-2 grid-rows-[180px_160px] gap-3">
-      <div className="col-span-2 rounded-lg border border-border bg-white" />
-      <div className="rounded-lg border border-border bg-white" />
-      <div className="rounded-lg border border-border bg-white" />
+      <div className="col-span-2 rounded-lg bg-white shadow-border" />
+      <div className="rounded-lg bg-white shadow-border" />
+      <div className="rounded-lg bg-white shadow-border" />
     </div>
   );
 }
@@ -59,7 +59,7 @@ export function HeroSection() {
         <div className="flex flex-col">
           <HeroEyebrow text={t("hero.eyebrow")} />
 
-          <h1 className="mt-4 text-[36px] font-extrabold leading-[1.12] tracking-[-0.025em] md:text-[44px]">
+          <h1 className="mt-4 text-[36px] font-extrabold leading-[1.1] tracking-[-0.03em] md:text-[48px] md:leading-[1.0] md:tracking-[-0.05em]">
             {t("hero.title")}
           </h1>
 

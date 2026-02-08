@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@source not "../../.claude";
+@source not "../../.agents";
 
 /* Tailwind v4 Plugins (order: animate before typography)
    - tailwindcss-animate: UI animation keyframes (animate-in, fade-in, slide-in-*)
@@ -126,6 +128,10 @@
   --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.06), 0 8px 10px rgba(0, 0, 0, 0.03);
   --shadow-inset: inset 0 1px 2px rgba(0, 0, 0, 0.04);
   --shadow-accent: 0 0 0 3px rgba(0, 77, 158, 0.2);
+
+  /* Shadow-Border (Vercel technique: shadow as border for smooth transitions) */
+  --shadow-card-active:
+    0 0 0 1px var(--primary), 0 0 0 4px rgba(0, 77, 158, 0.12);
 
   /* Section Divider (Vercel-style) */
   --divider: #ebebeb;
@@ -276,6 +282,15 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
   --radius-2xl: calc(var(--radius) + 8px);
+
+  /* Shadow-Border System (Vercel technique: box-shadow as border for smooth transitions) */
+  --shadow-border: 0 0 0 1px rgba(0, 0, 0, 0.08);
+  --shadow-card:
+    0 0 0 1px rgba(0, 0, 0, 0.08), 0px 1px 1px rgba(0, 0, 0, 0.02),
+    0px 4px 8px rgba(0, 0, 0, 0.04);
+  --shadow-card-hover:
+    0 0 0 1px rgba(0, 0, 0, 0.12), 0px 2px 4px rgba(0, 0, 0, 0.04),
+    0px 8px 16px -4px rgba(0, 0, 0, 0.06);
 }
 
 /* ==================== BASE LAYER ==================== */

@@ -17,7 +17,7 @@ export function ScenariosSection() {
           {SCENARIO_KEYS.map((key) => (
             <div
               key={key}
-              className="group overflow-hidden rounded-lg border border-border bg-white transition-colors hover:border-[#C8CDD2]"
+              className="group overflow-hidden rounded-lg bg-white shadow-card transition-shadow hover:shadow-card-hover"
             >
               {/* Image placeholder */}
               <div className="h-40 bg-gradient-to-br from-muted to-muted/60" />
