@@ -23,7 +23,7 @@ function ProductCard({
   link: string;
 }) {
   return (
-    <div className="group rounded-lg bg-background p-6 shadow-card transition-shadow hover:shadow-[var(--shadow-card-active)]">
+    <div className="group rounded-lg bg-background p-6 shadow-card transition-[box-shadow,transform] duration-150 hover:-translate-y-0.5 hover:shadow-[var(--shadow-card-active)]">
       <span className="inline-block rounded bg-[var(--primary-light)] px-2.5 py-1 text-xs font-semibold text-primary">
         {tag}
       </span>

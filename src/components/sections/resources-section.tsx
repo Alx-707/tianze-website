@@ -107,14 +107,16 @@ function ResourceCard({
   return (
     <a
       href={link}
-      className="flex flex-col gap-3 bg-background p-6 transition-colors hover:bg-[var(--primary-50)]"
+      className="group flex flex-col gap-3 bg-background p-6 transition-colors hover:bg-[var(--primary-50)]"
     >
       <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--primary-light)] text-primary">
         {icon}
       </div>
       <h3 className="text-[15px] font-semibold leading-snug">{title}</h3>
       <p className="text-sm leading-relaxed text-muted-foreground">{desc}</p>
-      <span className="mt-auto text-sm font-medium text-primary">&rarr;</span>
+      <span className="mt-auto inline-block text-sm font-medium text-primary transition-transform duration-150 group-hover:translate-x-1">
+        &rarr;
+      </span>
     </a>
   );
 }

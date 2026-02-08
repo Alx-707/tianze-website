@@ -17,9 +17,9 @@ export function ScenariosSection() {
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           {SCENARIO_KEYS.map((key, index) => (
             <ScrollReveal key={key} staggerIndex={index} staggerInterval={120}>
-              <div className="group overflow-hidden rounded-lg bg-white shadow-card transition-shadow hover:shadow-card-hover">
+              <div className="group overflow-hidden rounded-lg bg-white shadow-card transition-[box-shadow,transform] duration-150 hover:-translate-y-0.5 hover:shadow-card-hover">
                 {/* Image placeholder */}
-                <div className="h-40 bg-gradient-to-br from-muted to-muted/60" />
+                <div className="h-40 bg-gradient-to-br from-muted to-muted/60 transition-transform duration-300 group-hover:scale-[1.02]" />
 
                 {/* Body */}
                 <div className="p-5">

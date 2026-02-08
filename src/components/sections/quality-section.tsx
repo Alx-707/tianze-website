@@ -128,7 +128,10 @@ export function QualitySection() {
         {/* Commitments grid */}
         <div className="grid grid-cols-1 gap-[2px] overflow-hidden rounded-lg border bg-border sm:grid-cols-3 lg:grid-cols-5">
           {COMMITMENT_KEYS.map((key) => (
-            <div key={key} className="bg-white p-5">
+            <div
+              key={key}
+              className="bg-white p-5 transition-colors duration-150 hover:bg-[var(--primary-50)]"
+            >
               <div className="mb-3">{COMMITMENT_ICONS[key]}</div>
               <strong className="block text-sm">{t(`${key}.title`)}</strong>
               <p className="mt-1 text-[13px] text-muted-foreground">
