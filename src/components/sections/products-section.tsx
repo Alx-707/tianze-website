@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
+import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { SectionHead } from "@/components/ui/section-head";
 
 const PRODUCT_COUNT = 4;
@@ -77,18 +78,20 @@ export function ProductsSection() {
 
   return (
     <section className="section-divider py-14 md:py-[72px]">
-      <div className="mx-auto max-w-[1080px] px-6">
+      <ScrollReveal className="mx-auto max-w-[1080px] px-6">
         <SectionHead
           title={t("products.title")}
           subtitle={t("products.subtitle")}
           action={action}
         />
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          {products.map((product) => (
-            <ProductCard key={product.tag} {...product} />
+          {products.map((product, index) => (
+            <ScrollReveal key={product.tag} staggerIndex={index}>
+              <ProductCard {...product} />
+            </ScrollReveal>
           ))}
         </div>
-      </div>
+      </ScrollReveal>
     </section>
   );
 }

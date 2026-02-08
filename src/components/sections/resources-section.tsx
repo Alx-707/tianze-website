@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { SectionHead } from "@/components/ui/section-head";
 
 const RESOURCE_COUNT = 4;
@@ -133,7 +134,7 @@ export function ResourcesSection() {
 
   return (
     <section className="section-divider py-14 md:py-[72px]">
-      <div className="mx-auto max-w-[1080px] px-6">
+      <ScrollReveal className="mx-auto max-w-[1080px] px-6">
         <SectionHead
           title={t("resources.title")}
           subtitle={t("resources.subtitle")}
@@ -145,7 +146,7 @@ export function ResourcesSection() {
             ))}
           </div>
         </div>
-      </div>
+      </ScrollReveal>
     </section>
   );
 }

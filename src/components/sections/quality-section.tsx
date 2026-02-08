@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { SectionHead } from "@/components/ui/section-head";
 
 const COMMITMENT_KEYS = [
@@ -121,7 +122,7 @@ export function QualitySection() {
 
   return (
     <section className="py-14 md:py-[72px]">
-      <div className="mx-auto max-w-[1080px] px-6">
+      <ScrollReveal className="mx-auto max-w-[1080px] px-6">
         <SectionHead title={t("title")} subtitle={t("subtitle")} />
 
         {/* Commitments grid */}
@@ -154,7 +155,7 @@ export function QualitySection() {
         <div className="mt-8 flex h-20 items-center justify-center rounded-lg border-2 border-dashed border-border">
           <span className="text-sm text-muted-foreground">{t("logoWall")}</span>
         </div>
-      </div>
+      </ScrollReveal>
     </section>
   );
 }
