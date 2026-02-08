@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import {
   ArrowRight,
   BadgeCheck,
@@ -240,15 +240,9 @@ interface CTASectionProps {
   title: string;
   description: string;
   buttonText: string;
-  locale: string;
 }
 
-function CTASection({
-  title,
-  description,
-  buttonText,
-  locale,
-}: CTASectionProps) {
+function CTASection({ title, description, buttonText }: CTASectionProps) {
   return (
     <section className="bg-primary py-12 md:py-16">
       <div className="container mx-auto px-4 text-center">
@@ -259,7 +253,7 @@ function CTASection({
           {description}
         </p>
         <Button asChild size="lg" variant="secondary">
-          <Link href={`/${locale}/contact`}>
+          <Link href="/contact">
             {buttonText}
             <ArrowRight className="ml-2 h-4 w-4" />
           </Link>
@@ -323,7 +317,6 @@ async function AboutContent({ locale }: { locale: string }) {
     title: t("cta.title"),
     description: t("cta.description"),
     buttonText: t("cta.button"),
-    locale,
   };
 
   return (

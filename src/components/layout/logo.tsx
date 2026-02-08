@@ -7,7 +7,7 @@
  */
 
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
 import { SITE_CONFIG } from "@/config/paths/site-config";
 import { HOURS_PER_DAY } from "@/constants";
@@ -26,7 +26,6 @@ export function Logo({
   showText = true,
   size = "md",
   ariaLabel = SITE_CONFIG.name,
-  locale,
 }: LogoProps) {
   const getSizeClass = (sizeValue: "sm" | "md" | "lg"): string => {
     switch (sizeValue) {
@@ -56,7 +55,7 @@ export function Logo({
 
   return (
     <Link
-      href={locale ? `/${locale}` : "/"}
+      href="/"
       className={cn(
         "flex items-center gap-2 transition-opacity hover:opacity-80",
         className,

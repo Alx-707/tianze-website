@@ -11,7 +11,7 @@
  * - CSS variable coordination with floating elements (--cookie-banner-height)
  */
 import { useCallback, useEffect, useRef, useState } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCookieConsent } from "@/lib/cookie-consent";

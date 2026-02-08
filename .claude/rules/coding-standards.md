@@ -65,6 +65,32 @@ Configured in `.prettierrc.json` via `@ianvs/prettier-plugin-sort-imports`:
 - Only `console.error`, `console.warn` allowed
 - Use `src/lib/logger.ts` for structured logging
 
+## Testing
+
+### Behavior-Driven Descriptions
+
+Write tests from the user's perspective, not the implementation's perspective. Describe **what the user does and sees**, not what the component renders internally.
+
+```typescript
+// ❌ Implementation-focused: verifies existence
+it("renders primary and secondary CTA buttons", () => {
+  expect(screen.getByText("Get Quote")).toBeInTheDocument();
+});
+
+// ✅ Behavior-focused: verifies what the user can do
+it("navigates to contact page when user clicks primary CTA", () => {
+  const link = screen.getByText("Get Quote").closest("a");
+  expect(link).toHaveAttribute("href", "/contact");
+});
+```
+
+Rules:
+- Interactive elements (Button, Link, Form) must verify **behavior** (navigation target, submission), not just presence
+- Link tests must verify `href` resolves to a known route
+- Test descriptions use "user does X → Y happens" language
+
+### [2026-02-08] Origin — Codex review found 4 functional bugs (dead CTA buttons, broken links) that existing presence-only tests failed to catch.
+
 ## Git Commits
 
 Conventional Commits: `type(scope): description`

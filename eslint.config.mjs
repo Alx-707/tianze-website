@@ -10,6 +10,7 @@ import promisePlugin from "eslint-plugin-promise";
 import reactYouMightNotNeedAnEffect from "eslint-plugin-react-you-might-not-need-an-effect";
 import securityPlugin from "eslint-plugin-security";
 import securityNode from "eslint-plugin-security-node";
+import eslintComments from "@eslint-community/eslint-plugin-eslint-comments/configs";
 
 const security = securityPlugin.default ?? securityPlugin;
 const promise = promisePlugin.default ?? promisePlugin;
@@ -789,10 +790,17 @@ export default [
         },
       ],
 
-      // 禁止相对路径导入（强制使用@/别名）
+      // 禁止相对路径导入（强制使用@/别名）+ 禁止直接使用 next/link
       "no-restricted-imports": [
         "error",
         {
+          paths: [
+            {
+              name: "next/link",
+              message:
+                '🚫 Use { Link } from "@/i18n/routing" for locale-aware navigation.',
+            },
+          ],
           patterns: [
             {
               group: ["../*"],
@@ -835,6 +843,19 @@ export default [
       "@typescript-eslint/no-unused-expressions": "error", // 禁止未使用的表达式
       // 注意：prefer-nullish-coalescing 和 prefer-optional-chain 需要类型信息
       // 这些规则由 Next.js TypeScript 配置处理
+    },
+  },
+
+  // eslint-disable discipline — require rule name + justification
+  eslintComments.recommended,
+  {
+    name: "eslint-comments-strict",
+    rules: {
+      "@eslint-community/eslint-comments/require-description": "error",
+      "@eslint-community/eslint-comments/disable-enable-pair": [
+        "error",
+        { allowWholeFile: true },
+      ],
     },
   },
 
@@ -1019,6 +1040,9 @@ export default [
       "jest.setup.js",
       "jest.config.js",
       "tina/__generated__/**", // 忽略TinaCMS生成的文件
+      ".dependency-cruiser.js", // 工具配置文件
+      "docs/vercel-design-system/**", // 设计系统参考文件，非生产代码
+      ".claude/skills/**", // agent skill 参考脚本，非生产代码
     ],
   },
 ];

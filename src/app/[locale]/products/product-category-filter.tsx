@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-restricted-imports -- filter constructs locale-prefixed URLs via buildProductsFilterHref
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
