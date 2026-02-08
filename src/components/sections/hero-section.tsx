@@ -14,7 +14,7 @@ const PROOF_ITEMS = [
 
 function HeroEyebrow({ text }: { text: string }) {
   return (
-    <div className="flex items-center gap-2">
+    <div className="hero-stagger-1 flex items-center gap-2">
       <span className="h-2 w-2 rounded-full bg-primary" aria-hidden="true" />
       <span className="text-[13px] font-semibold uppercase tracking-[0.04em] text-primary">
         {text}
@@ -25,7 +25,7 @@ function HeroEyebrow({ text }: { text: string }) {
 
 function ProofBar({ t }: { t: ReturnType<typeof useTranslations<"home">> }) {
   return (
-    <div className="mt-7 flex flex-wrap gap-6 border-t border-border-light pt-6 md:gap-8">
+    <div className="hero-stagger-5 mt-7 flex flex-wrap gap-6 border-t border-border-light pt-6 md:gap-8">
       {PROOF_ITEMS.map(({ valueKey, labelKey }) => (
         <div key={valueKey} className="flex flex-col gap-1.5">
           <span className="font-mono text-xl font-medium">{t(valueKey)}</span>
@@ -40,7 +40,7 @@ function ProofBar({ t }: { t: ReturnType<typeof useTranslations<"home">> }) {
 
 function HeroVisual() {
   return (
-    <div className="grid grid-cols-2 grid-rows-[180px_160px] gap-3">
+    <div className="hero-stagger-6 grid grid-cols-2 grid-rows-[180px_160px] gap-3">
       <div className="col-span-2 rounded-lg bg-white shadow-border" />
       <div className="rounded-lg bg-white shadow-border" />
       <div className="rounded-lg bg-white shadow-border" />
@@ -62,15 +62,15 @@ export function HeroSection() {
         <div className="flex flex-col">
           <HeroEyebrow text={t("hero.eyebrow")} />
 
-          <h1 className="mt-4 text-[36px] font-extrabold leading-[1.1] tracking-[-0.03em] md:text-[48px] md:leading-[1.0] md:tracking-[-0.05em]">
+          <h1 className="hero-stagger-2 mt-4 text-[36px] font-extrabold leading-[1.1] tracking-[-0.03em] md:text-[48px] md:leading-[1.0] md:tracking-[-0.05em]">
             {t("hero.title")}
           </h1>
 
-          <p className="mt-4 max-w-[480px] text-lg text-muted-foreground">
+          <p className="hero-stagger-3 mt-4 max-w-[480px] text-lg text-muted-foreground">
             {t("hero.subtitle")}
           </p>
 
-          <div className="mt-7 flex flex-wrap gap-3">
+          <div className="hero-stagger-4 mt-7 flex flex-wrap gap-3">
             <Button>{t("hero.cta.primary")}</Button>
             <Button variant="secondary">{t("hero.cta.secondary")}</Button>
           </div>
