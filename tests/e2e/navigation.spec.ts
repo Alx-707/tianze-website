@@ -141,10 +141,10 @@ test.describe("Navigation System", () => {
       await page.waitForURL(/\/en\/?$/, { waitUntil: "domcontentloaded" });
 
       // More robust: wait for home page key elements instead of just URL
-      await expect(page.getByTestId("home-hero-title")).toBeVisible({
+      await expect(page.getByRole("heading", { level: 1 })).toBeVisible({
         timeout: 30_000,
       });
-      await expect(page.getByTestId("hero-section").first()).toBeVisible({
+      await expect(page.getByTestId("hero-section")).toBeVisible({
         timeout: 30_000,
       });
       await waitForStablePage(page);

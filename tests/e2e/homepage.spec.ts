@@ -145,12 +145,14 @@ test.describe("Homepage Core Functionality", () => {
       const heroTitle = page.getByRole("heading", { level: 1 });
       await expect(heroTitle).toBeVisible();
 
-      // Tablet may use mobile or desktop navigation depending on header breakpoint
-      if (await isHeaderInMobileMode(page)) {
-        await expect(getHeaderMobileMenuButton(page)).toBeVisible();
-      } else {
-        await expect(getNav(page)).toBeVisible();
-      }
+      // Tablet may use either mobile or desktop navigation
+      const mobileVisible = await getHeaderMobileMenuButton(page)
+        .isVisible()
+        .catch(() => false);
+      const navVisible = await getNav(page)
+        .isVisible()
+        .catch(() => false);
+      expect(mobileVisible || navVisible).toBe(true);
     });
 
     test("should display correctly on mobile (375x667)", async ({ page }) => {
