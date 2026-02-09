@@ -69,10 +69,10 @@ test.describe("Homepage Core Functionality", () => {
       await expect(eyebrow.first()).toBeVisible();
     }
 
-    // Verify CTA buttons exist
-    const buttons = heroSection.getByRole("button");
-    const buttonCount = await buttons.count();
-    expect(buttonCount).toBeGreaterThanOrEqual(2);
+    // Verify CTA links exist (Button asChild renders as <a>)
+    const ctaLinks = heroSection.getByRole("link");
+    const ctaCount = await ctaLinks.count();
+    expect(ctaCount).toBeGreaterThanOrEqual(2);
 
     // Verify proof bar with business metrics
     const proofItems = heroSection.locator(".font-mono");
@@ -85,14 +85,13 @@ test.describe("Homepage Core Functionality", () => {
     const heroSection = page.getByTestId("hero-section");
     await expect(heroSection).toBeVisible();
 
-    // Verify primary and secondary CTA buttons
-    const buttons = heroSection.getByRole("button");
-    const buttonCount = await buttons.count();
-    expect(buttonCount).toBeGreaterThanOrEqual(2);
+    // Verify primary and secondary CTA links (Button asChild renders as <a>)
+    const ctaLinks = heroSection.getByRole("link");
+    const ctaCount = await ctaLinks.count();
+    expect(ctaCount).toBeGreaterThanOrEqual(2);
 
-    // Verify buttons are visible and clickable
-    await expect(buttons.first()).toBeVisible();
-    await expect(buttons.first()).toBeEnabled();
+    // Verify CTA links are visible
+    await expect(ctaLinks.first()).toBeVisible();
   });
 
   test.describe("Responsive Design Tests", () => {

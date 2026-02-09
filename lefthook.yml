@@ -28,7 +28,7 @@ pre-commit:
     # 架构守卫 - 仅检查已暂存的 JS/TS 变更（排除测试文件和脚本目录）
     architecture-guard:
       run: |
-        FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(ts|tsx|js|jsx)$' | grep -v '^tests/' | grep -v '__tests__' | grep -v '^scripts/' | grep -v '^src/test/' || true)
+        FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(ts|tsx|js|jsx)$' | grep -v '^tests/' | grep -v '__tests__' | grep -v '^scripts/' | grep -v '^src/test/' | grep -v '^docs/' | grep -v '^design-system/' || true)
         if [ -z "$FILES" ]; then echo "✅ 架构守卫检查通过 (无 JS/TS 变更)"; exit 0; fi
         for f in $FILES; do
           if git diff --cached -- "$f" | grep -E '^\+' | grep -v '^\+.*\/\/' | grep -qE 'export \* from'; then

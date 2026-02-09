@@ -37,9 +37,9 @@ vi.mock("next/image", () => ({
   ),
 }));
 
-// Mock next/link (P0-2: Logo converted to Server Component using next/link)
-vi.mock("next/link", () => ({
-  default: ({
+// Mock @/i18n/routing Link (locale-aware navigation)
+vi.mock("@/i18n/routing", () => ({
+  Link: ({
     href,
     children,
     className,

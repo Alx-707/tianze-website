@@ -1,0 +1,94 @@
+commit 79887b2b1a13e0e196c62931adfc26ab7a41a376
+Author: Alx-707 <134922845+Alx-707@users.noreply.github.com>
+Date:   Wed Feb 4 08:10:56 2026 +0800
+
+    fix: security gates + reduce CI/tooling noise (#18)
+    
+    * fix(security): move next to deps and make semgrep gate usable
+    
+    * fix(test): reduce vitest stderr noise
+    
+    - Silence console output by default in vitest setup (toggle via VITEST_SHOW_LOGS=1)
+    
+    - Filter jsdom navigation noise from stderr
+    
+    - Clamp AnimatedCounter delay to avoid TimeoutOverflowWarning
+    
+    * chore(tools): align knip/madge checks
+    
+    - Remove knip config hints and ignore Prettier auto-loaded plugins
+    
+    - Define production scan boundary via tsconfig.knip.json
+    
+    - Use madge --ts-config to reduce warning noise
+    
+    - Quiet dotenv load in Playwright config
+    
+    * refactor(i18n): centralize next-intl pathnames
+    
+    * test(lib): cover merge-objects prototype pollution keys
+    
+    * refactor(i18n): derive locale prefix regex from routing locales
+    
+    * fix(ci): skip vercel deploy when secrets missing
+    
+    Prevent PR check failures when Vercel credentials are not configured.
+    
+    * chore(quality-gate): tighten diff coverage exclude globs
+    
+    * fix(ci): guard vercel deploy with secrets
+    
+    Use a single-line job if expression to avoid workflow parse failures.
+    
+    * chore(deps): update baseline-browser-mapping
+    
+    * refactor(constants): simplify time constants
+    
+    * fix(ci): skip vercel deploy without secrets
+    
+    Gate deploy steps behind a secrets preflight.
+    
+    Prevents PR check failures when Vercel credentials are not configured.
+    
+    ---------
+    
+    Co-authored-by: Flood Control Developer <developer@flood-control.com>
+
+diff --git a/knip.jsonc b/knip.jsonc
+index cd5e70c..c34cc2c 100644
+--- a/knip.jsonc
++++ b/knip.jsonc
+@@ -8,16 +8,12 @@
+   "entry": [
+     "src/app/**/{page,layout,template,loading,error,not-found,route,head}.{ts,tsx}",
+     "src/app/api/**/*.{ts,tsx}",
+-    "middleware.ts",
+     "src/constants/index.ts",
+     "src/components/**/*.{ts,tsx}",
+     "src/lib/**/*.{ts,tsx}",
+     "scripts/**/*.{ts,tsx,js}",
+     "tests/**/*.{ts,tsx}",
+-    "playwright.config.ts",
+-    "vitest.config.mts",
+     "vitest.config.browser.ts",
+-    "next.config.ts",
+   ],
+   // 项目扫描范围：聚焦源代码、脚本与测试，不扫描生成物/文档。
+   "project": [
+@@ -41,6 +37,8 @@
+   "ignoreBinaries": ["open", "du"],
+   // 工具型依赖由 CI/lint/分析脚本消费，标记为已使用以便聚焦业务未用项。
+   "ignoreDependencies": [
++    // Prettier plugins are auto-loaded by Prettier when installed; knip may not detect usage reliably.
++    "@ianvs/prettier-plugin-sort-imports",
+     "@react-email/preview-server",
+     "@tailwindcss/typography",
+     "@next/eslint-plugin-next",
+@@ -51,6 +49,7 @@
+     "eslint-plugin-react",
+     "eslint-plugin-react-hooks",
+     "lighthouse",
++    "prettier-plugin-tailwindcss",
+     "sharp",
+     "source-map-explorer",
+     "tailwindcss",

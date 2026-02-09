@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import Link from "next/link";
 import { Download, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { InquiryDrawer } from "@/components/products/inquiry-drawer";
@@ -62,10 +61,10 @@ function ActionButtons({
           asChild
           className={cn(fullWidth && "flex-1")}
         >
-          <Link href={pdfHref} target="_blank" rel="noreferrer">
+          <a href={pdfHref} target="_blank" rel="noreferrer">
             <Download className="mr-2 h-4 w-4" />
             {downloadPdfLabel}
-          </Link>
+          </a>
         </Button>
       )}
     </div>

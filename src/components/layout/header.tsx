@@ -3,7 +3,7 @@
  *
  * 服务端渲染的头部，交互部件以客户端小岛方式注入，减少首屏 JS 体积。
  */
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { getTranslations } from "next-intl/server";
 import { cn } from "@/lib/utils";
 import {
@@ -105,10 +105,7 @@ export async function Header({
                 asChild
                 className="header-cta-desktop-only"
               >
-                <Link
-                  href={`/${locale}/contact?source=header_cta`}
-                  data-testid="header-cta"
-                >
+                <Link href="/contact" data-testid="header-cta">
                   {t("contactSales")}
                 </Link>
               </Button>

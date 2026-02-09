@@ -1,0 +1,247 @@
+commit bad3d3228c848f1feaab6d5e463d4750394fd8e6
+Author: Alx-707 <134922845+Alx-707@users.noreply.github.com>
+Date:   Tue Feb 3 16:58:23 2026 +0800
+
+    refactor: code quality and modularization from Linus review (#16)
+    
+    * refactor: modularize test setup, airtable service, and lead pipeline
+    
+    P0 - Test Infrastructure:
+    - Remove net.Server.listen monkey patch from vitest.config.mts
+    - Change ui: true to ui: false
+    - Remove global retry: 2
+    - Migrate cache.dir → cacheDir
+    
+    P1 - API Error Protocol:
+    - Add createApiErrorResponse/createApiSuccessResponse utilities
+    - Migrate /api/contact, /api/inquiry, /api/verify-turnstile routes
+    - Update safeParseJson to return errorCode
+    
+    P2 - Async/Interface Fixes:
+    - Make withIdempotency truly async
+    - Fix MemoryRateLimitStore interface consistency
+    - Add LOG_LEVEL=warn in test setup
+    - Fix shadcn asChild mock warnings
+    
+    P3 - Component Refactoring:
+    - WhatsApp i18n + component split (hooks extracted)
+    - processLead table-driven refactor
+    - Remove @ts-nocheck from WhatsApp types
+    
+    * docs: add linus review notes
+    
+    * fix: address critical issues from pr review
+    
+    - add logging for json structure validation in safeParseJson
+    - add logging for turnstile configuration errors
+    - add unit tests for useWhatsAppPosition hook (9 tests)
+    - add unit tests for useContextualMessage hook (8 tests)
+    
+    * feat: lead pipeline quality hardening
+    
+    - refactor serviceresult to discriminated union type
+      - prevents invalid states (success=true with error)
+      - add factory functions: createsuccess, createfailure
+      - add type guards: isservicesuccess, isservicefailure
+    - simplify checkconnection to return this.isready()
+    - add unit tests for lead pipeline modules:
+      - settle-service.test.ts (8 tests)
+      - with-timeout.test.ts (6 tests)
+      - pipeline-observability.test.ts (7 tests)
+      - service-result.test.ts (7 tests)
+    
+    * fix(tests): resolve type errors in test files
+    
+    - settle-service.test.ts: use isServiceFailure type guard for error access
+    - pipeline-observability.test.ts: add non-null assertions for mock.calls
+    - vitest.config.mts: remove invalid cacheDir property
+    
+    * fix(middleware): resolve locale type errors in test type-check
+    
+    - Add isValidLocale type guard for proper locale narrowing
+    - Change Set<Locale> to Set<string> for has() compatibility
+    - Fix localeCookie optional chaining with object type check
+    - Use object destructuring per eslint prefer-destructuring rule
+    
+    * fix(i18n): add missing supportchat key to full locale files
+    
+    * test: add coverage tests for process-lead and distributed-rate-limit
+    
+    - Add unexpected error handling test to process-lead.test.ts
+      - Covers catch block for dispatchLeadHandler errors
+      - Coverage: 83% → 94%
+    
+    - Create comprehensive distributed-rate-limit.test.ts (38 tests)
+      - MemoryRateLimitStore behavior tests
+      - checkDistributedRateLimit and getRateLimitStatus tests
+      - createRateLimitHeaders tests
+      - RATE_LIMIT_PRESETS validation
+      - Edge cases and boundary tests
+      - Coverage: 0% → 52%
+    
+    ---------
+    
+    Co-authored-by: Flood Control Developer <developer@flood-control.com>
+
+diff --git a/vitest.config.mts b/vitest.config.mts
+index 6208976..6bd97ff 100644
+--- a/vitest.config.mts
++++ b/vitest.config.mts
+@@ -1,123 +1,7 @@
+ /// <reference types="vitest" />
+-import { createServer, Server, type AddressInfo } from "node:net";
+ import { resolve } from "path";
+ import { defineConfig } from "vitest/config";
+ 
+-const shouldBypassLocalListen = await detectListenRestriction();
+-
+-if (shouldBypassLocalListen) {
+-  patchServerListen();
+-}
+-
+-async function detectListenRestriction(): Promise<boolean> {
+-  if (process.env.VITEST_FORCE_REAL_LISTEN === "true") {
+-    return false;
+-  }
+-
+-  if (process.env.VITEST_BYPASS_NET_LISTEN === "true") {
+-    return true;
+-  }
+-
+-  return await new Promise<boolean>((resolvePromise) => {
+-    const tester = createServer();
+-    let finished = false;
+-
+-    const finish = (result: boolean) => {
+-      if (finished) {
+-        return;
+-      }
+-      finished = true;
+-      tester.removeAllListeners();
+-      resolvePromise(result);
+-    };
+-
+-    tester.once(
+-      "error",
+-      (error: Error & { code?: string; syscall?: string }) => {
+-        finish(error?.code === "EPERM" && error?.syscall === "listen");
+-      },
+-    );
+-
+-    tester.listen(0, "127.0.0.1", () => {
+-      tester.close(() => finish(false));
+-    });
+-
+-    setTimeout(() => finish(false), 1000);
+-  });
+-}
+-
+-function patchServerListen() {
+-  const proto = Server.prototype as Server & {
+-    isTemplateListenPatched?: boolean;
+-  };
+-
+-  if (proto.isTemplateListenPatched) {
+-    return;
+-  }
+-
+-  proto.isTemplateListenPatched = true;
+-
+-  const fallbackAddress: AddressInfo = {
+-    address: "127.0.0.1",
+-    family: "IPv4",
+-    port: 0,
+-  };
+-
+-  const originalAddress = proto.address;
+-  proto.address = function patchedAddress() {
+-    return originalAddress.call(this) ?? fallbackAddress;
+-  };
+-
+-  proto.listen = function patchedListen(this: Server, ...args: unknown[]) {
+-    const callback =
+-      typeof args[args.length - 1] === "function"
+-        ? (args[args.length - 1] as () => void)
+-        : undefined;
+-
+-    setListeningState(this, true);
+-
+-    queueMicrotask(() => {
+-      callback?.call(this);
+-      this.emit("listening");
+-    });
+-
+-    return this;
+-  };
+-
+-  type ServerCloseCallback = Parameters<Server["close"]>[0];
+-
+-  proto.close = function patchedClose(
+-    this: Server,
+-    callback?: ServerCloseCallback,
+-  ) {
+-    setListeningState(this, false);
+-
+-    queueMicrotask(() => {
+-      callback?.call(this);
+-      this.emit("close");
+-    });
+-
+-    return this;
+-  };
+-
+-  console.warn(
+-    "[vitest] 检测到沙箱禁止监听 127.0.0.1，已模拟 net.Server.listen 以确保测试流程可继续。",
+-  );
+-}
+-
+-function setListeningState(server: Server, value: boolean) {
+-  try {
+-    Object.defineProperty(server, "listening", {
+-      configurable: true,
+-      enumerable: false,
+-      value,
+-      writable: true,
+-    });
+-  } catch {
+-    // Node.js 20 在沙箱下禁止覆写该属性，静默忽略即可。
+-  }
+-}
+-
+ export default defineConfig({
+   test: {
+     // 测试环境配置 - 使用标准 jsdom 环境
+@@ -264,8 +148,8 @@ export default defineConfig({
+     // 并发设置 - 优化 CI 环境性能
+     pool: "threads",
+ 
+-    // 添加测试重试机制 - 处理间歇性失败
+-    retry: 2, // 失败后重试 2 次
++    // 添加测试重试机制 - 仅用于已知 flaky 测试，应在具体测试上使用 test.retry()
++    // retry: 2, // 已移除全局 retry，遇到 flaky 测试应修复根因或局部声明
+ 
+     // 报告器配置
+     reporters: ["verbose", "json", "html"],
+@@ -283,11 +167,6 @@ export default defineConfig({
+     logHeapUsage: true,
+     isolate: true,
+ 
+-    // 缓存配置 - 智能缓存策略
+-    cache: {
+-      dir: "node_modules/.vitest", // 缓存目录
+-    },
+-
+     // 依赖优化 - 提高模块解析性能
+     deps: {
+       optimizer: {
+@@ -300,8 +179,8 @@ export default defineConfig({
+       },
+     },
+ 
+-    // UI配置
+-    ui: true,
++    // UI配置 - 默认关闭以避免端口监听需求
++    ui: false,
+     open: false,
+   },
+ 

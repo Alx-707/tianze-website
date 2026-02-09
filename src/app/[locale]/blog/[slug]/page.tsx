@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Calendar, Clock, Tag, User } from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -255,7 +255,7 @@ async function BlogDetailContent({
       <JsonLdScript data={articleSchema} />
       <nav className="mb-6">
         <Link
-          href={`/${locale}/blog`}
+          href="/blog"
           className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft className="h-4 w-4" />

@@ -1,0 +1,114 @@
+commit 79887b2b1a13e0e196c62931adfc26ab7a41a376
+Author: Alx-707 <134922845+Alx-707@users.noreply.github.com>
+Date:   Wed Feb 4 08:10:56 2026 +0800
+
+    fix: security gates + reduce CI/tooling noise (#18)
+    
+    * fix(security): move next to deps and make semgrep gate usable
+    
+    * fix(test): reduce vitest stderr noise
+    
+    - Silence console output by default in vitest setup (toggle via VITEST_SHOW_LOGS=1)
+    
+    - Filter jsdom navigation noise from stderr
+    
+    - Clamp AnimatedCounter delay to avoid TimeoutOverflowWarning
+    
+    * chore(tools): align knip/madge checks
+    
+    - Remove knip config hints and ignore Prettier auto-loaded plugins
+    
+    - Define production scan boundary via tsconfig.knip.json
+    
+    - Use madge --ts-config to reduce warning noise
+    
+    - Quiet dotenv load in Playwright config
+    
+    * refactor(i18n): centralize next-intl pathnames
+    
+    * test(lib): cover merge-objects prototype pollution keys
+    
+    * refactor(i18n): derive locale prefix regex from routing locales
+    
+    * fix(ci): skip vercel deploy when secrets missing
+    
+    Prevent PR check failures when Vercel credentials are not configured.
+    
+    * chore(quality-gate): tighten diff coverage exclude globs
+    
+    * fix(ci): guard vercel deploy with secrets
+    
+    Use a single-line job if expression to avoid workflow parse failures.
+    
+    * chore(deps): update baseline-browser-mapping
+    
+    * refactor(constants): simplify time constants
+    
+    * fix(ci): skip vercel deploy without secrets
+    
+    Gate deploy steps behind a secrets preflight.
+    
+    Prevents PR check failures when Vercel credentials are not configured.
+    
+    ---------
+    
+    Co-authored-by: Flood Control Developer <developer@flood-control.com>
+
+diff --git a/tsconfig.knip.json b/tsconfig.knip.json
+new file mode 100644
+index 0000000..e586e13
+--- /dev/null
++++ b/tsconfig.knip.json
+@@ -0,0 +1,52 @@
++{
++  "extends": "./tsconfig.json",
++  "include": [
++    "next-env.d.ts",
++    "env.d.ts",
++    "middleware.ts",
++    "mdx-components.tsx",
++    "next.config.ts",
++    "src/**/*.ts",
++    "src/**/*.tsx"
++  ],
++  "exclude": [
++    "node_modules",
++    "backups/**/*",
++    "src/components/dev-tools/**/*.ts",
++    "src/components/dev-tools/**/*.tsx",
++    "src/app/[locale]/dev-tools/**/*.ts",
++    "src/app/[locale]/dev-tools/**/*.tsx",
++    "src/app/[locale]/diagnostics/**/*.ts",
++    "src/app/[locale]/diagnostics/**/*.tsx",
++    "src/lib/dev-tools-positioning.ts",
++    "src/lib/performance-monitoring-coordinator.ts",
++    "**/__tests__/**/*.ts",
++    "**/__tests__/**/*.tsx",
++    "**/*.test.ts",
++    "**/*.test.tsx",
++    "**/*.spec.ts",
++    "**/*.spec.tsx",
++    "src/test/**/*.ts",
++    "src/test/**/*.tsx",
++    "src/testing/**/*.ts",
++    "src/testing/**/*.tsx",
++    "tests/**/*.ts",
++    "tests/**/*.tsx",
++    "__mocks__/**/*.ts",
++    "__mocks__/**/*.tsx",
++    "__mocks__/**/*.js",
++    "src/**/__tests__/**/*.ts",
++    "src/**/__tests__/**/*.tsx",
++    "src/**/*.test.ts",
++    "src/**/*.test.tsx",
++    "src/**/*.spec.ts",
++    "src/**/*.spec.tsx",
++    "scripts/**/*.ts",
++    "scripts/**/*.js",
++    "config/**/*.ts",
++    "config/**/*.js",
++    "instrumentation*.ts",
++    "src/constants/dev-tools.ts",
++    "src/constants/test-*.ts"
++  ]
++}

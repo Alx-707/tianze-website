@@ -115,7 +115,7 @@ export const getAllProductsCached: GetAllProductsCachedFn = async (
 
   return filtered.map((product) => mapProductDetailToSummary(product));
 };
-/* eslint-enable require-await */
+/* eslint-enable require-await -- end of "use cache" async wrapper */
 
 /**
  * Get a single product by slug as a ProductDetail model.
@@ -137,7 +137,7 @@ export const getProductBySlugCached: GetProductBySlugCachedFn = async (
   const product = getProductDetail(locale, slug);
   return product;
 };
-/* eslint-enable require-await */
+/* eslint-enable require-await -- end of "use cache" async wrapper */
 
 /**
  * Get all unique product categories for a locale.
@@ -156,7 +156,7 @@ export const getProductCategoriesCached: GetProductCategoriesCachedFn = async (
   const categories = getProductCategories(locale);
   return categories;
 };
-/* eslint-enable require-await */
+/* eslint-enable require-await -- end of "use cache" async wrapper */
 
 /**
  * Get all unique product standards for a locale.
@@ -175,7 +175,7 @@ export const getProductStandardsCached: GetProductStandardsCachedFn = async (
   const standards = getProductStandards(locale);
   return standards;
 };
-/* eslint-enable require-await */
+/* eslint-enable require-await -- end of "use cache" async wrapper */
 
 /**
  * Get featured products for homepage or highlight sections.
@@ -195,4 +195,4 @@ export async function getFeaturedProductsCached(
   const products = getFeaturedProducts(locale, limit);
   return products.map((product) => mapProductDetailToSummary(product));
 }
-/* eslint-enable require-await */
+/* eslint-enable require-await -- end of "use cache" async wrapper */

@@ -154,6 +154,11 @@
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
   --ease-smooth: cubic-bezier(0.25, 0.1, 0.25, 1);
 
+  /* Scroll reveal — consumed by scroll-reveal.tsx via inline style + CSS var() */
+  --scroll-reveal-distance: 24px;
+  --scroll-reveal-duration: 700ms;
+  --scroll-reveal-stagger: 100ms;
+
   --transition-colors:
     color var(--duration-fast) var(--ease-out),
     background-color var(--duration-fast) var(--ease-out),
@@ -638,6 +643,28 @@
   .animate-scale-in {
     animation: scaleIn var(--duration-normal) var(--ease-spring) forwards;
   }
+
+  /* Hero stagger — mount-triggered entrance sequence
+     Duration: 700ms with spring easing for organic feel
+     Stagger: 100ms intervals for clear cascading perception */
+  .hero-stagger-1 {
+    animation: slideUp 700ms var(--ease-spring) 0ms both;
+  }
+  .hero-stagger-2 {
+    animation: slideUp 700ms var(--ease-spring) 100ms both;
+  }
+  .hero-stagger-3 {
+    animation: slideUp 700ms var(--ease-spring) 200ms both;
+  }
+  .hero-stagger-4 {
+    animation: slideUp 700ms var(--ease-spring) 300ms both;
+  }
+  .hero-stagger-5 {
+    animation: slideUp 700ms var(--ease-spring) 400ms both;
+  }
+  .hero-stagger-6 {
+    animation: scaleIn 800ms var(--ease-spring) 250ms both;
+  }
 }
 
 @keyframes fadeIn {
@@ -652,7 +679,7 @@
 @keyframes slideUp {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(24px);
   }
   to {
     opacity: 1;
@@ -663,7 +690,7 @@
 @keyframes slideDown {
   from {
     opacity: 0;
-    transform: translateY(-8px);
+    transform: translateY(-24px);
   }
   to {
     opacity: 1;
@@ -674,7 +701,7 @@
 @keyframes scaleIn {
   from {
     opacity: 0;
-    transform: scale(0.95);
+    transform: scale(0.9);
   }
   to {
     opacity: 1;

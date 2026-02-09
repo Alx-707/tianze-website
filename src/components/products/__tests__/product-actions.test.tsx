@@ -37,26 +37,6 @@ beforeEach(() => {
     MockIntersectionObserver as unknown as typeof IntersectionObserver;
 });
 
-// Mock next/link
-vi.mock("next/link", () => ({
-  default: ({
-    href,
-    children,
-    target,
-    rel,
-    ...rest
-  }: {
-    href: string;
-    children: React.ReactNode;
-    target?: string;
-    rel?: string;
-  }) => (
-    <a href={href} target={target} rel={rel} data-testid="pdf-link" {...rest}>
-      {children}
-    </a>
-  ),
-}));
-
 // Mock lucide-react icons
 vi.mock("lucide-react", () => ({
   Download: (props: React.SVGProps<SVGSVGElement>) => (
@@ -164,7 +144,9 @@ describe("ProductActions", () => {
     it("does not render PDF button when downloadPdfLabel is undefined", () => {
       render(<ProductActions {...defaultProps} pdfHref="/product.pdf" />);
 
-      expect(screen.queryByTestId("pdf-link")).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("link", { name: /download/i }),
+      ).not.toBeInTheDocument();
     });
 
     it("PDF link has correct href", () => {
@@ -176,7 +158,7 @@ describe("ProductActions", () => {
         />,
       );
 
-      const links = screen.getAllByTestId("pdf-link");
+      const links = screen.getAllByRole("link", { name: /download/i });
       expect(links[0]).toHaveAttribute("href", "/docs/product-spec.pdf");
     });
 
@@ -189,7 +171,7 @@ describe("ProductActions", () => {
         />,
       );
 
-      const links = screen.getAllByTestId("pdf-link");
+      const links = screen.getAllByRole("link", { name: /download/i });
       expect(links[0]).toHaveAttribute("target", "_blank");
       expect(links[0]).toHaveAttribute("rel", "noreferrer");
     });
@@ -361,10 +343,9 @@ describe("ProductActions", () => {
         />,
       );
 
-      // Empty string is not undefined, so link renders (implementation detail)
-      // There may be 2 links due to sticky bar
-      const links = screen.getAllByTestId("pdf-link");
-      expect(links.length).toBeGreaterThanOrEqual(1);
+      // Empty string is not undefined, so Download text renders
+      const downloadTexts = screen.getAllByText("Download");
+      expect(downloadTexts.length).toBeGreaterThanOrEqual(1);
     });
   });
 });

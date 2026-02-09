@@ -16,9 +16,10 @@ describe("ProductsSection", () => {
     expect(screen.getByText("products.subtitle")).toBeInTheDocument();
   });
 
-  it("renders CTA button with link to products page", () => {
+  it("renders CTA button as a link to products page", () => {
     render(<ProductsSection />);
-    expect(screen.getByText("products.cta")).toBeInTheDocument();
+    const ctaLink = screen.getByText("products.cta").closest("a");
+    expect(ctaLink).toHaveAttribute("href", "/products");
   });
 
   it("renders 4 product cards with tags, titles, and standards", () => {

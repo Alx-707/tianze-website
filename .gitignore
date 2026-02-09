@@ -29,6 +29,17 @@ public/messages/
 
 # AI Tools (personal config)
 .kiro/
+.claude/skills/
+.claude/skills-reference-*/
+.claude-plugin/
+.agents/
+sessions/
+config.json
+views.json
+labels/
+statuses/
+squirrel.toml
+scripts/ralph/
 
 # OS
 .DS_Store

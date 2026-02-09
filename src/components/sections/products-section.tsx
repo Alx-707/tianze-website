@@ -1,8 +1,10 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
+import type { LinkHref } from "@/lib/i18n/route-parsing";
 import { Button } from "@/components/ui/button";
+import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { SectionHead } from "@/components/ui/section-head";
 
 const PRODUCT_COUNT = 4;
@@ -19,10 +21,10 @@ function ProductCard({
   title: string;
   specs: string[];
   standard: string;
-  link: string;
+  link: LinkHref;
 }) {
   return (
-    <div className="group rounded-lg bg-background p-6 shadow-card transition-shadow hover:shadow-[var(--shadow-card-active)]">
+    <div className="group rounded-lg bg-background p-6 shadow-card transition-[box-shadow,transform] duration-150 hover:-translate-y-0.5 hover:shadow-[var(--shadow-card-active)]">
       <span className="inline-block rounded bg-[var(--primary-light)] px-2.5 py-1 text-xs font-semibold text-primary">
         {tag}
       </span>
@@ -65,7 +67,7 @@ export function ProductsSection() {
         t(`products.${key}.spec${String(j + 1)}`),
       ),
       standard: t(`products.${key}.standard`),
-      link: t(`products.${key}.link`),
+      link: t(`products.${key}.link`) as LinkHref,
     };
   });
 
@@ -77,18 +79,24 @@ export function ProductsSection() {
 
   return (
     <section className="section-divider py-14 md:py-[72px]">
-      <div className="mx-auto max-w-[1080px] px-6">
+      <ScrollReveal className="mx-auto max-w-[1080px] px-6">
         <SectionHead
           title={t("products.title")}
           subtitle={t("products.subtitle")}
           action={action}
         />
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          {products.map((product) => (
-            <ProductCard key={product.tag} {...product} />
+          {products.map((product, index) => (
+            <ScrollReveal
+              key={product.tag}
+              direction="scale"
+              staggerIndex={index}
+            >
+              <ProductCard {...product} />
+            </ScrollReveal>
           ))}
         </div>
-      </div>
+      </ScrollReveal>
     </section>
   );
 }

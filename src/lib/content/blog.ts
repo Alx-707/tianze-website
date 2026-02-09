@@ -171,7 +171,7 @@ export const getAllPostsCached: GetAllPostsCachedFn = async (
 
   return posts.map((post) => mapBlogPostToSummary(post, locale));
 };
-/* eslint-enable require-await */
+/* eslint-enable require-await -- end of "use cache" async wrapper */
 
 /**
  * Get a single blog post by slug as a PostDetail model.
@@ -197,4 +197,4 @@ export const getPostBySlugCached: GetPostBySlugCachedFn = async (
 
   return mapBlogPostToDetail(post, locale);
 };
-/* eslint-enable require-await */
+/* eslint-enable require-await -- end of "use cache" async wrapper */

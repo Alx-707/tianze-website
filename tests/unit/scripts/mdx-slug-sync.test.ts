@@ -1,4 +1,4 @@
-/* eslint-disable security/detect-non-literal-fs-filename */
+/* eslint-disable security/detect-non-literal-fs-filename -- test creates temp dirs with dynamic names for fixture isolation */
 import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";

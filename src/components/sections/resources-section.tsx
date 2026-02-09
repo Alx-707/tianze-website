@@ -1,6 +1,9 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/routing";
+import type { LinkHref } from "@/lib/i18n/route-parsing";
+import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { SectionHead } from "@/components/ui/section-head";
 
 const RESOURCE_COUNT = 4;
@@ -101,20 +104,22 @@ function ResourceCard({
   icon: React.ReactNode;
   title: string;
   desc: string;
-  link: string;
+  link: LinkHref;
 }) {
   return (
-    <a
+    <Link
       href={link}
-      className="flex flex-col gap-3 bg-background p-6 transition-colors hover:bg-[var(--primary-50)]"
+      className="group flex flex-col gap-3 bg-background p-6 transition-colors hover:bg-[var(--primary-50)]"
     >
       <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--primary-light)] text-primary">
         {icon}
       </div>
       <h3 className="text-[15px] font-semibold leading-snug">{title}</h3>
       <p className="text-sm leading-relaxed text-muted-foreground">{desc}</p>
-      <span className="mt-auto text-sm font-medium text-primary">&rarr;</span>
-    </a>
+      <span className="mt-auto inline-block text-sm font-medium text-primary transition-transform duration-150 group-hover:translate-x-1">
+        &rarr;
+      </span>
+    </Link>
   );
 }
 
@@ -127,13 +132,13 @@ export function ResourcesSection() {
       icon: ICONS[i],
       title: t(`resources.${key}.title`),
       desc: t(`resources.${key}.desc`),
-      link: t(`resources.${key}.link`),
+      link: t(`resources.${key}.link`) as LinkHref,
     };
   });
 
   return (
     <section className="section-divider py-14 md:py-[72px]">
-      <div className="mx-auto max-w-[1080px] px-6">
+      <ScrollReveal className="mx-auto max-w-[1080px] px-6">
         <SectionHead
           title={t("resources.title")}
           subtitle={t("resources.subtitle")}
@@ -145,7 +150,7 @@ export function ResourcesSection() {
             ))}
           </div>
         </div>
-      </div>
+      </ScrollReveal>
     </section>
   );
 }

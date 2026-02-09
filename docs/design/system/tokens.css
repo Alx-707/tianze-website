@@ -1,0 +1,324 @@
+/**
+ * Tianze Design Tokens - CSS Implementation
+ *
+ * Industrial Steel Blue Theme (Hue 230)
+ * B2B Manufacturing | Modern Minimalist
+ *
+ * Usage: Copy relevant sections to globals.css
+ * or import this file directly.
+ */
+
+/* ==================== PRIMITIVE TOKENS ==================== */
+
+:root {
+  /* Primary Scale (Industrial Steel Blue - sRGB Safe) */
+  --primary-50:  oklch(0.97 0.012 230);
+  --primary-100: oklch(0.93 0.028 230);
+  --primary-200: oklch(0.86 0.060 230);
+  --primary-300: oklch(0.78 0.090 230);
+  --primary-400: oklch(0.68 0.090 230);
+  --primary-500: oklch(0.58 0.090 230);
+  --primary-600: oklch(0.45 0.090 230);
+  --primary-700: oklch(0.37 0.070 230);
+  --primary-800: oklch(0.29 0.055 230);
+  --primary-900: oklch(0.22 0.040 230);
+  --primary-950: oklch(0.16 0.030 230);
+}
+
+/* ==================== SEMANTIC TOKENS (Light) ==================== */
+
+:root {
+  /* Border Radius - Micro Precision */
+  --radius: 0.375rem;
+  --radius-none: 0;
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+  --radius-full: 9999px;
+
+  /* Foundation */
+  --background: oklch(0.99 0.005 230);
+  --foreground: oklch(0.15 0.030 230);
+
+  /* Surfaces */
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.15 0.030 230);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.15 0.030 230);
+
+  /* Brand */
+  --primary: oklch(0.45 0.090 230);
+  --primary-foreground: oklch(0.98 0.005 230);
+
+  /* Secondary */
+  --secondary: oklch(0.96 0.015 230);
+  --secondary-foreground: oklch(0.25 0.040 230);
+
+  /* Muted */
+  --muted: oklch(0.96 0.015 230);
+  --muted-foreground: oklch(0.50 0.040 230);
+
+  /* Accent */
+  --accent: oklch(0.94 0.020 230);
+  --accent-foreground: oklch(0.25 0.040 230);
+
+  /* Destructive */
+  --destructive: oklch(0.55 0.200 27);
+  --destructive-foreground: oklch(0.98 0 0);
+
+  /* Borders & Inputs */
+  --border: oklch(0.90 0.015 230);
+  --input: oklch(0.90 0.015 230);
+  --ring: oklch(0.45 0.090 230);
+
+  /* Status Colors */
+  --success: oklch(0.60 0.150 145);
+  --success-foreground: oklch(0.98 0 0);
+  --warning: oklch(0.75 0.150 65);
+  --warning-foreground: oklch(0.15 0.030 230);
+  --error: oklch(0.55 0.200 27);
+  --error-foreground: oklch(0.98 0 0);
+  --info: oklch(0.60 0.120 240);
+  --info-foreground: oklch(0.98 0 0);
+
+  /* Charts */
+  --chart-1: oklch(0.45 0.090 230);
+  --chart-2: oklch(0.60 0.150 145);
+  --chart-3: oklch(0.75 0.150 65);
+  --chart-4: oklch(0.60 0.120 240);
+  --chart-5: oklch(0.50 0.040 230);
+
+  /* Selection */
+  --selection-background: oklch(0.45 0.090 230 / 20%);
+  --selection-foreground: oklch(0.15 0.030 230);
+
+  /* Sidebar */
+  --sidebar: oklch(0.98 0.008 230);
+  --sidebar-foreground: oklch(0.15 0.030 230);
+  --sidebar-primary: oklch(0.45 0.090 230);
+  --sidebar-primary-foreground: oklch(0.98 0.005 230);
+  --sidebar-accent: oklch(0.95 0.015 230);
+  --sidebar-accent-foreground: oklch(0.25 0.040 230);
+  --sidebar-border: oklch(0.90 0.015 230);
+  --sidebar-ring: oklch(0.45 0.090 230);
+
+  /* Shadows (Slate-toned) */
+  --shadow-sm: 0 1px 2px 0 rgb(15 23 42 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(15 23 42 / 0.08), 0 2px 4px -2px rgb(15 23 42 / 0.06);
+  --shadow-lg: 0 10px 15px -3px rgb(15 23 42 / 0.08), 0 4px 6px -4px rgb(15 23 42 / 0.04);
+  --shadow-xl: 0 20px 25px -5px rgb(15 23 42 / 0.10), 0 8px 10px -6px rgb(15 23 42 / 0.04);
+
+  /* Animation */
+  --duration-instant: 50ms;
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 350ms;
+  --ease-default: cubic-bezier(0.2, 0, 0, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+  /* Composite Transitions */
+  --transition-colors: color var(--duration-fast) var(--ease-default),
+                       background-color var(--duration-fast) var(--ease-default),
+                       border-color var(--duration-fast) var(--ease-default);
+  --transition-transform: transform var(--duration-normal) var(--ease-default);
+  --transition-opacity: opacity var(--duration-normal) var(--ease-default);
+  --transition-shadow: box-shadow var(--duration-normal) var(--ease-default);
+
+  /* Focus States */
+  --state-focus-ring: var(--ring);
+  --state-focus-ring-width: 2px;
+  --state-focus-ring-offset: 2px;
+
+  /* Interaction States */
+  --state-hover-bg: var(--accent);
+  --state-active-bg: oklch(0.92 0.025 230);
+  --state-selected-bg: oklch(0.45 0.090 230 / 0.1);
+  --state-selected-border: var(--primary);
+  --state-disabled-opacity: 0.5;
+}
+
+/* ==================== SEMANTIC TOKENS (Dark) ==================== */
+
+.dark {
+  /* Foundation */
+  --background: oklch(0.12 0.020 230);
+  --foreground: oklch(0.95 0.008 230);
+
+  /* Surfaces */
+  --card: oklch(0.15 0.020 230);
+  --card-foreground: oklch(0.95 0.008 230);
+  --popover: oklch(0.15 0.020 230);
+  --popover-foreground: oklch(0.95 0.008 230);
+
+  /* Brand */
+  --primary: oklch(0.70 0.090 230);
+  --primary-foreground: oklch(0.12 0.020 230);
+
+  /* Secondary */
+  --secondary: oklch(0.20 0.025 230);
+  --secondary-foreground: oklch(0.95 0.008 230);
+
+  /* Muted */
+  --muted: oklch(0.20 0.025 230);
+  --muted-foreground: oklch(0.65 0.050 230);
+
+  /* Accent */
+  --accent: oklch(0.22 0.025 230);
+  --accent-foreground: oklch(0.95 0.008 230);
+
+  /* Destructive */
+  --destructive: oklch(0.60 0.180 27);
+  --destructive-foreground: oklch(0.98 0 0);
+
+  /* Borders & Inputs */
+  --border: oklch(0.25 0.025 230);
+  --input: oklch(0.25 0.025 230);
+  --ring: oklch(0.60 0.090 230);
+
+  /* Status Colors */
+  --success: oklch(0.65 0.150 145);
+  --success-foreground: oklch(0.12 0.020 230);
+  --warning: oklch(0.80 0.150 65);
+  --warning-foreground: oklch(0.12 0.020 230);
+  --error: oklch(0.60 0.180 27);
+  --error-foreground: oklch(0.98 0 0);
+  --info: oklch(0.65 0.120 240);
+  --info-foreground: oklch(0.12 0.020 230);
+
+  /* Charts */
+  --chart-1: oklch(0.70 0.090 230);
+  --chart-2: oklch(0.65 0.150 145);
+  --chart-3: oklch(0.80 0.150 65);
+  --chart-4: oklch(0.65 0.120 240);
+  --chart-5: oklch(0.60 0.040 230);
+
+  /* Selection */
+  --selection-background: oklch(0.45 0.090 230 / 40%);
+  --selection-foreground: oklch(0.98 0.005 230);
+
+  /* Sidebar */
+  --sidebar: oklch(0.12 0.020 230);
+  --sidebar-foreground: oklch(0.95 0.008 230);
+  --sidebar-primary: oklch(0.70 0.090 230);
+  --sidebar-primary-foreground: oklch(0.12 0.020 230);
+  --sidebar-accent: oklch(0.20 0.025 230);
+  --sidebar-accent-foreground: oklch(0.95 0.008 230);
+  --sidebar-border: oklch(0.25 0.025 230);
+  --sidebar-ring: oklch(0.60 0.090 230);
+
+  /* Shadows (Stronger for dark mode) */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.30);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.40), 0 2px 4px -2px rgb(0 0 0 / 0.30);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.40), 0 4px 6px -4px rgb(0 0 0 / 0.20);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.50), 0 8px 10px -6px rgb(0 0 0 / 0.25);
+
+  /* Interaction States */
+  --state-hover-bg: var(--accent);
+  --state-active-bg: oklch(0.18 0.025 230);
+  --state-selected-bg: oklch(0.70 0.090 230 / 0.15);
+}
+
+/* ==================== COMPONENT TOKENS ==================== */
+
+:root {
+  /* Button */
+  --button-radius: var(--radius-md);
+  --button-font-weight: 500;
+  --button-transition: var(--transition-colors);
+
+  --button-primary-bg: var(--primary);
+  --button-primary-fg: var(--primary-foreground);
+  --button-primary-hover-bg: var(--primary-700);
+  --button-primary-active-bg: var(--primary-800);
+
+  --button-secondary-bg: var(--secondary);
+  --button-secondary-fg: var(--secondary-foreground);
+  --button-secondary-border: var(--border);
+
+  --button-outline-bg: transparent;
+  --button-outline-fg: var(--foreground);
+  --button-outline-border: var(--border);
+  --button-outline-hover-bg: var(--accent);
+
+  --button-ghost-bg: transparent;
+  --button-ghost-fg: var(--foreground);
+  --button-ghost-hover-bg: var(--accent);
+
+  --button-destructive-bg: var(--destructive);
+  --button-destructive-fg: var(--destructive-foreground);
+
+  /* Card */
+  --card-radius: var(--radius-xl);
+  --card-padding: 1.5rem;
+  --card-gap: 1rem;
+  --card-default-shadow: var(--shadow-sm);
+  --card-interactive-hover-shadow: var(--shadow-md);
+  --card-elevated-shadow: var(--shadow-md);
+
+  /* Form */
+  --input-height: 2.5rem;
+  --input-padding-x: 0.75rem;
+  --input-radius: var(--radius-md);
+  --input-border-width: 1px;
+
+  /* Table */
+  --table-header-bg: var(--muted);
+  --table-header-fg: var(--muted-foreground);
+  --table-row-hover-bg: var(--accent);
+  --table-cell-padding-x: 1rem;
+  --table-cell-padding-y: 0.75rem;
+
+  /* Badge */
+  --badge-radius: var(--radius-full);
+  --badge-padding-x: 0.625rem;
+  --badge-padding-y: 0.125rem;
+  --badge-font-size: 0.75rem;
+  --badge-font-weight: 500;
+
+  --badge-success-bg: oklch(0.60 0.150 145 / 0.15);
+  --badge-success-fg: oklch(0.50 0.150 145);
+  --badge-success-border: oklch(0.60 0.150 145 / 0.30);
+
+  --badge-warning-bg: oklch(0.75 0.150 65 / 0.15);
+  --badge-warning-fg: oklch(0.55 0.150 65);
+  --badge-warning-border: oklch(0.75 0.150 65 / 0.30);
+
+  --badge-error-bg: oklch(0.55 0.200 27 / 0.15);
+  --badge-error-fg: oklch(0.55 0.200 27);
+  --badge-error-border: oklch(0.55 0.200 27 / 0.30);
+
+  --badge-info-bg: oklch(0.60 0.120 240 / 0.15);
+  --badge-info-fg: oklch(0.50 0.120 240);
+  --badge-info-border: oklch(0.60 0.120 240 / 0.30);
+}
+
+/* ==================== HIGH CONTRAST MODE ==================== */
+
+@media (prefers-contrast: high) {
+  :root {
+    --border: oklch(0.30 0.030 230);
+    --ring: oklch(0.30 0.030 230);
+    --state-focus-ring-width: 3px;
+  }
+
+  .dark {
+    --border: oklch(0.85 0.020 230);
+    --ring: oklch(0.85 0.020 230);
+  }
+}
+
+/* ==================== REDUCED MOTION ==================== */
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-instant: 0.01ms;
+    --duration-fast: 0.01ms;
+    --duration-normal: 0.01ms;
+    --duration-slow: 0.01ms;
+  }
+}

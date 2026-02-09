@@ -1,6 +1,6 @@
 ---
 type: "auto"
-description: "shadcn/ui design system, Tailwind CSS, clsx + tailwind-merge, dynamic class safelist patterns, accessibility (a11y), responsive components, next/image, Next.js 16 Metadata/OG changes, hreflang, JSON-LD"
+description: "shadcn/ui design system, Tailwind CSS v4 (@theme inline), clsx + tailwind-merge, dynamic class @source inline patterns, accessibility (a11y), responsive components, next/image, Next.js Metadata/OG, hreflang, JSON-LD"
 ---
 
 # UI Design System Guidelines
@@ -12,7 +12,7 @@ description: "shadcn/ui design system, Tailwind CSS, clsx + tailwind-merge, dyna
 - Custom components live under `components/ui`; **do not modify library code**
 - Reuse styles with `@apply` in CSS/PostCSS
 - Manage conditional class names with **clsx** + **tailwind-merge**; keep logic simple
-- **Tailwind dynamic classes**: avoid building class names via template literals. Use literal mappings or configure `safelist` patterns in `tailwind.config.js` to prevent purging.
+- **Tailwind dynamic classes**: avoid building class names via template literals. Use literal mappings or `@source inline()` in CSS to prevent purging.
 
 ### shadcn/ui Component Usage
 
@@ -588,165 +588,179 @@ function BadStatusBadge({ color }: { color: string }) {
 }
 ```
 
-## Tailwind CSS Configuration Best Practices
+## Tailwind CSS v4 Configuration Best Practices
 
-### Enhanced Tailwind Configuration
+> **Important**: Tailwind CSS v4 uses **CSS-first configuration**. There is no `tailwind.config.js`.
+> All theme customization lives in your CSS file via `@theme` / `@theme inline`.
 
-```javascript
-// tailwind.config.js - Organized and optimized configuration
-/** @type {import('tailwindcss').Config} */
-module.exports = {
-  content: [
-    './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/components/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/app/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/lib/**/*.{js,ts,jsx,tsx,mdx}',
-  ],
+### v3 → v4 Key Migration Reference
 
-  // Dark mode configuration
-  darkMode: ['class'],
+| v3 Pattern | v4 Equivalent |
+|------------|---------------|
+| `tailwind.config.js` + `module.exports` | CSS-only (`@import "tailwindcss"`) |
+| `content: [...]` | Automatic scanning; use `@source not "..."` to exclude |
+| `darkMode: ['class']` | `@custom-variant dark (&:is(.dark *))` |
+| `theme.extend.colors` | `@theme inline { --color-*: var(--css-var) }` |
+| `safelist: [...]` | `@source inline("class1 class2 ...")` |
+| `plugins: [require('...')]` | `@plugin 'plugin-name'` |
 
-  theme: {
-    container: {
-      center: true,
-      padding: '2rem',
-      screens: {
-        '2xl': '1400px',
-      },
-    },
+### CSS-First Configuration Pattern
 
-    extend: {
-      // Brand colors with semantic naming
-      colors: {
-        border: 'hsl(var(--border))',
-        input: 'hsl(var(--input))',
-        ring: 'hsl(var(--ring))',
-        background: 'hsl(var(--background))',
-        foreground: 'hsl(var(--foreground))',
+```css
+/* src/app/globals.css — Tailwind v4 configuration */
+@import "tailwindcss";
 
-        primary: {
-          DEFAULT: 'hsl(var(--primary))',
-          foreground: 'hsl(var(--primary-foreground))',
-          50: '#f0f9ff',
-          100: '#e0f2fe',
-          500: '#3b82f6',
-          600: '#2563eb',
-          900: '#1e3a8a',
-        },
+/* Exclude directories from class scanning */
+@source not "../../.claude";
 
-        secondary: {
-          DEFAULT: 'hsl(var(--secondary))',
-          foreground: 'hsl(var(--secondary-foreground))',
-        },
+/* Plugins (order matters: animate before typography) */
+@plugin 'tailwindcss-animate';
+@plugin '@tailwindcss/typography';
 
-        destructive: {
-          DEFAULT: 'hsl(var(--destructive))',
-          foreground: 'hsl(var(--destructive-foreground))',
-        },
+/* Dark mode via class strategy */
+@custom-variant dark (&:is(.dark *));
 
-        muted: {
-          DEFAULT: 'hsl(var(--muted))',
-          foreground: 'hsl(var(--muted-foreground))',
-        },
+/* ==================== DESIGN TOKENS ==================== */
 
-        accent: {
-          DEFAULT: 'hsl(var(--accent))',
-          foreground: 'hsl(var(--accent-foreground))',
-        },
+:root {
+  /* Foundation */
+  --background: #fafafa;
+  --foreground: #36424a;
 
-        popover: {
-          DEFAULT: 'hsl(var(--popover))',
-          foreground: 'hsl(var(--popover-foreground))',
-        },
+  /* Surfaces */
+  --card: #ffffff;
+  --card-foreground: #36424a;
+  --popover: #ffffff;
+  --popover-foreground: #36424a;
 
-        card: {
-          DEFAULT: 'hsl(var(--card))',
-          foreground: 'hsl(var(--card-foreground))',
-        },
-      },
+  /* Brand Primary */
+  --primary: #004d9e;
+  --primary-foreground: #ffffff;
 
-      // Custom spacing scale for consistent layouts
-      spacing: {
-        '18': '4.5rem',   // 72px
-        '88': '22rem',    // 352px
-        '128': '32rem',   // 512px
-      },
+  /* Secondary */
+  --secondary: #ffffff;
+  --secondary-foreground: #36424a;
 
-      // Enhanced typography scale
-      fontSize: {
-        'xs': ['0.75rem', { lineHeight: '1rem' }],
-        'sm': ['0.875rem', { lineHeight: '1.25rem' }],
-        'base': ['1rem', { lineHeight: '1.5rem' }],
-        'lg': ['1.125rem', { lineHeight: '1.75rem' }],
-        'xl': ['1.25rem', { lineHeight: '1.75rem' }],
-        '2xl': ['1.5rem', { lineHeight: '2rem' }],
-        '3xl': ['1.875rem', { lineHeight: '2.25rem' }],
-        '4xl': ['2.25rem', { lineHeight: '2.5rem' }],
-        '5xl': ['3rem', { lineHeight: '1' }],
-        '6xl': ['3.75rem', { lineHeight: '1' }],
-      },
+  /* Accent */
+  --accent: #f0f6ff;
+  --accent-foreground: #004d9e;
 
-      // Custom border radius
-      borderRadius: {
-        lg: 'var(--radius)',
-        md: 'calc(var(--radius) - 2px)',
-        sm: 'calc(var(--radius) - 4px)',
-      },
+  /* Muted */
+  --muted: #f0f1f3;
+  --muted-foreground: #5f6b73;
 
-      // Animation and transitions
-      keyframes: {
-        'accordion-down': {
-          from: { height: '0' },
-          to: { height: 'var(--radix-accordion-content-height)' },
-        },
-        'accordion-up': {
-          from: { height: 'var(--radix-accordion-content-height)' },
-          to: { height: '0' },
-        },
-        'fade-in': {
-          '0%': { opacity: '0' },
-          '100%': { opacity: '1' },
-        },
-        'slide-in-from-top': {
-          '0%': { transform: 'translateY(-100%)' },
-          '100%': { transform: 'translateY(0)' },
-        },
-      },
+  /* Destructive */
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
 
-      animation: {
-        'accordion-down': 'accordion-down 0.2s ease-out',
-        'accordion-up': 'accordion-up 0.2s ease-out',
-        'fade-in': 'fade-in 0.2s ease-out',
-        'slide-in-from-top': 'slide-in-from-top 0.3s ease-out',
-      },
-    },
-  },
+  /* Borders & Inputs */
+  --border: #e2e5e9;
+  --input: #ffffff;
+  --ring: #004d9e;
 
-  // Safelist for dynamic classes
-  safelist: [
-    // Status colors
-    'bg-green-100', 'text-green-800', 'border-green-200',
-    'bg-yellow-100', 'text-yellow-800', 'border-yellow-200',
-    'bg-red-100', 'text-red-800', 'border-red-200',
-    'bg-blue-100', 'text-blue-800', 'border-blue-200',
+  /* Border Radius */
+  --radius: 0.5rem;
 
-    // Grid columns for dynamic layouts
-    'grid-cols-1', 'grid-cols-2', 'grid-cols-3', 'grid-cols-4',
-    'md:grid-cols-1', 'md:grid-cols-2', 'md:grid-cols-3', 'md:grid-cols-4',
-    'lg:grid-cols-1', 'lg:grid-cols-2', 'lg:grid-cols-3', 'lg:grid-cols-4',
+  /* Animation timing */
+  --duration-fast: 150ms;
+  --duration-normal: 200ms;
+  --duration-slow: 300ms;
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
 
-    // Common dynamic spacing
-    'p-1', 'p-2', 'p-3', 'p-4', 'p-6', 'p-8',
-    'm-1', 'm-2', 'm-3', 'm-4', 'm-6', 'm-8',
-  ],
+/* ==================== TAILWIND THEME BINDINGS ==================== */
 
-  plugins: [
-    require('@tailwindcss/forms'),
-    require('@tailwindcss/typography'),
-    require('tailwindcss-animate'),
-  ],
-};
+@theme inline {
+  /* Colors — map CSS variables to Tailwind utilities */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Fonts */
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+
+  /* Border radius scale */
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  /* Custom shadows */
+  --shadow-card:
+    0 0 0 1px rgba(0, 0, 0, 0.08),
+    0px 1px 1px rgba(0, 0, 0, 0.02),
+    0px 4px 8px rgba(0, 0, 0, 0.04);
+  --shadow-card-hover:
+    0 0 0 1px rgba(0, 0, 0, 0.12),
+    0px 2px 4px rgba(0, 0, 0, 0.04),
+    0px 8px 16px -4px rgba(0, 0, 0, 0.06);
+}
+
+/* ==================== ANIMATIONS (v4 pattern) ==================== */
+/* Define @keyframes outside @theme; reference via --animate-* inside @theme
+   or use @layer utilities for custom animation classes */
+
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn var(--duration-normal) var(--ease-out) forwards;
+  }
+  .animate-slide-up {
+    animation: slideUp var(--duration-slow) var(--ease-out) forwards;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 ```
+
+### Safelist in v4 (replacing `safelist: [...]`)
+
+```css
+/* Force Tailwind to generate classes not found in source files */
+@source inline("
+  bg-green-100 text-green-800 border-green-200
+  bg-yellow-100 text-yellow-800 border-yellow-200
+  bg-red-100 text-red-800 border-red-200
+  bg-blue-100 text-blue-800 border-blue-200
+  grid-cols-1 grid-cols-2 grid-cols-3 grid-cols-4
+  md:grid-cols-2 md:grid-cols-3 md:grid-cols-4
+  lg:grid-cols-2 lg:grid-cols-3 lg:grid-cols-4
+");
+```
+
+### Legacy Config Bridge (migration only)
+
+If incrementally migrating from v3, you can temporarily load a JS config:
+
+```css
+@config "../../tailwind.config.js";
+```
+
+**Note**: `corePlugins`, `safelist`, and `separator` from JS config are **not supported** in v4. Use `@source inline()` for safelist.
 
 ### Mobile-First Responsive Strategy
 
@@ -960,16 +974,26 @@ export function ResponsiveCard({
 }
 ```
 
-### Dynamic Class Management with Safelist
+### Dynamic Class Management with `@source inline()`
+
+In Tailwind v4, dynamic classes that can't be statically detected must be safelisted via `@source inline()` in CSS.
+The TypeScript-side pattern remains the same: use **literal string mappings** (never template literal construction).
+
+```css
+/* globals.css — safelist dynamic classes used in TypeScript mappings */
+@source inline("
+  bg-green-100 text-green-800 border-green-200
+  bg-yellow-100 text-yellow-800 border-yellow-200
+  bg-red-100 text-red-800 border-red-200
+  bg-blue-100 text-blue-800 border-blue-200
+");
+```
 
 ```typescript
 // src/lib/dynamic-classes.ts
-import React from 'react';
 import { cn } from '@/lib/utils';
 
-// Safe dynamic class generation with safelist support
-
-// Status color mappings (included in safelist)
+// Status color mappings (safelisted via @source inline in globals.css)
 export const statusColorMap = {
   success: 'bg-green-100 text-green-800 border-green-200',
   warning: 'bg-yellow-100 text-yellow-800 border-yellow-200',
@@ -977,7 +1001,7 @@ export const statusColorMap = {
   info: 'bg-blue-100 text-blue-800 border-blue-200',
 } as const;
 
-// Grid column mappings (included in safelist)
+// Grid column mappings (Tailwind v4 auto-detects these from source)
 export const gridColsMap = {
   1: 'grid-cols-1',
   2: 'grid-cols-2',
@@ -985,59 +1009,7 @@ export const gridColsMap = {
   4: 'grid-cols-4',
 } as const;
 
-// Responsive grid column mappings
-export const responsiveGridMap = {
-  1: { base: 'grid-cols-1', md: 'md:grid-cols-1', lg: 'lg:grid-cols-1' },
-  2: { base: 'grid-cols-1', md: 'md:grid-cols-2', lg: 'lg:grid-cols-2' },
-  3: { base: 'grid-cols-1', md: 'md:grid-cols-2', lg: 'lg:grid-cols-3' },
-  4: { base: 'grid-cols-1', md: 'md:grid-cols-2', lg: 'lg:grid-cols-4' },
-} as const;
-
-// Spacing mappings (included in safelist)
-export const spacingMap = {
-  1: { p: 'p-1', m: 'm-1' },
-  2: { p: 'p-2', m: 'm-2' },
-  3: { p: 'p-3', m: 'm-3' },
-  4: { p: 'p-4', m: 'm-4' },
-  6: { p: 'p-6', m: 'm-6' },
-  8: { p: 'p-8', m: 'm-8' },
-} as const;
-
-// Safe dynamic class builder
-export function buildDynamicClasses({
-  status,
-  gridCols,
-  spacing,
-  responsive = false,
-}: {
-  status?: keyof typeof statusColorMap;
-  gridCols?: keyof typeof gridColsMap;
-  spacing?: keyof typeof spacingMap;
-  responsive?: boolean;
-}) {
-  const classes: string[] = [];
-
-  if (status) {
-    classes.push(statusColorMap[status]);
-  }
-
-  if (gridCols) {
-    if (responsive) {
-      const responsiveGrid = responsiveGridMap[gridCols];
-      classes.push(responsiveGrid.base, responsiveGrid.md, responsiveGrid.lg);
-    } else {
-      classes.push(gridColsMap[gridCols]);
-    }
-  }
-
-  if (spacing) {
-    classes.push(spacingMap[spacing].p);
-  }
-
-  return classes.join(' ');
-}
-
-// Usage examples
+// Usage: literal mapping → safe for Tailwind scanning
 export function DynamicStatusBadge({ status }: { status: keyof typeof statusColorMap }) {
   return (
     <span className={cn(
@@ -1046,26 +1018,6 @@ export function DynamicStatusBadge({ status }: { status: keyof typeof statusColo
     )}>
       {status}
     </span>
-  );
-}
-
-export function DynamicGrid({
-  children,
-  cols,
-  responsive = true
-}: {
-  children: React.ReactNode;
-  cols: keyof typeof gridColsMap;
-  responsive?: boolean;
-}) {
-  const gridClasses = responsive
-    ? `${responsiveGridMap[cols].base} ${responsiveGridMap[cols].md} ${responsiveGridMap[cols].lg}`
-    : gridColsMap[cols];
-
-  return (
-    <div className={cn('grid gap-4', gridClasses)}>
-      {children}
-    </div>
   );
 }
 ```
@@ -1084,7 +1036,7 @@ export function DynamicGrid({
 
 ## SEO Optimization Guidelines
 
-- Use **Next.js 16 Metadata API**; OG/Twitter/icon/sitemap generators now receive `params`/`id` as Promises and must be awaited or unwrapped with `use()`
+- Use **Next.js Metadata API**; in Next.js 15+, `generateMetadata` and OG image generators receive `params` as a Promise that must be awaited
 - Generate `sitemap.xml` and `robots.txt` automatically with **next-sitemap**
 - Enable multi-language **hreflang** tags for international SEO
 - Use **static OG images** for consistent brand presentation, with **@vercel/og** as optional dynamic generation for specific use cases
@@ -1092,18 +1044,20 @@ export function DynamicGrid({
 - Local images with query strings require `images.localPatterns.search`; remote images must use `remotePatterns` (`images.domains` is deprecated)
 - **Structured data integration** - Schema.org JSON-LD support
 
-### Next.js 16 Metadata & OG Implementation
+### Metadata & OG Implementation
 
 ```typescript
 // src/app/[locale]/layout.tsx
 import type { Metadata } from 'next';
 import { generateLocalizedMetadata } from '@/lib/metadata';
 
+// Next.js 15+: params is a Promise, must be awaited
 export async function generateMetadata({
-  params: { locale }
+  params,
 }: {
-  params: { locale: string }
+  params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
+  const { locale } = await params;
   return generateLocalizedMetadata({
     locale,
     title: 'Company Name',
@@ -1115,15 +1069,10 @@ export async function generateMetadata({
 
 ```typescript
 // src/app/[locale]/blog/[slug]/opengraph-image.tsx
-// Next.js 16: params/id must be awaited (same as Async Request APIs)
-export async function generateImageMetadata({ params }: { params: { slug: string } }) {
-  return [{ id: 'default' }];
-}
-
-export default async function Image({ params, id }: { params: Promise<{ slug: string }>; id: Promise<string> }) {
+// Next.js 15+: params must be awaited (Async Request APIs)
+export default async function Image({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const resolvedId = await id;
-  return <OGCard title={slug} variant={resolvedId} />;
+  return <OGCard title={slug} />;
 }
 ```
 

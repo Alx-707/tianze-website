@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { SectionHead } from "@/components/ui/section-head";
 
 const COMMITMENT_KEYS = [
@@ -121,13 +122,16 @@ export function QualitySection() {
 
   return (
     <section className="py-14 md:py-[72px]">
-      <div className="mx-auto max-w-[1080px] px-6">
+      <ScrollReveal className="mx-auto max-w-[1080px] px-6">
         <SectionHead title={t("title")} subtitle={t("subtitle")} />
 
         {/* Commitments grid */}
         <div className="grid grid-cols-1 gap-[2px] overflow-hidden rounded-lg border bg-border sm:grid-cols-3 lg:grid-cols-5">
           {COMMITMENT_KEYS.map((key) => (
-            <div key={key} className="bg-white p-5">
+            <div
+              key={key}
+              className="bg-white p-5 transition-colors duration-150 hover:bg-[var(--primary-50)]"
+            >
               <div className="mb-3">{COMMITMENT_ICONS[key]}</div>
               <strong className="block text-sm">{t(`${key}.title`)}</strong>
               <p className="mt-1 text-[13px] text-muted-foreground">
@@ -154,7 +158,7 @@ export function QualitySection() {
         <div className="mt-8 flex h-20 items-center justify-center rounded-lg border-2 border-dashed border-border">
           <span className="text-sm text-muted-foreground">{t("logoWall")}</span>
         </div>
-      </div>
+      </ScrollReveal>
     </section>
   );
 }

@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Tianze - Industrial Precision PVC Conduits</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#3d618a", // Using the blue from user prompt as it fits industrial better, overriding system purple for this specific context
+                        "primary-dark": "#2c4a6b",
+                        "secondary": "#613d8a", // Keeping the purple as secondary accent
+                        "background-light": "#f8f9fb",
+                        "background-dark": "#1a2636", // Dark navy for dark sections
+                        "text-main": "#1a2332",
+                        "slate-shadow": "#cbd5e1",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"],
+                        "sans": ["Space Grotesk", "sans-serif"],
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    boxShadow: {
+                        'industrial': '0 4px 6px -1px rgba(26, 35, 50, 0.1), 0 2px 4px -1px rgba(26, 35, 50, 0.06)',
+                        'industrial-hover': '0 10px 15px -3px rgba(26, 35, 50, 0.1), 0 4px 6px -2px rgba(26, 35, 50, 0.05)',
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: "Space Grotesk", sans-serif;
+            background-color: #f8f9fb;
+            color: #1a2332;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        /* Custom scrollbar for industrial feel */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-text-main overflow-x-hidden">
+<!-- Top Navigation -->
+<nav class="sticky top-0 z-50 w-full bg-background-light/95 backdrop-blur border-b border-[#edeaf0]">
+<div class="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex items-center justify-between h-16">
+<!-- Logo -->
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 bg-primary rounded flex items-center justify-center text-white">
+<span class="material-symbols-outlined text-[20px]">precision_manufacturing</span>
+</div>
+<h2 class="text-text-main text-xl font-bold tracking-tight">TIANZE</h2>
+</div>
+<!-- Desktop Menu -->
+<div class="hidden md:flex flex-1 justify-end items-center gap-8">
+<div class="flex items-center gap-6">
+<a class="text-text-main hover:text-primary text-sm font-medium transition-colors" href="#">Products</a>
+<a class="text-text-main hover:text-primary text-sm font-medium transition-colors" href="#">Process</a>
+<a class="text-text-main hover:text-primary text-sm font-medium transition-colors" href="#">Applications</a>
+<a class="text-text-main hover:text-primary text-sm font-medium transition-colors" href="#">Quality</a>
+</div>
+<button class="bg-primary hover:bg-primary-dark text-white px-5 py-2 rounded-lg text-sm font-bold transition-all shadow-industrial">
+                        Get Quote
+                    </button>
+</div>
+</div>
+</div>
+</nav>
+<!-- Hero Section -->
+<section class="relative w-full py-16 md:py-24 bg-background-light overflow-hidden">
+<div class="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+<!-- Left Content -->
+<div class="flex flex-col gap-6 z-10">
+<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-200 w-fit">
+<span class="material-symbols-outlined text-primary text-sm">verified</span>
+<span class="text-xs font-bold text-slate-700 uppercase tracking-wider">15 Years Manufacturing Excellence</span>
+</div>
+<h1 class="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight tracking-tight text-text-main">
+                        Precision PVC Conduit Bends for <span class="text-primary">Industrial Scale</span>
+</h1>
+<p class="text-lg text-slate-600 max-w-lg leading-relaxed">
+                        In-house tooling and manufacturing for high-precision PVC bending. We deliver consistency where it matters most.
+                    </p>
+<div class="flex flex-col sm:flex-row gap-4 mt-4">
+<button class="bg-primary hover:bg-primary-dark text-white px-8 py-3.5 rounded-lg text-base font-bold transition-all shadow-industrial flex items-center justify-center gap-2">
+<span>See How We Build</span>
+<span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+<button class="bg-white border border-slate-300 hover:border-primary hover:text-primary text-text-main px-8 py-3.5 rounded-lg text-base font-bold transition-all flex items-center justify-center">
+                            Download Catalog
+                        </button>
+</div>
+<div class="flex items-center gap-4 mt-8 pt-8 border-t border-slate-200">
+<div class="flex -space-x-2">
+<div class="w-8 h-8 rounded-full bg-slate-100 border border-white flex items-center justify-center text-[10px] font-bold text-slate-500">UL</div>
+<div class="w-8 h-8 rounded-full bg-slate-100 border border-white flex items-center justify-center text-[10px] font-bold text-slate-500">ISO</div>
+<div class="w-8 h-8 rounded-full bg-slate-100 border border-white flex items-center justify-center text-[10px] font-bold text-slate-500">CE</div>
+</div>
+<p class="text-sm text-slate-500 font-medium">Certified for Global Standards</p>
+</div>
+</div>
+<!-- Right Content: Asymmetric Grid -->
+<div class="relative h-[500px] w-full hidden md:block">
+<!-- Background blobs for decoration -->
+<div class="absolute top-10 right-10 w-64 h-64 bg-primary/10 rounded-full blur-3xl -z-10"></div>
+<!-- Image 1: Main Machine -->
+<div class="absolute top-0 right-0 w-2/3 h-[60%] rounded-lg overflow-hidden shadow-industrial-hover z-10 border-4 border-white">
+<div class="w-full h-full bg-cover bg-center" data-alt="Industrial CNC machine for metal bending" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCsPkKNWJpB2th8abOe1f3kJowXAqHQfhGzbxaZYhkbXbMDPhErrfFE6EcDm0ULI-fWtsogkMKOLt5zgQrmzVBCKVhzSFTekdoK8DIZMXEEVoIdOkM2WLldTTCE6arWr5iIC-mJZPsjxQi3tij1GSx7JWZa35DwzqsfdWSIgdvyVV0SSxn0f7ynht88eoKAEh8P3UK11xv04xKLVM1aMI-ENzXm7myQDFfuAYPruPYFVbFfM25blViZfX5M7cyDuujFv4qRvhe-gD77');"></div>
+</div>
+<!-- Image 2: Production Line -->
+<div class="absolute bottom-0 right-[20%] w-[55%] h-[45%] rounded-lg overflow-hidden shadow-industrial-hover z-20 border-4 border-white">
+<div class="w-full h-full bg-cover bg-center" data-alt="Automated production line conveyor belt" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAY_APBAH9t-IMxJtkeSqzWdZWoeuujNqbIrszvYQjcr9YmjOJfOsAi_Vcxxbdnw_qIHkh8iYgIOMOpXN8w80n7Wbncmznz9gARrKb9i0Z5UGyXA3w_7wY_66f3k1Fy73K1-2U-VCcfZ3d1dd_gS3kpKt3K7R4gXMloQ2OzkRjEbGS7hiWW72s08-qLQLKenIZwJrsi5raYOHWZt_moQdgWJwSqt7VK74UOkj3Fe3BSE_Uc_5l9yFuk5Gm4_6cPpLnmt7zeT7wgbsu4');"></div>
+</div>
+<!-- Image 3: Close up -->
+<div class="absolute top-[40%] left-0 w-[40%] h-[35%] rounded-lg overflow-hidden shadow-industrial-hover z-30 border-4 border-white">
+<div class="w-full h-full bg-cover bg-center" data-alt="Close up of white PVC pipe connector" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDQcWvxrf81FZdvYipfJF46vbtRGP5TFkkRVjbu4omUh9-k351s6YpdtI5klzOMyVuJM7xRsTcljWnPePo-X_lYM4zVE_3C0WA4SKUG5opbH1oGN-zO7H8Z-3sqWRJTT0TVVE3aJE7XWedVCZbYBObP1SuMkeeA2_bezzKAvORZ2YPz50xH9zleuAXnWS2WkwdJ9Oe-wZ0vTNxl3J3I8MqcS7PIuoKVn247fDzia89N3v4GZyKU-8aurO5oDXx0pEsMNInbzThxR9A_');"></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Process Section (Dark) -->
+<section class="bg-background-dark py-20 text-white">
+<div class="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
+<div class="mb-16 text-center md:text-left">
+<h2 class="text-3xl font-bold tracking-tight mb-4">Full-Chain Control</h2>
+<p class="text-slate-400 max-w-2xl">From raw blueprint to finished product, every step is monitored for tolerance and material integrity.</p>
+</div>
+<!-- Horizontal Stepper -->
+<div class="relative">
+<!-- Connecting Line (Desktop) -->
+<div class="hidden md:block absolute top-8 left-0 w-full h-0.5 bg-slate-700 z-0"></div>
+<div class="grid grid-cols-1 md:grid-cols-4 gap-8 relative z-10">
+<!-- Step 1 -->
+<div class="group">
+<div class="flex items-center gap-4 md:block">
+<div class="w-16 h-16 rounded-full bg-background-dark border-2 border-primary flex items-center justify-center mb-6 shadow-[0_0_20px_rgba(61,97,138,0.3)] group-hover:bg-primary transition-colors">
+<span class="material-symbols-outlined text-3xl text-white">architecture</span>
+</div>
+<div>
+<h3 class="text-xl font-bold mb-2">01. Blueprint</h3>
+<p class="text-sm text-slate-400">CAD design and mold specification analysis.</p>
+</div>
+</div>
+</div>
+<!-- Step 2 -->
+<div class="group">
+<div class="flex items-center gap-4 md:block">
+<div class="w-16 h-16 rounded-full bg-background-dark border-2 border-slate-600 group-hover:border-primary flex items-center justify-center mb-6 transition-colors">
+<span class="material-symbols-outlined text-3xl text-slate-300 group-hover:text-white">precision_manufacturing</span>
+</div>
+<div>
+<h3 class="text-xl font-bold mb-2">02. Tooling</h3>
+<p class="text-sm text-slate-400">In-house mold fabrication for exact geometry.</p>
+</div>
+</div>
+</div>
+<!-- Step 3 -->
+<div class="group">
+<div class="flex items-center gap-4 md:block">
+<div class="w-16 h-16 rounded-full bg-background-dark border-2 border-slate-600 group-hover:border-primary flex items-center justify-center mb-6 transition-colors">
+<span class="material-symbols-outlined text-3xl text-slate-300 group-hover:text-white">factory</span>
+</div>
+<div>
+<h3 class="text-xl font-bold mb-2">03. Production</h3>
+<p class="text-sm text-slate-400">Injection &amp; extrusion with virgin PVC.</p>
+</div>
+</div>
+</div>
+<!-- Step 4 -->
+<div class="group">
+<div class="flex items-center gap-4 md:block">
+<div class="w-16 h-16 rounded-full bg-background-dark border-2 border-slate-600 group-hover:border-primary flex items-center justify-center mb-6 transition-colors">
+<span class="material-symbols-outlined text-3xl text-slate-300 group-hover:text-white">inventory_2</span>
+</div>
+<div>
+<h3 class="text-xl font-bold mb-2">04. Product</h3>
+<p class="text-sm text-slate-400">Final QC check and packaged for logistics.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Products Section -->
+<section class="py-20 bg-background-light">
+<div class="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex justify-between items-end mb-12">
+<div>
+<h2 class="text-3xl font-bold tracking-tight text-text-main">Featured Products</h2>
+<p class="text-slate-500 mt-2">Specialized conduit solutions for demanding environments.</p>
+</div>
+<a class="hidden sm:flex items-center text-primary font-bold hover:underline" href="#">
+                    View Full Catalog <span class="material-symbols-outlined text-sm ml-1">arrow_forward</span>
+</a>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<!-- Card 1 -->
+<div class="group relative bg-white rounded-lg p-8 shadow-industrial hover:shadow-industrial-hover transition-all border border-slate-100 overflow-hidden h-80 flex flex-col justify-between">
+<div class="absolute -right-4 -bottom-10 text-[180px] font-bold text-slate-50 opacity-[0.05] pointer-events-none select-none">01</div>
+<div class="absolute top-8 right-8 w-32 h-32 bg-slate-100 rounded-full mix-blend-multiply opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<div>
+<span class="inline-block bg-primary/10 text-primary text-xs font-bold px-2 py-1 rounded mb-4">IN-HOUSE MOLD</span>
+<h3 class="text-2xl font-bold text-text-main mb-2">Standard Bends</h3>
+<p class="text-slate-500 text-sm max-w-[60%]">High-impact resistance bends compliant with AS/NZS 2053 standards.</p>
+</div>
+<div class="self-end mt-4">
+<img alt="Gray PVC pipe elbow fitting" class="w-48 h-auto object-contain mix-blend-multiply opacity-90 group-hover:scale-105 transition-transform" data-alt="Gray PVC pipe elbow fitting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCF5-mRzfXSXfDwhKyxVrELYCeU0_LdYIeHRwrJu20o9t36WcdBcyXj8w8_S6o7uFmK_gxhvAtyDKR9vrcuadmQmVhmj3EIEkzwfc0RA3mEBsV5hikW5UFxGKwwIFzCnVMfzpZ3juAojEZEqEE4-IsYSA0FigRH7c5Z6GWjyLiQgNWuKym5TDsJlA4UKT_noPLmsvWQw4dX18HP2u-3ISRhmKdXLDninJV9FP_1M9xKV5ZKrlewZrE6gHPio-9EBq6WFtQhM1YNe96W"/>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="group relative bg-white rounded-lg p-8 shadow-industrial hover:shadow-industrial-hover transition-all border border-slate-100 overflow-hidden h-80 flex flex-col justify-between">
+<div class="absolute -right-4 -bottom-10 text-[180px] font-bold text-slate-50 opacity-[0.05] pointer-events-none select-none">02</div>
+<div>
+<span class="inline-block bg-primary/10 text-primary text-xs font-bold px-2 py-1 rounded mb-4">IN-HOUSE MOLD</span>
+<h3 class="text-2xl font-bold text-text-main mb-2">Bell End Series</h3>
+<p class="text-slate-500 text-sm max-w-[60%]">Precision bell ends for seamless pipe jointing and solvent welding.</p>
+</div>
+<div class="self-end mt-4">
+<img alt="White PVC pipe with bell end" class="w-48 h-auto object-contain mix-blend-multiply opacity-90 group-hover:scale-105 transition-transform" data-alt="White PVC pipe with bell end" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC-UjTIwzrY0aYzs7bsqamEX6NRv1my7G5RUvYwi-nkaTuIg6H0kTwR6QoFRA2DV7PhqbFcwDBc_7319_w-ncpOD2JLHMKcN9qT978tmM3AuHHPD7w8NKgQd9Gf-AWVziDS0KfC0NCRx-CLFgWr7rEaIX0VXbIIy0psdIwxgy8Ztt62oifYzedtBmeVcGVGykxdjt3w3Hukw9W8EXQAyI5-6gfi6IQldDFuhxYuiAIYZlKd-IhYiQ1AnPuASsAvIXv4b2DWCVX6sRPh"/>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="group relative bg-white rounded-lg p-8 shadow-industrial hover:shadow-industrial-hover transition-all border border-slate-100 overflow-hidden h-80 flex flex-col justify-between">
+<div class="absolute -right-4 -bottom-10 text-[180px] font-bold text-slate-50 opacity-[0.05] pointer-events-none select-none">03</div>
+<div>
+<span class="inline-block bg-primary/10 text-primary text-xs font-bold px-2 py-1 rounded mb-4">AU STANDARD</span>
+<h3 class="text-2xl font-bold text-text-main mb-2">Flared Conduit</h3>
+<p class="text-slate-500 text-sm max-w-[60%]">Specific flared dimensions for Australian market compatibility.</p>
+</div>
+<div class="self-end mt-4">
+<img alt="Orange electrical conduit pipe" class="w-48 h-auto object-contain mix-blend-multiply opacity-90 group-hover:scale-105 transition-transform" data-alt="Orange electrical conduit pipe" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBSsz5dwgiV3EGYRuoLzZutPBd7et2Y_sInblCs9lWhRaYiMJAFMTwRxOoicMYiu31bRvp5vNieCNbMEtR9JdsXjsJuNHqomtITtB11cYowNRX9FP-UAnTaSLe97If_RyviQM3LkrWNYLhWDUKTWDpoSX4sNczb13AocdvbHH4kVceoFbwX_GydvkyjdcWAyXf4VV0otKL1mlwPvQ1Nh6H4sIADpvDLL8_27IaMdpMha77oM4kwllUUCy2WJ4yWORxNMIag0is94cCY"/>
+</div>
+</div>
+<!-- Card 4 -->
+<div class="group relative bg-white rounded-lg p-8 shadow-industrial hover:shadow-industrial-hover transition-all border border-slate-100 overflow-hidden h-80 flex flex-col justify-between">
+<div class="absolute -right-4 -bottom-10 text-[180px] font-bold text-slate-50 opacity-[0.05] pointer-events-none select-none">04</div>
+<div>
+<span class="inline-block bg-secondary/10 text-secondary text-xs font-bold px-2 py-1 rounded mb-4">CUSTOM FABRICATION</span>
+<h3 class="text-2xl font-bold text-text-main mb-2">Custom Dimensions</h3>
+<p class="text-slate-500 text-sm max-w-[60%]">Rapid prototyping and mold creation for non-standard project specs.</p>
+</div>
+<div class="self-end mt-4 flex items-center justify-center w-40 h-32 border-2 border-dashed border-slate-300 rounded-lg">
+<span class="text-slate-400 text-xs text-center px-4">Upload Your Blueprint</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Sample CTA Section -->
+<section class="py-16 bg-primary text-white">
+<div class="max-w-[960px] mx-auto px-4 text-center">
+<h2 class="text-3xl font-bold mb-4">Test Before You Commit</h2>
+<p class="text-primary-100 mb-8 max-w-lg mx-auto">We are confident in our precision. Request a sample box to verify our tolerances and material quality firsthand.</p>
+<button class="bg-white text-primary hover:bg-slate-100 px-8 py-3 rounded-lg text-base font-bold shadow-lg transition-colors">
+                Request Sample Box
+            </button>
+</div>
+</section>
+<!-- Applications Section -->
+<section class="py-20 bg-[#f1f5f9]">
+<div class="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
+<div class="mb-12">
+<h2 class="text-3xl font-bold tracking-tight text-text-main">Industry Applications</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<!-- App Card 1 -->
+<div class="group relative h-64 rounded-lg overflow-hidden cursor-pointer">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" data-alt="Underground construction site with pipes" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuB72TFM5d_EdSuu9q0WRDL3Z5xdMCmWxq0bfgBrcRaUHQsU_6aTEtDaEvnjwsc5_n9nAmYtnjjhMOFgJatUBw3Us5eT-FnjIHrt-AmwKYbw3s8CM9ItpVoBBn9vf8ZmQbCoiXyAJl3yx_YF1zdFp9sOO7YKLORgKS5AdyFVIDjbtBWErOxSV8G563H9_2-M5N2wiRC0RrU3meGqm-Bu_IpXFy3lRUfm26S8YFSGnsHCauSYvUIurlE-ZHZDODgodSrN4NkjSK_9Os1k')"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+<div class="absolute bottom-0 left-0 p-6">
+<h3 class="text-white text-xl font-bold mb-1">Underground Utilities</h3>
+<p class="text-slate-300 text-sm opacity-0 group-hover:opacity-100 transition-opacity">High-durability protection for subterranean cables.</p>
+</div>
+</div>
+<!-- App Card 2 -->
+<div class="group relative h-64 rounded-lg overflow-hidden cursor-pointer">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" data-alt="Construction site interior with exposed wiring" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDh3s5eHDE4GYaMYW67nOD96QE0-LAdjY3b4eUILFS6eVTTumwjIu0PNPGcOfnVJFm5NcUY90-OEvlR39kBBEh8C9muicmgiVymtdOOlMuW00DhjMkd594ARCOqAJEu6WG_T1hhclZAHR9gD9Q98pTyI8sy8yb59LDbFSsXrSNOEOXhuKWjQ5a3f5YGtGufeYwtapg-4SmJnXOzWhWrfMBjTyilCvnlrYJNIITVKYh-xL32fURkT1PVhyE6fGhqXW9ULvF91F_0coYl')"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+<div class="absolute bottom-0 left-0 p-6">
+<h3 class="text-white text-xl font-bold mb-1">Commercial Build</h3>
+<p class="text-slate-300 text-sm opacity-0 group-hover:opacity-100 transition-opacity">Fire-retardant conduits for office complexes.</p>
+</div>
+</div>
+<!-- App Card 3 -->
+<div class="group relative h-64 rounded-lg overflow-hidden cursor-pointer">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" data-alt="Industrial factory interior piping" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCowzXCb0shvgcPsvEi7p02xGssq-BWZXlnIHpoohH5ap5P-Xxd8VG9Xe4eCunzs4c0qYrhu-WvDYYDLU_owc6QTnEZTezj3GCW7XCMMiBXomOHjaXuFidP1Q8lKgvAdGZCPZRRo-6YUztQpdMmTLmSjNleouGwq4bToPisw-3PgaivyoDn6BKNr5Z2wIR265UnpJredSVh7cvlvPEhLas7jHTCz3m2ArcHxjNTYgvgcAO_fSxe1loee3wpmVpu74h5NQu7jWmstPYf')"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+<div class="absolute bottom-0 left-0 p-6">
+<h3 class="text-white text-xl font-bold mb-1">Industrial Plants</h3>
+<p class="text-slate-300 text-sm opacity-0 group-hover:opacity-100 transition-opacity">Chemical resistant solutions for heavy industry.</p>
+</div>
+</div>
+<!-- App Card 4 -->
+<div class="group relative h-64 rounded-lg overflow-hidden cursor-pointer">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" data-alt="Modern hospital corridor" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCy42IzXZg3KqpHuWoPvgSE7TdPbnG-2wFi66_KvuflftXm4VdeoaDETzRnq-8NxItVJxyhyn8aUHahnYmwWEx-_RpqEoOMucVrUjWSyDj4KGGxQidTrQsKyogqcExBK4xC1ANidcsuAGCYpTz9LqSE6RyJCOYGd1LIRVpDYEgTaOzRvIS8uks8qv0tWX_rZ2ojDX5HMMMk6iNWPAD4c6qIDUs9hcQwdoA69SRhXHnMCDIiuBuYpj0Q4d9judtqum29dS2_vC9VMjjN')"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+<div class="absolute bottom-0 left-0 p-6">
+<h3 class="text-white text-xl font-bold mb-1">Hospital Grade</h3>
+<p class="text-slate-300 text-sm opacity-0 group-hover:opacity-100 transition-opacity">Sterile and low-smoke emission standards.</p>
+</div>
+</div>
+<!-- App Card 5 -->
+<div class="group relative h-64 rounded-lg overflow-hidden cursor-pointer">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" data-alt="City street infrastructure" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuD2EKn5wgRL8P0qKoKqv258gQgqbe1pmOpGgR4mmXgYyVW0PP3i22VOy6XLMWk84HMukYarGJTu41bAAClSZECGs5-jBndDX6NF2yLv_qL4jy6CmR9Rv7yp1rW5KyF1YfvcqxtTtLgXj5CXJ-nomkP-Y-epO61OimHR5DxYgldoiOnmNjWyFIxwKT4Dh-JmtDFTzTMSDDJz2r_77xp5dd6gQfUpGLdsrgkS4DtEEu14fjhxlJj2r4BbeKhesjJ-MFY7d3QfRH522mzi')"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+<div class="absolute bottom-0 left-0 p-6">
+<h3 class="text-white text-xl font-bold mb-1">Municipal Infrastructure</h3>
+<p class="text-slate-300 text-sm opacity-0 group-hover:opacity-100 transition-opacity">Long-life infrastructure for public works.</p>
+</div>
+</div>
+<!-- App Card 6 -->
+<div class="group relative h-64 rounded-lg overflow-hidden cursor-pointer">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" data-alt="Server room cabling" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuC4cNwMCndahrAlrNt7Wa0LLcjwIAzCDHlet1TwDdni4tcr4f8QkNJBTfBDYi43PaBCN_89RUSUgX7mligMz-UnFmblNNNpNnJCiOa5zMb_bAkaxTprYANFP32j8Xe-5g5AmQRlOdWg5eIaj1p_Y0Z_blr4KWam_JCyms17r3O5El1QMCf4SxlAxyw87x64yfueEMpP4mQy_QMd0enRKXSCfKoYgx-24mTpnkk7-34WTH3-BJF6SVS8gzBKiPxEN4KIQa9PPyMNcO1X')"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+<div class="absolute bottom-0 left-0 p-6">
+<h3 class="text-white text-xl font-bold mb-1">Data Centers</h3>
+<p class="text-slate-300 text-sm opacity-0 group-hover:opacity-100 transition-opacity">Structured cabling protection.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Quality Specs Section -->
+<section class="py-20 bg-background-light">
+<div class="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
+<div class="grid grid-cols-2 md:grid-cols-5 gap-8">
+<div class="flex flex-col items-center text-center gap-3">
+<span class="material-symbols-outlined text-4xl text-primary">straighten</span>
+<h4 class="font-bold text-lg">±0.5mm Tolerance</h4>
+<p class="text-sm text-slate-500">Precision calibrated machines</p>
+</div>
+<div class="flex flex-col items-center text-center gap-3">
+<span class="material-symbols-outlined text-4xl text-primary">recycling</span>
+<h4 class="font-bold text-lg">100% Virgin PVC</h4>
+<p class="text-sm text-slate-500">No recycled filler material</p>
+</div>
+<div class="flex flex-col items-center text-center gap-3">
+<span class="material-symbols-outlined text-4xl text-primary">history_toggle_off</span>
+<h4 class="font-bold text-lg">24/7 Production</h4>
+<p class="text-sm text-slate-500">Continuous shift manufacturing</p>
+</div>
+<div class="flex flex-col items-center text-center gap-3">
+<span class="material-symbols-outlined text-4xl text-primary">verified_user</span>
+<h4 class="font-bold text-lg">Batch Testing</h4>
+<p class="text-sm text-slate-500">Every lot is impact tested</p>
+</div>
+<div class="flex flex-col items-center text-center gap-3 col-span-2 md:col-span-1">
+<span class="material-symbols-outlined text-4xl text-primary">local_shipping</span>
+<h4 class="font-bold text-lg">Global Logistics</h4>
+<p class="text-sm text-slate-500">Experienced export team</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Logos Section -->
+<section class="py-12 border-t border-slate-200 bg-white">
+<div class="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
+<p class="text-center text-sm font-medium text-slate-400 mb-6 uppercase tracking-widest">Standards &amp; Partners</p>
+<div class="flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
+<!-- Simple textual representations for logos to avoid external dependencies or complex SVGs -->
+<div class="text-2xl font-black text-slate-800 flex items-center gap-1"><span class="border-2 border-slate-800 rounded-full w-8 h-8 flex items-center justify-center text-xs">UL</span> LISTED</div>
+<div class="text-2xl font-black text-slate-800 flex items-center gap-1">ISO<span class="font-normal text-sm ml-1">9001:2015</span></div>
+<div class="text-2xl font-black text-slate-800">AS/NZS <span class="font-normal">2053</span></div>
+<div class="text-2xl font-black text-slate-800">IEC <span class="font-normal">61386</span></div>
+<div class="text-2xl font-black text-slate-800 flex items-center gap-1"><span class="material-symbols-outlined">gpp_good</span> CE</div>
+</div>
+</div>
+</section>
+<!-- Footer -->
+<footer class="bg-background-dark text-white pt-16 pb-8">
+<div class="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-12 mb-16 border-b border-slate-700 pb-12">
+<div>
+<h2 class="text-3xl font-bold mb-4">Ready to Talk Specs?</h2>
+<p class="text-slate-400 mb-6 max-w-md">Our engineers are ready to review your blueprints and provide a detailed quote within 24 hours.</p>
+<div class="flex flex-col sm:flex-row gap-3">
+<input class="px-4 py-3 rounded-lg bg-slate-800 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary w-full sm:w-auto min-w-[280px]" placeholder="Enter your email" type="email"/>
+<button class="bg-primary hover:bg-primary-dark px-6 py-3 rounded-lg font-bold transition-colors w-full sm:w-auto">Get in Touch</button>
+</div>
+</div>
+<div class="grid grid-cols-2 sm:grid-cols-3 gap-8">
+<div class="flex flex-col gap-4">
+<h4 class="font-bold text-lg">Products</h4>
+<a class="text-slate-400 hover:text-white text-sm" href="#">Standard Bends</a>
+<a class="text-slate-400 hover:text-white text-sm" href="#">Bell Ends</a>
+<a class="text-slate-400 hover:text-white text-sm" href="#">Couplings</a>
+<a class="text-slate-400 hover:text-white text-sm" href="#">Custom Molds</a>
+</div>
+<div class="flex flex-col gap-4">
+<h4 class="font-bold text-lg">Company</h4>
+<a class="text-slate-400 hover:text-white text-sm" href="#">About Us</a>
+<a class="text-slate-400 hover:text-white text-sm" href="#">Process</a>
+<a class="text-slate-400 hover:text-white text-sm" href="#">Quality Lab</a>
+<a class="text-slate-400 hover:text-white text-sm" href="#">Contact</a>
+</div>
+<div class="flex flex-col gap-4">
+<h4 class="font-bold text-lg">Contact</h4>
+<p class="text-slate-400 text-sm">sales@tianze.com</p>
+<p class="text-slate-400 text-sm">+86 555 123 4567</p>
+<p class="text-slate-400 text-sm">No. 88 Industrial Rd,<br/>Guangdong, China</p>
+</div>
+</div>
+</div>
+<div class="flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-slate-500">
+<p>© 2024 Tianze Precision Manufacturing. All rights reserved.</p>
+<div class="flex gap-6">
+<a class="hover:text-white" href="#">Privacy Policy</a>
+<a class="hover:text-white" href="#">Terms of Service</a>
+</div>
+</div>
+</div>
+</footer>
+</body></html>

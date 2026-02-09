@@ -1,0 +1,65 @@
+# Tianze Pipe Industry - Company Facts
+# Structured data for AI retrieval. Single source of truth.
+
+identity:
+  name_cn: 连云港天泽管业有限公司
+  name_en: Lianyungang Tianze Pipe Industry Co., Ltd.
+  brand: Tianze / 天泽
+  type: Manufacturer + Trader (工贸一体)
+
+location:
+  province: Jiangsu
+  city: Lianyungang
+  district: Guanyun County
+  address_cn: 江苏省连云港市灌云县东王集工业集中区玉龙路6号
+  address_en: No.6 Yulong Road, Dongwangji Industrial Zone, Guanyun County, Lianyungang, Jiangsu, China
+
+timeline:
+  operations_start: 2018
+  formal_registration: 2023
+  milestones:
+    - year: 2018-2021
+      event: PVC bending machine R&D and manufacturing
+    - year: 2021-present
+      event: Expanded to pipe fittings production (Equipment + Fittings dual model)
+
+scale:
+  employees_total: 60
+  technical_team: 10
+  factory_area_mu: 100 # 亩
+  production_lines:
+    - PVC extrusion line
+    - Pipe bending line
+    - Pipe expansion line
+
+certifications:
+  - name: ISO 9001:2015
+    certificate_number: 240021Q09730R0S
+    issued_date: 2024-03
+    status: active
+
+standards_compliance:
+  # Note: compliance capability, not all formally certified
+  - UL651 SCH 40/80 (US)
+  - AS/NZS (Australia/New Zealand)
+  - ASTM (US)
+  - GB (China National)
+
+export:
+  countries_count: 100+
+  primary_regions:
+    - Eastern Europe
+    - North America
+    - South America
+    - Middle East
+    - Oceania
+    - Africa
+    - Southeast Asia
+  platforms:
+    - Alibaba International (tzepipe.en.alibaba.com)
+
+contact:
+  # TODO: Add specific contact details when available
+  website: null
+  email: null
+  phone: null

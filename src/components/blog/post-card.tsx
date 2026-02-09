@@ -1,4 +1,5 @@
 import Image from "next/image";
+// eslint-disable-next-line no-restricted-imports -- receives locale-prefixed href as prop, i18n Link would double-prefix
 import Link from "next/link";
 import { Calendar, Clock } from "lucide-react";
 import type { PostSummary } from "@/types/content.types";
