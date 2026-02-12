@@ -301,7 +301,7 @@ rm -rf design-system/  # 清理临时目录
 |------|------|---------|
 
 ## 下一步
-使用 HANDOFF.md 指导组件开发，运行 `/iwf` 进入开发流程
+使用 HANDOFF.md 指导组件开发，运行 `/superpowers:brainstorming` 进入 BDD 开发流程
 ```
 
 ---
@@ -319,8 +319,8 @@ dwf 完成后，输出：
 - 交接文档: docs/design/{page}/HANDOFF.md
 
 下一步:
-- 运行 /iwf 进入开发流程
-- iwf 将读取 HANDOFF.md 作为开发规范
+- 运行 /superpowers:brainstorming 进入 BDD 开发流程
+- brainstorming 将读取 HANDOFF.md 作为开发规范
 ```
 
 ---
