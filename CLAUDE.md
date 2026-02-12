@@ -55,7 +55,7 @@ pnpm ci:local     # Full CI
 1. **TypeScript strict** — No `any`, prefer `interface`
 2. **Server Components first** — `"use client"` only for interactivity
 3. **i18n required** — All user-facing text via translation keys
-4. **Git** — Never commit on `main`; create feature branch first
+4. **Git** — GitFlow 分支模型：`main`（生产）+ `develop`（开发），使用 `gitflow:start-feature` 创建 feature 分支
 5. **Complexity** — Function ≤120 lines, File ≤500 lines
 
 ## Language
@@ -70,7 +70,8 @@ Project-specific rules in `.claude/rules/` — read when relevant:
 - `architecture.md` — Project decisions, pitfalls
 - `coding-standards.md` — Naming, imports
 - `quality-gates.md` — CI, complexity limits
-- `security.md` — CSP, validation
+- `security.md` — CSP, validation, API endpoint protection table
+- `review-checklist.md` — Code review verification commands (FradSer agents 参考)
 - `debugging.md` — Troubleshooting
 - `page-patterns.md` — Page-level design patterns (→ `docs/design/system/PAGE-PATTERNS.md`)
 

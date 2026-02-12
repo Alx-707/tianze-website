@@ -695,7 +695,7 @@ dwf 读取 docs/content/{page}/v{N}-final.md
     ↓
 dwf 完成
     ↓
-提示: "设计定稿，可运行 /iwf 进入开发流程"
+提示: "设计定稿，可运行 /superpowers:brainstorming 进入 BDD 开发流程"
 ```
 
 ---

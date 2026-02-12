@@ -28,7 +28,6 @@ public/messages/
 *.swo
 
 # AI Tools (personal config)
-.kiro/
 .claude/skills/
 .claude/skills-reference-*/
 .claude-plugin/

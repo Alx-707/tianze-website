@@ -43,6 +43,22 @@ See `/.claude/rules/threat-modeling.md` for STRIDE analysis on new/changed API r
 
 Rate limit utility: `src/lib/security/security-rate-limit.ts`
 
+### Known API Endpoints & Protection Status
+
+| Endpoint | Required Protection | Status |
+|----------|---------------------|--------|
+| `/api/whatsapp/send` | API Key Auth + Rate Limit | ✅ |
+| `/api/whatsapp/webhook` | Signature Verify + Rate Limit | ✅ |
+| `/api/contact` | Rate Limit | ✅ |
+| `/api/inquiry` | Turnstile + Rate Limit | ✅ |
+| `/api/subscribe` | Rate Limit | ✅ |
+| `/api/cache/invalidate` | Secret Auth + Pre/Post Rate Limit | ✅ |
+| `/api/csp-report` | Rate Limit | ✅ |
+| `/api/verify-turnstile` | (Verification endpoint) | - |
+| `/api/health` | (Public healthcheck) | - |
+
+New write endpoints (POST/PUT/PATCH/DELETE) must have auth + rate limiting before merge.
+
 ### Security Headers
 - `Strict-Transport-Security: max-age=63072000; includeSubDomains; preload`
 - `X-Frame-Options: DENY`
