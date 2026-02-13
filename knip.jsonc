@@ -13,7 +13,6 @@
     "src/lib/**/*.{ts,tsx}",
     "scripts/**/*.{ts,tsx,js}",
     "tests/**/*.{ts,tsx}",
-    "vitest.config.browser.ts",
   ],
   // 项目扫描范围：聚焦源代码、脚本与测试，不扫描生成物/文档。
   "project": [
@@ -43,15 +42,12 @@
     "@tailwindcss/typography",
     "@next/eslint-plugin-next",
     "axe-core",
-    "concurrently",
     "eslint-import-resolver-typescript",
     "eslint-plugin-import",
     "eslint-plugin-react",
     "eslint-plugin-react-hooks",
-    "lighthouse",
     "prettier-plugin-tailwindcss",
     "sharp",
-    "source-map-explorer",
     "tailwindcss",
     "tailwindcss-animate",
     "typescript-eslint",

@@ -152,10 +152,9 @@ export default defineConfig({
     // retry: 2, // 已移除全局 retry，遇到 flaky 测试应修复根因或局部声明
 
     // 报告器配置
-    reporters: ["verbose", "json", "html"],
+    reporters: ["verbose", "json"],
     outputFile: {
       json: "./reports/test-results.json",
-      html: "./reports/test-results.html",
     },
 
     // 环境变量
