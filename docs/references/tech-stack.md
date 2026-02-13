@@ -127,7 +127,6 @@ content/
 - **@babel/generator 7.28.6** - Babel AST 生成器
 
 ### 开发工具链增强
-- **concurrently 9.2.1** - 并行执行多个命令
 - **dotenv 17.2.3** - 环境变量加载工具
 - **glob 13.0.0** - 文件匹配模式工具
 - **@tailwindcss/postcss 4.1.18** - Tailwind CSS PostCSS 插件

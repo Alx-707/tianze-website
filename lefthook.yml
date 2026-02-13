@@ -135,7 +135,6 @@ pre-push:
           echo "⏭️  RUN_FAST_PUSH=1: 跳过架构检查（仅用于紧急推送，CI/后续本地请补跑）";
         else
           pnpm exec dependency-cruiser src --config .dependency-cruiser.js -T err
-          pnpm circular:check
         fi
       fail_text: '架构检查失败 - 发现循环依赖或架构违规'
 
