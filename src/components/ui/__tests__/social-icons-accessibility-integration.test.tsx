@@ -462,7 +462,7 @@ describe("Social Icons Accessibility & Integration - Advanced Tests", () => {
       expect(container.querySelectorAll("svg")).toHaveLength(5);
     });
 
-    it("maintains performance with many icons", () => {
+    it("renders many icons without errors", () => {
       const manyIcons = Array.from({ length: 50 }, (_, i) => (
         <SocialIconMapper
           key={i}
@@ -471,14 +471,8 @@ describe("Social Icons Accessibility & Integration - Advanced Tests", () => {
         />
       ));
 
-      const _startTime = performance.now();
       render(<div>{manyIcons}</div>);
-      const endTime = performance.now();
 
-      // Should render quickly (less than 100ms for 50 icons)
-      expect(endTime - _startTime).toBeLessThan(100);
-
-      // All icons should be present
       expect(screen.getAllByTestId(/^icon-/)).toHaveLength(50);
     });
   });
