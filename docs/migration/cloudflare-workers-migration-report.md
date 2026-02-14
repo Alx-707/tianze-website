@@ -197,7 +197,7 @@ Cloudflare Images custom loader，替代 sharp 图片优化。
 
 ### 4.4 `.github/workflows/cloudflare-deploy.yml`（新建）
 
-替换 `vercel-deploy.yml`，流程：`opennextjs-cloudflare build` → `wrangler deploy`。
+新增 Cloudflare 部署 workflow（`cloudflare-deploy.yml`），Vercel workflow 保留兜底。流程：`opennextjs-cloudflare build` → `opennextjs-cloudflare deploy`。
 
 ### 4.5 `.dev.vars` / `.dev.vars.example`（新建）
 
@@ -216,8 +216,8 @@ Cloudflare Images custom loader，替代 sharp 图片优化。
 | `src/components/monitoring/enterprise-analytics-island.tsx` | 移除 `@vercel/analytics` + `@vercel/speed-insights`，保留 GA4 | P1 |
 | `src/lib/security/distributed-rate-limit.ts` | 移除 Vercel KV 分支，固定 Upstash Redis | P1 |
 | `src/lib/env.ts` | 移除 Vercel 专属变量（`VERCEL_URL`/`VERCEL_ENV` 等），添加 Cloudflare 变量；需同步更新 schema 和 runtimeEnv 映射 | P1 |
-| `.github/workflows/vercel-deploy.yml` | 替换为 Cloudflare deploy workflow | P1 |
-| `vercel.json` | 下线。redirects → `_redirects` 文件；crons → Workers Cron Triggers | P1 |
+| `.github/workflows/vercel-deploy.yml` | 保留不动（Vercel 兜底）；新增 `cloudflare-deploy.yml` | P1 |
+| `vercel.json` | 保留（Vercel 继续使用）；Cloudflare 侧 crons 通过 Workers Cron Triggers 独立配置 | P1 |
 | `.gitignore` | 添加 `.open-next/` | P0 |
 
 ---

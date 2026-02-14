@@ -99,11 +99,17 @@ jobs:
             exit 1
           }
           echo "$DEPLOY_OUTPUT"
-          # 尝试从输出中提取部署 URL
+          # 提取部署 URL — 优先从输出中正则匹配，否则按环境使用固定 URL
           DEPLOY_URL=$(echo "$DEPLOY_OUTPUT" | grep -oP 'https://[^\s]+\.workers\.dev' | head -1 || echo "")
-          if [ -n "$DEPLOY_URL" ]; then
-            echo "deployment-url=${DEPLOY_URL}" >> "$GITHUB_OUTPUT"
+          if [ -z "$DEPLOY_URL" ]; then
+            if [ "${{ inputs.environment }}" = "production" ]; then
+              DEPLOY_URL="https://tianze-pipe.com"
+            else
+              DEPLOY_URL="https://preview.tianze-pipe.com"
+            fi
+            echo "⚠️ 未从部署输出中提取到 URL，使用环境固定 URL: $DEPLOY_URL"
           fi
+          echo "deployment-url=${DEPLOY_URL}" >> "$GITHUB_OUTPUT"
           echo "✅ 部署成功"
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}

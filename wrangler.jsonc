@@ -57,8 +57,16 @@
   // No cron triggers in POC phase (requires custom worker entry with scheduled() handler)
 
   // Environment-specific overrides
+  // NOTE: Wrangler does NOT inherit top-level bindings into env.*.
+  // services, durable_objects, and migrations must be explicitly declared per environment.
   "env": {
     "preview": {
+      "services": [
+        {
+          "binding": "WORKER_SELF_REFERENCE",
+          "service": "tianze-website",
+        },
+      ],
       "r2_buckets": [
         {
           "binding": "NEXT_INC_CACHE_R2_BUCKET",
@@ -72,12 +80,32 @@
           "database_name": "tianze-website-tags-preview",
         },
       ],
+      "durable_objects": {
+        "bindings": [
+          {
+            "name": "NEXT_CACHE_DO_QUEUE",
+            "class_name": "DOQueueHandler",
+          },
+        ],
+      },
+      "migrations": [
+        {
+          "tag": "v1",
+          "new_sqlite_classes": ["DOQueueHandler"],
+        },
+      ],
       "vars": {
         "NEXT_PUBLIC_BASE_URL": "https://preview.tianze-pipe.com",
         "NEXT_PUBLIC_DEPLOYMENT_PLATFORM": "cloudflare",
       },
     },
     "production": {
+      "services": [
+        {
+          "binding": "WORKER_SELF_REFERENCE",
+          "service": "tianze-website",
+        },
+      ],
       "r2_buckets": [
         {
           "binding": "NEXT_INC_CACHE_R2_BUCKET",
@@ -89,6 +117,20 @@
           "binding": "NEXT_TAG_CACHE_D1",
           "database_id": "PLACEHOLDER_PRODUCTION_DB_ID",
           "database_name": "tianze-website-tags-production",
+        },
+      ],
+      "durable_objects": {
+        "bindings": [
+          {
+            "name": "NEXT_CACHE_DO_QUEUE",
+            "class_name": "DOQueueHandler",
+          },
+        ],
+      },
+      "migrations": [
+        {
+          "tag": "v1",
+          "new_sqlite_classes": ["DOQueueHandler"],
         },
       ],
       "vars": {
