@@ -2,7 +2,6 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import { Link } from "@/i18n/routing";
 import { notFound } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale, ProductDetail } from "@/types/content.types";
 import { getStaticParamsForType } from "@/lib/content-manifest";
@@ -12,6 +11,7 @@ import {
   type Locale as SeoLocale,
 } from "@/lib/seo-metadata";
 import { generateProductSchema } from "@/lib/structured-data";
+import { createBreadcrumbStructuredData } from "@/lib/structured-data-helpers";
 import { MDXContent } from "@/components/mdx";
 import {
   ProductActions,
@@ -23,6 +23,14 @@ import {
 } from "@/components/products";
 import { JsonLdScript } from "@/components/seo";
 import { Badge } from "@/components/ui/badge";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import { SITE_CONFIG } from "@/config/paths";
 
 function ProductDetailLoadingSkeleton() {
@@ -255,6 +263,27 @@ function buildProductSchema(
   );
 }
 
+interface BreadcrumbSchemaInput {
+  locale: Locale;
+  productName: string;
+  slug: string;
+}
+
+function buildBreadcrumbSchema(
+  input: BreadcrumbSchemaInput,
+  labels: { home: string; products: string },
+) {
+  const base = SITE_CONFIG.baseUrl;
+  return createBreadcrumbStructuredData(input.locale, [
+    { name: labels.home, url: `${base}/${input.locale}` },
+    { name: labels.products, url: `${base}/${input.locale}/products` },
+    {
+      name: input.productName,
+      url: `${base}/${input.locale}/products/${input.slug}`,
+    },
+  ]);
+}
+
 function ProductSpecsSection({
   specs,
   title,
@@ -306,6 +335,10 @@ async function ProductDetailContent({
   const images = [product.coverImage, ...(product.images ?? [])];
   const downloadPdfHref = getSafePdfHref(product);
   const productSchema = await buildProductSchema(localeTyped, product);
+  const breadcrumbSchema = await buildBreadcrumbSchema(
+    { locale: localeTyped, productName: product.title, slug },
+    { home: t("breadcrumb.home"), products: t("breadcrumb.products") },
+  );
 
   const tradeInfoLabels = {
     moq: t("detail.labels.moq"),
@@ -318,15 +351,26 @@ async function ProductDetailContent({
   return (
     <main className="container mx-auto px-4 py-8 md:py-12">
       <JsonLdScript data={productSchema} />
-      <nav className="mb-6">
-        <Link
-          href="/products"
-          className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          {t("pageTitle")}
-        </Link>
-      </nav>
+      <JsonLdScript data={breadcrumbSchema} />
+      <Breadcrumb className="mb-6">
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link href="/">{t("breadcrumb.home")}</Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link href="/products">{t("breadcrumb.products")}</Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>{product.title}</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
 
       <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
         <ProductGallery images={images} title={product.title} />

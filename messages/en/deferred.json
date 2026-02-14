@@ -408,6 +408,10 @@
     "allStandards": "All Standards",
     "standardsFilterAriaLabel": "Filter by standards",
     "featured": "Featured",
+    "breadcrumb": {
+      "home": "Home",
+      "products": "Products"
+    },
     "card": {
       "moq": "MOQ",
       "leadTime": "Lead Time",

@@ -408,6 +408,10 @@
     "allStandards": "全部标准",
     "standardsFilterAriaLabel": "按标准筛选",
     "featured": "精选",
+    "breadcrumb": {
+      "home": "首页",
+      "products": "产品中心"
+    },
     "card": {
       "moq": "起订量",
       "leadTime": "交货期",
