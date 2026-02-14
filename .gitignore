@@ -29,6 +29,8 @@ public/messages/
 
 # AI Tools (personal config)
 .claude/skills/
+.claude/settings.local.json
+.claude/skills-backup-*/
 .claude/skills-reference-*/
 .claude-plugin/
 .agents/
