@@ -60,6 +60,10 @@ pnpm-debug.log*
 # Vercel
 .vercel/
 
+# Cloudflare
+.open-next/
+.dev.vars
+
 # Local MCP config (may contain secrets)
 .mcp.json
 .lighthouseci/

@@ -38,6 +38,7 @@ export function EnterpriseAnalyticsIsland() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const isProd = process.env.NODE_ENV === "production";
+  const isVercel = process.env.NEXT_PUBLIC_DEPLOYMENT_PLATFORM !== "cloudflare";
   const cookieConsent = useCookieConsentOptional();
 
   const analyticsAllowed = cookieConsent
@@ -76,8 +77,8 @@ export function EnterpriseAnalyticsIsland() {
           strategy="afterInteractive"
         />
       )}
-      {isProd && <Analytics />}
-      {isProd && <SpeedInsights />}
+      {isProd && isVercel && <Analytics />}
+      {isProd && isVercel && <SpeedInsights />}
     </>
   );
 }

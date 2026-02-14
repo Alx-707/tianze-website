@@ -77,7 +77,10 @@
     "test:e2e:ci-local": "CI=1 pnpm test:e2e",
     "ci:local": "bash scripts/ci-local.sh",
     "ci:local:quick": "bash scripts/ci-local.sh --quick",
-    "ci:local:fix": "pnpm format:write && pnpm lint:fix && echo '✅ 自动修复完成，请重新运行 pnpm ci:local'"
+    "ci:local:fix": "pnpm format:write && pnpm lint:fix && echo '✅ 自动修复完成，请重新运行 pnpm ci:local'",
+    "build:cf": "DEPLOY_TARGET=cloudflare NEXT_PUBLIC_DEPLOYMENT_PLATFORM=cloudflare opennextjs-cloudflare build",
+    "preview:cf": "DEPLOY_TARGET=cloudflare NEXT_PUBLIC_DEPLOYMENT_PLATFORM=cloudflare opennextjs-cloudflare build && opennextjs-cloudflare preview",
+    "deploy:cf": "DEPLOY_TARGET=cloudflare NEXT_PUBLIC_DEPLOYMENT_PLATFORM=cloudflare opennextjs-cloudflare build && opennextjs-cloudflare deploy"
   },
   "dependencies": {
     "@marsidev/react-turnstile": "^1.4.1",
@@ -131,6 +134,7 @@
     "@lhci/cli": "^0.15.1",
     "@next/bundle-analyzer": "16.1.5",
     "@next/eslint-plugin-next": "16.1.5",
+    "@opennextjs/cloudflare": "^1.16.5",
     "@playwright/test": "^1.57.0",
     "@react-email/preview-server": "5.2.5",
     "@tailwindcss/postcss": "^4.1.18",
@@ -174,7 +178,8 @@
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.53.1",
-    "vitest": "^4.0.18"
+    "vitest": "^4.0.18",
+    "wrangler": "^4.65.0"
   },
   "pnpm": {
     "overrides": {

@@ -19,6 +19,8 @@ const withMDX = createMDX({
   },
 });
 
+const isCloudflare = process.env.DEPLOY_TARGET === "cloudflare";
+
 const nextConfig: NextConfig = {
   /* config options here */
 
@@ -58,6 +60,8 @@ const nextConfig: NextConfig = {
         hostname: "via.placeholder.com",
       },
     ],
+    // POC: Cloudflare Workers 构建时禁用图片优化（后续可升级为 Cloudflare Images loader）
+    ...(isCloudflare ? { unoptimized: true } : {}),
   },
 
   // Next.js Compiler 配置

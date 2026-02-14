@@ -182,12 +182,14 @@ export default defineCloudflareConfig({
 
 关键配置项：
 - `compatibility_date` >= `"2025-04-01"`（否则 `process.env` 为空）
-- `compatibility_flags: ["nodejs_compat"]`
+- `compatibility_flags: ["nodejs_compat", "global_fetch_strictly_public"]`
+- `services: WORKER_SELF_REFERENCE`（自引用 service binding，R2+D1+DO 缓存架构需要）
 - R2 binding: `NEXT_INC_CACHE_R2_BUCKET`
 - D1 binding: `NEXT_TAG_CACHE_D1`
 - Durable Objects: queue
 - Cron triggers: 替代 `vercel.json` 的 crons
 - Assets binding
+- 环境分层：`env.preview`（预发布）/ `env.production`（生产）— 资源名（R2 bucket、D1 database）使用占位符 + env 分层隔离
 
 ### 4.3 `image-loader.ts`（新建）
 
@@ -195,7 +197,13 @@ Cloudflare Images custom loader，替代 sharp 图片优化。
 
 ### 4.4 `.github/workflows/cloudflare-deploy.yml`（新建）
 
-替换 `vercel-deploy.yml`，流程：`pnpm build` → `opennextjs-cloudflare build` → `wrangler deploy`。
+替换 `vercel-deploy.yml`，流程：`opennextjs-cloudflare build` → `wrangler deploy`。
+
+### 4.5 `.dev.vars` / `.dev.vars.example`（新建）
+
+- **说明**：Cloudflare Workers 本地开发环境变量文件（`wrangler dev` 自动读取）
+- `.dev.vars.example` 跟踪到 git 作为模板，列出所有需要的变量名（不含实际值）
+- `.dev.vars` 包含本地开发的实际密钥值，加入 `.gitignore` 不跟踪
 
 ---
 
@@ -207,7 +215,7 @@ Cloudflare Images custom loader，替代 sharp 图片优化。
 | `next.config.ts` | `images.loader: "custom"` + `images.loaderFile`；评估 `serverExternalPackages` | P0 |
 | `src/components/monitoring/enterprise-analytics-island.tsx` | 移除 `@vercel/analytics` + `@vercel/speed-insights`，保留 GA4 | P1 |
 | `src/lib/security/distributed-rate-limit.ts` | 移除 Vercel KV 分支，固定 Upstash Redis | P1 |
-| `src/lib/env.ts` | 移除 Vercel 专属变量（`VERCEL_URL`/`VERCEL_ENV` 等），添加 Cloudflare 变量 | P1 |
+| `src/lib/env.ts` | 移除 Vercel 专属变量（`VERCEL_URL`/`VERCEL_ENV` 等），添加 Cloudflare 变量；需同步更新 schema 和 runtimeEnv 映射 | P1 |
 | `.github/workflows/vercel-deploy.yml` | 替换为 Cloudflare deploy workflow | P1 |
 | `vercel.json` | 下线。redirects → `_redirects` 文件；crons → Workers Cron Triggers | P1 |
 | `.gitignore` | 添加 `.open-next/` | P0 |
@@ -370,3 +378,36 @@ Cloudflare Images custom loader，替代 sharp 图片优化。
 8. **最终修正**：Claude 应用 #1093 状态更正、#1115 措辞校准、CPU 限制精确化、补充灰度策略和回滚 SOP
 
 最终报告采信原则：多轮验证一致确认的结论 > 单方结论 > 文档描述 > 过期信息。
+
+---
+
+## 十一、实施方案修正记录
+
+> 基于 Codex 审查反馈，修正初始实施方案中的错误和遗漏。
+
+### 11.1 脚本修正
+
+`opennextjs-cloudflare build` 内含 `next build`，不需要 `next build && opennextjs-cloudflare build` 两步调用。所有 Cloudflare 相关脚本（`build:cf`、`preview:cf`、`deploy:cf`）统一使用 OpenNext CLI 作为入口，避免重复构建。
+
+### 11.2 Cron Triggers 延后
+
+Cloudflare Cron Triggers 触发的是 `scheduled()` handler 而非 HTTP 路由，需要 custom worker entry 来接收 scheduled 事件。POC 阶段不配置 Cron Triggers，避免引入额外复杂度。健康检查等定时任务可暂用外部 cron 服务（如 UptimeRobot）替代。
+
+### 11.3 wrangler.jsonc 配置补全
+
+在 `wrangler.jsonc` 中补充以下配置：
+
+- **`global_fetch_strictly_public` compatibility flag**：确保 Worker 内 `fetch()` 调用发出公网请求（而非被拦截为内部 subrequest），防止 API 路由调用外部服务时行为异常
+- **`WORKER_SELF_REFERENCE` service binding**：R2+D1+DO 缓存架构需要 Worker 自引用来处理 ISR revalidation 回调
+- **资源命名**：R2 bucket、D1 database 名称使用占位符，通过 `env.preview` / `env.production` 分层配置实现环境隔离
+
+### 11.4 env.ts runtimeEnv 映射
+
+`@t3-oss/env-nextjs` 要求 `server` / `client` schema 和 `runtimeEnv` 两处同步新增变量。例如新增 `NEXT_PUBLIC_DEPLOYMENT_PLATFORM` 时，必须同时在 schema 中定义验证规则，并在 `runtimeEnv` 中映射 `process.env.NEXT_PUBLIC_DEPLOYMENT_PLATFORM`，否则运行时取不到值（返回 `undefined`）。
+
+### 11.5 本地开发环境
+
+新增 `.dev.vars` 文件（Cloudflare Workers 本地开发的环境变量文件，`wrangler dev` 自动读取）：
+
+- `.dev.vars` 包含本地开发所需的实际密钥值，加入 `.gitignore` 防止泄露
+- `.dev.vars.example` 作为模板跟踪到 git，列出所有变量名和说明，不含实际值
