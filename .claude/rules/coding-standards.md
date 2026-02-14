@@ -110,8 +110,6 @@ Conventional Commits format:
 
 - Bullet point 1                         (body required, ≤72 chars/line)
 - Bullet point 2
-
-Co-Authored-By: <Model Name> <noreply@anthropic.com>   (footer required)
 ```
 
 Types: `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `build`, `ci`, `style`
