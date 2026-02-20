@@ -1043,6 +1043,8 @@ export default [
       ".dependency-cruiser.js", // 工具配置文件
       "docs/vercel-design-system/**", // 设计系统参考文件，非生产代码
       ".claude/skills/**", // agent skill 参考脚本，非生产代码
+      ".open-next/**", // OpenNext/Cloudflare 构建产物
+      ".wrangler/**", // Wrangler 构建产物
     ],
   },
 ];
