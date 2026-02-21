@@ -11,7 +11,9 @@ const SOURCE_WRANGLER_CONFIG_PATH = path.join(ROOT_DIR, "wrangler.jsonc");
 const BIND_DOMAIN = process.argv.includes("--bind-domain");
 
 const DOMAIN_ROUTES = {
-  preview: [{ pattern: "preview.tianze-pipe.com/*", zone_name: "tianze-pipe.com" }],
+  preview: [
+    { pattern: "preview.tianze-pipe.com/*", zone_name: "tianze-pipe.com" },
+  ],
   production: [{ pattern: "tianze-pipe.com/*", zone_name: "tianze-pipe.com" }],
 };
 
@@ -50,7 +52,9 @@ const API_ROUTE_BINDING_RULES = [
 function parseJsoncFile(filePath, content) {
   const parsed = ts.parseConfigFileTextToJson(filePath, content);
   if (parsed.error) {
-    throw new Error(ts.flattenDiagnosticMessageText(parsed.error.messageText, "\n"));
+    throw new Error(
+      ts.flattenDiagnosticMessageText(parsed.error.messageText, "\n"),
+    );
   }
   return parsed.config;
 }
@@ -73,7 +77,9 @@ function resolveEnvConfig(baseConfig, envName) {
   const envConfig = baseConfig.env?.[envName] ?? {};
   return {
     r2_buckets: cloneJSON(envConfig.r2_buckets ?? baseConfig.r2_buckets ?? []),
-    d1_databases: cloneJSON(envConfig.d1_databases ?? baseConfig.d1_databases ?? []),
+    d1_databases: cloneJSON(
+      envConfig.d1_databases ?? baseConfig.d1_databases ?? [],
+    ),
     durable_objects: cloneJSON(
       envConfig.durable_objects ?? baseConfig.durable_objects ?? undefined,
     ),
@@ -100,11 +106,21 @@ function createCommonConfig(baseConfig, name, main, { includeAssets }) {
   return config;
 }
 
-function createServerWorkerConfig(baseConfig, workerNames, workerKey, envNames) {
+function createServerWorkerConfig(
+  baseConfig,
+  workerNames,
+  workerKey,
+  envNames,
+) {
   const name = workerNames[workerKey];
-  const config = createCommonConfig(baseConfig, name, `../../workers/${workerKey}.mjs`, {
-    includeAssets: workerKey === "web",
-  });
+  const config = createCommonConfig(
+    baseConfig,
+    name,
+    `../../workers/${workerKey}.mjs`,
+    {
+      includeAssets: workerKey === "web",
+    },
+  );
 
   config.services = [
     {
@@ -359,12 +375,18 @@ async function main() {
 
   const workerFiles = {
     gateway: createGatewayWorkerSource(),
-    web: createServiceWorkerSource("web", "../server-functions/default/handler.mjs"),
+    web: createServiceWorkerSource(
+      "web",
+      "../server-functions/default/handler.mjs",
+    ),
     apiLead: createServiceWorkerSource(
       "apiLead",
       "../server-functions/apiLead/index.mjs",
     ),
-    apiOps: createServiceWorkerSource("apiOps", "../server-functions/apiOps/index.mjs"),
+    apiOps: createServiceWorkerSource(
+      "apiOps",
+      "../server-functions/apiOps/index.mjs",
+    ),
     apiWhatsapp: createServiceWorkerSource(
       "apiWhatsapp",
       "../server-functions/apiWhatsapp/index.mjs",
@@ -379,14 +401,24 @@ async function main() {
 
   const envNames = ["preview", "production"];
   const gatewayConfig = createGatewayConfig(baseConfig, workerNames, envNames);
-  const webConfig = createServerWorkerConfig(baseConfig, workerNames, "web", envNames);
+  const webConfig = createServerWorkerConfig(
+    baseConfig,
+    workerNames,
+    "web",
+    envNames,
+  );
   const apiLeadConfig = createServerWorkerConfig(
     baseConfig,
     workerNames,
     "apiLead",
     envNames,
   );
-  const apiOpsConfig = createServerWorkerConfig(baseConfig, workerNames, "apiOps", envNames);
+  const apiOpsConfig = createServerWorkerConfig(
+    baseConfig,
+    workerNames,
+    "apiOps",
+    envNames,
+  );
   const apiWhatsappConfig = createServerWorkerConfig(
     baseConfig,
     workerNames,
@@ -399,14 +431,19 @@ async function main() {
     writeJsonFile(path.join(WRANGLER_DIR, "web.jsonc"), webConfig),
     writeJsonFile(path.join(WRANGLER_DIR, "api-lead.jsonc"), apiLeadConfig),
     writeJsonFile(path.join(WRANGLER_DIR, "api-ops.jsonc"), apiOpsConfig),
-    writeJsonFile(path.join(WRANGLER_DIR, "api-whatsapp.jsonc"), apiWhatsappConfig),
+    writeJsonFile(
+      path.join(WRANGLER_DIR, "api-whatsapp.jsonc"),
+      apiWhatsappConfig,
+    ),
   ]);
 
   console.log("[phase6] generated workers and wrangler configs");
   console.log(`[phase6] workers: ${path.relative(ROOT_DIR, WORKERS_DIR)}`);
   console.log(`[phase6] configs: ${path.relative(ROOT_DIR, WRANGLER_DIR)}`);
   if (BIND_DOMAIN) {
-    console.log("[phase6] gateway routes: domain binding enabled (--bind-domain)");
+    console.log(
+      "[phase6] gateway routes: domain binding enabled (--bind-domain)",
+    );
   } else {
     console.log("[phase6] gateway routes: workers.dev only (no --bind-domain)");
   }

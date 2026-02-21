@@ -48,19 +48,25 @@ function printUsage() {
 const args = parseArgs(process.argv);
 
 if (!args.env) {
-  console.error("[phase6] --env is required (no default to prevent wrong-env deploy)");
+  console.error(
+    "[phase6] --env is required (no default to prevent wrong-env deploy)",
+  );
   printUsage();
   process.exit(1);
 }
 
 if (!VALID_ENVS.has(args.env)) {
-  console.error(`[phase6] invalid env "${args.env}", expected: preview | production`);
+  console.error(
+    `[phase6] invalid env "${args.env}", expected: preview | production`,
+  );
   process.exit(1);
 }
 
 if (args.only) {
   // Allow both "gateway" and "gateway.jsonc"
-  const normalized = args.only.endsWith(".jsonc") ? args.only : `${args.only}.jsonc`;
+  const normalized = args.only.endsWith(".jsonc")
+    ? args.only
+    : `${args.only}.jsonc`;
   if (!VALID_CONFIGS.has(normalized)) {
     console.error(`[phase6] invalid --only target "${args.only}"`);
     console.error(`[phase6] valid targets: ${[...VALID_CONFIGS].join(", ")}`);
@@ -84,13 +90,17 @@ function checkAuth() {
 
   if (result.status !== 0) {
     console.error("[phase6] wrangler is not authenticated.");
-    console.error("[phase6] set CLOUDFLARE_API_TOKEN or run: pnpm exec wrangler login");
+    console.error(
+      "[phase6] set CLOUDFLARE_API_TOKEN or run: pnpm exec wrangler login",
+    );
     process.exit(1);
   }
 
   // Print account info for audit trail
   const output = (result.stdout ?? "").trim();
-  const accountLine = output.split("\n").find((line) => line.includes("Account ID"));
+  const accountLine = output
+    .split("\n")
+    .find((line) => line.includes("Account ID"));
   if (accountLine) {
     console.log(`[phase6] ${accountLine.trim()}`);
   }
@@ -112,7 +122,9 @@ async function ensureConfigs() {
     try {
       await access(fullPath);
     } catch {
-      console.error(`[phase6] missing config: ${path.relative(ROOT_DIR, fullPath)}`);
+      console.error(
+        `[phase6] missing config: ${path.relative(ROOT_DIR, fullPath)}`,
+      );
       console.error("[phase6] run `pnpm build:cf:phase6` first.");
       process.exit(1);
     }
@@ -123,7 +135,15 @@ async function ensureConfigs() {
 
 function runDeploy(configFile) {
   const fullPath = path.join(CONFIG_DIR, configFile);
-  const commandArgs = ["exec", "wrangler", "deploy", "--config", fullPath, "--env", targetEnv];
+  const commandArgs = [
+    "exec",
+    "wrangler",
+    "deploy",
+    "--config",
+    fullPath,
+    "--env",
+    targetEnv,
+  ];
   const printable = `pnpm exec wrangler deploy --config ${path.relative(ROOT_DIR, fullPath)} --env ${targetEnv}`;
 
   if (args.dryRun) {
@@ -151,7 +171,9 @@ if (!args.dryRun) {
 printWranglerVersion();
 await ensureConfigs();
 
-console.log(`[phase6] deploying ${configsToDeployList.length} worker(s) to ${targetEnv}`);
+console.log(
+  `[phase6] deploying ${configsToDeployList.length} worker(s) to ${targetEnv}`,
+);
 
 for (const file of configsToDeployList) {
   runDeploy(file);
