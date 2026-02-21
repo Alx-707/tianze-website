@@ -1,1 +1,0 @@
-/Users/Data/.claude/skills/verification-first.md

@@ -31,7 +31,7 @@
   "d1_databases": [
     {
       "binding": "NEXT_TAG_CACHE_D1",
-      "database_id": "PLACEHOLDER_PREVIEW_DB_ID",
+      "database_id": "0d902c4d-fa32-4376-ace0-0888d20e2a13",
       "database_name": "tianze-website-tags-preview",
     },
   ],
@@ -76,7 +76,7 @@
       "d1_databases": [
         {
           "binding": "NEXT_TAG_CACHE_D1",
-          "database_id": "PLACEHOLDER_PREVIEW_DB_ID",
+          "database_id": "0d902c4d-fa32-4376-ace0-0888d20e2a13",
           "database_name": "tianze-website-tags-preview",
         },
       ],
@@ -115,7 +115,7 @@
       "d1_databases": [
         {
           "binding": "NEXT_TAG_CACHE_D1",
-          "database_id": "PLACEHOLDER_PRODUCTION_DB_ID",
+          "database_id": "ab379023-ebc0-4033-978d-c782df2c3179",
           "database_name": "tianze-website-tags-production",
         },
       ],

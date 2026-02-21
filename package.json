@@ -83,9 +83,9 @@
     "build:cf:phase6": "pnpm build:cf && node scripts/cloudflare/build-phase6-workers.mjs",
     "preview:cf": "DEPLOY_TARGET=cloudflare NEXT_PUBLIC_DEPLOYMENT_PLATFORM=cloudflare opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "deploy:cf": "DEPLOY_TARGET=cloudflare NEXT_PUBLIC_DEPLOYMENT_PLATFORM=cloudflare opennextjs-cloudflare build && opennextjs-cloudflare deploy",
-    "deploy:cf:phase6:preview": "pnpm build:cf:phase6 && node scripts/cloudflare/deploy-phase6.mjs preview",
-    "deploy:cf:phase6:production": "pnpm build:cf:phase6 && node scripts/cloudflare/deploy-phase6.mjs production",
-    "deploy:cf:phase6:dry-run": "pnpm build:cf:phase6 && node scripts/cloudflare/deploy-phase6.mjs preview --dry-run"
+    "deploy:cf:phase6:preview": "pnpm build:cf:phase6 && node scripts/cloudflare/deploy-phase6.mjs --env preview",
+    "deploy:cf:phase6:production": "pnpm build:cf:phase6 && node scripts/cloudflare/deploy-phase6.mjs --env production",
+    "deploy:cf:phase6:dry-run": "pnpm build:cf:phase6 && node scripts/cloudflare/deploy-phase6.mjs --env preview --dry-run"
   },
   "dependencies": {
     "@marsidev/react-turnstile": "^1.4.1",

@@ -62,6 +62,7 @@ pnpm-debug.log*
 
 # Cloudflare
 .open-next/
+.wrangler/
 .dev.vars
 
 # Local MCP config (may contain secrets)
@@ -69,3 +70,8 @@ pnpm-debug.log*
 .lighthouseci/
 # next-agents-md
 .next-docs/
+
+# Codex review loop (runtime state & output)
+.claude/review-loop.local.md
+.claude/review-loop.log
+reviews/

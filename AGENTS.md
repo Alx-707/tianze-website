@@ -129,3 +129,32 @@
 ## Changelog
 
 - **2026-02-12** — 工具链精简 T1+T2：移除 9 个 devDep、6 个孤立脚本、`.augment/`、浏览器测试栈；madge → dependency-cruiser 统一；cssnano 移除（Next.js 自带 CSS minify）；lockfile 重生成（1608→1418 包）。
+- **2026-02-15** — Cloudflare Bundle Phase 5 原型：引入 OpenNext `functions` 路由拆分（`apiLead/apiOps/apiWhatsapp`）与网关 worker 生成脚本（`scripts/cloudflare/build-phase5-worker.mjs`），用于验证架构级分流与按函数体积观测。
+- **2026-02-15** — Cloudflare Bundle Phase 6 原型：引入多 Worker 生成器与 bindings/origin routing（`scripts/cloudflare/build-phase6-workers.mjs`、`scripts/cloudflare/deploy-phase6.mjs`），产出 `gateway/web/api*` 拆分部署骨架。
+
+## Architecture Notes (Cloudflare Phase 5 Prototype)
+
+### 目录结构（新增/关键）
+
+```text
+.
+├── open-next.config.ts
+├── package.json
+└── scripts/
+    └── cloudflare/
+        └── build-phase5-worker.mjs
+```
+
+### 文件职责
+
+- `open-next.config.ts`: 定义 Cloudflare 适配配置，并声明 Phase 5 的 server function 拆分边界（`functions`）。
+- `scripts/cloudflare/build-phase5-worker.mjs`: 在 `pnpm build:cf` 后生成 `.open-next/worker.phase5.mjs`，按 URL 路径把请求分发到 `default/apiLead/apiOps/apiWhatsapp`。
+- `scripts/cloudflare/build-phase6-workers.mjs`: 在 `pnpm build:cf` 后生成 `.open-next/workers/*` 多 Worker 入口与 `.open-next/wrangler/phase6/*` 配置（gateway + web + apiLead/apiOps/apiWhatsapp）。
+- `scripts/cloudflare/deploy-phase6.mjs`: 按 `web -> api* -> gateway` 顺序执行（或 dry-run）多 Worker wrangler 部署命令。
+- `package.json`: 暴露 `build:cf:phase5` / `build:cf:phase6` 与 `deploy:cf:phase6:*` 入口，串联构建、配置生成与多 Worker 部署编排。
+
+### 模块依赖与边界
+
+- 构建边界：`opennextjs-cloudflare build` 负责产出 `.open-next/server-functions/*`，脚本只做“分发层”拼装，不改 OpenNext 内部产物格式。
+- 运行边界：`worker.phase5.mjs` / `.open-next/workers/gateway.mjs` 仅负责分流与路由，不承载业务逻辑；业务逻辑仍在各 `server-functions/*/index.mjs|handler.mjs`。
+- 演进方向：Phase 6 已形成多 Worker 配置骨架（service bindings + origin route 规则）；后续重点是按 Worker 维度接入正式路由与体积门禁。
