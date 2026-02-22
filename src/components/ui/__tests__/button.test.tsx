@@ -21,24 +21,26 @@ vi.mock("next/link", () => ({
   ),
 }));
 
-// Mock Radix UI Slot component
-vi.mock("@radix-ui/react-slot", () => ({
-  Slot: ({
-    children,
-    ...props
-  }: {
-    children?: React.ReactNode;
-    [key: string]: any;
-  }) => {
-    // 如果children是React元素，克隆并添加props
-    if (React.isValidElement(children)) {
-      return React.cloneElement(children, {
-        ...props,
-        ...(children.props || {}),
-      });
-    }
-    // 否则返回一个div包装
-    return <div {...props}>{children}</div>;
+// Mock Radix UI Slot component (unified radix-ui package)
+vi.mock("radix-ui", () => ({
+  Slot: {
+    Slot: ({
+      children,
+      ...props
+    }: {
+      children?: React.ReactNode;
+      [key: string]: any;
+    }) => {
+      // 如果children是React元素，克隆并添加props
+      if (React.isValidElement(children)) {
+        return React.cloneElement(children, {
+          ...props,
+          ...(children.props || {}),
+        });
+      }
+      // 否则返回一个div包装
+      return <div {...props}>{children}</div>;
+    },
   },
 }));
 

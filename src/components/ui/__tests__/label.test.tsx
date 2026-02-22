@@ -2,15 +2,17 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { Label } from "@/components/ui/label";
 
-// Mock Radix UI Label
-vi.mock("@radix-ui/react-label", () => ({
-  Root: ({
-    children,
-    ...props
-  }: {
-    children?: React.ReactNode;
-    [key: string]: any;
-  }) => <label {...props}>{children}</label>,
+// Mock Radix UI Label (unified radix-ui package)
+vi.mock("radix-ui", () => ({
+  Label: {
+    Root: ({
+      children,
+      ...props
+    }: {
+      children?: React.ReactNode;
+      [key: string]: any;
+    }) => <label {...props}>{children}</label>,
+  },
 }));
 
 describe("Label Component", () => {
