@@ -29,6 +29,8 @@ public/messages/
 
 # AI Tools (personal config)
 .claude/skills/
+.claude/settings.local.json
+.claude/skills-backup-*/
 .claude/skills-reference-*/
 .claude-plugin/
 .agents/
@@ -58,6 +60,18 @@ pnpm-debug.log*
 # Vercel
 .vercel/
 
+# Cloudflare
+.open-next/
+.wrangler/
+.dev.vars
+
 # Local MCP config (may contain secrets)
 .mcp.json
 .lighthouseci/
+# next-agents-md
+.next-docs/
+
+# Codex review loop (runtime state & output)
+.claude/review-loop.local.md
+.claude/review-loop.log
+reviews/

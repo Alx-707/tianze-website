@@ -19,7 +19,23 @@ const withMDX = createMDX({
   },
 });
 
+const isCloudflare = process.env.DEPLOY_TARGET === "cloudflare";
+
 const nextConfig: NextConfig = {
+  // Exclude test/report artifacts from OpenNext bundle
+  outputFileTracingExcludes: {
+    "/*": [
+      "./reports/**",
+      "./coverage/**",
+      "./test-results/**",
+      "./.lighthouseci/**",
+      "./.next-docs/**",
+      "./tests/e2e/.playwright/**",
+      "./playwright-report/**",
+      "./.playwright/**",
+    ],
+  },
+
   /* config options here */
 
   // Enable Next.js 16 Cache Components mode
@@ -36,8 +52,8 @@ const nextConfig: NextConfig = {
   // Configure pageExtensions to include markdown and MDX files
   pageExtensions: ["js", "jsx", "md", "mdx", "ts", "tsx"],
 
-  // Enable source maps for better error tracking
-  productionBrowserSourceMaps: true,
+  // Cloudflare deploy artifacts prioritize bundle size; disable browser source maps there.
+  productionBrowserSourceMaps: !isCloudflare,
 
   images: {
     // Remote image patterns allow Next.js Image component to optimize external images.
@@ -58,6 +74,8 @@ const nextConfig: NextConfig = {
         hostname: "via.placeholder.com",
       },
     ],
+    // POC: Cloudflare Workers 构建时禁用图片优化（后续可升级为 Cloudflare Images loader）
+    ...(isCloudflare ? { unoptimized: true } : {}),
   },
 
   // Next.js Compiler 配置

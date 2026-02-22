@@ -1268,6 +1268,10 @@
         "portOfLoading": "装运港口"
       }
     },
+    "breadcrumb": {
+      "home": "首页",
+      "products": "产品中心"
+    },
     "inquiry": {
       "title": "产品询价",
       "description": "对此产品感兴趣？发送询价获取报价和货期信息。",

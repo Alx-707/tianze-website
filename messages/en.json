@@ -1268,6 +1268,10 @@
         "portOfLoading": "Port of Loading"
       }
     },
+    "breadcrumb": {
+      "home": "Home",
+      "products": "Products"
+    },
     "inquiry": {
       "title": "Product Inquiry",
       "description": "Interested in this product? Send us an inquiry for pricing and availability.",
