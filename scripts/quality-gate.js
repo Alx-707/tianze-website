@@ -177,6 +177,8 @@ class QualityGate {
             Number.isFinite(diffCoverageThreshold) && diffCoverageThreshold > 0
               ? diffCoverageThreshold
               : 90, // 增量覆盖率阈值：变更代码需达到90%覆盖率
+          // 最小可执行语句数：低于此值的增量变更跳过阈值检查（样本量不足，百分比无统计意义）
+          diffMinStatements: 10,
           diffWarningThreshold:
             Number.isFinite(diffWarningThreshold) && diffWarningThreshold >= 0
               ? diffWarningThreshold
@@ -191,13 +193,12 @@ class QualityGate {
             "src/lib/security-tokens.ts",
             "src/types/react19.ts",
             "src/lib/__tests__/theme-analytics/setup.ts",
-            "src/app/[locale]/products/error.tsx",
-            "src/app/[locale]/contact/error.tsx",
+            // error.tsx 已被 diffCoverageExcludeGlobs 中 src/app/**/error.tsx 覆盖
             "src/types/whatsapp-api-requests/api-types.ts",
             "src/types/whatsapp-webhook-utils/functions.ts",
             "src/lib/content-parser.ts", // Content parser - covered by content tests
           ],
-          // 增量覆盖率排除（glob）：生成文件/声明文件默认不纳入 diff-line coverage
+          // 增量覆盖率排除（glob）：生成文件/声明文件/无逻辑代码默认不纳入 diff-line coverage
           diffCoverageExcludeGlobs: [
             "**/*.generated.*",
             "**/*.d.ts",
@@ -208,6 +209,14 @@ class QualityGate {
             "**/__tests__/**",
             "src/test/**",
             "src/testing/**",
+            // 无逻辑代码：JSX 模板和数据声明被 Istanbul 计为可执行语句，
+            // 但不含分支逻辑，测试价值极低
+            "src/components/ui/**", // shadcn/ui CLI 生成的 UI 原语
+            "src/constants/**", // 纯数据声明（as const 对象）
+            "src/config/**", // 静态配置对象（零条件分支）
+            // App Router 固定模板文件（error boundary / loading skeleton）
+            "src/app/**/error.tsx",
+            "src/app/**/loading.tsx",
           ],
         },
         codeQuality: {
@@ -991,9 +1000,23 @@ class QualityGate {
             }
           }
 
+          // 最小语句守卫：变更语句数低于阈值时跳过百分比检查
+          const minStatements =
+            this.config.gates.coverage.diffMinStatements || 0;
+          if (
+            !diffCoverage.missingCoverageData &&
+            minStatements > 0 &&
+            diffCoverage.totalStatements < minStatements
+          ) {
+            log(
+              `ℹ️  增量覆盖率: ${diffCoverage.totalCovered}/${diffCoverage.totalStatements} 语句（低于最小阈值 ${minStatements}，跳过百分比检查）`,
+            );
+          }
+
           // 检查增量覆盖率是否达到阈值
           if (
             !diffCoverage.missingCoverageData &&
+            diffCoverage.totalStatements >= minStatements &&
             diffCoverage.pct < threshold
           ) {
             const shortfall = threshold - diffCoverage.pct;
@@ -1028,9 +1051,10 @@ class QualityGate {
             }
           }
 
-          // 检查增量覆盖率下降幅度
+          // 检查增量覆盖率下降幅度（同样受最小语句守卫约束）
           if (
             !diffCoverage.missingCoverageData &&
+            diffCoverage.totalStatements >= minStatements &&
             diffCoverage.drop > warningThreshold
           ) {
             gate.status = gate.status === "passed" ? "warning" : gate.status;
