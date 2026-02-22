@@ -4,7 +4,7 @@ Automate the Git PR workflow: commit, push, create PR, and enable auto-merge.
 
 ## Execution Steps
 
-1. **Verify Branch**: Ensure NOT on `main` or `develop`. Feature/hotfix/release branches only.
+1. **Verify Branch**: Ensure NOT on `main`. Feature/hotfix branches only.
 
 2. **Check Changes**: Run `git status` to identify staged/unstaged changes.
    - If no changes, abort with "No changes to commit".
@@ -22,9 +22,8 @@ Automate the Git PR workflow: commit, push, create PR, and enable auto-merge.
 
 6. **Push**: Execute `git push -u origin <current-branch>`.
 
-7. **Create PR**: Execute `gh pr create --base develop --fill`.
-   - Feature branches PR to `develop`
-   - Hotfix branches: use `gitflow:finish-hotfix` instead
+7. **Create PR**: Execute `gh pr create --base main --fill`.
+   - All branches PR to `main`
 
 8. **Enable Auto-merge**: Execute `gh pr merge --auto --squash` (default behavior).
    - Use `--no-auto` flag to skip auto-merge.
@@ -46,6 +45,5 @@ Automate the Git PR workflow: commit, push, create PR, and enable auto-merge.
 
 ## Notes
 
-- GitFlow model: feature branches merge to `develop`, not `main`
-- Use `gitflow:finish-feature` for local merge workflow (alternative to PR)
+- GitHub Flow: all branches merge to `main` via PR
 - Auto-merge uses GitHub's native feature (requires "Allow auto-merge" in repo settings)

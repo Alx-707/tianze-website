@@ -116,12 +116,10 @@ Types: `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `build`, `ci`
 
 Breaking changes: add `!` before `:` (e.g., `feat(api)!: migrate to oauth`)
 
-## Git Branching (GitFlow)
+## Git Branching (GitHub Flow)
 
-- **`main`**: 生产发布分支
-- **`develop`**: 开发主分支（所有 feature 合并到这里）
-- **`feature/*`**: 功能分支 → merge 到 `develop`
-- **`hotfix/*`**: 紧急修复 → merge 到 `main` + `develop`
-- **`release/*`**: 发布准备 → merge 到 `main` + `develop`
+- **`main`**: 唯一长期分支，始终可部署
+- **`feature/*`**: 功能分支 → PR 合并到 `main`
+- **`hotfix/*`**: 紧急修复 → PR 合并到 `main`
 
-使用 `gitflow:start-feature` / `gitflow:finish-feature` 管理分支生命周期。
+流程：`main` → 创建 feature 分支 → 开发 → PR → CI 通过 → 合并 → 删除分支。

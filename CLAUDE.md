@@ -55,7 +55,7 @@ pnpm ci:local     # Full CI
 1. **TypeScript strict** — No `any`, prefer `interface`
 2. **Server Components first** — `"use client"` only for interactivity
 3. **i18n required** — All user-facing text via translation keys
-4. **Git** — GitFlow 分支模型：`main`（生产）+ `develop`（开发），使用 `gitflow:start-feature` 创建 feature 分支
+4. **Git** — GitHub Flow：`main` 为唯一长期分支，feature 分支通过 PR 合并
 5. **Complexity** — Function ≤120 lines, File ≤500 lines
 
 ## Language

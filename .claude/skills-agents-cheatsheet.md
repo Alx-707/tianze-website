@@ -73,10 +73,7 @@
 │         │            body: 必须，bullet points                                   │
 │         │            footer: Co-Authored-By 必须                                 │
 │         ▼                                                                        │
-│  /gitflow:finish-feature ──▶ 测试 + CHANGELOG + merge 到 develop               │
-│         │                                                                        │
-│         ▼                                                                        │
-│  /pr ──▶ 推送远程 + 创建 PR (base=develop) + 自动合并                           │
+│  /pr ──▶ 推送远程 + 创建 PR (base=main) + 自动合并                             │
 │         │                                                                        │
 │         ▼                                                                        │
 │  Pre-push Hooks: build → translation → quality-gate → arch → security           │
@@ -85,23 +82,22 @@
 
 ---
 
-## GitFlow 分支模型
+## GitHub Flow 分支模型
 
 ```
-main (生产发布) ◄── release/* / hotfix/*
+main (唯一长期分支，始终可部署)
   │
-develop (开发主分支) ◄── feature/*
-  │
-feature/* ──▶ gitflow:start-feature 创建
-           ──▶ gitflow:finish-feature 合并回 develop
-           ──▶ /pr 创建 PR (base=develop)
+feature/* ──▶ 从 main 创建
+           ──▶ /pr 创建 PR (base=main)
+           ──▶ CI 通过后合并，删除分支
+
+hotfix/*  ──▶ 同 feature，紧急修复走相同流程
 ```
 
-| 分支类型 | 从哪创建 | 合并到 | 命令 |
+| 分支类型 | 从哪创建 | 合并到 | 方式 |
 |----------|---------|--------|------|
-| `feature/*` | develop | develop | `start-feature` / `finish-feature` |
-| `hotfix/*` | main | main + develop | `start-hotfix` / `finish-hotfix` |
-| `release/*` | develop | main + develop | `start-release` / `finish-release` |
+| `feature/*` | main | main | PR |
+| `hotfix/*` | main | main | PR |
 
 ---
 
@@ -127,11 +123,11 @@ task 文件引用 scenario
 
 ```
 完整开发:
-  gitflow:start-feature → brainstorming → bdd-specs.md → writing-plans → task 文件
+  创建 feature 分支 → brainstorming → bdd-specs.md → writing-plans → task 文件
        ↓
   executing-plans → BDD (Red-Green-Refactor) → commit
        ↓
-  review:hierarchical → gitflow:finish-feature → /pr
+  review:hierarchical → /pr (base=main)
 ```
 
 ---
@@ -140,13 +136,13 @@ task 文件引用 scenario
 
 | 阶段 | 必用 | 按需 |
 |------|------|------|
-| **分支** | `gitflow:start-feature` | — |
+| **分支** | `git checkout -b feature/*` | — |
 | **探索** | `brainstorming` | — |
 | **规划** | `writing-plans` | — |
 | **执行** | `behavior-driven-development` (自动) | `agent-team-driven-development` |
 | **调试** | — | `systematic-debugging` |
 | **审查** | `review:hierarchical` | `review:quick`, `ui-visual-validator` |
-| **完成** | `gitflow:finish-feature` | `/pr` |
+| **完成** | `/pr` | — |
 
 ---
 
@@ -168,21 +164,11 @@ task 文件引用 scenario
 | `review:hierarchical` | 多代理层级审查 (tech-lead → code/security/ux) | 审查 |
 | `review:quick` | 精简审查 (tech-lead 按需选择专项) | 审查 |
 
-### Gitflow 插件
-| Skill | 作用 | 阶段 |
-|-------|------|------|
-| `gitflow:start-feature` | 从 develop 创建 feature/* 分支 | 分支 |
-| `gitflow:finish-feature` | 测试 + CHANGELOG + merge 到 develop | 完成 |
-| `gitflow:start-hotfix` | 从 main 创建 hotfix/* 分支 | 分支 |
-| `gitflow:finish-hotfix` | merge 到 main + develop | 完成 |
-| `gitflow:start-release` | 从 develop 创建 release/* 分支 | 分支 |
-| `gitflow:finish-release` | merge 到 main + develop | 完成 |
-
 ### 项目本地
 | 名称 | 类型 | 作用 | 阶段 |
 |------|------|------|------|
 | `afk` | Command | 无人值守模式 | 入口 |
-| `pr` | Command | 创建 PR (base=develop) | 提交 |
+| `pr` | Command | 创建 PR (base=main) | 提交 |
 | `cwf` | Command | 文案工作流 | 入口 |
 | `dwf` | Command | 设计工作流 | 入口 |
 
@@ -239,7 +225,7 @@ task 文件引用 scenario
 
 | 场景 | 推荐路径 |
 |------|----------|
-| 开始新功能 | `gitflow:start-feature` → `brainstorming` → `writing-plans` → `executing-plans` |
+| 开始新功能 | 创建 feature 分支 → `brainstorming` → `writing-plans` → `executing-plans` |
 | 写新页面/组件 | `brainstorming` → `frontend-design` → BDD 执行 |
 | 落地页 | `brainstorming` → `landing-page-designer` → BDD 执行 |
 | 调 bug | `systematic-debugging` (4 阶段) → 写失败测试 → 修复 → 绿色 |
@@ -247,8 +233,8 @@ task 文件引用 scenario
 | 升级 Next.js | `next-upgrade` |
 | 样式问题 | `tailwind-v4-shadcn` |
 | 代码审查 | `review:hierarchical` 或 `review:quick` |
-| 提 PR | `gitflow:finish-feature` → `/pr` |
-| 紧急修复 | `gitflow:start-hotfix` → 修复 → `gitflow:finish-hotfix` |
+| 提 PR | `/pr` (base=main) |
+| 紧急修复 | 创建 hotfix 分支 → 修复 → `/pr` |
 | 复杂多人 | `agent-team-driven-development` |
 | 离开执行 | `/afk` |
 | 不知道用啥 | `/find-skills` |
