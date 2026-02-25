@@ -19,10 +19,27 @@
 
 ## Files to Modify/Create
 
+**核心变更（content-parser 层）：**
 - Modify: `src/lib/content-parser.ts` — 同步 → 异步 I/O
-- Modify: `src/lib/content-query.ts` — 调用方适配（如需 await）
 - Modify: `src/lib/__tests__/content-parser.test.ts` — 更新现有同步测试为 async/await
-- Possibly modify: `src/lib/content/blog.ts`、`src/lib/content-query.ts` 等调用链上游文件
+
+**直接调用方（content-query 层）：**
+- Modify: `src/lib/content-query/queries.ts` — `getAllPosts`/`getAllPages`/`getContentBySlug`/`getPostBySlug`/`getPageBySlug` 全部改为 async
+- Modify: `src/lib/content-query/stats.ts` — `getContentStats` 中调用 `getAllPosts`/`getAllPages` 需 await
+- Modify: `src/lib/content-query/__tests__/queries.test.ts` — 测试适配 async
+- Modify: `src/lib/content-query/__tests__/stats.test.ts` — 测试适配 async
+- Modify: `src/lib/content-query/__tests__/filters.test.ts` — 如依赖 queries 则适配
+- Modify: `src/lib/content-query/__tests__/sorting.test.ts` — 如依赖 queries 则适配
+- Modify: `src/lib/content.ts` — barrel re-export（类型签名自动跟随，需确认无问题）
+
+**上游消费层：**
+- Modify: `src/lib/content/blog.ts` — `getAllPostsCached`/`getPostBySlugCached` 内部调用添加 await（已是 async）
+- Modify: `src/lib/content/products-source.ts` — `getAllProductFiles` 及 `getProductFilesInLocale` 改为 async
+- Modify: `src/lib/__tests__/content-blog-wrapper.test.ts` — 测试适配
+- Modify: `src/app/[locale]/privacy/page.tsx` — `getPageBySlug` 调用添加 await
+- Modify: `src/app/[locale]/terms/page.tsx` — 同上
+- Modify: `src/app/[locale]/faq/page.tsx` — 同上
+- Modify: `src/app/sitemap.ts` — 如调用 content-query 函数需适配
 
 ## Steps
 
@@ -38,17 +55,42 @@
 - `fs.existsSync(dir)` → 异步检查
 - `fs.readdirSync(dir)` → `await fs.promises.readdir(dir)`
 
-### Step 3: 更新调用链
+### Step 3: 更新 content-query 层
 
-追踪所有调用 `parseContentFile` 和 `getContentFiles` 的文件，添加 `await`。关键调用方：
-- `src/lib/content-query.ts` 中的 `getAllPosts`、`getPostBySlug` 等函数需要变为 async
-- `src/lib/content/blog.ts` 中的 `getAllPostsCached` 已经是 async（使用 `"use cache"`），内部调用添加 `await` 即可
+`src/lib/content-query/queries.ts` 中所有函数改为 async：
+- `getAllPosts` → `async getAllPosts` — 内部 `getContentFiles` 和 `parseContentFile` 调用添加 await
+- `getAllPages` → `async getAllPages`
+- `getContentBySlug` → `async getContentBySlug`
+- `getPostBySlug` → `async getPostBySlug`
+- `getPageBySlug` → `async getPageBySlug`
 
-### Step 4: 更新现有测试
+`src/lib/content-query/stats.ts` 中 `getContentStats` 改为 async（调用 `getAllPosts`/`getAllPages`）。
 
-现有同步测试需要改为 `async/await` 形式，mock 从 `fs.readFileSync` 改为 `fs.promises.readFile`。
+### Step 4: 更新 content 消费层
 
-### Step 5: 运行全量测试
+- `src/lib/content/products-source.ts` — `getAllProductFiles` 改为 async（第 39 行调用 `parseContentFile`）
+- `src/lib/content/blog.ts` — 内部调用添加 await（函数本身已是 async）
+- `src/app/[locale]/privacy/page.tsx:269` — `getPageBySlug("privacy", locale)` 改为 `await getPageBySlug(...)`
+- `src/app/[locale]/terms/page.tsx:146` — 同上
+- `src/app/[locale]/faq/page.tsx:147` — 同上
+- `src/app/sitemap.ts` — 检查并适配
+
+### Step 5: 更新 barrel export
+
+`src/lib/content.ts` re-export 的函数签名会自动跟随源文件变更，但需确认 TypeScript 类型推断正确。
+
+### Step 6: 更新现有测试
+
+以下测试文件需要改为 `async/await` 形式：
+- `src/lib/__tests__/content-parser.test.ts` — mock 从 `fs.readFileSync` 改为 `fs.promises.readFile`
+- `src/lib/content-query/__tests__/queries.test.ts` — 所有 query 调用添加 await
+- `src/lib/content-query/__tests__/stats.test.ts` — stats 调用添加 await
+- `src/lib/content-query/__tests__/filters.test.ts` — 如需适配
+- `src/lib/content-query/__tests__/sorting.test.ts` — 如需适配
+- `src/lib/__tests__/content-blog-wrapper.test.ts`
+- 页面测试（privacy/terms/faq 对应的 `__tests__/page.test.tsx`）
+
+### Step 7: 运行全量测试
 
 确认所有测试（新增 + 现有）通过。
 
@@ -61,7 +103,10 @@ grep -n "existsSync\|readFileSync\|readdirSync" src/lib/content-parser.ts
 
 # 运行 content 相关测试
 pnpm vitest run src/lib/__tests__/content-parser.test.ts
-pnpm vitest run src/lib/__tests__/content-query.test.ts
+pnpm vitest run src/lib/content-query/__tests__/queries.test.ts
+pnpm vitest run src/lib/content-query/__tests__/stats.test.ts
+pnpm vitest run src/lib/content-query/__tests__/filters.test.ts
+pnpm vitest run src/lib/content-query/__tests__/sorting.test.ts
 pnpm vitest run src/lib/__tests__/content-blog-wrapper.test.ts
 
 # TypeScript + Lint + 全量测试

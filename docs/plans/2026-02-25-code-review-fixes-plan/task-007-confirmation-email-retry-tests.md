@@ -37,7 +37,7 @@
 
 ## Files to Modify/Create
 
-- Modify: `src/lib/lead-pipeline/processors/__tests__/contact.test.ts`（或对应测试文件）
+- Create: `src/lib/lead-pipeline/__tests__/contact-processor.test.ts`（新建专用测试文件，现有 `process-lead.test.ts` 测试的是 pipeline 调度层，不适合放 processor 级别测试）
 
 ## Steps
 
@@ -57,7 +57,10 @@ Scenario 2 和 3 应失败（当前无重试），Scenario 1 和 4 应通过。
 
 ```bash
 # 运行 contact processor 测试
-pnpm vitest run src/lib/lead-pipeline/processors/__tests__/contact.test.ts --reporter=verbose
+pnpm vitest run src/lib/lead-pipeline/__tests__/contact-processor.test.ts --reporter=verbose
+
+# 确认现有 pipeline 测试不受影响
+pnpm vitest run src/lib/lead-pipeline/__tests__/process-lead.test.ts
 ```
 
 ## Success Criteria

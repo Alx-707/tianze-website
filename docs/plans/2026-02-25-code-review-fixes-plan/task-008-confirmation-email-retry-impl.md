@@ -4,7 +4,9 @@
 
 ## Description
 
-为确认邮件发送添加轻量重试机制（最多 2 次重试，指数退避），失败时升级日志级别并在 CRM 记录中标记。保持非阻塞特性（不阻塞主流程返回）。
+为确认邮件发送添加轻量重试机制（最多 2 次重试，指数退避），失败时升级日志级别。保持非阻塞特性（不阻塞主流程返回）。
+
+> **注意**：原计划包含"在 CRM 记录中标记失败"，经核实当前 `ContactStatus` 仅有 4 种状态（New/In Progress/Completed/Archived），且 `processContactLead` 未持久化 record.id 用于后续更新。CRM 标记需先扩展 Airtable schema，属于独立工作项，不在此 Task 范围内。
 
 ## Execution Context
 
@@ -59,7 +61,10 @@ retryAsync(() => resendService.sendConfirmationEmail(emailData), { maxRetries: 2
 
 ```bash
 # 运行 contact processor 测试
-pnpm vitest run src/lib/lead-pipeline/processors/__tests__/contact.test.ts
+pnpm vitest run src/lib/lead-pipeline/__tests__/contact-processor.test.ts
+
+# 确认 pipeline 调度层不受影响
+pnpm vitest run src/lib/lead-pipeline/__tests__/process-lead.test.ts
 
 # TypeScript + Lint
 pnpm type-check

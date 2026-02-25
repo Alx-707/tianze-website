@@ -59,7 +59,7 @@ Phase C (增强, 全部可与 Phase A/B 并行):
   Task 009 (type fix)
 ```
 
-最大并行度：Task 001 / 003 / 004 / 006 / 007 / 009 可同时启动（6 路并行）。
+最大并行度：Task 001 / 003 / 004 / 006 / 007 / 009 理论上可并行，但建议按推荐执行顺序串行处理以降低合并冲突风险（详见下方"推荐执行顺序"）。
 
 ---
 
@@ -72,34 +72,54 @@ Phase C (增强, 全部可与 Phase A/B 并行):
 | **删除** | `src/lib/security-validation.ts` (sanitizeForDatabase 函数) | -15 行 |
 | **修改** | `src/lib/__tests__/security-validation.test.ts` | -40 行 |
 | **修改** | `src/lib/content-parser.ts` | ~40 行（sync → async） |
-| **修改** | `src/lib/content-query.ts` | ~10 行（调用链适配） |
+| **修改** | `src/lib/content-query/queries.ts` | ~30 行（所有函数改 async） |
+| **修改** | `src/lib/content-query/stats.ts` | ~10 行 |
+| **修改** | `src/lib/content/products-source.ts` | ~15 行 |
+| **修改** | `src/lib/content/blog.ts` | ~5 行（内部调用 await） |
+| **修改** | `src/app/[locale]/privacy/page.tsx` | ~2 行 |
+| **修改** | `src/app/[locale]/terms/page.tsx` | ~2 行 |
+| **修改** | `src/app/[locale]/faq/page.tsx` | ~2 行 |
+| **修改** | `src/app/sitemap.ts` | ~5 行 |
 | **修改** | `src/lib/__tests__/content-parser.test.ts` | +20 行 |
+| **修改** | `src/lib/content-query/__tests__/*.test.ts` (4 files) | ~40 行 |
 | **修改** | `src/constants/count.ts` | ~30 行（重命名） |
 | **修改** | `src/constants/decimal.ts` | ~20 行（重命名） |
-| **修改** | 引用 MAGIC_* 的所有文件 | 批量替换 |
+| **修改** | 引用 MAGIC_* 的 31 个文件 | 批量替换 |
+| **新建** | `src/lib/lead-pipeline/__tests__/contact-processor.test.ts` | +60 行 |
 | **修改** | `src/lib/lead-pipeline/processors/contact.ts` | ~20 行 |
 | **修改** | `src/app/api/contact/contact-api-validation.ts` | ~10 行 |
 | **修改** | `src/config/contact-form-config.ts` | ~15 行 |
 
-**总计：~13 个文件修改 + 测试新增，约 250-300 行净变更**
+**总计：~50+ 个文件修改（含 MAGIC_* 批量替换 31 个文件），约 400-450 行净变更**
 
 ---
 
+## 推荐执行顺序
+
+基于 Codex 审查反馈，建议按以下顺序串行执行以避免合并冲突：
+
+1. **Task 001 → Task 002**（Webhook 安全修复，最高优先级）
+2. **Task 003**（死代码清理，独立且快速）
+3. **Task 004 → Task 005**（Content parser 异步迁移，影响面最大，需独立窗口）
+4. **Task 006**（常量重命名，影响 31 个文件，避免与 async 迁移冲突）
+5. **Task 007 → Task 008**（确认邮件重试）
+6. **Task 009**（类型优化，纯类型改动，最后处理）
+
 ## 验证策略
 
-每个 Task 完成后执行：
+**轻量验证**（每个 Task 完成后）：
 ```bash
 pnpm type-check    # TypeScript 零错误
-pnpm lint:check    # ESLint 零警告
-pnpm test          # 全部测试通过
+pnpm test          # 相关测试通过
 ```
 
-Phase A 完成后额外执行：
+**完整验证**（Phase 切换时，即 Task 002/005/008/009 完成后）：
 ```bash
-pnpm build         # 生产构建通过
+pnpm type-check && pnpm lint:check && pnpm test
 ```
 
-全部 Task 完成后执行：
+**最终验证**（全部 Task 完成后）：
 ```bash
 pnpm ci:local      # 完整 CI 管线
+pnpm build         # 生产构建
 ```
