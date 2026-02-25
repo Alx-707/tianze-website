@@ -46,20 +46,22 @@
 | Task 009 | — | ✓ |
 
 ```
-Phase A (安全):
-  Task 001 (Red) ── Task 002 (Green)
+推荐串行执行路径：
 
-Phase B (清理, 全部可与 Phase A 并行):
-  Task 003 (dead code removal)
-  Task 004 (Red) ── Task 005 (Green)
-  Task 006 (rename refactor)
-
-Phase C (增强, 全部可与 Phase A/B 并行):
-  Task 007 (Red) ── Task 008 (Green)
-  Task 009 (type fix)
+  Task 001 (Red) → Task 002 (Green)   # 安全修复
+       ↓
+  Task 003                             # 死代码清理
+       ↓
+  Task 004 (Red) → Task 005 (Green)   # async 迁移（影响面最大）
+       ↓
+  Task 006                             # 常量重命名（31 个文件）
+       ↓
+  Task 007 (Red) → Task 008 (Green)   # 确认邮件重试
+       ↓
+  Task 009                             # 类型优化
 ```
 
-最大并行度：Task 001 / 003 / 004 / 006 / 007 / 009 理论上可并行，但建议按推荐执行顺序串行处理以降低合并冲突风险（详见下方"推荐执行顺序"）。
+Task 间技术依赖仅存在于 Red→Green 配对内（001→002, 004→005, 007→008），其余 Task 操作不同文件。串行执行是为了避免大范围变更（Task 005 改 18 个文件、Task 006 改 31 个文件）之间的合并冲突。
 
 ---
 
@@ -75,6 +77,7 @@ Phase C (增强, 全部可与 Phase A/B 并行):
 | **修改** | `src/lib/content-query/queries.ts` | ~30 行（所有函数改 async） |
 | **修改** | `src/lib/content-query/stats.ts` | ~10 行 |
 | **修改** | `src/lib/content/products-source.ts` | ~15 行 |
+| **修改** | `src/lib/content/products.ts` | ~5 行（5 个 cached 函数加 await） |
 | **修改** | `src/lib/content/blog.ts` | ~5 行（内部调用 await） |
 | **修改** | `src/app/[locale]/privacy/page.tsx` | ~2 行 |
 | **修改** | `src/app/[locale]/terms/page.tsx` | ~2 行 |

@@ -35,6 +35,7 @@
 **上游消费层：**
 - Modify: `src/lib/content/blog.ts` — `getAllPostsCached`/`getPostBySlugCached` 内部调用添加 await（已是 async）
 - Modify: `src/lib/content/products-source.ts` — `getAllProductFiles` 及 `getProductFilesInLocale` 改为 async
+- Modify: `src/lib/content/products.ts` — 5 个 cached 函数内部调用添加 await（函数本身已是 async，仅需在第 81/137/156/175/195 行加 await）
 - Modify: `src/lib/__tests__/content-blog-wrapper.test.ts` — 测试适配
 - Modify: `src/app/[locale]/privacy/page.tsx` — `getPageBySlug` 调用添加 await
 - Modify: `src/app/[locale]/terms/page.tsx` — 同上
@@ -69,6 +70,7 @@
 ### Step 4: 更新 content 消费层
 
 - `src/lib/content/products-source.ts` — `getAllProductFiles` 改为 async（第 39 行调用 `parseContentFile`）
+- `src/lib/content/products.ts` — 5 个 cached 函数（`getAllProductsCached`/`getProductBySlugCached`/`getProductCategoriesCached`/`getProductStandardsCached`/`getFeaturedProductsCached`）内部调用 products-source 的函数前添加 await（函数本身已是 async，无需改签名）
 - `src/lib/content/blog.ts` — 内部调用添加 await（函数本身已是 async）
 - `src/app/[locale]/privacy/page.tsx:269` — `getPageBySlug("privacy", locale)` 改为 `await getPageBySlug(...)`
 - `src/app/[locale]/terms/page.tsx:146` — 同上
