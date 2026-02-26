@@ -331,6 +331,84 @@ import { WhatsAppWidget } from '@carlos8a/react-whatsapp-floating-button';
 
 ---
 
+## 路径演进：网页内真实聊天（消除跳转）
+
+> 添加日期：2026-02-26
+> 背景：方案 B 已实现并上线，但最终仍需跳转到 WhatsApp Web/App，体验不友好。
+> 项目现状：已有 WhatsApp Business API 后端（`/api/whatsapp/send` + `/api/whatsapp/webhook`）。
+
+### 问题
+
+当前方案 B 的用户体验断裂点：
+
+```
+用户在网页输入消息 → 点击发送 → 跳转离开网站 → 打开 WhatsApp → 继续对话
+```
+
+对海外买家来说，跳转意味着离开产品页面，增加流失风险。
+
+### 方案 D：开源客服系统集成（推荐评估）
+
+用开源自托管客服平台替代自建实时聊天，直接获得「网页内收发 WhatsApp 消息」能力。
+
+#### 候选方案
+
+| 平台 | 类型 | WhatsApp 集成 | 网页 Widget | 自托管 | 许可证 |
+|------|------|---------------|-------------|--------|--------|
+| **Chatwoot** | 全功能客服 | WhatsApp Cloud API 原生支持 | 内置 | Docker | MIT |
+| **Typebot** | 对话式表单 | 通过 Webhook | 内置 | Docker | AGPL-3.0 |
+| **Rocket.Chat** | 团队通讯+客服 | 通过 App | 内置 | Docker | MIT |
+
+#### Chatwoot 方案详情（首选）
+
+**架构：**
+
+```
+买家在网页聊天 Widget 输入
+  → Chatwoot 服务端接收
+  → 通过 WhatsApp Cloud API 发送到销售的 WhatsApp
+  → 销售在 WhatsApp App 或 Chatwoot 后台回复
+  → Chatwoot 推送到网页 Widget 实时显示
+```
+
+**优势：**
+- 网页端真实双向聊天，无需跳转
+- 多渠道统一（WhatsApp + 网页 + Email）
+- 多客服分配、自动回复、对话标签
+- 访客信息自动采集（页面来源、地区）
+- 开源自托管，数据完全可控
+- Docker 一键部署
+
+**成本评估：**
+- 自托管：服务器费用（约 $5-20/月 VPS）
+- WhatsApp Business API：Meta 按对话收费（前 1000 条/月免费）
+- 人力：初始部署 + 持续维护
+
+**需要验证：**
+- [ ] Chatwoot Docker 部署复杂度
+- [ ] WhatsApp Cloud API 对接流程（需 Meta 商业验证）
+- [ ] 网页 Widget 样式自定义程度（能否适配项目设计系统）
+- [ ] 性能影响（Widget JS 体积、加载策略）
+- [ ] 是否支持多语言 Widget（跟随网站 locale）
+
+#### 与方案 B 的关系
+
+方案 B（当前）和方案 D 可以共存：
+- **短期**：保持方案 B 作为降级方案
+- **中期**：部署 Chatwoot，接入 WhatsApp Cloud API
+- **切换**：验证 Chatwoot 稳定后，替换前端 Widget
+
+#### 排除方案：vercel/chat
+
+> 评估日期：2026-02-26
+
+vercel/chat（GitHub: vercel/chat）是 Vercel 出品的统一 chatbot SDK，支持 Slack/Teams/Discord 等平台。**不适用于本项目**：
+1. 不支持 WhatsApp — 无 WhatsApp adapter
+2. 解决的是不同问题 — 服务端 bot SDK，非前端客服 Widget
+3. 面向内部团队通讯，非面向客户的网页嵌入聊天
+
+---
+
 ## 参考资料
 
 - [Elfsight: How to Add Floating WhatsApp Button](https://elfsight.com/blog/how-to-embed-floating-whatsapp-button-to-website/)
