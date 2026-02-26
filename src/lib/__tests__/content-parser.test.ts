@@ -16,10 +16,23 @@ import { CONTENT_LIMITS } from "@/constants/app-constants";
 
 // Mock依赖（v4：为内置模块手动提供函数实现）
 vi.mock("fs", () => {
+  const mockAccess = vi.fn();
+  const mockReadFile = vi.fn();
+  const mockReaddir = vi.fn();
+  // Keep sync mocks as sentinels for async contract tests
   const existsSync = vi.fn();
   const readFileSync = vi.fn();
   const readdirSync = vi.fn();
-  const exports = { existsSync, readFileSync, readdirSync } as any;
+  const exports = {
+    existsSync,
+    readFileSync,
+    readdirSync,
+    promises: {
+      access: mockAccess,
+      readFile: mockReadFile,
+      readdir: mockReaddir,
+    },
+  } as any;
   return { default: exports, ...exports };
 });
 vi.mock("@/lib/logger");
@@ -55,10 +68,16 @@ vi.mock("@/lib/content-validation", () => ({
   })),
 }));
 
+const mockFsPromises = vi.mocked(fs.promises) as {
+  access: ReturnType<typeof vi.fn>;
+  readFile: ReturnType<typeof vi.fn>;
+  readdir: ReturnType<typeof vi.fn>;
+};
 const mockFs = vi.mocked(fs) as {
   existsSync: ReturnType<typeof vi.fn>;
   readFileSync: ReturnType<typeof vi.fn>;
   readdirSync: ReturnType<typeof vi.fn>;
+  promises: typeof mockFsPromises;
 };
 const mockLogger = vi.mocked(logger);
 
@@ -86,12 +105,12 @@ author: Test Author
 This is test content.`;
 
     beforeEach(() => {
-      mockFs.existsSync.mockReturnValue(true);
-      mockFs.readFileSync.mockReturnValue(mockFileContent);
+      mockFsPromises.access.mockResolvedValue(undefined);
+      mockFsPromises.readFile.mockResolvedValue(mockFileContent);
     });
 
-    it("should successfully parse a valid MDX file", () => {
-      const result = parseContentFile(mockFilePath, mockContentType);
+    it("should successfully parse a valid MDX file", async () => {
+      const result = await parseContentFile(mockFilePath, mockContentType);
 
       expect(result).toEqual({
         slug: "test-content",
@@ -106,46 +125,44 @@ This is test content.`;
       });
     });
 
-    it("should throw ContentError when file does not exist", () => {
-      mockFs.existsSync.mockReturnValue(false);
+    it("should throw ContentError when file does not exist", async () => {
+      mockFsPromises.access.mockRejectedValue(new Error("ENOENT"));
 
-      expect(() => parseContentFile(mockFilePath, mockContentType)).toThrow(
-        ContentError,
-      );
-      expect(() => parseContentFile(mockFilePath, mockContentType)).toThrow(
-        "Content file not found: test-content.mdx",
-      );
+      await expect(
+        parseContentFile(mockFilePath, mockContentType),
+      ).rejects.toThrow(ContentError);
+      await expect(
+        parseContentFile(mockFilePath, mockContentType),
+      ).rejects.toThrow("Content file not found: test-content.mdx");
     });
 
-    it("should throw ContentError when file is too large", () => {
+    it("should throw ContentError when file is too large", async () => {
       const largeContent = "x".repeat(CONTENT_LIMITS.MAX_FILE_SIZE + 1);
-      mockFs.readFileSync.mockReturnValue(largeContent);
+      mockFsPromises.readFile.mockResolvedValue(largeContent);
 
-      expect(() => parseContentFile(mockFilePath, mockContentType)).toThrow(
-        ContentError,
-      );
-      expect(() => parseContentFile(mockFilePath, mockContentType)).toThrow(
-        "Content file too large",
-      );
+      await expect(
+        parseContentFile(mockFilePath, mockContentType),
+      ).rejects.toThrow(ContentError);
+      await expect(
+        parseContentFile(mockFilePath, mockContentType),
+      ).rejects.toThrow("Content file too large");
     });
 
-    it("should handle invalid file paths", () => {
-      expect(() =>
+    it("should handle invalid file paths", async () => {
+      await expect(
         parseContentFile("../invalid/path.mdx", mockContentType),
-      ).toThrow("Invalid file path");
+      ).rejects.toThrow("Invalid file path");
     });
 
-    it("should handle file read errors", () => {
-      mockFs.readFileSync.mockImplementation(() => {
-        throw new Error("File read error");
-      });
+    it("should handle file read errors", async () => {
+      mockFsPromises.readFile.mockRejectedValue(new Error("File read error"));
 
-      expect(() => parseContentFile(mockFilePath, mockContentType)).toThrow(
-        ContentError,
-      );
-      expect(() => parseContentFile(mockFilePath, mockContentType)).toThrow(
-        "Failed to parse content file",
-      );
+      await expect(
+        parseContentFile(mockFilePath, mockContentType),
+      ).rejects.toThrow(ContentError);
+      await expect(
+        parseContentFile(mockFilePath, mockContentType),
+      ).rejects.toThrow("Failed to parse content file");
     });
 
     it("should log warnings when content validation fails", async () => {
@@ -158,7 +175,7 @@ This is test content.`;
         warnings: ["Deprecated field used"],
       });
 
-      parseContentFile(mockFilePath, mockContentType);
+      await parseContentFile(mockFilePath, mockContentType);
 
       expect(mockLogger.warn).toHaveBeenCalledWith(
         "Content validation failed",
@@ -170,31 +187,36 @@ This is test content.`;
       );
     });
 
-    it("should extract slug from filename correctly", () => {
-      const result = parseContentFile("my-blog-post.mdx", mockContentType);
+    it("should extract slug from filename correctly", async () => {
+      const result = await parseContentFile(
+        "my-blog-post.mdx",
+        mockContentType,
+      );
       expect(result.slug).toBe("my-blog-post");
     });
 
-    it("should handle files without frontmatter", () => {
-      mockFs.readFileSync.mockReturnValue("# Just content without frontmatter");
+    it("should handle files without frontmatter", async () => {
+      mockFsPromises.readFile.mockResolvedValue(
+        "# Just content without frontmatter",
+      );
 
-      const result = parseContentFile(mockFilePath, mockContentType);
+      const result = await parseContentFile(mockFilePath, mockContentType);
 
       expect(result.metadata).toEqual({});
       expect(result.content).toBe("# Just content without frontmatter");
     });
 
-    it("should handle empty files", () => {
-      mockFs.readFileSync.mockReturnValue("");
+    it("should handle empty files", async () => {
+      mockFsPromises.readFile.mockResolvedValue("");
 
-      const result = parseContentFile(mockFilePath, mockContentType);
+      const result = await parseContentFile(mockFilePath, mockContentType);
 
       expect(result.metadata).toEqual({});
       expect(result.content).toBe("");
     });
 
-    it("should preserve file path in result", () => {
-      const result = parseContentFile(mockFilePath, mockContentType);
+    it("should preserve file path in result", async () => {
+      const result = await parseContentFile(mockFilePath, mockContentType);
       expect(result.filePath).toBe("/mock/content/test-content.mdx");
     });
   });
@@ -203,8 +225,8 @@ This is test content.`;
     const mockContentDir = "content/blog";
 
     beforeEach(() => {
-      mockFs.existsSync.mockReturnValue(true);
-      mockFs.readdirSync.mockReturnValue([
+      mockFsPromises.access.mockResolvedValue(undefined);
+      mockFsPromises.readdir.mockResolvedValue([
         "post1.mdx",
         "post2.md",
         "post3.en.mdx",
@@ -214,8 +236,8 @@ This is test content.`;
       ] as string[]);
     });
 
-    it("should return all valid content files when no locale specified", () => {
-      const result = getContentFiles(mockContentDir);
+    it("should return all valid content files when no locale specified", async () => {
+      const result = await getContentFiles(mockContentDir);
 
       expect(result).toEqual([
         "/mock/content/content/blog/post1.mdx",
@@ -226,8 +248,8 @@ This is test content.`;
       ]);
     });
 
-    it("should filter files by locale when specified", () => {
-      const result = getContentFiles(mockContentDir, "en");
+    it("should filter files by locale when specified", async () => {
+      const result = await getContentFiles(mockContentDir, "en");
 
       expect(result).toEqual([
         "/mock/content/content/blog/en/post1.mdx",
@@ -237,8 +259,8 @@ This is test content.`;
       ]);
     });
 
-    it("should filter Chinese locale files correctly", () => {
-      const result = getContentFiles(mockContentDir, "zh");
+    it("should filter Chinese locale files correctly", async () => {
+      const result = await getContentFiles(mockContentDir, "zh");
 
       expect(result).toEqual([
         "/mock/content/content/blog/zh/post1.mdx",
@@ -248,10 +270,10 @@ This is test content.`;
       ]);
     });
 
-    it("should return empty array when directory does not exist", () => {
-      mockFs.existsSync.mockReturnValue(false);
+    it("should return empty array when directory does not exist", async () => {
+      mockFsPromises.access.mockRejectedValue(new Error("ENOENT"));
 
-      const result = getContentFiles(mockContentDir);
+      const result = await getContentFiles(mockContentDir);
 
       expect(result).toEqual([]);
       expect(mockLogger.warn).toHaveBeenCalledWith(
@@ -260,8 +282,8 @@ This is test content.`;
       );
     });
 
-    it("should filter out non-markdown files", () => {
-      mockFs.readdirSync.mockReturnValue([
+    it("should filter out non-markdown files", async () => {
+      mockFsPromises.readdir.mockResolvedValue([
         "post1.mdx",
         "post2.md",
         "image.jpg",
@@ -269,7 +291,7 @@ This is test content.`;
         "readme.txt",
       ] as string[]);
 
-      const result = getContentFiles(mockContentDir);
+      const result = await getContentFiles(mockContentDir);
 
       expect(result).toEqual([
         "/mock/content/content/blog/post1.mdx",
@@ -277,26 +299,26 @@ This is test content.`;
       ]);
     });
 
-    it("should handle empty directory", () => {
-      mockFs.readdirSync.mockReturnValue([] as string[]);
+    it("should handle empty directory", async () => {
+      mockFsPromises.readdir.mockResolvedValue([] as string[]);
 
-      const result = getContentFiles(mockContentDir);
+      const result = await getContentFiles(mockContentDir);
 
       expect(result).toEqual([]);
     });
 
-    it("should handle directory read errors", () => {
-      mockFs.readdirSync.mockImplementation(() => {
-        throw new Error("Directory read error");
-      });
+    it("should handle directory read errors", async () => {
+      mockFsPromises.readdir.mockRejectedValue(
+        new Error("Directory read error"),
+      );
 
-      expect(() => getContentFiles(mockContentDir)).toThrow(
+      await expect(getContentFiles(mockContentDir)).rejects.toThrow(
         "Directory read error",
       );
     });
 
-    it("should validate content directory path", () => {
-      expect(() => getContentFiles("../invalid/path")).toThrow(
+    it("should validate content directory path", async () => {
+      await expect(getContentFiles("../invalid/path")).rejects.toThrow(
         "Invalid file path",
       );
     });
@@ -313,8 +335,8 @@ draft: true
 Draft content.`;
 
     beforeEach(() => {
-      mockFs.existsSync.mockReturnValue(true);
-      mockFs.readFileSync.mockReturnValue(mockDraftContent);
+      mockFsPromises.access.mockResolvedValue(undefined);
+      mockFsPromises.readFile.mockResolvedValue(mockDraftContent);
     });
 
     it("should return parsed content when not a draft", async () => {
@@ -323,7 +345,7 @@ Draft content.`;
       );
       shouldFilterDraft.mockReturnValue(false);
 
-      const result = parseContentFileWithDraftFilter(
+      const result = await parseContentFileWithDraftFilter(
         mockFilePath,
         mockContentType,
       );
@@ -338,7 +360,7 @@ Draft content.`;
       );
       shouldFilterDraft.mockReturnValue(true);
 
-      const result = parseContentFileWithDraftFilter(
+      const result = await parseContentFileWithDraftFilter(
         mockFilePath,
         mockContentType,
       );
@@ -361,8 +383,8 @@ title: Test
 Content`;
 
     beforeEach(() => {
-      mockFs.existsSync.mockReturnValue(true);
-      mockFs.readFileSync.mockReturnValue(mockFileContent);
+      mockFsPromises.access.mockResolvedValue(undefined);
+      mockFsPromises.readFile.mockResolvedValue(mockFileContent);
     });
 
     it("should log errors in strict mode when validation fails", async () => {
@@ -375,9 +397,9 @@ Content`;
         warnings: [],
       });
 
-      expect(() =>
+      await expect(
         parseContentFile(mockFilePath, mockContentType, { strictMode: true }),
-      ).toThrow(ContentValidationError);
+      ).rejects.toThrow(ContentValidationError);
       expect(mockLogger.error).toHaveBeenCalledWith(
         "Content validation failed",
         {
@@ -398,7 +420,7 @@ Content`;
         warnings: ["Field is deprecated"],
       });
 
-      parseContentFile(mockFilePath, mockContentType);
+      await parseContentFile(mockFilePath, mockContentType);
 
       expect(mockLogger.info).toHaveBeenCalledWith(
         "Content validation warnings",
@@ -419,23 +441,196 @@ Content`;
         warnings: [],
       });
 
-      expect(() =>
+      await expect(
         parseContentFile(mockFilePath, mockContentType, { strictMode: true }),
-      ).toThrow(ContentValidationError);
+      ).rejects.toThrow(ContentValidationError);
     });
 
-    it("should use slug from frontmatter if provided", () => {
+    it("should use slug from frontmatter if provided", async () => {
       const contentWithSlug = `---
 title: Test
 slug: custom-slug
 ---
 
 Content`;
-      mockFs.readFileSync.mockReturnValue(contentWithSlug);
+      mockFsPromises.readFile.mockResolvedValue(contentWithSlug);
 
-      const result = parseContentFile(mockFilePath, mockContentType);
+      const result = await parseContentFile(mockFilePath, mockContentType);
 
       expect(result.slug).toBe("custom-slug");
+    });
+  });
+
+  describe("async I/O contract", () => {
+    /**
+     * These tests verify that content-parser functions use async fs APIs
+     * (fs.promises.*) instead of synchronous APIs (fs.*Sync).
+     *
+     * Strategy:
+     * 1. "Returns a Promise" -- call function, check return is instanceof Promise.
+     *    Current sync impl returns plain object/array -> FAIL.
+     * 2. "Does not use sync APIs" -- make sync mocks throw sentinel errors,
+     *    confirm function does NOT throw those sentinels (i.e. it never calls them).
+     *    Current sync impl calls them -> throws sentinel -> FAIL.
+     * 3. "Rejects properly" -- verify async error handling via Promise rejection.
+     *    Current sync impl throws synchronously -> FAIL.
+     */
+
+    const SYNC_SENTINEL = "SYNC_API_USED";
+
+    const validMdxContent = `---
+title: Async Test Content
+description: Testing async I/O
+date: 2024-01-01
+---
+
+# Async Test
+
+This is async test content.`;
+
+    describe("parseContentFile", () => {
+      const mockFilePath = "async-test.mdx";
+      const mockContentType: ContentType = "posts";
+
+      it("should return a Promise that resolves to parsed content", () => {
+        // Provide valid async mocks so the function can execute.
+        mockFsPromises.access.mockResolvedValue(undefined);
+        mockFsPromises.readFile.mockResolvedValue(validMdxContent);
+
+        const returnValue = parseContentFile(mockFilePath, mockContentType);
+
+        // Async implementation returns a Promise; sync returns a plain object.
+        expect(returnValue).toBeInstanceOf(Promise);
+      });
+
+      it("should not call fs.existsSync (uses fs.promises.access instead)", () => {
+        // Make existsSync throw a sentinel error
+        mockFs.existsSync.mockImplementation(() => {
+          throw new Error(SYNC_SENTINEL);
+        });
+        // Provide valid async mocks
+        mockFsPromises.access.mockResolvedValue(undefined);
+        mockFsPromises.readFile.mockResolvedValue(validMdxContent);
+
+        // If async impl, existsSync is never called -> no throw.
+        expect(() =>
+          parseContentFile(mockFilePath, mockContentType),
+        ).not.toThrow(SYNC_SENTINEL);
+      });
+
+      it("should not call fs.readFileSync (uses fs.promises.readFile instead)", () => {
+        // Provide valid async mocks
+        mockFsPromises.access.mockResolvedValue(undefined);
+        mockFsPromises.readFile.mockResolvedValue(validMdxContent);
+        // Make readFileSync throw a sentinel error
+        mockFs.readFileSync.mockImplementation(() => {
+          throw new Error(SYNC_SENTINEL);
+        });
+
+        // If async impl, readFileSync is never called -> no throw.
+        expect(() =>
+          parseContentFile(mockFilePath, mockContentType),
+        ).not.toThrow(SYNC_SENTINEL);
+      });
+
+      it("should reject with appropriate error for non-existent file via async API", async () => {
+        // Make sync APIs throw sentinel
+        mockFs.existsSync.mockImplementation(() => {
+          throw new Error(SYNC_SENTINEL);
+        });
+        mockFs.readFileSync.mockImplementation(() => {
+          throw new Error(SYNC_SENTINEL);
+        });
+        // Make async access reject
+        mockFsPromises.access.mockRejectedValue(new Error("ENOENT"));
+
+        let caughtError: Error | undefined;
+        try {
+          await parseContentFile("non-existent.mdx", "posts");
+        } catch (error) {
+          caughtError = error as Error;
+        }
+
+        // Function should have thrown/rejected
+        expect(caughtError).toBeDefined();
+        // The error should NOT contain the sync sentinel
+        expect(caughtError!.message).not.toContain(SYNC_SENTINEL);
+      });
+    });
+
+    describe("getContentFiles", () => {
+      const mockContentDir = "content/blog";
+
+      it("should return a Promise that resolves to an array of file paths", () => {
+        // Provide valid async mocks
+        mockFsPromises.access.mockResolvedValue(undefined);
+        mockFsPromises.readdir.mockResolvedValue([
+          "post1.mdx",
+          "post2.md",
+        ] as string[]);
+
+        const returnValue = getContentFiles(mockContentDir);
+
+        // Async implementation returns a Promise; sync returns a plain array.
+        expect(returnValue).toBeInstanceOf(Promise);
+      });
+
+      it("should not call fs.existsSync (uses fs.promises.access instead)", () => {
+        // Make existsSync throw a sentinel error
+        mockFs.existsSync.mockImplementation(() => {
+          throw new Error(SYNC_SENTINEL);
+        });
+        // Provide valid async mocks
+        mockFsPromises.access.mockResolvedValue(undefined);
+        mockFsPromises.readdir.mockResolvedValue(["post1.mdx"] as string[]);
+
+        // If async impl, existsSync is never called -> no throw.
+        expect(() => getContentFiles(mockContentDir)).not.toThrow(
+          SYNC_SENTINEL,
+        );
+      });
+
+      it("should not call fs.readdirSync (uses fs.promises.readdir instead)", () => {
+        // Provide valid async mocks
+        mockFsPromises.access.mockResolvedValue(undefined);
+        mockFsPromises.readdir.mockResolvedValue(["post1.mdx"] as string[]);
+        // Make readdirSync throw a sentinel error
+        mockFs.readdirSync.mockImplementation(() => {
+          throw new Error(SYNC_SENTINEL);
+        });
+
+        // If async impl, readdirSync is never called -> no throw.
+        expect(() => getContentFiles(mockContentDir)).not.toThrow(
+          SYNC_SENTINEL,
+        );
+      });
+
+      it("should resolve to empty array for non-existent directory via async API", async () => {
+        // Make sync APIs throw sentinel
+        mockFs.existsSync.mockImplementation(() => {
+          throw new Error(SYNC_SENTINEL);
+        });
+        mockFs.readdirSync.mockImplementation(() => {
+          throw new Error(SYNC_SENTINEL);
+        });
+        // Make async access reject
+        mockFsPromises.access.mockRejectedValue(new Error("ENOENT"));
+
+        let result: string[] | undefined;
+        let caughtError: Error | undefined;
+        try {
+          result = await getContentFiles("non-existent-dir");
+        } catch (error) {
+          caughtError = error as Error;
+        }
+
+        // Should NOT have thrown a sync sentinel error
+        if (caughtError) {
+          expect(caughtError.message).not.toContain(SYNC_SENTINEL);
+        }
+        // Should return an empty array for non-existent directory
+        expect(result).toEqual([]);
+      });
     });
   });
 });

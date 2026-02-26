@@ -12,7 +12,6 @@ import { checkContrastCompliance, type OKLCHColor } from "@/lib/colors";
 import { logger } from "@/lib/logger";
 import { COUNT_TRIPLE, ONE, ZERO } from "@/constants";
 import { OPACITY_CONSTANTS } from "@/constants/app-constants";
-import { MAGIC_6 } from "@/constants/count";
 
 /**
  * 无障碍性工具类
@@ -166,7 +165,7 @@ export class AccessibilityUtils {
    * 解析OKLCH格式的颜色字符串
    */
   private static parseOKLCHString(trimmed: string): OKLCHColor | null {
-    const OKLCH_PREFIX_LENGTH = MAGIC_6; // 'oklch('.length
+    const OKLCH_PREFIX_LENGTH = "oklch(".length;
     const MIN_OKLCH_PARTS = COUNT_TRIPLE;
 
     if (!trimmed.startsWith("oklch(") || !trimmed.endsWith(")")) {

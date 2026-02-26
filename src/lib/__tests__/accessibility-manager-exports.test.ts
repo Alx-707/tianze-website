@@ -48,7 +48,7 @@ vi.mock("@/constants/app-constants", () => ({
 }));
 
 vi.mock("@/constants/count", () => ({
-  MAGIC_6: 6,
+  OTP_DEFAULT_LENGTH: 6,
 }));
 
 const originalDocumentDescriptor = Object.getOwnPropertyDescriptor(

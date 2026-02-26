@@ -6,7 +6,9 @@
  */
 
 import { type FC, type ReactNode } from "react";
-import { MAGIC_16, MAGIC_20 } from "@/constants/count";
+import { DEFAULT_ICON_SIZE } from "@/constants/count";
+
+const EXTERNAL_LINK_ICON_SIZE = 16;
 
 interface SocialIconProps {
   className?: string;
@@ -17,7 +19,7 @@ interface SocialIconProps {
 // Twitter/X Icon
 export const TwitterIcon: FC<SocialIconProps> = ({
   className = "",
-  size = MAGIC_20,
+  size = DEFAULT_ICON_SIZE,
   "data-testid": dataTestId,
 }) => (
   <svg
@@ -36,7 +38,7 @@ export const TwitterIcon: FC<SocialIconProps> = ({
 // LinkedIn Icon
 export const LinkedInIcon: FC<SocialIconProps> = ({
   className = "",
-  size = MAGIC_20,
+  size = DEFAULT_ICON_SIZE,
   "data-testid": dataTestId,
 }) => (
   <svg
@@ -55,7 +57,7 @@ export const LinkedInIcon: FC<SocialIconProps> = ({
 // Facebook Icon
 export const FacebookIcon: FC<SocialIconProps> = ({
   className = "",
-  size = MAGIC_20,
+  size = DEFAULT_ICON_SIZE,
   "data-testid": dataTestId,
 }) => (
   <svg
@@ -74,7 +76,7 @@ export const FacebookIcon: FC<SocialIconProps> = ({
 // YouTube Icon
 export const YouTubeIcon: FC<SocialIconProps> = ({
   className = "",
-  size = MAGIC_20,
+  size = DEFAULT_ICON_SIZE,
   "data-testid": dataTestId,
 }) => (
   <svg
@@ -93,7 +95,7 @@ export const YouTubeIcon: FC<SocialIconProps> = ({
 // GitHub Icon
 export const GitHubIcon: FC<SocialIconProps> = ({
   className = "",
-  size = MAGIC_20,
+  size = DEFAULT_ICON_SIZE,
   "data-testid": dataTestId,
 }) => (
   <svg
@@ -112,7 +114,7 @@ export const GitHubIcon: FC<SocialIconProps> = ({
 // External Link Icon (for external links)
 export const ExternalLinkIcon: FC<SocialIconProps> = ({
   className = "",
-  size = MAGIC_16,
+  size = EXTERNAL_LINK_ICON_SIZE,
   "data-testid": dataTestId,
 }) => (
   <svg
@@ -205,7 +207,7 @@ export const SocialIconLink: FC<SocialIconLinkProps> = (props) => {
       label,
       ariaLabel,
       className = "",
-      iconSize = MAGIC_20,
+      iconSize = DEFAULT_ICON_SIZE,
       "data-testid": dataTestId,
     } = props as SocialIconLinkPropsV1;
 
@@ -230,7 +232,7 @@ export const SocialIconLink: FC<SocialIconLinkProps> = (props) => {
       platform,
       "aria-label": ariaLabel,
       className = "",
-      iconSize = MAGIC_20,
+      iconSize = DEFAULT_ICON_SIZE,
       "data-testid": dataTestId,
       children,
     } = props as SocialIconLinkPropsV2;

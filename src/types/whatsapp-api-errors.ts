@@ -1,8 +1,8 @@
 import {
   ANIMATION_DURATION_VERY_SLOW,
   COUNT_PAIR,
-  MAGIC_9,
-  MAGIC_36,
+  SHORT_ID_LENGTH,
+  BASE36_RADIX,
   ONE,
   THIRTY_SECONDS_MS,
 } from "@/constants";
@@ -546,9 +546,9 @@ export const ErrorUtils = {
           const buf = new Uint32Array(3);
           crypto.getRandomValues(buf);
           const randomPart = Array.from(buf, (value) =>
-            value.toString(MAGIC_36).padStart(COUNT_PAIR, "0"),
+            value.toString(BASE36_RADIX).padStart(COUNT_PAIR, "0"),
           ).join("");
-          return `error_${timestamp}_${randomPart.substring(0, MAGIC_9)}`;
+          return `error_${timestamp}_${randomPart.substring(0, SHORT_ID_LENGTH)}`;
         }
         throw new Error(
           "Secure random generator unavailable for error report id",

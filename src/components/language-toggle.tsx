@@ -20,7 +20,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ANIMATION_DURATION_VERY_SLOW } from "@/constants";
-import { MAGIC_2000 } from "@/constants/count";
+import { RESPONSE_TIME_DEGRADED_MS } from "@/constants/count";
 import { Link, usePathname } from "@/i18n/routing";
 
 const TRANSITION_TIMEOUT = ANIMATION_DURATION_VERY_SLOW; // 1 second timeout for language switch
@@ -53,7 +53,10 @@ const useLanguageSwitch = () => {
   }, []);
 
   const scheduleSuccessReset = useCallback(() => {
-    successResetRef.current = setTimeout(resetSuccessState, MAGIC_2000);
+    successResetRef.current = setTimeout(
+      resetSuccessState,
+      RESPONSE_TIME_DEGRADED_MS,
+    );
   }, [resetSuccessState]);
 
   const finalizeSwitch = useCallback(() => {

@@ -1,4 +1,4 @@
-import { COUNT_PAIR, MAGIC_16 } from "../constants/count";
+import { COUNT_PAIR, HEX_RADIX } from "../constants/count";
 import { ZERO } from "../constants/magic-numbers";
 
 export type SecurityHeader = {
@@ -197,7 +197,7 @@ export function getSecurityHeaders(
  * - 32 hex characters output for CSP compatibility
  * - Must pass isValidNonce validation
  */
-const NONCE_BYTE_LENGTH = MAGIC_16; // 16 bytes = 128 bits = 32 hex characters
+const NONCE_BYTE_LENGTH = HEX_RADIX; // 16 bytes = 128 bits = 32 hex characters
 const NONCE_HEX_PAD = COUNT_PAIR;
 
 export function generateNonce(): string {
@@ -215,7 +215,7 @@ export function generateNonce(): string {
     crypto.getRandomValues(bytes);
     // Convert to hex: 16 bytes = 32 hex characters = 128 bits
     return Array.from(bytes, (value) =>
-      value.toString(MAGIC_16).padStart(NONCE_HEX_PAD, "0"),
+      value.toString(HEX_RADIX).padStart(NONCE_HEX_PAD, "0"),
     ).join("");
   }
 

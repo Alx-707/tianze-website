@@ -11,7 +11,7 @@ import {
   isAllowedTurnstileAction,
   isAllowedTurnstileHostname,
 } from "@/lib/security/turnstile-config";
-import { COUNT_PAIR, MAGIC_9, MAGIC_36, ZERO } from "@/constants";
+import { COUNT_PAIR, SHORT_ID_LENGTH, BASE36_RADIX, ZERO } from "@/constants";
 
 interface TurnstileVerificationResult {
   success: boolean;
@@ -229,10 +229,10 @@ export function generateRequestId(): string {
     typeof crypto !== "undefined" &&
     typeof crypto.getRandomValues === "function"
   ) {
-    const buffer = new Uint32Array(MAGIC_9);
+    const buffer = new Uint32Array(SHORT_ID_LENGTH);
     crypto.getRandomValues(buffer);
     const randomPart = Array.from(buffer, (value) =>
-      value.toString(MAGIC_36).padStart(COUNT_PAIR, "0"),
+      value.toString(BASE36_RADIX).padStart(COUNT_PAIR, "0"),
     ).join("");
     return `req_${randomPart}`;
   }

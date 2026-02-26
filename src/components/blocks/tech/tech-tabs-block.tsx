@@ -14,7 +14,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MAGIC_0_3 } from "@/constants/decimal";
+import { DEC_0_3 } from "@/constants/decimal";
 import { useIntersectionObserver } from "@/hooks/use-intersection-observer";
 
 // Types
@@ -161,7 +161,7 @@ function TechStackStats({
   categoryCount: number;
 }) {
   const { ref, isVisible } = useIntersectionObserver<HTMLDivElement>({
-    threshold: MAGIC_0_3,
+    threshold: DEC_0_3,
     triggerOnce: true,
   });
 
@@ -333,13 +333,13 @@ export function TechTabsBlock({
   // Animation hooks
   const { ref: titleRef, isVisible: titleVisible } =
     useIntersectionObserver<HTMLDivElement>({
-      threshold: MAGIC_0_3,
+      threshold: DEC_0_3,
       triggerOnce: true,
     });
 
   const { ref: tabsRef, isVisible: tabsVisible } =
     useIntersectionObserver<HTMLDivElement>({
-      threshold: MAGIC_0_3,
+      threshold: DEC_0_3,
       triggerOnce: true,
     });
 

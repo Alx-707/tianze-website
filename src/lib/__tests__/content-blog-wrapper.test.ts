@@ -81,7 +81,7 @@ describe("content blog wrappers", () => {
         }),
       ];
 
-      mockGetAllPosts.mockReturnValue(posts);
+      mockGetAllPosts.mockResolvedValue(posts);
 
       const result = await getAllPostsCached(locale, {
         limit: 10,
@@ -128,7 +128,7 @@ describe("content blog wrappers", () => {
     it("should return empty array when there are no posts", async () => {
       const locale: Locale = "en";
 
-      mockGetAllPosts.mockReturnValue([]);
+      mockGetAllPosts.mockResolvedValue([]);
 
       const result = await getAllPostsCached(locale);
 
@@ -148,7 +148,7 @@ describe("content blog wrappers", () => {
         relatedPosts: ["post-1", "post-2"],
       });
 
-      mockGetPostBySlug.mockReturnValue(post);
+      mockGetPostBySlug.mockResolvedValue(post);
 
       const result = await getPostBySlugCached(locale, slug);
 
@@ -170,9 +170,7 @@ describe("content blog wrappers", () => {
       const slug = "missing-post";
 
       const error = new Error("Content not found");
-      mockGetPostBySlug.mockImplementation(() => {
-        throw error;
-      });
+      mockGetPostBySlug.mockRejectedValue(error);
 
       await expect(getPostBySlugCached(locale, slug)).rejects.toBe(error);
       expect(mockGetPostBySlug).toHaveBeenCalledTimes(1);

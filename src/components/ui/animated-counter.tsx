@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 import { animationUtils } from "@/components/ui/animated-counter-helpers";
 import { COUNT_PAIR, COUNT_TRIPLE, ONE, ZERO } from "@/constants";
 import { COUNT_4 } from "@/constants/count";
-import { MAGIC_0_3, MAGIC_0_5 } from "@/constants/decimal";
+import { DEC_0_3, DEC_0_5 } from "@/constants/decimal";
 import { ANIMATION_DURATIONS } from "@/constants/performance-constants";
 import { MAX_SET_TIMEOUT_DELAY_MS } from "@/constants/time";
 import { useIntersectionObserver } from "@/hooks/use-intersection-observer";
@@ -27,7 +27,7 @@ const EASING_CONSTANTS = {
   /** 立方幂次 */
   CUBIC_POWER: COUNT_TRIPLE,
   /** 缓动阈值 */
-  THRESHOLD: MAGIC_0_5,
+  THRESHOLD: DEC_0_5,
   /** 缓动倍数 */
   MULTIPLIER: COUNT_4,
   /** 缓动偏移 */
@@ -151,7 +151,7 @@ function useAnimatedCounter({
   const [isAnimating, setIsAnimating] = useState(false);
 
   // Intersection Observer Hook
-  const INTERSECTION_THRESHOLD = MAGIC_0_3;
+  const INTERSECTION_THRESHOLD = DEC_0_3;
   const observerConfig = {
     threshold: INTERSECTION_THRESHOLD,
     triggerOnce: true,

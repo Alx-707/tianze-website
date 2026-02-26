@@ -16,16 +16,20 @@ import { routing } from '@/i18n/routing';
 /**
  * Get all MDX files in a specific locale directory.
  */
-function getProductFilesInLocale(locale: Locale): string[] {
+async function getProductFilesInLocale(locale: Locale): Promise<string[]> {
   const localeDir = path.join(PRODUCTS_DIR, locale);
 
-  // eslint-disable-next-line security/detect-non-literal-fs-filename -- localeDir is derived from PRODUCTS_DIR + Locale union, not user input
-  if (!fs.existsSync(localeDir)) {
+   
+  const dirExists = await fs.promises
+    .access(localeDir)
+    .then(() => true)
+    .catch(() => false);
+  if (!dirExists) {
     return [];
   }
 
   // eslint-disable-next-line security/detect-non-literal-fs-filename -- localeDir is derived from PRODUCTS_DIR + Locale union, not user input
-  const files = fs.readdirSync(localeDir);
+  const files = await fs.promises.readdir(localeDir);
   return files
     .filter((file) => ['.md', '.mdx'].includes(path.extname(file)))
     .map((file) => path.join(localeDir, file));
@@ -34,9 +38,11 @@ function getProductFilesInLocale(locale: Locale): string[] {
 /**
  * Get all product files for a locale
  */
-function getAllProductFiles(locale: Locale): Product[] {
-  const files = getProductFilesInLocale(locale);
-  return files.map((file) => parseContentFile<ProductMetadata>(file, 'products'));
+async function getAllProductFiles(locale: Locale): Promise<Product[]> {
+  const files = await getProductFilesInLocale(locale);
+  return Promise.all(
+    files.map((file) => parseContentFile<ProductMetadata>(file, 'products')),
+  );
 }
 
 /**
@@ -103,8 +109,8 @@ function mapProductToDetail(product: Product, locale: Locale): ProductDetail {
 /**
  * Get all products for a locale, optionally filtered by category.
  */
-export function getProductListing(locale: Locale, category?: string): ProductDetail[] {
-  const products = getAllProductFiles(locale);
+export async function getProductListing(locale: Locale, category?: string): Promise<ProductDetail[]> {
+  const products = await getAllProductFiles(locale);
 
   let filtered = products;
   if (category !== undefined && category !== '') {
@@ -117,7 +123,7 @@ export function getProductListing(locale: Locale, category?: string): ProductDet
 /**
  * Get a single product by slug.
  */
-export function getProductDetail(locale: Locale, slug: string): ProductDetail {
+export async function getProductDetail(locale: Locale, slug: string): Promise<ProductDetail> {
   const supportedLocales = routing.locales as readonly string[];
   if (!supportedLocales.includes(locale)) {
     throw new Error(
@@ -127,7 +133,7 @@ export function getProductDetail(locale: Locale, slug: string): ProductDetail {
     );
   }
 
-  const files = getProductFilesInLocale(locale);
+  const files = await getProductFilesInLocale(locale);
 
   const matchingFile = files.find((file) => {
     const fileSlug = path.basename(file, path.extname(file));
@@ -138,15 +144,15 @@ export function getProductDetail(locale: Locale, slug: string): ProductDetail {
     throw new Error(`Product not found: slug="${slug}", locale="${locale}"`);
   }
 
-  const product = parseContentFile<ProductMetadata>(matchingFile, 'products');
+  const product = await parseContentFile<ProductMetadata>(matchingFile, 'products');
   return mapProductToDetail(product, locale);
 }
 
 /**
  * Get all unique product categories for a locale.
  */
-export function getProductCategories(locale: Locale): string[] {
-  const products = getAllProductFiles(locale);
+export async function getProductCategories(locale: Locale): Promise<string[]> {
+  const products = await getAllProductFiles(locale);
 
   const categories = new Set<string>();
   for (const product of products) {
@@ -159,8 +165,8 @@ export function getProductCategories(locale: Locale): string[] {
 /**
  * Get all unique product standards for a locale.
  */
-export function getProductStandards(locale: Locale): ProductStandardId[] {
-  const products = getAllProductFiles(locale);
+export async function getProductStandards(locale: Locale): Promise<ProductStandardId[]> {
+  const products = await getAllProductFiles(locale);
 
   const standards = new Set<ProductStandardId>();
   for (const product of products) {
@@ -178,8 +184,8 @@ export function getProductStandards(locale: Locale): ProductStandardId[] {
 /**
  * Get featured products for a locale.
  */
-export function getFeaturedProducts(locale: Locale, limit?: number): ProductDetail[] {
-  const products = getAllProductFiles(locale);
+export async function getFeaturedProducts(locale: Locale, limit?: number): Promise<ProductDetail[]> {
+  const products = await getAllProductFiles(locale);
 
   const featured = products.filter((p) => p.metadata.featured === true);
   const mapped = featured.map((product) => mapProductToDetail(product, locale));

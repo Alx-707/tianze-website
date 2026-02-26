@@ -5,7 +5,7 @@
  * - getContentStats
  */
 
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type {
   BlogPost,
   BlogPostMetadata,
@@ -101,7 +101,7 @@ describe("content-query/stats", () => {
   });
 
   describe("getContentStats", () => {
-    it("should return content statistics for all supported locales", () => {
+    it("should return content statistics for all supported locales", async () => {
       const enPosts = [createMockBlogPost({ slug: "en-post-1" })];
       const zhPosts = [
         createMockBlogPost({ slug: "zh-post-1" }),
@@ -114,13 +114,13 @@ describe("content-query/stats", () => {
       ];
 
       mockGetAllPosts
-        .mockReturnValueOnce(enPosts) // First call for 'en'
-        .mockReturnValueOnce(zhPosts); // Second call for 'zh'
+        .mockResolvedValueOnce(enPosts) // First call for 'en'
+        .mockResolvedValueOnce(zhPosts); // Second call for 'zh'
       mockGetAllPages
-        .mockReturnValueOnce(enPages) // First call for 'en'
-        .mockReturnValueOnce(zhPages); // Second call for 'zh'
+        .mockResolvedValueOnce(enPages) // First call for 'en'
+        .mockResolvedValueOnce(zhPages); // Second call for 'zh'
 
-      const result = getContentStats();
+      const result = await getContentStats();
 
       expect(result.totalPosts).toBe(3); // 1 en + 2 zh
       expect(result.totalPages).toBe(3); // 1 en + 2 zh
@@ -130,30 +130,30 @@ describe("content-query/stats", () => {
       expect(result.pagesByLocale.zh).toBe(2);
     });
 
-    it("should return lastUpdated timestamp", () => {
-      mockGetAllPosts.mockReturnValue([]);
-      mockGetAllPages.mockReturnValue([]);
+    it("should return lastUpdated timestamp", async () => {
+      mockGetAllPosts.mockResolvedValue([]);
+      mockGetAllPages.mockResolvedValue([]);
 
-      const result = getContentStats();
+      const result = await getContentStats();
 
       expect(result.lastUpdated).toBe("2024-06-15T12:00:00.000Z");
     });
 
-    it("should initialize totalTags and totalCategories to zero", () => {
-      mockGetAllPosts.mockReturnValue([]);
-      mockGetAllPages.mockReturnValue([]);
+    it("should initialize totalTags and totalCategories to zero", async () => {
+      mockGetAllPosts.mockResolvedValue([]);
+      mockGetAllPages.mockResolvedValue([]);
 
-      const result = getContentStats();
+      const result = await getContentStats();
 
       expect(result.totalTags).toBe(0);
       expect(result.totalCategories).toBe(0);
     });
 
-    it("should handle empty content directories", () => {
-      mockGetAllPosts.mockReturnValue([]);
-      mockGetAllPages.mockReturnValue([]);
+    it("should handle empty content directories", async () => {
+      mockGetAllPosts.mockResolvedValue([]);
+      mockGetAllPages.mockResolvedValue([]);
 
-      const result = getContentStats();
+      const result = await getContentStats();
 
       expect(result.totalPosts).toBe(0);
       expect(result.totalPages).toBe(0);
@@ -163,11 +163,11 @@ describe("content-query/stats", () => {
       expect(result.pagesByLocale.zh).toBe(0);
     });
 
-    it("should iterate over all supported locales from config", () => {
-      mockGetAllPosts.mockReturnValue([]);
-      mockGetAllPages.mockReturnValue([]);
+    it("should iterate over all supported locales from config", async () => {
+      mockGetAllPosts.mockResolvedValue([]);
+      mockGetAllPages.mockResolvedValue([]);
 
-      getContentStats();
+      await getContentStats();
 
       // Should be called twice for each locale (en, zh)
       expect(mockGetAllPosts).toHaveBeenCalledTimes(2);
@@ -178,17 +178,17 @@ describe("content-query/stats", () => {
       expect(mockGetAllPages).toHaveBeenCalledWith("zh");
     });
 
-    it("should handle single locale configuration", () => {
+    it("should handle single locale configuration", async () => {
       mockGetContentConfig.mockReturnValue(
         createMockContentConfig({ supportedLocales: ["en"] }),
       );
       const enPosts = [createMockBlogPost()];
       const enPages = [createMockPage()];
 
-      mockGetAllPosts.mockReturnValue(enPosts);
-      mockGetAllPages.mockReturnValue(enPages);
+      mockGetAllPosts.mockResolvedValue(enPosts);
+      mockGetAllPages.mockResolvedValue(enPages);
 
-      const result = getContentStats();
+      const result = await getContentStats();
 
       expect(mockGetAllPosts).toHaveBeenCalledTimes(1);
       expect(mockGetAllPages).toHaveBeenCalledTimes(1);
@@ -197,7 +197,7 @@ describe("content-query/stats", () => {
       expect(result.postsByLocale.en).toBe(1);
     });
 
-    it("should correctly accumulate totals across locales", () => {
+    it("should correctly accumulate totals across locales", async () => {
       const enPosts = Array.from({ length: 5 }, (_, i) =>
         createMockBlogPost({ slug: `en-post-${i}` }),
       );
@@ -205,17 +205,19 @@ describe("content-query/stats", () => {
         createMockBlogPost({ slug: `zh-post-${i}` }),
       );
 
-      mockGetAllPosts.mockReturnValueOnce(enPosts).mockReturnValueOnce(zhPosts);
-      mockGetAllPages.mockReturnValue([]);
+      mockGetAllPosts
+        .mockResolvedValueOnce(enPosts)
+        .mockResolvedValueOnce(zhPosts);
+      mockGetAllPages.mockResolvedValue([]);
 
-      const result = getContentStats();
+      const result = await getContentStats();
 
       expect(result.totalPosts).toBe(8);
       expect(result.postsByLocale.en).toBe(5);
       expect(result.postsByLocale.zh).toBe(3);
     });
 
-    it("should only set locale-specific counts for known locales (en, zh)", () => {
+    it("should only set locale-specific counts for known locales (en, zh)", async () => {
       // This tests the explicit locale validation in the implementation
       mockGetContentConfig.mockReturnValue(
         createMockContentConfig({ supportedLocales: ["en", "zh"] }),
@@ -224,10 +226,12 @@ describe("content-query/stats", () => {
       const enPosts = [createMockBlogPost()];
       const zhPosts = [createMockBlogPost(), createMockBlogPost()];
 
-      mockGetAllPosts.mockReturnValueOnce(enPosts).mockReturnValueOnce(zhPosts);
-      mockGetAllPages.mockReturnValue([]);
+      mockGetAllPosts
+        .mockResolvedValueOnce(enPosts)
+        .mockResolvedValueOnce(zhPosts);
+      mockGetAllPages.mockResolvedValue([]);
 
-      const result = getContentStats();
+      const result = await getContentStats();
 
       // Verify both locales are properly assigned
       expect(result.postsByLocale).toHaveProperty("en");
@@ -236,7 +240,7 @@ describe("content-query/stats", () => {
       expect(result.postsByLocale.zh).toBe(2);
     });
 
-    it("should handle large number of posts efficiently", () => {
+    it("should handle large number of posts efficiently", async () => {
       const largePosts = Array.from({ length: 100 }, (_, i) =>
         createMockBlogPost({ slug: `post-${i}` }),
       );
@@ -244,20 +248,20 @@ describe("content-query/stats", () => {
         createMockPage({ slug: `page-${i}` }),
       );
 
-      mockGetAllPosts.mockReturnValue(largePosts);
-      mockGetAllPages.mockReturnValue(largePages);
+      mockGetAllPosts.mockResolvedValue(largePosts);
+      mockGetAllPages.mockResolvedValue(largePages);
 
-      const result = getContentStats();
+      const result = await getContentStats();
 
       expect(result.totalPosts).toBe(200); // 100 * 2 locales
       expect(result.totalPages).toBe(100); // 50 * 2 locales
     });
 
-    it("should return correct structure with all required fields", () => {
-      mockGetAllPosts.mockReturnValue([]);
-      mockGetAllPages.mockReturnValue([]);
+    it("should return correct structure with all required fields", async () => {
+      mockGetAllPosts.mockResolvedValue([]);
+      mockGetAllPages.mockResolvedValue([]);
 
-      const result = getContentStats();
+      const result = await getContentStats();
 
       expect(result).toHaveProperty("totalPosts");
       expect(result).toHaveProperty("totalPages");
@@ -268,7 +272,7 @@ describe("content-query/stats", () => {
       expect(result).toHaveProperty("lastUpdated");
     });
 
-    it("should handle asymmetric content across locales", () => {
+    it("should handle asymmetric content across locales", async () => {
       const enPosts = [
         createMockBlogPost({ slug: "post-1" }),
         createMockBlogPost({ slug: "post-2" }),
@@ -276,21 +280,23 @@ describe("content-query/stats", () => {
       ];
       const zhPosts: BlogPost[] = []; // No Chinese posts
 
-      mockGetAllPosts.mockReturnValueOnce(enPosts).mockReturnValueOnce(zhPosts);
-      mockGetAllPages.mockReturnValue([]);
+      mockGetAllPosts
+        .mockResolvedValueOnce(enPosts)
+        .mockResolvedValueOnce(zhPosts);
+      mockGetAllPages.mockResolvedValue([]);
 
-      const result = getContentStats();
+      const result = await getContentStats();
 
       expect(result.postsByLocale.en).toBe(3);
       expect(result.postsByLocale.zh).toBe(0);
       expect(result.totalPosts).toBe(3);
     });
 
-    it("should use getContentConfig to determine supported locales", () => {
-      mockGetAllPosts.mockReturnValue([]);
-      mockGetAllPages.mockReturnValue([]);
+    it("should use getContentConfig to determine supported locales", async () => {
+      mockGetAllPosts.mockResolvedValue([]);
+      mockGetAllPages.mockResolvedValue([]);
 
-      getContentStats();
+      await getContentStats();
 
       expect(mockGetContentConfig).toHaveBeenCalled();
     });

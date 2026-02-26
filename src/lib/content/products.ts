@@ -69,7 +69,6 @@ function mapProductDetailToSummary(product: ProductDetail): ProductSummary {
  * Cache tags enable selective invalidation:
  * - `product:list:{category|all}:{locale}` - Invalidate product list
  */
-/* eslint-disable require-await -- Next.js "use cache" functions must be async even if implementation is sync */
 export const getAllProductsCached: GetAllProductsCachedFn = async (
   locale,
   options = {},
@@ -78,7 +77,7 @@ export const getAllProductsCached: GetAllProductsCachedFn = async (
   cacheLife('days');
   cacheTag(productTags.list(locale, options.category));
 
-  const products = getProductListing(locale, options.category);
+  const products = await getProductListing(locale, options.category);
 
   let filtered = products;
 
@@ -115,7 +114,6 @@ export const getAllProductsCached: GetAllProductsCachedFn = async (
 
   return filtered.map((product) => mapProductDetailToSummary(product));
 };
-/* eslint-enable require-await -- end of "use cache" async wrapper */
 
 /**
  * Get a single product by slug as a ProductDetail model.
@@ -124,7 +122,6 @@ export const getAllProductsCached: GetAllProductsCachedFn = async (
  * - `product:detail:{slug}:{locale}` - Invalidate this specific product
  * - `product:list:all:{locale}` - Also tagged for list invalidation cascade
  */
-/* eslint-disable require-await -- Next.js "use cache" functions must be async even if implementation is sync */
 export const getProductBySlugCached: GetProductBySlugCachedFn = async (
   locale,
   slug,
@@ -134,10 +131,9 @@ export const getProductBySlugCached: GetProductBySlugCachedFn = async (
   cacheTag(productTags.detail(slug, locale));
   cacheTag(productTags.list(locale));
 
-  const product = getProductDetail(locale, slug);
+  const product = await getProductDetail(locale, slug);
   return product;
 };
-/* eslint-enable require-await -- end of "use cache" async wrapper */
 
 /**
  * Get all unique product categories for a locale.
@@ -145,7 +141,6 @@ export const getProductBySlugCached: GetProductBySlugCachedFn = async (
  * Cache tags enable selective invalidation:
  * - `product:category:{locale}` - Invalidate categories for this locale
  */
-/* eslint-disable require-await -- Next.js "use cache" functions must be async even if implementation is sync */
 export const getProductCategoriesCached: GetProductCategoriesCachedFn = async (
   locale,
 ) => {
@@ -153,10 +148,9 @@ export const getProductCategoriesCached: GetProductCategoriesCachedFn = async (
   cacheLife('days');
   cacheTag(productTags.categories(locale));
 
-  const categories = getProductCategories(locale);
+  const categories = await getProductCategories(locale);
   return categories;
 };
-/* eslint-enable require-await -- end of "use cache" async wrapper */
 
 /**
  * Get all unique product standards for a locale.
@@ -164,7 +158,6 @@ export const getProductCategoriesCached: GetProductCategoriesCachedFn = async (
  * Cache tags enable selective invalidation:
  * - `product:standard:{locale}` - Invalidate standards for this locale
  */
-/* eslint-disable require-await -- Next.js "use cache" functions must be async even if implementation is sync */
 export const getProductStandardsCached: GetProductStandardsCachedFn = async (
   locale,
 ) => {
@@ -172,10 +165,9 @@ export const getProductStandardsCached: GetProductStandardsCachedFn = async (
   cacheLife('days');
   cacheTag(productTags.standards(locale));
 
-  const standards = getProductStandards(locale);
+  const standards = await getProductStandards(locale);
   return standards;
 };
-/* eslint-enable require-await -- end of "use cache" async wrapper */
 
 /**
  * Get featured products for homepage or highlight sections.
@@ -183,7 +175,6 @@ export const getProductStandardsCached: GetProductStandardsCachedFn = async (
  * Cache tags enable selective invalidation:
  * - `product:featured:{locale}` - Invalidate featured products for this locale
  */
-/* eslint-disable require-await -- Next.js "use cache" functions must be async even if implementation is sync */
 export async function getFeaturedProductsCached(
   locale: Locale,
   limit?: number,
@@ -192,7 +183,6 @@ export async function getFeaturedProductsCached(
   cacheLife('days');
   cacheTag(productTags.featured(locale));
 
-  const products = getFeaturedProducts(locale, limit);
+  const products = await getFeaturedProducts(locale, limit);
   return products.map((product) => mapProductDetailToSummary(product));
 }
-/* eslint-enable require-await -- end of "use cache" async wrapper */

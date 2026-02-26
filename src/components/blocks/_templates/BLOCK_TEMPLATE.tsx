@@ -23,7 +23,7 @@ import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
 import { siteFacts } from "@/config/site-facts";
 import { COUNT_700 } from "@/constants/count";
-import { MAGIC_0_2 } from "@/constants/decimal";
+import { DEC_0_2 } from "@/constants/decimal";
 import { useIntersectionObserver } from "@/hooks/use-intersection-observer";
 
 // ============================================================================
@@ -59,7 +59,7 @@ export interface BlockTemplateProps {
 
 const UI_CONSTANTS = {
   ANIMATION_DURATION: COUNT_700,
-  INTERSECTION_THRESHOLD: MAGIC_0_2,
+  INTERSECTION_THRESHOLD: DEC_0_2,
 } as const;
 
 // ============================================================================

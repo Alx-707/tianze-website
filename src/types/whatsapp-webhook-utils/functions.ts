@@ -10,7 +10,7 @@ import type {
 import {
   ANIMATION_DURATION_NORMAL,
   ANIMATION_DURATION_VERY_SLOW,
-  MAGIC_600,
+  HTTP_SERVER_ERROR_UPPER,
 } from "@/constants";
 
 /**
@@ -59,7 +59,7 @@ export function createWebhookError(
 
 export function isRetryableError(error: WebhookError): boolean {
   // 5xx 错误通常可以重试
-  return error.code >= 500 && error.code < MAGIC_600;
+  return error.code >= 500 && error.code < HTTP_SERVER_ERROR_UPPER;
 }
 
 /**

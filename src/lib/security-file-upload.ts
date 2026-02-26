@@ -13,9 +13,9 @@ import {
   HEX_PNG_SIGNATURE_5,
   HEX_PNG_SIGNATURE_6,
   HEX_ZIP_SIGNATURE,
-  MAGIC_255,
-  MAGIC_HEX_03,
-  MAGIC_HEX_04,
+  MAX_FILENAME_LENGTH,
+  HEX_ZIP_LOCAL_HEADER_3,
+  HEX_ZIP_LOCAL_HEADER_4,
   ONE,
   ZERO,
 } from "@/constants";
@@ -183,9 +183,9 @@ function checkFileNameIssues(fileName: string): {
     warnings.push("File name matches a reserved system name pattern");
   }
 
-  if (lower.length > MAGIC_255) {
+  if (lower.length > MAX_FILENAME_LENGTH) {
     return {
-      error: "File name is too long (maximum MAGIC_255 characters)",
+      error: `File name is too long (maximum ${MAX_FILENAME_LENGTH} characters)`,
       warnings,
     };
   }
@@ -277,8 +277,8 @@ export async function validateFileSignature(
           return [
             HEX_PNG_SIGNATURE_2,
             HEX_ZIP_SIGNATURE,
-            MAGIC_HEX_03,
-            MAGIC_HEX_04,
+            HEX_ZIP_LOCAL_HEADER_3,
+            HEX_ZIP_LOCAL_HEADER_4,
           ] as const;
         default:
           return null;
@@ -318,7 +318,7 @@ export function sanitizeFileName(fileName: string): string {
     .replace(/[^a-zA-Z0-9._-]/g, "_") // Replace special chars with underscore
     .replace(/_{2,}/g, "_") // Replace multiple underscores with single
     .replace(/^_+|_+$/g, "") // Remove leading/trailing underscores
-    .substring(ZERO, MAGIC_255); // Limit length
+    .substring(ZERO, MAX_FILENAME_LENGTH); // Limit length
 }
 
 /**

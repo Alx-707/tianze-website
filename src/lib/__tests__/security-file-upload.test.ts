@@ -207,7 +207,7 @@ describe("security-file-upload", () => {
     });
 
     it("should validate matching ZIP signature", async () => {
-      // Implementation expects [HEX_PNG_SIGNATURE_2, HEX_ZIP_SIGNATURE, MAGIC_HEX_03, MAGIC_HEX_04] = [0x50, 0x50, 0x03, 0x04]
+      // Implementation expects [HEX_PNG_SIGNATURE_2, HEX_ZIP_SIGNATURE, HEX_ZIP_LOCAL_HEADER_3, HEX_ZIP_LOCAL_HEADER_4] = [0x50, 0x50, 0x03, 0x04]
       const zipBytes = new Uint8Array([0x50, 0x50, 0x03, 0x04]);
       const mockFile = {
         name: "test.zip",

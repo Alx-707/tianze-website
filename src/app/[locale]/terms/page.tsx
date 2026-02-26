@@ -143,7 +143,7 @@ function buildTocItems(
 async function TermsContent({ locale }: { locale: string }) {
   setRequestLocale(locale);
 
-  const page = getPageBySlug("terms", locale as Locale);
+  const page = await getPageBySlug("terms", locale as Locale);
 
   const t = await getTranslations({
     locale,

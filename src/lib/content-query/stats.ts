@@ -10,7 +10,7 @@ import { ZERO } from "@/constants";
 /**
  * Get content statistics
  */
-export function getContentStats(): ContentStats {
+export async function getContentStats(): Promise<ContentStats> {
   const config = getContentConfig();
   const stats: ContentStats = {
     totalPosts: ZERO,
@@ -24,8 +24,8 @@ export function getContentStats(): ContentStats {
 
   // Count posts by locale
   for (const locale of config.supportedLocales) {
-    const posts = getAllPosts(locale);
-    const pages = getAllPages(locale);
+    const posts = await getAllPosts(locale);
+    const pages = await getAllPages(locale);
 
     // Use type-safe property access with explicit validation
     if (locale === "en" || locale === "zh") {

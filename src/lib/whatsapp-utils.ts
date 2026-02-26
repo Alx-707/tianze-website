@@ -6,11 +6,11 @@ import {
   HOURS_PER_DAY,
   HTTP_OK,
   MAX_WA_BUTTON_ID_LENGTH,
+  MAX_WA_BUTTON_TITLE_LENGTH,
   MAX_WA_MESSAGE_LENGTH,
-  MAGIC_9,
-  MAGIC_20,
-  MAGIC_36,
-  MAGIC_72,
+  SHORT_ID_LENGTH,
+  BASE36_RADIX,
+  WA_ROW_DESC_MAX_LENGTH,
   ZERO,
 } from "@/constants";
 
@@ -78,7 +78,7 @@ export class WhatsAppUtils {
         button.id.length > ZERO &&
         button.id.length <= MAX_WA_BUTTON_ID_LENGTH &&
         button.title.length > ZERO &&
-        button.title.length <= MAGIC_20,
+        button.title.length <= MAX_WA_BUTTON_TITLE_LENGTH,
     );
   }
 
@@ -102,7 +102,7 @@ export class WhatsAppUtils {
         row.title.length <= HOURS_PER_DAY &&
         (!row.description ||
           (row.description.length > ZERO &&
-            row.description.length <= MAGIC_72)),
+            row.description.length <= WA_ROW_DESC_MAX_LENGTH)),
     );
   }
 
@@ -124,9 +124,9 @@ export class WhatsAppUtils {
       const buf = new Uint32Array(3);
       crypto.getRandomValues(buf);
       const randomPart = Array.from(buf, (value) =>
-        value.toString(MAGIC_36).padStart(COUNT_PAIR, "0"),
+        value.toString(BASE36_RADIX).padStart(COUNT_PAIR, "0"),
       ).join("");
-      return `msg_${timestamp}_${randomPart.substring(0, MAGIC_9)}`;
+      return `msg_${timestamp}_${randomPart.substring(0, SHORT_ID_LENGTH)}`;
     }
     throw new Error("Secure random generator unavailable for message id");
   }
