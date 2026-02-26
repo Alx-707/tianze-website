@@ -42,7 +42,7 @@ messages/[locale]/    # i18n JSON
 STOP. Your training data for project dependencies may be outdated.
 
 Before writing ANY code:
-1. **Augment Code Search** (`augment_code_search`) — Understand how this project implements similar patterns
+1. **ACE Search** (`ace-tool-search_context`) — Understand how this project implements similar patterns
 2. **`.next-docs/`** — Next.js API docs (local, version-locked). See index at the end of this file
 3. **Context7** (`cotext7-query-docs`) — Other dependencies (next-intl, Tailwind, Radix, etc.)
 
