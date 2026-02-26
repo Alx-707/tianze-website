@@ -197,6 +197,7 @@ class QualityGate {
             "src/types/whatsapp-api-requests/api-types.ts",
             "src/types/whatsapp-webhook-utils/functions.ts",
             "src/lib/content-parser.ts", // Content parser - covered by content tests
+            "src/app/api/contact/contact-api-utils.ts", // Utility wrappers - covered via route tests
           ],
           // 增量覆盖率排除（glob）：生成文件/声明文件/无逻辑代码默认不纳入 diff-line coverage
           diffCoverageExcludeGlobs: [
@@ -216,9 +217,11 @@ class QualityGate {
             "src/components/ui/**", // shadcn/ui CLI 生成的 UI 原语
             "src/constants/**", // 纯数据声明（as const 对象）
             "src/config/**", // 静态配置对象（零条件分支）
-            // App Router 固定模板文件（error boundary / loading skeleton）
+            // App Router 固定模板文件（error boundary / loading skeleton / pages）
             "src/app/**/error.tsx",
             "src/app/**/loading.tsx",
+            "src/app/**/page.tsx", // 页面组件（SSR 组合层，E2E 覆盖）
+            "src/components/blocks/_templates/**", // 开发模板
           ],
         },
         codeQuality: {
