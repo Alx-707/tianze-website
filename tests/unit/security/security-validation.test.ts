@@ -5,7 +5,6 @@ import {
   isValidPhoneNumber,
   isValidUrl,
   sanitizeFilePath,
-  sanitizeForDatabase,
   sanitizeHtml,
   sanitizeInput,
   validateCharacters,
@@ -18,7 +17,6 @@ describe("security-validation", () => {
       sanitizeHtml('<script>alert(1)</script><div onclick="x">ok</div>'),
     ).not.toContain("script");
     expect(sanitizeInput("<img onerror=alert(1)>")).toBe("img alert(1)");
-    expect(sanitizeForDatabase("'DROP TABLE")).not.toMatch(/['"\\]/);
   });
 
   it("validates url/email/phone patterns", () => {

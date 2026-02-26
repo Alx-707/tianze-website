@@ -233,20 +233,3 @@ export function isValidJson(jsonString: string): boolean {
     return false;
   }
 }
-
-/**
- * Validate and sanitize user input for database queries
- */
-export function sanitizeForDatabase(input: string): string {
-  if (typeof input !== "string") {
-    return "";
-  }
-
-  // Basic SQL injection prevention
-  return input
-    .replace(/['";\\]/g, "") // Remove quotes and backslashes
-    .replace(/--/g, "") // Remove SQL comments
-    .replace(/\/\*/g, "") // Remove block comment start
-    .replace(/\*\//g, "") // Remove block comment end
-    .trim();
-}

@@ -5,7 +5,6 @@ import {
   isValidPhoneNumber,
   isValidUrl,
   sanitizeFilePath,
-  sanitizeForDatabase,
   sanitizeHtml,
   sanitizeInput,
   sanitizePlainText,
@@ -391,48 +390,6 @@ describe("security-validation", () => {
       expect(isValidJson("{'single': 'quotes'}")).toBe(false);
       expect(isValidJson('{key: "unquoted key"}')).toBe(false);
       expect(isValidJson("undefined")).toBe(false);
-    });
-  });
-
-  describe("sanitizeForDatabase", () => {
-    it("should remove single quotes", () => {
-      expect(sanitizeForDatabase("O'Brien")).toBe("OBrien");
-    });
-
-    it("should remove double quotes", () => {
-      expect(sanitizeForDatabase('test"value')).toBe("testvalue");
-    });
-
-    it("should remove semicolons", () => {
-      expect(sanitizeForDatabase("SELECT; DROP TABLE")).toBe(
-        "SELECT DROP TABLE",
-      );
-    });
-
-    it("should remove backslashes", () => {
-      expect(sanitizeForDatabase("path\\to\\file")).toBe("pathtofile");
-    });
-
-    it("should remove SQL comments", () => {
-      expect(sanitizeForDatabase("value-- comment")).toBe("value comment");
-      // Implementation removes /* and */ separately, and trims the result
-      expect(sanitizeForDatabase("/* block */ value")).toBe("block  value");
-    });
-
-    it("should trim whitespace", () => {
-      expect(sanitizeForDatabase("  test  ")).toBe("test");
-    });
-
-    it("should return empty string for non-string input", () => {
-      expect(sanitizeForDatabase(123 as unknown as string)).toBe("");
-      expect(sanitizeForDatabase(null as unknown as string)).toBe("");
-    });
-
-    it("should handle combined SQL injection attempts", () => {
-      // Quote, semicolons, and -- are removed; result is trimmed
-      expect(sanitizeForDatabase("'; DROP TABLE users; --")).toBe(
-        "DROP TABLE users",
-      );
     });
   });
 });
