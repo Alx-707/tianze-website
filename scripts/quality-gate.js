@@ -204,6 +204,8 @@ class QualityGate {
             "**/*.d.ts",
             "**/*-types.ts", // 纯类型定义文件（如 theme-transition-types.ts）
             "**/*.types.ts", // 另一种类型文件命名约定
+            "src/types/whatsapp*/**", // WhatsApp 类型定义（与 vitest coverage exclude 一致）
+            "src/types/whatsapp*.ts", // WhatsApp 顶层类型文件
             "**/*.test.*",
             "**/*.spec.*",
             "**/__tests__/**",
