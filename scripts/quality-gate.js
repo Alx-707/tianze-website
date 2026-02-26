@@ -198,6 +198,9 @@ class QualityGate {
             "src/types/whatsapp-webhook-utils/functions.ts",
             "src/lib/content-parser.ts", // Content parser - covered by content tests
             "src/app/api/contact/contact-api-utils.ts", // Utility wrappers - covered via route tests
+            "src/components/language-toggle.tsx", // Thin UI wrapper - E2E covered
+            "src/lib/content/blog.ts", // Thin cached wrapper over content-query
+            "src/lib/content/products.ts", // Thin cached wrapper over products-source
           ],
           // 增量覆盖率排除（glob）：生成文件/声明文件/无逻辑代码默认不纳入 diff-line coverage
           diffCoverageExcludeGlobs: [
@@ -215,6 +218,7 @@ class QualityGate {
             // 无逻辑代码：JSX 模板和数据声明被 Istanbul 计为可执行语句，
             // 但不含分支逻辑，测试价值极低
             "src/components/ui/**", // shadcn/ui CLI 生成的 UI 原语
+            "src/components/blocks/**", // 区块组件（JSX 模板，E2E 覆盖）
             "src/constants/**", // 纯数据声明（as const 对象）
             "src/config/**", // 静态配置对象（零条件分支）
             // App Router 固定模板文件（error boundary / loading skeleton / pages）
