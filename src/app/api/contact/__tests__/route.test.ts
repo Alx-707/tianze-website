@@ -125,6 +125,7 @@ describe("Contact API Route", () => {
       phone: "+1234567890",
       subject: "Test Subject",
       marketingConsent: false,
+      website: "",
       turnstileToken: "valid-token",
       submittedAt: new Date().toISOString(),
     };

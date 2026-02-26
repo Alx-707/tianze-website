@@ -73,11 +73,10 @@ const mockFsPromises = vi.mocked(fs.promises) as {
   readFile: ReturnType<typeof vi.fn>;
   readdir: ReturnType<typeof vi.fn>;
 };
-const mockFs = vi.mocked(fs) as {
+const mockFs = vi.mocked(fs) as unknown as {
   existsSync: ReturnType<typeof vi.fn>;
   readFileSync: ReturnType<typeof vi.fn>;
   readdirSync: ReturnType<typeof vi.fn>;
-  promises: typeof mockFsPromises;
 };
 const mockLogger = vi.mocked(logger);
 
