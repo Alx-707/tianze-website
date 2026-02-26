@@ -183,8 +183,8 @@ class QualityGate {
             Number.isFinite(diffWarningThreshold) && diffWarningThreshold >= 0
               ? diffWarningThreshold
               : 1.5, // 变更覆盖率较全量下降超过该阈值触发 warning（目标 1-2% 区间）
-          // 增量覆盖率排除列表：这些文件的格式化变更不计入增量覆盖率计算
-          // 用于排除仅有 Prettier 格式化变更但原有覆盖率较低的文件
+          // 增量覆盖率排除列表：仅限纯类型/纯配置/无运行时逻辑的文件
+          // 安全/业务逻辑文件禁止加入此列表
           diffCoverageExclude: [
             "src/components/forms/use-rate-limit.ts",
             "src/components/lazy/lazy-web-vitals-reporter.tsx",
@@ -197,10 +197,6 @@ class QualityGate {
             "src/types/whatsapp-api-requests/api-types.ts",
             "src/types/whatsapp-webhook-utils/functions.ts",
             "src/lib/content-parser.ts", // Content parser - covered by content tests
-            "src/app/api/contact/contact-api-utils.ts", // Utility wrappers - covered via route tests
-            "src/components/language-toggle.tsx", // Thin UI wrapper - E2E covered
-            "src/lib/content/blog.ts", // Thin cached wrapper over content-query
-            "src/lib/content/products.ts", // Thin cached wrapper over products-source
           ],
           // 增量覆盖率排除（glob）：生成文件/声明文件/无逻辑代码默认不纳入 diff-line coverage
           diffCoverageExcludeGlobs: [
@@ -218,14 +214,12 @@ class QualityGate {
             // 无逻辑代码：JSX 模板和数据声明被 Istanbul 计为可执行语句，
             // 但不含分支逻辑，测试价值极低
             "src/components/ui/**", // shadcn/ui CLI 生成的 UI 原语
-            "src/components/blocks/**", // 区块组件（JSX 模板，E2E 覆盖）
+            "src/components/blocks/_templates/**", // 开发模板（无运行时逻辑）
             "src/constants/**", // 纯数据声明（as const 对象）
             "src/config/**", // 静态配置对象（零条件分支）
-            // App Router 固定模板文件（error boundary / loading skeleton / pages）
+            // App Router 固定模板文件（error boundary / loading skeleton）
             "src/app/**/error.tsx",
             "src/app/**/loading.tsx",
-            "src/app/**/page.tsx", // 页面组件（SSR 组合层，E2E 覆盖）
-            "src/components/blocks/_templates/**", // 开发模板
           ],
         },
         codeQuality: {
