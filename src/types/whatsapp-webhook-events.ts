@@ -14,15 +14,15 @@ import type { IncomingWhatsAppMessage } from "@/types/whatsapp-webhook-messages"
 import {
   ANIMATION_DURATION_VERY_SLOW,
   COUNT_FIVE,
+  COUNT_SIX,
+  COUNT_SEVEN,
+  COUNT_EIGHT,
+  COUNT_NINE,
   COUNT_PAIR,
   COUNT_QUAD,
   COUNT_TEN,
   COUNT_TRIPLE,
-  DAYS_PER_WEEK,
   HOURS_PER_DAY,
-  MAGIC_6,
-  MAGIC_8,
-  MAGIC_9,
   ONE,
   SECONDS_PER_MINUTE,
 } from "@/constants";
@@ -408,14 +408,14 @@ export function getEventPriority(event: WebhookEvent): number {
     case "template_status":
       return COUNT_FIVE;
     case "phone_number_quality":
-      return MAGIC_6;
+      return COUNT_SIX;
     case "account_update":
-      return DAYS_PER_WEEK;
+      return COUNT_SEVEN;
     case "message_read":
     case "message_delivery":
-      return MAGIC_8;
+      return COUNT_EIGHT;
     case "user_status_change":
-      return MAGIC_9; // Lowest priority
+      return COUNT_NINE; // Lowest priority
     default:
       return COUNT_TEN;
   }

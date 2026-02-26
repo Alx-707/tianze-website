@@ -55,10 +55,17 @@ export const HEX_PDF_SIGNATURE_1 = 0x50 as const; // PDF signature 'P'
 export const HEX_ZIP_SIGNATURE = 0x50 as const; // ZIP signature 'P'
 
 // ============================================================================
+// ZIP 文件签名常量
+// ============================================================================
+
+/** ZIP local file header version needed (PK\x03\x04 byte 3) */
+export const HEX_ZIP_LOCAL_HEADER_3 = 0x03 as const;
+/** ZIP local file header version extract (PK\x03\x04 byte 4) */
+export const HEX_ZIP_LOCAL_HEADER_4 = 0x04 as const;
+
+// ============================================================================
 // 通用十六进制数值
 // ============================================================================
 
-export const MAGIC_HEX_03 = 0x03 as const;
-export const MAGIC_HEX_04 = 0x04 as const;
-export const MAGIC_HEX_3 = 0x3 as const;
-export const MAGIC_HEX_8 = 0x8 as const;
+export const HEX_VALUE_3 = 0x3 as const;
+export const HEX_VALUE_8 = 0x8 as const;

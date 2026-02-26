@@ -81,11 +81,13 @@ function getProductionValidationConfig(): ValidationConfig {
 /**
  * Parse MDX file with frontmatter
  */
-export function parseContentFile<T extends ContentMetadata = ContentMetadata>(
+export async function parseContentFile<
+  T extends ContentMetadata = ContentMetadata,
+>(
   filePath: string,
   type: ContentType,
   options: ParseContentOptions = {},
-): ParsedContent<T> {
+): Promise<ParsedContent<T>> {
   const validationConfig =
     options.validationConfig ?? getProductionValidationConfig();
 
@@ -93,8 +95,11 @@ export function parseContentFile<T extends ContentMetadata = ContentMetadata>(
     // Validate file path for security
     const validatedPath = validateFilePath(filePath, CONTENT_DIR);
 
-    // eslint-disable-next-line security/detect-non-literal-fs-filename -- validatedPath已通过validateFilePath安全验证，防止路径遍历攻击
-    if (!fs.existsSync(validatedPath)) {
+    const fileExists = await fs.promises
+      .access(validatedPath)
+      .then(() => true)
+      .catch(() => false);
+    if (!fileExists) {
       throw new ContentError(
         `Content file not found: ${filePath}`,
         "FILE_NOT_FOUND",
@@ -102,7 +107,7 @@ export function parseContentFile<T extends ContentMetadata = ContentMetadata>(
     }
 
     // eslint-disable-next-line security/detect-non-literal-fs-filename -- validatedPath已通过validateFilePath安全验证，防止路径遍历攻击
-    const fileContent = fs.readFileSync(validatedPath, "utf-8");
+    const fileContent = await fs.promises.readFile(validatedPath, "utf-8");
 
     // Check file size limits
     if (fileContent.length > CONTENT_LIMITS.MAX_FILE_SIZE) {
@@ -188,14 +193,14 @@ function logValidationResult(
 /**
  * Parse content file with draft filtering
  */
-export function parseContentFileWithDraftFilter<
+export async function parseContentFileWithDraftFilter<
   T extends ContentMetadata = ContentMetadata,
 >(
   filePath: string,
   type: ContentType,
   options: ParseContentOptions = {},
-): ParsedContent<T> | null {
-  const parsed = parseContentFile<T>(filePath, type, options);
+): Promise<ParsedContent<T> | null> {
+  const parsed = await parseContentFile<T>(filePath, type, options);
 
   // Filter out drafts based on configuration
   if (shouldFilterDraft(parsed.metadata.draft)) {
@@ -212,7 +217,10 @@ export function parseContentFileWithDraftFilter<
 /**
  * Get all content files in a directory
  */
-export function getContentFiles(contentDir: string, locale?: Locale): string[] {
+export async function getContentFiles(
+  contentDir: string,
+  locale?: Locale,
+): Promise<string[]> {
   // When a locale is provided, read from the locale-specific subdirectory
   // (e.g. content/pages/en, content/posts/zh). This matches the actual
   // content layout under the content/ directory.
@@ -221,8 +229,11 @@ export function getContentFiles(contentDir: string, locale?: Locale): string[] {
   // Validate the base content directory to guard against path traversal.
   const validatedContentDir = validateFilePath(baseDir, CONTENT_DIR);
 
-  // eslint-disable-next-line security/detect-non-literal-fs-filename -- validatedContentDir已通过validateFilePath安全验证，防止路径遍历攻击
-  if (!fs.existsSync(validatedContentDir)) {
+  const dirExists = await fs.promises
+    .access(validatedContentDir)
+    .then(() => true)
+    .catch(() => false);
+  if (!dirExists) {
     logger.warn("Content directory does not exist", {
       dir: validatedContentDir,
     });
@@ -230,7 +241,7 @@ export function getContentFiles(contentDir: string, locale?: Locale): string[] {
   }
 
   // eslint-disable-next-line security/detect-non-literal-fs-filename -- validatedContentDir已通过validateFilePath安全验证，防止路径遍历攻击
-  const files = fs.readdirSync(validatedContentDir);
+  const files = await fs.promises.readdir(validatedContentDir);
   return files
     .filter((file) => {
       const ext = path.extname(file);

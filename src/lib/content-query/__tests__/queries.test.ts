@@ -28,7 +28,7 @@ import {
 
 // Mocks setup via vi.hoisted for ESM compatibility
 const mockGetContentFiles = vi.hoisted(() =>
-  vi.fn<(dir: string, locale?: string) => string[]>(),
+  vi.fn<(dir: string, locale?: string) => Promise<string[]>>(),
 );
 const mockParseContentFile = vi.hoisted(() => vi.fn());
 const mockGetContentConfig = vi.hoisted(() => vi.fn<() => ContentConfig>());
@@ -138,7 +138,7 @@ describe("content-query/queries", () => {
   });
 
   describe("getAllPosts", () => {
-    it("should get all posts without locale", () => {
+    it("should get all posts without locale", async () => {
       const mockFiles = [
         "/mock/content/posts/post1.mdx",
         "/mock/content/posts/post2.mdx",
@@ -148,15 +148,15 @@ describe("content-query/queries", () => {
         createMockParsedBlogPost({ slug: "post2" }),
       ];
 
-      mockGetContentFiles.mockReturnValue(mockFiles);
+      mockGetContentFiles.mockResolvedValue(mockFiles);
       mockParseContentFile
-        .mockReturnValueOnce(mockParsedPosts[0])
-        .mockReturnValueOnce(mockParsedPosts[1]);
+        .mockResolvedValueOnce(mockParsedPosts[0])
+        .mockResolvedValueOnce(mockParsedPosts[1]);
       mockFilterPosts.mockReturnValue(mockParsedPosts);
       mockSortPosts.mockImplementation((posts) => posts);
       mockPaginatePosts.mockImplementation((posts) => posts);
 
-      const result = getAllPosts();
+      const result = await getAllPosts();
 
       expect(mockGetContentFiles).toHaveBeenCalledWith(
         "/mock/content/posts",
@@ -169,17 +169,17 @@ describe("content-query/queries", () => {
       expect(result).toHaveLength(2);
     });
 
-    it("should get posts for specific locale", () => {
+    it("should get posts for specific locale", async () => {
       const mockFiles = ["/mock/content/posts/en/post1.mdx"];
       const mockParsedPost = createMockParsedBlogPost({ slug: "post1" });
 
-      mockGetContentFiles.mockReturnValue(mockFiles);
-      mockParseContentFile.mockReturnValue(mockParsedPost);
+      mockGetContentFiles.mockResolvedValue(mockFiles);
+      mockParseContentFile.mockResolvedValue(mockParsedPost);
       mockFilterPosts.mockReturnValue([mockParsedPost]);
       mockSortPosts.mockImplementation((posts) => posts);
       mockPaginatePosts.mockImplementation((posts) => posts);
 
-      const result = getAllPosts("en");
+      const result = await getAllPosts("en");
 
       expect(mockGetContentFiles).toHaveBeenCalledWith(
         "/mock/content/posts",
@@ -188,7 +188,7 @@ describe("content-query/queries", () => {
       expect(result).toHaveLength(1);
     });
 
-    it("should apply query options to filter, sort, and paginate", () => {
+    it("should apply query options to filter, sort, and paginate", async () => {
       const mockFiles = ["/mock/content/posts/post1.mdx"];
       const mockParsedPost = createMockParsedBlogPost({ slug: "post1" });
       const options: ContentQueryOptions = {
@@ -199,41 +199,41 @@ describe("content-query/queries", () => {
         offset: 2,
       };
 
-      mockGetContentFiles.mockReturnValue(mockFiles);
-      mockParseContentFile.mockReturnValue(mockParsedPost);
+      mockGetContentFiles.mockResolvedValue(mockFiles);
+      mockParseContentFile.mockResolvedValue(mockParsedPost);
       mockFilterPosts.mockReturnValue([mockParsedPost]);
       mockSortPosts.mockImplementation((posts) => posts);
       mockPaginatePosts.mockImplementation((posts) => posts);
 
-      getAllPosts("en", options);
+      await getAllPosts("en", options);
 
       expect(mockFilterPosts).toHaveBeenCalledWith([mockParsedPost], options);
       expect(mockSortPosts).toHaveBeenCalledWith([mockParsedPost], options);
       expect(mockPaginatePosts).toHaveBeenCalledWith([mockParsedPost], options);
     });
 
-    it("should return empty array when no files found", () => {
-      mockGetContentFiles.mockReturnValue([]);
+    it("should return empty array when no files found", async () => {
+      mockGetContentFiles.mockResolvedValue([]);
       mockFilterPosts.mockReturnValue([]);
       mockSortPosts.mockReturnValue([]);
       mockPaginatePosts.mockReturnValue([]);
 
-      const result = getAllPosts("en");
+      const result = await getAllPosts("en");
 
       expect(result).toEqual([]);
     });
 
-    it("should parse each file as posts type", () => {
+    it("should parse each file as posts type", async () => {
       const mockFiles = ["/mock/content/posts/post1.mdx"];
       const mockParsedPost = createMockParsedBlogPost();
 
-      mockGetContentFiles.mockReturnValue(mockFiles);
-      mockParseContentFile.mockReturnValue(mockParsedPost);
+      mockGetContentFiles.mockResolvedValue(mockFiles);
+      mockParseContentFile.mockResolvedValue(mockParsedPost);
       mockFilterPosts.mockReturnValue([mockParsedPost]);
       mockSortPosts.mockImplementation((posts) => posts);
       mockPaginatePosts.mockImplementation((posts) => posts);
 
-      getAllPosts();
+      await getAllPosts();
 
       expect(mockParseContentFile).toHaveBeenCalledWith(
         "/mock/content/posts/post1.mdx",
@@ -241,20 +241,20 @@ describe("content-query/queries", () => {
       );
     });
 
-    it("should use default empty options when not provided", () => {
-      mockGetContentFiles.mockReturnValue([]);
+    it("should use default empty options when not provided", async () => {
+      mockGetContentFiles.mockResolvedValue([]);
       mockFilterPosts.mockReturnValue([]);
       mockSortPosts.mockReturnValue([]);
       mockPaginatePosts.mockReturnValue([]);
 
-      getAllPosts();
+      await getAllPosts();
 
       expect(mockFilterPosts).toHaveBeenCalledWith([], {});
     });
   });
 
   describe("getAllPages", () => {
-    it("should get all pages without locale", () => {
+    it("should get all pages without locale", async () => {
       const mockFiles = [
         "/mock/content/pages/about.mdx",
         "/mock/content/pages/contact.mdx",
@@ -264,12 +264,12 @@ describe("content-query/queries", () => {
         createMockParsedPage({ slug: "contact" }),
       ];
 
-      mockGetContentFiles.mockReturnValue(mockFiles);
+      mockGetContentFiles.mockResolvedValue(mockFiles);
       mockParseContentFile
-        .mockReturnValueOnce(mockParsedPages[0])
-        .mockReturnValueOnce(mockParsedPages[1]);
+        .mockResolvedValueOnce(mockParsedPages[0])
+        .mockResolvedValueOnce(mockParsedPages[1]);
 
-      const result = getAllPages();
+      const result = await getAllPages();
 
       expect(mockGetContentFiles).toHaveBeenCalledWith(
         "/mock/content/pages",
@@ -278,14 +278,14 @@ describe("content-query/queries", () => {
       expect(result).toHaveLength(2);
     });
 
-    it("should get pages for specific locale", () => {
+    it("should get pages for specific locale", async () => {
       const mockFiles = ["/mock/content/pages/zh/about.mdx"];
       const mockParsedPage = createMockParsedPage({ slug: "about" });
 
-      mockGetContentFiles.mockReturnValue(mockFiles);
-      mockParseContentFile.mockReturnValue(mockParsedPage);
+      mockGetContentFiles.mockResolvedValue(mockFiles);
+      mockParseContentFile.mockResolvedValue(mockParsedPage);
 
-      const result = getAllPages("zh");
+      const result = await getAllPages("zh");
 
       expect(mockGetContentFiles).toHaveBeenCalledWith(
         "/mock/content/pages",
@@ -294,7 +294,7 @@ describe("content-query/queries", () => {
       expect(result).toHaveLength(1);
     });
 
-    it("should filter draft pages when enableDrafts is false", () => {
+    it("should filter draft pages when enableDrafts is false", async () => {
       mockGetContentConfig.mockReturnValue(
         createMockContentConfig({ enableDrafts: false }),
       );
@@ -312,18 +312,18 @@ describe("content-query/queries", () => {
         metadata: createMockPageMetadata({ draft: true }),
       });
 
-      mockGetContentFiles.mockReturnValue(mockFiles);
+      mockGetContentFiles.mockResolvedValue(mockFiles);
       mockParseContentFile
-        .mockReturnValueOnce(publishedPage)
-        .mockReturnValueOnce(draftPage);
+        .mockResolvedValueOnce(publishedPage)
+        .mockResolvedValueOnce(draftPage);
 
-      const result = getAllPages();
+      const result = await getAllPages();
 
       expect(result).toHaveLength(1);
       expect(result[0]!.slug).toBe("published");
     });
 
-    it("should include draft pages when enableDrafts is true", () => {
+    it("should include draft pages when enableDrafts is true", async () => {
       mockGetContentConfig.mockReturnValue(
         createMockContentConfig({ enableDrafts: true }),
       );
@@ -341,32 +341,32 @@ describe("content-query/queries", () => {
         metadata: createMockPageMetadata({ draft: true }),
       });
 
-      mockGetContentFiles.mockReturnValue(mockFiles);
+      mockGetContentFiles.mockResolvedValue(mockFiles);
       mockParseContentFile
-        .mockReturnValueOnce(publishedPage)
-        .mockReturnValueOnce(draftPage);
+        .mockResolvedValueOnce(publishedPage)
+        .mockResolvedValueOnce(draftPage);
 
-      const result = getAllPages();
+      const result = await getAllPages();
 
       expect(result).toHaveLength(2);
     });
 
-    it("should return empty array when no files found", () => {
-      mockGetContentFiles.mockReturnValue([]);
+    it("should return empty array when no files found", async () => {
+      mockGetContentFiles.mockResolvedValue([]);
 
-      const result = getAllPages();
+      const result = await getAllPages();
 
       expect(result).toEqual([]);
     });
 
-    it("should parse each file as pages type", () => {
+    it("should parse each file as pages type", async () => {
       const mockFiles = ["/mock/content/pages/about.mdx"];
       const mockParsedPage = createMockParsedPage();
 
-      mockGetContentFiles.mockReturnValue(mockFiles);
-      mockParseContentFile.mockReturnValue(mockParsedPage);
+      mockGetContentFiles.mockResolvedValue(mockFiles);
+      mockParseContentFile.mockResolvedValue(mockParsedPage);
 
-      getAllPages();
+      await getAllPages();
 
       expect(mockParseContentFile).toHaveBeenCalledWith(
         "/mock/content/pages/about.mdx",
@@ -376,17 +376,17 @@ describe("content-query/queries", () => {
   });
 
   describe("getContentBySlug", () => {
-    it("should find content by exact slug match", () => {
+    it("should find content by exact slug match", async () => {
       const mockFiles = [
         "/mock/content/posts/en/my-post.mdx",
         "/mock/content/posts/en/other-post.mdx",
       ];
       const mockParsedPost = createMockParsedBlogPost({ slug: "my-post" });
 
-      mockGetContentFiles.mockReturnValue(mockFiles);
-      mockParseContentFile.mockReturnValue(mockParsedPost);
+      mockGetContentFiles.mockResolvedValue(mockFiles);
+      mockParseContentFile.mockResolvedValue(mockParsedPost);
 
-      const result = getContentBySlug("my-post", "posts", "en");
+      const result = await getContentBySlug("my-post", "posts", "en");
 
       expect(result.slug).toBe("my-post");
       expect(mockParseContentFile).toHaveBeenCalledWith(
@@ -395,14 +395,14 @@ describe("content-query/queries", () => {
       );
     });
 
-    it("should find content by slug with locale suffix", () => {
+    it("should find content by slug with locale suffix", async () => {
       const mockFiles = ["/mock/content/posts/en/my-post.en.mdx"];
       const mockParsedPost = createMockParsedBlogPost({ slug: "my-post.en" });
 
-      mockGetContentFiles.mockReturnValue(mockFiles);
-      mockParseContentFile.mockReturnValue(mockParsedPost);
+      mockGetContentFiles.mockResolvedValue(mockFiles);
+      mockParseContentFile.mockResolvedValue(mockParsedPost);
 
-      const result = getContentBySlug("my-post", "posts", "en");
+      const result = await getContentBySlug("my-post", "posts", "en");
 
       expect(mockParseContentFile).toHaveBeenCalledWith(
         "/mock/content/posts/en/my-post.en.mdx",
@@ -411,12 +411,12 @@ describe("content-query/queries", () => {
       expect(result).toBeDefined();
     });
 
-    it("should use posts directory for posts type", () => {
+    it("should use posts directory for posts type", async () => {
       const mockFiles = ["/mock/content/posts/en/test.mdx"];
-      mockGetContentFiles.mockReturnValue(mockFiles);
-      mockParseContentFile.mockReturnValue(createMockParsedBlogPost());
+      mockGetContentFiles.mockResolvedValue(mockFiles);
+      mockParseContentFile.mockResolvedValue(createMockParsedBlogPost());
 
-      getContentBySlug("test", "posts", "en");
+      await getContentBySlug("test", "posts", "en");
 
       expect(mockGetContentFiles).toHaveBeenCalledWith(
         "/mock/content/posts",
@@ -424,12 +424,12 @@ describe("content-query/queries", () => {
       );
     });
 
-    it("should use pages directory for pages type", () => {
+    it("should use pages directory for pages type", async () => {
       const mockFiles = ["/mock/content/pages/en/about.mdx"];
-      mockGetContentFiles.mockReturnValue(mockFiles);
-      mockParseContentFile.mockReturnValue(createMockParsedPage());
+      mockGetContentFiles.mockResolvedValue(mockFiles);
+      mockParseContentFile.mockResolvedValue(createMockParsedPage());
 
-      getContentBySlug("about", "pages", "en");
+      await getContentBySlug("about", "pages", "en");
 
       expect(mockGetContentFiles).toHaveBeenCalledWith(
         "/mock/content/pages",
@@ -437,22 +437,24 @@ describe("content-query/queries", () => {
       );
     });
 
-    it("should throw error when content not found", () => {
-      mockGetContentFiles.mockReturnValue(["/mock/content/posts/en/other.mdx"]);
+    it("should throw error when content not found", async () => {
+      mockGetContentFiles.mockResolvedValue([
+        "/mock/content/posts/en/other.mdx",
+      ]);
 
-      expect(() => getContentBySlug("nonexistent", "posts", "en")).toThrow(
-        "Content not found: nonexistent",
-      );
+      await expect(
+        getContentBySlug("nonexistent", "posts", "en"),
+      ).rejects.toThrow("Content not found: nonexistent");
     });
 
-    it("should work without locale parameter", () => {
+    it("should work without locale parameter", async () => {
       const mockFiles = ["/mock/content/posts/my-post.mdx"];
       const mockParsedPost = createMockParsedBlogPost();
 
-      mockGetContentFiles.mockReturnValue(mockFiles);
-      mockParseContentFile.mockReturnValue(mockParsedPost);
+      mockGetContentFiles.mockResolvedValue(mockFiles);
+      mockParseContentFile.mockResolvedValue(mockParsedPost);
 
-      const result = getContentBySlug("my-post", "posts");
+      const result = await getContentBySlug("my-post", "posts");
 
       expect(mockGetContentFiles).toHaveBeenCalledWith(
         "/mock/content/posts",
@@ -461,17 +463,17 @@ describe("content-query/queries", () => {
       expect(result).toBeDefined();
     });
 
-    it("should handle files with different extensions", () => {
+    it("should handle files with different extensions", async () => {
       const mockFiles = [
         "/mock/content/posts/en/my-post.md",
         "/mock/content/posts/en/other.mdx",
       ];
       const mockParsedPost = createMockParsedBlogPost({ slug: "my-post" });
 
-      mockGetContentFiles.mockReturnValue(mockFiles);
-      mockParseContentFile.mockReturnValue(mockParsedPost);
+      mockGetContentFiles.mockResolvedValue(mockFiles);
+      mockParseContentFile.mockResolvedValue(mockParsedPost);
 
-      const result = getContentBySlug("my-post", "posts", "en");
+      const result = await getContentBySlug("my-post", "posts", "en");
 
       expect(result).toBeDefined();
       expect(mockParseContentFile).toHaveBeenCalledWith(
@@ -480,17 +482,17 @@ describe("content-query/queries", () => {
       );
     });
 
-    it("should match slug prefix correctly", () => {
+    it("should match slug prefix correctly", async () => {
       const mockFiles = [
         "/mock/content/posts/en/my-post.en.mdx",
         "/mock/content/posts/en/my-post-extra.mdx",
       ];
       const mockParsedPost = createMockParsedBlogPost({ slug: "my-post.en" });
 
-      mockGetContentFiles.mockReturnValue(mockFiles);
-      mockParseContentFile.mockReturnValue(mockParsedPost);
+      mockGetContentFiles.mockResolvedValue(mockFiles);
+      mockParseContentFile.mockResolvedValue(mockParsedPost);
 
-      const result = getContentBySlug("my-post", "posts", "en");
+      const result = await getContentBySlug("my-post", "posts", "en");
 
       // Should match 'my-post.en.mdx' because slug starts with 'my-post.'
       expect(mockParseContentFile).toHaveBeenCalledWith(
@@ -502,28 +504,28 @@ describe("content-query/queries", () => {
   });
 
   describe("getPostBySlug", () => {
-    it("should return blog post by slug", () => {
+    it("should return blog post by slug", async () => {
       const mockFiles = ["/mock/content/posts/en/test-post.mdx"];
       const mockParsedPost = createMockParsedBlogPost({
         slug: "test-post",
         metadata: createMockBlogPostMetadata({ title: "Test Post Title" }),
       });
 
-      mockGetContentFiles.mockReturnValue(mockFiles);
-      mockParseContentFile.mockReturnValue(mockParsedPost);
+      mockGetContentFiles.mockResolvedValue(mockFiles);
+      mockParseContentFile.mockResolvedValue(mockParsedPost);
 
-      const result = getPostBySlug("test-post", "en");
+      const result = await getPostBySlug("test-post", "en");
 
       expect(result.slug).toBe("test-post");
       expect(result.metadata.title).toBe("Test Post Title");
     });
 
-    it("should call getContentBySlug with posts type", () => {
+    it("should call getContentBySlug with posts type", async () => {
       const mockFiles = ["/mock/content/posts/en/my-post.mdx"];
-      mockGetContentFiles.mockReturnValue(mockFiles);
-      mockParseContentFile.mockReturnValue(createMockParsedBlogPost());
+      mockGetContentFiles.mockResolvedValue(mockFiles);
+      mockParseContentFile.mockResolvedValue(createMockParsedBlogPost());
 
-      getPostBySlug("my-post", "en");
+      await getPostBySlug("my-post", "en");
 
       expect(mockParseContentFile).toHaveBeenCalledWith(
         "/mock/content/posts/en/my-post.mdx",
@@ -531,12 +533,12 @@ describe("content-query/queries", () => {
       );
     });
 
-    it("should work without locale", () => {
+    it("should work without locale", async () => {
       const mockFiles = ["/mock/content/posts/my-post.mdx"];
-      mockGetContentFiles.mockReturnValue(mockFiles);
-      mockParseContentFile.mockReturnValue(createMockParsedBlogPost());
+      mockGetContentFiles.mockResolvedValue(mockFiles);
+      mockParseContentFile.mockResolvedValue(createMockParsedBlogPost());
 
-      const result = getPostBySlug("my-post");
+      const result = await getPostBySlug("my-post");
 
       expect(result).toBeDefined();
       expect(mockGetContentFiles).toHaveBeenCalledWith(
@@ -545,17 +547,17 @@ describe("content-query/queries", () => {
       );
     });
 
-    it("should throw error when post not found", () => {
-      mockGetContentFiles.mockReturnValue([]);
+    it("should throw error when post not found", async () => {
+      mockGetContentFiles.mockResolvedValue([]);
 
-      expect(() => getPostBySlug("nonexistent", "en")).toThrow(
+      await expect(getPostBySlug("nonexistent", "en")).rejects.toThrow(
         "Content not found: nonexistent",
       );
     });
   });
 
   describe("getPageBySlug", () => {
-    it("should return page by slug", () => {
+    it("should return page by slug", async () => {
       const mockFiles = ["/mock/content/pages/en/about.mdx"];
       const mockParsedPage = createMockParsedPage({
         slug: "about",
@@ -565,22 +567,22 @@ describe("content-query/queries", () => {
         }),
       });
 
-      mockGetContentFiles.mockReturnValue(mockFiles);
-      mockParseContentFile.mockReturnValue(mockParsedPage);
+      mockGetContentFiles.mockResolvedValue(mockFiles);
+      mockParseContentFile.mockResolvedValue(mockParsedPage);
 
-      const result = getPageBySlug("about", "en");
+      const result = await getPageBySlug("about", "en");
 
       expect(result.slug).toBe("about");
       expect(result.metadata.title).toBe("About Us");
       expect(result.metadata.layout).toBe("default");
     });
 
-    it("should call getContentBySlug with pages type", () => {
+    it("should call getContentBySlug with pages type", async () => {
       const mockFiles = ["/mock/content/pages/en/contact.mdx"];
-      mockGetContentFiles.mockReturnValue(mockFiles);
-      mockParseContentFile.mockReturnValue(createMockParsedPage());
+      mockGetContentFiles.mockResolvedValue(mockFiles);
+      mockParseContentFile.mockResolvedValue(createMockParsedPage());
 
-      getPageBySlug("contact", "en");
+      await getPageBySlug("contact", "en");
 
       expect(mockParseContentFile).toHaveBeenCalledWith(
         "/mock/content/pages/en/contact.mdx",
@@ -588,12 +590,12 @@ describe("content-query/queries", () => {
       );
     });
 
-    it("should work without locale", () => {
+    it("should work without locale", async () => {
       const mockFiles = ["/mock/content/pages/about.mdx"];
-      mockGetContentFiles.mockReturnValue(mockFiles);
-      mockParseContentFile.mockReturnValue(createMockParsedPage());
+      mockGetContentFiles.mockResolvedValue(mockFiles);
+      mockParseContentFile.mockResolvedValue(createMockParsedPage());
 
-      const result = getPageBySlug("about");
+      const result = await getPageBySlug("about");
 
       expect(result).toBeDefined();
       expect(mockGetContentFiles).toHaveBeenCalledWith(
@@ -602,56 +604,56 @@ describe("content-query/queries", () => {
       );
     });
 
-    it("should throw error when page not found", () => {
-      mockGetContentFiles.mockReturnValue([]);
+    it("should throw error when page not found", async () => {
+      mockGetContentFiles.mockResolvedValue([]);
 
-      expect(() => getPageBySlug("nonexistent", "en")).toThrow(
+      await expect(getPageBySlug("nonexistent", "en")).rejects.toThrow(
         "Content not found: nonexistent",
       );
     });
 
-    it("should handle page with different layout types", () => {
+    it("should handle page with different layout types", async () => {
       const mockFiles = ["/mock/content/pages/en/landing.mdx"];
       const mockParsedPage = createMockParsedPage({
         slug: "landing",
         metadata: createMockPageMetadata({ layout: "landing" }),
       });
 
-      mockGetContentFiles.mockReturnValue(mockFiles);
-      mockParseContentFile.mockReturnValue(mockParsedPage);
+      mockGetContentFiles.mockResolvedValue(mockFiles);
+      mockParseContentFile.mockResolvedValue(mockParsedPage);
 
-      const result = getPageBySlug("landing", "en");
+      const result = await getPageBySlug("landing", "en");
 
       expect(result.metadata.layout).toBe("landing");
     });
   });
 
   describe("edge cases", () => {
-    it("should handle special characters in slug", () => {
+    it("should handle special characters in slug", async () => {
       const mockFiles = ["/mock/content/posts/en/hello-world-2024.mdx"];
       const mockParsedPost = createMockParsedBlogPost({
         slug: "hello-world-2024",
       });
 
-      mockGetContentFiles.mockReturnValue(mockFiles);
-      mockParseContentFile.mockReturnValue(mockParsedPost);
+      mockGetContentFiles.mockResolvedValue(mockFiles);
+      mockParseContentFile.mockResolvedValue(mockParsedPost);
 
-      const result = getContentBySlug("hello-world-2024", "posts", "en");
+      const result = await getContentBySlug("hello-world-2024", "posts", "en");
 
       expect(result.slug).toBe("hello-world-2024");
     });
 
-    it("should handle slug that matches multiple files (returns first match)", () => {
+    it("should handle slug that matches multiple files (returns first match)", async () => {
       const mockFiles = [
         "/mock/content/posts/en/test.mdx",
         "/mock/content/posts/en/test.en.mdx",
       ];
       const mockParsedPost = createMockParsedBlogPost({ slug: "test" });
 
-      mockGetContentFiles.mockReturnValue(mockFiles);
-      mockParseContentFile.mockReturnValue(mockParsedPost);
+      mockGetContentFiles.mockResolvedValue(mockFiles);
+      mockParseContentFile.mockResolvedValue(mockParsedPost);
 
-      const result = getContentBySlug("test", "posts", "en");
+      const result = await getContentBySlug("test", "posts", "en");
 
       expect(result).toBeDefined();
       // Should match first file (exact slug match)
@@ -661,10 +663,10 @@ describe("content-query/queries", () => {
       );
     });
 
-    it("should handle empty file list gracefully", () => {
-      mockGetContentFiles.mockReturnValue([]);
+    it("should handle empty file list gracefully", async () => {
+      mockGetContentFiles.mockResolvedValue([]);
 
-      expect(() => getContentBySlug("any-slug", "posts", "en")).toThrow(
+      await expect(getContentBySlug("any-slug", "posts", "en")).rejects.toThrow(
         "Content not found: any-slug",
       );
     });

@@ -10,6 +10,16 @@
 
 Production project, solo development.
 
+## Collaboration
+
+Owner is non-technical. Communication uses business language, not technical terms.
+
+- **Describing intent**: Owner describes what users should be able to do (e.g., "海外买家能按管径筛选产品"), not how to build it
+- **Confirming direction**: Before implementing non-trivial features, describe the planned interaction in 1-3 plain-language sentences and wait for owner confirmation
+- **Decision boundary**: Business intent ambiguity → ask owner. Technical ambiguity → decide autonomously per project rules
+- **Validation**: Owner validates by observable behavior (see, click, submit) on the running site, not by code review
+- **Knowledge accumulation**: Record corrected misunderstandings and business rules in project documentation to avoid repeated clarification
+
 ## Stack
 
 Next.js 16 (App Router, Cache Components) + React 19 + TypeScript 5 + Tailwind CSS 4 + next-intl
@@ -33,11 +43,10 @@ STOP. Your training data for project dependencies may be outdated.
 
 Before writing ANY code:
 1. **Augment Code Search** (`augment_code_search`) — Understand how this project implements similar patterns
-2. **Context7** (`cotext7-query-docs`) — Query official docs for the APIs you will use
+2. **`.next-docs/`** — Next.js API docs (local, version-locked). See index at the end of this file
+3. **Context7** (`cotext7-query-docs`) — Other dependencies (next-intl, Tailwind, Radix, etc.)
 
 This is not optional. Even familiar APIs may have changed.
-
-For Next.js specifically: consult `.next-docs/` index at the end of this file.
 
 ## Commands
 

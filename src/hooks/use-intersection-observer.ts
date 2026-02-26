@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { AccessibilityUtils } from "@/lib/accessibility";
 import { logger } from "@/lib/logger";
 import { ZERO } from "@/constants";
-import { MAGIC_0_1 } from "@/constants/decimal";
+import { DEC_0_1 } from "@/constants/decimal";
 
 /**
  * Intersection Observer Hook 配置选项
@@ -38,7 +38,7 @@ export interface IntersectionObserverHookReturn<
  * 默认配置
  */
 const DEFAULT_OPTIONS: Required<Omit<IntersectionObserverOptions, "root">> = {
-  threshold: MAGIC_0_1,
+  threshold: DEC_0_1,
   rootMargin: "0px",
   triggerOnce: true,
 };

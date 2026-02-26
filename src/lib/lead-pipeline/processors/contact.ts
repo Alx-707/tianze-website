@@ -1,12 +1,15 @@
+import { after } from "next/server";
+
 import {
   LEAD_TYPES,
   type ContactLeadInput,
 } from "@/lib/lead-pipeline/lead-schema";
+import { retryAsync } from "@/lib/lead-pipeline/retry-async";
 import { settleService } from "@/lib/lead-pipeline/settle-service";
 import type { ServiceResult } from "@/lib/lead-pipeline/service-result";
-import { logger, sanitizeEmail } from "@/lib/logger";
-import { CONTACT_FORM_CONFIG } from "@/config/contact-form-config";
 import { splitName } from "@/lib/lead-pipeline/utils";
+import { CONTACT_FORM_CONFIG } from "@/config/contact-form-config";
+import { logger, sanitizeEmail } from "@/lib/logger";
 
 export async function processContactLead(
   lead: ContactLeadInput,
@@ -52,13 +55,21 @@ export async function processContactLead(
     ),
   ]);
 
-  // Send confirmation email if enabled (fire-and-forget, non-blocking)
+  // Send confirmation email if enabled (fire-and-forget with retry, non-blocking)
   if (CONTACT_FORM_CONFIG.features.sendConfirmationEmail) {
-    resendService.sendConfirmationEmail(emailData).catch((error) => {
-      logger.warn("Confirmation email failed (non-blocking)", {
-        error: error instanceof Error ? error.message : "Unknown error",
-        email: sanitizeEmail(lead.email),
-      });
+    const maxRetries = 2;
+    after(async () => {
+      try {
+        await retryAsync(() => resendService.sendConfirmationEmail(emailData), {
+          maxRetries,
+        });
+      } catch (error) {
+        logger.error("Confirmation email failed after retries (non-blocking)", {
+          error: error instanceof Error ? error.message : "Unknown error",
+          email: sanitizeEmail(lead.email),
+          retries: maxRetries,
+        });
+      }
     });
   }
 

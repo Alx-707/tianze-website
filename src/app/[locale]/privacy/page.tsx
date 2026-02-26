@@ -266,7 +266,7 @@ function renderPrivacyContent(content: string): ReactNode {
 async function PrivacyContent({ locale }: { locale: string }) {
   setRequestLocale(locale);
 
-  const page = getPageBySlug("privacy", locale as Locale);
+  const page = await getPageBySlug("privacy", locale as Locale);
 
   const t = await getTranslations({
     locale,

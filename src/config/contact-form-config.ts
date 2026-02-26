@@ -8,7 +8,7 @@ import {
   PERCENTAGE_HALF,
   SECONDS_PER_MINUTE,
 } from "@/constants";
-import { MAGIC_15 } from "@/constants/count";
+import { PHONE_MAX_DIGITS } from "@/constants/count";
 
 /**
  * 表单字段枚举键值
@@ -101,7 +101,7 @@ export const CONTACT_FORM_VALIDATION_CONSTANTS = {
   MESSAGE_MAX_LENGTH: ANIMATION_DURATION_VERY_SLOW,
   SUBJECT_MIN_LENGTH: COUNT_FIVE,
   SUBJECT_MAX_LENGTH: PERCENTAGE_FULL,
-  PHONE_MAX_DIGITS: MAGIC_15,
+  PHONE_MAX_DIGITS: PHONE_MAX_DIGITS,
   HONEYPOT_MAX_LENGTH: 0,
   DEFAULT_COOLDOWN_MINUTES: COUNT_FIVE,
   COOLDOWN_TO_MS_MULTIPLIER: SECONDS_PER_MINUTE * 1000,
@@ -329,10 +329,20 @@ export type ContactFormFieldValidators = Record<
   ContactFormFieldValidator
 >;
 
+/**
+ * Zod shape type that maps each ContactFormFieldValues key to a ZodType
+ * producing the correct output type. Used to bridge the gap between
+ * config-driven dynamic schema construction (which loses type specificity
+ * via Record<string, ZodTypeAny>) and the statically-known field value types.
+ */
+type ContactFormFieldValuesShape = {
+  [K in keyof ContactFormFieldValues]-?: z.ZodType<ContactFormFieldValues[K]>;
+};
+
 export function createContactFormSchemaFromConfig(
   config: ContactFormConfig,
   validators: ContactFormFieldValidators,
-) {
+): z.ZodObject<ContactFormFieldValuesShape> {
   const shape = CONTACT_FORM_FIELD_KEYS.reduce<Record<string, z.ZodTypeAny>>(
     (acc, key) => {
       const field = config.fields[key];
@@ -351,5 +361,10 @@ export function createContactFormSchemaFromConfig(
     {},
   );
 
-  return z.object(shape);
+  // Single assertion: config-driven dynamic schema inherently loses type
+  // specificity because validators are selected at runtime from a Record.
+  // The shape is guaranteed to match ContactFormFieldValues by the field
+  // validators contract, so we bridge the type gap here at the definition
+  // site rather than requiring double assertions at every consumer.
+  return z.object(shape) as z.ZodObject<ContactFormFieldValuesShape>;
 }

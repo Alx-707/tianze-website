@@ -8,7 +8,7 @@
 
 import { env } from "@/lib/env";
 import { COUNT_PAIR, ONE } from "@/constants";
-import { MAGIC_0_1 } from "@/constants/decimal";
+import { DEC_0_1 } from "@/constants/decimal";
 import { WEB_VITALS_THRESHOLDS } from "@/constants/performance-constants";
 import {
   HOURS_PER_DAY,
@@ -137,7 +137,7 @@ export const MEMORY_CONFIG = {
  */
 export const MONITORING_CONFIG = {
   /** 性能指标采样率 (0-1) */
-  PERFORMANCE_SAMPLE_RATE: env.PERFORMANCE_SAMPLE_RATE ?? MAGIC_0_1,
+  PERFORMANCE_SAMPLE_RATE: env.PERFORMANCE_SAMPLE_RATE ?? DEC_0_1,
   /** 错误采样率 (0-1) */
   ERROR_SAMPLE_RATE: env.ERROR_SAMPLE_RATE ?? ONE,
   /** 监控数据上报间隔 (毫秒) */

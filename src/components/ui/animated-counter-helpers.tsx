@@ -1,13 +1,13 @@
 import * as React from "react";
 import { COUNT_PAIR, ONE, ZERO } from "@/constants";
-import { COUNT_4, MAGIC_16 } from "@/constants/count";
-import { MAGIC_0_5 } from "@/constants/decimal";
+import { COUNT_4, HEX_RADIX } from "@/constants/count";
+import { DEC_0_5 } from "@/constants/decimal";
 
 /**
  * Animation constants to avoid magic numbers
  */
 const ANIMATION_CONSTANTS = {
-  HALF_POINT: MAGIC_0_5,
+  HALF_POINT: DEC_0_5,
   DOUBLE_MULTIPLIER: COUNT_PAIR,
   CUBIC_MULTIPLIER: COUNT_4,
   EASE_ADJUSTMENT: COUNT_PAIR,
@@ -105,7 +105,7 @@ export const animationUtils = {
       return requestAnimationFrame(callback);
     }
     // Fallback to setTimeout for environments without requestAnimationFrame
-    const FRAME_DURATION = MAGIC_16; // 16ms for 60fps
+    const FRAME_DURATION = HEX_RADIX; // 16ms for 60fps
     return setTimeout(
       () => callback(animationUtils.getTime()),
       FRAME_DURATION,
@@ -208,7 +208,7 @@ export function scheduleAnimationFrame(
     return requestAnimationFrame(callback);
   }
   // Fallback to setTimeout for environments without requestAnimationFrame
-  const FRAME_DURATION = MAGIC_16; // 16ms for 60fps
+  const FRAME_DURATION = HEX_RADIX; // 16ms for 60fps
   return setTimeout(
     () => callback(getCurrentTime()),
     FRAME_DURATION,

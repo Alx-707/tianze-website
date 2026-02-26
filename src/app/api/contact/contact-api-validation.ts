@@ -66,7 +66,7 @@ export async function validateFormData(body: unknown, clientIP: string) {
     };
   }
 
-  const formData = validationResult.data as unknown as ContactFormWithToken;
+  const formData = validationResult.data;
 
   // 验证提交时间（防止重放攻击）
   const submittedAt = new Date(formData.submittedAt);

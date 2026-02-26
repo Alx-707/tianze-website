@@ -22,13 +22,13 @@ import { getContentConfig, PAGES_DIR, POSTS_DIR } from "@/lib/content-utils";
 /**
  * Get all blog posts
  */
-export function getAllPosts(
+export async function getAllPosts(
   locale?: Locale,
   options: ContentQueryOptions = {},
-): BlogPost[] {
-  const files = getContentFiles(POSTS_DIR, locale);
-  const parsedPosts = files.map((file) =>
-    parseContentFile<BlogPostMetadata>(file, "posts"),
+): Promise<BlogPost[]> {
+  const files = await getContentFiles(POSTS_DIR, locale);
+  const parsedPosts = await Promise.all(
+    files.map((file) => parseContentFile<BlogPostMetadata>(file, "posts")),
   );
 
   const filteredPosts = filterPosts(parsedPosts, options);
@@ -41,27 +41,26 @@ export function getAllPosts(
 /**
  * Get all pages
  */
-export function getAllPages(locale?: Locale): Page[] {
-  const files = getContentFiles(PAGES_DIR, locale);
-  return files
-    .map((file) => parseContentFile<PageMetadata>(file, "pages"))
-    .filter((page) => {
-      // Filter drafts in production
-      const config = getContentConfig();
-      return config.enableDrafts || !page.metadata.draft;
-    }) as Page[];
+export async function getAllPages(locale?: Locale): Promise<Page[]> {
+  const files = await getContentFiles(PAGES_DIR, locale);
+  const parsedPages = await Promise.all(
+    files.map((file) => parseContentFile<PageMetadata>(file, "pages")),
+  );
+  return parsedPages.filter((page) => {
+    // Filter drafts in production
+    const config = getContentConfig();
+    return config.enableDrafts || !page.metadata.draft;
+  }) as Page[];
 }
 
 /**
  * Get content by slug
  */
-export function getContentBySlug<T extends ContentMetadata = ContentMetadata>(
-  slug: string,
-  type: ContentType,
-  locale?: Locale,
-): ParsedContent<T> {
+export async function getContentBySlug<
+  T extends ContentMetadata = ContentMetadata,
+>(slug: string, type: ContentType, locale?: Locale): Promise<ParsedContent<T>> {
   const contentDir = type === "posts" ? POSTS_DIR : PAGES_DIR;
-  const files = getContentFiles(contentDir, locale);
+  const files = await getContentFiles(contentDir, locale);
 
   const matchingFile = files.find((file) => {
     const fileSlug = path.basename(file, path.extname(file));
@@ -78,13 +77,20 @@ export function getContentBySlug<T extends ContentMetadata = ContentMetadata>(
 /**
  * Get blog post by slug
  */
-export function getPostBySlug(slug: string, locale?: Locale): BlogPost {
-  return getContentBySlug<BlogPostMetadata>(slug, "posts", locale) as BlogPost;
+export function getPostBySlug(
+  slug: string,
+  locale?: Locale,
+): Promise<BlogPost> {
+  return getContentBySlug<BlogPostMetadata>(
+    slug,
+    "posts",
+    locale,
+  ) as Promise<BlogPost>;
 }
 
 /**
  * Get page by slug
  */
-export function getPageBySlug(slug: string, locale?: Locale): Page {
-  return getContentBySlug<PageMetadata>(slug, "pages", locale) as Page;
+export function getPageBySlug(slug: string, locale?: Locale): Promise<Page> {
+  return getContentBySlug<PageMetadata>(slug, "pages", locale) as Promise<Page>;
 }

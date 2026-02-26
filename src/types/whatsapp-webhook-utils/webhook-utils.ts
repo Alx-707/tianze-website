@@ -21,7 +21,7 @@ import type {
   WebhookParsingResult,
   WebhookValidationResult,
 } from "@/types/whatsapp-webhook-utils/interfaces";
-import { MAGIC_0_95, MAGIC_0_99, ONE, ZERO } from "@/constants";
+import { DEC_0_95, DEC_0_99, ONE, ZERO } from "@/constants";
 
 /**
  * Webhook工具函数
@@ -428,8 +428,8 @@ export class WebhookUtils {
           processingTimes.length > ZERO
             ? (processingTimes.at(-ONE) ?? ZERO)
             : ZERO,
-        p95_ms: getQuantile(MAGIC_0_95),
-        p99_ms: getQuantile(MAGIC_0_99),
+        p95_ms: getQuantile(DEC_0_95),
+        p99_ms: getQuantile(DEC_0_99),
       },
       error_rate: ZERO, // 应该基于实际错误计算
       success_rate: ONE, // 应该基于实际成功率计算

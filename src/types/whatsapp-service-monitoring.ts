@@ -2,10 +2,10 @@ import {
   COUNT_FIVE,
   COUNT_TEN,
   FIVE_SECONDS_MS,
-  MAGIC_0_1,
-  MAGIC_95,
-  MAGIC_99,
-  MAGIC_2000,
+  DEC_0_1,
+  UPTIME_UNHEALTHY_THRESHOLD,
+  UPTIME_DEGRADED_THRESHOLD,
+  RESPONSE_TIME_DEGRADED_MS,
   PERCENTAGE_FULL,
   ZERO,
 } from "@/constants";
@@ -344,7 +344,7 @@ export function determineHealthStatus(
   if (
     errorRate > COUNT_TEN ||
     responseTime > FIVE_SECONDS_MS ||
-    uptime < MAGIC_95
+    uptime < UPTIME_UNHEALTHY_THRESHOLD
   ) {
     return "unhealthy";
   }
@@ -352,8 +352,8 @@ export function determineHealthStatus(
   // Degraded thresholds
   if (
     errorRate > COUNT_FIVE ||
-    responseTime > MAGIC_2000 ||
-    uptime < MAGIC_99
+    responseTime > RESPONSE_TIME_DEGRADED_MS ||
+    uptime < UPTIME_DEGRADED_THRESHOLD
   ) {
     return "degraded";
   }
@@ -444,7 +444,7 @@ export function needsAttention(
   return (
     health.status !== "healthy" ||
     (health.errorRate && health.errorRate > COUNT_FIVE) ||
-    (health.responseTime && health.responseTime > MAGIC_2000) ||
-    metrics.messagesFailed > metrics.messagesSent * MAGIC_0_1
+    (health.responseTime && health.responseTime > RESPONSE_TIME_DEGRADED_MS) ||
+    metrics.messagesFailed > metrics.messagesSent * DEC_0_1
   );
 }

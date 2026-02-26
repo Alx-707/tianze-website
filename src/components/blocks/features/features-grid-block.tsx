@@ -22,7 +22,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { MAGIC_0_2 } from "@/constants/decimal";
+import { DEC_0_2 } from "@/constants/decimal";
 import { useIntersectionObserver } from "@/hooks/use-intersection-observer";
 
 export interface FeatureItem {
@@ -293,7 +293,7 @@ export function FeaturesGridBlock({
   const t = useTranslations(i18nNamespace);
 
   const { ref, isVisible } = useIntersectionObserver<HTMLDivElement>({
-    threshold: MAGIC_0_2,
+    threshold: DEC_0_2,
     triggerOnce: true,
   });
 

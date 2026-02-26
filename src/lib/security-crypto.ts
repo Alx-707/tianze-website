@@ -1,8 +1,8 @@
 import {
   AES_KEY_LENGTH_BITS,
   COUNT_PAIR,
-  MAGIC_12,
-  MAGIC_16,
+  AES_GCM_IV_BYTES,
+  HEX_RADIX,
   PBKDF2_ITERATIONS,
   ZERO,
 } from "@/constants";
@@ -16,9 +16,9 @@ import {
  * Crypto constants
  */
 const CRYPTO_CONSTANTS = {
-  SALT_BYTE_LENGTH: MAGIC_16,
+  SALT_BYTE_LENGTH: HEX_RADIX,
   HEX_CHARS_PER_BYTE: COUNT_PAIR,
-  HEX_BASE: MAGIC_16,
+  HEX_BASE: HEX_RADIX,
   HEX_PAD_LENGTH: COUNT_PAIR,
 } as const;
 
@@ -79,7 +79,7 @@ export async function verifyPassword(
         const seg = saltHex.slice(i, i + COUNT_PAIR);
         if (seg.length === COUNT_PAIR) pairs.push(seg);
       }
-      return pairs.map((byte) => parseInt(byte, MAGIC_16));
+      return pairs.map((byte) => parseInt(byte, HEX_RADIX));
     })();
     if (!salt) {
       return false;
@@ -210,8 +210,8 @@ export async function encryptData(
   const dataBytes = encoder.encode(data);
 
   // Generate salt and IV
-  const salt = crypto.getRandomValues(new Uint8Array(MAGIC_16));
-  const iv = crypto.getRandomValues(new Uint8Array(MAGIC_12));
+  const salt = crypto.getRandomValues(new Uint8Array(HEX_RADIX));
+  const iv = crypto.getRandomValues(new Uint8Array(AES_GCM_IV_BYTES));
 
   // Derive key from password
   const passwordKey = await crypto.subtle.importKey(
@@ -244,13 +244,13 @@ export async function encryptData(
 
   return {
     encrypted: Array.from(new Uint8Array(encrypted))
-      .map((b) => b.toString(MAGIC_16).padStart(COUNT_PAIR, "0"))
+      .map((b) => b.toString(HEX_RADIX).padStart(COUNT_PAIR, "0"))
       .join(""),
     iv: Array.from(iv)
-      .map((b) => b.toString(MAGIC_16).padStart(COUNT_PAIR, "0"))
+      .map((b) => b.toString(HEX_RADIX).padStart(COUNT_PAIR, "0"))
       .join(""),
     salt: Array.from(salt)
-      .map((b) => b.toString(MAGIC_16).padStart(COUNT_PAIR, "0"))
+      .map((b) => b.toString(HEX_RADIX).padStart(COUNT_PAIR, "0"))
       .join(""),
   };
 }
@@ -273,7 +273,7 @@ export async function decryptData(params: {
       const out: number[] = [];
       for (let i = 0; i < encryptedHex.length; i += COUNT_PAIR) {
         const seg = encryptedHex.slice(i, i + COUNT_PAIR);
-        if (seg.length === COUNT_PAIR) out.push(parseInt(seg, MAGIC_16));
+        if (seg.length === COUNT_PAIR) out.push(parseInt(seg, HEX_RADIX));
       }
       return out;
     })(),
@@ -283,7 +283,7 @@ export async function decryptData(params: {
       const out: number[] = [];
       for (let i = 0; i < ivHex.length; i += COUNT_PAIR) {
         const seg = ivHex.slice(i, i + COUNT_PAIR);
-        if (seg.length === COUNT_PAIR) out.push(parseInt(seg, MAGIC_16));
+        if (seg.length === COUNT_PAIR) out.push(parseInt(seg, HEX_RADIX));
       }
       return out;
     })(),
@@ -293,7 +293,7 @@ export async function decryptData(params: {
       const out: number[] = [];
       for (let i = 0; i < saltHex.length; i += COUNT_PAIR) {
         const seg = saltHex.slice(i, i + COUNT_PAIR);
-        if (seg.length === COUNT_PAIR) out.push(parseInt(seg, MAGIC_16));
+        if (seg.length === COUNT_PAIR) out.push(parseInt(seg, HEX_RADIX));
       }
       return out;
     })(),
@@ -348,7 +348,7 @@ export function generateEncryptionKey(): Promise<CryptoKey> {
 export async function exportKey(key: CryptoKey): Promise<string> {
   const exported = await crypto.subtle.exportKey("raw", key);
   return Array.from(new Uint8Array(exported))
-    .map((b) => b.toString(MAGIC_16).padStart(COUNT_PAIR, "0"))
+    .map((b) => b.toString(HEX_RADIX).padStart(COUNT_PAIR, "0"))
     .join("");
 }
 
@@ -361,7 +361,7 @@ export function importKey(keyHex: string): Promise<CryptoKey> {
       const out: number[] = [];
       for (let i = 0; i < keyHex.length; i += COUNT_PAIR) {
         const seg = keyHex.slice(i, i + COUNT_PAIR);
-        if (seg.length === COUNT_PAIR) out.push(parseInt(seg, MAGIC_16));
+        if (seg.length === COUNT_PAIR) out.push(parseInt(seg, HEX_RADIX));
       }
       return out;
     })(),

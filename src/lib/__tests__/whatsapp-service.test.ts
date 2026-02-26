@@ -1,5 +1,6 @@
 import { createHmac } from "crypto";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { logger } from "@/lib/logger";
 import {
   getWhatsAppService,
   handleIncomingMessage,
@@ -145,9 +146,9 @@ describe("WhatsApp Service Module", () => {
   });
 
   describe("verifyWebhookSignature", () => {
-    it("should return true in test mode without signature", () => {
+    it("should reject missing signature in test mode (secure default)", () => {
       const result = verifyWebhookSignature("payload", null);
-      expect(result).toBe(true);
+      expect(result).toBe(false);
     });
 
     it("should verify valid signature", () => {
@@ -424,6 +425,115 @@ describe("WhatsApp Service Module", () => {
       expect(mockClient.sendTextMessage).toHaveBeenCalledTimes(1);
       expect(mockClient.sendImageMessage).toHaveBeenCalledTimes(1);
       expect(mockClient.sendTemplateMessage).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("verifyWebhookSignature — security boundary", () => {
+    const testPayload = '{"object":"whatsapp_business_account"}';
+
+    it("rejects missing signature in non-production env (development/test)", () => {
+      // Given: NODE_ENV is "test" (set by mockEnv default)
+      // When: verifyWebhookSignature called with null signature
+      const result = verifyWebhookSignature(testPayload, null);
+
+      // Then: should return false — missing signature is never acceptable
+      expect(result).toBe(false);
+    });
+
+    it("rejects missing secret in non-production env when signature is provided", () => {
+      // Given: NODE_ENV is "development", no WHATSAPP_APP_SECRET configured
+      const savedNodeEnv = mockEnv.NODE_ENV;
+      mockEnv.NODE_ENV = "development";
+
+      // Ensure process.env also has no secret
+      const savedProcessSecret = process.env.WHATSAPP_APP_SECRET;
+      delete process.env.WHATSAPP_APP_SECRET;
+
+      try {
+        // When: verifyWebhookSignature called with a signature but no secret available
+        const result = verifyWebhookSignature(
+          testPayload,
+          "sha256=abc123def456",
+        );
+
+        // Then: should return false — cannot verify without secret
+        expect(result).toBe(false);
+      } finally {
+        mockEnv.NODE_ENV = savedNodeEnv;
+        if (savedProcessSecret !== undefined) {
+          process.env.WHATSAPP_APP_SECRET = savedProcessSecret;
+        }
+      }
+    });
+
+    it("returns true and logs warning when SKIP_WEBHOOK_VERIFICATION is explicitly set", () => {
+      // Given: NODE_ENV is "development" AND SKIP_WEBHOOK_VERIFICATION="true"
+      const savedNodeEnv = mockEnv.NODE_ENV;
+      mockEnv.NODE_ENV = "development";
+      process.env.SKIP_WEBHOOK_VERIFICATION = "true";
+
+      const mockLogger = vi.mocked(logger);
+
+      try {
+        // When: verifyWebhookSignature called with null signature
+        const result = verifyWebhookSignature(testPayload, null);
+
+        // Then: should return true (explicit opt-in skip) AND log a warning
+        expect(result).toBe(true);
+        expect(mockLogger.warn).toHaveBeenCalledWith(
+          expect.stringContaining("SKIP_WEBHOOK_VERIFICATION"),
+        );
+      } finally {
+        mockEnv.NODE_ENV = savedNodeEnv;
+        delete process.env.SKIP_WEBHOOK_VERIFICATION;
+      }
+    });
+
+    it("always rejects missing signature in production (regression guard)", () => {
+      // Given: NODE_ENV is "production"
+      const savedNodeEnv = mockEnv.NODE_ENV;
+      mockEnv.NODE_ENV = "production";
+
+      try {
+        // When: verifyWebhookSignature called with null signature
+        const result = verifyWebhookSignature(testPayload, null);
+
+        // Then: should return false — production never skips verification
+        expect(result).toBe(false);
+      } finally {
+        mockEnv.NODE_ENV = savedNodeEnv;
+      }
+    });
+
+    it("accepts valid HMAC-SHA256 signature regardless of environment", () => {
+      // Given: correct HMAC-SHA256 signature with matching secret
+      const secret = "whatsapp-app-secret-for-test";
+      const hash = createHmac("sha256", secret)
+        .update(testPayload)
+        .digest("hex");
+      const validSignature = `sha256=${hash}`;
+
+      // Test across all environments
+      const environments = ["development", "test", "production"] as const;
+
+      for (const nodeEnv of environments) {
+        const savedNodeEnv = mockEnv.NODE_ENV;
+        mockEnv.NODE_ENV = nodeEnv;
+
+        try {
+          // When: verifyWebhookSignature called with valid signature
+          const result = verifyWebhookSignature(
+            testPayload,
+            validSignature,
+            secret,
+          );
+
+          // Then: should return true — valid signature passes everywhere
+          expect(result).toBe(true);
+        } finally {
+          mockEnv.NODE_ENV = savedNodeEnv;
+        }
+      }
     });
   });
 });

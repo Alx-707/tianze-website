@@ -3,17 +3,26 @@ import {
   HEX_MASK_BIT_6,
   HEX_MASK_HIGH_BIT,
   HEX_MASK_LOW_NIBBLE,
-  MAGIC_8,
-  MAGIC_12,
-  MAGIC_16,
-  MAGIC_20,
-  MAGIC_32,
-  MAGIC_48,
-  MAGIC_64,
+  VERIFY_CODE_DEFAULT_LENGTH,
+  HEX_RADIX,
+  TOKEN_DEFAULT_LENGTH,
+  API_KEY_TOKEN_LENGTH,
+  SESSION_TOKEN_LENGTH,
   ZERO,
 } from "@/constants";
-import { COUNT_TWO, MAGIC_6 } from "@/constants/count";
+import { COUNT_TWO, OTP_DEFAULT_LENGTH } from "@/constants/count";
 import { MINUTES_PER_HOUR, MINUTE_MS } from "@/constants/time";
+
+// UUID v4 constants (RFC 4122)
+const UUID_BYTE_LENGTH = 16;
+const UUID_VERSION_BYTE = 6;
+const UUID_VARIANT_BYTE = 8;
+// Standard 8-4-4-4-12 hex format segment boundaries
+const UUID_SEG_1_END = 8;
+const UUID_SEG_2_END = 12;
+const UUID_SEG_3_END = 16;
+const UUID_SEG_4_END = 20;
+const UUID_TOTAL_HEX = 32;
 
 const getCrypto = (): Crypto | null => {
   if (typeof globalThis === "undefined") {
@@ -45,24 +54,24 @@ function secureRandomUUID(): string {
     return crypto.randomUUID();
   }
 
-  const array = secureRandomBytes(MAGIC_16);
+  const array = secureRandomBytes(UUID_BYTE_LENGTH);
   const dv = new DataView(array.buffer);
 
-  const b6 = dv.getUint8(MAGIC_6);
-  dv.setUint8(MAGIC_6, (b6 & HEX_MASK_LOW_NIBBLE) | HEX_MASK_BIT_6);
-  const b8 = dv.getUint8(MAGIC_8);
-  dv.setUint8(MAGIC_8, (b8 & HEX_MASK_6_BITS) | HEX_MASK_HIGH_BIT);
+  const b6 = dv.getUint8(UUID_VERSION_BYTE);
+  dv.setUint8(UUID_VERSION_BYTE, (b6 & HEX_MASK_LOW_NIBBLE) | HEX_MASK_BIT_6);
+  const b8 = dv.getUint8(UUID_VARIANT_BYTE);
+  dv.setUint8(UUID_VARIANT_BYTE, (b8 & HEX_MASK_6_BITS) | HEX_MASK_HIGH_BIT);
 
   const hex = Array.from(array, (byte) =>
-    byte.toString(MAGIC_16).padStart(COUNT_TWO, "0"),
+    byte.toString(HEX_RADIX).padStart(COUNT_TWO, "0"),
   ).join("");
 
   return [
-    hex.substring(ZERO, MAGIC_8),
-    hex.substring(MAGIC_8, MAGIC_12),
-    hex.substring(MAGIC_12, MAGIC_16),
-    hex.substring(MAGIC_16, MAGIC_20),
-    hex.substring(MAGIC_20, MAGIC_32),
+    hex.substring(ZERO, UUID_SEG_1_END),
+    hex.substring(UUID_SEG_1_END, UUID_SEG_2_END),
+    hex.substring(UUID_SEG_2_END, UUID_SEG_3_END),
+    hex.substring(UUID_SEG_3_END, UUID_SEG_4_END),
+    hex.substring(UUID_SEG_4_END, UUID_TOTAL_HEX),
   ].join("-");
 }
 
@@ -76,10 +85,10 @@ function secureRandomUUID(): string {
  */
 const TOKEN_CONSTANTS = {
   // Token generation
-  DEFAULT_TOKEN_LENGTH: MAGIC_32,
+  DEFAULT_TOKEN_LENGTH: TOKEN_DEFAULT_LENGTH,
   HEX_RADIX: COUNT_TWO,
   HEX_PAD_LENGTH: COUNT_TWO,
-  HEX_BASE: MAGIC_16,
+  HEX_BASE: HEX_RADIX,
 } as const;
 
 /**
@@ -110,7 +119,7 @@ export function generateUUID(): string {
  * Generate a secure random API key
  */
 export function generateApiKey(prefix: string = "sk"): string {
-  const randomPart = generateSecureToken(MAGIC_48);
+  const randomPart = generateSecureToken(API_KEY_TOKEN_LENGTH);
   return `${prefix}_${randomPart}`;
 }
 
@@ -118,14 +127,14 @@ export function generateApiKey(prefix: string = "sk"): string {
  * Generate a secure session token
  */
 export function generateSessionToken(): string {
-  return generateSecureToken(MAGIC_64);
+  return generateSecureToken(SESSION_TOKEN_LENGTH);
 }
 
 /**
  * Generate a secure CSRF token
  */
 export function generateCsrfToken(): string {
-  return generateSecureToken(MAGIC_32);
+  return generateSecureToken(TOKEN_DEFAULT_LENGTH);
 }
 
 /**
@@ -147,7 +156,7 @@ export { isValidNonce } from "@/config/security";
 /**
  * Generate a secure one-time password (OTP)
  */
-export function generateOTP(length: number = MAGIC_6): string {
+export function generateOTP(length: number = OTP_DEFAULT_LENGTH): string {
   const digits = "0123456789";
   let result = "";
 
@@ -164,7 +173,9 @@ export function generateOTP(length: number = MAGIC_6): string {
 /**
  * Generate a secure verification code (alphanumeric)
  */
-export function generateVerificationCode(length: number = MAGIC_8): string {
+export function generateVerificationCode(
+  length: number = VERIFY_CODE_DEFAULT_LENGTH,
+): string {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
   let result = "";
 
@@ -213,7 +224,7 @@ export function isValidUUID(uuid: string): boolean {
 /**
  * Generate a secure random salt for password hashing
  */
-export function generateSalt(length: number = MAGIC_16): string {
+export function generateSalt(length: number = HEX_RADIX): string {
   return generateSecureToken(length * COUNT_TWO); // Double length for hex representation
 }
 
@@ -229,7 +240,7 @@ export interface TokenWithExpiry {
  * Create a token with expiration
  */
 export function createTokenWithExpiry(
-  tokenLength: number = MAGIC_32,
+  tokenLength: number = TOKEN_DEFAULT_LENGTH,
   expiryMinutes: number = MINUTES_PER_HOUR,
 ): TokenWithExpiry {
   return {

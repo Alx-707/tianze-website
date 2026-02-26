@@ -10,7 +10,7 @@ import type { TemplateMessage } from "@/types/whatsapp-template-types";
 import {
   COUNT_TEN,
   COUNT_TRIPLE,
-  MAGIC_20,
+  MAX_WA_BUTTON_TITLE_LENGTH,
   MAX_WA_MESSAGE_LENGTH,
   ONE,
   ZERO,
@@ -375,9 +375,9 @@ export function validateInteractiveMessage(
       if (!button.reply.id || !button.reply.title) {
         errors.push(`Button ${index + ONE} must have both id and title`);
       }
-      if (button.reply.title.length > MAGIC_20) {
+      if (button.reply.title.length > MAX_WA_BUTTON_TITLE_LENGTH) {
         warnings.push(
-          `Button ${index + ONE} title should not exceed MAGIC_20 characters`,
+          `Button ${index + ONE} title should not exceed ${MAX_WA_BUTTON_TITLE_LENGTH} characters`,
         );
       }
     });

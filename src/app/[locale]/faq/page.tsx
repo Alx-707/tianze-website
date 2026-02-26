@@ -144,7 +144,7 @@ function parseFaqContent(rawContent: string): FaqCategory[] {
 async function FaqContent({ locale }: { locale: string }) {
   setRequestLocale(locale);
 
-  const page = getPageBySlug("faq", locale as Locale);
+  const page = await getPageBySlug("faq", locale as Locale);
   const t = await getTranslations({
     locale,
     namespace: "faq",

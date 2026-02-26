@@ -174,18 +174,24 @@ export function verifyWebhookSignature(
   signature: string | null,
   appSecret?: string,
 ): boolean {
-  // Skip verification if no signature provided (for local dev)
   if (!signature) {
-    logger.warn(
-      "[WebhookSignature] No signature provided, skipping verification",
-    );
-    return !env.NODE_ENV || env.NODE_ENV !== "production";
+    if (
+      env.NODE_ENV === "development" &&
+      process.env.SKIP_WEBHOOK_VERIFICATION === "true"
+    ) {
+      logger.warn(
+        "[WebhookSignature] Verification skipped via SKIP_WEBHOOK_VERIFICATION (dev only)",
+      );
+      return true;
+    }
+    logger.warn("[WebhookSignature] No signature provided, rejecting");
+    return false;
   }
 
   const secret = appSecret || process.env.WHATSAPP_APP_SECRET;
   if (!secret) {
-    logger.warn("[WebhookSignature] No app secret configured");
-    return env.NODE_ENV !== "production";
+    logger.error("[WebhookSignature] No app secret configured, rejecting");
+    return false;
   }
 
   try {

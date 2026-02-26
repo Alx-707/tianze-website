@@ -183,8 +183,8 @@ class QualityGate {
             Number.isFinite(diffWarningThreshold) && diffWarningThreshold >= 0
               ? diffWarningThreshold
               : 1.5, // 变更覆盖率较全量下降超过该阈值触发 warning（目标 1-2% 区间）
-          // 增量覆盖率排除列表：这些文件的格式化变更不计入增量覆盖率计算
-          // 用于排除仅有 Prettier 格式化变更但原有覆盖率较低的文件
+          // 增量覆盖率排除列表：仅限纯类型/纯配置/无运行时逻辑的文件
+          // 安全/业务逻辑文件禁止加入此列表
           diffCoverageExclude: [
             "src/components/forms/use-rate-limit.ts",
             "src/components/lazy/lazy-web-vitals-reporter.tsx",
@@ -204,6 +204,8 @@ class QualityGate {
             "**/*.d.ts",
             "**/*-types.ts", // 纯类型定义文件（如 theme-transition-types.ts）
             "**/*.types.ts", // 另一种类型文件命名约定
+            "src/types/whatsapp*/**", // WhatsApp 类型定义（与 vitest coverage exclude 一致）
+            "src/types/whatsapp*.ts", // WhatsApp 顶层类型文件
             "**/*.test.*",
             "**/*.spec.*",
             "**/__tests__/**",
@@ -212,6 +214,7 @@ class QualityGate {
             // 无逻辑代码：JSX 模板和数据声明被 Istanbul 计为可执行语句，
             // 但不含分支逻辑，测试价值极低
             "src/components/ui/**", // shadcn/ui CLI 生成的 UI 原语
+            "src/components/blocks/_templates/**", // 开发模板（无运行时逻辑）
             "src/constants/**", // 纯数据声明（as const 对象）
             "src/config/**", // 静态配置对象（零条件分支）
             // App Router 固定模板文件（error boundary / loading skeleton）
