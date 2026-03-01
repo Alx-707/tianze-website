@@ -20,7 +20,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           OPENAI__KEY: ${{ secrets.PR_AGENT_API_KEY }}
-          OPENAI__API_BASE: "https://api.rockclaude.com"
+          OPENAI__API_BASE: "https://api.rockclaude.com/v1"
           config.model: "openai/gpt-5.2"
           config.reasoning_effort: "high"
           config.fallback_models: '["openai/gpt-5.2"]'
