@@ -1,0 +1,19 @@
+code_review:
+  comment_severity_threshold: HIGH
+  max_review_comments: 15
+  ignore_patterns:
+    - "pnpm-lock.yaml"
+    - ".next/**"
+    - "dist/**"
+    - "coverage/**"
+    - "*.config.js"
+    - "*.config.mjs"
+    - "*.config.cjs"
+    - "lighthouserc.js"
+    - "public/mockServiceWorker.js"
+
+summary:
+  enabled: true
+
+styleguide:
+  enabled: true
