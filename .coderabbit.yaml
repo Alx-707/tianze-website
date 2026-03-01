@@ -78,7 +78,7 @@ tone_instructions: >
 
 knowledge_base:
   code_guidelines:
-    file_patterns:
+    filePatterns:
       - ".claude/rules/*.md"
 
 chat:
