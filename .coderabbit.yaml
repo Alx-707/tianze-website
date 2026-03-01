@@ -74,9 +74,7 @@ reviews:
       enabled: true
 
 tone_instructions: >
-  Skip style and formatting issues — ESLint and Prettier already enforce these via pre-commit hooks.
-  Focus on logic errors, security issues, performance problems, and architectural concerns.
-  This is a Next.js 16 project with Cache Components enabled — pay attention to "use cache" compatibility.
+  Skip style/formatting (ESLint+Prettier handle it). Focus on logic, security, performance, architecture. Next.js 16 with Cache Components — check "use cache" compat.
 
 knowledge_base:
   code_guidelines:
