@@ -46,14 +46,14 @@ Fetch unresolved PR review comments, categorize, fix, validate, and push.
          }
        }
      }
-   ' -f owner=Alx-707 -f repo=tianze-website -F pr=<number>
+   ' -f owner="$(gh repo view --json owner -q .owner.login)" -f repo="$(gh repo view --json name -q .name)" -F pr=<number>
    ```
    - Paginate if `hasNextPage` is true (use `endCursor` as cursor).
    - Filter: keep only `isResolved: false` and `isOutdated: false` threads.
 
 5. **Fetch bot summary comments** (CodeRabbit / Gemini summaries in issue comments):
    ```bash
-   gh api repos/Alx-707/tianze-website/issues/<number>/comments --jq '.[] | select(.user.login == "coderabbitai" or .user.login == "gemini-code-assist[bot]") | {author: .user.login, body: .body}'
+   gh api "repos/$(gh repo view --json nameWithOwner -q .nameWithOwner)/issues/<number>/comments" --jq '.[] | select(.user.login == "coderabbitai" or .user.login == "gemini-code-assist[bot]") | {author: .user.login, body: .body}'
    ```
 
 6. **Report**: If no unresolved threads and no actionable bot comments → "No review feedback to address. PR is clean."
@@ -70,9 +70,22 @@ Fetch unresolved PR review comments, categorize, fix, validate, and push.
    | FYI | Informational, no action needed → skip |
    | Business decision | Requires user input → flag for user |
 
-   Present categorization table to user. Wait for acknowledgment.
+   **Autonomous triage with evidence-based decisions**: Do NOT rubber-stamp reviewer suggestions. For each thread, **actually verify** before deciding:
 
-8. **Fix accepted items**: Address must-fix and should-fix items. For suggestions, fix only if low-cost and beneficial.
+   - Read the file and line referenced in the comment
+   - Confirm the issue exists in the current code (reviewer may be wrong or outdated)
+   - Run commands if needed (e.g., `grep` for usage, check if the pattern exists elsewhere)
+   - Cross-reference with `.claude/rules/` for convention claims
+
+   Decision criteria:
+   - **Fix**: Issue is objectively verified in code
+   - **Reject**: Issue doesn't exist, is based on wrong assumptions, or contradicts project conventions
+   - **Defer**: Issue is real but fix cost exceeds benefit (add `<!-- TODO -->` in code)
+   - **Flag to user**: Issue involves **business decisions** (product behavior, user-facing copy, pricing) — only this category pauses for user input
+
+8. **Fix verified items**: Address must-fix and should-fix items where the issue is confirmed. For suggestions, fix only if objectively beneficial and low-risk.
+
+   Present a brief evidence summary (e.g., "Verified: hardcoded repo name at line 49 — fixed to use dynamic resolution. Rejected: pagination concern — route count is 3, not worth adding").
 
    For business-decision items: ask user for direction before proceeding.
 
@@ -80,7 +93,7 @@ Fetch unresolved PR review comments, categorize, fix, validate, and push.
 
 9. **Oscillation check**: Check if this is a repeated review-fix cycle:
    ```bash
-   git log --oneline -10 | grep "Review-Fix-Run:"
+   git log -10 --format='%(trailers:key=Review-Fix-Run,valueonly)' | grep -v '^$'
    ```
    - If `Review-Fix-Run: 3` or higher found in recent commits → warn user: "This is review-fix round 4+. Consider whether fixes are converging or oscillating."
 

@@ -113,7 +113,19 @@ Automate the full PR lifecycle: preflight → self-heal → Codex review → com
    | Style / preference | **Accept only if** aligned with `.claude/rules/` |
    | Irrelevant to project | **Reject** |
 
-   Present triage table to user. Wait for acknowledgment. Fix accepted items.
+   **Autonomous triage with evidence-based decisions**: For each finding, **actually verify** before deciding:
+
+   - Read the relevant source code to confirm the issue exists
+   - Run commands if needed (e.g., check if a function is actually called, trace data flow)
+   - Cross-reference with `.claude/rules/` to confirm convention violations
+
+   Decision criteria:
+   - **Fix**: Issue is objectively verified in code (bug exists, vulnerability confirmed, convention violated)
+   - **Reject**: Issue is not reproducible, based on incorrect assumptions, or doesn't apply to this codebase
+   - **Defer**: Issue is real but fix cost exceeds benefit for current scope (add `<!-- TODO -->` comment)
+   - **Flag to user**: Issue involves **business decisions** (product behavior, user-facing copy, pricing logic) — only this category pauses for user input
+
+   Present a brief summary of decisions with evidence (e.g., "Confirmed: `fetchData()` at line 42 doesn't handle null — fixed"). Fix accepted items.
 
    After fixing, if changes were made, re-run `pnpm ci:local:quick` (with self-heal if needed) to ensure fixes don't break anything.
 
@@ -159,7 +171,7 @@ Automate the full PR lifecycle: preflight → self-heal → Codex review → com
           }
         }
       }
-    ' -f owner=Alx-707 -f repo=tianze-website -F pr=<number>
+    ' -f owner="$(gh repo view --json owner -q .owner.login)" -f repo="$(gh repo view --json name -q .name)" -F pr=<number>
     ```
     - If reviews present with no unresolved blocking threads → report summary, proceed to step 15.
     - If no reviews after 10 minutes → report to user with 3 options:
