@@ -406,3 +406,74 @@
   - 缺少可用于 wrangler 发布的 Cloudflare API token；
   - 域名访问链路在 TLS 握手前已失败，无法验证 `x-phase6-origin-target` / `x-phase6-worker` 头。
 - 因此本轮只能确认“构建与部署脚本可执行”，不能确认“公网请求路径已闭环”。
+
+## 2026-02-26 vinext 迁移阶段一审计笔记
+
+### 输入约束与上下文
+- 目标：对当前 Next.js 项目做 vinext 迁移可行性审计（阶段一），先报告后暂停。
+- 现状：仓库已有未提交改动（非本次任务产生），本次仅新增审计文件。
+- 用户给定的两个文档路径不存在：
+  - `docs/migration/vendor-lock-in-audit.md`
+  - `docs/known-issue/phase6-api-worker-bundle-failure.md`
+- 替代参考：
+  - `docs/migration/cloudflare-workers-migration-report.md`
+  - `cloudflare_bundle_phase6.md`
+
+### 项目结构与框架快照
+- Next.js 版本：`16.1.6`
+- 路由模式：仅 `App Router`（`src/app` 存在，`src/pages` 不存在）
+- 页面文件（`page.tsx`）数量：11
+- API Route Handlers（`app/api/**/route.ts`）数量：9
+- Middleware：`middleware.ts` 存在
+
+### 关键特性扫描结果（摘要）
+- `use client`：82 个文件
+- `use server`：2 个文件（含 `src/app/actions.ts`）
+- `generateStaticParams`：10 个页面文件使用
+- `generateMetadata`：10 个页面文件使用
+- `next/cache`：使用 `unstable_cache`、`cacheLife`、`cacheTag`、`revalidateTag`、`revalidatePath`
+- `next/headers`：`headers()` 在 `src/app/actions.ts` 中使用
+
+### UI 组件能力使用
+- `next/image`：10 处导入
+- `next/link`：5 处导入
+- `next/font/google`：1 处导入
+- `next/script`：1 处导入
+- `next/head`：0 处导入（业务代码）
+
+### Next 配置扫描
+- 配置文件：`next.config.ts`
+- 主要配置键：
+  - `outputFileTracingExcludes`
+  - `cacheComponents`
+  - `turbopack`
+  - `pageExtensions`
+  - `productionBrowserSourceMaps`
+  - `images`
+  - `compiler`
+  - `experimental`
+  - `webpack`
+  - `headers`
+- 注意：存在 `webpack` 与 `turbopack` 定制（vinext 官方标注不支持该类配置）
+
+### Node.js API 使用（server-side 重点）
+- `fs/path`：内容读取与路径处理（`src/lib/content-*`, `src/lib/load-messages.ts`, `src/app/[locale]/head.tsx`）
+- `crypto`：Webhook 签名、限流 key 计算（`src/lib/whatsapp-service.ts`, `src/lib/security/rate-limit-key-strategies.ts`）
+- `net`：IP 校验（`src/lib/security/client-ip.ts`）
+- `Buffer`：WhatsApp 与图片占位符数据 URL 处理
+- `node:` 前缀：`src/app/[locale]/head.tsx` (`node:fs`, `node:path`)
+
+### 外部资料核验（2026-02-26）
+- vinext README（`cloudflare/vinext`）：
+  - 声称 Next.js 16 API 覆盖约 94%
+  - `next/image`、`next/font` 为部分支持
+  - `webpack`/`turbopack` 配置不支持（Vite 路线）
+  - `generateStaticParams`、`generateMetadata`、`next/cache`、Middleware、Route Handlers 标注支持
+- Cloudflare Workers Node.js compatibility 文档（2026-02-02 更新）：
+  - `fs`、`path`、`crypto`、`net`、`process`、`Buffer` 标注为支持（在 `nodejs_compat` 下）
+
+### 初步风险判断
+- 高风险：`next.config.ts` 中 `webpack` / `turbopack` 自定义在 vinext 下需要重构到 `vite.config.ts` 或替代实现。
+- 中风险：`next/font` 与 `next/image` 行为差异（运行时注入/无构建期优化）。
+- 中风险：存在 `generateStaticParams` 使用，若采用 vinext 的默认 SSR 路径，需确认是否继续静态导出策略。
+- 低~中风险：server-side Node API 使用较多，但 Workers 文档显示相关 API 已支持（需以 `vinext dev/build` 实测收口）。
