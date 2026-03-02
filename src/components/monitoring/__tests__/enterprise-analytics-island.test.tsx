@@ -89,6 +89,7 @@ describe("EnterpriseAnalyticsIsland", () => {
   it("renders analytics components when no consent system exists (prod)", async () => {
     mockUseCookieConsentOptional.mockReturnValue(null);
     vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("NEXT_PUBLIC_DEPLOYMENT_PLATFORM", "vercel");
 
     const { EnterpriseAnalyticsIsland } =
       await import("../enterprise-analytics-island");

@@ -21,9 +21,8 @@ describe("WhatsApp Client Factory", () => {
   });
 
   describe("detectEnvironment", () => {
-    it("should return production when NODE_ENV and VERCEL_ENV are production", async () => {
-      vi.stubEnv("NODE_ENV", "production");
-      vi.stubEnv("VERCEL_ENV", "production");
+    it("should return production when APP_ENV is production", async () => {
+      vi.stubEnv("APP_ENV", "production");
       vi.stubEnv("WHATSAPP_ACCESS_TOKEN", "token");
       vi.stubEnv("WHATSAPP_PHONE_NUMBER_ID", "phone-id");
 
@@ -43,13 +42,24 @@ describe("WhatsApp Client Factory", () => {
     });
 
     it("should return development for preview deployments", async () => {
+      vi.stubEnv("APP_ENV", "preview");
       vi.stubEnv("NODE_ENV", "production");
-      vi.stubEnv("VERCEL_ENV", "preview");
 
       const { getClientEnvironmentInfo } = await import("../client-factory");
       const info = getClientEnvironmentInfo();
 
       expect(info.environment).toBe("development");
+    });
+
+    it("should fallback to production when APP_ENV is unset and NODE_ENV is production", async () => {
+      vi.stubEnv("NODE_ENV", "production");
+      vi.stubEnv("WHATSAPP_ACCESS_TOKEN", "token");
+      vi.stubEnv("WHATSAPP_PHONE_NUMBER_ID", "phone-id");
+
+      const { getClientEnvironmentInfo } = await import("../client-factory");
+      const info = getClientEnvironmentInfo();
+
+      expect(info.environment).toBe("production");
     });
   });
 
@@ -75,8 +85,7 @@ describe("WhatsApp Client Factory", () => {
     });
 
     it("should throw in production without credentials", async () => {
-      vi.stubEnv("NODE_ENV", "production");
-      vi.stubEnv("VERCEL_ENV", "production");
+      vi.stubEnv("APP_ENV", "production");
 
       const { createWhatsAppClient } = await import("../client-factory");
 

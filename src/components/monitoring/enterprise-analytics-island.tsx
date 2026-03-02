@@ -38,7 +38,7 @@ export function EnterpriseAnalyticsIsland() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const isProd = process.env.NODE_ENV === "production";
-  const isVercel = process.env.NEXT_PUBLIC_DEPLOYMENT_PLATFORM !== "cloudflare";
+  const isVercel = process.env.NEXT_PUBLIC_DEPLOYMENT_PLATFORM === "vercel";
   const cookieConsent = useCookieConsentOptional();
 
   const analyticsAllowed = cookieConsent

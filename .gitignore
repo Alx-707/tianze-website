@@ -75,3 +75,4 @@ pnpm-debug.log*
 .claude/review-loop.local.md
 .claude/review-loop.log
 reviews/
+.ace-tool/

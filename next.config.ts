@@ -5,6 +5,13 @@ import createMDX from "@next/mdx";
 import createNextIntlPlugin from "next-intl/plugin";
 import { getSecurityHeaders } from "./src/config/security";
 
+// react-grab Claude Code agent server (dev only, auto-stops with dev server)
+if (process.env.NODE_ENV === "development") {
+  import("@react-grab/claude-code/server").then(({ startServer }) =>
+    startServer(),
+  );
+}
+
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const withBundleAnalyzer = bundleAnalyzer({

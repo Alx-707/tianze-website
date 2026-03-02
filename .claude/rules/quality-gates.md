@@ -108,8 +108,15 @@ Lighthouse CI enforces progressive thresholds:
 ## Failure Policy
 
 - Any gate failure stops pipeline immediately
-- No bypasses allowed
 - Must fix before proceeding
+
+### Bypass Policy
+
+**`RUN_FAST_PUSH=1`（/pr 去重专用）**：当 `/pr` 已运行 `pnpm ci:local:quick` 作为 preflight，推送时用 `RUN_FAST_PUSH=1` 跳过 lefthook pre-push 中已验证的检查（build-check, quality-gate, arch-check, security-check）。`translation-check` 仍然运行（~2s）。
+
+规则：`RUN_FAST_PUSH=1` 必须**绝不**跳过尚未运行的检查。仅在同一 `/pr` 会话中 preflight 已通过时使用。
+
+**紧急绕过**：不存在。所有检查必须通过才能推送。如果 preflight 失败且 self-heal 无法修复，流程中止，报告给用户。
 
 ## Security Gate Clarification
 

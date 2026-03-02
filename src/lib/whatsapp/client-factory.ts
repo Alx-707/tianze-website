@@ -18,20 +18,31 @@ import { RealWhatsAppClient } from "@/lib/whatsapp/real-client";
  * Determine current environment for client selection
  */
 function detectEnvironment(): WhatsAppEnvironment {
-  const nodeEnv = process.env.NODE_ENV;
-  const vercelEnv = process.env.VERCEL_ENV;
+  const appEnv = (process.env.APP_ENV ?? process.env.DEPLOY_ENV ?? "")
+    .trim()
+    .toLowerCase();
+  const nodeEnv = (process.env.NODE_ENV ?? "").trim().toLowerCase();
 
-  // Production: only when NODE_ENV is production AND Vercel env is production
-  if (nodeEnv === "production" && vercelEnv === "production") {
+  // Explicit app/deploy env takes precedence and is platform-agnostic.
+  if (appEnv === "production" || appEnv === "prod") {
     return "production";
   }
+  if (appEnv === "test") {
+    return "test";
+  }
+  if (appEnv) {
+    return "development";
+  }
 
-  // Test environment
+  // Fallback when APP_ENV/DEPLOY_ENV is not configured.
   if (nodeEnv === "test") {
     return "test";
   }
+  if (nodeEnv === "production") {
+    return "production";
+  }
 
-  // Development or preview deployments
+  // Development, preview, and staging-like environments
   return "development";
 }
 
