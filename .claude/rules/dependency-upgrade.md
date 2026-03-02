@@ -66,6 +66,15 @@ For vulnerabilities (`pnpm audit`):
 2. Verify server component boundaries
 3. Test hydration behavior
 
+## CDN-Linked Dependencies
+
+Some dev tools load via CDN but have a corresponding npm package for version tracking.
+When upgrading these packages, **must also update the CDN URL version** in `src/app/layout.tsx`.
+
+| Package | CDN URL Pattern |
+|---------|----------------|
+| `react-scan` | `https://unpkg.com/react-scan@{version}/dist/auto.global.js` |
+
 ## Rollback
 
 If validation fails:

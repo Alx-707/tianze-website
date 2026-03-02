@@ -144,21 +144,34 @@ function runDeploy(configFile) {
     "--env",
     targetEnv,
   ];
-  const printable = `pnpm exec wrangler deploy --config ${path.relative(ROOT_DIR, fullPath)} --env ${targetEnv}`;
+  const basePrintable = `pnpm exec wrangler deploy --config ${path.relative(ROOT_DIR, fullPath)} --env ${targetEnv}`;
 
   if (args.dryRun) {
-    console.log(`[phase6][dry-run] ${printable}`);
-    return;
+    commandArgs.push("--dry-run");
+    console.log(`[phase6][dry-run] ${basePrintable} --dry-run`);
+  } else {
+    console.log(`[phase6] deploying ${configFile} (${targetEnv})`);
   }
 
-  console.log(`[phase6] deploying ${configFile} (${targetEnv})`);
   const result = spawnSync("pnpm", commandArgs, {
     cwd: ROOT_DIR,
-    stdio: "inherit",
+    stdio: args.dryRun ? "pipe" : "inherit",
+    encoding: args.dryRun ? "utf8" : undefined,
   });
 
+  if (args.dryRun) {
+    if (result.stdout) {
+      process.stdout.write(result.stdout);
+    }
+    if (result.stderr) {
+      process.stderr.write(result.stderr);
+    }
+  }
+
   if (result.status !== 0) {
-    console.error(`[phase6] deployment failed for ${configFile}`);
+    console.error(
+      `[phase6] ${args.dryRun ? "dry-run" : "deployment"} failed for ${configFile}`,
+    );
     process.exit(result.status ?? 1);
   }
 }

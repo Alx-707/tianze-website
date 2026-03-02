@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
+import Script from "next/script";
 import type { Metadata } from "next";
 import { getFontClassNames } from "@/app/[locale]/layout-fonts";
-import { ReactGrabLoader } from "@/components/dev-tools/ReactGrabLoader";
 import { SITE_CONFIG } from "@/config/paths/site-config";
 import { routing } from "@/i18n/routing";
 
@@ -35,7 +35,26 @@ export default function RootLayout({ children }: RootLayoutProps) {
         className="flex min-h-screen flex-col antialiased"
         suppressHydrationWarning
       >
-        {process.env.NODE_ENV === "development" && <ReactGrabLoader />}
+        {process.env.NODE_ENV === "development" && (
+          <>
+            {/* react-scan: must load before React hydrates (beforeInteractive) */}
+            <Script
+              src="https://unpkg.com/react-scan@0.5.3/dist/auto.global.js"
+              crossOrigin="anonymous"
+              strategy="beforeInteractive"
+            />
+            {/* react-grab + Claude Code integration */}
+            <Script
+              src="//unpkg.com/react-grab/dist/index.global.js"
+              crossOrigin="anonymous"
+              strategy="beforeInteractive"
+            />
+            <Script
+              src="//unpkg.com/@react-grab/claude-code/dist/client.global.js"
+              strategy="lazyOnload"
+            />
+          </>
+        )}
         {children}
       </body>
     </html>
