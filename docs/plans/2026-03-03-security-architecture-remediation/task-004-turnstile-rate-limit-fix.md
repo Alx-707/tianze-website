@@ -26,16 +26,16 @@
 ### Step 1: 定义 turnstile 限流 preset
 
 在 `distributed-rate-limit.ts` 的 preset 配置中添加 `turnstile` preset：
-- 窗口/阈值参考项目现有 preset 但适当收紧（建议 fail-closed：Turnstile API 故障时返回 503 而非放行）
-- 理由：该端点是公开的外部请求放大器，应严格限流
+- 窗口/阈值参考项目现有 preset 但适当收紧
+- **限流 failureMode=closed**：rate limit store 故障时拒绝请求（返回 503），而非放行。理由：该端点是公开的外部请求放大器，应严格限流
 
 ### Step 2: 用 withRateLimit 包裹 POST
 
 在 `route.ts` 中用 `withRateLimit` 包裹现有 POST handler，preset 设为 `turnstile`。
 
-### Step 3: 确认外部故障行为
+### Step 3: Turnstile API 自身故障处理
 
-如果 Turnstile API 本身返回错误，端点应返回 503（不是 200 + 模糊结果）。
+独立于限流 failureMode：如果 Turnstile 验证 API 本身返回错误（非限流触发），端点应返回 503 Service Unavailable（不是 200 + 模糊结果），属于端点业务语义。
 
 ## Verification Commands
 

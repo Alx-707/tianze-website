@@ -4,7 +4,7 @@
 
 ## Description
 
-Task 017 解决了"文件层面的真相源"，但未覆盖运行时缓存错位问题：`revalidateTag` 只打掉外层 `"use cache"` 缓存，内层 `fetch` cache 可能不失效，导致"翻译改了但线上不生效/偶发旧文案"。
+Task 017 解决了"文件层面的真相源"，但未覆盖运行时缓存错位问题：`load-messages.ts` 中 `unstable_cache` 外层包裹的 `fetchWithFallback` 内部又带 `fetch(..., { cache: "force-cache", next: { revalidate } })`，形成双层缓存。`revalidateTag` 只失效 `unstable_cache` 层，内层 `fetch` cache 不穿透，导致"翻译改了但线上不生效/偶发旧文案"。
 
 ## Execution Context
 
@@ -14,9 +14,10 @@ Task 017 解决了"文件层面的真相源"，但未覆盖运行时缓存错位
 
 ## 审查证据
 
-- `src/lib/load-messages.ts:76`：外层 `"use cache"` + `cacheTag`
-- `src/lib/cache/invalidate.ts:48`：`revalidateTag` 只失效外层
-- 如果 `load-messages` 内部有 `fetch` 调用或其他缓存层，外层 revalidateTag 不穿透
+- `src/lib/load-messages.ts:95-106`：外层 `unstable_cache` 带 `tags: [i18nTags.critical(locale), i18nTags.all()]`
+- `src/lib/load-messages.ts:76-78`：内层 `fetchWithFallback` 使用 `fetch(url, { cache: "force-cache", next: { revalidate } })`——这是第二层独立缓存
+- `src/lib/cache/invalidate.ts:67-71`：`invalidateI18n.critical(locale)` 调用 `revalidateTag(i18nTags.critical(locale))`，只失效 `unstable_cache` 层
+- **双层缓存问题**：`unstable_cache` 失效后重新执行 `loadCore` → `fetchWithFallback`，但 `fetch` 的 `force-cache` 可能返回旧数据
 
 ## BDD Scenarios
 
@@ -24,7 +25,7 @@ Task 017 解决了"文件层面的真相源"，但未覆盖运行时缓存错位
 ```gherkin
 Scenario: revalidateTag 后翻译内容更新
   Given 翻译文件已更新并部署
-  When 调用 revalidateTag("i18n-en-critical")
+  When 调用 invalidateI18n.critical("en")（即 revalidateTag("i18n:critical:en")）
   Then 下一次页面请求使用新翻译
   And 不出现"部分请求用新翻译、部分用旧翻译"的状态
 ```
@@ -47,7 +48,7 @@ Scenario: 翻译加载只有一层缓存
 
 ### Step 1: 审计 load-messages 的缓存层
 
-确认 `load-messages.ts` 中有几层缓存（`"use cache"` / `fetch` / `unstable_cache` / 自定义 Map），绘制缓存层级图。
+确认 `load-messages.ts` 中的缓存层级：已知外层 `unstable_cache`（L95-106）+ 内层 `fetch(..., { cache: "force-cache" })`（L76-78）。绘制缓存层级图，标注各层的 tag/revalidate 配置。
 
 ### Step 2: 合并或穿透缓存层
 

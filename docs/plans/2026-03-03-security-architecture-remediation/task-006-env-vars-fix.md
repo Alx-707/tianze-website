@@ -16,12 +16,11 @@
 
 ## 审查证据（三轮验证确认）
 
-**IP 退化（已实锤）：**
-- `wrangler.jsonc:100,140`：只设 `NEXT_PUBLIC_DEPLOYMENT_PLATFORM`
-- `src/lib/security/client-ip.ts:86`：读 `process.env.DEPLOYMENT_PLATFORM`（无 NEXT_PUBLIC 前缀）
-- `CF_PAGES` 是 Pages 专属变量，Workers 不注入（Cloudflare 官方文档确认）
-- `.open-next/server-functions/default/index.mjs`：`processEnv.NODE_ENV = process.env.NODE_ENV ?? "production"`，第四分支 `NODE_ENV === "development"` 不满足
-- **结论**：`getDeploymentPlatform()` 在 Workers 中返回 `null` → 不信任代理头 → IP = `0.0.0.0` → rate limit 对所有用户共享 bucket
+**IP 退化（已修复配置，待验证运行时）：**
+- `wrangler.jsonc:99,140`：✅ 已设 `DEPLOYMENT_PLATFORM: "cloudflare"`（含 NEXT_PUBLIC 版本）
+- `.dev.vars.example:9`：✅ 已添加 `DEPLOYMENT_PLATFORM=cloudflare`
+- `src/lib/security/client-ip.ts:86`：读 `process.env.DEPLOYMENT_PLATFORM`
+- **原问题已通过配置修复**，此 Task 剩余工作为 Step 2（cookie secure）和 Step 3（env.ts 验证）
 
 **Cookie secure（不确定）：**
 - `middleware.ts:28`：`process.env.NODE_ENV === "production"`
@@ -67,9 +66,9 @@ Scenario: Preview 环境 cookie 正确标记
 
 ## Steps
 
-### Step 1: 添加 DEPLOYMENT_PLATFORM 到 wrangler vars
+### Step 1: ~~添加 DEPLOYMENT_PLATFORM 到 wrangler vars~~ ✅ 已完成
 
-在 `wrangler.jsonc` 的 preview 和 production vars 中各加一行 `"DEPLOYMENT_PLATFORM": "cloudflare"`。这是一行配置变更，零代码风险，立即修复 IP 退化。
+> **已完成**：`wrangler.jsonc:99,140` 已设置 `"DEPLOYMENT_PLATFORM": "cloudflare"`，`.dev.vars.example:9` 也已添加。此步骤跳过。
 
 ### Step 2: 修改 cookie secure 判断
 
@@ -95,8 +94,8 @@ pnpm build
 
 ## Success Criteria
 
-- `wrangler.jsonc` preview/production 均含 `DEPLOYMENT_PLATFORM`
-- `middleware.ts` cookie secure 不再依赖 `NODE_ENV`
+- `wrangler.jsonc` preview/production 均含 `DEPLOYMENT_PLATFORM` ✅ 已完成
+- `middleware.ts` cookie secure 不再依赖 `NODE_ENV`（本 Task 剩余工作）
 - `client-ip.test.ts` 相关测试通过
 - 构建成功
 
