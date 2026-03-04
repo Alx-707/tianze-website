@@ -15,10 +15,12 @@ import { mapZodIssueToErrorKey } from "@/lib/contact-form-error-utils";
 import {
   CONTACT_FORM_CONFIG,
   createContactFormSchemaFromConfig,
-  type ContactFormFieldValues,
 } from "@/config/contact-form-config";
 import { ONE, ZERO } from "@/constants";
 import { TEN_MINUTES_MS } from "@/constants/time";
+// Canonical type definition lives in contact-form-processing.ts (lib layer).
+// Import here to avoid duplicating the shape definition.
+import { type ContactFormWithToken } from "@/lib/contact-form-processing";
 
 const contactFormSchema = createContactFormSchemaFromConfig(
   CONTACT_FORM_CONFIG,
@@ -34,10 +36,7 @@ export const contactFormWithTokenSchema = contactFormSchema.extend({
   submittedAt: z.string(),
 });
 
-export type ContactFormWithToken = ContactFormFieldValues & {
-  turnstileToken: string;
-  submittedAt: string;
-};
+export type { ContactFormWithToken };
 
 const SUBMISSION_EXPIRED_RESPONSE = {
   success: false,

@@ -2,15 +2,16 @@
  * Idempotency Store — Interface and In-Memory Implementation
  *
  * Provides atomic set-if-not-exists (SETNX) semantics for idempotency
- * protection. Task 011 will implement the state machine on top of this.
+ * protection. The state machine (PENDING → COMPLETED) is implemented in
+ * src/lib/idempotency.ts on top of this interface.
  *
  * Storage backend decision (Task 025):
- * - Primary: D1 (INSERT ... ON CONFLICT DO NOTHING for atomic SETNX)
+ * - D1 adapter is planned (INSERT … ON CONFLICT DO NOTHING) but not yet implemented
  * - Fallback: In-memory (local development / current behavior)
  *
  * State model:
  * - PENDING: Request is being processed (set by SETNX)
- * - COMPLETED: Request finished successfully (updated after handler completes)
+ * - COMPLETED: Request finished successfully (set by complete())
  */
 
 export type IdempotencyStatus = "PENDING" | "COMPLETED";
@@ -42,9 +43,11 @@ export interface IdempotencyStore {
   get(key: string): Promise<IdempotencyEntry | null>;
 
   /**
-   * Update an existing entry (e.g., PENDING → COMPLETED with result).
+   * Transition a PENDING entry to COMPLETED, storing the handler result.
+   * Narrowed to only the legal PENDING → COMPLETED transition; prevents callers
+   * from making arbitrary field mutations that would corrupt the state machine.
    */
-  update(key: string, entry: Partial<IdempotencyEntry>): Promise<void>;
+  complete(key: string, result: unknown, statusCode: number): Promise<void>;
 
   /**
    * Delete a key (e.g., on handler failure to allow retry).
@@ -104,13 +107,20 @@ export class MemoryIdempotencyStore implements IdempotencyStore {
   }
 
   // eslint-disable-next-line require-await -- Interface requires async for distributed store compatibility
-  async update(key: string, partial: Partial<IdempotencyEntry>): Promise<void> {
+  async complete(
+    key: string,
+    result: unknown,
+    statusCode: number,
+  ): Promise<void> {
     const existing = this.store.get(key);
     if (!existing) return;
 
-    // nosemgrep: object-injection-sink-spread-operator
-    // Safe: partial is internal data from application code, not user input
-    this.store.set(key, { ...existing, ...partial });
+    this.store.set(key, {
+      ...existing,
+      status: "COMPLETED",
+      result,
+      statusCode,
+    });
   }
 
   // eslint-disable-next-line require-await -- Interface requires async for distributed store compatibility
@@ -128,7 +138,7 @@ export class MemoryIdempotencyStore implements IdempotencyStore {
 
 /**
  * Create the appropriate idempotency store based on available configuration.
- * Currently only Memory is implemented. Task 011 will add D1 adapter.
+ * D1 adapter is planned (Task 025) but not yet implemented.
  */
 export function createIdempotencyStore(): IdempotencyStore {
   return new MemoryIdempotencyStore();

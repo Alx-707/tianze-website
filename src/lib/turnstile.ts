@@ -5,6 +5,7 @@
  * Used by API routes, Server Actions, and other consumers.
  */
 
+import { FIVE_SECONDS_MS } from "@/constants/time";
 import { env } from "@/lib/env";
 import { logger, sanitizeIP } from "@/lib/logger";
 import {
@@ -41,24 +42,32 @@ function buildTurnstilePayload(
 async function requestTurnstileVerification(
   payload: URLSearchParams,
 ): Promise<TurnstileVerificationResult> {
-  const response = await fetch(
-    "https://challenges.cloudflare.com/turnstile/v0/siteverify",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), FIVE_SECONDS_MS);
+
+  try {
+    const response = await fetch(
+      "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: payload,
+        signal: controller.signal,
       },
-      body: payload,
-    },
-  );
-
-  if (!response.ok) {
-    throw new Error(
-      `Turnstile API returned ${response.status}: ${response.statusText}`,
     );
-  }
 
-  return response.json();
+    if (!response.ok) {
+      throw new Error(
+        `Turnstile API returned ${response.status}: ${response.statusText}`,
+      );
+    }
+
+    return response.json() as Promise<TurnstileVerificationResult>;
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 function validateTurnstileHostnameResponse(
@@ -172,7 +181,18 @@ export async function verifyTurnstileDetailed(
 
     return { success: true };
   } catch (error) {
-    logger.error("Turnstile verification error", { error, ip: sanitizeIP(ip) });
-    throw error;
+    // Network errors (timeout, DNS failure, Cloudflare outage) are returned as
+    // a structured failure instead of re-throwing so callers always receive
+    // Promise<TurnstileVerificationResult> without an unexpected exception path.
+    const errorCode =
+      error instanceof Error && error.name === "AbortError"
+        ? "timeout"
+        : "network-error";
+    logger.error("Turnstile verification network failure", {
+      errorCode,
+      ip: sanitizeIP(ip),
+      error,
+    });
+    return { success: false, errorCodes: [errorCode] };
   }
 }

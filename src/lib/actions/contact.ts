@@ -12,6 +12,7 @@ import { contactFieldValidators } from "@/lib/form-schema/contact-field-validato
 import { type ContactFormData } from "@/lib/form-schema/contact-form-schema";
 import { logger } from "@/lib/logger";
 import { checkDistributedRateLimit } from "@/lib/security/distributed-rate-limit";
+import { TEN_MINUTES_MS } from "@/constants/time";
 import { getClientIPFromHeaders } from "@/lib/security/client-ip";
 import { hmacKey } from "@/lib/security/rate-limit-key-strategies";
 import {
@@ -97,7 +98,7 @@ async function validateContactFormData(
   }
   const now = new Date();
   const timeDiff = now.getTime() - submittedAtMs;
-  const maxAge = 10 * 60 * 1000; // 10分钟
+  const maxAge = TEN_MINUTES_MS;
 
   if (timeDiff > maxAge || timeDiff < 0) {
     return {

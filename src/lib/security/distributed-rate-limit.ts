@@ -129,8 +129,10 @@ async function executeRateLimitCheck(
   key: string,
   config: ReturnType<typeof getRateLimitConfig>,
 ): Promise<RateLimitResult> {
-  const store = getRateLimitStore();
   try {
+    // getRateLimitStore inside try so any constructor/factory failure
+    // is caught and handled by the failureMode logic below.
+    const store = getRateLimitStore();
     const { count, resetTime } = await store.increment(key, config.windowMs);
     const now = Date.now();
     const remaining = Math.max(ZERO, config.maxRequests - count);
@@ -232,13 +234,20 @@ export async function getRateLimitStatus(
       retryAfter: allowed ? null : Math.ceil((entry.resetTime - now) / 1000),
     };
   } catch (error) {
-    logger.error("[Rate Limit] Status check failed (fail-open)", { error });
+    const failClosed = config.failureMode === "closed";
+    logger.error(
+      failClosed
+        ? "[Rate Limit] Status check storage failure — fail-closed"
+        : "[Rate Limit] Status check storage failure — fail-open",
+      { error },
+    );
     return {
-      allowed: true,
-      remaining: config.maxRequests,
+      allowed: !failClosed,
+      remaining: failClosed ? ZERO : config.maxRequests,
       resetTime: Date.now() + config.windowMs,
-      retryAfter: null,
+      retryAfter: failClosed ? Math.ceil(config.windowMs / 1000) : null,
       degraded: true,
+      ...(failClosed ? { deniedReason: "storage_failure" as const } : {}),
     };
   }
 }

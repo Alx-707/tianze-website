@@ -237,6 +237,30 @@ describe("withRateLimit", () => {
         (details as { keyPrefix: string }).keyPrefix.length,
       ).toBeLessThanOrEqual(8);
     });
+    it("should return 503 with SERVICE_UNAVAILABLE errorCode when storage fails for fail-closed preset", async () => {
+      mockCheckDistributedRateLimit.mockResolvedValue({
+        allowed: false,
+        remaining: 0,
+        resetTime: Date.now() + 60000,
+        retryAfter: 60,
+        degraded: true,
+        deniedReason: "storage_failure" as const,
+      });
+      mockCreateRateLimitHeaders.mockReturnValue(new Headers());
+
+      const mockHandler = createMockHandler({ success: true });
+      const wrappedHandler = withRateLimit("turnstile", mockHandler);
+
+      const response = await wrappedHandler(createMockRequest());
+      const body = await response.json();
+
+      expect(response.status).toBe(503);
+      expect(body).toEqual({
+        success: false,
+        errorCode: "SERVICE_UNAVAILABLE",
+      });
+      expect(mockHandler).not.toHaveBeenCalled();
+    });
   });
 
   describe("degraded mode (storage failure)", () => {

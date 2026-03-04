@@ -196,18 +196,22 @@ async function handleWithIdempotencyKey<T>(
       const result = await handler();
 
       if (result instanceof NextResponse) {
-        // Don't cache non-2xx responses (errors should be retryable)
-        // Clean up the PENDING key so the next request can retry
-        await store.delete(idempotencyKey);
+        // Don't cache responses where the handler returns a NextResponse directly
+        // (both 2xx and non-2xx). For idempotency caching, handlers must return
+        // a plain serializable object instead of a NextResponse.
+        try {
+          await store.delete(idempotencyKey);
+        } catch (deleteError) {
+          logger.warn("Failed to delete non-cached idempotency key", {
+            deleteError,
+            idempotencyKey,
+          });
+        }
         return result;
       }
 
-      // Cache successful result
-      await store.update(idempotencyKey, {
-        status: "COMPLETED",
-        result,
-        statusCode: HTTP_OK,
-      });
+      // Cache successful result — PENDING → COMPLETED transition
+      await store.complete(idempotencyKey, result, HTTP_OK);
 
       return NextResponse.json(result, { status: HTTP_OK });
     } catch (error) {
@@ -215,8 +219,16 @@ async function handleWithIdempotencyKey<T>(
         error: error as Error,
         idempotencyKey,
       });
-      // Delete the PENDING key so the next request can retry
-      await store.delete(idempotencyKey);
+      // Delete the PENDING key so the next request can retry.
+      // Isolated try/catch so a store failure does not mask the original error.
+      try {
+        await store.delete(idempotencyKey);
+      } catch (deleteError) {
+        logger.error(
+          "Failed to delete PENDING idempotency key after handler failure — key stuck until TTL expires",
+          { deleteError, idempotencyKey },
+        );
+      }
       throw error;
     } finally {
       pendingRequests.delete(idempotencyKey);

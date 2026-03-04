@@ -99,6 +99,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Degraded rate limit: storage failure triggered fail-open — log for observability.
+    // The whatsapp preset is fail-open so requests are allowed; this matches withRateLimit HOF behavior.
+    if (rateLimitResult.degraded) {
+      logger.warn(
+        "[WhatsAppWebhook] Rate limit storage degraded (fail-open) — proceeding without enforcement",
+        {
+          rateLimitKey,
+        },
+      );
+    }
+
     // 3. Read body — safe now (rate limited); verify actual size
     const rawBody = await request.text();
     if (rawBody.length > MAX_BODY_BYTES) {

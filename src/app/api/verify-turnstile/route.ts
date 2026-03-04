@@ -150,6 +150,19 @@ export async function POST(request: NextRequest) {
     }
 
     if (!verificationResult.success) {
+      const isNetworkError = verificationResult.errorCodes?.some(
+        (code) => code === "network-error" || code === "timeout",
+      );
+      if (isNetworkError) {
+        logger.error("Turnstile verification network failure", {
+          errorCodes: verificationResult.errorCodes,
+          clientIP: sanitizeIP(clientIP),
+        });
+        return createApiErrorResponse(
+          API_ERROR_CODES.TURNSTILE_NETWORK_ERROR,
+          HTTP_SERVICE_UNAVAILABLE,
+        );
+      }
       return createVerificationErrorResponse();
     }
 

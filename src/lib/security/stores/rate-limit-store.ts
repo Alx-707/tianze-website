@@ -4,14 +4,16 @@
  * Extracted from distributed-rate-limit.ts for reuse across
  * rate limiting and other security modules.
  *
- * Storage backend decision (Task 025):
- * - Primary: D1 (already bound, supports atomic SQL operations)
- * - Backward compat: Upstash Redis, Vercel KV (if env vars configured)
- * - Fallback: In-memory (local development only)
+ * Storage backend selection (runtime, in priority order):
+ * - Upstash Redis (if UPSTASH_REDIS_REST_URL configured)
+ * - Vercel KV     (if KV_REST_API_URL configured)
+ * - In-memory     (local development / fallback — not cross-instance safe)
+ *
+ * D1 adapter is planned (Task 025) but not yet implemented.
  */
 
 import { logger } from "@/lib/logger";
-import { MINUTE_MS, ONE } from "@/constants";
+import { ONE } from "@/constants";
 
 // ==================== Interface ====================
 
@@ -141,19 +143,30 @@ export class RedisRateLimitStore implements RateLimitStore {
 
     try {
       return JSON.parse(result) as RateLimitEntry;
-    } catch {
-      return null;
+    } catch (error) {
+      // Treat corrupted data as a storage error so the caller's failureMode
+      // logic handles it (fail-closed presets deny; fail-open presets degrade).
+      logger.error(
+        "[Rate Limit] Redis entry parse failure — treating as storage error",
+        {
+          keyPrefix: key.slice(0, 16),
+          valueLength: result.length,
+          error,
+        },
+      );
+      throw error;
     }
   }
 
   async set(key: string, entry: RateLimitEntry, ttlMs: number): Promise<void> {
-    const ttlSeconds = Math.ceil(ttlMs / MINUTE_MS) * (MINUTE_MS / 1000);
+    // Use EX (seconds) to match KV store precision; no rounding to minute boundaries.
+    const ttlSeconds = Math.ceil(ttlMs / 1000);
     await this.redisCommand([
       "SET",
       key,
       JSON.stringify(entry),
-      "PX",
-      Math.ceil(ttlSeconds * 1000),
+      "EX",
+      ttlSeconds,
     ]);
   }
 
@@ -223,8 +236,18 @@ export class KVRateLimitStore implements RateLimitStore {
 
     try {
       return JSON.parse(result.result) as RateLimitEntry;
-    } catch {
-      return null;
+    } catch (error) {
+      // Treat corrupted data as a storage error so the caller's failureMode
+      // logic handles it (fail-closed presets deny; fail-open presets degrade).
+      logger.error(
+        "[Rate Limit] KV entry parse failure — treating as storage error",
+        {
+          keyPrefix: key.slice(0, 16),
+          valueLength: result.result.length,
+          error,
+        },
+      );
+      throw error;
     }
   }
 
