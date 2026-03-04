@@ -159,8 +159,8 @@ async function handleWithIdempotencyKey<T>(
     }
 
     if (existing.status === "COMPLETED") {
-      logger.info("Returning cached result for idempotency key", {
-        key: idempotencyKey,
+      logger.warn("Returning cached result for idempotency key", {
+        keyHash: idempotencyKey.slice(0, 8),
         age: Date.now() - existing.createdAt,
       });
       return NextResponse.json(existing.result, {
