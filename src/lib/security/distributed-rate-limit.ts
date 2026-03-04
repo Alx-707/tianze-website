@@ -1,7 +1,11 @@
 /**
- * Distributed Rate Limiting for Serverless
+ * Rate Limiting with Per-Key Serialization
  *
- * Implements rate limiting that works across serverless instances.
+ * Provides single-instance rate limiting with per-key promise queue
+ * to prevent TOCTOU races within one process. Cross-instance consistency
+ * requires a distributed store backend (Upstash Redis / KV); without one,
+ * limits are best-effort per-instance only.
+ *
  * Store implementations are in ./stores/rate-limit-store.ts.
  */
 
@@ -70,8 +74,10 @@ interface RateLimitResult {
   remaining: number;
   resetTime: number;
   retryAfter: number | null;
-  /** Indicates storage failure triggered fail-open behavior */
+  /** Indicates storage failure triggered fail-open or fail-closed behavior */
   degraded?: boolean;
+  /** Reason for denial: 'limit' = real rate limit exceeded, 'storage_failure' = backend unavailable */
+  deniedReason?: "limit" | "storage_failure";
 }
 
 let rateLimitStore: RateLimitStore | null = null;
@@ -135,6 +141,7 @@ async function executeRateLimitCheck(
       remaining,
       resetTime,
       retryAfter: allowed ? null : Math.ceil((resetTime - now) / 1000),
+      ...(allowed ? {} : { deniedReason: "limit" as const }),
     };
   } catch (error) {
     const failClosed = config.failureMode === "closed";
@@ -150,6 +157,7 @@ async function executeRateLimitCheck(
       resetTime: Date.now() + config.windowMs,
       retryAfter: failClosed ? Math.ceil(config.windowMs / 1000) : null,
       degraded: true,
+      ...(failClosed ? { deniedReason: "storage_failure" as const } : {}),
     };
   }
 }
@@ -174,13 +182,18 @@ export function checkDistributedRateLimit(
   });
   const current = previous.then(() => executeRateLimitCheck(key, config));
 
-  // Register as the latest pending operation for this key
-  rateLimitQueue.set(
-    key,
-    current.catch(() => {
+  // Register as the latest pending operation for this key.
+  // Clean up after settlement to prevent unbounded Map growth.
+  const tracked = current
+    .catch(() => {
       /* swallow queue errors to prevent cascade failures */
-    }),
-  );
+    })
+    .finally(() => {
+      if (rateLimitQueue.get(key) === tracked) {
+        rateLimitQueue.delete(key);
+      }
+    });
+  rateLimitQueue.set(key, tracked);
 
   return current;
 }

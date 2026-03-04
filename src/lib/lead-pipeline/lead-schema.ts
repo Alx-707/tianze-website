@@ -59,56 +59,45 @@ const baseLeadFields = {
  * Contact form lead schema
  * Used for general inquiries via /contact page
  */
-export const contactLeadSchema = z
-  .object({
-    type: z.literal(LEAD_TYPES.CONTACT),
-    fullName: sanitizedString().min(ONE).max(MAX_LEAD_NAME_LENGTH),
-    subject: z.enum([
-      CONTACT_SUBJECTS.PRODUCT_INQUIRY,
-      CONTACT_SUBJECTS.DISTRIBUTOR,
-      CONTACT_SUBJECTS.OEM_ODM,
-      CONTACT_SUBJECTS.OTHER,
-    ]),
-    message: sanitizedString()
-      .min(MIN_LEAD_MESSAGE_LENGTH)
-      .max(MAX_LEAD_MESSAGE_LENGTH),
-    turnstileToken: z.string().min(ONE),
-    submittedAt: z.string().optional(),
-    ...baseLeadFields,
-  })
-  .strict();
+export const contactLeadSchema = z.object({
+  type: z.literal(LEAD_TYPES.CONTACT),
+  fullName: sanitizedString().min(ONE).max(MAX_LEAD_NAME_LENGTH),
+  subject: z.enum([
+    CONTACT_SUBJECTS.PRODUCT_INQUIRY,
+    CONTACT_SUBJECTS.DISTRIBUTOR,
+    CONTACT_SUBJECTS.OEM_ODM,
+    CONTACT_SUBJECTS.OTHER,
+  ]),
+  message: sanitizedString()
+    .min(MIN_LEAD_MESSAGE_LENGTH)
+    .max(MAX_LEAD_MESSAGE_LENGTH),
+  turnstileToken: z.string().min(ONE),
+  submittedAt: z.string().optional(),
+  ...baseLeadFields,
+});
 
 /**
  * Product inquiry lead schema
  * Used for product-specific inquiries via product page drawer
  */
-export const productLeadSchema = z
-  .object({
-    type: z.literal(LEAD_TYPES.PRODUCT),
-    fullName: sanitizedString().min(ONE).max(MAX_LEAD_NAME_LENGTH),
-    productSlug: z.string().trim().min(ONE),
-    productName: sanitizedString().min(ONE).max(MAX_LEAD_PRODUCT_NAME_LENGTH),
-    quantity: z.union([
-      z.string().trim().min(ONE),
-      z.coerce.number().positive(),
-    ]),
-    requirements: sanitizedString()
-      .max(MAX_LEAD_REQUIREMENTS_LENGTH)
-      .optional(),
-    ...baseLeadFields,
-  })
-  .strict();
+export const productLeadSchema = z.object({
+  type: z.literal(LEAD_TYPES.PRODUCT),
+  fullName: sanitizedString().min(ONE).max(MAX_LEAD_NAME_LENGTH),
+  productSlug: z.string().trim().min(ONE),
+  productName: sanitizedString().min(ONE).max(MAX_LEAD_PRODUCT_NAME_LENGTH),
+  quantity: z.union([z.string().trim().min(ONE), z.coerce.number().positive()]),
+  requirements: sanitizedString().max(MAX_LEAD_REQUIREMENTS_LENGTH).optional(),
+  ...baseLeadFields,
+});
 
 /**
  * Newsletter subscription lead schema
  * Used for blog/news page email subscriptions
  */
-export const newsletterLeadSchema = z
-  .object({
-    type: z.literal(LEAD_TYPES.NEWSLETTER),
-    email: z.string().email().max(MAX_LEAD_EMAIL_LENGTH),
-  })
-  .strict();
+export const newsletterLeadSchema = z.object({
+  type: z.literal(LEAD_TYPES.NEWSLETTER),
+  email: z.string().email().max(MAX_LEAD_EMAIL_LENGTH),
+});
 
 /**
  * Unified lead schema using discriminated union

@@ -99,8 +99,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 3. Read body — safe now (size checked, rate limited)
+    // 3. Read body — safe now (rate limited); verify actual size
     const rawBody = await request.text();
+    if (rawBody.length > MAX_BODY_BYTES) {
+      return NextResponse.json(
+        { error: "Payload too large" },
+        { status: HTTP_PAYLOAD_TOO_LARGE },
+      );
+    }
     const signature = request.headers.get("x-hub-signature-256");
 
     // 4. Verify webhook signature

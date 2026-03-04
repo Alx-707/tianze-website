@@ -109,6 +109,30 @@ interface IdempotencyHandlerContext {
   ttlMs: number;
 }
 
+/** Track the fingerprint associated with each in-flight key */
+const inFlightFingerprints = new Map<string, string>();
+
+/**
+ * Fast path: check if an in-flight promise exists for this key.
+ * Returns the in-flight promise, a 409 conflict response, or null to continue.
+ */
+function checkInFlight(
+  idempotencyKey: string,
+  fingerprint: string,
+): NextResponse | Promise<NextResponse> | null {
+  const inFlight = pendingRequests.get(idempotencyKey);
+  if (!inFlight) return null;
+
+  const existingFingerprint = inFlightFingerprints.get(idempotencyKey);
+  if (existingFingerprint && existingFingerprint !== fingerprint) {
+    return NextResponse.json(
+      { error: "Idempotency key already used for a different endpoint" },
+      { status: 409 },
+    );
+  }
+  return inFlight;
+}
+
 async function handleWithIdempotencyKey<T>(
   idempotencyKey: string,
   handler: () => Promise<T>,
@@ -118,11 +142,9 @@ async function handleWithIdempotencyKey<T>(
   const store = getIdempotencyStore();
 
   // Fast path: if there's already a pending in-flight promise for this key
-  // (same process, same request racing), return it directly.
-  const inFlight = pendingRequests.get(idempotencyKey);
-  if (inFlight) {
-    return inFlight;
-  }
+  // (same process, same request racing), verify fingerprint before returning.
+  const inFlightResult = checkInFlight(idempotencyKey, fingerprint);
+  if (inFlightResult) return inFlightResult;
 
   // Check existing entry in the persistent store
   const existing = await store.get(idempotencyKey);
@@ -198,11 +220,13 @@ async function handleWithIdempotencyKey<T>(
       throw error;
     } finally {
       pendingRequests.delete(idempotencyKey);
+      inFlightFingerprints.delete(idempotencyKey);
     }
   })();
 
   // Register in-flight to short-circuit concurrent duplicates in this process
   pendingRequests.set(idempotencyKey, work);
+  inFlightFingerprints.set(idempotencyKey, fingerprint);
 
   return work;
 }
@@ -305,6 +329,7 @@ export function generateIdempotencyKey(): string {
  */
 export function clearIdempotencyKey(key: string): void {
   pendingRequests.delete(key);
+  inFlightFingerprints.delete(key);
 }
 
 /**
@@ -314,6 +339,7 @@ export function clearIdempotencyKey(key: string): void {
  */
 export function clearAllIdempotencyKeys(): void {
   pendingRequests.clear();
+  inFlightFingerprints.clear();
 }
 
 /**

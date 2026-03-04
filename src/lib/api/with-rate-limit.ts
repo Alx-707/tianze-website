@@ -22,7 +22,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { HTTP_TOO_MANY_REQUESTS } from "@/constants";
+import { HTTP_SERVICE_UNAVAILABLE, HTTP_TOO_MANY_REQUESTS } from "@/constants";
 import { API_ERROR_CODES } from "@/constants/api-error-codes";
 import { logger } from "@/lib/logger";
 import { getClientIP as getTrustedClientIP } from "@/lib/security/client-ip";
@@ -108,6 +108,7 @@ function trackStorageFailure(): boolean {
 function createRateLimitResponse<T>(
   result: Awaited<ReturnType<typeof checkDistributedRateLimit>>,
   keyPrefix: string,
+  statusCode: number = HTTP_TOO_MANY_REQUESTS,
 ): NextResponse<T> {
   const headers = createRateLimitHeaders(result);
 
@@ -115,14 +116,18 @@ function createRateLimitResponse<T>(
   logger.warn("Rate limit exceeded", {
     keyPrefix: keyPrefix.slice(0, 8),
     retryAfter: result.retryAfter,
+    deniedReason: result.deniedReason,
   });
 
   return NextResponse.json(
     {
       success: false,
-      errorCode: API_ERROR_CODES.RATE_LIMIT_EXCEEDED,
+      errorCode:
+        result.deniedReason === "storage_failure"
+          ? API_ERROR_CODES.SERVICE_UNAVAILABLE
+          : API_ERROR_CODES.RATE_LIMIT_EXCEEDED,
     } as RateLimitErrorBody,
-    { status: HTTP_TOO_MANY_REQUESTS, headers },
+    { status: statusCode, headers },
   ) as NextResponse<T>;
 }
 
@@ -164,9 +169,13 @@ export function withRateLimit<T = unknown>(
 
     const result = await checkDistributedRateLimit(rateLimitKey, preset);
 
-    // Rate limit exceeded - return 429
+    // Rate limit exceeded or storage failure — return 429 (limit) or 503 (storage)
     if (!result.allowed) {
-      return createRateLimitResponse<T>(result, rateLimitKey);
+      const statusCode =
+        result.deniedReason === "storage_failure"
+          ? HTTP_SERVICE_UNAVAILABLE
+          : HTTP_TOO_MANY_REQUESTS;
+      return createRateLimitResponse<T>(result, rateLimitKey, statusCode);
     }
 
     // Storage failure triggered fail-open - track and add degraded header

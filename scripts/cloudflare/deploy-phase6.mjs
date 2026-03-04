@@ -184,10 +184,13 @@ if (!args.dryRun) {
   // Preflight: verify server-actions-key sync
   console.log("[phase6] preflight: syncing server-actions encryption key...");
   try {
-    execSync("node scripts/cloudflare/sync-server-actions-key.mjs", {
-      cwd: ROOT_DIR,
-      stdio: "inherit",
-    });
+    execSync(
+      `node scripts/cloudflare/sync-server-actions-key.mjs --env ${targetEnv} --scope phase6`,
+      {
+        cwd: ROOT_DIR,
+        stdio: "inherit",
+      },
+    );
   } catch {
     console.error(
       "[phase6] server-actions-key sync failed. Aborting deployment.",
