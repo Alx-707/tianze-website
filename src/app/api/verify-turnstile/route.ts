@@ -7,9 +7,20 @@ import { safeParseJson } from "@/lib/api/safe-parse-json";
 import { env } from "@/lib/env";
 import { logger, sanitizeIP } from "@/lib/logger";
 import { getClientIP } from "@/lib/security/client-ip";
-import { verifyTurnstileDetailed } from "@/app/api/contact/contact-api-utils";
+import {
+  checkDistributedRateLimit,
+  createRateLimitHeaders,
+} from "@/lib/security/distributed-rate-limit";
+import { getIPKey } from "@/lib/security/rate-limit-key-strategies";
+import { verifyTurnstileDetailed } from "@/lib/turnstile";
 import { API_ERROR_CODES } from "@/constants/api-error-codes";
-import { HTTP_BAD_REQUEST, HTTP_INTERNAL_ERROR, HTTP_OK } from "@/constants";
+import {
+  HTTP_BAD_REQUEST,
+  HTTP_INTERNAL_ERROR,
+  HTTP_OK,
+  HTTP_SERVICE_UNAVAILABLE,
+  HTTP_TOO_MANY_REQUESTS,
+} from "@/constants";
 
 /**
  * Request body interface for Turnstile verification.
@@ -47,7 +58,7 @@ function createVerificationErrorResponse() {
 }
 
 /**
- * Create network error response
+ * Create network error response (503 Service Unavailable for upstream failures)
  */
 function createNetworkErrorResponse(verifyError: Error, clientIP: string) {
   logger.error("Turnstile verification request failed", {
@@ -56,7 +67,7 @@ function createNetworkErrorResponse(verifyError: Error, clientIP: string) {
   });
   return createApiErrorResponse(
     API_ERROR_CODES.TURNSTILE_NETWORK_ERROR,
-    HTTP_INTERNAL_ERROR,
+    HTTP_SERVICE_UNAVAILABLE,
   );
 }
 
@@ -81,10 +92,25 @@ function checkTurnstileConfigured(): NextResponse | null {
  * to ensure the user has passed the bot protection challenge.
  * Uses the shared verifyTurnstile function for consistency.
  */
+// eslint-disable-next-line max-statements -- Sequential security gates (config→rate→parse→validate→verify→respond) require multiple statements
 export async function POST(request: NextRequest) {
   try {
     const configError = checkTurnstileConfigured();
     if (configError) return configError;
+
+    // Rate limiting: security-sensitive endpoint uses fail-closed preset
+    const rateLimitKey = getIPKey(request);
+    const rateLimitResult = await checkDistributedRateLimit(
+      rateLimitKey,
+      "turnstile",
+    );
+    if (!rateLimitResult.allowed) {
+      const rateLimitHeaders = createRateLimitHeaders(rateLimitResult);
+      return NextResponse.json(
+        { success: false, errorCode: API_ERROR_CODES.RATE_LIMIT_EXCEEDED },
+        { status: HTTP_TOO_MANY_REQUESTS, headers: rateLimitHeaders },
+      );
+    }
 
     const parsedBody = await safeParseJson<TurnstileVerificationRequest>(
       request,

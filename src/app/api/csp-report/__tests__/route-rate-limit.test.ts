@@ -112,7 +112,7 @@ describe("CSP Report API Route - Rate Limiting", () => {
       const data = await response.json();
 
       expect(response.status).toBe(429);
-      expect(data.error).toBe("Too many requests");
+      expect(data.errorCode).toBe("RATE_LIMIT_EXCEEDED");
     });
   });
 });

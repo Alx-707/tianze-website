@@ -1,7 +1,4 @@
 {
-  "_comment": "⚠️ THIS FILE IS ONLY USED FOR VITEST MOCKS - DO NOT USE IN PRODUCTION CODE",
-  "_usage": "Referenced by vi.mock() in Vitest tests. Runtime translations are loaded from messages/[locale]/critical.json and messages/[locale]/deferred.json.",
-  "_last_updated": "2025-11-26",
   "common": {
     "loading": "Loading...",
     "error": "An error occurred",
@@ -14,6 +11,43 @@
       "defaultMessage": "Hi! I'm interested in your products.",
       "buttonLabel": "Chat with us on WhatsApp",
       "supportChat": "Support chat"
+    },
+    "success": "Success",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "edit": "Edit",
+    "delete": "Delete",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort",
+    "next": "Next",
+    "previous": "Previous",
+    "open": "Open",
+    "toast": {
+      "form": {
+        "contact": {
+          "success": "Message sent successfully!",
+          "successDescription": "Thank you for your message. We'll get back to you soon.",
+          "error": "Failed to send message",
+          "errorDescription": "Please try again later or contact us directly.",
+          "loading": "Sending message..."
+        },
+        "newsletter": {
+          "success": "Successfully subscribed!",
+          "successDescription": "Thank you for subscribing to our newsletter.",
+          "error": "Subscription failed",
+          "errorDescription": "Please check your email and try again.",
+          "loading": "Subscribing..."
+        },
+        "feedback": {
+          "success": "Feedback submitted!",
+          "successDescription": "Thank you for your valuable feedback.",
+          "error": "Failed to submit feedback",
+          "errorDescription": "Please try again later.",
+          "loading": "Submitting feedback..."
+        }
+      }
     }
   },
   "navigation": {
@@ -507,10 +541,34 @@
         "viewSource": "View Products"
       }
     },
-    "cta": {
-      "message": "Contact us for samples or technical support",
-      "button": "Get Quote"
-    }
+    "title": "Tianze Pipe",
+    "subtitle": "Professional Pipe Manufacturer",
+    "description": "Professional PVC conduit and PETG pneumatic tube manufacturer with ISO 9001:2015 certification.",
+    "getStarted": "Get Started",
+    "learnMore": "Learn More",
+    "welcome": "Welcome to Tianze Pipe",
+    "modernApp": "A modern web application built with Next.js 16 and React 19",
+    "features": {
+      "title": "Features",
+      "performance": {
+        "title": "High Performance",
+        "description": "Optimized for speed and efficiency with modern web technologies."
+      },
+      "scalable": {
+        "title": "Scalable Architecture",
+        "description": "Built to grow with your business needs and requirements."
+      },
+      "secure": {
+        "title": "Enterprise Security",
+        "description": "Industry-standard security practices and compliance."
+      }
+    },
+    "modernStack": "Modern Stack",
+    "modernStackDesc": "Built with the latest technologies",
+    "internationalization": "Internationalization",
+    "internationalizationDesc": "Multi-language support with next-intl",
+    "testingReady": "Testing Ready",
+    "testingReadyDesc": "Comprehensive E2E testing setup"
   },
   "monitoring": {
     "loadError": "Monitoring component failed to load"
@@ -610,7 +668,12 @@
         "twitter": "Twitter",
         "youtube": "YouTube"
       }
-    }
+    },
+    "learn": "Learn",
+    "examples": "Examples",
+    "goToNextjs": "Go to nextjs.org",
+    "copyright": "(c) {year} Tianze Pipe. All rights reserved.",
+    "description": "Professional PVC conduit and PETG pneumatic tube manufacturer."
   },
   "accessibility": {
     "skipToContent": "Skip to main content",
@@ -850,6 +913,15 @@
       "title": "Page not found",
       "description": "The page you're looking for doesn't exist or has been moved.",
       "goHome": "Back to homepage"
-    }
+    },
+    "serverError": "Internal server error",
+    "networkError": "Network connection error",
+    "validationError": "Please check your input",
+    "unauthorized": "You are not authorized to access this page",
+    "forbidden": "Access to this resource is forbidden",
+    "timeout": "Request timeout - please try again",
+    "generic": "Something went wrong. Please try again later.",
+    "translationMissing": "Translation not available",
+    "loadingFailed": "Failed to load content"
   }
 }

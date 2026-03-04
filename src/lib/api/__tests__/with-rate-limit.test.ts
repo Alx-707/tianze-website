@@ -166,7 +166,10 @@ describe("withRateLimit", () => {
       const body = await response.json();
 
       expect(response.status).toBe(429);
-      expect(body).toEqual({ success: false, error: "Too many requests" });
+      expect(body).toEqual({
+        success: false,
+        errorCode: "RATE_LIMIT_EXCEEDED",
+      });
       expect(mockHandler).not.toHaveBeenCalled();
     });
 

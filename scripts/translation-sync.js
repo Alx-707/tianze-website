@@ -50,13 +50,20 @@ function createBackup() {
   }
 
   for (const locale of CONFIG.LOCALES) {
-    const sourceFile = path.join(CONFIG.MESSAGES_DIR, `${locale}.json`);
-    const backupFile = path.join(backupDir, `${locale}.json`);
+    const localeBackupDir = path.join(backupDir, locale);
+    if (!fs.existsSync(localeBackupDir)) {
+      fs.mkdirSync(localeBackupDir, { recursive: true });
+    }
 
-    if (fs.existsSync(sourceFile)) {
-      fs.copyFileSync(sourceFile, backupFile);
-      syncResults.backups.push(backupFile);
-      console.log(`💾 备份创建: ${locale}.json -> ${backupFile}`);
+    for (const splitFile of ["critical.json", "deferred.json"]) {
+      const sourceFile = path.join(CONFIG.MESSAGES_DIR, locale, splitFile);
+      const backupFile = path.join(localeBackupDir, splitFile);
+
+      if (fs.existsSync(sourceFile)) {
+        fs.copyFileSync(sourceFile, backupFile);
+        syncResults.backups.push(backupFile);
+        console.log(`💾 备份创建: ${locale}/${splitFile} -> ${backupFile}`);
+      }
     }
   }
 
@@ -64,20 +71,65 @@ function createBackup() {
 }
 
 /**
- * 加载翻译文件
+ * Deep merge two objects (source wins on leaf conflicts)
+ */
+function deepMerge(target, source) {
+  const result = { ...target };
+  for (const [key, value] of Object.entries(source)) {
+    if (
+      typeof value === "object" &&
+      value !== null &&
+      !Array.isArray(value) &&
+      typeof result[key] === "object" &&
+      result[key] !== null &&
+      !Array.isArray(result[key])
+    ) {
+      result[key] = deepMerge(result[key], value);
+    } else {
+      result[key] = value;
+    }
+  }
+  return result;
+}
+
+/**
+ * 加载翻译文件 — 从 split 格式 (canonical) 读取
+ * 合并 critical.json + deferred.json 为完整翻译对象
  */
 function loadTranslations() {
   const translations = {};
 
   for (const locale of CONFIG.LOCALES) {
-    const filePath = path.join(CONFIG.MESSAGES_DIR, `${locale}.json`);
+    const criticalPath = path.join(
+      CONFIG.MESSAGES_DIR,
+      locale,
+      "critical.json",
+    );
+    const deferredPath = path.join(
+      CONFIG.MESSAGES_DIR,
+      locale,
+      "deferred.json",
+    );
+
     try {
-      const content = fs.readFileSync(filePath, "utf8");
-      translations[locale] = JSON.parse(content);
-      console.log(`📖 加载翻译文件: ${locale}.json`);
+      const critical = JSON.parse(fs.readFileSync(criticalPath, "utf8"));
+      const deferred = JSON.parse(fs.readFileSync(deferredPath, "utf8"));
+      translations[locale] = deepMerge(critical, deferred);
+      console.log(
+        `📖 加载翻译文件: ${locale}/critical.json + ${locale}/deferred.json`,
+      );
     } catch (error) {
-      console.warn(`⚠️  无法加载翻译文件: ${locale}.json - ${error.message}`);
-      translations[locale] = {};
+      console.warn(
+        `⚠️  无法加载翻译文件: ${locale}/split files - ${error.message}`,
+      );
+      // Fallback to flat file
+      const flatPath = path.join(CONFIG.MESSAGES_DIR, `${locale}.json`);
+      try {
+        translations[locale] = JSON.parse(fs.readFileSync(flatPath, "utf8"));
+        console.log(`📖 回退加载: ${locale}.json (flat)`);
+      } catch {
+        translations[locale] = {};
+      }
     }
   }
 
@@ -251,24 +303,105 @@ function validateTranslations(translations) {
 }
 
 /**
- * 保存翻译文件
+ * 保存翻译文件 — 写回 split 格式 (canonical)，然后从 split 重新生成 flat
+ *
+ * Split 分类策略：保持原有 critical/deferred 的顶级 key 归属不变。
+ * 如果有新的顶级 key（在任何 split 文件中都不存在），默认放入 deferred。
  */
 function saveTranslations(translations) {
   for (const locale of CONFIG.LOCALES) {
-    const filePath = path.join(CONFIG.MESSAGES_DIR, `${locale}.json`);
+    const criticalPath = path.join(
+      CONFIG.MESSAGES_DIR,
+      locale,
+      "critical.json",
+    );
+    const deferredPath = path.join(
+      CONFIG.MESSAGES_DIR,
+      locale,
+      "deferred.json",
+    );
+    const flatPath = path.join(CONFIG.MESSAGES_DIR, `${locale}.json`);
 
     try {
-      const content = `${JSON.stringify(translations[locale], null, 2)}\n`;
-      fs.writeFileSync(filePath, content, "utf8");
+      // Read original split files to determine key classification
+      let originalCritical = {};
+      let originalDeferred = {};
+      try {
+        originalCritical = JSON.parse(fs.readFileSync(criticalPath, "utf8"));
+      } catch {
+        /* empty */
+      }
+      try {
+        originalDeferred = JSON.parse(fs.readFileSync(deferredPath, "utf8"));
+      } catch {
+        /* empty */
+      }
+
+      // Determine which top-level keys belong to critical vs deferred
+      const criticalTopKeys = new Set(
+        Object.keys(originalCritical).filter((k) => !k.startsWith("_")),
+      );
+      const deferredTopKeys = new Set(
+        Object.keys(originalDeferred).filter((k) => !k.startsWith("_")),
+      );
+
+      // Preserve metadata from critical
+      const metaKeys = Object.keys(originalCritical).filter((k) =>
+        k.startsWith("_"),
+      );
+      const criticalMeta = {};
+      for (const mk of metaKeys) {
+        criticalMeta[mk] = originalCritical[mk];
+      }
+
+      // Split synced translations back
+      const newCritical = { ...criticalMeta };
+      const newDeferred = {};
+
+      for (const [key, value] of Object.entries(translations[locale])) {
+        if (key.startsWith("_")) continue; // skip metadata
+        if (criticalTopKeys.has(key)) {
+          newCritical[key] = value;
+        } else if (deferredTopKeys.has(key)) {
+          newDeferred[key] = value;
+        } else {
+          // New key — default to deferred
+          newDeferred[key] = value;
+        }
+      }
+
+      // Write split files
+      fs.writeFileSync(
+        criticalPath,
+        `${JSON.stringify(newCritical, null, 2)}\n`,
+        "utf8",
+      );
+      fs.writeFileSync(
+        deferredPath,
+        `${JSON.stringify(newDeferred, null, 2)}\n`,
+        "utf8",
+      );
+      console.log(
+        `💾 保存翻译文件: ${locale}/critical.json + ${locale}/deferred.json`,
+      );
+
+      // Regenerate flat file from split (flat = merge of critical + deferred, with meta)
+      const flatContent = deepMerge(newCritical, newDeferred);
+      fs.writeFileSync(
+        flatPath,
+        `${JSON.stringify(flatContent, null, 2)}\n`,
+        "utf8",
+      );
+      console.log(`💾 重新生成 flat 文件: ${locale}.json`);
+
       syncResults.updated++;
-      console.log(`💾 保存翻译文件: ${locale}.json`);
     } catch (error) {
       syncResults.errors.push({
         type: "save_error",
         locale,
         error: error.message,
       });
-      console.error(`❌ 保存失败: ${locale}.json - ${error.message}`);
+      console.error(`❌ 保存失败: ${locale}/split files - ${error.message}`);
     }
   }
 }

@@ -16,7 +16,7 @@ import {
   ConfirmationEmail,
   ContactFormEmail,
   ProductInquiryEmail,
-} from "@/components/emails";
+} from "@/emails";
 import { ZERO } from "@/constants";
 
 /**

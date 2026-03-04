@@ -8,12 +8,10 @@
 import { z } from "zod";
 import { airtableService } from "@/lib/airtable";
 import { contactFieldValidators } from "@/lib/form-schema/contact-field-validators";
-import { processLead } from "@/lib/lead-pipeline";
-import { CONTACT_SUBJECTS, LEAD_TYPES } from "@/lib/lead-pipeline/lead-schema";
-import { logger, sanitizeEmail, sanitizeIP } from "@/lib/logger";
+import { logger, sanitizeIP } from "@/lib/logger";
 import { constantTimeCompare } from "@/lib/security-crypto";
-import { verifyTurnstile } from "@/app/api/contact/contact-api-utils";
-import { mapZodIssueToErrorKey } from "@/app/api/contact/contact-form-error-utils";
+import { verifyTurnstile } from "@/lib/turnstile";
+import { mapZodIssueToErrorKey } from "@/lib/contact-form-error-utils";
 import {
   CONTACT_FORM_CONFIG,
   createContactFormSchemaFromConfig,
@@ -40,6 +38,39 @@ export type ContactFormWithToken = ContactFormFieldValues & {
   turnstileToken: string;
   submittedAt: string;
 };
+
+const SUBMISSION_EXPIRED_RESPONSE = {
+  success: false,
+  error: "Form submission expired or invalid",
+  details: ["Please refresh the page and try again"],
+  data: null,
+} as const;
+
+/**
+ * 验证提交时间（防止重放攻击）
+ * Must validate NaN before arithmetic: NaN comparisons always return false,
+ * allowing an attacker to bypass the time window check with "not-a-date".
+ */
+function validateSubmissionTime(submittedAt: string, clientIP: string) {
+  const ms = new Date(submittedAt).getTime();
+  if (!submittedAt || isNaN(ms)) {
+    logger.warn("Form submission time validation failed — invalid date", {
+      submittedAt,
+      clientIP: sanitizeIP(clientIP),
+    });
+    return SUBMISSION_EXPIRED_RESPONSE;
+  }
+  const timeDiff = Date.now() - ms;
+  if (timeDiff > TEN_MINUTES_MS || timeDiff < ZERO) {
+    logger.warn("Form submission time validation failed", {
+      submittedAt,
+      timeDiff,
+      clientIP: sanitizeIP(clientIP),
+    });
+    return SUBMISSION_EXPIRED_RESPONSE;
+  }
+  return null;
+}
 
 /**
  * 验证表单数据
@@ -68,26 +99,8 @@ export async function validateFormData(body: unknown, clientIP: string) {
 
   const formData = validationResult.data;
 
-  // 验证提交时间（防止重放攻击）
-  const submittedAt = new Date(formData.submittedAt);
-  const now = new Date();
-  const timeDiff = now.getTime() - submittedAt.getTime();
-  const maxAge = TEN_MINUTES_MS;
-
-  if (timeDiff > maxAge || timeDiff < ZERO) {
-    logger.warn("Form submission time validation failed", {
-      submittedAt: formData.submittedAt,
-      timeDiff,
-      clientIP: sanitizeIP(clientIP),
-    });
-
-    return {
-      success: false,
-      error: "Form submission expired or invalid",
-      details: ["Please refresh the page and try again"],
-      data: null,
-    };
-  }
+  const timeError = validateSubmissionTime(formData.submittedAt, clientIP);
+  if (timeError) return timeError;
 
   // 验证Turnstile token
   const turnstileValid = await verifyTurnstile(
@@ -112,69 +125,6 @@ export async function validateFormData(body: unknown, clientIP: string) {
     details: null,
     data: formData,
   };
-}
-
-/**
- * Map legacy subject string to contact subject enum
- */
-function mapSubjectToEnum(
-  subject: string | undefined,
-): (typeof CONTACT_SUBJECTS)[keyof typeof CONTACT_SUBJECTS] {
-  if (!subject) return CONTACT_SUBJECTS.OTHER;
-
-  const subjectLower = subject.toLowerCase();
-  if (subjectLower.includes("product")) return CONTACT_SUBJECTS.PRODUCT_INQUIRY;
-  if (subjectLower.includes("distributor")) return CONTACT_SUBJECTS.DISTRIBUTOR;
-  if (subjectLower.includes("oem") || subjectLower.includes("odm")) {
-    return CONTACT_SUBJECTS.OEM_ODM;
-  }
-  return CONTACT_SUBJECTS.OTHER;
-}
-
-/**
- * 处理表单提交 - 委托给统一的 processLead pipeline
- * Process form submission - delegates to unified processLead pipeline
- */
-export async function processFormSubmission(formData: ContactFormWithToken) {
-  // 将旧格式映射到新的 Lead Pipeline 格式
-  // Map legacy format to new Lead Pipeline format
-  const fullName = [formData.firstName, formData.lastName]
-    .filter(Boolean)
-    .join(" ")
-    .trim();
-
-  const leadInput = {
-    type: LEAD_TYPES.CONTACT,
-    fullName: fullName || formData.firstName || "Unknown",
-    email: formData.email,
-    company: formData.company,
-    subject: mapSubjectToEnum(formData.subject),
-    message: formData.message,
-    turnstileToken: formData.turnstileToken,
-    submittedAt: formData.submittedAt,
-    marketingConsent: formData.marketingConsent ?? false,
-  };
-
-  // 调用统一的 Lead Pipeline
-  const result = await processLead(leadInput);
-
-  if (result.success) {
-    return {
-      success: true,
-      emailSent: result.emailSent,
-      recordCreated: result.recordCreated,
-      emailMessageId: result.referenceId,
-      airtableRecordId: result.referenceId,
-    };
-  }
-
-  // 处理失败情况
-  logger.error("Contact form submission failed via processLead", {
-    error: result.error,
-    email: sanitizeEmail(formData.email),
-  });
-
-  throw new Error("Failed to process form submission");
 }
 
 /**

@@ -65,12 +65,7 @@ vi.mock("@/lib/security/distributed-rate-limit", () => ({
 // 在需要的地方进行局部Mock
 // vi.mock('@/lib/validations', () => { ... });
 
-// Mock contact API utils
-vi.mock("@/app/api/contact/contact-api-utils", () => ({
-  verifyTurnstile: vi.fn().mockResolvedValue(true),
-}));
-
-// Mock contact API validation
+// Mock contact API validation (validateFormData, validateAdminAccess, getContactFormStats remain here)
 vi.mock("@/app/api/contact/contact-api-validation", async () => {
   const actual = await vi.importActual(
     "@/app/api/contact/contact-api-validation",
@@ -78,16 +73,20 @@ vi.mock("@/app/api/contact/contact-api-validation", async () => {
   return {
     ...actual,
     validateFormData: vi.fn(),
-    processFormSubmission: vi.fn().mockResolvedValue({
-      emailSent: true,
-      recordCreated: true,
-      emailMessageId: "email-123",
-      airtableRecordId: "record-123",
-    }),
     validateAdminAccess: vi.fn(),
     getContactFormStats: vi.fn(),
   };
 });
+
+// Mock processFormSubmission from its new lib location
+vi.mock("@/lib/contact-form-processing", () => ({
+  processFormSubmission: vi.fn().mockResolvedValue({
+    emailSent: true,
+    recordCreated: true,
+    emailMessageId: "email-123",
+    airtableRecordId: "record-123",
+  }),
+}));
 
 // Mock process.env for Turnstile verification
 Object.defineProperty(process, "env", {
@@ -109,9 +108,15 @@ describe("Contact API Route", () => {
     mockValidationHelpers.validateEmail.mockReturnValue(true);
     mockValidationHelpers.sanitizeInput.mockImplementation((input) => input);
 
-    // Reset contact-api-utils mocks
-    const contactApiUtils = await import("@/app/api/contact/contact-api-utils");
-    vi.mocked(contactApiUtils.verifyTurnstile).mockResolvedValue(true);
+    // Reset contact-form-processing mocks
+    const contactFormProcessing = await import("@/lib/contact-form-processing");
+    vi.mocked(contactFormProcessing.processFormSubmission).mockResolvedValue({
+      success: true,
+      emailSent: true,
+      recordCreated: true,
+      emailMessageId: "email-123",
+      airtableRecordId: "record-123",
+    } as any);
   });
 
   describe("POST /api/contact", () => {
@@ -143,7 +148,7 @@ describe("Contact API Route", () => {
 
       // Ensure submission processing is mocked to succeed under Vitest v4
       const { processFormSubmission } =
-        await import("@/app/api/contact/contact-api-validation");
+        await import("@/lib/contact-form-processing");
       vi.mocked(processFormSubmission).mockResolvedValue({
         success: true,
         emailSent: true,
@@ -304,7 +309,7 @@ describe("Contact API Route", () => {
       mockResendService.isReady.mockReturnValue(false);
 
       // Mock successful validation
-      const { validateFormData, processFormSubmission } =
+      const { validateFormData } =
         await import("@/app/api/contact/contact-api-validation");
       vi.mocked(validateFormData).mockResolvedValue({
         success: true,
@@ -314,6 +319,8 @@ describe("Contact API Route", () => {
       });
 
       // Mock processFormSubmission to handle service unavailability gracefully
+      const { processFormSubmission } =
+        await import("@/lib/contact-form-processing");
       vi.mocked(processFormSubmission).mockResolvedValue({
         success: true,
         emailSent: false,

@@ -74,6 +74,46 @@ pnpm type-check
 - `RateLimitStore` 和 `IdempotencyStore` 接口已定义
 - Task 009/011 的实现方案已确定（不再有"先确认后端"的歧义）
 
+## Decision Record (2026-03-03)
+
+### Q1: Rate limit 原子计数器后端
+
+**决策: 保持现有多后端策略（Upstash Redis > Vercel KV > Memory），未来可加 D1 适配器**
+
+理由:
+- 现有代码已实现 Upstash Redis 和 Vercel KV 适配器，且生产环境未配置任何一个（当前使用 Memory fallback）
+- D1 已绑定但用于 tag cache，rate limit 和 tag cache 共用同一 D1 会增加耦合
+- 当前流量规模下 Memory 足够（单 Worker 实例内有效），后续如需跨实例一致性再配置 Upstash
+- Task 009 的改进重点是原子性语义（increment 改为 throw-on-failure），不需要更换后端
+
+### Q2: 幂等 SETNX 后端
+
+**决策: Memory 作为当前后端，接口预留分布式适配器**
+
+理由:
+- 当前 idempotency.ts 使用 `Map<string, IdempotencyCache>` 进程内缓存
+- 幂等 key 的生命周期通常是 24h，serverless 冷启动后缓存丢失的影响有限（最多导致重复处理一次）
+- `IdempotencyStore` 接口已定义 `setIfNotExists()` 方法，Task 011 可直接在 Memory 实现上实现状态机
+- 如需 D1 后端: `INSERT INTO idempotency_keys(key, status, ...) ON CONFLICT DO NOTHING` + scheduled cleanup
+
+### Q3: 是否共用存储层
+
+**决策: 分离（各自独立接口和适配器）**
+
+理由:
+- Rate limit 和 idempotency 有不同的数据模型（计数器 vs 状态机）
+- 故障域隔离 — rate limit 存储故障不应影响幂等判断
+- 接口定义在同一 `stores/` 目录下，共享代码组织但不共享运行时实例
+
+### 文件变更
+
+| 文件 | 变更 |
+|------|------|
+| `src/lib/security/stores/rate-limit-store.ts` | 新建 — 从 distributed-rate-limit.ts 抽取 RateLimitStore 接口 + 3 个适配器 + factory |
+| `src/lib/security/stores/idempotency-store.ts` | 新建 — IdempotencyStore 接口 + MemoryIdempotencyStore + factory |
+| `src/lib/security/stores/index.ts` | 新建 — barrel export |
+| `src/lib/security/distributed-rate-limit.ts` | 重写 — 从 stores/ 导入，移除内联定义 |
+
 ## Commit
 
 ```

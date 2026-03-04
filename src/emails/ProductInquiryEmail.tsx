@@ -1,9 +1,9 @@
 import type { CSSProperties } from "react";
 import { Section, Text } from "@react-email/components";
 import type { ProductInquiryEmailData } from "@/lib/validations";
-import { EmailField } from "@/components/emails/EmailField";
-import { EmailLayout } from "@/components/emails/EmailLayout";
-import { COLORS, FONT_SIZES, SPACING } from "@/components/emails/theme";
+import { EmailField } from "@/emails/EmailField";
+import { EmailLayout } from "@/emails/EmailLayout";
+import { COLORS, FONT_SIZES, SPACING } from "@/emails/theme";
 
 const ACCENT_COLOR = COLORS.success;
 const CONTENT_BACKGROUND = COLORS.contentBackground;

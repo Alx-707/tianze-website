@@ -9,49 +9,31 @@
  * - Prefer static imports for critical above-the-fold images when possible
  * - Use shimmer placeholder for dynamic/remote images to improve perceived LCP
  * - CSS-based blur filter provides instant visual feedback while image loads
+ *
+ * Note: Base64 strings are pre-computed constants (not Buffer.from at runtime)
+ * to prevent the Node.js Buffer polyfill (~5KB) from entering the client bundle.
  */
 
 /**
- * Shimmer placeholder with gradient animation.
- * Provides visual feedback during image loading without requiring pre-computation.
- *
- * Uses a base64-encoded SVG with animated gradient for a modern loading effect.
- * The 10x10 dimension is intentional - Next.js will scale it and apply blur.
+ * Pre-computed base64 of the shimmer SVG (animated gradient, 10x10).
+ * Equivalent to Buffer.from(SHIMMER_SVG.trim()).toString("base64") but avoids
+ * pulling Buffer into the client bundle.
  */
-const SHIMMER_SVG_TEMPLATE = `
-<svg width="10" height="10" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:rgb(229,231,235);stop-opacity:1">
-        <animate attributeName="offset" values="-2;1" dur="1.5s" repeatCount="indefinite"/>
-      </stop>
-      <stop offset="50%" style="stop-color:rgb(243,244,246);stop-opacity:1">
-        <animate attributeName="offset" values="-1;2" dur="1.5s" repeatCount="indefinite"/>
-      </stop>
-      <stop offset="100%" style="stop-color:rgb(229,231,235);stop-opacity:1">
-        <animate attributeName="offset" values="0;3" dur="1.5s" repeatCount="indefinite"/>
-      </stop>
-    </linearGradient>
-  </defs>
-  <rect width="10" height="10" fill="url(#g)"/>
-</svg>
-`;
+const SHIMMER_BASE64 =
+  "PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iMTAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPGRlZnM+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9ImciIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAlIiBzdHlsZT0ic3RvcC1jb2xvcjpyZ2IoMjI5LDIzMSwyMzUpO3N0b3Atb3BhY2l0eToxIj4KICAgICAgICA8YW5pbWF0ZSBhdHRyaWJ1dGVOYW1lPSJvZmZzZXQiIHZhbHVlcz0iLTI7MSIgZHVyPSIxLjVzIiByZXBlYXRDb3VudD0iaW5kZWZpbml0ZSIvPgogICAgICA8L3N0b3A+CiAgICAgIDxzdG9wIG9mZnNldD0iNTAlIiBzdHlsZT0ic3RvcC1jb2xvcjpyZ2IoMjQzLDI0NCwyNDYpO3N0b3Atb3BhY2l0eToxIj4KICAgICAgICA8YW5pbWF0ZSBhdHRyaWJ1dGVOYW1lPSJvZmZzZXQiIHZhbHVlcz0iLTE7MiIgZHVyPSIxLjVzIiByZXBlYXRDb3VudD0iaW5kZWZpbml0ZSIvPgogICAgICA8L3N0b3A+CiAgICAgIDxzdG9wIG9mZnNldD0iMTAwJSIgc3R5bGU9InN0b3AtY29sb3I6cmdiKDIyOSwyMzEsMjM1KTtzdG9wLW9wYWNpdHk6MSI+CiAgICAgICAgPGFuaW1hdGUgYXR0cmlidXRlTmFtZT0ib2Zmc2V0IiB2YWx1ZXM9IjA7MyIgZHVyPSIxLjVzIiByZXBlYXRDb3VudD0iaW5kZWZpbml0ZSIvPgogICAgICA8L3N0b3A+CiAgICA8L2xpbmVhckdyYWRpZW50PgogIDwvZGVmcz4KICA8cmVjdCB3aWR0aD0iMTAiIGhlaWdodD0iMTAiIGZpbGw9InVybCgjZykiLz4KPC9zdmc+";
 
 /** Static shimmer placeholder encoded as data URL */
-export const SHIMMER_BLUR_DATA_URL = `data:image/svg+xml;base64,${Buffer.from(SHIMMER_SVG_TEMPLATE.trim()).toString("base64")}`;
+export const SHIMMER_BLUR_DATA_URL = `data:image/svg+xml;base64,${SHIMMER_BASE64}`;
 
 /**
- * Neutral gray blur placeholder for product/blog images.
+ * Pre-computed base64 of the neutral gray SVG (solid gray, 10x10).
  * Simpler and lighter than shimmer, appropriate when animation isn't desired.
  */
-const NEUTRAL_SVG = `
-<svg width="10" height="10" xmlns="http://www.w3.org/2000/svg">
-  <rect width="10" height="10" fill="rgb(229,231,235)"/>
-</svg>
-`;
+const NEUTRAL_BASE64 =
+  "PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iMTAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPHJlY3Qgd2lkdGg9IjEwIiBoZWlnaHQ9IjEwIiBmaWxsPSJyZ2IoMjI5LDIzMSwyMzUpIi8+Cjwvc3ZnPg==";
 
 /** Static neutral gray placeholder */
-export const NEUTRAL_BLUR_DATA_URL = `data:image/svg+xml;base64,${Buffer.from(NEUTRAL_SVG.trim()).toString("base64")}`;
+export const NEUTRAL_BLUR_DATA_URL = `data:image/svg+xml;base64,${NEUTRAL_BASE64}`;
 
 /**
  * Image placeholder configuration for Next.js Image component.

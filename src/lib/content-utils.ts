@@ -124,7 +124,8 @@ export function validateFilePath(
   const resolvedPath = path.resolve(absolutePath);
   const resolvedBaseDir = path.resolve(allowedBaseDir);
 
-  if (!resolvedPath.startsWith(resolvedBaseDir)) {
+  const relative = path.relative(resolvedBaseDir, resolvedPath);
+  if (relative.startsWith("..") || path.isAbsolute(relative)) {
     throw new ContentError(
       `File path outside allowed directory: ${resolvedPath}`,
       "PATH_OUTSIDE_BASE",

@@ -15,7 +15,7 @@ import {
   FONT_SIZES,
   SIZES,
   SPACING,
-} from "@/components/emails/theme";
+} from "@/emails/theme";
 
 interface EmailLayoutProps {
   title: string;

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { ZodIssue } from "zod";
-import { mapZodIssueToErrorKey } from "../contact-form-error-utils";
+import { mapZodIssueToErrorKey } from "@/lib/contact-form-error-utils";
 
 // Helper to create ZodIssue for testing
 // Uses Record<string, unknown> to allow any Zod issue properties

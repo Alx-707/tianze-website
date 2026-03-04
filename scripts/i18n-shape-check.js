@@ -345,7 +345,9 @@ async function main() {
         ),
         "utf-8",
       );
-    } catch {}
+    } catch {
+      // Report file write is best-effort; exit with error regardless
+    }
     process.exit(1);
   }
 }

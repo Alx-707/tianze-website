@@ -200,7 +200,7 @@ describe("Verify Turnstile API Route - Core Tests", () => {
       const response = await POST(request);
       const data = await response.json();
 
-      expect(response.status).toBe(500);
+      expect(response.status).toBe(503);
       expect(data.success).toBe(false);
       expect(data.errorCode).toBe(API_ERROR_CODES.TURNSTILE_NETWORK_ERROR);
     });

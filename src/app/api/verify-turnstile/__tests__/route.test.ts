@@ -7,6 +7,18 @@ import { GET, POST } from "@/app/api/verify-turnstile/route";
 const mockFetch = vi.fn();
 global.fetch = mockFetch;
 
+// Mock distributed rate limit
+vi.mock("@/lib/security/distributed-rate-limit", () => ({
+  checkDistributedRateLimit: vi.fn(() =>
+    Promise.resolve({
+      allowed: true,
+      remaining: 10,
+      resetTime: Date.now() + 60000,
+    }),
+  ),
+  createRateLimitHeaders: vi.fn(() => new Headers()),
+}));
+
 // Mock environment variables
 vi.mock("@/lib/env", () => ({
   env: {
@@ -185,13 +197,13 @@ describe("Verify Turnstile API Route", () => {
       const response = await POST(request);
       const data = await response.json();
 
-      expect(response.status).toBe(500);
+      expect(response.status).toBe(503);
       expect(data.success).toBe(false);
       expect(data.errorCode).toBe(API_ERROR_CODES.TURNSTILE_NETWORK_ERROR);
     });
 
     it("应该处理Cloudflare API响应错误", async () => {
-      // Mock HTTP error response
+      // Mock HTTP error response — Cloudflare returning non-2xx is an upstream failure (503)
       mockFetch.mockResolvedValue({
         ok: false,
         status: 500,
@@ -212,7 +224,7 @@ describe("Verify Turnstile API Route", () => {
       const response = await POST(request);
       const data = await response.json();
 
-      expect(response.status).toBe(500);
+      expect(response.status).toBe(503);
       expect(data.success).toBe(false);
       expect(data.errorCode).toBe(API_ERROR_CODES.TURNSTILE_NETWORK_ERROR);
     });
@@ -343,6 +355,96 @@ describe("Verify Turnstile API Route", () => {
         writable: true,
         configurable: true,
       });
+    });
+  });
+
+  describe("Rate Limiting", () => {
+    it("should return 429 when rate limit is exceeded", async () => {
+      const { checkDistributedRateLimit } =
+        await import("@/lib/security/distributed-rate-limit");
+      vi.mocked(checkDistributedRateLimit).mockResolvedValueOnce({
+        allowed: false,
+        remaining: 0,
+        resetTime: Date.now() + 60000,
+        retryAfter: 60,
+      });
+
+      const request = new NextRequest(
+        "http://localhost:3000/api/verify-turnstile",
+        {
+          method: "POST",
+          body: JSON.stringify(validRequestBody),
+          headers: {
+            "content-type": "application/json",
+            "x-forwarded-for": "127.0.0.1",
+          },
+        },
+      );
+
+      const response = await POST(request);
+
+      expect(response.status).toBe(429);
+    });
+
+    it("should process normally when rate limit allows", async () => {
+      const { checkDistributedRateLimit } =
+        await import("@/lib/security/distributed-rate-limit");
+      vi.mocked(checkDistributedRateLimit).mockResolvedValueOnce({
+        allowed: true,
+        remaining: 10,
+        resetTime: Date.now() + 60000,
+        retryAfter: null,
+      });
+
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: () =>
+          Promise.resolve({
+            success: true,
+            hostname: "localhost",
+            action: "contact_form",
+          }),
+      });
+
+      const request = new NextRequest(
+        "http://localhost:3000/api/verify-turnstile",
+        {
+          method: "POST",
+          body: JSON.stringify(validRequestBody),
+          headers: {
+            "content-type": "application/json",
+            "x-forwarded-for": "127.0.0.1",
+          },
+        },
+      );
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(data.success).toBe(true);
+    });
+
+    it("should return 503 when Turnstile API throws exception", async () => {
+      mockFetch.mockRejectedValueOnce(new Error("Service unavailable"));
+
+      const request = new NextRequest(
+        "http://localhost:3000/api/verify-turnstile",
+        {
+          method: "POST",
+          body: JSON.stringify(validRequestBody),
+          headers: {
+            "content-type": "application/json",
+            "x-forwarded-for": "127.0.0.1",
+          },
+        },
+      );
+
+      const response = await POST(request);
+
+      // Current implementation returns 500, test expects 503
+      // This verifies whether error handling distinguishes upstream failures
+      expect(response.status).toBe(503);
     });
   });
 });

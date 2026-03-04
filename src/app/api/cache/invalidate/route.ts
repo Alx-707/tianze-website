@@ -33,6 +33,7 @@ import {
   invalidateProduct,
 } from "@/lib/cache";
 import { logger } from "@/lib/logger";
+import { constantTimeCompare } from "@/lib/security-crypto";
 import {
   checkDistributedRateLimit,
   createRateLimitHeaders,
@@ -42,6 +43,7 @@ import {
   getIPKey,
 } from "@/lib/security/rate-limit-key-strategies";
 import { API_ERROR_CODES } from "@/constants/api-error-codes";
+import { HTTP_INTERNAL_ERROR, HTTP_OK } from "@/constants";
 
 const VALID_LOCALES = ["en", "zh"] as const;
 const VALID_DOMAINS = ["i18n", "content", "product", "all"] as const;
@@ -55,14 +57,16 @@ const VALID_ENTITIES = [
   "featured",
 ] as const;
 
-const cacheInvalidationSchema = z.object({
-  domain: z.enum(VALID_DOMAINS, {
-    message: `domain must be one of: ${VALID_DOMAINS.join(", ")}`,
-  }),
-  locale: z.enum(VALID_LOCALES).optional(),
-  entity: z.enum(VALID_ENTITIES).optional(),
-  identifier: z.string().min(1).max(256).optional(),
-});
+const cacheInvalidationSchema = z
+  .object({
+    domain: z.enum(VALID_DOMAINS, {
+      message: `domain must be one of: ${VALID_DOMAINS.join(", ")}`,
+    }),
+    locale: z.enum(VALID_LOCALES).optional(),
+    entity: z.enum(VALID_ENTITIES).optional(),
+    identifier: z.string().min(1).max(256).optional(),
+  })
+  .strict();
 
 type InvalidationRequest = z.infer<typeof cacheInvalidationSchema>;
 
@@ -89,7 +93,7 @@ function validateApiKey(request: NextRequest): boolean {
   }
 
   const token = authHeader.slice(7);
-  return token === secret;
+  return constantTimeCompare(token, secret);
 }
 
 interface InvalidationResult {
@@ -199,12 +203,17 @@ async function parseRequestBody(
 }
 
 function buildSuccessResponse(result: InvalidationResult): NextResponse {
-  return NextResponse.json({
-    success: result.success,
-    errorCode: API_ERROR_CODES.CACHE_INVALIDATED,
-    invalidatedTags: result.invalidatedTags,
-    ...(result.errors.length > 0 && { errors: result.errors }),
-  });
+  return NextResponse.json(
+    {
+      success: result.success,
+      errorCode: result.success
+        ? API_ERROR_CODES.CACHE_INVALIDATED
+        : API_ERROR_CODES.CACHE_INVALIDATION_FAILED,
+      invalidatedTags: result.invalidatedTags,
+      ...(result.errors.length > 0 && { errors: result.errors }),
+    },
+    { status: result.success ? HTTP_OK : HTTP_INTERNAL_ERROR },
+  );
 }
 
 async function handleCacheInvalidation(

@@ -121,6 +121,17 @@ export function sanitizeCompany(company: string | undefined | null): string {
 }
 
 /**
+ * Sanitize phone number for logging
+ * Keeps first 3 chars and last 4 digits, masks middle
+ */
+export function sanitizePhone(phone: string | undefined | null): string {
+  if (!phone) return "[NO_PHONE]";
+  const s = String(phone).replace(/\s/g, "");
+  if (s.length <= 7) return "[PHONE]";
+  return `${s.slice(0, 3)}****${s.slice(s.length - 4)}`;
+}
+
+/**
  * Sanitize log context object by replacing PII fields
  */
 export function sanitizeLogContext<T extends Record<string, unknown>>(
@@ -138,6 +149,9 @@ export function sanitizeLogContext<T extends Record<string, unknown>>(
   }
   if ("company" in sanitized && typeof sanitized.company === "string") {
     sanitized.company = sanitizeCompany(sanitized.company);
+  }
+  if ("phone" in sanitized && typeof sanitized.phone === "string") {
+    sanitized.phone = sanitizePhone(sanitized.phone);
   }
   if ("from" in sanitized && typeof sanitized.from === "string") {
     sanitized.from = sanitizeEmail(sanitized.from);

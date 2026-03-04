@@ -23,6 +23,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { HTTP_TOO_MANY_REQUESTS } from "@/constants";
+import { API_ERROR_CODES } from "@/constants/api-error-codes";
 import { logger } from "@/lib/logger";
 import { getClientIP as getTrustedClientIP } from "@/lib/security/client-ip";
 import {
@@ -82,7 +83,7 @@ export type RateLimitedHandler<T = unknown> = (
  */
 interface RateLimitErrorBody {
   success: false;
-  error: string;
+  errorCode: string;
 }
 
 /**
@@ -117,7 +118,10 @@ function createRateLimitResponse<T>(
   });
 
   return NextResponse.json(
-    { success: false, error: "Too many requests" } as RateLimitErrorBody,
+    {
+      success: false,
+      errorCode: API_ERROR_CODES.RATE_LIMIT_EXCEEDED,
+    } as RateLimitErrorBody,
     { status: HTTP_TOO_MANY_REQUESTS, headers },
   ) as NextResponse<T>;
 }

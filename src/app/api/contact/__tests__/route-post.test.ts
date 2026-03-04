@@ -102,15 +102,19 @@ vi.mock("@/lib/security/distributed-rate-limit", () => ({
   createRateLimitHeaders: mockCreateRateLimitHeaders,
 }));
 
-// Mock contact API utils
-vi.mock("@/app/api/contact/contact-api-utils", () => ({
+// Mock turnstile (moved from contact-api-utils to lib)
+vi.mock("@/lib/turnstile", () => ({
   verifyTurnstile: mockVerifyTurnstile,
+}));
+
+// Mock contact form processing (processFormSubmission moved to lib)
+vi.mock("@/lib/contact-form-processing", () => ({
+  processFormSubmission: mockProcessFormSubmission,
 }));
 
 // Mock contact API validation
 vi.mock("@/app/api/contact/contact-api-validation", () => ({
   validateFormData: mockValidateFormData,
-  processFormSubmission: mockProcessFormSubmission,
   validateAdminAccess: vi.fn(),
   getContactFormStats: vi.fn(),
 }));

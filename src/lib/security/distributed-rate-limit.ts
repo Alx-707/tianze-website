@@ -2,8 +2,7 @@
  * Distributed Rate Limiting for Serverless
  *
  * Implements rate limiting that works across serverless instances.
- * Supports Upstash Redis or Vercel KV when configured, falls back to
- * in-memory store with warning for local development.
+ * Store implementations are in ./stores/rate-limit-store.ts.
  */
 
 import { logger } from "@/lib/logger";
@@ -16,28 +15,55 @@ import {
   ONE,
   ZERO,
 } from "@/constants";
+import {
+  type RateLimitStore,
+  MemoryRateLimitStore,
+  createRateLimitStore,
+} from "@/lib/security/stores/rate-limit-store";
 
 // Rate limit configuration per endpoint
+// failureMode: "open" = allow on storage failure; "closed" = deny on storage failure
 export const RATE_LIMIT_PRESETS = {
-  contact: { maxRequests: COUNT_FIVE, windowMs: MINUTE_MS },
-  inquiry: { maxRequests: COUNT_TEN, windowMs: MINUTE_MS },
-  subscribe: { maxRequests: COUNT_THREE, windowMs: MINUTE_MS },
-  whatsapp: { maxRequests: COUNT_FIVE, windowMs: MINUTE_MS },
-  csp: { maxRequests: 100, windowMs: MINUTE_MS },
-  cacheInvalidate: { maxRequests: COUNT_TEN, windowMs: MINUTE_MS },
-  // Pre-auth rate limit for brute force protection (more aggressive)
+  contact: {
+    maxRequests: COUNT_FIVE,
+    windowMs: MINUTE_MS,
+    failureMode: "open" as const,
+  },
+  inquiry: {
+    maxRequests: COUNT_TEN,
+    windowMs: MINUTE_MS,
+    failureMode: "open" as const,
+  },
+  subscribe: {
+    maxRequests: COUNT_THREE,
+    windowMs: MINUTE_MS,
+    failureMode: "open" as const,
+  },
+  whatsapp: {
+    maxRequests: COUNT_FIVE,
+    windowMs: MINUTE_MS,
+    failureMode: "open" as const,
+  },
+  csp: { maxRequests: 100, windowMs: MINUTE_MS, failureMode: "open" as const },
+  // Security-sensitive: deny on storage failure to prevent brute-force bypass
+  turnstile: {
+    maxRequests: COUNT_TEN,
+    windowMs: MINUTE_MS,
+    failureMode: "closed" as const,
+  },
+  cacheInvalidate: {
+    maxRequests: COUNT_TEN,
+    windowMs: MINUTE_MS,
+    failureMode: "closed" as const,
+  },
   cacheInvalidatePreAuth: {
     maxRequests: COUNT_TEN * COUNT_PAIR,
     windowMs: MINUTE_MS,
+    failureMode: "closed" as const,
   },
 } as const;
 
 export type RateLimitPreset = keyof typeof RATE_LIMIT_PRESETS;
-
-interface RateLimitEntry {
-  count: number;
-  resetTime: number;
-}
 
 interface RateLimitResult {
   allowed: boolean;
@@ -48,284 +74,10 @@ interface RateLimitResult {
   degraded?: boolean;
 }
 
-interface RateLimitStore {
-  get(key: string): Promise<RateLimitEntry | null>;
-  set(key: string, entry: RateLimitEntry, ttlMs: number): Promise<void>;
-  increment(
-    key: string,
-    windowMs: number,
-  ): Promise<{ count: number; resetTime: number }>;
-}
-
-/**
- * In-memory rate limit store (fallback for local development)
- */
-class MemoryRateLimitStore implements RateLimitStore {
-  private store = new Map<
-    string,
-    { entry: RateLimitEntry; expiresAt: number }
-  >();
-  private warned = false;
-
-  constructor() {
-    this.warnAboutMemoryStore();
-  }
-
-  private warnAboutMemoryStore(): void {
-    if (!this.warned) {
-      logger.warn(
-        "[Rate Limit] Using in-memory store. Rate limits will not persist across serverless instances. " +
-          "Configure UPSTASH_REDIS_REST_URL or KV_REST_API_URL for distributed rate limiting.",
-      );
-      this.warned = true;
-    }
-  }
-
-  // eslint-disable-next-line require-await -- Interface requires async for distributed store compatibility
-  async get(key: string): Promise<RateLimitEntry | null> {
-    const stored = this.store.get(key);
-    if (!stored) return null;
-
-    const now = Date.now();
-    if (now > stored.expiresAt) {
-      this.store.delete(key);
-      return null;
-    }
-
-    return stored.entry;
-  }
-
-  // eslint-disable-next-line require-await -- Interface requires async for distributed store compatibility
-  async set(key: string, entry: RateLimitEntry, ttlMs: number): Promise<void> {
-    const expiresAt = Date.now() + ttlMs;
-    this.store.set(key, { entry, expiresAt });
-  }
-
-  async increment(
-    key: string,
-    windowMs: number,
-  ): Promise<{ count: number; resetTime: number }> {
-    const now = Date.now();
-    const stored = this.store.get(key);
-
-    if (!stored || now > stored.expiresAt) {
-      const newEntry: RateLimitEntry = {
-        count: ONE,
-        resetTime: now + windowMs,
-      };
-      await this.set(key, newEntry, windowMs);
-      return newEntry;
-    }
-
-    stored.entry.count += ONE;
-    return stored.entry;
-  }
-
-  cleanup(): void {
-    const now = Date.now();
-    for (const [key, stored] of this.store.entries()) {
-      if (now > stored.expiresAt) {
-        this.store.delete(key);
-      }
-    }
-  }
-}
-
-/**
- * Redis-based rate limit store (Upstash Redis)
- */
-class RedisRateLimitStore implements RateLimitStore {
-  private baseUrl: string;
-  private token: string;
-
-  constructor(url: string, token: string) {
-    this.baseUrl = url.replace(/\/$/, "");
-    this.token = token;
-  }
-
-  private async redisCommand<T>(
-    commands: (string | number)[],
-  ): Promise<T | null> {
-    try {
-      const response = await fetch(`${this.baseUrl}`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${this.token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(commands),
-      });
-
-      if (!response.ok) {
-        logger.error("[Rate Limit] Redis command failed", {
-          status: response.status,
-        });
-        return null;
-      }
-
-      const data = (await response.json()) as { result: T };
-      return data.result;
-    } catch (error) {
-      logger.error("[Rate Limit] Redis connection error", { error });
-      return null;
-    }
-  }
-
-  async get(key: string): Promise<RateLimitEntry | null> {
-    const result = await this.redisCommand<string | null>(["GET", key]);
-    if (!result) return null;
-
-    try {
-      return JSON.parse(result) as RateLimitEntry;
-    } catch {
-      return null;
-    }
-  }
-
-  async set(key: string, entry: RateLimitEntry, ttlMs: number): Promise<void> {
-    const ttlSeconds = Math.ceil(ttlMs / MINUTE_MS) * (MINUTE_MS / 1000);
-    await this.redisCommand([
-      "SET",
-      key,
-      JSON.stringify(entry),
-      "PX",
-      Math.ceil(ttlSeconds * 1000),
-    ]);
-  }
-
-  async increment(
-    key: string,
-    windowMs: number,
-  ): Promise<{ count: number; resetTime: number }> {
-    const now = Date.now();
-    const existing = await this.get(key);
-
-    if (!existing || now > existing.resetTime) {
-      const newEntry: RateLimitEntry = {
-        count: ONE,
-        resetTime: now + windowMs,
-      };
-      await this.set(key, newEntry, windowMs);
-      return newEntry;
-    }
-
-    existing.count += ONE;
-    const remainingTtl = existing.resetTime - now;
-    await this.set(key, existing, remainingTtl);
-    return existing;
-  }
-}
-
-/**
- * Vercel KV-based rate limit store
- */
-class KVRateLimitStore implements RateLimitStore {
-  private baseUrl: string;
-  private token: string;
-
-  constructor(url: string, token: string) {
-    this.baseUrl = url.replace(/\/$/, "");
-    this.token = token;
-  }
-
-  private async kvCommand<T>(
-    method: string,
-    path: string,
-    body?: unknown,
-  ): Promise<T | null> {
-    try {
-      const response = await fetch(`${this.baseUrl}${path}`, {
-        method,
-        headers: {
-          Authorization: `Bearer ${this.token}`,
-          "Content-Type": "application/json",
-        },
-        ...(body ? { body: JSON.stringify(body) } : {}),
-      });
-
-      if (!response.ok) {
-        logger.error("[Rate Limit] KV command failed", {
-          status: response.status,
-        });
-        return null;
-      }
-
-      return response.json() as Promise<T>;
-    } catch (error) {
-      logger.error("[Rate Limit] KV connection error", { error });
-      return null;
-    }
-  }
-
-  async get(key: string): Promise<RateLimitEntry | null> {
-    const result = await this.kvCommand<{ result: string | null }>(
-      "GET",
-      `/get/${key}`,
-    );
-    if (!result?.result) return null;
-
-    try {
-      return JSON.parse(result.result) as RateLimitEntry;
-    } catch {
-      return null;
-    }
-  }
-
-  async set(key: string, entry: RateLimitEntry, ttlMs: number): Promise<void> {
-    const ttlSeconds = Math.ceil(ttlMs / 1000);
-    await this.kvCommand("POST", `/set/${key}`, {
-      value: JSON.stringify(entry),
-      ex: ttlSeconds,
-    });
-  }
-
-  async increment(
-    key: string,
-    windowMs: number,
-  ): Promise<{ count: number; resetTime: number }> {
-    const now = Date.now();
-    const existing = await this.get(key);
-
-    if (!existing || now > existing.resetTime) {
-      const newEntry: RateLimitEntry = {
-        count: ONE,
-        resetTime: now + windowMs,
-      };
-      await this.set(key, newEntry, windowMs);
-      return newEntry;
-    }
-
-    existing.count += ONE;
-    const remainingTtl = existing.resetTime - now;
-    await this.set(key, existing, remainingTtl);
-    return existing;
-  }
-}
-
-/**
- * Create the appropriate rate limit store based on available configuration
- */
-function createRateLimitStore(): RateLimitStore {
-  const upstashUrl = process.env.UPSTASH_REDIS_REST_URL;
-  const upstashToken = process.env.UPSTASH_REDIS_REST_TOKEN;
-
-  if (upstashUrl && upstashToken) {
-    logger.info("[Rate Limit] Using Upstash Redis store");
-    return new RedisRateLimitStore(upstashUrl, upstashToken);
-  }
-
-  const kvUrl = process.env.KV_REST_API_URL;
-  const kvToken = process.env.KV_REST_API_TOKEN;
-
-  if (kvUrl && kvToken) {
-    logger.info("[Rate Limit] Using Vercel KV store");
-    return new KVRateLimitStore(kvUrl, kvToken);
-  }
-
-  return new MemoryRateLimitStore();
-}
-
 let rateLimitStore: RateLimitStore | null = null;
+
+/** Per-key promise queue for single-process atomicity (prevents TOCTOU races) */
+const rateLimitQueue = new Map<string, Promise<unknown>>();
 
 function getRateLimitStore(): RateLimitStore {
   if (!rateLimitStore) {
@@ -340,6 +92,7 @@ function getRateLimitStore(): RateLimitStore {
 function getRateLimitConfig(preset: RateLimitPreset): {
   maxRequests: number;
   windowMs: number;
+  failureMode: "open" | "closed";
 } {
   switch (preset) {
     case "contact":
@@ -352,6 +105,8 @@ function getRateLimitConfig(preset: RateLimitPreset): {
       return RATE_LIMIT_PRESETS.whatsapp;
     case "csp":
       return RATE_LIMIT_PRESETS.csp;
+    case "turnstile":
+      return RATE_LIMIT_PRESETS.turnstile;
     case "cacheInvalidate":
       return RATE_LIMIT_PRESETS.cacheInvalidate;
     case "cacheInvalidatePreAuth":
@@ -364,17 +119,11 @@ function getRateLimitConfig(preset: RateLimitPreset): {
   }
 }
 
-/**
- * Check rate limit for a given identifier and preset
- */
-export async function checkDistributedRateLimit(
-  identifier: string,
-  preset: RateLimitPreset,
+async function executeRateLimitCheck(
+  key: string,
+  config: ReturnType<typeof getRateLimitConfig>,
 ): Promise<RateLimitResult> {
   const store = getRateLimitStore();
-  const config = getRateLimitConfig(preset);
-  const key = `ratelimit:${preset}:${identifier}`;
-
   try {
     const { count, resetTime } = await store.increment(key, config.windowMs);
     const now = Date.now();
@@ -388,17 +137,52 @@ export async function checkDistributedRateLimit(
       retryAfter: allowed ? null : Math.ceil((resetTime - now) / 1000),
     };
   } catch (error) {
-    logger.error("[Rate Limit] Check failed, allowing request (fail-open)", {
-      error,
-    });
+    const failClosed = config.failureMode === "closed";
+    logger.warn(
+      failClosed
+        ? "[Rate Limit] Storage failure — fail-closed, denying request (degraded)"
+        : "[Rate Limit] Storage failure — fail-open, allowing request (degraded)",
+    );
+    logger.error("[Rate Limit] Storage backend error details", { error });
     return {
-      allowed: true,
-      remaining: config.maxRequests - ONE,
+      allowed: !failClosed,
+      remaining: failClosed ? ZERO : config.maxRequests - ONE,
       resetTime: Date.now() + config.windowMs,
-      retryAfter: null,
+      retryAfter: failClosed ? Math.ceil(config.windowMs / 1000) : null,
       degraded: true,
     };
   }
+}
+
+/**
+ * Check rate limit for a given identifier and preset.
+ *
+ * Serializes concurrent requests for the same key via a promise queue to
+ * prevent TOCTOU races within a single process instance.
+ */
+export function checkDistributedRateLimit(
+  identifier: string,
+  preset: RateLimitPreset,
+): Promise<RateLimitResult> {
+  const config = getRateLimitConfig(preset);
+  const key = `ratelimit:${preset}:${identifier}`;
+
+  // Chain onto the previous pending request for this key (if any) to serialize
+  // increments within the same process and prevent read-modify-write races.
+  const previous = (rateLimitQueue.get(key) ?? Promise.resolve()).catch(() => {
+    /* swallow queue errors to prevent cascade failures */
+  });
+  const current = previous.then(() => executeRateLimitCheck(key, config));
+
+  // Register as the latest pending operation for this key
+  rateLimitQueue.set(
+    key,
+    current.catch(() => {
+      /* swallow queue errors to prevent cascade failures */
+    }),
+  );
+
+  return current;
 }
 
 /**
@@ -476,4 +260,5 @@ export function cleanupRateLimitStore(): void {
  */
 export function resetRateLimitStore(): void {
   rateLimitStore = null;
+  rateLimitQueue.clear();
 }

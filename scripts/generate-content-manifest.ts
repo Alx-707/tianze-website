@@ -63,7 +63,7 @@ function scanDirectory(
     return entries;
   }
 
-  const files = fs.readdirSync(dirPath);
+  const files = fs.readdirSync(dirPath).sort();
 
   for (const file of files) {
     const ext = path.extname(file);
@@ -113,6 +113,11 @@ function generateManifest(): ContentManifest {
   const byKey: Record<string, ContentEntry> = {};
   for (const entry of entries) {
     const key = buildManifestKey(entry.type, entry.locale, entry.slug);
+    if (byKey[key]) {
+      throw new Error(
+        `Duplicate slug "${key}": found in both "${byKey[key].filePath}" and "${entry.filePath}"`,
+      );
+    }
     byKey[key] = entry;
   }
 

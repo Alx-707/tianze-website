@@ -171,7 +171,7 @@ describe("CSP Report API Route - 核心功能测试", () => {
       expect(responseData.error).toBe("Invalid CSP report format");
     });
 
-    it("应该拒绝空的csp-report对象", async () => {
+    it("应该用204接受空的csp-report对象（浏览器怪癖）", async () => {
       const emptyReport = {
         "csp-report": {},
       };
@@ -186,9 +186,9 @@ describe("CSP Report API Route - 核心功能测试", () => {
 
       const response = await POST(request);
 
-      expect(response.status).toBe(200);
-      const responseData = await response.json();
-      expect(responseData.error).toBe("Invalid CSP report format");
+      // Empty csp-report is a browser quirk — acknowledged with 204 No Content
+      expect(response.status).toBe(204);
+      expect(response.body).toBeNull();
     });
   });
 

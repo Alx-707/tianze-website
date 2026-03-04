@@ -17,10 +17,10 @@ import {
 import { logger, sanitizeIP, sanitizeLogContext } from "@/lib/logger";
 import {
   getContactFormStats,
-  processFormSubmission,
   validateAdminAccess,
   validateFormData,
 } from "@/app/api/contact/contact-api-validation";
+import { processFormSubmission } from "@/lib/contact-form-processing";
 import { API_ERROR_CODES } from "@/constants/api-error-codes";
 import {
   HTTP_BAD_REQUEST,

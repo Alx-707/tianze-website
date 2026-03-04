@@ -29,7 +29,6 @@ export default [
     name: "ignores",
     ignores: [
       "performance-audit/**",
-      "scripts/**",
       "reports/**",
       ".next/**",
       ".context/**",
@@ -964,7 +963,7 @@ export default [
   // Scripts directory overrides - Allow more relaxed rules for build/utility scripts
   {
     name: "scripts-directory-overrides",
-    files: ["scripts/**/*.{js,ts}"],
+    files: ["scripts/**/*.{js,ts,mjs}"],
     plugins: {
       security,
     },
@@ -1010,10 +1009,20 @@ export default [
       "max-statements": "off",
       // Allow long functions
       "max-lines-per-function": "off",
+      // Allow large files
+      "max-lines": "off",
+      // Allow many parameters
+      "max-params": "off",
+      // Allow parameter reassignment
+      "no-param-reassign": "off",
+      // Allow direct property access
+      "prefer-destructuring": "off",
       // Allow non-literal regex
       "security/detect-non-literal-regexp": "off",
       // Allow @ts-nocheck
       "@typescript-eslint/ban-ts-comment": "off",
+      // Allow process.exit in CLI scripts
+      "no-process-exit": "off",
     },
   },
 

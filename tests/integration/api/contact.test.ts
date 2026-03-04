@@ -12,20 +12,20 @@ vi.mock("@/lib/security/distributed-rate-limit", () => ({
   createRateLimitHeaders: vi.fn(() => new Headers()),
 }));
 
-vi.mock("@/app/api/contact/contact-api-utils", () => ({
-  getClientIP: vi.fn(() => "1.1.1.1"),
+vi.mock("@/lib/contact-form-processing", () => ({
+  processFormSubmission: vi.fn(async () => ({
+    success: true,
+    emailSent: true,
+    recordCreated: true,
+    emailMessageId: "msg-1",
+    airtableRecordId: "rec-1",
+  })),
 }));
 
 vi.mock("@/app/api/contact/contact-api-validation", () => ({
   validateFormData: vi.fn(async (body: unknown) => ({
     success: true,
     data: body as any,
-  })),
-  processFormSubmission: vi.fn(async () => ({
-    emailSent: true,
-    recordCreated: true,
-    emailMessageId: "msg-1",
-    airtableRecordId: "rec-1",
   })),
   validateAdminAccess: vi.fn((auth?: string | null) => auth === "Bearer admin"),
   getContactFormStats: vi.fn(async () => ({ total: 10 })),

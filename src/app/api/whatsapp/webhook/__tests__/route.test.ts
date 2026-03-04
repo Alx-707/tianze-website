@@ -390,7 +390,8 @@ describe("WhatsApp Webhook Route", () => {
   });
 
   describe("Signature-First Rate Limiting", () => {
-    it("should NOT call rate limit check when signature is invalid", async () => {
+    it("should call rate limit check even when signature is invalid", async () => {
+      // Rate limit now happens BEFORE signature check (new execution order)
       mockVerifyWebhookSignature.mockReturnValue(false);
 
       const request = createMockPostRequest({
@@ -401,11 +402,11 @@ describe("WhatsApp Webhook Route", () => {
       const response = await POST(request);
 
       expect(response.status).toBe(401);
+      expect(mockCheckDistributedRateLimit).toHaveBeenCalled();
       expect(mockVerifyWebhookSignature).toHaveBeenCalled();
-      expect(mockCheckDistributedRateLimit).not.toHaveBeenCalled();
     });
 
-    it("should call rate limit check ONLY after signature is valid", async () => {
+    it("should call rate limit check before signature verification", async () => {
       mockVerifyWebhookSignature.mockReturnValue(true);
 
       const request = createMockPostRequest({
@@ -441,10 +442,17 @@ describe("WhatsApp Webhook Route", () => {
       expect(mockHandleIncomingMessage).not.toHaveBeenCalled();
     });
 
-    it("should not consume rate limit quota for invalid signatures", async () => {
+    it("should consume rate limit quota even for invalid signatures", async () => {
+      // Rate limit now happens BEFORE signature check to prevent brute-force
+      // signature guessing and resource exhaustion attacks.
       mockVerifyWebhookSignature.mockReturnValue(false);
+      mockCheckDistributedRateLimit.mockResolvedValue({
+        allowed: true,
+        remaining: 4,
+        resetTime: Date.now() + 60000,
+        retryAfter: null,
+      });
 
-      // Simulate multiple invalid signature requests
       for (let i = 0; i < 5; i++) {
         const request = createMockPostRequest(
           { object: "whatsapp_business_account", entry: [] },
@@ -453,8 +461,116 @@ describe("WhatsApp Webhook Route", () => {
         await POST(request);
       }
 
-      // Rate limit should never be called for invalid signatures
-      expect(mockCheckDistributedRateLimit).not.toHaveBeenCalled();
+      // Rate limit IS called (happens before signature check)
+      expect(mockCheckDistributedRateLimit).toHaveBeenCalled();
+    });
+  });
+
+  // =========================================================================
+  // Security Hardening Tests (Red)
+  // =========================================================================
+  describe("oversized body protection", () => {
+    it("should reject requests with body exceeding 1MB", async () => {
+      mockVerifyWebhookSignature.mockReturnValue(true);
+
+      // Create a request with Content-Length header indicating 2MB body
+      const url = "http://localhost:3000/api/whatsapp/webhook";
+      const largeBody = "x".repeat(2_000_000);
+      const request = new NextRequest(url, {
+        method: "POST",
+        body: largeBody,
+        headers: {
+          "Content-Type": "application/json",
+          "x-hub-signature-256": "sha256=test-signature",
+          "Content-Length": "2000000",
+        },
+      });
+
+      const response = await POST(request);
+
+      // Should return 413 Payload Too Large before processing body
+      expect(response.status).toBe(413);
+    });
+  });
+
+  describe("execution order security", () => {
+    it("should apply rate limiting BEFORE reading request body", async () => {
+      // This tests that rate limit check happens before body is read.
+      // Currently, the implementation reads the full body (request.text())
+      // BEFORE checking rate limits, allowing attackers to force the server
+      // to read arbitrarily large bodies even when rate limited.
+      mockVerifyWebhookSignature.mockReturnValue(false);
+
+      const callOrder: string[] = [];
+
+      // Track when rate limit is checked
+      mockCheckDistributedRateLimit.mockImplementation(async () => {
+        callOrder.push("rate-limit");
+        return {
+          allowed: true,
+          remaining: 10,
+          resetTime: Date.now() + 60000,
+          retryAfter: null,
+        };
+      });
+
+      const request = createMockPostRequest({
+        object: "whatsapp_business_account",
+        entry: [],
+      });
+
+      await POST(request);
+
+      // Rate limit should be called (even for invalid signatures,
+      // it should happen before body reading to prevent resource exhaustion).
+      // Current implementation skips rate limit for invalid signatures entirely.
+      expect(mockCheckDistributedRateLimit).toHaveBeenCalled();
+    });
+
+    it("should consume rate limit quota for invalid signature requests", async () => {
+      // Invalid signature requests should still consume rate limit quota
+      // to prevent brute-force signature guessing attacks.
+      // Current implementation skips rate limit entirely for invalid signatures.
+      mockVerifyWebhookSignature.mockReturnValue(false);
+      mockCheckDistributedRateLimit.mockResolvedValue({
+        allowed: true,
+        remaining: 4,
+        resetTime: Date.now() + 60000,
+        retryAfter: null,
+      });
+
+      const request = createMockPostRequest(
+        { object: "whatsapp_business_account", entry: [] },
+        "sha256=invalid-brute-force-attempt",
+      );
+
+      await POST(request);
+
+      // Rate limit SHOULD be consumed even for invalid signatures
+      expect(mockCheckDistributedRateLimit).toHaveBeenCalled();
+    });
+
+    it("should return 429 after repeated invalid signature attempts", async () => {
+      // After enough invalid signature attempts, rate limit should kick in
+      mockVerifyWebhookSignature.mockReturnValue(false);
+
+      // Simulate rate limit being exceeded
+      mockCheckDistributedRateLimit.mockResolvedValue({
+        allowed: false,
+        remaining: 0,
+        resetTime: Date.now() + 60000,
+        retryAfter: 60,
+      });
+
+      const request = createMockPostRequest(
+        { object: "whatsapp_business_account", entry: [] },
+        "sha256=brute-force-attempt",
+      );
+
+      const response = await POST(request);
+
+      // Should return 429 even for invalid signatures when rate limited
+      expect(response.status).toBe(429);
     });
   });
 });

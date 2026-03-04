@@ -5,7 +5,7 @@
 import { render } from "@react-email/render";
 import { describe, expect, it } from "vitest";
 import type { ProductInquiryEmailData } from "@/lib/validations";
-import { ProductInquiryEmail } from "@/components/emails/ProductInquiryEmail";
+import { ProductInquiryEmail } from "@/emails/ProductInquiryEmail";
 
 const baseData: ProductInquiryEmailData = {
   firstName: "John",
