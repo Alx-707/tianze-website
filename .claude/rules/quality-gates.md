@@ -25,10 +25,10 @@ All limits are **function-level** (cyclomatic complexity measured per function).
 
 No bare numbers allowed. Use constants from `src/constants/`.
 
-**ESLint allowlist**: `0, 1, -1, 100, 200, 201, 400, 401, 403, 404, 500, 502, 503, 24, 60, 1000`
+**ESLint allowlist**: 见 `eslint.config.mjs` 中 `no-magic-numbers.ignore`（列表已大幅扩展，以配置文件为准）
 
 Constants organization:
-- `src/constants/performance.ts` — Performance thresholds
+- `src/constants/performance-constants.ts` — Performance thresholds
 - `src/constants/time.ts` — Time values
 
 ## Performance Monitoring (Lighthouse CI)
@@ -71,7 +71,7 @@ When upgrading `next` / `react` / `typescript` or dependencies with security ale
 
 ## Test Coverage
 
-**Progressive Roadmap** (aligned with `.augment/rules`):
+**Progressive Roadmap**:
 
 | Phase | Target | Timeline |
 |-------|--------|----------|
@@ -79,7 +79,7 @@ When upgrading `next` / `react` / `typescript` or dependencies with security ale
 | Phase 2 | ≥75% | +3 months |
 | Phase 3 | ≥80% | +6 months |
 
-**Current Status**: ~72% (exceeds Phase 1 target)
+**Current Status**: 运行 `pnpm test:coverage` 查看实时数据
 
 | Module Type | Target | Enforcement |
 |-------------|--------|-------------|

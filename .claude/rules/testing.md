@@ -138,7 +138,7 @@ const mockConfig = {
 const mockConfig = createMockConfig({ enabled: true });
 ```
 
-Factory functions in `src/test/factories/` — when interface changes, factory fails first.
+Factory functions in `src/test/factories/` (create if needed) — when interface changes, factory fails first.
 
 ## Skipped Tests Policy
 
