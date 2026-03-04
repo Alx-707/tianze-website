@@ -108,16 +108,15 @@ export const CONTACT_FORM_CONFIG = {
 
 ### 测试覆盖率
 
-当前组件覆盖率略低于阈值（实际 ~41.9% vs 目标 42%），不阻塞构建但会显示警告：
+覆盖率阈值由 `scripts/quality-gate.js` 统一管理（SSoT）：
 
-```
-ERROR: Coverage for lines (41.91%) does not meet "src/components/**/*.{ts,tsx}" threshold (42%)
-```
+- **全局**: ≥65%（Phase 1），路线图 → 75%（Phase 2）→ 80%（Phase 3）
+- **增量（diff coverage）**: 变更代码 ≥90%（CI 阻断）
 
-**建议**：
-- 为新增组件编写测试
-- 运行 `pnpm test:coverage` 查看详细报告
-- 覆盖率配置见 `vitest.config.mts` 中的 `thresholds`
+```bash
+pnpm test:coverage                    # 生成覆盖率报告
+pnpm quality:gate -- --skip-test-run  # 本地检查门禁
+```
 
 ### 架构警告
 

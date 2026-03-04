@@ -90,7 +90,9 @@ When upgrading `next` / `react` / `typescript` or dependencies with security ale
 | Performance/i18n | 85-88% | Blocking |
 | UI Components | ≥70% | Blocking |
 
-**Incremental Coverage**: New/changed code must achieve ≥90% coverage.
+**Incremental Coverage (tiered)**: New/changed code uses two thresholds:
+- **≥70%**: Blocking (hard gate) — ensures new code is better than the 65% baseline
+- **≥90%**: Warning (soft gate) — encourages high standards without blocking large refactoring PRs
 
 ## Performance Budget (Core Web Vitals)
 
