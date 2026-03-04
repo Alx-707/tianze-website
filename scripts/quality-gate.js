@@ -197,7 +197,6 @@ class QualityGate {
             // error.tsx 已被 diffCoverageExcludeGlobs 中 src/app/**/error.tsx 覆盖
             "src/types/whatsapp-api-requests/api-types.ts",
             "src/types/whatsapp-webhook-utils/functions.ts",
-            "src/lib/content-parser.ts", // Content parser - covered by content tests
           ],
           // 增量覆盖率排除（glob）：生成文件/声明文件/无逻辑代码默认不纳入 diff-line coverage
           diffCoverageExcludeGlobs: [

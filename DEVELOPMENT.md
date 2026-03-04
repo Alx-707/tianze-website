@@ -111,7 +111,7 @@ export const CONTACT_FORM_CONFIG = {
 覆盖率阈值由 `scripts/quality-gate.js` 统一管理（SSoT）：
 
 - **全局**: ≥65%（Phase 1），路线图 → 75%（Phase 2）→ 80%（Phase 3）
-- **增量（diff coverage）**: 变更代码 ≥90%（CI 阻断）
+- **增量（diff coverage）**: ≥70% 阻断（硬门禁）/ ≥90% 警告（软门禁）
 
 ```bash
 pnpm test:coverage                    # 生成覆盖率报告
