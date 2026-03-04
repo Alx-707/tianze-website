@@ -43,7 +43,12 @@ import {
   getIPKey,
 } from "@/lib/security/rate-limit-key-strategies";
 import { API_ERROR_CODES } from "@/constants/api-error-codes";
-import { HTTP_INTERNAL_ERROR, HTTP_OK } from "@/constants";
+import {
+  HTTP_INTERNAL_ERROR,
+  HTTP_OK,
+  HTTP_SERVICE_UNAVAILABLE,
+  HTTP_TOO_MANY_REQUESTS,
+} from "@/constants";
 
 const VALID_LOCALES = ["en", "zh"] as const;
 const VALID_DOMAINS = ["i18n", "content", "product", "all"] as const;
@@ -166,13 +171,25 @@ async function checkRateLimitAndRespond(
 ): Promise<NextResponse | null> {
   const rateLimitResult = await checkDistributedRateLimit(identifier, preset);
   if (!rateLimitResult.allowed) {
+    const isStorageFailure = rateLimitResult.deniedReason === "storage_failure";
     logger.warn(`Cache invalidation ${logContext} rate limit exceeded`, {
       keyPrefix: identifier.slice(0, 8),
       retryAfter: rateLimitResult.retryAfter,
+      deniedReason: rateLimitResult.deniedReason,
     });
     return NextResponse.json(
-      { success: false, errorCode: API_ERROR_CODES.RATE_LIMIT_EXCEEDED },
-      { status: 429, headers: createRateLimitHeaders(rateLimitResult) },
+      {
+        success: false,
+        errorCode: isStorageFailure
+          ? API_ERROR_CODES.SERVICE_UNAVAILABLE
+          : API_ERROR_CODES.RATE_LIMIT_EXCEEDED,
+      },
+      {
+        status: isStorageFailure
+          ? HTTP_SERVICE_UNAVAILABLE
+          : HTTP_TOO_MANY_REQUESTS,
+        headers: createRateLimitHeaders(rateLimitResult),
+      },
     );
   }
   return null;

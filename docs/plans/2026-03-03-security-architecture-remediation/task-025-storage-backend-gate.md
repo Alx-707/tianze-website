@@ -80,6 +80,8 @@ pnpm type-check
 
 **决策: 保持现有多后端策略（Upstash Redis > Vercel KV > Memory），未来可加 D1 适配器**
 
+**已知限制（2026-03-04 验收确认）：** 当前实现为**单实例串行**（per-key promise queue），非跨实例原子。store 侧 `increment()` 仍为 GET→SET，多实例并发可能超发。跨实例原子性需配置分布式后端（Upstash INCR / D1 原子 SQL）。当前流量规模下单实例 Memory 足够。
+
 理由:
 - 现有代码已实现 Upstash Redis 和 Vercel KV 适配器，且生产环境未配置任何一个（当前使用 Memory fallback）
 - D1 已绑定但用于 tag cache，rate limit 和 tag cache 共用同一 D1 会增加耦合
@@ -89,6 +91,8 @@ pnpm type-check
 ### Q2: 幂等 SETNX 后端
 
 **决策: Memory 作为当前后端，接口预留分布式适配器**
+
+**已知限制（2026-03-04 验收确认）：** 当前为**进程内 Memory store**，serverless 冷启动后丢失。fingerprint 仅绑定 `method:pathname`，未绑定 body hash。跨实例持久化幂等需 D1/DO 后端，body fingerprint 为后续增强项。
 
 理由:
 - 当前 idempotency.ts 使用 `Map<string, IdempotencyCache>` 进程内缓存

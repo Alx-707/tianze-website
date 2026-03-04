@@ -106,9 +106,19 @@ export async function POST(request: NextRequest) {
     );
     if (!rateLimitResult.allowed) {
       const rateLimitHeaders = createRateLimitHeaders(rateLimitResult);
+      const statusCode =
+        rateLimitResult.deniedReason === "storage_failure"
+          ? HTTP_SERVICE_UNAVAILABLE
+          : HTTP_TOO_MANY_REQUESTS;
       return NextResponse.json(
-        { success: false, errorCode: API_ERROR_CODES.RATE_LIMIT_EXCEEDED },
-        { status: HTTP_TOO_MANY_REQUESTS, headers: rateLimitHeaders },
+        {
+          success: false,
+          errorCode:
+            rateLimitResult.deniedReason === "storage_failure"
+              ? API_ERROR_CODES.SERVICE_UNAVAILABLE
+              : API_ERROR_CODES.RATE_LIMIT_EXCEEDED,
+        },
+        { status: statusCode, headers: rateLimitHeaders },
       );
     }
 
