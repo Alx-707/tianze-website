@@ -25,7 +25,8 @@ function extractLocaleCandidate(pathname: string): Locale | undefined {
 
 function setLocaleCookie(resp: NextResponse, locale: Locale): void {
   try {
-    const isProduction = process.env.NODE_ENV === "production";
+    const appEnv = process.env.APP_ENV;
+    const isSecure = appEnv === "production" || appEnv === "preview";
     const { localeCookie } = routing;
     const maxAge =
       typeof localeCookie === "object" && localeCookie !== null
@@ -35,7 +36,7 @@ function setLocaleCookie(resp: NextResponse, locale: Locale): void {
       path: "/",
       httpOnly: true,
       sameSite: "lax",
-      secure: isProduction,
+      secure: isSecure,
       ...(typeof maxAge === "number" ? { maxAge } : {}),
     });
   } catch {

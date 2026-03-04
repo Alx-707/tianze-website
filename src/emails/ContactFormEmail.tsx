@@ -2,9 +2,9 @@ import type { CSSProperties } from "react";
 import { Text } from "@react-email/components";
 import { ResendUtils } from "@/lib/resend-utils";
 import type { EmailTemplateData } from "@/lib/validations";
-import { EmailField } from "@/components/emails/EmailField";
-import { EmailLayout } from "@/components/emails/EmailLayout";
-import { COLORS, FONT_SIZES } from "@/components/emails/theme";
+import { EmailField } from "@/emails/EmailField";
+import { EmailLayout } from "@/emails/EmailLayout";
+import { COLORS, FONT_SIZES } from "@/emails/theme";
 import { SITE_CONFIG } from "@/config/paths/site-config";
 
 const ACCENT_COLOR = COLORS.primary;

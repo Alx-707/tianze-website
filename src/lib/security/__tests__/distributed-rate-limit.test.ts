@@ -604,4 +604,134 @@ describe("distributed-rate-limit", () => {
       );
     });
   });
+
+  // =========================================================================
+  // 9. Atomicity & Concurrency Tests (Red — non-atomic read-modify-write)
+  // =========================================================================
+  describe("atomicity and concurrency", () => {
+    it("should use atomic increment to prevent over-admission under concurrent access", async () => {
+      // The Redis/KV store implementations use non-atomic read-modify-write:
+      //   1. GET key -> count=N
+      //   2. count + 1 = N+1
+      //   3. SET key count=N+1
+      // Two concurrent requests can both read count=N and both write N+1,
+      // effectively admitting 2 requests but only incrementing by 1.
+      //
+      // This test verifies the implementation uses atomic operations (e.g., INCR).
+      vi.useRealTimers();
+      resetRateLimitStore();
+
+      // Set up Upstash Redis store to trigger the non-atomic code path
+      setEnv("UPSTASH_REDIS_REST_URL", "http://fake-redis:8080");
+      setEnv("UPSTASH_REDIS_REST_TOKEN", "fake-token");
+
+      // Simulate a Redis-like store with async delay on reads
+      // to guarantee the race window is open
+      let storedValue: string | null = null;
+      const fetchSpy = vi.spyOn(globalThis, "fetch");
+
+      fetchSpy.mockImplementation(async (_url, options) => {
+        const body = JSON.parse(String((options as RequestInit).body));
+        const command = body[0] as string;
+
+        if (command === "GET") {
+          // Capture current value BEFORE any delay
+          const snapshot = storedValue;
+          // Async delay opens the race window: all concurrent reads
+          // see the same snapshot before any write lands
+          await new Promise<void>((resolve) => {
+            setTimeout(resolve, 20);
+          });
+          return new Response(JSON.stringify({ result: snapshot }), {
+            status: 200,
+          });
+        }
+
+        if (command === "SET") {
+          storedValue = body[2] as string;
+          return new Response(JSON.stringify({ result: "OK" }), {
+            status: 200,
+          });
+        }
+
+        return new Response(JSON.stringify({ result: null }), { status: 200 });
+      });
+
+      const identifier = "concurrent-redis-user";
+      const concurrentRequests = COUNT_TEN;
+
+      // Fire 10 concurrent requests against a window of 5 (contact preset)
+      const results = await Promise.all(
+        Array.from({ length: concurrentRequests }, () =>
+          checkDistributedRateLimit(identifier, "contact"),
+        ),
+      );
+
+      const allowedCount = results.filter((r) => r.allowed).length;
+
+      fetchSpy.mockRestore();
+
+      // With atomic INCR, at most 5 should be allowed.
+      // With non-atomic GET+SET, ALL 10 see count=null (no entry yet),
+      // each creates count=1, and all 10 are allowed.
+      expect(allowedCount).toBeLessThanOrEqual(COUNT_FIVE);
+    });
+  });
+
+  // =========================================================================
+  // 10. Storage Failure Behavior Tests (Red — silent null instead of throw)
+  // =========================================================================
+  describe("storage failure behavior", () => {
+    it("should set degraded flag and warn when storage backend throws", async () => {
+      // First call to initialize the store
+      await checkDistributedRateLimit("init-for-failure", "contact");
+
+      // We need the store's increment to throw. Since the memory store
+      // increment does not throw, we simulate by resetting and using
+      // env vars pointing to a non-existent Redis that fails.
+      resetRateLimitStore();
+      setEnv("UPSTASH_REDIS_REST_URL", "http://localhost:1");
+      setEnv("UPSTASH_REDIS_REST_TOKEN", "fake-token");
+
+      // This will try to connect to a non-existent Redis.
+      // The current implementation returns null from redisCommand and
+      // does NOT throw — meaning checkDistributedRateLimit's catch block
+      // is not reached. The result should have degraded=true, but
+      // the current code silently returns null from increment without
+      // triggering the fail-open path.
+      const result = await checkDistributedRateLimit(
+        "storage-failure-user",
+        "contact",
+      );
+
+      // Expected: degraded should be true when storage fails
+      expect(result.degraded).toBe(true);
+      // Expected: logger.warn should be called about degraded state
+      expect(mockLoggerWarn).toHaveBeenCalledWith(
+        expect.stringContaining("degraded"),
+      );
+    });
+  });
+
+  // =========================================================================
+  // 11. Failure Mode Configuration Tests (Red — no failureMode config)
+  // =========================================================================
+  describe("failure mode configuration", () => {
+    it("should use fail-closed for cacheInvalidate preset on storage failure", async () => {
+      // cacheInvalidate is a security-sensitive preset and should
+      // fail-closed (deny) when storage is unavailable, not fail-open.
+      resetRateLimitStore();
+      setEnv("UPSTASH_REDIS_REST_URL", "http://localhost:1");
+      setEnv("UPSTASH_REDIS_REST_TOKEN", "fake-token");
+
+      const result = await checkDistributedRateLimit(
+        "failmode-user",
+        "cacheInvalidate",
+      );
+
+      // For security-sensitive endpoints, storage failure should deny the request
+      expect(result.allowed).toBe(false);
+      expect(result.degraded).toBe(true);
+    });
+  });
 });

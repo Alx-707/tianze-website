@@ -2,7 +2,7 @@
 paths:
   - "src/app/api/**/*"
   - "src/lib/security/**/*"
-  - "src/lib/validations/**/*"
+  - "src/lib/validations.ts"
 ---
 
 # Security Implementation
@@ -14,7 +14,7 @@ See `/.claude/rules/threat-modeling.md` for STRIDE analysis on new/changed API r
 ## Server Code Protection
 
 - Add `import "server-only"` at top of sensitive server files
-- Server Actions must verify authentication in middleware
+- Server Actions / Route Handlers 内部必须自行做 authn/authz（DAL 模式）；proxy/middleware 仅可选做前置拦截，不能作为唯一 auth 层
 
 ## XSS Prevention
 
@@ -39,9 +39,10 @@ See `/.claude/rules/threat-modeling.md` for STRIDE analysis on new/changed API r
 | Measure | Config |
 |---------|--------|
 | Rate Limiting | Default 10/min/IP, Contact API 5/min/IP |
-| CSRF | Cloudflare Turnstile |
+| Anti-abuse / Bot 过滤 | Cloudflare Turnstile（human 校验，非 CSRF token） |
+| CSRF | 当前架构无需（无 cookie-based session auth）；若引入后必须加 Origin 校验 + SameSite + CSRF token |
 
-Rate limit utility: `src/lib/security/security-rate-limit.ts`
+Rate limit utility: `src/lib/security/distributed-rate-limit.ts`
 
 ### Known API Endpoints & Protection Status
 
@@ -57,7 +58,7 @@ Rate limit utility: `src/lib/security/security-rate-limit.ts`
 | `/api/verify-turnstile` | (Verification endpoint) | - |
 | `/api/health` | (Public healthcheck) | - |
 
-New write endpoints (POST/PUT/PATCH/DELETE) must have auth + rate limiting before merge.
+New write endpoints (POST/PUT/PATCH/DELETE) must have explicit anti-abuse strategy before merge: auth, OR Turnstile + rate-limit + input validation（公开提交类接口如 contact/subscribe 适用后者）。
 
 ### Security Headers
 - `Strict-Transport-Security: max-age=63072000; includeSubDomains; preload`

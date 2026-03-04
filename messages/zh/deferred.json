@@ -1,77 +1,8 @@
 {
-  "common": {
-    "success": "成功",
-    "cancel": "取消",
-    "confirm": "确认",
-    "save": "保存",
-    "edit": "编辑",
-    "delete": "删除",
-    "search": "搜索",
-    "filter": "筛选",
-    "sort": "排序",
-    "next": "下一页",
-    "previous": "上一页",
-    "open": "打开",
-    "toast": {
-      "form": {
-        "contact": {
-          "success": "消息发送成功！",
-          "successDescription": "感谢您的留言，我们会尽快回复您。",
-          "error": "消息发送失败",
-          "errorDescription": "请稍后重试或直接联系我们。",
-          "loading": "正在发送消息..."
-        },
-        "newsletter": {
-          "success": "订阅成功！",
-          "successDescription": "感谢您订阅我们的邮件通讯。",
-          "error": "订阅失败",
-          "errorDescription": "请检查您的邮箱地址并重试。",
-          "loading": "正在订阅..."
-        },
-        "feedback": {
-          "success": "反馈提交成功！",
-          "successDescription": "感谢您的宝贵反馈。",
-          "error": "反馈提交失败",
-          "errorDescription": "请稍后重试。",
-          "loading": "正在提交反馈..."
-        }
-      }
-    }
-  },
   "errorBoundary": {
     "title": "发生错误",
     "description": "出现了一些问题，请尝试刷新页面。",
     "tryAgain": "重试"
-  },
-  "home": {
-    "title": "天泽管业",
-    "subtitle": "专业管道制造商",
-    "description": "专业PVC管道与PETG气动传输管制造商，通过ISO 9001:2015认证。",
-    "getStarted": "开始使用",
-    "learnMore": "了解更多",
-    "welcome": "欢迎来到天泽管业",
-    "modernApp": "基于 Next.js 16 和 React 19 构建的现代化Web应用",
-    "features": {
-      "title": "特性",
-      "performance": {
-        "title": "高性能",
-        "description": "采用现代Web技术优化速度和效率"
-      },
-      "scalable": {
-        "title": "可扩展架构",
-        "description": "随着您的业务需求和要求而增长"
-      },
-      "secure": {
-        "title": "企业级安全",
-        "description": "行业标准的安全实践和合规性"
-      }
-    },
-    "modernStack": "现代化技术栈",
-    "modernStackDesc": "采用最新技术构建",
-    "internationalization": "国际化",
-    "internationalizationDesc": "基于 next-intl 的多语言支持",
-    "testingReady": "测试就绪",
-    "testingReadyDesc": "完整的端到端测试配置"
   },
   "themeDemo": {
     "title": "主题系统演示",
@@ -203,13 +134,6 @@
       }
     }
   },
-  "footer": {
-    "learn": "学习",
-    "examples": "示例",
-    "goToNextjs": "访问nextjs.org",
-    "copyright": "(c) {year} 天泽管业。保留所有权利。",
-    "description": "专业PVC管道与PETG气动传输管制造商。"
-  },
   "formatting": {
     "date": {
       "today": "今天",
@@ -240,17 +164,6 @@
         "other": "{count}条新通知"
       }
     }
-  },
-  "errors": {
-    "serverError": "服务器内部错误",
-    "networkError": "网络连接错误",
-    "validationError": "请检查您的输入",
-    "unauthorized": "您无权访问此页面",
-    "forbidden": "禁止访问此资源",
-    "timeout": "请求超时，请重试",
-    "generic": "出现了一些问题，请稍后重试",
-    "translationMissing": "翻译不可用",
-    "loadingFailed": "内容加载失败"
   },
   "progress": {
     "title": "开发进度",

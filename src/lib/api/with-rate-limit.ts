@@ -7,7 +7,7 @@
  * @example
  * ```typescript
  * // Basic usage with default IP-based key
- * export const POST = withRateLimit('analytics', async (req, { clientIP }) => {
+ * export const POST = withRateLimit('contact', async (req, { clientIP }) => {
  *   // Handler logic - clientIP already extracted
  *   return NextResponse.json({ success: true });
  * });
@@ -22,12 +22,14 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { HTTP_TOO_MANY_REQUESTS } from "@/constants";
+import { HTTP_SERVICE_UNAVAILABLE, HTTP_TOO_MANY_REQUESTS } from "@/constants";
+import { API_ERROR_CODES } from "@/constants/api-error-codes";
 import { logger } from "@/lib/logger";
 import { getClientIP as getTrustedClientIP } from "@/lib/security/client-ip";
 import {
   checkDistributedRateLimit,
   createRateLimitHeaders,
+  RATE_LIMIT_PRESETS,
   type RateLimitPreset,
 } from "@/lib/security/distributed-rate-limit";
 import {
@@ -82,7 +84,7 @@ export type RateLimitedHandler<T = unknown> = (
  */
 interface RateLimitErrorBody {
   success: false;
-  error: string;
+  errorCode: string;
 }
 
 /**
@@ -102,11 +104,47 @@ function trackStorageFailure(): boolean {
 }
 
 /**
+ * Handle a request that was allowed in degraded (storage-failure) mode.
+ * Tracks the failure, emits an alert when the threshold is exceeded,
+ * and adds the X-RateLimit-Degraded header to the handler response.
+ */
+async function handleDegradedRequest<T>({
+  request,
+  handler,
+  clientIP,
+  preset,
+}: {
+  request: NextRequest;
+  handler: RateLimitedHandler<T>;
+  clientIP: string;
+  preset: RateLimitPreset;
+}): Promise<NextResponse<T>> {
+  const shouldAlert = trackStorageFailure();
+
+  logger.warn("Rate limit storage degraded (fail-open)", {
+    preset,
+    alertTriggered: shouldAlert,
+  });
+
+  if (shouldAlert) {
+    logger.error("ALERT: Rate limit storage failure threshold exceeded", {
+      failureCount: storageFailureTracker.count,
+      windowMs: ALERT_WINDOW_MS,
+    });
+  }
+
+  const response = await handler(request, { clientIP, degraded: true });
+  response.headers.set(RATE_LIMIT_DEGRADED_HEADER, "true");
+  return response;
+}
+
+/**
  * Create rate limit exceeded response
  */
 function createRateLimitResponse<T>(
   result: Awaited<ReturnType<typeof checkDistributedRateLimit>>,
   keyPrefix: string,
+  statusCode: number = HTTP_TOO_MANY_REQUESTS,
 ): NextResponse<T> {
   const headers = createRateLimitHeaders(result);
 
@@ -114,11 +152,18 @@ function createRateLimitResponse<T>(
   logger.warn("Rate limit exceeded", {
     keyPrefix: keyPrefix.slice(0, 8),
     retryAfter: result.retryAfter,
+    deniedReason: result.deniedReason,
   });
 
   return NextResponse.json(
-    { success: false, error: "Too many requests" } as RateLimitErrorBody,
-    { status: HTTP_TOO_MANY_REQUESTS, headers },
+    {
+      success: false,
+      errorCode:
+        result.deniedReason === "storage_failure"
+          ? API_ERROR_CODES.SERVICE_UNAVAILABLE
+          : API_ERROR_CODES.RATE_LIMIT_EXCEEDED,
+    } as RateLimitErrorBody,
+    { status: statusCode, headers },
   ) as NextResponse<T>;
 }
 
@@ -127,22 +172,21 @@ function createRateLimitResponse<T>(
  *
  * Features:
  * - Eliminates 10-15 lines of boilerplate per route
- * - Consistent 429 responses with proper headers
- * - Fail-open behavior on storage failures
+ * - Consistent 429/503 responses with proper headers
+ * - Storage failure behavior determined by preset `failureMode`:
+ *   'open' allows traffic with degraded header; 'closed' returns 503
  * - Context injection with clientIP
  * - TypeScript-safe generics
  *
- * @param preset - Rate limit preset name (e.g., 'analytics', 'whatsapp')
+ * @param preset - Rate limit preset name (e.g., 'contact', 'turnstile')
  * @param handler - The actual request handler function
  * @param keyStrategy - Optional custom key generation strategy (defaults to IP-based)
  * @returns Wrapped handler function compatible with Next.js route exports
  *
  * @example
  * ```typescript
- * // In src/app/api/analytics/i18n/route.ts
- * export const dynamic = 'force-dynamic';
- *
- * export const POST = withRateLimit('analytics', async (req, { clientIP }) => {
+ * // In src/app/api/contact/route.ts
+ * export const POST = withRateLimit('contact', async (req, { clientIP }) => {
  *   const body = await req.json();
  *   // ... handler logic
  *   return NextResponse.json({ success: true });
@@ -158,33 +202,47 @@ export function withRateLimit<T = unknown>(
     const clientIP = getTrustedClientIP(request);
     const rateLimitKey = keyStrategy(request);
 
-    const result = await checkDistributedRateLimit(rateLimitKey, preset);
-
-    // Rate limit exceeded - return 429
-    if (!result.allowed) {
-      return createRateLimitResponse<T>(result, rateLimitKey);
+    // Defensive catch: checkDistributedRateLimit is designed to always resolve,
+    // but guard against unexpected rejections (e.g. store factory exceptions).
+    let result: Awaited<ReturnType<typeof checkDistributedRateLimit>>;
+    try {
+      result = await checkDistributedRateLimit(rateLimitKey, preset);
+    } catch (error) {
+      logger.error("Unexpected rate limit infrastructure failure", {
+        preset,
+        error,
+      });
+      const failClosed = RATE_LIMIT_PRESETS[preset].failureMode === "closed";
+      if (failClosed) {
+        return NextResponse.json(
+          {
+            success: false,
+            errorCode: API_ERROR_CODES.SERVICE_UNAVAILABLE,
+          } as RateLimitErrorBody,
+          { status: HTTP_SERVICE_UNAVAILABLE },
+        ) as NextResponse<T>;
+      }
+      result = {
+        allowed: true,
+        remaining: 0,
+        resetTime: Date.now() + RATE_LIMIT_PRESETS[preset].windowMs,
+        retryAfter: null,
+        degraded: true,
+      };
     }
 
-    // Storage failure triggered fail-open - track and add degraded header
+    // Rate limit exceeded or storage failure — return 429 (limit) or 503 (storage)
+    if (!result.allowed) {
+      const statusCode =
+        result.deniedReason === "storage_failure"
+          ? HTTP_SERVICE_UNAVAILABLE
+          : HTTP_TOO_MANY_REQUESTS;
+      return createRateLimitResponse<T>(result, rateLimitKey, statusCode);
+    }
+
+    // Storage failure triggered fail-open - track, alert, and add degraded header
     if (result.degraded) {
-      const shouldAlert = trackStorageFailure();
-
-      logger.warn("Rate limit storage degraded (fail-open)", {
-        preset,
-        alertTriggered: shouldAlert,
-      });
-
-      if (shouldAlert) {
-        logger.error("ALERT: Rate limit storage failure threshold exceeded", {
-          failureCount: storageFailureTracker.count,
-          windowMs: ALERT_WINDOW_MS,
-        });
-      }
-
-      // Execute handler and add degraded header
-      const response = await handler(request, { clientIP, degraded: true });
-      response.headers.set(RATE_LIMIT_DEGRADED_HEADER, "true");
-      return response;
+      return handleDegradedRequest({ request, handler, clientIP, preset });
     }
 
     // Normal flow - rate limit passed

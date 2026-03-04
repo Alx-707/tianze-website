@@ -32,14 +32,23 @@ const textComponents = {
       {children}
     </p>
   ),
-  a: ({ children, href }: { children: React.ReactNode; href?: string }) => (
-    <a
-      href={href}
-      className="text-blue-600 underline hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-    >
-      {children}
-    </a>
-  ),
+  a: ({ children, href }: { children: React.ReactNode; href?: string }) => {
+    const SAFE_PROTOCOLS = ["https:", "http:", "mailto:", "tel:"];
+    const isSafe =
+      !href ||
+      href.startsWith("/") ||
+      href.startsWith("#") ||
+      SAFE_PROTOCOLS.some((p) => href.startsWith(p));
+    const safeHref = isSafe ? href : "#";
+    return (
+      <a
+        href={safeHref}
+        className="text-blue-600 underline hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+      >
+        {children}
+      </a>
+    );
+  },
   blockquote: ({ children }: { children: React.ReactNode }) => (
     <blockquote className="mb-4 border-l-4 border-blue-500 pl-4 text-gray-700 italic dark:text-gray-300">
       {children}

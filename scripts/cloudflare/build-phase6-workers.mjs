@@ -17,6 +17,10 @@ const DOMAIN_ROUTES = {
   production: [{ pattern: "tianze-pipe.com/*", zone_name: "tianze-pipe.com" }],
 };
 
+/**
+ * Worker name suffixes for wrangler config naming.
+ * "gateway" and "web" are always present; API worker entries are derived from API_ROUTE_BINDING_RULES.
+ */
 const WORKER_NAME_SUFFIX = {
   gateway: "gateway",
   web: "web",
@@ -154,25 +158,24 @@ function createServerWorkerConfig(
   return config;
 }
 
+/**
+ * Derive gateway service bindings from API_ROUTE_BINDING_RULES (single source of truth).
+ * Always includes WORKER_WEB; API bindings are generated from the route rules.
+ */
 function createGatewayServiceBindings(workerNames) {
-  return [
-    {
-      binding: "WORKER_WEB",
-      service: workerNames.web,
-    },
-    {
-      binding: "WORKER_API_LEAD",
-      service: workerNames.apiLead,
-    },
-    {
-      binding: "WORKER_API_OPS",
-      service: workerNames.apiOps,
-    },
-    {
-      binding: "WORKER_API_WHATSAPP",
-      service: workerNames.apiWhatsapp,
-    },
-  ];
+  const seen = new Set();
+  const apiBindings = [];
+
+  for (const rule of API_ROUTE_BINDING_RULES) {
+    if (seen.has(rule.binding)) continue;
+    seen.add(rule.binding);
+    apiBindings.push({
+      binding: rule.binding,
+      service: workerNames[rule.target],
+    });
+  }
+
+  return [{ binding: "WORKER_WEB", service: workerNames.web }, ...apiBindings];
 }
 
 function createGatewayConfig(baseConfig, workerNames, envNames) {
@@ -205,6 +208,14 @@ function createGatewayConfig(baseConfig, workerNames, envNames) {
 }
 
 function createGatewayWorkerSource() {
+  // Generate routeRules and resolver from the single source of truth (API_ROUTE_BINDING_RULES).
+  // Serialise each match function with .toString() so the generated worker stays in sync
+  // when routes are added/removed in API_ROUTE_BINDING_RULES.
+  const routeRulesSource = API_ROUTE_BINDING_RULES.map(
+    (rule) =>
+      `  {\n    target: "${rule.target}",\n    binding: "${rule.binding}",\n    match: ${rule.match.toString()},\n  }`,
+  ).join(",\n");
+
   const routeResolver = API_ROUTE_BINDING_RULES.map(
     (rule, index) => `
   if (routeRules[${index}].match(pathname)) {
@@ -228,27 +239,7 @@ export { DOShardedTagCache } from "../.build/durable-objects/sharded-tag-cache.j
 export { BucketCachePurge } from "../.build/durable-objects/bucket-cache-purge.js";
 
 const routeRules = [
-  {
-    target: "apiWhatsapp",
-    binding: "WORKER_API_WHATSAPP",
-    match: (pathname) => pathname.startsWith("/api/whatsapp/"),
-  },
-  {
-    target: "apiOps",
-    binding: "WORKER_API_OPS",
-    match: (pathname) =>
-      pathname === "/api/cache/invalidate" || pathname === "/api/csp-report",
-  },
-  {
-    target: "apiLead",
-    binding: "WORKER_API_LEAD",
-    match: (pathname) =>
-      pathname === "/api/contact" ||
-      pathname === "/api/inquiry" ||
-      pathname === "/api/subscribe" ||
-      pathname === "/api/verify-turnstile" ||
-      pathname === "/api/health",
-  },
+${routeRulesSource}
 ];
 
 function resolveOriginRoute(pathname) {${routeResolver}
@@ -373,25 +364,26 @@ async function main() {
   await mkdir(WORKERS_DIR, { recursive: true });
   await mkdir(WRANGLER_DIR, { recursive: true });
 
+  // Derive unique API worker targets from the single source of truth
+  const apiWorkerTargets = [
+    ...new Set(API_ROUTE_BINDING_RULES.map((rule) => rule.target)),
+  ];
+
+  // Generate worker source files: gateway + web + API workers from route rules
   const workerFiles = {
     gateway: createGatewayWorkerSource(),
     web: createServiceWorkerSource(
       "web",
       "../server-functions/default/handler.mjs",
     ),
-    apiLead: createServiceWorkerSource(
-      "apiLead",
-      "../server-functions/apiLead/index.mjs",
-    ),
-    apiOps: createServiceWorkerSource(
-      "apiOps",
-      "../server-functions/apiOps/index.mjs",
-    ),
-    apiWhatsapp: createServiceWorkerSource(
-      "apiWhatsapp",
-      "../server-functions/apiWhatsapp/index.mjs",
-    ),
   };
+
+  for (const target of apiWorkerTargets) {
+    workerFiles[target] = createServiceWorkerSource(
+      target,
+      `../server-functions/${target}/index.mjs`,
+    );
+  }
 
   await Promise.all(
     Object.entries(workerFiles).map(([name, content]) =>
@@ -399,6 +391,7 @@ async function main() {
     ),
   );
 
+  // Generate wrangler configs: gateway + web + API workers from route rules
   const envNames = ["preview", "production"];
   const gatewayConfig = createGatewayConfig(baseConfig, workerNames, envNames);
   const webConfig = createServerWorkerConfig(
@@ -407,35 +400,26 @@ async function main() {
     "web",
     envNames,
   );
-  const apiLeadConfig = createServerWorkerConfig(
-    baseConfig,
-    workerNames,
-    "apiLead",
-    envNames,
-  );
-  const apiOpsConfig = createServerWorkerConfig(
-    baseConfig,
-    workerNames,
-    "apiOps",
-    envNames,
-  );
-  const apiWhatsappConfig = createServerWorkerConfig(
-    baseConfig,
-    workerNames,
-    "apiWhatsapp",
-    envNames,
-  );
 
-  await Promise.all([
+  const configWriteOps = [
     writeJsonFile(path.join(WRANGLER_DIR, "gateway.jsonc"), gatewayConfig),
     writeJsonFile(path.join(WRANGLER_DIR, "web.jsonc"), webConfig),
-    writeJsonFile(path.join(WRANGLER_DIR, "api-lead.jsonc"), apiLeadConfig),
-    writeJsonFile(path.join(WRANGLER_DIR, "api-ops.jsonc"), apiOpsConfig),
-    writeJsonFile(
-      path.join(WRANGLER_DIR, "api-whatsapp.jsonc"),
-      apiWhatsappConfig,
-    ),
-  ]);
+  ];
+
+  for (const target of apiWorkerTargets) {
+    const suffix = WORKER_NAME_SUFFIX[target];
+    const config = createServerWorkerConfig(
+      baseConfig,
+      workerNames,
+      target,
+      envNames,
+    );
+    configWriteOps.push(
+      writeJsonFile(path.join(WRANGLER_DIR, `${suffix}.jsonc`), config),
+    );
+  }
+
+  await Promise.all(configWriteOps);
 
   console.log("[phase6] generated workers and wrangler configs");
   console.log(`[phase6] workers: ${path.relative(ROOT_DIR, WORKERS_DIR)}`);

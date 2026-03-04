@@ -11,7 +11,7 @@ import { createHmac, timingSafeEqual } from "crypto";
 import { z } from "zod";
 import type { SendMessageRequest } from "@/types/whatsapp";
 import { env } from "@/lib/env";
-import { logger } from "@/lib/logger";
+import { logger, sanitizePhone } from "@/lib/logger";
 import { WhatsAppService } from "@/lib/whatsapp-core";
 import { resetWhatsAppClient } from "@/lib/whatsapp/client-factory";
 
@@ -239,7 +239,7 @@ export async function handleIncomingMessage(
     const messageBody = message.text?.body;
 
     logger.info(
-      `[WhatsAppWebhook] Received message from ${from}: ${messageBody?.substring(0, 50)}`,
+      `[WhatsAppWebhook] Received message from ${sanitizePhone(from)}, type=text, length=${messageBody?.length ?? 0}`,
     );
 
     if (enableAutoReply && messageBody) {
@@ -249,7 +249,9 @@ export async function handleIncomingMessage(
       const result = await service.sendTextMessage(from, replyMessage);
 
       if (result.success) {
-        logger.info(`[WhatsAppWebhook] Auto-reply sent to ${from}`);
+        logger.info(
+          `[WhatsAppWebhook] Auto-reply sent to ${sanitizePhone(from)}`,
+        );
         return { success: true, autoReplySent: true };
       }
 

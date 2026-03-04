@@ -74,4 +74,4 @@ const post = getPostBySlug('my-post', 'en'); // slug first, then locale
 
 ## Validation
 
-Frontmatter validated at build time via `src/types/content.ts`.
+Frontmatter validated at build time via `src/types/content.types.ts`.

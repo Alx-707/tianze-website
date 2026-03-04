@@ -5,9 +5,10 @@
 
 ## Project Decisions
 
-- `cacheComponents: true` enabled in `next.config.ts`
-- **PPR / dynamicIO**: Not enabled. See `docs/known-issue/nextjs-i18n-future-upgrade-checklist.md`.
+- `cacheComponents: true` enabled in `next.config.ts` — 启用 Cache Components (`"use cache"` 指令)
+- **PPR** (`experimental.ppr`): Not enabled — 需要 canary，已注释。注意：`dynamicIO` 是 Next.js 15 canary 阶段的旧实验 flag，已由 `cacheComponents` 取代，不是两个独立功能。
 - **Optional Cache APIs** (not yet used): `cacheTag()`, `revalidateTag()`, `updateTag()`
+- 迁移说明: `docs/known-issue/cache-i18n-upgrade-status.md`
 
 ### Page Props Convention
 

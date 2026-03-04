@@ -10,7 +10,7 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "dev:webpack": "next dev",
-    "email:dev": "email dev --dir src/components/emails --port 3001",
+    "email:dev": "email dev --dir src/emails --port 3001",
     "prebuild": "node scripts/copy-translations.js && tsx scripts/generate-content-manifest.ts && pnpm content:slug-check && pnpm validate:config",
     "build": "next build",
     "build:analyze": "ANALYZE=true TURBOPACK_STATS=1 next build",
@@ -36,6 +36,7 @@
     "build:check": "pnpm prebuild && next build",
     "commitlint": "commitlint",
     "hooks:install": "lefthook install",
+    "dep:check": "dependency-cruiser src --config .dependency-cruiser.js",
     "arch:check": "dependency-cruiser src --config .dependency-cruiser.js",
     "circular:check": "dependency-cruiser src --config .dependency-cruiser.js --include-only '^src' -T err",
     "security:audit": "pnpm audit --prod --audit-level moderate",

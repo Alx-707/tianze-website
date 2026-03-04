@@ -99,12 +99,9 @@ async function parseAndValidateCSPReport(
     );
   }
 
-  // Check for empty csp-report (browser quirk)
+  // Check for empty csp-report (browser quirk) — acknowledge with 204 No Content
   if (Object.keys(result.data["csp-report"]).length === 0) {
-    return NextResponse.json(
-      { error: "Invalid CSP report format" },
-      { status: 200 },
-    );
+    return new NextResponse(null, { status: 204 });
   }
 
   return result.data as CSPReport;

@@ -13,8 +13,7 @@ vi.mock("@/lib/security/distributed-rate-limit", () => ({
   createRateLimitHeaders: vi.fn(() => new Headers()),
 }));
 
-vi.mock("@/app/api/contact/contact-api-utils", () => ({
-  getClientIP: vi.fn(() => "1.1.1.1"),
+vi.mock("@/lib/turnstile", () => ({
   verifyTurnstile: vi.fn(async () => true),
 }));
 
@@ -86,7 +85,7 @@ describe("api/subscribe", () => {
   });
 
   it("returns 400 when turnstile verification fails", async () => {
-    const utils = await import("@/app/api/contact/contact-api-utils");
+    const utils = await import("@/lib/turnstile");
     (utils.verifyTurnstile as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
       false,
     );

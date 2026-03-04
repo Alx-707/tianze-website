@@ -9,7 +9,7 @@ import { withIdempotency } from "@/lib/idempotency";
 import { processLead, type LeadResult } from "@/lib/lead-pipeline";
 import { LEAD_TYPES } from "@/lib/lead-pipeline/lead-schema";
 import { logger, sanitizeEmail, sanitizeIP } from "@/lib/logger";
-import { verifyTurnstile } from "@/app/api/contact/contact-api-utils";
+import { verifyTurnstile } from "@/lib/turnstile";
 import { HTTP_BAD_REQUEST, HTTP_INTERNAL_ERROR } from "@/constants";
 import { API_ERROR_CODES } from "@/constants/api-error-codes";
 

@@ -10,13 +10,23 @@ import {
   verifyWebhook,
   verifyWebhookSignature,
 } from "@/lib/whatsapp-service";
+import { HTTP_PAYLOAD_TOO_LARGE } from "@/constants";
 
 /**
  * WhatsApp Webhook Endpoint
  *
  * Handles Meta webhook verification (GET) and incoming messages (POST).
  * Uses unified whatsapp-service for all operations.
+ *
+ * Execution order (security-critical):
+ *   1. Body size check  — prevents resource exhaustion before any work
+ *   2. Rate limit check — limits request volume before reading body
+ *   3. Read body        — now safe to read (within limits, not rate-limited)
+ *   4. Signature verify — validates body integrity
+ *   5. Process message  — business logic
  */
+
+const MAX_BODY_BYTES = 1_000_000; // 1 MB
 
 // GET: Webhook verification
 export function GET(request: NextRequest) {
@@ -60,20 +70,22 @@ export function GET(request: NextRequest) {
 }
 
 // POST: Receive incoming messages
+// eslint-disable-next-line max-statements -- Sequential security gates (size→rate→signature→parse→handle) require multiple statements
 export async function POST(request: NextRequest) {
   try {
-    // Get raw body for signature verification
-    const rawBody = await request.text();
-    const signature = request.headers.get("x-hub-signature-256");
-
-    // Verify webhook signature FIRST (before rate limiting)
-    // Invalid signatures are rejected early without consuming rate limit quota
-    if (!verifyWebhookSignature(rawBody, signature)) {
-      logger.warn("[WhatsAppWebhook] Invalid signature");
-      return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
+    // 1. Body size check — reject oversized payloads before reading body
+    const contentLength = request.headers.get("content-length");
+    if (
+      contentLength !== null &&
+      parseInt(contentLength, 10) > MAX_BODY_BYTES
+    ) {
+      return NextResponse.json(
+        { error: "Payload too large" },
+        { status: HTTP_PAYLOAD_TOO_LARGE },
+      );
     }
 
-    // Rate limiting (only for valid signatures)
+    // 2. Rate limiting — consume quota before reading body to prevent exhaustion
     const rateLimitKey = getIPKey(request);
     const rateLimitResult = await checkDistributedRateLimit(
       rateLimitKey,
@@ -87,7 +99,34 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Parse JSON body
+    // Degraded rate limit: storage failure triggered fail-open — log for observability.
+    // The whatsapp preset is fail-open so requests are allowed; this matches withRateLimit HOF behavior.
+    if (rateLimitResult.degraded) {
+      logger.warn(
+        "[WhatsAppWebhook] Rate limit storage degraded (fail-open) — proceeding without enforcement",
+        {
+          rateLimitKey,
+        },
+      );
+    }
+
+    // 3. Read body — safe now (rate limited); verify actual size
+    const rawBody = await request.text();
+    if (rawBody.length > MAX_BODY_BYTES) {
+      return NextResponse.json(
+        { error: "Payload too large" },
+        { status: HTTP_PAYLOAD_TOO_LARGE },
+      );
+    }
+    const signature = request.headers.get("x-hub-signature-256");
+
+    // 4. Verify webhook signature
+    if (!verifyWebhookSignature(rawBody, signature)) {
+      logger.warn("[WhatsAppWebhook] Invalid signature");
+      return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
+    }
+
+    // 5. Parse JSON body
     let body: unknown;
     try {
       body = JSON.parse(rawBody);
@@ -95,7 +134,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
     }
 
-    // Handle incoming message with auto-reply
+    // 6. Handle incoming message with auto-reply
     await handleIncomingMessage(body);
 
     return NextResponse.json({ success: true }, { status: 200 });

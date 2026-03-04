@@ -7,6 +7,8 @@
 
 ### Middleware & Security Headers
 
+> 当前使用 `middleware.ts`（next-intl 尚未支持 `createProxy`，迁移待办见 `docs/known-issue/middleware-to-proxy-migration.md`）。迁移后改为检查 `proxy.ts`。
+
 ```bash
 ls -la middleware.ts src/middleware.ts 2>/dev/null
 grep -rn "Content-Security-Policy" next.config.* src/ middleware.* 2>/dev/null

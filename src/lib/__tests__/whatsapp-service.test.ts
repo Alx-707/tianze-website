@@ -81,6 +81,12 @@ vi.mock("@/lib/logger", () => ({
     warn: vi.fn(),
     debug: vi.fn(),
   },
+  sanitizePhone: (phone: string) => {
+    if (!phone) return "[NO_PHONE]";
+    const s = String(phone).replace(/\s/g, "");
+    if (s.length <= 7) return "[PHONE]";
+    return `${s.slice(0, 3)}****${s.slice(s.length - 4)}`;
+  },
 }));
 
 describe("WhatsApp Service Module", () => {

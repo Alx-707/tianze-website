@@ -49,7 +49,7 @@ describe("Middleware Cookie Security", () => {
     });
 
     it("should set secure: true in production environment", async () => {
-      vi.stubEnv("NODE_ENV", "production");
+      vi.stubEnv("APP_ENV", "production");
 
       // Re-import to pick up new env
       vi.resetModules();
@@ -82,7 +82,7 @@ describe("Middleware Cookie Security", () => {
     });
 
     it("should not set secure flag in development environment", async () => {
-      vi.stubEnv("NODE_ENV", "development");
+      vi.stubEnv("APP_ENV", "local");
 
       vi.resetModules();
 

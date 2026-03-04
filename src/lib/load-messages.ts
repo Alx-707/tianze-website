@@ -73,10 +73,10 @@ async function fetchWithFallback(
 ): Promise<Messages> {
   const url = `${getBaseUrl()}/messages/${locale}/${type}.json`;
   try {
-    const res = await fetch(url, {
-      next: { revalidate: revalidate() },
-      cache: "force-cache",
-    });
+    // cache: "no-store" prevents a second independent fetch-cache layer.
+    // Caching is handled entirely by the outer unstable_cache wrapper, so
+    // revalidateTag("i18n:...") can fully invalidate the translation data.
+    const res = await fetch(url, { cache: "no-store" });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return (await res.json()) as Messages;
   } catch (e) {

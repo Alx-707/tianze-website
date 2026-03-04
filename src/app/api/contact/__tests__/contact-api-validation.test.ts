@@ -1,14 +1,16 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { airtableService } from "@/lib/airtable";
 import { processLead } from "@/lib/lead-pipeline";
-import { verifyTurnstile } from "../contact-api-utils";
+import { verifyTurnstile } from "@/lib/turnstile";
+import {
+  processFormSubmission,
+  type ContactFormWithToken,
+} from "@/lib/contact-form-processing";
 import {
   getContactFormStats,
-  processFormSubmission,
   sanitizeFormData,
   validateAdminAccess,
   validateFormData,
-  type ContactFormWithToken,
 } from "../contact-api-validation";
 
 // Mock dependencies before imports
@@ -49,7 +51,7 @@ vi.mock("@/lib/lead-pipeline", () => ({
   ),
 }));
 
-vi.mock("@/app/api/contact/contact-api-utils", () => ({
+vi.mock("@/lib/turnstile", () => ({
   verifyTurnstile: vi.fn(() => Promise.resolve(true)),
 }));
 
@@ -128,6 +130,74 @@ describe("contact-api-validation", () => {
 
       expect(result.success).toBe(false);
       expect(result.error).toBe("Form submission expired or invalid");
+    });
+
+    it("should return error when submittedAt is garbage string", async () => {
+      vi.setSystemTime(new Date());
+      const garbageData = {
+        ...validFormData,
+        submittedAt: "garbage",
+      };
+
+      const result = await validateFormData(garbageData, "192.168.1.1");
+
+      expect(result.success).toBe(false);
+      expect(result.error).toBe("Form submission expired or invalid");
+    });
+
+    it("should return error when submittedAt is empty string", async () => {
+      vi.setSystemTime(new Date());
+      const emptyData = {
+        ...validFormData,
+        submittedAt: "",
+      };
+
+      const result = await validateFormData(emptyData, "192.168.1.1");
+
+      expect(result.success).toBe(false);
+    });
+
+    it("should return error when submittedAt is undefined", async () => {
+      vi.setSystemTime(new Date());
+      const undefinedData = {
+        ...validFormData,
+        submittedAt: undefined as unknown as string,
+      };
+
+      const result = await validateFormData(undefinedData, "192.168.1.1");
+
+      expect(result.success).toBe(false);
+    });
+
+    it("should return error when submittedAt is 24 hours ago", async () => {
+      vi.setSystemTime(new Date());
+      const oldTime = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+      const oldData = {
+        ...validFormData,
+        submittedAt: oldTime,
+      };
+
+      const result = await validateFormData(oldData, "192.168.1.1");
+
+      expect(result.success).toBe(false);
+      expect(result.error).toBe("Form submission expired or invalid");
+    });
+
+    it("should pass time check when submittedAt is 5 minutes ago", async () => {
+      vi.setSystemTime(new Date());
+      const recentTime = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+      const recentData = {
+        ...validFormData,
+        submittedAt: recentTime,
+      };
+
+      const result = await validateFormData(recentData, "192.168.1.1");
+
+      // Should pass time check and proceed to turnstile verification
+      // (success depends on turnstile mock, but should NOT fail with time error)
+      if (!result.success) {
+        expect(result.error).not.toBe("Form submission expired or invalid");
+      }
     });
 
     it("should return error when turnstile verification fails", async () => {

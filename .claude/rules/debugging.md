@@ -24,7 +24,7 @@ Common causes:
 ### API Route 500
 1. Check server logs: `pnpm dev` terminal output
 2. Validate request body with Zod schema
-3. Verify env vars: `src/env.ts` validation
+3. Verify env vars: `src/lib/env.ts` validation
 
 ### i18n "Missing message"
 1. Run `pnpm validate:translations`

@@ -96,6 +96,7 @@
       ],
       "vars": {
         "APP_ENV": "preview",
+        "DEPLOYMENT_PLATFORM": "cloudflare",
         "NEXT_PUBLIC_BASE_URL": "https://preview.tianze-pipe.com",
         "NEXT_PUBLIC_DEPLOYMENT_PLATFORM": "cloudflare",
       },
@@ -136,6 +137,7 @@
       ],
       "vars": {
         "APP_ENV": "production",
+        "DEPLOYMENT_PLATFORM": "cloudflare",
         "NEXT_PUBLIC_BASE_URL": "https://tianze-pipe.com",
         "NEXT_PUBLIC_DEPLOYMENT_PLATFORM": "cloudflare",
       },

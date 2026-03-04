@@ -3,6 +3,35 @@ const path = require("node:path");
 
 module.exports = {
   forbidden: [
+    // === 层边界规则（Task 016 — 防止重构回退） ===
+    {
+      name: "no-lib-to-components-or-app",
+      severity: "error",
+      comment:
+        "src/lib 不能依赖 src/components 或 src/app — lib 层必须独立于 UI 层",
+      from: { path: "^src/lib/" },
+      to: { path: "^src/(app|components)/" },
+    },
+    {
+      name: "no-components-to-app",
+      severity: "error",
+      comment:
+        "src/components 不能依赖 src/app — components 层不能反向依赖 app 层",
+      from: { path: "^src/components/" },
+      to: { path: "^src/app/" },
+    },
+    {
+      name: "no-non-test-imports-api-routes",
+      severity: "error",
+      comment:
+        "非测试文件不能直接导入 API 路由实现 — 使用 fetch 或 server actions 代替",
+      from: {
+        path: "^src/",
+        pathNot:
+          "\\.(spec|test|stories)\\.(js|ts|tsx)$|/__tests__/|^src/app/api/",
+      },
+      to: { path: "^src/app/api/" },
+    },
     {
       name: "no-circular",
       severity: "error",

@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { checkDistributedRateLimit } from "@/lib/security/distributed-rate-limit";
-import { verifyTurnstile } from "@/app/api/contact/contact-api-utils";
+import { verifyTurnstile } from "@/lib/turnstile";
 import { contactFormAction } from "../actions";
 
 // Mock dependencies before imports
@@ -36,11 +36,11 @@ vi.mock("@/lib/security/distributed-rate-limit", () => ({
   ),
 }));
 
-vi.mock("@/app/api/contact/contact-api-utils", () => ({
+vi.mock("@/lib/turnstile", () => ({
   verifyTurnstile: vi.fn(() => Promise.resolve(true)),
 }));
 
-vi.mock("@/app/api/contact/contact-api-validation", () => ({
+vi.mock("@/lib/contact-form-processing", () => ({
   processFormSubmission: vi.fn(() =>
     Promise.resolve({
       emailSent: true,
@@ -165,15 +165,28 @@ describe("actions.ts", () => {
       expect(result).toBeDefined();
     });
 
-    it("should use current time when submittedAt is not provided", async () => {
+    it("should return error when submittedAt is not provided", async () => {
       const dataWithoutSubmittedAt = { ...validFormData };
       delete (dataWithoutSubmittedAt as { submittedAt?: string }).submittedAt;
       const formData = createFormData(dataWithoutSubmittedAt);
 
       const result = await contactFormAction(null, formData);
 
-      // Should still return a result (success or error depending on validation)
-      expect(result).toBeDefined();
+      // Missing submittedAt should be rejected, not silently fallback to now
+      expect(result.success).toBe(false);
+    });
+
+    it("should return error when submittedAt is not-a-date", async () => {
+      const invalidDateData = {
+        ...validFormData,
+        submittedAt: "not-a-date",
+      };
+      const formData = createFormData(invalidDateData);
+
+      const result = await contactFormAction(null, formData);
+
+      // Invalid date string should be rejected (NaN bypass vulnerability)
+      expect(result.success).toBe(false);
     });
 
     it("should return result object with expected structure", async () => {

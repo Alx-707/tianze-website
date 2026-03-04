@@ -173,10 +173,16 @@ class QualityGate {
             statements: 65,
           },
           blocking: true, // 启用阻断模式：覆盖率不达标时阻塞构建
+          // 增量覆盖率分层阻断策略：
+          // - diffBlockingThreshold (70%): 低于此值阻断构建（硬门禁，确保新代码优于存量 65%）
+          // - diffCoverageThreshold (90%): 低于此值警告但不阻断（软门禁，鼓励高标准）
+          // 根据：大型重构/安全 PR 常碰到已有低覆盖率文件导致连锁惩罚，
+          // 硬阻断 90% 对此类 PR 不公平。行业惯例（Google/Codecov）均以高阈值作警告而非阻断。
+          diffBlockingThreshold: 70,
           diffCoverageThreshold:
             Number.isFinite(diffCoverageThreshold) && diffCoverageThreshold > 0
               ? diffCoverageThreshold
-              : 90, // 增量覆盖率阈值：变更代码需达到90%覆盖率
+              : 90, // 增量覆盖率警告阈值：低于此值 warning
           // 最小可执行语句数：低于此值的增量变更跳过阈值检查（样本量不足，百分比无统计意义）
           diffMinStatements: 10,
           diffWarningThreshold:
@@ -187,16 +193,10 @@ class QualityGate {
           // 安全/业务逻辑文件禁止加入此列表
           diffCoverageExclude: [
             "src/components/forms/use-rate-limit.ts",
-            "src/components/lazy/lazy-web-vitals-reporter.tsx",
-            "src/lib/i18n-validation.ts",
-            "src/lib/locale-storage-hooks.ts",
-            "src/lib/security-tokens.ts",
             "src/types/react19.ts",
-            "src/lib/__tests__/theme-analytics/setup.ts",
             // error.tsx 已被 diffCoverageExcludeGlobs 中 src/app/**/error.tsx 覆盖
             "src/types/whatsapp-api-requests/api-types.ts",
             "src/types/whatsapp-webhook-utils/functions.ts",
-            "src/lib/content-parser.ts", // Content parser - covered by content tests
           ],
           // 增量覆盖率排除（glob）：生成文件/声明文件/无逻辑代码默认不纳入 diff-line coverage
           diffCoverageExcludeGlobs: [
@@ -229,7 +229,7 @@ class QualityGate {
             eslintWarnings: 10,
             typeErrors: 0,
           },
-          blocking: false, // 渐进式改进：代码质量问题警告但不阻塞
+          blocking: true, // 代码质量问题阻塞部署
         },
         performance: {
           enabled: performanceEnabledByMode && !performanceDisabledByEnv,
@@ -987,7 +987,10 @@ class QualityGate {
           istanbulCoverageMap,
         );
         if (diffCoverage) {
-          const threshold = this.config.gates.coverage.diffCoverageThreshold;
+          const softThreshold =
+            this.config.gates.coverage.diffCoverageThreshold;
+          const hardThreshold =
+            this.config.gates.coverage.diffBlockingThreshold || softThreshold;
           const warningThreshold =
             this.config.gates.coverage.diffWarningThreshold;
 
@@ -1016,41 +1019,52 @@ class QualityGate {
             );
           }
 
-          // 检查增量覆盖率是否达到阈值
+          // 分层阻断：硬门禁（hardThreshold）阻断构建，软门禁（softThreshold）仅警告
           if (
             !diffCoverage.missingCoverageData &&
-            diffCoverage.totalStatements >= minStatements &&
-            diffCoverage.pct < threshold
+            diffCoverage.totalStatements >= minStatements
           ) {
-            const shortfall = threshold - diffCoverage.pct;
-            gate.status = gate.blocking ? "failed" : "warning";
             const unitLabel = diffCoverage.unitLabel || "行";
-            gate.issues.push(
-              `增量覆盖率不达标: ${diffCoverage.pct.toFixed(2)}% < ${threshold}%（差距 ${shortfall.toFixed(2)}%，变更 ${diffCoverage.changedFilesCount} 个文件，${diffCoverage.totalCovered}/${diffCoverage.totalStatements} ${unitLabel}覆盖）`,
-            );
 
-            // 列出覆盖率低于阈值的文件
-            const lowCoverageFiles = diffCoverage.fileMetrics.filter(
-              (f) =>
-                f.pct < threshold &&
-                !f.skippedNonExecutable &&
-                !f.missingCoverageData,
-            );
-            if (lowCoverageFiles.length > 0 && lowCoverageFiles.length <= 5) {
-              lowCoverageFiles.forEach((f) => {
-                gate.issues.push(
-                  `  - ${f.file}: ${f.pct.toFixed(2)}% (${f.covered}/${f.total})`,
-                );
-              });
-            } else if (lowCoverageFiles.length > 5) {
+            if (diffCoverage.pct < hardThreshold) {
+              // 低于硬门禁 → 阻断
+              const shortfall = hardThreshold - diffCoverage.pct;
+              gate.status = gate.blocking ? "failed" : "warning";
               gate.issues.push(
-                `  共 ${lowCoverageFiles.length} 个文件覆盖率不达标（仅显示前5个）`,
+                `增量覆盖率不达标: ${diffCoverage.pct.toFixed(2)}% < ${hardThreshold}%（差距 ${shortfall.toFixed(2)}%，变更 ${diffCoverage.changedFilesCount} 个文件，${diffCoverage.totalCovered}/${diffCoverage.totalStatements} ${unitLabel}覆盖）`,
               );
-              lowCoverageFiles.slice(0, 5).forEach((f) => {
+            } else if (diffCoverage.pct < softThreshold) {
+              // 介于硬门禁和软门禁之间 → 警告不阻断
+              gate.status = gate.status === "passed" ? "warning" : gate.status;
+              gate.issues.push(
+                `增量覆盖率低于目标: ${diffCoverage.pct.toFixed(2)}% < ${softThreshold}%（硬门禁 ${hardThreshold}% 已通过，变更 ${diffCoverage.changedFilesCount} 个文件，${diffCoverage.totalCovered}/${diffCoverage.totalStatements} ${unitLabel}覆盖）`,
+              );
+            }
+
+            // 列出覆盖率低于软阈值的文件（无论阻断还是警告都列出）
+            if (diffCoverage.pct < softThreshold) {
+              const lowCoverageFiles = diffCoverage.fileMetrics.filter(
+                (f) =>
+                  f.pct < softThreshold &&
+                  !f.skippedNonExecutable &&
+                  !f.missingCoverageData,
+              );
+              if (lowCoverageFiles.length > 0 && lowCoverageFiles.length <= 5) {
+                lowCoverageFiles.forEach((f) => {
+                  gate.issues.push(
+                    `  - ${f.file}: ${f.pct.toFixed(2)}% (${f.covered}/${f.total})`,
+                  );
+                });
+              } else if (lowCoverageFiles.length > 5) {
                 gate.issues.push(
-                  `  - ${f.file}: ${f.pct.toFixed(2)}% (${f.covered}/${f.total})`,
+                  `  共 ${lowCoverageFiles.length} 个文件覆盖率不达标（仅显示前5个）`,
                 );
-              });
+                lowCoverageFiles.slice(0, 5).forEach((f) => {
+                  gate.issues.push(
+                    `  - ${f.file}: ${f.pct.toFixed(2)}% (${f.covered}/${f.total})`,
+                  );
+                });
+              }
             }
           }
 

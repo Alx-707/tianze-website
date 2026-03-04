@@ -89,7 +89,7 @@ async function main() {
   const key = process.env[KEY_NAME]?.trim();
   if (!key) {
     console.error(
-      `[server-actions-key] missing ${KEY_NAME}. Example: ${KEY_NAME}=\"$(openssl rand -base64 32)\" pnpm cf:sync:server-actions-key`,
+      `[server-actions-key] missing ${KEY_NAME}. Example: ${KEY_NAME}="$(openssl rand -base64 32)" pnpm cf:sync:server-actions-key`,
     );
     process.exit(1);
   }

@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { API_ERROR_CODES } from "@/constants/api-error-codes";
 import { processLead } from "@/lib/lead-pipeline";
-import { verifyTurnstile } from "@/app/api/contact/contact-api-utils";
+import { verifyTurnstile } from "@/lib/turnstile";
 import { OPTIONS, POST } from "../route";
 
 // Mock dependencies before imports
@@ -50,7 +50,7 @@ vi.mock("@/lib/lead-pipeline/lead-schema", () => ({
   },
 }));
 
-vi.mock("@/app/api/contact/contact-api-utils", () => ({
+vi.mock("@/lib/turnstile", () => ({
   verifyTurnstile: vi.fn(() => Promise.resolve(true)),
 }));
 
@@ -128,9 +128,7 @@ describe("/api/inquiry route", () => {
 
       expect(response.status).toBe(429);
       expect(data.success).toBe(false);
-      // Note: Rate limiting is handled by withRateLimit middleware which hasn't been
-      // migrated to errorCode pattern yet. It returns { error: "Too many requests" }
-      expect(data.error).toBe("Too many requests");
+      expect(data.errorCode).toBe(API_ERROR_CODES.RATE_LIMIT_EXCEEDED);
     });
 
     it("should return 400 for invalid JSON", async () => {

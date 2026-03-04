@@ -1,4 +1,4 @@
-import { spawnSync } from "node:child_process";
+import { execSync, spawnSync } from "node:child_process";
 import { access } from "node:fs/promises";
 import path from "node:path";
 
@@ -180,6 +180,23 @@ function runDeploy(configFile) {
 
 if (!args.dryRun) {
   checkAuth();
+
+  // Preflight: verify server-actions-key sync
+  console.log("[phase6] preflight: syncing server-actions encryption key...");
+  try {
+    execSync(
+      `node scripts/cloudflare/sync-server-actions-key.mjs --env ${targetEnv} --scope phase6`,
+      {
+        cwd: ROOT_DIR,
+        stdio: "inherit",
+      },
+    );
+  } catch {
+    console.error(
+      "[phase6] server-actions-key sync failed. Aborting deployment.",
+    );
+    process.exit(1);
+  }
 }
 printWranglerVersion();
 await ensureConfigs();

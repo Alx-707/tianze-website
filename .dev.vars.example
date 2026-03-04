@@ -6,6 +6,7 @@ NODE_ENV=development
 NEXTJS_ENV=development
 NEXT_PUBLIC_BASE_URL=http://localhost:8787
 NEXT_PUBLIC_DEPLOYMENT_PLATFORM=cloudflare
+DEPLOYMENT_PLATFORM=cloudflare
 
 # 以下敏感变量需从 .env.local 复制对应值
 # RESEND_API_KEY=

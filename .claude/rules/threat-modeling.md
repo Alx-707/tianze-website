@@ -52,8 +52,9 @@ Before implementing, answer:
 
 | Threat | Implementation |
 |--------|----------------|
-| CSRF | Cloudflare Turnstile |
-| Rate Limiting | `src/lib/security/security-rate-limit.ts` |
+| Anti-abuse / Bot 过滤 | Cloudflare Turnstile（human 校验，非 CSRF token） |
+| CSRF | 当前架构无需（无 cookie-based session auth）；若引入后必须加 Origin 校验 + SameSite + CSRF token |
+| Rate Limiting | `src/lib/security/distributed-rate-limit.ts` |
 | Input Validation | Zod schemas |
 | XSS | CSP headers, DOMPurify |
 | Injection | Parameterized queries, path validation |
@@ -61,5 +62,5 @@ Before implementing, answer:
 ## File Locations
 
 - CSP config: `src/config/security.ts`
-- Rate limiter: `src/lib/security/security-rate-limit.ts`
-- Input schemas: `src/lib/validations/`
+- Rate limiter: `src/lib/security/distributed-rate-limit.ts`
+- Input schemas: `src/lib/validations.ts`

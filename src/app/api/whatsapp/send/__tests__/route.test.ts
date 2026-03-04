@@ -484,8 +484,8 @@ describe("WhatsApp Send Route", () => {
       const data = await response.json();
 
       expect(response.status).toBe(429);
-      // withRateLimit HOF uses standardized error message
-      expect(data.error).toBe("Too many requests");
+      // withRateLimit HOF uses standardized errorCode
+      expect(data.errorCode).toBe("RATE_LIMIT_EXCEEDED");
     });
 
     it("should include rate limit headers in 429 response", async () => {

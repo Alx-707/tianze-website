@@ -3,6 +3,11 @@
  *
  * 提供幂等键支持，防止重复请求导致的重复处理
  *
+ * Security properties:
+ * - TOCTOU protection: atomic SETNX via IdempotencyStore.setIfNotExists()
+ * - Key semantic binding: key fingerprinted to {method}:{pathname}
+ * - Persistence: results stored in IdempotencyStore (survives hot-cache clear)
+ *
  * 使用方式：
  * 1. 客户端在请求头中添加 Idempotency-Key
  * 2. 服务端使用 withIdempotency 包装处理函数
@@ -16,63 +21,63 @@ import {
   HTTP_BAD_REQUEST,
   HTTP_OK,
   MILLISECONDS_PER_HOUR,
-  MILLISECONDS_PER_MINUTE,
 } from "@/constants";
+import {
+  type IdempotencyStore,
+  MemoryIdempotencyStore,
+} from "@/lib/security/stores/idempotency-store";
 
-/**
- * 幂等键缓存接口
- *
- * 说明：
- * - result：处理函数返回的原始结果（通常为可 JSON 序列化的对象）；
- * - statusCode：返回给客户端的 HTTP 状态码（通常为 200）；
- * - timestamp：首次写入缓存的时间戳，用于过期清理。
- *
- * 注意：此处只缓存「被视为成功且可安全复用」的结果，错误/异常响应不会进入该缓存。
- */
-interface IdempotencyCache {
-  result: unknown;
-  timestamp: number;
-  expiresAt: number;
-  statusCode: number;
+const DEFAULT_TTL_MS = HOURS_PER_DAY * MILLISECONDS_PER_HOUR;
+
+/** Singleton store — persists across clearAllIdempotencyKeys() calls */
+let idempotencyStore: IdempotencyStore | null = null;
+
+function getIdempotencyStore(): IdempotencyStore {
+  if (!idempotencyStore) {
+    idempotencyStore = new MemoryIdempotencyStore();
+  }
+  return idempotencyStore;
 }
 
 /**
- * 幂等键缓存存储（内存实现）
- * 生产环境建议使用 Redis 或其他持久化存储
+ * Hot-cache Map tracks in-flight PENDING requests for fast duplicate detection.
+ * Cleared by clearAllIdempotencyKeys() — does NOT affect the persistent store.
  */
-const idempotencyCache = new Map<string, IdempotencyCache>();
+const pendingRequests = new Map<string, Promise<NextResponse>>();
 
 /**
- * 缓存过期时间（默认：24小时）
+ * Poll the store until the entry transitions from PENDING to COMPLETED.
+ * Used by the "loser" of a concurrent SETNX race to wait for the winner.
  */
-const DEFAULT_CACHE_TTL_MS = HOURS_PER_DAY * MILLISECONDS_PER_HOUR;
+async function waitForCompletion(
+  key: string,
+  store: IdempotencyStore,
+): Promise<NextResponse> {
+  const POLL_INTERVAL_MS = 50;
+  const TIMEOUT_MS = 10_000;
+  const start = Date.now();
 
-/**
- * 清理频率上限（避免每次访问都扫全量 Map）
- */
-const CLEANUP_THROTTLE_MS = MILLISECONDS_PER_MINUTE;
-
-let lastCleanupAt = 0;
-
-/**
- * 清理过期缓存
- */
-function cleanExpiredCache(now: number) {
-  for (const [key, value] of idempotencyCache.entries()) {
-    if (now >= value.expiresAt) {
-      idempotencyCache.delete(key);
+  while (Date.now() - start < TIMEOUT_MS) {
+    await new Promise<void>((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
+    const entry = await store.get(key);
+    if (!entry) {
+      // Key expired or deleted — handler failed, allow retry
+      return NextResponse.json(
+        { error: "Request processing failed, please retry" },
+        { status: 503 },
+      );
+    }
+    if (entry.status === "COMPLETED") {
+      return NextResponse.json(entry.result, {
+        status: entry.statusCode ?? HTTP_OK,
+      });
     }
   }
-}
 
-/**
- * 访问时顺便清理（节流）
- */
-function maybeCleanExpiredCache(): void {
-  const now = Date.now();
-  if (now - lastCleanupAt < CLEANUP_THROTTLE_MS) return;
-  lastCleanupAt = now;
-  cleanExpiredCache(now);
+  return NextResponse.json(
+    { error: "Request processing timed out, please retry" },
+    { status: 503 },
+  );
 }
 
 /**
@@ -83,99 +88,163 @@ export function getIdempotencyKey(request: NextRequest): string | null {
 }
 
 /**
- * 检查幂等键是否已存在
+ * Build the semantic fingerprint for a request (method + pathname).
+ * The same raw idempotency key used for a different endpoint is rejected.
  */
-export function checkIdempotencyKey(key: string): IdempotencyCache | undefined {
-  maybeCleanExpiredCache();
-  const cached = idempotencyCache.get(key);
-  if (cached) {
-    // 检查是否过期
-    if (Date.now() >= cached.expiresAt) {
-      idempotencyCache.delete(key);
-      return undefined;
-    }
-    return cached;
+function buildFingerprint(request: NextRequest): string {
+  const { pathname } = new URL(request.url);
+  return `${request.method}:${pathname}`;
+}
+
+/**
+ * Handle requests that have an Idempotency-Key header.
+ *
+ * State machine:
+ *   - Key absent → SETNX PENDING (winner runs handler) or wait for COMPLETED
+ *   - Fingerprint mismatch → 409 Conflict
+ *   - COMPLETED → return cached result
+ */
+interface IdempotencyHandlerContext {
+  fingerprint: string;
+  ttlMs: number;
+}
+
+/** Track the fingerprint associated with each in-flight key */
+const inFlightFingerprints = new Map<string, string>();
+
+/**
+ * Fast path: check if an in-flight promise exists for this key.
+ * Returns the in-flight promise, a 409 conflict response, or null to continue.
+ */
+function checkInFlight(
+  idempotencyKey: string,
+  fingerprint: string,
+): NextResponse | Promise<NextResponse> | null {
+  const inFlight = pendingRequests.get(idempotencyKey);
+  if (!inFlight) return null;
+
+  const existingFingerprint = inFlightFingerprints.get(idempotencyKey);
+  if (existingFingerprint && existingFingerprint !== fingerprint) {
+    return NextResponse.json(
+      { error: "Idempotency key already used for a different endpoint" },
+      { status: 409 },
+    );
   }
-  return undefined;
+  return inFlight;
 }
 
-/**
- * 保存幂等键结果
- */
-export function saveIdempotencyKey(
-  key: string,
-  result: unknown,
-  options: { statusCode?: number; ttlMs?: number } = {},
-): void {
-  maybeCleanExpiredCache();
-  const now = Date.now();
-  const statusCode = options.statusCode ?? HTTP_OK;
-  const ttlMs = options.ttlMs ?? DEFAULT_CACHE_TTL_MS;
-  idempotencyCache.set(key, {
-    result,
-    timestamp: now,
-    expiresAt: now + ttlMs,
-    statusCode,
-  });
-}
-
-/**
- * 处理有幂等键的请求
- *
- * 行为约定（错误不缓存、成功缓存）：
- * - 当 handler 返回「普通值」（非 NextResponse）时：
- *   - 该结果会被视为成功响应写入幂等缓存；
- *   - 并由 withIdempotency 统一包装为 `NextResponse.json(result, { status: HTTP_OK })` 返回；
- * - 当 handler 返回 NextResponse 时：
- *   - 直接透传该 NextResponse（包含自定义状态码和响应体）；
- *   - 不会写入幂等缓存（常用于 4xx/5xx 错误或特殊响应）；
- * - 当 handler 抛出异常时：
- *   - 记录错误日志后继续向上抛出，由调用方负责统一错误处理。
- *
- * 推荐使用方式：
- * - 成功路径：返回普通对象，由 withIdempotency 统一包装并缓存；
- * - 错误路径：返回 NextResponse（携带非 2xx 状态码），保证错误不会被缓存。
- */
 async function handleWithIdempotencyKey<T>(
   idempotencyKey: string,
   handler: () => Promise<T>,
-  ttlMs: number,
+  context: IdempotencyHandlerContext,
 ): Promise<NextResponse> {
-  // 检查缓存
-  const cached = checkIdempotencyKey(idempotencyKey);
-  if (cached) {
-    logger.info("Returning cached result for idempotency key", {
-      key: idempotencyKey,
-      age: Date.now() - cached.timestamp,
-    });
-    return NextResponse.json(cached.result, { status: cached.statusCode });
+  const { fingerprint, ttlMs } = context;
+  const store = getIdempotencyStore();
+
+  // Fast path: if there's already a pending in-flight promise for this key
+  // (same process, same request racing), verify fingerprint before returning.
+  const inFlightResult = checkInFlight(idempotencyKey, fingerprint);
+  if (inFlightResult) return inFlightResult;
+
+  // Check existing entry in the persistent store
+  const existing = await store.get(idempotencyKey);
+
+  if (existing) {
+    // Reject if the same key is used for a different endpoint
+    if (existing.fingerprint && existing.fingerprint !== fingerprint) {
+      return NextResponse.json(
+        { error: "Idempotency key already used for a different endpoint" },
+        { status: 409 },
+      );
+    }
+
+    if (existing.status === "COMPLETED") {
+      logger.warn("Returning cached result for idempotency key", {
+        keyHash: idempotencyKey.slice(0, 8),
+        age: Date.now() - existing.createdAt,
+      });
+      return NextResponse.json(existing.result, {
+        status: existing.statusCode ?? HTTP_OK,
+      });
+    }
+
+    // PENDING — another concurrent request is processing it; wait for result
+    return waitForCompletion(idempotencyKey, store);
   }
 
-  // 处理请求并缓存结果
-  try {
-    const result = await handler();
-    // 如果处理函数已经返回 NextResponse，则直接透传，避免重复包装
-    if (result instanceof NextResponse) {
-      return result;
-    }
-    saveIdempotencyKey(idempotencyKey, result, { statusCode: HTTP_OK, ttlMs });
-    return NextResponse.json(result, { status: HTTP_OK });
-  } catch (error) {
-    logger.error("Request handler failed", {
-      error: error as Error,
-      idempotencyKey,
-    });
-    throw error;
+  // Atomically claim the key (SETNX)
+  const now = Date.now();
+  const claimed = await store.setIfNotExists(
+    idempotencyKey,
+    {
+      status: "PENDING",
+      fingerprint,
+      createdAt: now,
+      expiresAt: now + ttlMs,
+    },
+    ttlMs,
+  );
+
+  if (!claimed) {
+    // Lost the SETNX race — another request claimed it concurrently
+    return waitForCompletion(idempotencyKey, store);
   }
+
+  // We own the key — run the handler
+  const work = (async (): Promise<NextResponse> => {
+    try {
+      const result = await handler();
+
+      if (result instanceof NextResponse) {
+        // Don't cache responses where the handler returns a NextResponse directly
+        // (both 2xx and non-2xx). For idempotency caching, handlers must return
+        // a plain serializable object instead of a NextResponse.
+        try {
+          await store.delete(idempotencyKey);
+        } catch (deleteError) {
+          logger.warn("Failed to delete non-cached idempotency key", {
+            deleteError,
+            idempotencyKey,
+          });
+        }
+        return result;
+      }
+
+      // Cache successful result — PENDING → COMPLETED transition
+      await store.complete(idempotencyKey, result, HTTP_OK);
+
+      return NextResponse.json(result, { status: HTTP_OK });
+    } catch (error) {
+      logger.error("Request handler failed", {
+        error: error as Error,
+        idempotencyKey,
+      });
+      // Delete the PENDING key so the next request can retry.
+      // Isolated try/catch so a store failure does not mask the original error.
+      try {
+        await store.delete(idempotencyKey);
+      } catch (deleteError) {
+        logger.error(
+          "Failed to delete PENDING idempotency key after handler failure — key stuck until TTL expires",
+          { deleteError, idempotencyKey },
+        );
+      }
+      throw error;
+    } finally {
+      pendingRequests.delete(idempotencyKey);
+      inFlightFingerprints.delete(idempotencyKey);
+    }
+  })();
+
+  // Register in-flight to short-circuit concurrent duplicates in this process
+  pendingRequests.set(idempotencyKey, work);
+  inFlightFingerprints.set(idempotencyKey, fingerprint);
+
+  return work;
 }
 
 /**
- * 处理没有幂等键的请求
- *
- * 行为约定：
- * - 不参与任何幂等缓存逻辑；
- * - 当 handler 返回 NextResponse 时：直接透传该响应；
- * - 当 handler 返回普通对象时：统一包装为 `NextResponse.json(result, { status: HTTP_OK })`。
+ * Handle requests without an idempotency key (no caching, just wrap handler)
  */
 async function handleWithoutIdempotencyKey<T>(
   handler: () => Promise<T>,
@@ -195,40 +264,21 @@ async function handleWithoutIdempotencyKey<T>(
 /**
  * 幂等键中间件
  *
- * 核心行为（错误不缓存、成功缓存）：
+ * 核心行为：
  * - 当请求携带 Idempotency-Key 时：
- *   - 命中缓存 → 按缓存中的 statusCode 与 result 直接返回；
- *   - 未命中 → 执行 handler：
- *     - 如果 handler 返回 NextResponse：直接透传（通常用于 4xx/5xx 错误或特殊响应），不写入缓存；
- *     - 如果 handler 返回普通对象：视为成功结果，写入缓存，并统一包装为 200 JSON 返回；
- * - 当请求未携带 Idempotency-Key 时：
- *   - 不进行缓存；
- *   - 仅统一处理 NextResponse 与普通对象的包装逻辑（见 handleWithoutIdempotencyKey）。
- *
- * 推荐使用模式：
- * - 成功路径：返回普通对象（可被缓存与复用）；
- * - 业务错误 / 校验失败 / 特殊状态码：返回 NextResponse（不会被缓存）。
- *
- * 使用示例：
- * ```typescript
- * export async function POST(request: NextRequest) {
- *   return withIdempotency(request, async () => {
- *     const data = await doSomething();
- *     if (!data.ok) {
- *       return NextResponse.json({ success: false }, { status: 400 });
- *     }
- *     return { success: true };
- *   });
- * }
- * ```
+ *   - 首次请求：原子 SETNX PENDING → 执行 handler → COMPLETED（成功）或删除（失败）
+ *   - 重复请求：命中缓存 → 按缓存结果直接返回
+ *   - 并发重复请求：等待首次请求完成后返回缓存结果（TOCTOU 保护）
+ *   - 跨端点复用：409 Conflict（key 语义绑定）
+ * - 当请求未携带 Idempotency-Key 时：直接执行 handler
  */
-// eslint-disable-next-line require-await -- Returns Promise for API consistency; actual async work is in handleWithIdempotencyKey
+// eslint-disable-next-line require-await -- Returns Promise for API consistency
 export async function withIdempotency<T>(
   request: NextRequest,
   handler: () => Promise<T>,
   options: {
-    required?: boolean; // 是否必须提供幂等键
-    ttl?: number; // 自定义缓存过期时间（毫秒）
+    required?: boolean;
+    ttl?: number;
   } = {},
 ): Promise<NextResponse> {
   const { required = false } = options;
@@ -236,9 +286,8 @@ export async function withIdempotency<T>(
   const ttlMs =
     typeof options.ttl === "number" && options.ttl > 0
       ? options.ttl
-      : DEFAULT_CACHE_TTL_MS;
+      : DEFAULT_TTL_MS;
 
-  // 检查是否必须提供幂等键
   if (required && !idempotencyKey) {
     logger.warn("Missing required Idempotency-Key header");
     return NextResponse.json(
@@ -251,25 +300,16 @@ export async function withIdempotency<T>(
     );
   }
 
-  // 根据是否有幂等键选择处理方式
   return idempotencyKey
-    ? handleWithIdempotencyKey(idempotencyKey, handler, ttlMs)
+    ? handleWithIdempotencyKey(idempotencyKey, handler, {
+        fingerprint: buildFingerprint(request),
+        ttlMs,
+      })
     : handleWithoutIdempotencyKey(handler);
 }
 
 /**
  * 生成幂等键（客户端使用）
- *
- * 使用方式：
- * ```typescript
- * const idempotencyKey = generateIdempotencyKey();
- * fetch('/api/subscribe', {
- *   method: 'POST',
- *   headers: {
- *     'Idempotency-Key': idempotencyKey,
- *   },
- * });
- * ```
  */
 export function generateIdempotencyKey(): string {
   const timestamp = Date.now();
@@ -300,14 +340,18 @@ export function generateIdempotencyKey(): string {
  * 清除指定幂等键（用于测试或手动清理）
  */
 export function clearIdempotencyKey(key: string): void {
-  idempotencyCache.delete(key);
+  pendingRequests.delete(key);
+  inFlightFingerprints.delete(key);
 }
 
 /**
- * 清除所有幂等键（用于测试）
+ * 清除所有幂等键热缓存（用于测试）
+ * NOTE: Does NOT clear the IdempotencyStore — store persists to simulate
+ * cross-process/restart persistence.
  */
 export function clearAllIdempotencyKeys(): void {
-  idempotencyCache.clear();
+  pendingRequests.clear();
+  inFlightFingerprints.clear();
 }
 
 /**
@@ -315,7 +359,7 @@ export function clearAllIdempotencyKeys(): void {
  */
 export function getIdempotencyCacheStats() {
   return {
-    size: idempotencyCache.size,
-    keys: Array.from(idempotencyCache.keys()),
+    size: pendingRequests.size,
+    keys: Array.from(pendingRequests.keys()),
   };
 }

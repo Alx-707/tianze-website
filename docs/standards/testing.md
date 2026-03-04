@@ -6,7 +6,7 @@ This document defines the canonical testing patterns for this project. All new t
 
 - **Unit/Integration**: Vitest + React Testing Library
 - **E2E**: Playwright
-- **Coverage Target**: 85% global threshold
+- **Coverage Target**: 65% global (Phase 1) — roadmap: 75% (Phase 2) → 80% (Phase 3). Incremental (changed lines): ≥70% blocking (hard gate, new code must exceed global baseline); ≥90% advisory warning (soft target, encourages high standards without blocking large refactors).
 
 ## CI Quality Gate (diff-line coverage)
 
