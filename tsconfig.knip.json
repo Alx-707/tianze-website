@@ -3,7 +3,6 @@
   "include": [
     "next-env.d.ts",
     "env.d.ts",
-    "middleware.ts",
     "mdx-components.tsx",
     "next.config.ts",
     "src/**/*.ts",

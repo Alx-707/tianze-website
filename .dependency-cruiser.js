@@ -62,6 +62,8 @@ module.exports = {
           "^src/app/.*/page\\.tsx$",
           "^src/app/page\\.tsx$",
           "^src/app/.*/route\\.(ts|tsx)$",
+          "^src/app/.*/head\\.tsx$",
+          "^src/app/head\\.tsx$",
           // Next.js布局和字体配置
           "^src/app/.*/layout-fonts\\.(ts|tsx)$",
           // 配置文件

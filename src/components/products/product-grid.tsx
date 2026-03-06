@@ -4,6 +4,12 @@ import {
   ProductCard,
   type ProductCardLabels,
 } from "@/components/products/product-card";
+import {
+  getGapClass,
+  getLgColumnClass,
+  getMdColumnClass,
+  getSmColumnClass,
+} from "@/components/products/grid-utils";
 
 export interface ProductGridProps {
   products: ProductSummary[];
@@ -27,28 +33,6 @@ export interface ProductGridProps {
   className?: string;
   /** Localized labels for product cards */
   labels?: ProductCardLabels;
-}
-
-// Static column class getters to avoid object injection
-function getSmColumnClass(sm: 1 | 2): string {
-  if (sm === 1) return "sm:grid-cols-1";
-  return "sm:grid-cols-2";
-}
-
-function getMdColumnClass(md: 2 | 3): string {
-  if (md === 2) return "md:grid-cols-2";
-  return "md:grid-cols-3";
-}
-
-function getLgColumnClass(lg: 3 | 4): string {
-  if (lg === 3) return "lg:grid-cols-3";
-  return "lg:grid-cols-4";
-}
-
-function getGapClass(gap: 4 | 6 | 8): string {
-  if (gap === 4) return "gap-4";
-  if (gap === 6) return "gap-6";
-  return "gap-8";
 }
 
 /**

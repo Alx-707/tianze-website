@@ -4,7 +4,7 @@
  * Shared form submission logic used by both Server Actions and API routes.
  */
 
-import { processLead } from "@/lib/lead-pipeline";
+import { processLead } from "@/lib/lead-pipeline/process-lead";
 import { CONTACT_SUBJECTS, LEAD_TYPES } from "@/lib/lead-pipeline/lead-schema";
 import { logger, sanitizeEmail } from "@/lib/logger";
 import type { ContactFormFieldValues } from "@/config/contact-form-config";

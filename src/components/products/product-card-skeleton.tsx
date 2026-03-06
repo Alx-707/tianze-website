@@ -5,6 +5,12 @@ import {
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
+import {
+  getGapClass,
+  getLgColumnClass,
+  getMdColumnClass,
+  getSmColumnClass,
+} from "@/components/products/grid-utils";
 
 export interface ProductCardSkeletonProps {
   /** Whether to show cover image skeleton */
@@ -74,28 +80,6 @@ export interface ProductGridSkeletonProps {
   gap?: 4 | 6 | 8;
   /** Custom class name */
   className?: string;
-}
-
-// Static column class getters
-function getSmColumnClass(sm: 1 | 2): string {
-  if (sm === 1) return "sm:grid-cols-1";
-  return "sm:grid-cols-2";
-}
-
-function getMdColumnClass(md: 2 | 3): string {
-  if (md === 2) return "md:grid-cols-2";
-  return "md:grid-cols-3";
-}
-
-function getLgColumnClass(lg: 3 | 4): string {
-  if (lg === 3) return "lg:grid-cols-3";
-  return "lg:grid-cols-4";
-}
-
-function getGapClass(gap: 4 | 6 | 8): string {
-  if (gap === 4) return "gap-4";
-  if (gap === 6) return "gap-6";
-  return "gap-8";
 }
 
 /**

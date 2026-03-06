@@ -12,11 +12,9 @@ import type {
   EmailTemplateData,
   ProductInquiryEmailData,
 } from "@/lib/validations";
-import {
-  ConfirmationEmail,
-  ContactFormEmail,
-  ProductInquiryEmail,
-} from "@/emails";
+import { ConfirmationEmail } from "@/emails/ConfirmationEmail";
+import { ContactFormEmail } from "@/emails/ContactFormEmail";
+import { ProductInquiryEmail } from "@/emails/ProductInquiryEmail";
 import { ZERO } from "@/constants";
 
 /**
