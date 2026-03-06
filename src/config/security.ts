@@ -7,6 +7,38 @@ export type SecurityHeader = {
 };
 
 /**
+ * Inline script allowlist (CSP hashes)
+ *
+ * Why:
+ * - In strict CSP mode we rely on a per-request nonce for Next.js internal inline scripts.
+ * - Some inline scripts are intentionally rendered without nonce (e.g. JSON-LD, next-themes init),
+ *   and Turbopack also emits a small `$RT` bootstrap without nonce.
+ * - Hash allowlisting keeps strict CSP enforceable without falling back to `unsafe-inline`.
+ *
+ * Maintenance:
+ * - When upgrading Next.js/next-themes or editing JSON-LD generation, run `pnpm security:csp:check`
+ *   to refresh these hashes (and ensure no new nonced scripts regress).
+ */
+const CSP_INLINE_SCRIPT_SHA256_BASE64_ALLOWLIST = [
+  // Next/Turbopack bootstrap: `requestAnimationFrame(function(){$RT=performance.now()});`
+  "7mu4H06fwDCjmnxxr/xNHyuQC6pLTHr4M2E4jXw5WZs=",
+  // JSON-LD (Organization, en)
+  "Tcfh954qwV9qknq8Ezd3MBf0MJ9wiU8Z7dCX6khgyxA=",
+  // JSON-LD (WebSite, en)
+  "VxJza9U1bmz5qK7sD4aFS4OyP7yM812BKGYKRw0ifDM=",
+  // JSON-LD (Organization, zh)
+  "ggN5lYnon4D8g2kEp5TfFcrUrGKwpl7EIdb1EI06ous=",
+  // JSON-LD (WebSite, zh)
+  "iodQClLVXjTfWzOZ4T5nGgqIJTrWmOCGDpFn58amtMM=",
+  // next-themes init script (ThemeProvider)
+  "n46vPwSWuMC0W703pBofImv82Z26xo4LXymv0E9caPk=",
+] as const;
+
+// Exported for CI/runtime verification scripts (see scripts/csp/check-inline-scripts.ts).
+export const CSP_INLINE_SCRIPT_SHA256_BASE64_ALLOWLIST_FOR_TESTS =
+  CSP_INLINE_SCRIPT_SHA256_BASE64_ALLOWLIST;
+
+/**
  * Security configuration for the application
  * Includes CSP, security headers, and other security-related settings
  */
@@ -29,8 +61,13 @@ export function generateCSP(nonce?: string): string {
     "script-src": [
       "'self'",
       // Allow inline scripts with nonce in production, unsafe-inline in development
-      ...(isDevelopment ? ["'unsafe-inline'", "'unsafe-eval'"] : []),
+      ...(isDevelopment
+        ? ["'unsafe-inline'", "'unsafe-eval'", "https://unpkg.com"]
+        : []),
       ...(nonce ? [`'nonce-${nonce}'`] : []),
+      ...CSP_INLINE_SCRIPT_SHA256_BASE64_ALLOWLIST.map(
+        (hash) => `'sha256-${hash}'`,
+      ),
       // Vercel Analytics
       "https://va.vercel-scripts.com",
       // Cloudflare Turnstile

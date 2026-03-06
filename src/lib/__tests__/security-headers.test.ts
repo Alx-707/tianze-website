@@ -234,7 +234,6 @@ describe("security-headers", () => {
       const headers = {
         "X-Content-Type-Options": "nosniff",
         "X-Frame-Options": "DENY",
-        "X-XSS-Protection": "1; mode=block",
         "Referrer-Policy": "strict-origin-when-cross-origin",
       };
 
@@ -253,7 +252,6 @@ describe("security-headers", () => {
 
       expect(result.valid).toBe(false);
       expect(result.missing).toContain("X-Frame-Options");
-      expect(result.missing).toContain("X-XSS-Protection");
       expect(result.missing).toContain("Referrer-Policy");
     });
 
@@ -261,7 +259,6 @@ describe("security-headers", () => {
       const headers = {
         "X-Content-Type-Options": "nosniff",
         "X-Frame-Options": "DENY",
-        "X-XSS-Protection": "1; mode=block",
         "Referrer-Policy": "strict-origin-when-cross-origin",
       };
 
@@ -275,7 +272,6 @@ describe("security-headers", () => {
       const headers = {
         "X-Content-Type-Options": "nosniff",
         "X-Frame-Options": "DENY",
-        "X-XSS-Protection": "1; mode=block",
         "Referrer-Policy": "strict-origin-when-cross-origin",
         "Content-Security-Policy": "default-src 'self'",
         "Strict-Transport-Security": "max-age=31536000",

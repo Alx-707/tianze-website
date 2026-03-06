@@ -173,7 +173,7 @@ describe("ProductActions", () => {
 
       const links = screen.getAllByRole("link", { name: /download/i });
       expect(links[0]).toHaveAttribute("target", "_blank");
-      expect(links[0]).toHaveAttribute("rel", "noreferrer");
+      expect(links[0]).toHaveAttribute("rel", "noopener noreferrer");
     });
 
     it("renders download icon in PDF button", () => {

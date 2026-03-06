@@ -35,7 +35,7 @@ describe("Middleware Cookie Security", () => {
 
   describe("setLocaleCookie security attributes", () => {
     it("should set httpOnly: true to prevent XSS access", async () => {
-      const { default: middleware } = await import("../../middleware");
+      const { default: middleware } = await import("@/middleware");
 
       const request = new NextRequest("http://localhost:3000/en/about");
       const response = middleware(request);
@@ -70,7 +70,7 @@ describe("Middleware Cookie Security", () => {
         },
       }));
 
-      const { default: middleware } = await import("../../middleware");
+      const { default: middleware } = await import("@/middleware");
 
       const request = new NextRequest("http://localhost:3000/en/about");
       const response = middleware(request);
@@ -101,7 +101,7 @@ describe("Middleware Cookie Security", () => {
         },
       }));
 
-      const { default: middleware } = await import("../../middleware");
+      const { default: middleware } = await import("@/middleware");
 
       const request = new NextRequest("http://localhost:3000/en/about");
       const response = middleware(request);
@@ -116,7 +116,7 @@ describe("Middleware Cookie Security", () => {
     });
 
     it("should maintain sameSite: lax for cross-site navigation", async () => {
-      const { default: middleware } = await import("../../middleware");
+      const { default: middleware } = await import("@/middleware");
 
       const request = new NextRequest("http://localhost:3000/en/about");
       const response = middleware(request);
@@ -128,7 +128,7 @@ describe("Middleware Cookie Security", () => {
     });
 
     it("should set correct cookie path", async () => {
-      const { default: middleware } = await import("../../middleware");
+      const { default: middleware } = await import("@/middleware");
 
       const request = new NextRequest("http://localhost:3000/en/about");
       const response = middleware(request);
@@ -159,7 +159,7 @@ describe("Middleware Cookie Security", () => {
         },
       }));
 
-      const { default: middleware } = await import("../../middleware");
+      const { default: middleware } = await import("@/middleware");
 
       // Request without existing NEXT_LOCALE cookie
       const request = new NextRequest("http://localhost:3000/zh/about");
@@ -193,7 +193,7 @@ describe("Middleware Cookie Security", () => {
         },
       }));
 
-      const { default: middleware } = await import("../../middleware");
+      const { default: middleware } = await import("@/middleware");
 
       // Request with invalid locale prefix but known path
       const request = new NextRequest(

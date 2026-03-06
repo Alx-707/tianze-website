@@ -45,12 +45,12 @@ export default function RootLayout({ children }: RootLayoutProps) {
             />
             {/* react-grab + Claude Code integration */}
             <Script
-              src="//unpkg.com/react-grab/dist/index.global.js"
+              src="https://unpkg.com/react-grab/dist/index.global.js"
               crossOrigin="anonymous"
               strategy="beforeInteractive"
             />
             <Script
-              src="//unpkg.com/@react-grab/claude-code/dist/client.global.js"
+              src="https://unpkg.com/@react-grab/claude-code/dist/client.global.js"
               strategy="lazyOnload"
             />
           </>

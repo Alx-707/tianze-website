@@ -238,7 +238,6 @@ export function validateSecurityHeaders(headers: Record<string, string>): {
   const requiredHeaders = [
     HEADER_KEYS.contentTypeOptions,
     HEADER_KEYS.frameOptions,
-    HEADER_KEYS.xssProtection,
     HEADER_KEYS.referrerPolicy,
   ];
 

@@ -9,7 +9,7 @@ vi.mock("next-intl/middleware", () => ({
   },
 }));
 
-import middleware from "../../middleware";
+import middleware from "../middleware";
 
 function countOccurrences(haystack: string, needle: string): number {
   return haystack.split(needle).length - 1;

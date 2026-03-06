@@ -21,6 +21,7 @@ describe("Security Configuration", () => {
       expect(csp).toContain("default-src 'self'");
       expect(csp).toContain("'unsafe-inline'");
       expect(csp).toContain("'unsafe-eval'");
+      expect(csp).toContain("https://unpkg.com");
     });
 
     it("should generate strict CSP in production", () => {

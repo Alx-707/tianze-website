@@ -61,7 +61,7 @@ function ActionButtons({
           asChild
           className={cn(fullWidth && "flex-1")}
         >
-          <a href={pdfHref} target="_blank" rel="noreferrer">
+          <a href={pdfHref} target="_blank" rel="noopener noreferrer">
             <Download className="mr-2 h-4 w-4" />
             {downloadPdfLabel}
           </a>

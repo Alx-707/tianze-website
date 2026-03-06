@@ -11,6 +11,9 @@ import { SITE_CONFIG } from "@/config/paths/site-config";
 import { routing } from "@/i18n/routing";
 
 const DEFAULT_BASE_URL =
+  process.env.NODE_ENV === "production" ? SITE_CONFIG.baseUrl : undefined;
+const FALLBACK_BASE_URL =
+  DEFAULT_BASE_URL ||
   process.env["NEXT_PUBLIC_BASE_URL"] ||
   process.env["NEXT_PUBLIC_SITE_URL"] ||
   SITE_CONFIG.baseUrl;
@@ -37,8 +40,8 @@ export function generateOrganizationData(
       t("organization.description", {
         defaultValue: SITE_CONFIG.description,
       }),
-    url: data.url || DEFAULT_BASE_URL,
-    logo: data.logo || `${DEFAULT_BASE_URL}${DEFAULT_LOGO_PATH}`,
+    url: data.url || FALLBACK_BASE_URL,
+    logo: data.logo || `${FALLBACK_BASE_URL}${DEFAULT_LOGO_PATH}`,
     contactPoint: {
       "@type": "ContactPoint",
       telephone:
@@ -82,11 +85,11 @@ export function generateWebSiteData(
       t("website.description", {
         defaultValue: SITE_CONFIG.seo.defaultDescription,
       }),
-    url: data.url || DEFAULT_BASE_URL,
+    url: data.url || FALLBACK_BASE_URL,
     potentialAction: {
       "@type": "SearchAction",
       target:
-        data.searchUrl || `${DEFAULT_BASE_URL}/search?q={search_term_string}`,
+        data.searchUrl || `${FALLBACK_BASE_URL}/search?q={search_term_string}`,
       "query-input": "required name=search_term_string",
     },
     inLanguage: routing.locales,
@@ -122,7 +125,7 @@ export function generateArticleData(
       }),
       logo: {
         "@type": "ImageObject",
-        url: `${DEFAULT_BASE_URL}${DEFAULT_LOGO_PATH}`,
+        url: `${FALLBACK_BASE_URL}${DEFAULT_LOGO_PATH}`,
       },
     },
     datePublished: data.publishedTime,

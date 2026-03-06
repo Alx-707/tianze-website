@@ -5,9 +5,32 @@ import { routing, type Locale } from "@/i18n/routing-config";
 
 const intlMiddleware = createMiddleware(routing);
 const SUPPORTED_LOCALES = new Set<string>(routing.locales);
+const NONCE_REQUEST_HEADER_KEY = "x-nonce";
 
 function isValidLocale(candidate: string): candidate is Locale {
   return SUPPORTED_LOCALES.has(candidate);
+}
+
+function applyRequestHeaderOverride(
+  response: NextResponse,
+  headerKey: string,
+  headerValue: string,
+): void {
+  const normalizedKey = headerKey.toLowerCase();
+  response.headers.set(`x-middleware-request-${normalizedKey}`, headerValue);
+
+  const existing = response.headers.get("x-middleware-override-headers");
+  const keys = new Set(
+    (existing ?? "")
+      .split(",")
+      .map((k) => k.trim().toLowerCase())
+      .filter(Boolean),
+  );
+  keys.add(normalizedKey);
+  response.headers.set(
+    "x-middleware-override-headers",
+    Array.from(keys).join(","),
+  );
 }
 
 function addSecurityHeaders(response: NextResponse, nonce: string): void {
@@ -100,17 +123,30 @@ export default function middleware(request: NextRequest) {
   const nonce = generateNonce();
 
   const invalidLocaleHandled = tryHandleInvalidLocalePrefix(request, nonce);
-  if (invalidLocaleHandled) return invalidLocaleHandled;
+  if (invalidLocaleHandled) {
+    applyRequestHeaderOverride(
+      invalidLocaleHandled,
+      NONCE_REQUEST_HEADER_KEY,
+      nonce,
+    );
+    return invalidLocaleHandled;
+  }
 
   const early = tryHandleExplicitLocalizedRequest(request, nonce);
-  if (early) return early;
+  if (early) {
+    applyRequestHeaderOverride(early, NONCE_REQUEST_HEADER_KEY, nonce);
+    return early;
+  }
 
   const response = intlMiddleware(request);
   const locale = extractLocaleCandidate(request.nextUrl.pathname);
   const existingLocale = request.cookies.get("NEXT_LOCALE")?.value;
   if (response && locale && existingLocale !== locale)
     setLocaleCookie(response, locale);
-  if (response) addSecurityHeaders(response, nonce);
+  if (response) {
+    applyRequestHeaderOverride(response, NONCE_REQUEST_HEADER_KEY, nonce);
+    addSecurityHeaders(response, nonce);
+  }
   return response;
 }
 
