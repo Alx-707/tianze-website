@@ -105,7 +105,7 @@ export async function Header({
                 asChild
                 className="header-cta-desktop-only"
               >
-                <Link href="/contact" data-testid="header-cta">
+                <Link href="/contact" prefetch={false} data-testid="header-cta">
                   {t("contactSales")}
                 </Link>
               </Button>

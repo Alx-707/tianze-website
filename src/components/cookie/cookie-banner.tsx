@@ -152,6 +152,7 @@ function MainBanner({
           {t("description")}{" "}
           <Link
             href="/privacy"
+            prefetch={false}
             className="underline underline-offset-4 hover:text-foreground"
           >
             {t("learnMore")}

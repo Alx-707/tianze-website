@@ -56,6 +56,7 @@ export function Logo({
   return (
     <Link
       href="/"
+      prefetch={false}
       className={cn(
         "flex items-center gap-2 transition-opacity hover:opacity-80",
         className,

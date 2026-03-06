@@ -96,6 +96,7 @@ export function MobileNavigation({ className }: MobileNavigationProps) {
                 <Link
                   key={item.key}
                   href={item.href as "/"}
+                  prefetch={false}
                   className={cn(
                     "flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors duration-200",
                     isActive
@@ -121,6 +122,7 @@ export function MobileNavigation({ className }: MobileNavigationProps) {
                     pathname: "/contact",
                     query: { source: "mobile_nav_cta" },
                   }}
+                  prefetch={false}
                   onClick={() => setIsOpen(false)}
                 >
                   {t("navigation.contactSales")}
@@ -173,6 +175,7 @@ function MobileLanguageSwitcher({
             key={locale}
             href={(pathname || "/") as "/"}
             locale={locale}
+            prefetch={false}
             className={cn(
               "flex items-center justify-between rounded-md px-3 py-2 text-sm font-medium transition-colors duration-200",
               isActive

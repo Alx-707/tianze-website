@@ -41,11 +41,12 @@ function ProductCard({
         ))}
       </ul>
       <div className="mt-4 flex items-center justify-between border-t pt-4">
-        <span className="font-mono text-xs text-muted-foreground">
+        <span className="text-xs font-medium tracking-[0.04em] text-muted-foreground">
           {standard}
         </span>
         <Link
           href={link}
+          prefetch={false}
           className="text-sm font-medium text-primary hover:underline"
         >
           {title} &rarr;
@@ -73,7 +74,9 @@ export function ProductsSection() {
 
   const action = (
     <Button variant="secondary" asChild>
-      <Link href="/products">{t("products.cta")}</Link>
+      <Link href="/products" prefetch={false}>
+        {t("products.cta")}
+      </Link>
     </Button>
   );
 

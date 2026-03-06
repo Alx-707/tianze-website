@@ -48,7 +48,7 @@ function ProofBar({ t }: { t: ReturnType<typeof useTranslations<"home">> }) {
     <div className="hero-stagger-5 mt-7 flex flex-wrap gap-6 border-t border-border-light pt-6 md:gap-8">
       {PROOF_ITEMS.map(({ valueKey, labelKey, countUp }) => (
         <div key={valueKey} className="flex flex-col gap-1.5">
-          <span className="font-mono text-xl font-medium">
+          <span className="text-xl font-semibold tabular-nums">
             {countUp ? (
               <AnimatedCounter
                 to={countUp.end}
@@ -109,10 +109,14 @@ export function HeroSection() {
 
           <div className="hero-stagger-4 mt-7 flex flex-wrap gap-3">
             <Button asChild>
-              <Link href="/contact">{t("hero.cta.primary")}</Link>
+              <Link href="/contact" prefetch={false}>
+                {t("hero.cta.primary")}
+              </Link>
             </Button>
             <Button variant="secondary" asChild>
-              <Link href="/products">{t("hero.cta.secondary")}</Link>
+              <Link href="/products" prefetch={false}>
+                {t("hero.cta.secondary")}
+              </Link>
             </Button>
           </div>
 

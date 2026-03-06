@@ -24,6 +24,10 @@ export const jetbrainsMono = JetBrains_Mono({
   weight: ["400", "500"],
   variable: "--font-jetbrains-mono",
   display: "swap",
+  // Perf: avoid preloading a second font on critical routes (e.g. /en, /zh).
+  // If a page actually uses monospace above the fold, the browser will still
+  // fetch it when needed; otherwise it won't inflate Lighthouse total bytes.
+  preload: false,
 });
 
 // Backwards compatibility alias

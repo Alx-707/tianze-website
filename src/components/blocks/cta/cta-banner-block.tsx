@@ -35,7 +35,11 @@ export function CTABannerBlock({
             className="bg-white text-primary hover:bg-white/90"
             asChild
           >
-            <Link href="/contact" className="flex items-center gap-2">
+            <Link
+              href="/contact"
+              prefetch={false}
+              className="flex items-center gap-2"
+            >
               {t("button")}
               <ArrowRight className="h-4 w-4" />
             </Link>

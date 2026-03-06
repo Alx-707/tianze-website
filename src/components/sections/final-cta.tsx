@@ -24,10 +24,14 @@ export function FinalCTA() {
 
         <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <Button variant="on-dark" size="lg" asChild>
-            <Link href="/contact">{t("primary")}</Link>
+            <Link href="/contact" prefetch={false}>
+              {t("primary")}
+            </Link>
           </Button>
           <Button variant="ghost-dark" size="lg" asChild>
-            <Link href="/products">{t("secondary")}</Link>
+            <Link href="/products" prefetch={false}>
+              {t("secondary")}
+            </Link>
           </Button>
         </div>
 

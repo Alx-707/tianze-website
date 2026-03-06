@@ -32,7 +32,9 @@ function StepCard({
 }) {
   return (
     <div className="bg-background p-6 transition-colors hover:bg-[var(--primary-50)]">
-      <span className="font-mono text-sm text-muted-foreground">{num}</span>
+      <span className="text-sm font-medium tabular-nums text-muted-foreground">
+        {num}
+      </span>
       <h3 className="mt-2 text-[15px] font-semibold leading-snug">{title}</h3>
       <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
         {desc}

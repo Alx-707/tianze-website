@@ -21,7 +21,9 @@ export function SampleCTA() {
             </p>
           </div>
           <Button asChild className="shrink-0">
-            <Link href="/contact">{t("sample.cta")}</Link>
+            <Link href="/contact" prefetch={false}>
+              {t("sample.cta")}
+            </Link>
           </Button>
         </div>
       </ScrollReveal>

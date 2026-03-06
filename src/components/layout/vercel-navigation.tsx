@@ -45,6 +45,7 @@ interface VercelNavigationProps {
 }
 
 const SECONDARY_NAV_KEYS = new Set(["about", "privacy"]);
+const PREFETCH_ALLOWLIST = new Set<StaticPathname>(["/products", "/contact"]);
 
 // Hook for hover delay interaction
 function useHoverDelay() {
@@ -140,11 +141,15 @@ function renderLinkItem(
   t: (key: string) => string,
   className?: string,
 ) {
+  const href = item.href as StaticPathname;
+  const prefetchDisabled = !PREFETCH_ALLOWLIST.has(href);
+
   return (
     <NavigationMenuItem key={item.key} className={className}>
       <NavigationMenuLink asChild>
         <Link
-          href={item.href as StaticPathname}
+          href={href}
+          {...(prefetchDisabled ? { prefetch: false } : {})}
           className={cn(
             "relative inline-flex items-center rounded-full bg-transparent px-3 py-2 text-sm font-medium tracking-[0.01em]",
             "text-muted-foreground hover:text-foreground",

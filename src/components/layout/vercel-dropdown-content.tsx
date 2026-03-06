@@ -21,6 +21,7 @@ export function DropdownContent({
         <li key={child.key} className="flex justify-center">
           <Link
             href={child.href as ValidPathname}
+            prefetch={false}
             className={cn(
               "inline-flex rounded-lg px-3 py-2 leading-none no-underline transition-colors outline-none select-none",
               "text-muted-foreground hover:text-foreground",
