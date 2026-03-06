@@ -244,7 +244,7 @@ describe("CSP Report API Route - GET & OPTIONS Tests", () => {
         method: "POST",
         body: JSON.stringify({ invalid: "data" }),
         headers: {
-          "content-type": "application/json", // Wrong content type
+          "content-type": "text/plain", // Wrong content type
         },
       });
 

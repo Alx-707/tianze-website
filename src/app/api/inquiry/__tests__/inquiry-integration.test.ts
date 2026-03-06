@@ -72,6 +72,9 @@ vi.mock("@/lib/lead-pipeline/lead-schema", () => ({
 
 // CORS utilities
 vi.mock("@/lib/api/cors-utils", () => ({
+  applyCorsHeaders: vi.fn(
+    ({ response }: { response: any; request: NextRequest }) => response,
+  ),
   createCorsPreflightResponse: vi.fn(
     () => new (require("next/server").NextResponse)(null, { status: 200 }),
   ),
@@ -82,12 +85,15 @@ vi.mock("@/lib/api/cors-utils", () => ({
 function validInquiryData() {
   return {
     turnstileToken: "valid-turnstile-token",
-    firstName: "Bob",
-    lastName: "Wang",
+    type: "product",
+    fullName: "Bob Wang",
     email: "bob@example.com",
     company: "BuildCo Ltd.",
-    message: "Interested in 25mm PVC conduit fittings for warehouse project.",
     productSlug: "pvc-conduit-25mm",
+    productName: "PVC Conduit 25mm",
+    quantity: "1000",
+    requirements:
+      "Interested in 25mm PVC conduit fittings for warehouse project.",
   };
 }
 

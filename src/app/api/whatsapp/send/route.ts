@@ -9,9 +9,15 @@ import {
 import { logger } from "@/lib/logger";
 import { constantTimeCompare } from "@/lib/security-crypto";
 import {
+  checkDistributedRateLimit,
+  createRateLimitHeaders,
+} from "@/lib/security/distributed-rate-limit";
+import { getApiKeyPriorityKey } from "@/lib/security/rate-limit-key-strategies";
+import {
   getClientEnvironmentInfo,
   sendWhatsAppMessage,
 } from "@/lib/whatsapp-service";
+import { API_ERROR_CODES } from "@/constants/api-error-codes";
 import { COUNT_THREE } from "@/constants/count";
 import {
   FIVE_SECONDS_MS,
@@ -21,6 +27,7 @@ import {
 
 // HTTP status codes
 const HTTP_UNAUTHORIZED = 401;
+const HTTP_TOO_MANY_REQUESTS = 429;
 const HTTP_SERVICE_UNAVAILABLE = 503;
 
 /**
@@ -69,6 +76,31 @@ function validateApiKey(request: NextRequest): NextResponse | null {
   }
 
   return null;
+}
+
+async function checkPostAuthRateLimit(
+  request: NextRequest,
+): Promise<NextResponse | null> {
+  const rateLimitKey = getApiKeyPriorityKey(request);
+  const result = await checkDistributedRateLimit(rateLimitKey, "whatsapp");
+
+  if (result.allowed) return null;
+
+  const isStorageFailure = result.deniedReason === "storage_failure";
+  return NextResponse.json(
+    {
+      success: false,
+      errorCode: isStorageFailure
+        ? API_ERROR_CODES.SERVICE_UNAVAILABLE
+        : API_ERROR_CODES.RATE_LIMIT_EXCEEDED,
+    },
+    {
+      status: isStorageFailure
+        ? HTTP_SERVICE_UNAVAILABLE
+        : HTTP_TOO_MANY_REQUESTS,
+      headers: createRateLimitHeaders(result),
+    },
+  );
 }
 
 /**
@@ -398,6 +430,11 @@ async function handlePost(
   const authError = validateApiKey(request);
   if (authError) {
     return authError;
+  }
+
+  const postAuthRateLimitError = await checkPostAuthRateLimit(request);
+  if (postAuthRateLimitError) {
+    return postAuthRateLimitError;
   }
 
   try {

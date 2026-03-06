@@ -406,6 +406,40 @@ describe("Contact API Route", () => {
       expect(data.data.data).toEqual(mockStats);
     });
 
+    it("应该在 rate limit 超限时返回 429（并且不进入鉴权逻辑）", async () => {
+      const { checkDistributedRateLimit } =
+        await import("@/lib/security/distributed-rate-limit");
+      vi.mocked(checkDistributedRateLimit).mockResolvedValueOnce({
+        allowed: false,
+        remaining: 0,
+        resetTime: Date.now() + 60000,
+        retryAfter: 60,
+        deniedReason: "limit",
+      });
+
+      const { validateAdminAccess } =
+        await import("@/app/api/contact/contact-api-validation");
+      vi.mocked(validateAdminAccess).mockReturnValue(true);
+
+      const request = new NextRequest("http://localhost:3000/api/contact", {
+        method: "GET",
+        headers: {
+          authorization: "Bearer test-admin-token",
+        },
+      });
+
+      const response = await GET(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(429);
+      expect(data.errorCode).toBe(API_ERROR_CODES.RATE_LIMIT_EXCEEDED);
+      expect(validateAdminAccess).not.toHaveBeenCalled();
+      expect(checkDistributedRateLimit).toHaveBeenCalledWith(
+        expect.stringMatching(/^ip:/),
+        "contactAdminStats",
+      );
+    });
+
     it("应该拒绝无效的管理员token", async () => {
       const request = new NextRequest("http://localhost:3000/api/contact", {
         method: "GET",

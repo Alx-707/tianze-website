@@ -31,7 +31,11 @@ const makeReq = (body: unknown, headers: HeadersInit = {}) =>
     new Request("http://localhost/api/subscribe", {
       method: "POST",
       body: JSON.stringify(body),
-      headers,
+      headers: {
+        "Content-Type": "application/json",
+        "Idempotency-Key": "test-idempotency-key",
+        ...(headers as Record<string, string>),
+      },
     }),
   );
 
@@ -45,7 +49,10 @@ describe("api/subscribe", () => {
       new Request("http://localhost/api/subscribe", {
         method: "POST",
         body: "this is not json",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Idempotency-Key": "test-idempotency-key",
+        },
       }),
     );
 
@@ -54,6 +61,21 @@ describe("api/subscribe", () => {
     const json = await res.json();
     expect(json.success).toBe(false);
     expect(json.errorCode).toBe(API_ERROR_CODES.INVALID_JSON_BODY);
+  });
+
+  it("returns 400 when Idempotency-Key is missing", async () => {
+    const req = new NextRequest(
+      new Request("http://localhost/api/subscribe", {
+        method: "POST",
+        body: JSON.stringify({ email: "ok@example.com", turnstileToken: "x" }),
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
+
+    const res = await route.POST(req);
+    expect(res.status).toBe(400);
+    const json = await res.json();
+    expect(json).toHaveProperty("error");
   });
 
   it("accepts valid email with idempotency key and caches", async () => {

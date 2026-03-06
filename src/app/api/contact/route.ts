@@ -8,7 +8,10 @@ import {
   createApiErrorResponse,
   createApiSuccessResponse,
 } from "@/lib/api/api-response";
-import { createCorsPreflightResponse } from "@/lib/api/cors-utils";
+import {
+  applyCorsHeaders,
+  createCorsPreflightResponse,
+} from "@/lib/api/cors-utils";
 import { safeParseJson } from "@/lib/api/safe-parse-json";
 import {
   withRateLimit,
@@ -33,7 +36,7 @@ import {
  * 处理联系表单提交
  * Handle contact form submission
  */
-export const POST = withRateLimit(
+const POST_RATE_LIMITED = withRateLimit(
   "contact",
   async (
     request: NextRequest,
@@ -95,38 +98,59 @@ export const POST = withRateLimit(
   },
 );
 
+export async function POST(request: NextRequest) {
+  const response = await POST_RATE_LIMITED(request);
+  return applyCorsHeaders({ request, response });
+}
+
 /**
  * GET /api/contact
  * 获取联系表单统计信息（仅管理员）
  * Get contact form statistics (admin only)
  */
-export async function GET(request: NextRequest) {
-  try {
-    // 验证管理员权限
-    const authHeader = request.headers.get("authorization");
+const GET_RATE_LIMITED = withRateLimit(
+  "contactAdminStats",
+  async (
+    request: NextRequest,
+    _ctx: RateLimitContext,
+  ): Promise<NextResponse> => {
+    try {
+      // 验证管理员权限
+      const authHeader = request.headers.get("authorization");
 
-    if (!validateAdminAccess(authHeader)) {
-      logger.warn("Unauthorized access attempt to contact statistics");
+      if (!validateAdminAccess(authHeader)) {
+        logger.warn("Unauthorized access attempt to contact statistics");
+        return createApiErrorResponse(
+          API_ERROR_CODES.UNAUTHORIZED,
+          HTTP_UNAUTHORIZED,
+        );
+      }
+
+      // 获取统计信息
+      const statsResult = await getContactFormStats();
+
+      return createApiSuccessResponse(statsResult);
+    } catch (error) {
+      logger.error("Failed to get contact statistics", {
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
+
       return createApiErrorResponse(
-        API_ERROR_CODES.UNAUTHORIZED,
-        HTTP_UNAUTHORIZED,
+        API_ERROR_CODES.CONTACT_STATS_ERROR,
+        HTTP_INTERNAL_ERROR,
       );
     }
+  },
+);
 
-    // 获取统计信息
-    const statsResult = await getContactFormStats();
-
-    return createApiSuccessResponse(statsResult);
-  } catch (error) {
-    logger.error("Failed to get contact statistics", {
-      error: error instanceof Error ? error.message : "Unknown error",
-    });
-
-    return createApiErrorResponse(
-      API_ERROR_CODES.CONTACT_STATS_ERROR,
-      HTTP_INTERNAL_ERROR,
-    );
-  }
+export async function GET(request: NextRequest) {
+  const response = await GET_RATE_LIMITED(request);
+  return applyCorsHeaders({
+    request,
+    response,
+    additionalMethods: ["GET"],
+    additionalHeaders: ["Authorization"],
+  });
 }
 
 /**

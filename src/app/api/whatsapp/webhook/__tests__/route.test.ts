@@ -232,6 +232,34 @@ describe("WhatsApp Webhook Route", () => {
       expect(mockHandleIncomingMessage).toHaveBeenCalledWith(messagePayload);
     });
 
+    it("should reject payload when UTF-8 byte length exceeds limit (even if string length does not)", async () => {
+      const oversizedMultibyte = "中".repeat(400_000); // ~1.2MB UTF-8, but 400k chars
+      const body = {
+        object: "whatsapp_business_account",
+        data: oversizedMultibyte,
+      };
+
+      const request = new NextRequest(
+        "http://localhost:3000/api/whatsapp/webhook",
+        {
+          method: "POST",
+          body: JSON.stringify(body),
+          headers: {
+            "Content-Type": "application/json",
+            // Intentionally under-report to ensure we don't rely solely on Content-Length
+            "content-length": "100",
+            "x-hub-signature-256": "sha256=valid-signature",
+          },
+        },
+      );
+
+      const response = await POST(request);
+      expect(response.status).toBe(413);
+      const data = await response.json();
+      expect(data.error).toBe("Payload too large");
+      expect(mockVerifyWebhookSignature).not.toHaveBeenCalled();
+    });
+
     it("should handle status update webhooks", async () => {
       const statusPayload = {
         object: "whatsapp_business_account",

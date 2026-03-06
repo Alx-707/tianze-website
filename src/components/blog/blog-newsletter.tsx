@@ -6,6 +6,7 @@ import { CheckCircle, Loader2, Mail, XCircle } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { getAttributionAsObject } from "@/lib/utm";
+import { generateIdempotencyKey } from "@/lib/idempotency-key";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -221,6 +222,7 @@ export function BlogNewsletter({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const turnstileTokenRef = useRef<string | null>(null);
+  const idempotencyKeyRef = useRef<string | null>(null);
 
   const handleTurnstileSuccess = useCallback((token: string) => {
     turnstileTokenRef.current = token;
@@ -247,10 +249,17 @@ export function BlogNewsletter({
       const token = turnstileTokenRef.current;
       if (!token) return { success: false, error: t("turnstileRequired") };
 
+      const idempotencyKey =
+        idempotencyKeyRef.current ?? generateIdempotencyKey();
+      idempotencyKeyRef.current = idempotencyKey;
+
       const attribution = getAttributionAsObject();
       const response = await fetch("/api/subscribe", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Idempotency-Key": idempotencyKey,
+        },
         // nosemgrep: object-injection-sink-spread-operator
         // Safe: attribution is from getAttributionAsObject() which returns sanitized alphanumeric values
         body: JSON.stringify({
@@ -264,6 +273,7 @@ export function BlogNewsletter({
       if (!response.ok || result.success !== true) {
         return { success: false, error: result.message ?? t("error") };
       }
+      idempotencyKeyRef.current = null;
       return { success: true, error: undefined };
     } catch {
       return { success: false, error: t("error") };

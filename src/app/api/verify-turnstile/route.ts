@@ -3,6 +3,10 @@ import {
   createApiErrorResponse,
   createApiSuccessResponse,
 } from "@/lib/api/api-response";
+import {
+  applyCorsHeaders,
+  createCorsPreflightResponse,
+} from "@/lib/api/cors-utils";
 import { safeParseJson } from "@/lib/api/safe-parse-json";
 import { env } from "@/lib/env";
 import { logger, sanitizeIP } from "@/lib/logger";
@@ -93,7 +97,7 @@ function checkTurnstileConfigured(): NextResponse | null {
  * Uses the shared verifyTurnstile function for consistency.
  */
 // eslint-disable-next-line max-statements -- Sequential security gates (config→rate→parse→validate→verify→respond) require multiple statements
-export async function POST(request: NextRequest) {
+async function handlePost(request: NextRequest) {
   try {
     const configError = checkTurnstileConfigured();
     if (configError) return configError;
@@ -176,6 +180,11 @@ export async function POST(request: NextRequest) {
   }
 }
 
+export async function POST(request: NextRequest) {
+  const response = await handlePost(request);
+  return applyCorsHeaders({ request, response });
+}
+
 /**
  * Handle GET requests (for health checks)
  */
@@ -195,13 +204,6 @@ export function GET() {
 /**
  * Only allow POST and GET methods
  */
-export function OPTIONS() {
-  return new NextResponse(null, {
-    status: 200,
-    headers: {
-      Allow: "POST, GET, OPTIONS",
-      "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type",
-    },
-  });
+export function OPTIONS(request: NextRequest) {
+  return createCorsPreflightResponse(request, ["GET"]);
 }

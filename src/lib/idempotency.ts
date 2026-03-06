@@ -24,7 +24,7 @@ import {
 } from "@/constants";
 import {
   type IdempotencyStore,
-  MemoryIdempotencyStore,
+  createIdempotencyStore,
 } from "@/lib/security/stores/idempotency-store";
 
 const DEFAULT_TTL_MS = HOURS_PER_DAY * MILLISECONDS_PER_HOUR;
@@ -34,7 +34,7 @@ let idempotencyStore: IdempotencyStore | null = null;
 
 function getIdempotencyStore(): IdempotencyStore {
   if (!idempotencyStore) {
-    idempotencyStore = new MemoryIdempotencyStore();
+    idempotencyStore = createIdempotencyStore();
   }
   return idempotencyStore;
 }
@@ -311,30 +311,7 @@ export async function withIdempotency<T>(
 /**
  * 生成幂等键（客户端使用）
  */
-export function generateIdempotencyKey(): string {
-  const timestamp = Date.now();
-
-  if (
-    typeof crypto !== "undefined" &&
-    typeof crypto.randomUUID === "function"
-  ) {
-    return `${timestamp}-${crypto.randomUUID().replaceAll("-", "")}`;
-  }
-
-  if (
-    typeof crypto !== "undefined" &&
-    typeof crypto.getRandomValues === "function"
-  ) {
-    const buf = new Uint32Array(3);
-    crypto.getRandomValues(buf);
-    const random = Array.from(buf, (value) =>
-      value.toString(36).padStart(4, "0"),
-    ).join("");
-    return `${timestamp}-${random}`;
-  }
-
-  throw new Error("Secure random generator unavailable for idempotency key");
-}
+export { generateIdempotencyKey } from "@/lib/idempotency-key";
 
 /**
  * 清除指定幂等键（用于测试或手动清理）

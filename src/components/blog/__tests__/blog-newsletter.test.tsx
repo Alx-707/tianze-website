@@ -364,11 +364,17 @@ describe("BlogNewsletter", () => {
 
       // Wait for success message
       await waitFor(() => {
-        expect(mockFetch).toHaveBeenCalledWith("/api/subscribe", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: expect.stringContaining("test@example.com"),
-        });
+        expect(mockFetch).toHaveBeenCalledWith(
+          "/api/subscribe",
+          expect.objectContaining({
+            method: "POST",
+            headers: expect.objectContaining({
+              "Content-Type": "application/json",
+              "Idempotency-Key": expect.any(String),
+            }),
+            body: expect.stringContaining("test@example.com"),
+          }),
+        );
       });
 
       // Verify success state

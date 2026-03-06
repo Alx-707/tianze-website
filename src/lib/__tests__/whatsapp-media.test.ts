@@ -97,7 +97,8 @@ describe("WhatsAppMediaService", () => {
 
   describe("downloadMedia", () => {
     it("should return buffer on successful download", async () => {
-      const mockMediaUrl = "https://cdn.example.com/media/12345";
+      const mockMediaUrl =
+        "https://lookaside.fbsbx.com/whatsapp_business/attachments/12345";
       const mockArrayBuffer = new ArrayBuffer(8);
       const mockUint8Array = new Uint8Array(mockArrayBuffer);
       mockUint8Array.set([1, 2, 3, 4, 5, 6, 7, 8]);
@@ -114,6 +115,8 @@ describe("WhatsAppMediaService", () => {
           // Second call: download media
           .mockResolvedValueOnce({
             ok: true,
+            status: 200,
+            headers: new Headers(),
             arrayBuffer: () => Promise.resolve(mockArrayBuffer),
           }),
       );
@@ -122,6 +125,65 @@ describe("WhatsAppMediaService", () => {
 
       expect(result).toBeInstanceOf(Buffer);
       expect(result?.length).toBe(8);
+    });
+
+    it("should reject untrusted mediaUrl and avoid leaking Authorization header", async () => {
+      const untrustedUrl = "https://evil.example.com/media/12345";
+
+      const fetchMock = vi
+        .fn()
+        // First call: getMediaUrl
+        .mockResolvedValueOnce({
+          ok: true,
+          json: () => Promise.resolve({ url: untrustedUrl }),
+        });
+      vi.stubGlobal("fetch", fetchMock);
+
+      const result = await service.downloadMedia("media-123");
+
+      expect(result).toBeNull();
+      // Only getMediaUrl() fetch should run; download should be blocked pre-fetch.
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+    });
+
+    it("should follow redirects only within allowlist", async () => {
+      const initialUrl =
+        "https://lookaside.fbsbx.com/whatsapp_business/attachments/12345";
+      const redirectedUrl =
+        "https://lookaside.fbsbx.com/whatsapp_business/attachments/67890";
+
+      const mockArrayBuffer = new ArrayBuffer(2);
+      const mockUint8Array = new Uint8Array(mockArrayBuffer);
+      mockUint8Array.set([9, 10]);
+
+      vi.stubGlobal(
+        "fetch",
+        vi
+          .fn()
+          // First call: getMediaUrl
+          .mockResolvedValueOnce({
+            ok: true,
+            json: () => Promise.resolve({ url: initialUrl }),
+          })
+          // Second call: initial download attempt returns redirect
+          .mockResolvedValueOnce({
+            ok: false,
+            status: 302,
+            headers: new Headers({ location: redirectedUrl }),
+          })
+          // Third call: follow redirect and download
+          .mockResolvedValueOnce({
+            ok: true,
+            status: 200,
+            headers: new Headers(),
+            arrayBuffer: () => Promise.resolve(mockArrayBuffer),
+          }),
+      );
+
+      const result = await service.downloadMedia("media-123");
+
+      expect(result).toBeInstanceOf(Buffer);
+      expect(result?.length).toBe(2);
     });
 
     it("should return null when getMediaUrl fails", async () => {
@@ -138,7 +200,8 @@ describe("WhatsAppMediaService", () => {
     });
 
     it("should return null when download fails", async () => {
-      const mockMediaUrl = "https://cdn.example.com/media/12345";
+      const mockMediaUrl =
+        "https://lookaside.fbsbx.com/whatsapp_business/attachments/12345";
       vi.stubGlobal(
         "fetch",
         vi
@@ -151,6 +214,8 @@ describe("WhatsAppMediaService", () => {
           // Second call: download fails
           .mockResolvedValueOnce({
             ok: false,
+            status: 500,
+            headers: new Headers(),
           }),
       );
 

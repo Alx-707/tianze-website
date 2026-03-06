@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createCorsPreflightResponse } from "@/lib/api/cors-utils";
+import {
+  applyCorsHeaders,
+  createCorsPreflightResponse,
+} from "@/lib/api/cors-utils";
 import { safeParseJson as safeParseJsonHelper } from "@/lib/api/safe-parse-json";
 import {
   withRateLimit,
@@ -68,80 +71,89 @@ function handlePost(
   { clientIP }: RateLimitContext,
 ): ReturnType<typeof withIdempotency> {
   // 使用幂等键中间件包装处理逻辑
-  return withIdempotency(request, async () => {
-    const parsedBody = await safeParseJson<{
-      email?: string;
-      pageType?: string;
-      turnstileToken?: string;
-    }>(request);
+  return withIdempotency(
+    request,
+    async () => {
+      const parsedBody = await safeParseJson<{
+        email?: string;
+        pageType?: string;
+        turnstileToken?: string;
+      }>(request);
 
-    if (!parsedBody.ok) {
-      return NextResponse.json(
-        {
-          success: false,
-          errorCode: API_ERROR_CODES.INVALID_JSON_BODY,
-        },
-        { status: HTTP_BAD_REQUEST },
-      );
-    }
+      if (!parsedBody.ok) {
+        return NextResponse.json(
+          {
+            success: false,
+            errorCode: API_ERROR_CODES.INVALID_JSON_BODY,
+          },
+          { status: HTTP_BAD_REQUEST },
+        );
+      }
 
-    const email = parsedBody.data?.email;
-    const turnstileToken = parsedBody.data?.turnstileToken;
+      const email = parsedBody.data?.email;
+      const turnstileToken = parsedBody.data?.turnstileToken;
 
-    if (email === undefined || email === "") {
-      return NextResponse.json(
-        {
-          success: false,
-          errorCode: API_ERROR_CODES.SUBSCRIBE_VALIDATION_EMAIL_REQUIRED,
-        },
-        { status: HTTP_BAD_REQUEST },
-      );
-    }
+      if (email === undefined || email === "") {
+        return NextResponse.json(
+          {
+            success: false,
+            errorCode: API_ERROR_CODES.SUBSCRIBE_VALIDATION_EMAIL_REQUIRED,
+          },
+          { status: HTTP_BAD_REQUEST },
+        );
+      }
 
-    // Verify Turnstile token
-    if (!turnstileToken) {
-      logger.warn("Newsletter subscription missing Turnstile token", {
-        ip: sanitizeIP(clientIP),
-      });
-      return NextResponse.json(
-        {
-          success: false,
-          errorCode: API_ERROR_CODES.SUBSCRIBE_SECURITY_REQUIRED,
-        },
-        { status: HTTP_BAD_REQUEST },
-      );
-    }
+      // Verify Turnstile token
+      if (!turnstileToken) {
+        logger.warn("Newsletter subscription missing Turnstile token", {
+          ip: sanitizeIP(clientIP),
+        });
+        return NextResponse.json(
+          {
+            success: false,
+            errorCode: API_ERROR_CODES.SUBSCRIBE_SECURITY_REQUIRED,
+          },
+          { status: HTTP_BAD_REQUEST },
+        );
+      }
 
-    const isValidTurnstile = await verifyTurnstile(turnstileToken, clientIP);
-    if (!isValidTurnstile) {
-      logger.warn("Newsletter Turnstile verification failed", {
-        ip: sanitizeIP(clientIP),
-      });
-      return NextResponse.json(
-        {
-          success: false,
-          errorCode: API_ERROR_CODES.SUBSCRIBE_SECURITY_FAILED,
-        },
-        { status: HTTP_BAD_REQUEST },
-      );
-    }
+      const isValidTurnstile = await verifyTurnstile(turnstileToken, clientIP);
+      if (!isValidTurnstile) {
+        logger.warn("Newsletter Turnstile verification failed", {
+          ip: sanitizeIP(clientIP),
+        });
+        return NextResponse.json(
+          {
+            success: false,
+            errorCode: API_ERROR_CODES.SUBSCRIBE_SECURITY_FAILED,
+          },
+          { status: HTTP_BAD_REQUEST },
+        );
+      }
 
-    // Prepare lead input for newsletter subscription
-    const leadInput = {
-      type: LEAD_TYPES.NEWSLETTER,
-      email,
-    };
+      // Prepare lead input for newsletter subscription
+      const leadInput = {
+        type: LEAD_TYPES.NEWSLETTER,
+        email,
+      };
 
-    // Process via unified Lead Pipeline
-    const result = await processLead(leadInput);
+      // Process via unified Lead Pipeline
+      const result = await processLead(leadInput);
 
-    return result.success
-      ? createSuccessResponse(result, email)
-      : createErrorResponse(result);
-  });
+      return result.success
+        ? createSuccessResponse(result, email)
+        : createErrorResponse(result);
+    },
+    { required: true },
+  );
 }
 
-export const POST = withRateLimit("subscribe", handlePost);
+const POST_RATE_LIMITED = withRateLimit("subscribe", handlePost);
+
+export async function POST(request: NextRequest) {
+  const response = await POST_RATE_LIMITED(request);
+  return applyCorsHeaders({ request, response });
+}
 
 // 处理 OPTIONS 请求 (CORS)
 export function OPTIONS(request: NextRequest) {

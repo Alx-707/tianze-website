@@ -1,11 +1,14 @@
 /**
- * Idempotency Protection Tests (Red)
+ * Idempotency Protection Tests
  *
- * Tests for security properties that the current in-memory Map
- * implementation does NOT satisfy:
- * - TOCTOU concurrency (no lock)
- * - Key semantic binding (key not tied to method/path)
- * - Persistence across process restarts (in-memory only)
+ * These tests verify key security/stability properties provided by
+ * `src/lib/idempotency.ts`:
+ * - TOCTOU concurrency: duplicate concurrent requests execute handler once
+ * - Key semantic binding: same key reused across different method/path is rejected
+ * - Hot-cache resilience: clearing in-process hot caches does not lose completed results
+ *
+ * Note: cross-instance persistence requires a distributed IdempotencyStore backend
+ * (not implemented yet).
  */
 
 import { NextRequest } from "next/server";
@@ -116,21 +119,23 @@ describe("idempotency security properties", () => {
   });
 
   // =========================================================================
-  // 3. Persistence Test (Red)
+  // 3. Hot-cache Resilience Test
   // =========================================================================
-  describe("persistence across restarts", () => {
-    it("should recognize previously used key after cache clear (simulated restart)", async () => {
+  describe("hot-cache resilience", () => {
+    it("should recognize previously used key after hot-cache clear (simulated)", async () => {
       const key = "persistence-test-key-1";
 
       // First request succeeds and caches
       const request1 = createRequest("POST", "/api/contact", key);
       await withIdempotency(request1, async () => ({ success: true }));
 
-      // Simulate process restart by clearing the in-memory Map
+      // Simulate a hot-cache clear (e.g., module-level Maps cleared in tests).
+      // This is NOT a true process restart; cross-instance persistence requires
+      // a distributed IdempotencyStore backend.
       clearAllIdempotencyKeys();
 
       // Second request with same key should still return cached result
-      // (from persistent storage), not re-execute business logic.
+      // (from the IdempotencyStore), not re-execute business logic.
       const executionCount = { value: 0 };
       const request2 = createRequest("POST", "/api/contact", key);
       const response2 = await withIdempotency(request2, async () => {
@@ -140,8 +145,7 @@ describe("idempotency security properties", () => {
 
       const data = (await response2.json()) as Record<string, unknown>;
 
-      // If key was persisted, handler should NOT execute again.
-      // With in-memory Map, the key is lost and handler re-executes.
+      // If results are stored in IdempotencyStore, handler should NOT execute again.
       expect(executionCount.value).toBe(0);
       expect(data).not.toHaveProperty("reExecuted");
     });

@@ -153,6 +153,28 @@ describe("cache invalidate route", () => {
     expect(body.errorCode).toBe(API_ERROR_CODES.UNAUTHORIZED);
   });
 
+  it("POST returns 503 when CACHE_INVALIDATION_SECRET is not configured", async () => {
+    vi.stubEnv("CACHE_INVALIDATION_SECRET", "");
+
+    const request = new NextRequest(
+      "http://localhost:3000/api/cache/invalidate",
+      {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          authorization: "Bearer secret",
+        },
+        body: JSON.stringify({ domain: "i18n" }),
+      },
+    );
+
+    const response = await POST(request);
+    expect(response.status).toBe(503);
+    const body = await response.json();
+    expect(body.errorCode).toBe(API_ERROR_CODES.SERVICE_UNAVAILABLE);
+    expect(mockInvalidateI18n.all).not.toHaveBeenCalled();
+  });
+
   it("POST invalidates i18n tags when authorized", async () => {
     const request = new NextRequest(
       "http://localhost:3000/api/cache/invalidate",

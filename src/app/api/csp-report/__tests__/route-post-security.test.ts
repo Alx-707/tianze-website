@@ -58,8 +58,7 @@ describe("CSP Report API Route - 安全性测试", () => {
 
       const response = await POST(request);
 
-      expect(response.status).toBe(200);
-      expect(console.warn).toHaveBeenCalled();
+      expect(response.status).toBe(413);
     });
 
     it("应该处理包含特殊字符的报告", async () => {

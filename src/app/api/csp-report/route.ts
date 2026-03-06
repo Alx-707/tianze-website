@@ -7,6 +7,9 @@ import {
   type RateLimitContext,
 } from "@/lib/api/with-rate-limit";
 import type { CSPReport } from "@/config/security";
+import { HTTP_PAYLOAD_TOO_LARGE } from "@/constants";
+
+const MAX_CSP_REPORT_BODY_BYTES = 16 * 1024; // 16 KB — CSP reports should be tiny; prevents body-based DoS
 
 /** Zod schema for CSP report validation (all fields optional per browser behavior) */
 const cspReportInnerSchema = z.object({
@@ -37,7 +40,10 @@ const cspReportSchema = z.object({
 const isDevIgnored = () =>
   env.NODE_ENV === "development" && !env.CSP_REPORT_URI;
 const isContentTypeValid = (ct: string | null) =>
-  Boolean(ct && ct.includes("application/csp-report"));
+  Boolean(
+    ct &&
+    (ct.includes("application/csp-report") || ct.includes("application/json")),
+  );
 const buildViolationData = (
   request: NextRequest,
   cspReport: CSPReport["csp-report"],
@@ -73,10 +79,67 @@ const isSuspiciousReport = (csp: CSPReport["csp-report"]) => {
   return patterns.some((p) => blocked.includes(p) || sample.includes(p));
 };
 
+function createPayloadTooLargeResponse(): NextResponse {
+  return NextResponse.json(
+    { error: "Payload too large" },
+    { status: HTTP_PAYLOAD_TOO_LARGE },
+  );
+}
+
+function parseContentLengthHeader(value: string | null): number | null {
+  if (!value) return null;
+  const parsed = Number.parseInt(value, 10);
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
+}
+
+async function readRequestTextWithLimit(
+  request: NextRequest,
+  maxBytes: number,
+): Promise<string | NextResponse> {
+  const contentLength = parseContentLengthHeader(
+    request.headers.get("content-length"),
+  );
+  if (contentLength !== null && contentLength > maxBytes) {
+    return createPayloadTooLargeResponse();
+  }
+
+  const reader = request.body?.getReader();
+  if (!reader) {
+    return "";
+  }
+
+  const decoder = new TextDecoder();
+  let totalBytes = 0;
+  let text = "";
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    if (!value) continue;
+
+    totalBytes += value.byteLength;
+    if (totalBytes > maxBytes) {
+      await reader.cancel();
+      return createPayloadTooLargeResponse();
+    }
+
+    text += decoder.decode(value, { stream: true });
+  }
+
+  text += decoder.decode();
+  return text;
+}
+
 async function parseAndValidateCSPReport(
   request: NextRequest,
 ): Promise<CSPReport | NextResponse> {
-  const body = await request.text();
+  const bodyOrResponse = await readRequestTextWithLimit(
+    request,
+    MAX_CSP_REPORT_BODY_BYTES,
+  );
+  if (bodyOrResponse instanceof NextResponse) return bodyOrResponse;
+
+  const body = bodyOrResponse;
   if (!body.trim()) {
     return NextResponse.json(
       { error: "Invalid CSP report format" },

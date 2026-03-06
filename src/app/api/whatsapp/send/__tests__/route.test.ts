@@ -532,6 +532,51 @@ describe("WhatsApp Send Route", () => {
 
       expect(response.status).toBe(200);
     });
+
+    it("should apply post-auth per-API-key rate limiting after authentication passes", async () => {
+      mockCheckDistributedRateLimit.mockImplementation(async (key: string) => {
+        if (key.startsWith("ip:")) {
+          return {
+            allowed: true,
+            remaining: 4,
+            resetTime: Date.now() + 60000,
+            retryAfter: null,
+          };
+        }
+        if (key.startsWith("apikey:")) {
+          return {
+            allowed: false,
+            remaining: 0,
+            resetTime: Date.now() + 60000,
+            retryAfter: 60,
+            deniedReason: "limit",
+          };
+        }
+        return {
+          allowed: true,
+          remaining: 4,
+          resetTime: Date.now() + 60000,
+          retryAfter: null,
+        };
+      });
+
+      const request = createMockRequest("POST", {
+        to: "+1234567890",
+        type: "text",
+        content: { body: "Hello" },
+      });
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(429);
+      expect(data.errorCode).toBe("RATE_LIMIT_EXCEEDED");
+      expect(mockSendWhatsAppMessage).not.toHaveBeenCalled();
+      expect(mockCheckDistributedRateLimit).toHaveBeenCalledWith(
+        expect.stringMatching(/^apikey:/),
+        "whatsapp",
+      );
+    });
   });
 
   describe("POST - Message ID extraction", () => {

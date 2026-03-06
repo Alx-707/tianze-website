@@ -8,7 +8,10 @@ import {
   createApiErrorResponse,
   createApiSuccessResponse,
 } from "@/lib/api/api-response";
-import { createCorsPreflightResponse } from "@/lib/api/cors-utils";
+import {
+  applyCorsHeaders,
+  createCorsPreflightResponse,
+} from "@/lib/api/cors-utils";
 import { safeParseJson } from "@/lib/api/safe-parse-json";
 import {
   withRateLimit,
@@ -112,7 +115,7 @@ async function validateTurnstile(
  * POST /api/inquiry
  * Handle product inquiry form submission
  */
-export const POST = withRateLimit(
+const POST_RATE_LIMITED = withRateLimit(
   "inquiry",
   async (request: NextRequest, { clientIP }: RateLimitContext) => {
     const startTime = Date.now();
@@ -136,10 +139,21 @@ export const POST = withRateLimit(
       });
       if (turnstileError) return turnstileError;
 
-      const { turnstileToken: _token, ...leadData } = parsedBody.data ?? {};
+      const data = parsedBody.data ?? {};
+      const pickedLeadData = {
+        fullName: data.fullName,
+        productSlug: data.productSlug,
+        productName: data.productName,
+        quantity: data.quantity,
+        requirements: data.requirements,
+        email: data.email,
+        company: data.company,
+        marketingConsent: data.marketingConsent,
+      };
       const result = await processLead({
+        ...pickedLeadData,
+        // Ensure route semantics cannot be overwritten by request body.
         type: LEAD_TYPES.PRODUCT,
-        ...leadData,
       });
       const processingTime = Date.now() - startTime;
 
@@ -165,6 +179,11 @@ export const POST = withRateLimit(
     }
   },
 );
+
+export async function POST(request: NextRequest) {
+  const response = await POST_RATE_LIMITED(request);
+  return applyCorsHeaders({ request, response });
+}
 
 /**
  * OPTIONS /api/inquiry

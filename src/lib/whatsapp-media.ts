@@ -4,6 +4,12 @@
  */
 
 import { logger } from "@/lib/logger";
+import { safeFetchThirdPartyUrl } from "@/lib/security/safe-third-party-fetch";
+
+const WHATSAPP_MEDIA_URL_POLICY = {
+  // Meta/WhatsApp infra (Graph returns short-lived URLs; host may vary)
+  allowHostSuffixes: ["fbsbx.com", "fbcdn.net", "facebook.com", "whatsapp.net"],
+} as const;
 
 /**
  * WhatsApp 媒体处理类
@@ -55,11 +61,15 @@ export class WhatsAppMediaService {
         return null;
       }
 
-      const response = await fetch(mediaUrl, {
-        headers: {
-          Authorization: `Bearer ${this.accessToken}`,
+      const response = await safeFetchThirdPartyUrl(
+        mediaUrl,
+        {
+          headers: {
+            Authorization: `Bearer ${this.accessToken}`,
+          },
         },
-      });
+        { policy: WHATSAPP_MEDIA_URL_POLICY, maxRedirects: 2 },
+      );
 
       if (!response.ok) {
         throw new Error("Failed to download media");

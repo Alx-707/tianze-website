@@ -76,7 +76,7 @@ describe("CSP Report API Route", () => {
         method: "POST",
         body: JSON.stringify(validCSPReport),
         headers: {
-          "content-type": "application/json",
+          "content-type": "text/plain",
         },
       });
 

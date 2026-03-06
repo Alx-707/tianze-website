@@ -28,6 +28,12 @@ import { HTTP_PAYLOAD_TOO_LARGE } from "@/constants";
 
 const MAX_BODY_BYTES = 1_000_000; // 1 MB
 
+function getUtf8ByteLength(text: string): number {
+  // Buffer.byteLength avoids allocating a full byte array; keep a fallback for edge-like runtimes.
+  if (typeof Buffer !== "undefined") return Buffer.byteLength(text, "utf8");
+  return new TextEncoder().encode(text).length;
+}
+
 // GET: Webhook verification
 export function GET(request: NextRequest) {
   try {
@@ -112,7 +118,7 @@ export async function POST(request: NextRequest) {
 
     // 3. Read body — safe now (rate limited); verify actual size
     const rawBody = await request.text();
-    if (rawBody.length > MAX_BODY_BYTES) {
+    if (getUtf8ByteLength(rawBody) > MAX_BODY_BYTES) {
       return NextResponse.json(
         { error: "Payload too large" },
         { status: HTTP_PAYLOAD_TOO_LARGE },

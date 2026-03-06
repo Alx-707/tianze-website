@@ -79,26 +79,36 @@ function isValidLocale(locale: unknown): locale is Locale {
   return typeof locale === "string" && VALID_LOCALES.includes(locale as Locale);
 }
 
-function validateApiKey(request: NextRequest): boolean {
+type ApiKeyValidationResult =
+  | { ok: true }
+  | { ok: false; status: number; errorCode: string };
+
+function validateApiKey(request: NextRequest): ApiKeyValidationResult {
   const secret = process.env.CACHE_INVALIDATION_SECRET;
 
   // In development, allow without secret if not set
   if (!secret && process.env.NODE_ENV === "development") {
-    return true;
+    return { ok: true };
   }
 
   if (!secret) {
     logger.error("CACHE_INVALIDATION_SECRET not configured");
-    return false;
+    return {
+      ok: false,
+      status: HTTP_SERVICE_UNAVAILABLE,
+      errorCode: API_ERROR_CODES.SERVICE_UNAVAILABLE,
+    };
   }
 
   const authHeader = request.headers.get("authorization");
   if (!authHeader?.startsWith("Bearer ")) {
-    return false;
+    return { ok: false, status: 401, errorCode: API_ERROR_CODES.UNAUTHORIZED };
   }
 
   const token = authHeader.slice(7);
-  return constantTimeCompare(token, secret);
+  return constantTimeCompare(token, secret)
+    ? { ok: true }
+    : { ok: false, status: 401, errorCode: API_ERROR_CODES.UNAUTHORIZED };
 }
 
 interface InvalidationResult {
@@ -276,10 +286,11 @@ export async function POST(request: NextRequest) {
   if (preAuthBlock) return preAuthBlock;
 
   // 2. Auth check
-  if (!validateApiKey(request)) {
+  const authResult = validateApiKey(request);
+  if (!authResult.ok) {
     return NextResponse.json(
-      { success: false, errorCode: API_ERROR_CODES.UNAUTHORIZED },
-      { status: 401 },
+      { success: false, errorCode: authResult.errorCode },
+      { status: authResult.status },
     );
   }
 

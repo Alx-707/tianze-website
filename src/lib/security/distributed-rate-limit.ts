@@ -33,6 +33,11 @@ export const RATE_LIMIT_PRESETS = {
     windowMs: MINUTE_MS,
     failureMode: "open" as const,
   },
+  contactAdminStats: {
+    maxRequests: 30,
+    windowMs: MINUTE_MS,
+    failureMode: "open" as const,
+  },
   inquiry: {
     maxRequests: COUNT_TEN,
     windowMs: MINUTE_MS,
@@ -103,6 +108,8 @@ function getRateLimitConfig(preset: RateLimitPreset): {
   switch (preset) {
     case "contact":
       return RATE_LIMIT_PRESETS.contact;
+    case "contactAdminStats":
+      return RATE_LIMIT_PRESETS.contactAdminStats;
     case "inquiry":
       return RATE_LIMIT_PRESETS.inquiry;
     case "subscribe":

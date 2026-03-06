@@ -56,6 +56,15 @@ vi.mock("@/lib/turnstile", () => ({
 
 // Mock CORS utilities
 vi.mock("@/lib/api/cors-utils", () => ({
+  applyCorsHeaders: vi.fn(
+    ({ response, request }: { response: any; request: NextRequest }) => {
+      const origin = request.headers.get("origin");
+      if (origin) {
+        response.headers.set("Access-Control-Allow-Origin", origin);
+      }
+      return response;
+    },
+  ),
   createCorsPreflightResponse: vi.fn((request: NextRequest) => {
     const origin = request.headers.get("origin");
     const headers: Record<string, string> = {
@@ -84,12 +93,14 @@ describe("/api/inquiry route", () => {
   describe("POST", () => {
     const validInquiryData = {
       turnstileToken: "valid-token",
-      firstName: "John",
-      lastName: "Doe",
+      type: "product",
+      fullName: "John Doe",
       email: "john@example.com",
       company: "Acme Inc",
-      message: "I am interested in your products.",
       productSlug: "example-product",
+      productName: "Example Product",
+      quantity: "100",
+      requirements: "I am interested in your products.",
     };
 
     it("should process valid inquiry successfully", async () => {
@@ -106,6 +117,19 @@ describe("/api/inquiry route", () => {
       expect(data.success).toBe(true);
       expect(data.data.referenceId).toBe("ref-123");
       expect(processLead).toHaveBeenCalled();
+    });
+
+    it("should apply CORS headers on POST response when Origin is present", async () => {
+      const origin = "http://localhost:3000";
+      const request = new NextRequest("http://localhost:3000/api/inquiry", {
+        method: "POST",
+        body: JSON.stringify(validInquiryData),
+        headers: { "Content-Type": "application/json", origin },
+      });
+
+      const response = await POST(request);
+
+      expect(response.headers.get("Access-Control-Allow-Origin")).toBe(origin);
     });
 
     it("should return 429 when rate limited", async () => {
@@ -247,6 +271,25 @@ describe("/api/inquiry route", () => {
       const request = new NextRequest("http://localhost:3000/api/inquiry", {
         method: "POST",
         body: JSON.stringify(validInquiryData),
+        headers: { "Content-Type": "application/json" },
+      });
+
+      await POST(request);
+
+      expect(processLead).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "PRODUCT",
+        }),
+      );
+    });
+
+    it("should not allow request body to override lead type", async () => {
+      const request = new NextRequest("http://localhost:3000/api/inquiry", {
+        method: "POST",
+        body: JSON.stringify({
+          ...validInquiryData,
+          type: "CONTACT",
+        }),
         headers: { "Content-Type": "application/json" },
       });
 

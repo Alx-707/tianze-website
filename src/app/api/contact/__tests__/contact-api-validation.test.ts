@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { airtableService } from "@/lib/airtable";
-import { processLead } from "@/lib/lead-pipeline";
+import { processLead } from "@/lib/lead-pipeline/process-lead";
 import { verifyTurnstile } from "@/lib/turnstile";
 import {
   processFormSubmission,
@@ -40,7 +40,7 @@ vi.mock("@/lib/airtable", () => ({
   },
 }));
 
-vi.mock("@/lib/lead-pipeline", () => ({
+vi.mock("@/lib/lead-pipeline/process-lead", () => ({
   processLead: vi.fn(() =>
     Promise.resolve({
       success: true,
