@@ -102,7 +102,7 @@ export default defineConfig({
         "lefthook.yml",
         "semgrep.yml",
         "mdx-components.tsx",
-        "middleware.ts",
+        "src/middleware.ts",
         "instrumentation.ts",
         "instrumentation-client.ts",
         "sentry.*.config.ts",

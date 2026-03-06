@@ -253,6 +253,16 @@ export * from './button';
 | 架构检查 | `dependency-cruiser` + `madge` | 循环依赖和架构违规检测 |
 | 安全检查 | `pnpm security:audit` | npm audit + semgrep |
 
+### Playwright browsers 安装
+
+`pnpm test:e2e` / `pnpm ci:local` 首次运行需要安装 Playwright browsers（例如 chromium）：
+
+```bash
+pnpm exec playwright install
+```
+
+如果本地缺少 browsers，`scripts/ci-local.sh` 会在执行 E2E 前给出明确提示与修复命令。
+
 ### 紧急推送
 
 如需跳过耗时检查（**仅限紧急情况**）：

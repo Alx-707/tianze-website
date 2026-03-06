@@ -193,6 +193,20 @@ run_quality_gate() {
     fi
 }
 
+check_playwright_browsers() {
+    print_step "检查 Playwright browsers（chromium）"
+
+    if node -e "const fs=require('fs');const {chromium}=require('playwright');const p=chromium.executablePath();if(!p||!fs.existsSync(p)){console.error('Missing Playwright Chromium executable: '+p);process.exit(1);}"; then
+        print_success "Playwright browsers 已就绪"
+        return 0
+    fi
+
+    print_error "Playwright browsers 未安装（E2E 将无法运行）"
+    echo "  修复: pnpm exec playwright install"
+    echo "  说明: 首次安装可能耗时较长，需要可用的网络环境"
+    return 1
+}
+
 # E2E 测试
 run_e2e_tests() {
     print_header "🎭 E2E 测试 (End-to-End Tests)"
@@ -200,6 +214,10 @@ run_e2e_tests() {
     if [ "$QUICK_MODE" = "true" ]; then
         print_skip "E2E 测试（快速模式跳过）"
         return 0
+    fi
+
+    if ! check_playwright_browsers; then
+        return 1
     fi
 
     print_step "运行 E2E 测试 (Playwright)"
@@ -245,6 +263,18 @@ run_security_checks() {
     else
         print_error "安全审计失败"
         return 1
+    fi
+
+    if [ "$QUICK_MODE" = "true" ]; then
+        print_skip "CSP strict 校验（快速模式跳过）"
+    else
+        print_step "CSP strict 校验（inline scripts nonce/hash 闭环）"
+        if pnpm security:csp:check; then
+            print_success "CSP strict 校验通过"
+        else
+            print_error "CSP strict 校验失败"
+            return 1
+        fi
     fi
 
     print_step "PII 日志泄露检查"
@@ -378,4 +408,3 @@ fi
 
 # 运行主函数
 main
-
