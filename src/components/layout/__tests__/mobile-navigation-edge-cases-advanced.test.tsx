@@ -16,6 +16,7 @@ import { renderWithIntl } from "@/test/utils";
 // Mock next-intl
 vi.mock("next-intl", () => ({
   useTranslations: vi.fn(),
+  useLocale: vi.fn(() => "en"),
   NextIntlClientProvider: ({ children }: { children: React.ReactNode }) =>
     children,
 }));

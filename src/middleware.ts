@@ -141,8 +141,9 @@ export default function middleware(request: NextRequest) {
   const response = intlMiddleware(request);
   const locale = extractLocaleCandidate(request.nextUrl.pathname);
   const existingLocale = request.cookies.get("NEXT_LOCALE")?.value;
-  if (response && locale && existingLocale !== locale)
+  if (response && locale && existingLocale !== locale) {
     setLocaleCookie(response, locale);
+  }
   if (response) {
     applyRequestHeaderOverride(response, NONCE_REQUEST_HEADER_KEY, nonce);
     addSecurityHeaders(response, nonce);
@@ -151,6 +152,5 @@ export default function middleware(request: NextRequest) {
 }
 
 export const config = {
-  // Root path (/) is handled by src/app/page.tsx due to Turbopack matcher inconsistency
-  matcher: ["/((?!api|_next|_vercel|admin|.*\\..*).*)", "/(en|zh)/:path*"],
+  matcher: ["/", "/((?!api|_next|_vercel|admin|.*\\..*).*)"],
 };

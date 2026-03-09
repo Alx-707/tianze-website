@@ -7,9 +7,7 @@ const MAIN_NAV_ROLE_OPTIONS = {
 const HEADER_MOBILE_MENU_BUTTON_TESTID = "header-mobile-menu-button";
 
 /**
- * Wait for the html[lang] attribute to be updated after hydration.
- * In PPR mode, the initial HTML has lang="en" (default), and LangUpdater
- * corrects it client-side after hydration.
+ * Wait for the rendered html[lang] attribute to match the expected locale.
  */
 export async function waitForHtmlLang(
   page: Page,
@@ -24,8 +22,7 @@ export async function waitForHtmlLang(
 }
 
 /**
- * Assert html[lang] attribute after waiting for hydration.
- * Use this instead of direct toHaveAttribute('lang', ...) assertions.
+ * Assert html[lang] after waiting for navigation/render to settle.
  */
 export async function expectHtmlLang(
   page: Page,

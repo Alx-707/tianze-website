@@ -57,7 +57,7 @@ test.describe("Next.js 16 国际化重定向验证", () => {
         );
       }
 
-      // 验证页面语言（等待 hydration 后 LangUpdater 更新 html[lang]）
+      // 验证页面语言（服务端首包应直接输出正确的 html[lang]）
       // waitForHtmlLang 已包含断言，无需额外的 toHaveAttribute
       await expectHtmlLang(page, "zh");
     });
@@ -106,7 +106,7 @@ test.describe("Next.js 16 国际化重定向验证", () => {
       // 验证 URL 保持中文路径（使用 Shared Pathnames）
       expect(page.url()).toMatch(/\/zh\/about\/?$/);
 
-      // 验证页面语言（等待 hydration 后 LangUpdater 更新 html[lang]）
+      // 验证页面语言（服务端首包应直接输出正确的 html[lang]）
       await expectHtmlLang(page, "zh");
     });
   });
@@ -285,7 +285,7 @@ test.describe("Next.js 16 国际化重定向验证", () => {
       expect(finalUrl).toMatch(/\/en\/blog\/?$/);
 
       // 等待客户端水合完成后再检查 lang 属性
-      // LangUpdater 组件会在 useEffect 中更新 html[lang]
+      // html[lang] 应在服务端首包上正确，无需客户端补丁
       await expectHtmlLang(page, "en");
 
       // NOTE: 此测试仅验证 lang 属性设置正确，不验证页面内容是否正常加载。
@@ -324,7 +324,7 @@ test.describe("Next.js 16 国际化重定向验证", () => {
         .getAttribute("content");
       expect(description).toBeTruthy();
 
-      // 验证语言属性（等待 hydration 后 LangUpdater 更新 html[lang]）
+      // 验证语言属性（服务端首包应直接输出正确的 html[lang]）
       await expectHtmlLang(page, "zh");
     });
   });

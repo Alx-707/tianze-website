@@ -32,6 +32,7 @@ vi.mock("next-intl", () => ({
     };
     return translations[key] || key;
   }),
+  useLocale: vi.fn(() => "en"),
   NextIntlClientProvider: ({ children }: { children: any }) => children,
 }));
 

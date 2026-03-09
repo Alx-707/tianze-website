@@ -21,6 +21,11 @@ export async function generateLocaleMetadata({
   await params;
 
   return {
+    metadataBase: new URL(
+      process.env.NEXT_PUBLIC_BASE_URL ||
+        process.env.NEXT_PUBLIC_SITE_URL ||
+        "http://localhost:3000",
+    ),
     title: {
       default: SITE_CONFIG.seo.defaultTitle,
       template: SITE_CONFIG.seo.titleTemplate,

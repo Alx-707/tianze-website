@@ -35,6 +35,7 @@ vi.mock("next-intl", () => ({
     };
     return translations[key] || key;
   }),
+  useLocale: vi.fn(() => "en"),
 }));
 
 // Mock @/i18n/routing

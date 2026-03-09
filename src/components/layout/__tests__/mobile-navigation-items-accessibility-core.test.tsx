@@ -13,6 +13,7 @@ import { MobileNavigation } from "@/components/layout/mobile-navigation";
 // Mock next-intl
 vi.mock("next-intl", () => ({
   useTranslations: vi.fn(),
+  useLocale: vi.fn(() => "en"),
   NextIntlClientProvider: ({ children }: { children: any }) => children,
 }));
 
