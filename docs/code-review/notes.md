@@ -28,6 +28,277 @@
 
 ## 重要发现（待转成问题清单）
 
+## Round 4 Kickoff（2026-03-06）
+
+### 本轮目标
+- 不沿用上一轮结论做增量修补，而是重新做一遍全仓库扫荡式审查。
+- 最终只保留“当前仍成立”的问题到 `docs/code-review/issues.md`，把历史已修复项和当前新问题彻底拆开。
+
+### 本轮交付口径
+- 证据与命令输出摘要：`docs/code-review/notes.md`
+- 当前权威问题清单：`docs/code-review/issues.md`
+- 总体进度与轮次状态：`task_plan.md`
+- 收尾执行入口：`docs/code-review/round4-remediation-plan.md`
+
+### 审查原则
+- 先自动化，再人工深审：避免只靠印象找问题。
+- 优先抓“系统性问题”，不是堆零碎样式建议。
+- 测试通过不算安全；要专门检查“测试是否掩盖设计失败”。
+- 文档若与当前代码现实不符，以代码与复现实验为准，再回写文档。
+
+### 采用的 skill 组合
+- `planning-with-files`
+  - 作用：把计划、证据、问题清单稳定落盘，避免全仓库扫荡中途漂移。
+- `Linus`
+  - 作用：优先识别补丁驱动复杂度、特殊分支、共享 helper 污染和“补修不重构”的坏味道。
+- `testing-qa`
+  - 作用：把测试设计、门禁可信度、回归覆盖缺口纳入正式审查面。
+- `debugging-strategies`
+  - 作用：对失败测试和异常门禁先做最小复现，再下结论，避免把噪音当产品缺陷。
+- `performance-optimization`
+  - 作用：性能问题按 baseline → bundle → runtime 路径拆解，不凭感觉判。
+- `next-best-practices`
+  - 作用：针对 Next.js 16、App Router、proxy/cache/route handler 边界做框架级复核。
+
+### Round 4 基线扫描（第一波，2026-03-06）
+
+#### 工作树与环境
+- `git status --short`
+  - 当前工作树为脏状态。
+  - 已见变更：`docs/code-review/issues.md`、`docs/code-review/notes.md`、`linus_review_round3.md`、`notes.md`、`task_plan.md`
+  - 未跟踪：`docs/code-review/round3-review.md`
+- `node -v`
+  - 当前本机 Node 为 `v22.22.0`
+  - 需持续注意与历史文档中 CI Node 20 口径的偏差，避免误判
+
+#### 已确认结果
+- `pnpm type-check`
+  - 通过（exit code 0，无输出错误）
+- `pnpm lint:check`
+  - 通过（exit code 0，无 warnings）
+- `pnpm unused:production`
+  - 通过（exit code 0，无 production dependency 问题）
+- `pnpm arch:check`
+  - 通过：`✔ no dependency violations found (461 modules, 1138 dependencies cruised)`
+- `pnpm security:check`
+  - `pnpm audit --prod --audit-level moderate`：`No known vulnerabilities found`
+  - `pnpm security:semgrep`：`Semgrep ERROR findings: 0`、`Semgrep WARNING findings: 0`
+- `pnpm build`
+  - 构建通过
+  - 命中 Next.js 告警：`The "middleware" file convention is deprecated. Please use "proxy" instead.`
+  - 该项属于框架迁移技术债，需要在问题清单中保留，不应因 build 通过而忽略
+
+#### 测试基线
+- `pnpm test`
+  - 最终汇总（`reports/test-results.json`）：
+    - `numTotalTests: 5724`
+    - `numPassedTests: 5724`
+    - `numFailedTests: 0`
+    - `numPendingTests: 0`
+- 额外观察
+  - 全量测试全绿，但此前单独运行 `mobile-navigation-responsive-basic.test.tsx` 与 `mobile-navigation-responsive.test.tsx` 的 wall-clock 用例时，曾分别复现出 `2238ms` 与 `2397ms` 的失败。
+  - 该现象表明当前至少存在“在全量运行下可能被掩盖、在局部运行下会抖动”的脆弱测试门禁，属于 Round 4 需要单独定级的 QA 风险。
+
+### Round 4 框架级初步发现（Next.js / App Router）
+
+- `src/middleware.ts` 仍是当前生效入口，`pnpm build` 已明确给出官方弃用告警：
+  - `The "middleware" file convention is deprecated. Please use "proxy" instead.`
+  - 证据：`src/middleware.ts` 当前仍导出默认 `middleware()`；构建链路已把迁移债暴露出来。
+- 根路径 `/` 目前依赖 `src/app/page.tsx` 做额外 redirect 兜底：
+  - 注释直接写明“因 Turbopack matcher 不稳定，由 `src/app/page.tsx` 处理 root path”
+  - 这说明根路径语言路由从框架约定退化成了页面层补丁。
+- `html[lang]` 当前不是服务端正确输出，而是客户端 hydration 后修正：
+  - `src/app/layout.tsx` 将 `<html lang>` 固定为 `routing.defaultLocale`
+  - `src/app/layout.tsx` 在 `<html>` / `<body>` 上启用了 `suppressHydrationWarning`
+  - `src/app/[locale]/layout.tsx` 通过 `LangUpdater` 在客户端 `useEffect` 中改写 `document.documentElement.lang`
+  - 这意味着无 JS / 爬虫 / 首屏 SSR 读取到的文档语言可能是错的，属于真实语义偏差。
+  - 下游组件已开始依赖 `document.documentElement.lang` 判断当前语言：
+    - `src/components/layout/mobile-navigation.tsx`
+    - `src/components/language-toggle.tsx`
+- 根路径 `/` 的 locale 路由也不是由单一入口负责：
+  - `src/app/page.tsx` 明确作为 root path redirect 补丁存在
+  - `src/middleware.ts` 的 matcher 注释直接承认 root path 由页面层处理
+  - 这说明当前 locale 路由边界已经拆成 middleware + page 两套逻辑
+
+### Round 4 测试门禁模式观察（扩展）
+- wall-clock 断言不是单点，而是一类反复出现的测试模式：
+  - `src/components/layout/__tests__/mobile-navigation-responsive-basic.test.tsx`
+  - `src/components/layout/__tests__/mobile-navigation-responsive.test.tsx`
+  - `src/app/api/csp-report/__tests__/route-post-advanced.test.ts`
+  - `src/lib/__tests__/structured-data.test.ts`
+  - `src/lib/__tests__/i18n-validation-advanced.test.ts`
+  - `src/lib/__tests__/navigation.test.ts`
+  - `src/lib/__tests__/i18n-validation.test.ts`
+- 这些用例把 `Date.now()` / `performance.now()` 包裹的执行时长上限当作普通 Vitest 门禁。
+- 结合“全量绿、单独跑会红”的现象，当前更接近“对机器负载敏感的脆弱门禁”，不是可信的功能质量信号。
+
+### Round 4 门禁配置观察（第一批）
+- `scripts/quality-gate.js`
+  - `diffCoverageExcludeGlobs` 直接排除了 `src/components/ui/**`
+  - 注释把该目录描述成“shadcn/ui CLI 生成的 UI 原语”
+- 目录现实并不支持这个假设：
+  - `src/components/ui/animated-counter.tsx` 含状态、observer、动画调度和 a11y 分支
+  - `src/components/ui/navigation-menu.tsx` 含自定义行为开关 `viewport`
+  - `src/components/ui/theme-switcher.tsx`、`src/components/ui/scroll-reveal.tsx` 也不是零逻辑模板
+- 结论：
+  - 当前 diff coverage 对整类真实交互组件存在目录级豁免，属于门禁设计失真，而不是个别配置噪音。
+- `scripts/ci-local.sh`
+  - 注释宣称“完全模拟远程 GitHub Actions CI/CD Pipeline”
+  - 但 Node 检查只要求 `>=20`，当前 `v22.22.0` 也能直接通过
+  - 结论：脚本口径比“完全模拟 CI”更宽，本地和 CI 的版本差异仍可能被掩盖
+- `vitest.config.mts`
+  - 默认同时开启 `reporters: ["verbose", "json"]` 和 `logHeapUsage: true`
+  - 结论：这会把默认 `pnpm test` 输出放大成逐用例刷屏，更适合诊断模式，而不是日常门禁模式
+
+### Round 4 内部协议观察（第一批）
+- `src/lib/actions/contact.ts`
+  - server action 返回自由文本错误：`Validation failed`、`Security verification required`、`Too many requests`
+- `src/components/forms/contact-form-container.tsx`
+  - UI 通过 `state.error === "Validation failed"` 判断是否走“翻译 details”分支
+- 对应测试也在固化这个英文字符串契约：
+  - `src/components/forms/__tests__/contact-form-container-core.test.tsx`
+  - `src/components/forms/__tests__/contact-form-container.test.tsx`
+  - `src/components/forms/__tests__/contact-form-validation.test.tsx`
+- 结论：
+  - 这是内部协议靠英文文案驱动流程，不是稳定类型驱动流程；一旦文案或本地化策略变化，UI 分支会一起飘。
+
+### Round 4 客户端错误消费观察（第一批）
+- `src/components/blog/blog-newsletter.tsx`
+  - 失败分支仍读取 `result.message ?? t("error")`
+- 但 `/api/subscribe` 当前失败响应已经统一为 `errorCode`
+  - `src/app/api/subscribe/route.ts`
+- 对应测试仍在 mock 旧协议：
+  - `src/components/blog/__tests__/blog-newsletter.test.tsx` 使用 `{ success: false, message: "Invalid email" }`
+- 结论：
+  - 统一 `errorCode` 已经在服务端建立，但客户端消费链并没有完全接上，导致精确错误在 UI 层丢失。
+
+### Round 4 重复实现观察（第一批）
+- `src/app/api/contact/contact-api-utils.ts`
+  - 当前仍保留一整套旧工具：`verifyTurnstile()` / `verifyTurnstileDetailed()` / `validateEnvironmentConfig()` / `generateRequestId()` / `formatErrorResponse()`
+- 代码搜索显示它现在主要只被自己的测试引用：
+  - `src/app/api/contact/__tests__/contact-api-utils.test.ts`
+- 与共享实现的分叉已经出现：
+  - `src/lib/turnstile.ts` 网络失败返回结构化 `errorCodes`
+  - `contact-api-utils.ts` 在 catch 中仍直接 re-throw
+- 结论：
+  - 这是“测试把旧实现保活”的典型例子。它不一定马上炸，但会持续制造假入口和重复维护成本。
+
+### Round 4 错误协议落地观察（第二批）
+- `src/components/products/product-inquiry-form.tsx`
+  - 客户端失败分支仍读取 `result.error`
+  - 但 `/api/inquiry` 失败响应已统一为 `errorCode`
+- `src/lib/api/translate-error-code.ts`
+  - 统一错误翻译工具已经存在
+- 全仓搜索 `translateApiError(`
+  - 当前只出现在注释/示例中，没有实际生产代码调用
+- `src/lib/api/get-request-locale.ts`
+  - `getApiMessages()` 的注释仍声称 `/api/contact`、`/api/inquiry`、`/api/verify-turnstile` 在使用它
+  - 但代码搜索显示该函数已无生产引用
+- 结论：
+  - “服务端统一到 errorCode” 这件事在客户端落地上还停留在半成品状态：工具存在、文档存在、但主路径消费链没真正接上。
+
+### Round 4 遗留基础设施观察（第二批）
+- `src/lib/security-headers.ts`
+  - 文件本身已经标注 `legacy helper`
+  - 但导出函数名仍然像生产基础设施：`getApiSecurityHeaders()`、`getWebSecurityHeaders()`、`getCORSHeaders()`、`verifyTurnstileToken()`、`checkSecurityConfig()`、`getSecurityMiddlewareHeaders()`、`validateSecurityHeaders()`
+- 引用面几乎全部落在测试：
+  - `src/lib/__tests__/security-headers.test.ts`
+  - `src/lib/__tests__/security.test.ts`
+  - `tests/unit/security/security-headers.test.ts`
+- 其中 `verifyTurnstileToken()` 还保留了对相对路径 `/api/verify-turnstile` 的 fetch 封装
+- 结论：
+  - 这又是一块“看起来像生产真相源，但实际上主要靠测试保活”的遗留基础设施层，和 `contact-api-utils.ts` 属于同一类问题。
+
+### Round 4 混合职责模块观察（第一批）
+- `src/lib/validations.ts`
+  - 仍在生产使用的是真类型：
+    - `FormSubmissionStatus`
+    - `EmailTemplateData`
+    - `ProductInquiryEmailData`
+    - `AirtableRecord`
+  - 但同文件还混着主要只被测试消费的旧层：
+    - `apiResponseSchema`
+    - `validationHelpers`
+    - `validationConfig`
+- 其中 `apiResponseSchema` 仍编码旧式 `message/error/data` 响应形状，与当前 API 主推的 `errorCode` 协议脱节。
+- 结论：
+  - 这不是“可以顺手删一点”的小问题，而是模块职责已经分裂：一半是生产真类型，一半是测试/遗留 helper。
+
+### Round 4 遗留薄封装观察（第一批）
+- `sanitizePlainText()` 明显已经是当前真实主入口：
+  - 生产代码广泛直接引用 `src/lib/security-validation.ts`
+- 但仓库里还并存着多个遗留薄封装：
+  - `src/lib/security-validation.ts` 的 `sanitizeInput()`（deprecated）
+  - `src/lib/validations.ts` 的 `validationHelpers.sanitizeInput()`
+  - `src/lib/lead-pipeline/utils.ts` 的 `sanitizeInput()`
+- 这些 wrapper 当前主要只剩测试消费，生产代码基本不再依赖。
+- 结论：
+  - 这又是一种“旧入口被测试保活”的模式，只不过发生在安全清洗 helper，而不是 API/基础设施层。
+
+### Round 4 类型真相源观察（第一批）
+- `src/types/global.ts`
+  - 定义了通用 `ApiResponse<T>` / `PaginatedResponse<T>`
+  - 结构仍是旧式 `message` / `errors`
+- `src/types/index.ts`
+  - 继续把这套类型作为统一类型入口导出
+- `src/types/__tests__/global.test.ts`
+  - 对其做了完整测试覆盖
+- 但生产代码搜索显示：
+  - 基本没有实际生产模块从 `@/types/global` 或 `@/types` 消费这套 API 类型
+  - 真实 API 路径已经在用 `src/lib/api/api-response.ts`
+- 结论：
+  - 这又是一套“被导出 + 被测试 + 看起来官方，但并不是生产真相源”的类型层遗留结构。
+
+### Round 4 失活模块观察（第一批）
+- `src/lib/api/get-request-locale.ts`
+  - 整个文件都围绕旧的服务端 API i18n 机制组织
+  - 内部大量 `@deprecated` / `legacy` 注释
+  - 仍保留误导性说明：`Currently used by: /api/contact, /api/inquiry, /api/verify-turnstile`
+- 但代码搜索显示：
+  - 除文件自身外，`getRequestLocale()` / `getApiMessages()` / `ApiMessages` / `API_MESSAGES` 基本没有实际生产引用
+- 结论：
+  - 这不是“一个工具函数注释过时”，而是一整层 legacy API i18n 模块已经失活，却还留在生产路径命名空间下。
+
+### Round 4 兼容包装层观察（第一批）
+- `src/lib/metadata.ts`
+  - 只是在 `seo-metadata.ts` 外再包一层 `generatePageMetadata()`，并重新导出底层函数
+- 代码搜索显示：
+  - 生产代码里看不到明显消费方
+  - 但 `src/lib/__tests__/metadata.test.ts` 对它做了完整测试
+- 结论：
+  - 这类“兼容包装层 + 自己的测试”会让一个实际上已退出生产链路的入口长期保活，和 `contact-api-utils.ts` / `security-headers.ts` / `get-request-locale.ts` 属于同一家族问题。
+
+### Round 4 零引用/测试保活工具层观察（第三批）
+- `src/lib/api-cache-utils.ts`
+  - 搜索 `api-cache-utils|createCacheHeaders|createCachedResponse`
+  - 当前只命中文件自身，未见生产引用，也未见测试引用
+  - 结论：这是一块已经失活但仍留在正式工具层命名空间里的缓存辅助层
+- `src/lib/site-config.ts`
+  - 导出一套看似官方的项目常量（`PROJECT_STATS` / `PROJECT_LINKS` 等）
+  - 但生产代码真正直接依赖的是 `@/config/paths/site-config` 下的 `SITE_CONFIG`
+  - 当前 `src/lib/site-config.ts` 的消费面主要集中在 `src/lib/__tests__/site-config.test.ts`
+  - 结论：这更像“测试保活的配置镜像层”，不是当前生产真相源
+
+### Round 4 类型入口污染观察（第二批）
+- `src/types/index.ts`
+  - 作为“统一类型入口”，却直接导出 `@/types/test-types` 中的测试函数与测试类型
+  - 包括 `isMockDOMElement`、`isMockKeyboardEvent`、`MockDOMElement`、`MockKeyboardEvent` 等
+- 代码搜索显示：
+  - `@/types` 当前几乎只被测试消费
+- 结论：
+  - 这是正式类型入口被测试专用类型污染，不一定立刻出 bug，但会持续误导命名空间边界。
+
+### Round 4 i18n 辅助层观察（第三批）
+- `src/lib/translation-benchmarks.ts`
+- `src/lib/translation-validators.ts`
+- `src/lib/translation-quality-types.ts`
+- `src/lib/locale-constants.ts`
+- 当前观察：
+  - `translation-benchmarks` / `translation-validators` 的消费面基本集中在 `src/lib/__tests__/**`
+  - `locale-constants.ts` 当前几乎没有实际引用
+- 结论：
+  - 这组模块更像测试、离线分析或预备功能，而不是当前生产运行时真相源；继续留在 `src/lib/` 主命名空间只会放大“哪些东西真在运行”的认知噪音。
+
 ## Phase 3：API 写接口深审（src/app/api/**）
 
 ### 范围与目标
@@ -310,3 +581,151 @@
   - Turnstile 校验、rate limit store、WhatsApp Graph API 调用均使用固定 baseUrl（低风险）。
   - `src/lib/whatsapp-media.ts` 的 `downloadMedia()` 会对 `getMediaUrl()` 返回的 `data.url` 做二次 `fetch(mediaUrl)`（该 URL 为第三方返回值，而非代码内固定常量）。
 - 目前仓库内暂未发现生产链路调用 `downloadMedia()`，但这是一个典型“未来接入媒体下载时容易引入 SSRF”的点，建议在实现前先加 URL allowlist 校验（见 issues）。
+
+## Round 3：2026-03-06 当前工作树复审（Linus 口径回归）
+
+### 目标
+- 不是重复历史报告，而是确认：第三轮原定要干掉的问题，现在还有哪些真的活着。
+
+### 已复核为“关闭”的旧问题
+- `vitest.config.mts`
+  - 全局 `retry` 已移除
+  - `ui` 已关闭
+  - 当前文件中已无 `detectListenRestriction()` / `patchServerListen()` 之类 monkey patch
+- `src/lib/api/safe-parse-json.ts`
+  - 统一返回 `errorCode: API_ERROR_CODES.INVALID_JSON_BODY`
+- 主写接口
+  - `src/app/api/contact/route.ts`
+  - `src/app/api/inquiry/route.ts`
+  - `src/app/api/verify-turnstile/route.ts`
+  - 已接入 `createApiErrorResponse()` / `createApiSuccessResponse()`
+- 其它 Round 3 旧项
+  - `src/components/whatsapp/whatsapp-floating-button.tsx` 已无硬编码英文默认文案
+  - `src/lib/lead-pipeline/process-lead.ts` 已从 if/else + flag 改为表驱动配置
+  - `src/test/setup.ts` 已拆分为多文件入口
+
+### 新证据：错误协议仍未完全收敛
+
+#### 1) 共享 helper `withIdempotency()` 还在返回自由文本
+- `src/lib/idempotency.ts:65-79`
+  - `Request processing failed, please retry`
+  - `Request processing timed out, please retry`
+- `src/lib/idempotency.ts:128-131`
+  - `Idempotency key already used for a different endpoint`
+- `src/lib/idempotency.ts:291-300`
+  - 缺失 `Idempotency-Key` 时返回 `{ error, message }`
+- 旁证：`tests/integration/api/subscribe.test.ts:66-79` 仍只断言 `json.error`
+
+结论：
+- 这说明“协议分裂”仍在共享层，而不只是个别 route 的疏漏。
+
+#### 2) 若干 API route 仍绕开统一 response helper
+- `src/app/api/whatsapp/send/route.ts`
+  - `41-76`：鉴权错误走 `{ error: "..." }`
+  - `292-307`：解析/校验错误混用 `errorCode` 字符串和自由文本，还把 `details` 返回给客户端
+  - `384-393`：成功体不是统一 `{ success: true, data }`
+- `src/app/api/whatsapp/webhook/route.ts:132-155`
+  - `Invalid signature` / `Invalid JSON body` / `Failed to process message`
+- `src/app/api/csp-report/route.ts:144-162`
+  - `Invalid CSP report format` / `Invalid JSON format`
+
+结论：
+- 当前 API surface 仍是混合协议，不适合再声称“统一错误模型已完成”。
+
+### 新证据：wall-clock 单测仍在污染门禁
+
+#### 当前复现
+- 基线命令：
+  - `pnpm type-check`：通过
+  - `pnpm lint:check`：通过（无新的 warning / 噪音信号）
+- 命令：
+  - `pnpm test -- src/app/api/whatsapp/send/__tests__/route.test.ts src/app/api/csp-report/__tests__/route.test.ts src/app/api/whatsapp/webhook/__tests__/route.test.ts src/lib/__tests__/idempotency.test.ts`
+- 现象：
+  - 本次运行命中失败：`src/components/layout/__tests__/mobile-navigation-responsive.test.tsx:345-358`
+  - 失败摘要：`expected 2066 to be less than 1000`
+
+#### 同类模式（不是单点）
+- `src/components/layout/__tests__/mobile-navigation-responsive.test.tsx:345-358`
+- `src/app/api/csp-report/__tests__/route-post-advanced.test.ts:42-90`
+- `src/lib/__tests__/structured-data.test.ts:622-637`
+
+结论：
+- 这类断言测的是“当前机器快不快”，不是“代码行为是否正确”。
+- 全局 retry 清掉以后，机器相关噪音会直接暴露成红灯，这不是偶发，是设计问题。
+
+### 新证据：`contact-form-submission` 冷却期测试前提错误
+
+- 当前命令最终还有第三条失败：
+  - `src/components/forms/__tests__/contact-form-submission.test.tsx:342-380`
+  - 失败点：等待 `wait before submitting again` 文案出现
+- 对照实现：
+  - `src/components/forms/use-rate-limit.ts:28-43`
+    - `isRateLimited` 只有在 `lastSubmissionTime` 存在时才可能为真
+  - `src/components/forms/contact-form-container.tsx:171-177`
+    - `recordSubmission()` 只在真正执行 `enhancedFormAction(formData)` 时触发
+  - 但测试 `src/components/forms/__tests__/contact-form-submission.test.tsx:347-364`
+    - 只执行 `renderContactForm()` 和点击 `turnstile-success`
+    - 没有提交表单，也没有显式设置 `lastSubmissionTime`
+
+结论：
+- 这条测试不是在验证“冷却结束后恢复提交”，而是在等一个当前代码路径根本不会自动出现的 UI 状态。
+- 如果它偶尔通过，那反而说明有共享状态或时序污染，不是测试写对了。
+
+## Round 4 执行收口（2026-03-09）
+
+### Wave A：协议统一与错误消费闭环
+- `withIdempotency()`、`/api/whatsapp/send`、`/api/whatsapp/webhook`、`/api/csp-report` 已统一到 `errorCode` 契约。
+- newsletter / inquiry / contact form 已接入 `translateApiError()`。
+- `src/lib/api/get-request-locale.ts` 已删除。
+- 验证：
+  - `pnpm type-check`
+  - `pnpm lint:check`
+  - 178 条 Wave A 相关 Vitest 回归测试通过
+
+### Wave B：测试与门禁信号修复
+- `mobile-navigation` 的 wall-clock 断言已改成结构性状态断言。
+- `contact-form-submission` 冷却期测试已改为显式 `useRateLimit` 状态驱动。
+- `quality-gate` 不再对整个 `src/components/ui/**` 做目录级 diff coverage 豁免。
+- Vitest 默认输出已降噪，并新增 `pnpm test:debug`。
+- 验证：
+  - `pnpm type-check`
+  - `pnpm lint:check`
+  - `pnpm ci:local:quick`
+
+### Wave C：遗留假真相源清理
+- 已删除零生产引用的假入口：
+  - `src/app/api/contact/contact-api-utils.ts`
+  - `src/lib/api-cache-utils.ts`
+  - `src/lib/site-config.ts`
+  - `src/lib/metadata.ts`
+  - `src/types/index.ts`
+  - `src/types/global.ts`
+  - `src/lib/security-headers.ts`
+  - `src/lib/translation-benchmarks.ts`
+  - `src/lib/translation-quality-types.ts`
+  - `src/lib/translation-validators.ts`
+- `src/lib/validations.ts` 已拆分并删除，生产链路迁移到：
+  - `src/lib/email/email-data-schema.ts`
+  - `src/lib/airtable/record-schema.ts`
+  - `src/lib/forms/form-submission-status.ts`
+  - `src/lib/forms/validation-helpers.ts`
+- `security-validation.ts` 的 deprecated `sanitizeInput` alias 已删除；`lead-pipeline/index.ts` 不再正式导出 `sanitizeInput`。
+- 验证：
+  - `pnpm type-check`
+  - `pnpm lint:check`
+  - 151 条与 104 条定向 Vitest 回归测试通过
+
+### Wave D：Next.js 框架边界收口
+- `src/app/[locale]/layout.tsx` 已成为真正的 root layout，服务端直接输出 `<html lang={locale}>`。
+- `src/proxy.ts` 曾接管 locale redirect 与安全头部，但在 Cloudflare 兼容复核后已按最小回退方案恢复到 `src/middleware.ts`。
+- 已删除：
+  - `src/app/layout.tsx`
+  - `src/app/page.tsx`
+  - `src/components/i18n/lang-updater.tsx`
+- `mobile-navigation` 与 `language-toggle` 已改为从 `next-intl` locale context 取值，不再读取 `document.documentElement.lang`。
+- 验证：
+  - `pnpm type-check`
+  - `pnpm lint:check`
+  - middleware / locale / language-toggle 定向 Vitest 回归测试通过
+  - `pnpm build` 通过（会出现 `middleware -> proxy` 弃用告警）
+  - `pnpm build:cf` 通过

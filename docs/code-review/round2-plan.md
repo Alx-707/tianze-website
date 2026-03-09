@@ -242,4 +242,5 @@ Round 2 的“完成”以可验证门禁为准（建议全部满足）：
 - Round 2 完成后：
   - ✅ 已完成：再次跑通 `pnpm ci:local` 作为最终回归（2026-03-06）
   - ✅ 已完成：`pnpm perf:lighthouse` 通过，`total-byte-weight` 回到 budget 内，无需调高 Lighthouse budget
-  - 当前仅保留独立技术债：CR-022（Next.js `middleware → proxy` 迁移告警）
+  - 历史上曾保留独立技术债：CR-022（Next.js `middleware → proxy` 迁移告警）
+  - 当前状态（2026-03-09）：该技术债已在 Round 4 / Wave D 关闭
