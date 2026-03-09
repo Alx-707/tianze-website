@@ -6,7 +6,7 @@ import {
   isValidUrl,
   sanitizeFilePath,
   sanitizeHtml,
-  sanitizeInput,
+  sanitizePlainText,
   validateCharacters,
   validateInputLength,
 } from "@/lib/security-validation";
@@ -16,7 +16,7 @@ describe("security-validation", () => {
     expect(
       sanitizeHtml('<script>alert(1)</script><div onclick="x">ok</div>'),
     ).not.toContain("script");
-    expect(sanitizeInput("<img onerror=alert(1)>")).toBe("img alert(1)");
+    expect(sanitizePlainText("<img onerror=alert(1)>")).toBe("img alert(1)");
   });
 
   it("validates url/email/phone patterns", () => {

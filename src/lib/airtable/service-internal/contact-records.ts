@@ -7,9 +7,9 @@ import type {
   ContactFormData,
   ContactStatus,
 } from "@/lib/airtable/types";
+import { airtableRecordSchema } from "@/lib/airtable/record-schema";
 import { logger, sanitizeCompany, sanitizeEmail } from "@/lib/logger";
 import { sanitizePlainText } from "@/lib/security-validation";
-import { airtableRecordSchema } from "@/lib/validations";
 import { ONE, PERCENTAGE_FULL, ZERO } from "@/constants";
 
 function sanitizeFormData(formData: ContactFormData): ContactFormData {

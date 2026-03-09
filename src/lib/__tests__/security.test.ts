@@ -1,36 +1,35 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { validateFileUpload } from "@/lib/security-file-upload";
-import { checkSecurityConfig } from "@/lib/security-headers";
 import { generateSecureToken } from "@/lib/security-tokens";
 import {
   isValidEmail,
   isValidUrl,
-  sanitizeInput,
+  sanitizePlainText,
 } from "@/lib/security-validation";
 
 describe("Security Utils", () => {
-  describe("sanitizeInput", () => {
+  describe("sanitizePlainText", () => {
     it("should remove dangerous characters", () => {
-      expect(sanitizeInput('<script>alert("xss")</script>')).toBe(
+      expect(sanitizePlainText('<script>alert("xss")</script>')).toBe(
         'scriptalert("xss")/script',
       );
-      expect(sanitizeInput('javascript:alert("xss")')).toBe('alert("xss")');
-      expect(sanitizeInput('onclick=alert("xss")')).toBe('alert("xss")');
+      expect(sanitizePlainText('javascript:alert("xss")')).toBe('alert("xss")');
+      expect(sanitizePlainText('onclick=alert("xss")')).toBe('alert("xss")');
       expect(
-        sanitizeInput('data:text/html,<script>alert("xss")</script>'),
+        sanitizePlainText('data:text/html,<script>alert("xss")</script>'),
       ).toBe('text/html,scriptalert("xss")/script');
     });
 
     it("should handle non-string input", () => {
-      expect(sanitizeInput(null as unknown as string)).toBe("");
-      expect(sanitizeInput(undefined as unknown as string)).toBe("");
-      expect(sanitizeInput(123 as unknown as string)).toBe("");
+      expect(sanitizePlainText(null as unknown as string)).toBe("");
+      expect(sanitizePlainText(undefined as unknown as string)).toBe("");
+      expect(sanitizePlainText(123 as unknown as string)).toBe("");
     });
 
     it("should preserve safe content", () => {
-      expect(sanitizeInput("Hello World")).toBe("Hello World");
-      expect(sanitizeInput("user@example.com")).toBe("user@example.com");
-      expect(sanitizeInput("Some text with spaces")).toBe(
+      expect(sanitizePlainText("Hello World")).toBe("Hello World");
+      expect(sanitizePlainText("user@example.com")).toBe("user@example.com");
+      expect(sanitizePlainText("Some text with spaces")).toBe(
         "Some text with spaces",
       );
     });
@@ -129,42 +128,6 @@ describe("Security Utils", () => {
       const result = validateFileUpload(dangerousFile);
       expect(result.valid).toBe(false);
       expect(result.error).toContain("is not allowed");
-    });
-  });
-
-  describe("checkSecurityConfig", () => {
-    it("should identify missing configuration in production", () => {
-      // Mock production environment
-      vi.stubEnv("NODE_ENV", "production");
-      vi.stubEnv("TURNSTILE_SECRET_KEY", "");
-      vi.stubEnv("SENTRY_DSN", "");
-
-      const result = checkSecurityConfig(true);
-      expect(result.configured).toBe(false);
-      expect(result.issues).toContain(
-        "Turnstile secret key not configured in production",
-      );
-    });
-
-    it("should pass in development environment", () => {
-      // Mock development environment
-      vi.stubEnv("NODE_ENV", "development");
-
-      const result = checkSecurityConfig(true);
-      expect(result.configured).toBe(true);
-      expect(result.issues).toHaveLength(0);
-    });
-
-    it("should identify relaxed security mode in production", () => {
-      // Mock production with relaxed security
-      vi.stubEnv("NODE_ENV", "production");
-      vi.stubEnv("NEXT_PUBLIC_SECURITY_MODE", "relaxed");
-
-      const result = checkSecurityConfig(true);
-      expect(result.configured).toBe(false);
-      expect(result.issues).toContain(
-        "Security mode is set to relaxed in production",
-      );
     });
   });
 });

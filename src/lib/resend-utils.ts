@@ -9,7 +9,7 @@ import {
   productInquiryEmailDataSchema,
   type EmailTemplateData,
   type ProductInquiryEmailData,
-} from "@/lib/validations";
+} from "@/lib/email/email-data-schema";
 import { SITE_CONFIG } from "@/config/paths/site-config";
 
 /**

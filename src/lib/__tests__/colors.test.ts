@@ -1,5 +1,5 @@
 import { TEST_CONSTANTS } from "@/constants/test-constants";
-import type { ThemeColors } from "@/types";
+import type { ThemeColors } from "@/lib/colors/types";
 import {
   calculateContrast,
   checkContrastCompliance,

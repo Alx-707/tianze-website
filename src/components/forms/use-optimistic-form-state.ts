@@ -1,7 +1,7 @@
 "use client";
 
 import { useOptimistic } from "react";
-import { type FormSubmissionStatus } from "@/lib/validations";
+import { type FormSubmissionStatus } from "@/lib/forms/form-submission-status";
 
 /**
  * 乐观更新状态类型

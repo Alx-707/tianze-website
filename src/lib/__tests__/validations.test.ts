@@ -1,24 +1,24 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { airtableRecordSchema } from "@/lib/airtable/record-schema";
+import { apiResponseSchema } from "@/lib/api/api-response-schema";
+import { emailTemplateDataSchema } from "@/lib/email/email-data-schema";
 import { contactFieldValidators } from "@/lib/form-schema/contact-field-validators";
+import {
+  contactFormSchema,
+  type ContactFormData,
+} from "@/lib/form-schema/contact-form-schema";
+import { type FormSubmissionStatus } from "@/lib/forms/form-submission-status";
+import {
+  validationConfig,
+  validationHelpers,
+  type FormValidationError,
+} from "@/lib/forms/validation-helpers";
 import {
   CONTACT_FORM_CONFIG,
   createContactFormSchemaFromConfig,
 } from "@/config/contact-form-config";
-import {
-  airtableRecordSchema,
-  apiResponseSchema,
-  contactFormSchema,
-  emailTemplateDataSchema,
-  validationConfig,
-  validationHelpers,
-  type ContactFormData,
-  type FormSubmissionStatus,
-  type FormValidationError,
-} from "../validations";
 
-// 确保使用真实的validations模块和Zod库，不受Mock影响
-vi.unmock("../validations");
-vi.unmock("@/lib/validations");
+// 确保使用真实的 schema/helper 模块和 Zod 库，不受 Mock 影响
 vi.unmock("zod");
 vi.unmock("@/config/contact-form-config");
 
@@ -348,27 +348,6 @@ describe("validations - Helper Functions", () => {
           ["example.com"],
         );
         expect(result).toBe(true);
-      });
-    });
-
-    describe("sanitizeInput", () => {
-      it("should trim whitespace", () => {
-        const result = validationHelpers.sanitizeInput("  test  ");
-        expect(result).toBe("test");
-      });
-
-      it("should replace multiple spaces with single space", () => {
-        const result = validationHelpers.sanitizeInput(
-          "test   multiple   spaces",
-        );
-        expect(result).toBe("test multiple spaces");
-      });
-
-      it("should remove HTML tags", () => {
-        const result = validationHelpers.sanitizeInput(
-          'test<script>alert("xss")</script>',
-        );
-        expect(result).toBe('testscriptalert("xss")/script');
       });
     });
 

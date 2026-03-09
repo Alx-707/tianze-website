@@ -2,8 +2,9 @@
  * Airtable 相关类型定义
  */
 
-// 重新导出验证相关类型
-export type { AirtableRecord, ContactFormData } from "@/lib/validations";
+// 重新导出生产链路仍在使用的表单/Airtable类型
+export type { ContactFormData } from "@/lib/form-schema/contact-form-schema";
+export type { AirtableRecord } from "@/lib/airtable/record-schema";
 
 // Airtable 查询选项类型
 export interface AirtableQueryOptions {
