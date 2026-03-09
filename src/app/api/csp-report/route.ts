@@ -1,13 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { env } from "@/lib/env";
+import { API_ERROR_CODES } from "@/constants/api-error-codes";
+import { createApiErrorResponse } from "@/lib/api/api-response";
 import { logger, sanitizeIP, sanitizeLogContext } from "@/lib/logger";
 import {
   withRateLimit,
   type RateLimitContext,
 } from "@/lib/api/with-rate-limit";
 import type { CSPReport } from "@/config/security";
-import { HTTP_PAYLOAD_TOO_LARGE } from "@/constants";
+import {
+  HTTP_BAD_REQUEST,
+  HTTP_INTERNAL_ERROR,
+  HTTP_PAYLOAD_TOO_LARGE,
+} from "@/constants";
 
 const MAX_CSP_REPORT_BODY_BYTES = 16 * 1024; // 16 KB — CSP reports should be tiny; prevents body-based DoS
 
@@ -80,9 +86,9 @@ const isSuspiciousReport = (csp: CSPReport["csp-report"]) => {
 };
 
 function createPayloadTooLargeResponse(): NextResponse {
-  return NextResponse.json(
-    { error: "Payload too large" },
-    { status: HTTP_PAYLOAD_TOO_LARGE },
+  return createApiErrorResponse(
+    API_ERROR_CODES.PAYLOAD_TOO_LARGE,
+    HTTP_PAYLOAD_TOO_LARGE,
   );
 }
 
@@ -141,9 +147,9 @@ async function parseAndValidateCSPReport(
 
   const body = bodyOrResponse;
   if (!body.trim()) {
-    return NextResponse.json(
-      { error: "Invalid CSP report format" },
-      { status: 400 },
+    return createApiErrorResponse(
+      API_ERROR_CODES.INVALID_REQUEST,
+      HTTP_BAD_REQUEST,
     );
   }
 
@@ -151,14 +157,17 @@ async function parseAndValidateCSPReport(
   try {
     parsed = JSON.parse(body);
   } catch {
-    return NextResponse.json({ error: "Invalid JSON format" }, { status: 400 });
+    return createApiErrorResponse(
+      API_ERROR_CODES.INVALID_JSON_BODY,
+      HTTP_BAD_REQUEST,
+    );
   }
 
   const result = cspReportSchema.safeParse(parsed);
   if (!result.success) {
-    return NextResponse.json(
-      { error: "Invalid CSP report format" },
-      { status: 400 },
+    return createApiErrorResponse(
+      API_ERROR_CODES.INVALID_REQUEST,
+      HTTP_BAD_REQUEST,
     );
   }
 
@@ -212,9 +221,9 @@ async function processReport(
 ): Promise<NextResponse> {
   const contentType = request.headers.get("content-type");
   if (!isContentTypeValid(contentType)) {
-    return NextResponse.json(
-      { error: "Unsupported Media Type" },
-      { status: 400 },
+    return createApiErrorResponse(
+      API_ERROR_CODES.UNSUPPORTED_MEDIA_TYPE,
+      HTTP_BAD_REQUEST,
     );
   }
 
@@ -240,9 +249,9 @@ const POST_RATE_LIMITED = withRateLimit(
       return await processReport(request, clientIP);
     } catch (error) {
       logger.error("Error processing CSP report:", error as unknown);
-      return NextResponse.json(
-        { error: "Internal server error" },
-        { status: 500 },
+      return createApiErrorResponse(
+        API_ERROR_CODES.INTERNAL_SERVER_ERROR,
+        HTTP_INTERNAL_ERROR,
       );
     }
   },

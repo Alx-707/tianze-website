@@ -13,6 +13,7 @@
  * - Turnstile token presence check
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { API_ERROR_CODES } from "@/constants/api-error-codes";
 import { checkDistributedRateLimit } from "@/lib/security/distributed-rate-limit";
 import { verifyTurnstile } from "@/lib/turnstile";
 import { processFormSubmission } from "@/lib/contact-form-processing";
@@ -151,7 +152,7 @@ describe("Contact form — integration (happy path chain)", () => {
       const result = await contactFormAction(null, formData);
 
       expect(result.success).toBe(false);
-      expect(result.error).toContain("Too many requests");
+      expect(result.errorCode).toBe(API_ERROR_CODES.RATE_LIMIT_EXCEEDED);
       // Turnstile and processLead should NOT be called
       expect(verifyTurnstile).not.toHaveBeenCalled();
       expect(processFormSubmission).not.toHaveBeenCalled();
@@ -181,7 +182,7 @@ describe("Contact form — integration (happy path chain)", () => {
       const result = await contactFormAction(null, formData);
 
       expect(result.success).toBe(false);
-      expect(result.error).toContain("Security verification required");
+      expect(result.errorCode).toBe(API_ERROR_CODES.TURNSTILE_MISSING_TOKEN);
       expect(verifyTurnstile).not.toHaveBeenCalled();
       expect(processFormSubmission).not.toHaveBeenCalled();
     });
@@ -195,6 +196,7 @@ describe("Contact form — integration (happy path chain)", () => {
       const result = await contactFormAction(null, formData);
 
       expect(result.success).toBe(false);
+      expect(result.errorCode).toBe(API_ERROR_CODES.CONTACT_SUBMISSION_EXPIRED);
       // Rate limit was checked (first gate)
       expect(checkDistributedRateLimit).toHaveBeenCalledTimes(1);
       // Turnstile NOT called (time check failed first)
@@ -211,6 +213,7 @@ describe("Contact form — integration (happy path chain)", () => {
       const result = await contactFormAction(null, formData);
 
       expect(result.success).toBe(false);
+      expect(result.errorCode).toBe(API_ERROR_CODES.CONTACT_SUBMISSION_EXPIRED);
       // Turnstile should NOT be called (time check failed first)
       expect(verifyTurnstile).not.toHaveBeenCalled();
       expect(processFormSubmission).not.toHaveBeenCalled();
@@ -223,6 +226,9 @@ describe("Contact form — integration (happy path chain)", () => {
       const result = await contactFormAction(null, formData);
 
       expect(result.success).toBe(false);
+      expect(result.errorCode).toBe(
+        API_ERROR_CODES.TURNSTILE_VERIFICATION_FAILED,
+      );
       // Rate limit was checked
       expect(checkDistributedRateLimit).toHaveBeenCalledTimes(1);
       // Turnstile was called (failed)
@@ -249,7 +255,7 @@ describe("Contact form — integration (happy path chain)", () => {
       const result = await contactFormAction(null, formData);
 
       expect(result.success).toBe(false);
-      expect(result.error).toContain("Too many requests");
+      expect(result.errorCode).toBe(API_ERROR_CODES.RATE_LIMIT_EXCEEDED);
       expect(verifyTurnstile).not.toHaveBeenCalled();
     });
   });

@@ -6,7 +6,6 @@ import { fireEvent, render, screen } from "@/test/utils";
 
 // 确保使用真实的Zod库和validations模块
 vi.unmock("zod");
-vi.unmock("@/lib/validations");
 
 // Mock fetch
 global.fetch = vi.fn();

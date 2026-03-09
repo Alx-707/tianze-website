@@ -9,11 +9,16 @@ import {
   useTransition,
 } from "react";
 import { useTranslations } from "next-intl";
+import { API_ERROR_CODES } from "@/constants/api-error-codes";
 import { useFormStatus } from "react-dom";
+import { type FormSubmissionStatus } from "@/lib/forms/form-submission-status";
+import {
+  API_ERROR_NAMESPACE,
+  translateApiError,
+} from "@/lib/api/translate-error-code";
 import { logger } from "@/lib/logger";
 import { type ServerActionResult } from "@/lib/server-action-utils";
 import { appendAttributionToFormData } from "@/lib/utm";
-import { type FormSubmissionStatus } from "@/lib/validations";
 import { LazyTurnstile } from "@/components/forms/lazy-turnstile";
 import { useOptimisticFormState } from "@/components/forms/use-optimistic-form-state";
 import { useRateLimit } from "@/components/forms/use-rate-limit";
@@ -195,25 +200,36 @@ function useContactForm() {
  */
 function ErrorDisplay({
   state,
-  translate,
+  translateForm,
+  translateApi,
 }: {
   state: ServerActionResult<ContactFormResult> | null;
-  translate: (key: string) => string;
+  translateForm: (key: string) => string;
+  translateApi: (key: string) => string;
 }) {
-  if (!state?.error) return null;
+  if (!state?.error && !state?.errorCode) return null;
 
   const translatedDetails = state.details?.map((detail) =>
-    detail.startsWith("errors.") ? translate(detail) : detail,
+    detail.startsWith("errors.") ? translateForm(detail) : detail,
   );
   const uniqueDetails = translatedDetails
     ? Array.from(new Set(translatedDetails))
     : undefined;
-  const isValidationError = state.error === "Validation failed";
-  const shouldShowRawMessage = state.error && !isValidationError;
+  const isValidationError =
+    state.errorCode === API_ERROR_CODES.CONTACT_VALIDATION_FAILED;
+  const translatedError = state.errorCode
+    ? translateApiError(translateApi, state.errorCode)
+    : undefined;
+  const shouldShowTranslatedMessage = translatedError && !isValidationError;
+  const shouldShowRawMessage =
+    state.error && !state.errorCode && !isValidationError;
 
   return (
     <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-800">
-      <p className="font-medium">{translate("error")}</p>
+      <p className="font-medium">{translateForm("error")}</p>
+      {shouldShowTranslatedMessage && (
+        <p className="text-sm">{translatedError}</p>
+      )}
       {shouldShowRawMessage && <p className="text-sm">{state.error}</p>}
       {uniqueDetails && uniqueDetails.length > 0 && (
         <ul className="mt-2 list-inside list-disc text-sm">
@@ -371,6 +387,7 @@ function SubmitButton({
  */
 export function ContactFormContainer() {
   const t = useTranslations("contact.form");
+  const tApi = useTranslations(API_ERROR_NAMESPACE);
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     if (process.env.NODE_ENV === "test") {
       e.preventDefault();
@@ -404,7 +421,7 @@ export function ContactFormContainer() {
           optimisticMessage={optimisticMessage}
         />
 
-        <ErrorDisplay state={state} translate={t} />
+        <ErrorDisplay state={state} translateForm={t} translateApi={tApi} />
 
         <FormFields t={t} isPending={isPending} />
 

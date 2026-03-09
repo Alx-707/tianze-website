@@ -11,7 +11,6 @@ import { ContactFormContainer } from "@/components/forms/contact-form-container"
 
 // 确保使用真实的Zod库和validations模块
 vi.unmock("zod");
-vi.unmock("@/lib/validations");
 
 // Mock fetch
 global.fetch = vi.fn();

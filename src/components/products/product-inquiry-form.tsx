@@ -4,6 +4,10 @@ import { useActionState, useCallback, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { CheckCircle, Loader2, MessageSquare, XCircle } from "lucide-react";
 import { useTranslations } from "next-intl";
+import {
+  API_ERROR_NAMESPACE,
+  translateApiError,
+} from "@/lib/api/translate-error-code";
 import { cn } from "@/lib/utils";
 import { getAttributionAsObject } from "@/lib/utm";
 import { Button } from "@/components/ui/button";
@@ -276,12 +280,17 @@ interface SubmitInquiryParams {
   token: string;
 }
 
+interface InquiryApiResponse {
+  success?: boolean;
+  errorCode?: string;
+}
+
 async function submitInquiry({
   data,
   productSlug,
   productName,
   token,
-}: SubmitInquiryParams): Promise<{ ok: boolean; error?: string }> {
+}: SubmitInquiryParams): Promise<{ ok: boolean; errorCode?: string }> {
   const attribution = getAttributionAsObject();
   const requestBody = {
     type: "product",
@@ -301,8 +310,11 @@ async function submitInquiry({
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(requestBody),
   });
-  const result = await response.json();
-  return { ok: response.ok && result.success === true, error: result.error };
+  const result = (await response.json()) as InquiryApiResponse;
+  return {
+    ok: response.ok && result.success === true,
+    ...(result.errorCode !== undefined && { errorCode: result.errorCode }),
+  };
 }
 
 /**
@@ -316,6 +328,7 @@ export function ProductInquiryForm({
 }: ProductInquiryFormProps) {
   const t = useTranslations("products.inquiry");
   const tContact = useTranslations("contact.form");
+  const tApi = useTranslations(API_ERROR_NAMESPACE);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const turnstileTokenRef = useRef<string | null>(null);
@@ -347,7 +360,10 @@ export function ProductInquiryForm({
         token,
       });
       if (!result.ok)
-        return { success: false, error: result.error ?? t("error") };
+        return {
+          success: false,
+          error: translateApiError(tApi, result.errorCode),
+        };
 
       onSuccess?.();
       return { success: true, error: undefined };

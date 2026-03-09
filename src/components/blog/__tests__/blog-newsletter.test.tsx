@@ -102,6 +102,8 @@ function createTranslationMock() {
     success: "Successfully subscribed!",
     error: "Something went wrong",
     turnstileRequired: "Please complete verification",
+    SUBSCRIBE_VALIDATION_EMAIL_INVALID: "Invalid email",
+    UNKNOWN_ERROR: "Something went wrong",
   };
 
   return (key: string) => translations[key] ?? `blog.newsletter.${key}`;
@@ -388,7 +390,10 @@ describe("BlogNewsletter", () => {
     it("shows error message when API returns error", async () => {
       mockFetch.mockResolvedValueOnce({
         ok: false,
-        json: async () => ({ success: false, message: "Invalid email" }),
+        json: async () => ({
+          success: false,
+          errorCode: "SUBSCRIBE_VALIDATION_EMAIL_INVALID",
+        }),
       });
 
       render(<BlogNewsletter />);

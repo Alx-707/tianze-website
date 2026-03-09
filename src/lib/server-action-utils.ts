@@ -11,6 +11,8 @@ export interface ServerActionResult<T = unknown> {
   success: boolean;
   /** 返回数据（成功时） */
   data?: T | undefined;
+  /** 稳定错误码（失败时优先消费） */
+  errorCode?: string | undefined;
   /** 错误信息（失败时） */
   error?: string | undefined;
   /** 详细错误信息（失败时） */
@@ -66,6 +68,7 @@ export function createErrorResult(
 
   return {
     success: false,
+    errorCode: typeof error === "string" ? undefined : error.code,
     error: errorMessage,
     details: errorDetails,
     timestamp: new Date().toISOString(),
@@ -109,6 +112,7 @@ export function createErrorResultWithLogging(
 
   return {
     success: false,
+    errorCode: errorObj.code,
     error: errorObj.message,
     details: details || errorObj.details || undefined,
     timestamp: new Date().toISOString(),

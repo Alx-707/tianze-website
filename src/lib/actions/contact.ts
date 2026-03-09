@@ -13,6 +13,7 @@ import { type ContactFormData } from "@/lib/form-schema/contact-form-schema";
 import { logger } from "@/lib/logger";
 import { checkDistributedRateLimit } from "@/lib/security/distributed-rate-limit";
 import { TEN_MINUTES_MS } from "@/constants/time";
+import { API_ERROR_CODES } from "@/constants/api-error-codes";
 import { getClientIPFromHeaders } from "@/lib/security/client-ip";
 import { hmacKey } from "@/lib/security/rate-limit-key-strategies";
 import {
@@ -77,6 +78,7 @@ async function validateContactFormData(
 
     return {
       success: false,
+      errorCode: API_ERROR_CODES.CONTACT_VALIDATION_FAILED,
       error: "Validation failed",
       details: errorMessages,
       data: null,
@@ -91,6 +93,7 @@ async function validateContactFormData(
   if (!data.submittedAt || isNaN(submittedAtMs)) {
     return {
       success: false,
+      errorCode: API_ERROR_CODES.CONTACT_SUBMISSION_EXPIRED,
       error: "Form submission expired or invalid",
       details: ["Please refresh the page and try again"],
       data: null,
@@ -103,6 +106,7 @@ async function validateContactFormData(
   if (timeDiff > maxAge || timeDiff < 0) {
     return {
       success: false,
+      errorCode: API_ERROR_CODES.CONTACT_SUBMISSION_EXPIRED,
       error: "Form submission expired or invalid",
       details: ["Please refresh the page and try again"],
       data: null,
@@ -114,6 +118,7 @@ async function validateContactFormData(
   if (!turnstileValid) {
     return {
       success: false,
+      errorCode: API_ERROR_CODES.TURNSTILE_VERIFICATION_FAILED,
       error: "Security verification failed",
       details: ["Please complete the security check"],
       data: null,
@@ -178,7 +183,14 @@ async function performSecurityChecks(
     "contact",
   );
   if (!rateLimitResult.allowed) {
-    return createErrorResultWithLogging("Too many requests", undefined, logger);
+    return createErrorResultWithLogging(
+      {
+        code: API_ERROR_CODES.RATE_LIMIT_EXCEEDED,
+        message: "Too many requests",
+      },
+      undefined,
+      logger,
+    );
   }
 
   const honeypot = getFormDataString(formData, "website");
@@ -238,7 +250,10 @@ export const contactFormAction: ServerAction<FormData, ContactFormResult> =
       // 验证必需的Turnstile token
       if (!contactData.turnstileToken) {
         return createErrorResultWithLogging(
-          "Security verification required",
+          {
+            code: API_ERROR_CODES.TURNSTILE_MISSING_TOKEN,
+            message: "Security verification required",
+          },
           undefined,
           logger,
         );
@@ -248,7 +263,11 @@ export const contactFormAction: ServerAction<FormData, ContactFormResult> =
       const validation = await validateContactFormData(contactData, clientIP);
       if (!validation.success || !validation.data) {
         return createErrorResultWithLogging(
-          validation.error || "Validation failed",
+          {
+            code:
+              validation.errorCode ?? API_ERROR_CODES.CONTACT_VALIDATION_FAILED,
+            message: validation.error || "Validation failed",
+          },
           validation.details || undefined,
           logger,
         );
@@ -281,7 +300,10 @@ export const contactFormAction: ServerAction<FormData, ContactFormResult> =
       });
 
       return createErrorResultWithLogging(
-        "An unexpected error occurred. Please try again later.",
+        {
+          code: API_ERROR_CODES.CONTACT_PROCESSING_ERROR,
+          message: "An unexpected error occurred. Please try again later.",
+        },
         undefined,
         logger,
       );

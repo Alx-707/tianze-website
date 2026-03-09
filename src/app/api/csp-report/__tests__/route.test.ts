@@ -84,7 +84,7 @@ describe("CSP Report API Route", () => {
       const data = await response.json();
 
       expect(response.status).toBe(400);
-      expect(data.error).toBe("Unsupported Media Type");
+      expect(data.errorCode).toBe("UNSUPPORTED_MEDIA_TYPE");
     });
 
     it("应该处理缺少Content-Type的请求", async () => {
@@ -97,7 +97,7 @@ describe("CSP Report API Route", () => {
       const data = await response.json();
 
       expect(response.status).toBe(400);
-      expect(data.error).toBe("Unsupported Media Type");
+      expect(data.errorCode).toBe("UNSUPPORTED_MEDIA_TYPE");
     });
 
     it("应该处理无效的JSON", async () => {
@@ -113,7 +113,7 @@ describe("CSP Report API Route", () => {
       const data = await response.json();
 
       expect(response.status).toBe(400);
-      expect(data.error).toBe("Invalid JSON format");
+      expect(data.errorCode).toBe("INVALID_JSON_BODY");
     });
 
     it("应该处理缺少csp-report字段的请求", async () => {
@@ -133,7 +133,7 @@ describe("CSP Report API Route", () => {
       const data = await response.json();
 
       expect(response.status).toBe(400);
-      expect(data.error).toBe("Invalid CSP report format");
+      expect(data.errorCode).toBe("INVALID_REQUEST");
     });
 
     it("应该检测可疑的违规模式", async () => {
@@ -332,7 +332,7 @@ describe("CSP Report API Route", () => {
       const data = await response.json();
 
       expect(response.status).toBe(400);
-      expect(data.error).toBe("Invalid CSP report format");
+      expect(data.errorCode).toBe("INVALID_REQUEST");
       // 空请求体是预期的错误处理，不会记录到error级别
     });
 
@@ -350,7 +350,7 @@ describe("CSP Report API Route", () => {
       const data = await response.json();
 
       expect(response.status).toBe(400);
-      expect(data.error).toBe("Invalid JSON format");
+      expect(data.errorCode).toBe("INVALID_JSON_BODY");
       // JSON解析错误是预期的错误处理，不会记录到error级别
     });
   });

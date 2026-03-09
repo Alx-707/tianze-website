@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import type { SendMessageRequest, TemplateComponent } from "@/types/whatsapp";
+import {
+  createApiErrorResponse,
+  createApiSuccessResponse,
+} from "@/lib/api/api-response";
 import { safeParseJson } from "@/lib/api/safe-parse-json";
+import { createValidationErrorResponse } from "@/lib/api/validation-error-response";
 import {
   withRateLimit,
   type RateLimitContext,
@@ -19,6 +24,7 @@ import {
 } from "@/lib/whatsapp-service";
 import { API_ERROR_CODES } from "@/constants/api-error-codes";
 import { COUNT_THREE } from "@/constants/count";
+import { HTTP_BAD_REQUEST, HTTP_INTERNAL_ERROR } from "@/constants";
 import {
   FIVE_SECONDS_MS,
   ONE_SECOND_MS,
@@ -40,18 +46,18 @@ function validateApiKey(request: NextRequest): NextResponse | null {
   // API key is mandatory - return 503 if not configured
   if (!configuredApiKey) {
     logger.warn("WhatsApp API: WHATSAPP_API_KEY not configured");
-    return NextResponse.json(
-      { error: "WhatsApp API service not configured" },
-      { status: HTTP_SERVICE_UNAVAILABLE },
+    return createApiErrorResponse(
+      API_ERROR_CODES.SERVICE_UNAVAILABLE,
+      HTTP_SERVICE_UNAVAILABLE,
     );
   }
 
   const authHeader = request.headers.get("Authorization");
   if (!authHeader) {
     logger.warn("WhatsApp API: Missing Authorization header");
-    return NextResponse.json(
-      { error: "Authentication required" },
-      { status: HTTP_UNAUTHORIZED },
+    return createApiErrorResponse(
+      API_ERROR_CODES.UNAUTHORIZED,
+      HTTP_UNAUTHORIZED,
     );
   }
 
@@ -59,9 +65,9 @@ function validateApiKey(request: NextRequest): NextResponse | null {
   const bearerMatch = authHeader.match(/^Bearer\s+(.+)$/i);
   if (!bearerMatch) {
     logger.warn("WhatsApp API: Invalid Authorization header format");
-    return NextResponse.json(
-      { error: "Invalid authentication format" },
-      { status: HTTP_UNAUTHORIZED },
+    return createApiErrorResponse(
+      API_ERROR_CODES.UNAUTHORIZED,
+      HTTP_UNAUTHORIZED,
     );
   }
 
@@ -69,9 +75,9 @@ function validateApiKey(request: NextRequest): NextResponse | null {
   // Use constant-time comparison to prevent timing attacks
   if (!providedKey || !constantTimeCompare(providedKey, configuredApiKey)) {
     logger.warn("WhatsApp API: Invalid API key provided");
-    return NextResponse.json(
-      { error: "Invalid credentials" },
-      { status: HTTP_UNAUTHORIZED },
+    return createApiErrorResponse(
+      API_ERROR_CODES.UNAUTHORIZED,
+      HTTP_UNAUTHORIZED,
     );
   }
 
@@ -213,16 +219,16 @@ function validateMessageContent(
   content: Record<string, unknown>,
 ): NextResponse | null {
   if (type === "text" && !content.body) {
-    return NextResponse.json(
-      { error: 'Text message requires "body" in content' },
-      { status: 400 },
+    return createApiErrorResponse(
+      API_ERROR_CODES.INVALID_REQUEST,
+      HTTP_BAD_REQUEST,
     );
   }
 
   if (type === "template" && !content.templateName) {
-    return NextResponse.json(
-      { error: 'Template message requires "templateName" in content' },
-      { status: 400 },
+    return createApiErrorResponse(
+      API_ERROR_CODES.INVALID_REQUEST,
+      HTTP_BAD_REQUEST,
     );
   }
 
@@ -289,22 +295,16 @@ async function parseSendMessageRequest(
   });
   if (!parsedBody.ok) {
     return {
-      error: NextResponse.json(
-        { error: parsedBody.errorCode },
-        { status: 400 },
-      ),
+      error: createApiErrorResponse(parsedBody.errorCode, HTTP_BAD_REQUEST),
     };
   }
   const body = parsedBody.data;
   const validationResult = SendMessageSchema.safeParse(body);
   if (!validationResult.success) {
     return {
-      error: NextResponse.json(
-        {
-          error: "Invalid request body",
-          details: validationResult.error.issues,
-        },
-        { status: 400 },
+      error: createValidationErrorResponse(
+        validationResult.error,
+        API_ERROR_CODES.INVALID_REQUEST,
       ),
     };
   }
@@ -407,15 +407,15 @@ function handleServiceError(error: unknown): NextResponse {
     error instanceof Error &&
     error.message.includes("WHATSAPP_ACCESS_TOKEN")
   ) {
-    return NextResponse.json(
-      { error: "WhatsApp service not configured" },
-      { status: 503 },
+    return createApiErrorResponse(
+      API_ERROR_CODES.SERVICE_UNAVAILABLE,
+      HTTP_SERVICE_UNAVAILABLE,
     );
   }
 
-  return NextResponse.json(
-    { error: "Failed to send message" },
-    { status: 500 },
+  return createApiErrorResponse(
+    API_ERROR_CODES.INTERNAL_SERVER_ERROR,
+    HTTP_INTERNAL_ERROR,
   );
 }
 
@@ -473,7 +473,7 @@ export function GET(request: NextRequest) {
 
   const clientInfo = getClientEnvironmentInfo();
 
-  return NextResponse.json({
+  return createApiSuccessResponse({
     message: "WhatsApp Send Message API",
     environment: clientInfo.environment,
     clientType: clientInfo.clientType,

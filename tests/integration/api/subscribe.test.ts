@@ -75,7 +75,7 @@ describe("api/subscribe", () => {
     const res = await route.POST(req);
     expect(res.status).toBe(400);
     const json = await res.json();
-    expect(json).toHaveProperty("error");
+    expect(json.errorCode).toBe(API_ERROR_CODES.IDEMPOTENCY_KEY_REQUIRED);
   });
 
   it("accepts valid email with idempotency key and caches", async () => {

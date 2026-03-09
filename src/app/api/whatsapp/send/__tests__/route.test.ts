@@ -90,10 +90,10 @@ describe("WhatsApp Send Route", () => {
       const data = await response.json();
 
       expect(response.status).toBe(200);
-      expect(data.message).toBe("WhatsApp Send Message API");
-      expect(data.usage).toBeDefined();
-      expect(data.usage.method).toBe("POST");
-      expect(data.usage.endpoint).toBe("/api/whatsapp/send");
+      expect(data.data.message).toBe("WhatsApp Send Message API");
+      expect(data.data.usage).toBeDefined();
+      expect(data.data.usage.method).toBe("POST");
+      expect(data.data.usage.endpoint).toBe("/api/whatsapp/send");
     });
 
     it("should include example messages in documentation", async () => {
@@ -101,9 +101,9 @@ describe("WhatsApp Send Route", () => {
       const response = GET(request);
       const data = await response.json();
 
-      expect(data.examples).toBeDefined();
-      expect(data.examples.textMessage).toBeDefined();
-      expect(data.examples.templateMessage).toBeDefined();
+      expect(data.data.examples).toBeDefined();
+      expect(data.data.examples.textMessage).toBeDefined();
+      expect(data.data.examples.templateMessage).toBeDefined();
     });
 
     it("should require authentication", async () => {
@@ -152,7 +152,7 @@ describe("WhatsApp Send Route", () => {
       const data = await response.json();
 
       expect(response.status).toBe(400);
-      expect(data.error).toBe('Text message requires "body" in content');
+      expect(data.errorCode).toBe("INVALID_REQUEST");
     });
   });
 
@@ -237,9 +237,7 @@ describe("WhatsApp Send Route", () => {
       const data = await response.json();
 
       expect(response.status).toBe(400);
-      expect(data.error).toBe(
-        'Template message requires "templateName" in content',
-      );
+      expect(data.errorCode).toBe("INVALID_REQUEST");
     });
   });
 
@@ -329,7 +327,7 @@ describe("WhatsApp Send Route", () => {
       const data = await response.json();
 
       expect(response.status).toBe(500);
-      expect(data.error).toBe("Failed to send message");
+      expect(data.errorCode).toBe("INTERNAL_SERVER_ERROR");
     });
 
     it("should return 503 when WhatsApp service is not configured", async () => {
@@ -347,7 +345,7 @@ describe("WhatsApp Send Route", () => {
       const data = await response.json();
 
       expect(response.status).toBe(503);
-      expect(data.error).toBe("WhatsApp service not configured");
+      expect(data.errorCode).toBe("SERVICE_UNAVAILABLE");
     });
 
     it("should return 500 for unexpected errors", async () => {
@@ -363,7 +361,7 @@ describe("WhatsApp Send Route", () => {
       const data = await response.json();
 
       expect(response.status).toBe(500);
-      expect(data.error).toBe("Failed to send message");
+      expect(data.errorCode).toBe("INTERNAL_SERVER_ERROR");
     });
   });
 
@@ -383,7 +381,7 @@ describe("WhatsApp Send Route", () => {
       const data = await response.json();
 
       expect(response.status).toBe(401);
-      expect(data.error).toBe("Authentication required");
+      expect(data.errorCode).toBe("UNAUTHORIZED");
     });
 
     it("should return 401 when API key is invalid", async () => {
@@ -405,7 +403,7 @@ describe("WhatsApp Send Route", () => {
       const data = await response.json();
 
       expect(response.status).toBe(401);
-      expect(data.error).toBe("Invalid credentials");
+      expect(data.errorCode).toBe("UNAUTHORIZED");
     });
 
     it("should return 401 for malformed Authorization header", async () => {
@@ -427,7 +425,7 @@ describe("WhatsApp Send Route", () => {
       const data = await response.json();
 
       expect(response.status).toBe(401);
-      expect(data.error).toBe("Invalid authentication format");
+      expect(data.errorCode).toBe("UNAUTHORIZED");
     });
 
     it("should succeed with valid API key", async () => {
@@ -461,7 +459,7 @@ describe("WhatsApp Send Route", () => {
       const data = await response.json();
 
       expect(response.status).toBe(503);
-      expect(data.error).toBe("WhatsApp API service not configured");
+      expect(data.errorCode).toBe("SERVICE_UNAVAILABLE");
     });
   });
 

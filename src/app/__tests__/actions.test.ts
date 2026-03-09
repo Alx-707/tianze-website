@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { API_ERROR_CODES } from "@/constants/api-error-codes";
 import { checkDistributedRateLimit } from "@/lib/security/distributed-rate-limit";
 import { verifyTurnstile } from "@/lib/turnstile";
 import { contactFormAction } from "../actions";
@@ -100,7 +101,7 @@ describe("actions.ts", () => {
       const result = await contactFormAction(null, formData);
 
       expect(result.success).toBe(false);
-      expect(result.error).toContain("Security verification required");
+      expect(result.errorCode).toBe(API_ERROR_CODES.TURNSTILE_MISSING_TOKEN);
     });
 
     it("should return error when turnstile verification fails", async () => {
@@ -110,8 +111,10 @@ describe("actions.ts", () => {
       const result = await contactFormAction(null, formData);
 
       expect(result.success).toBe(false);
-      // Error could be validation-related or security-related depending on validation order
-      expect(result.error).toBeDefined();
+      expect([
+        API_ERROR_CODES.TURNSTILE_VERIFICATION_FAILED,
+        API_ERROR_CODES.CONTACT_SUBMISSION_EXPIRED,
+      ]).toContain(result.errorCode);
     });
 
     it("should return error when submittedAt is expired", async () => {
@@ -124,8 +127,7 @@ describe("actions.ts", () => {
       const result = await contactFormAction(null, formData);
 
       expect(result.success).toBe(false);
-      // Error could be about expired form or validation
-      expect(result.error).toBeDefined();
+      expect(result.errorCode).toBe(API_ERROR_CODES.CONTACT_SUBMISSION_EXPIRED);
     });
 
     it("should return error when form validation fails for missing field", async () => {
@@ -174,6 +176,7 @@ describe("actions.ts", () => {
 
       // Missing submittedAt should be rejected, not silently fallback to now
       expect(result.success).toBe(false);
+      expect(result.errorCode).toBe(API_ERROR_CODES.CONTACT_SUBMISSION_EXPIRED);
     });
 
     it("should return error when submittedAt is not-a-date", async () => {
@@ -187,6 +190,7 @@ describe("actions.ts", () => {
 
       // Invalid date string should be rejected (NaN bypass vulnerability)
       expect(result.success).toBe(false);
+      expect(result.errorCode).toBe(API_ERROR_CODES.CONTACT_SUBMISSION_EXPIRED);
     });
 
     it("should return result object with expected structure", async () => {

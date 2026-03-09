@@ -516,7 +516,10 @@ describe("ProductInquiryForm", () => {
     it("handles API error response", async () => {
       mockFetch.mockResolvedValueOnce({
         ok: false,
-        json: async () => ({ success: false, error: "Server error" }),
+        json: async () => ({
+          success: false,
+          errorCode: "INQUIRY_PROCESSING_ERROR",
+        }),
       });
 
       render(
