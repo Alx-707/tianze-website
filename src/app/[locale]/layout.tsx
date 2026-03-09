@@ -2,15 +2,16 @@ import { generateLocaleMetadata } from "@/app/[locale]/layout-metadata";
 import { generatePageStructuredData } from "@/app/[locale]/layout-structured-data";
 import "@/app/globals.css";
 import { Suspense, type ReactNode } from "react";
+import Script from "next/script";
 import { notFound } from "next/navigation";
 import { NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { getFontClassNames } from "@/app/[locale]/layout-fonts";
 import { loadCompleteMessages } from "@/lib/load-messages";
 import { generateJSONLD } from "@/lib/structured-data";
 import { AttributionBootstrap } from "@/components/attribution-bootstrap";
 import { LazyCookieConsentIsland } from "@/components/cookie/lazy-cookie-consent-island";
 import { Footer } from "@/components/footer";
-import { LangUpdater } from "@/components/i18n/lang-updater";
 import { Header } from "@/components/layout/header";
 import { LazyToaster } from "@/components/lazy/lazy-toaster";
 import { LazyTopLoader } from "@/components/lazy/lazy-top-loader";
@@ -40,9 +41,6 @@ async function AsyncLocaleLayoutContent({
   locale,
   children,
 }: AsyncLocaleLayoutContentProps) {
-  // Set request locale inside Suspense boundary
-  setRequestLocale(locale);
-
   // Load translations for layout-level strings inside Suspense boundary
   const tFooter = await getTranslations({
     locale,
@@ -69,9 +67,6 @@ async function AsyncLocaleLayoutContent({
 
   return (
     <>
-      {/* Client-side html[lang] correction (PPR root layout is static) */}
-      <LangUpdater locale={locale} />
-
       {/*
         JSON-LD Structured Data for SEO
         --------------------------------
@@ -148,15 +143,39 @@ export default async function LocaleLayout({
   }
 
   const typedLocale = locale as "en" | "zh";
+  setRequestLocale(typedLocale);
 
-  // Root layout renders <html>/<body> to ensure metadata is injected.
-  // This layout provides locale context and page skeleton only.
-  // All async operations (setRequestLocale, getTranslations) are inside Suspense.
   return (
-    <Suspense fallback={null}>
-      <AsyncLocaleLayoutContent locale={typedLocale}>
-        {children}
-      </AsyncLocaleLayoutContent>
-    </Suspense>
+    <html
+      lang={typedLocale}
+      className={getFontClassNames()}
+      suppressHydrationWarning
+    >
+      <body className="flex min-h-screen flex-col antialiased">
+        {process.env.NODE_ENV === "development" && (
+          <>
+            <Script
+              src="https://unpkg.com/react-scan@0.5.3/dist/auto.global.js"
+              crossOrigin="anonymous"
+              strategy="beforeInteractive"
+            />
+            <Script
+              src="https://unpkg.com/react-grab/dist/index.global.js"
+              crossOrigin="anonymous"
+              strategy="beforeInteractive"
+            />
+            <Script
+              src="https://unpkg.com/@react-grab/claude-code/dist/client.global.js"
+              strategy="lazyOnload"
+            />
+          </>
+        )}
+        <Suspense fallback={null}>
+          <AsyncLocaleLayoutContent locale={typedLocale}>
+            {children}
+          </AsyncLocaleLayoutContent>
+        </Suspense>
+      </body>
+    </html>
   );
 }

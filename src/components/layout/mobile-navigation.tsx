@@ -8,7 +8,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Check, Globe, Menu, X } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import {
   isActivePath,
   mobileNavigation,
@@ -152,10 +152,7 @@ function MobileLanguageSwitcher({
   pathname: string;
   onSelect: () => void;
 }) {
-  const currentLocale =
-    typeof document !== "undefined" && document.documentElement?.lang === "zh"
-      ? "zh"
-      : "en";
+  const currentLocale = useLocale() === "zh" ? "zh" : "en";
 
   const languages = [
     { locale: "en" as const, label: "English" },

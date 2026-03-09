@@ -4,7 +4,7 @@ import { PATHNAMES } from "@/config/paths/utils";
 /**
  * Core routing configuration for next-intl.
  * This file contains only the routing definition without navigation exports,
- * making it safe to import in Edge Runtime (middleware).
+ * making it safe to import in runtime boundary entrypoints such as `src/middleware.ts`.
  *
  * For navigation components (Link, redirect, usePathname, useRouter),
  * import from '@/i18n/routing' instead.

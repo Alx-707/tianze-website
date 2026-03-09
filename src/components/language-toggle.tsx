@@ -9,6 +9,7 @@ import {
   useState,
   useTransition,
 } from "react";
+import { useLocale } from "next-intl";
 import { Check, Globe, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { parsePathnameForLink } from "@/lib/i18n/route-parsing";
@@ -95,12 +96,9 @@ const useLanguageSwitch = () => {
 
 export const LanguageToggle = memo(({ locale }: { locale?: "en" | "zh" }) => {
   const pathname = usePathname();
-  // Derive locale from <html lang> when not provided
+  const contextLocale = useLocale();
   const effectiveLocale: "en" | "zh" =
-    locale ||
-    (typeof document !== "undefined" && document.documentElement?.lang === "zh"
-      ? "zh"
-      : "en");
+    locale || (contextLocale === "zh" ? "zh" : "en");
   const { switchingTo, isPending, handleLanguageSwitch } = useLanguageSwitch();
   const [isOpen, setIsOpen] = useState(false);
 

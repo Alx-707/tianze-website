@@ -8,11 +8,14 @@ import {
 } from "@/components/layout/mobile-navigation";
 import { createMockTranslations, renderWithIntl } from "@/test/utils";
 
+const mockLocale = { current: "en" as "en" | "zh" };
+
 // Mock next-intl
 // Note: 使用集中的 mock 翻译函数,无需在此定义具体翻译
 vi.mock("next-intl", () => ({
   NextIntlClientProvider: ({ children }: { children: React.ReactNode }) =>
     children,
+  useLocale: vi.fn(() => mockLocale.current),
   useTranslations: vi.fn(() => createMockTranslations()),
 }));
 
@@ -547,6 +550,7 @@ describe("MobileLanguageSwitcher Integration", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    mockLocale.current = "en";
   });
 
   it("renders language options in mobile menu", async () => {
@@ -561,13 +565,8 @@ describe("MobileLanguageSwitcher Integration", () => {
     expect(screen.getByText("简体中文")).toBeInTheDocument();
   });
 
-  it("detects current locale from document.documentElement.lang", async () => {
-    // Mock document.documentElement.lang as 'zh'
-    Object.defineProperty(document.documentElement, "lang", {
-      value: "zh",
-      writable: true,
-      configurable: true,
-    });
+  it("detects current locale from next-intl locale context", async () => {
+    mockLocale.current = "zh";
 
     renderWithIntl(<MobileNavigation />);
 
@@ -577,21 +576,10 @@ describe("MobileLanguageSwitcher Integration", () => {
     // Chinese should be marked as active (has check icon)
     const chineseLink = screen.getByText("简体中文").closest("a");
     expect(chineseLink).toHaveClass("bg-accent");
-
-    // Reset
-    Object.defineProperty(document.documentElement, "lang", {
-      value: "en",
-      writable: true,
-      configurable: true,
-    });
   });
 
-  it("defaults to English when document.documentElement.lang is not zh", async () => {
-    Object.defineProperty(document.documentElement, "lang", {
-      value: "en",
-      writable: true,
-      configurable: true,
-    });
+  it("defaults to English when locale context is not zh", async () => {
+    mockLocale.current = "en";
 
     renderWithIntl(<MobileNavigation />);
 

@@ -50,12 +50,18 @@ For LCP-critical content, avoid `dynamic` and use direct import.
 
 ## Middleware / Proxy
 
-Project uses `middleware.ts`:
+Project currently uses `src/middleware.ts`:
 - ✅ Locale detection and redirect (next-intl)
 - ✅ Security headers injection (CSP nonce)
+- ✅ Compatible with current `pnpm build:cf` / OpenNext Cloudflare chain
 - ❌ **No authentication**
 
-**Proxy migration**: See `docs/known-issue/middleware-to-proxy-migration.md`
+Notes:
+- `src/app/[locale]/layout.tsx` remains the true root layout; server-side `<html lang>` output was not rolled back.
+- `src/components/language-toggle.tsx` and `src/components/layout/mobile-navigation.tsx` still consume locale from `next-intl` context.
+- Re-migrating to `src/proxy.ts` stays a future task after Cloudflare/OpenNext support is verified.
+
+**Compatibility record**: See `docs/known-issue/middleware-to-proxy-migration.md`
 
 ## Key Files
 

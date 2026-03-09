@@ -7,11 +7,11 @@
 
 ### Middleware & Security Headers
 
-> 当前使用 `middleware.ts`（next-intl 尚未支持 `createProxy`，迁移待办见 `docs/known-issue/middleware-to-proxy-migration.md`）。迁移后改为检查 `proxy.ts`。
+> 当前使用 `src/middleware.ts`。这是为了兼容当前 Cloudflare/OpenNext 构建链路；`next-intl` 仍通过 `createMiddleware(routing)` 工作。兼容记录见 `docs/known-issue/middleware-to-proxy-migration.md`。
 
 ```bash
-ls -la middleware.ts src/middleware.ts 2>/dev/null
-grep -rn "Content-Security-Policy" next.config.* src/ middleware.* 2>/dev/null
+ls -la middleware.ts src/middleware.ts proxy.ts src/proxy.ts 2>/dev/null
+grep -rn "Content-Security-Policy" next.config.* src/ middleware.* proxy.* 2>/dev/null
 curl -sI http://localhost:3000/ | grep -iE "content-security-policy|strict-transport|x-frame-options"
 ```
 
@@ -30,6 +30,7 @@ For each public write endpoint, must verify:
 
 ```bash
 pnpm build
+pnpm build:cf
 grep -r "unpkg.com\|cdn.jsdelivr" .next/ 2>/dev/null | grep -v ".map"
 ```
 
