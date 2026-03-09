@@ -218,7 +218,6 @@
 - `pnpm build:cf`
 - `du -sh .open-next .open-next/server-functions/default .open-next/server-functions/default/node_modules .open-next/server-functions/default/.next .open-next/assets`
 - `stat -f '%z %N' .open-next/server-functions/default/handler.mjs .open-next/server-functions/default/handler.mjs.meta.json`
-- `find .open-next/assets -type f -name '*.map' | wc -l`
 
 ### Phase 4 验证结果（2026-02-15）
 
@@ -477,3 +476,31 @@
 - 中风险：`next/font` 与 `next/image` 行为差异（运行时注入/无构建期优化）。
 - 中风险：存在 `generateStaticParams` 使用，若采用 vinext 的默认 SSR 路径，需确认是否继续静态导出策略。
 - 低~中风险：server-side Node API 使用较多，但 Workers 文档显示相关 API 已支持（需以 `vinext dev/build` 实测收口）。
+
+## 2026-03-06 Round 3 复审工作笔记
+
+### 本轮目标
+- 将第三轮审查方案正式落到仓库文档
+- 复核“旧问题是否真的修掉”
+- 只把当前工作树里仍然活着的问题继续挂单
+
+### 已确认关闭的旧条目
+- `vitest.config.mts`：全局 `retry: 2` 已去除，`ui: false`，也不再有 `net.Server.listen` monkey patch
+- `src/lib/api/safe-parse-json.ts`：已改为统一 `errorCode`
+- `/api/contact`、`/api/inquiry`、`/api/verify-turnstile`：已接入统一 API response helper
+- `src/components/whatsapp/whatsapp-floating-button.tsx`：已走 i18n
+- `src/lib/lead-pipeline/process-lead.ts`：已从 if/else + flag 收敛为表驱动配置
+
+### 当前仍存的 findings（详见 `docs/code-review/round3-review.md`）
+- `src/lib/idempotency.ts` 仍返回自由文本 `error/message`，导致 `/api/subscribe` 没真正回到统一错误协议
+- `/api/whatsapp/send`、`/api/whatsapp/webhook`、`/api/csp-report` 仍绕开统一 response helper，存在 `{ error: "..." }`、`{ success: true, data }`、`{ success: true, errorCode }` 混用
+- 单测仍存在 wall-clock 阈值断言，当前复现命令已命中 `src/components/layout/__tests__/mobile-navigation-responsive.test.tsx:345-358` 失败：`expected 2066 to be less than 1000`
+- `src/components/forms/__tests__/contact-form-submission.test.tsx:342-380` 还在等待一个当前实现根本不会自动出现的 cooldown 文案，属于错误前提测试
+
+### 本轮命令记录
+- `pnpm type-check`
+  - 结果：通过
+- `pnpm lint:check`
+  - 结果：通过（无新的 warning / 噪音信号）
+- `pnpm test -- src/app/api/whatsapp/send/__tests__/route.test.ts src/app/api/csp-report/__tests__/route.test.ts src/app/api/whatsapp/webhook/__tests__/route.test.ts src/lib/__tests__/idempotency.test.ts`
+  - 结果：最终 `3 failed | 352 passed`；其中两条是 wall-clock 断言失败，另一条是 `contact-form-submission` 的错误前提测试失败

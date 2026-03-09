@@ -7,6 +7,7 @@
 - Round 1（已完成，2026-03-05）：建立基线 + 自动化扫描 + 分层深审（Stability→Performance→Maintainability→Security）+ 汇总成可执行问题清单与证据。
 - Round 2（已完成，2026-03-05 ~ 2026-03-06）：按优先级逐条落地修复/优化，并完成“回归验证 + 门禁复测 + 复审”，问题清单已基本关闭，仅保留独立技术债跟进项。
 - Round 3（进行中，2026-03-06）：按既定 Linus 口径对当前工作树做复审，重点检查“测试补丁残留 / API 错误协议分裂 / 假异步与接口撒谎 / 噪音与边界分叉”是否仍存在，并将本轮发现同步到 Round 3 文档与证据笔记。
+- Round 4（计划中，2026-03-06）：不受第三轮口径限制，重新做一遍全仓库扫荡式审查，覆盖代码、测试、构建、配置、架构、性能与安全，最终将“当前仍成立的问题”重新收敛为新的权威问题清单。
 
 > Round 2 的详细执行规划见：`docs/code-review/round2-plan.md`。
 
@@ -18,15 +19,43 @@
 
 ## Round 3 Phases
 - [x] Phase R3.1: 读取既有审查文档并确认第三轮口径
-- [ ] Phase R3.2: 复核当前工作树在 Round 3 四大主题上的实际状态
-- [ ] Phase R3.3: 形成本轮 findings（按严重度排序，含证据）
-- [ ] Phase R3.4: 将复审结论同步回 `linus_review_round3.md` / `notes.md`
+- [x] Phase R3.2: 复核当前工作树在 Round 3 四大主题上的实际状态
+- [x] Phase R3.3: 形成本轮 findings（按严重度排序，含证据）
+- [x] Phase R3.4: 将复审结论同步回 `linus_review_round3.md` / `notes.md`
 
 ## Round 3 Scope
 - 测试基础设施：`vitest.config.mts`、`src/test/**`、典型测试 mock
 - API 错误协议：`src/lib/api/**`、`src/app/api/**`
 - 假异步与接口一致性：`src/lib/idempotency.ts`、`src/lib/security/**`
 - 噪音与边界分叉：构建/测试日志噪音、i18n 漏洞、表驱动/分支收敛情况
+
+## Round 4 Phases
+- [x] Phase R4.1: 建立审查基线（工作树状态、现有审查文档、门禁脚本、关键目录）
+- [x] Phase R4.2: 全量自动化扫描（type/lint/test/build/security/architecture/unused/perf 可用项）
+- [x] Phase R4.3: 代码分层深审（`src/app/**`、`src/components/**`、`src/lib/**`、`tests/**`、配置脚本）
+- [x] Phase R4.4: 交叉复核“测试是否掩盖设计失败”与“文档/门禁是否与现实脱节”
+- [x] Phase R4.5: 将仍成立的问题重写进 `docs/code-review/issues.md`，同步证据到 `docs/code-review/notes.md`
+- [x] Phase R4.6: 将开放问题重组为“问题分类处理方案”，形成执行波次
+
+## Round 4 Execution Phases
+- [x] Phase R4E.1: Wave A 协议统一与错误消费闭环
+- [x] Phase R4E.2: Wave B 测试与门禁信号修复
+- [x] Phase R4E.3: Wave C 遗留假真相源清理
+- [x] Phase R4E.4: Wave D Next.js 框架边界收口
+
+## Round 4 Scope
+- 代码层：`src/app/**`、`src/components/**`、`src/lib/**`、`src/config/**`
+- 测试层：`src/**/__tests__/**`、`tests/**`、`vitest.config.mts`、`playwright` 相关配置
+- 工程层：`package.json`、`scripts/**`、ESLint/TS/Next/Vitest/depcruise/knip 配置
+- 风险层：稳定性、性能、可维护性、安全、可观测性、一致性
+
+## Round 4 Skills
+- `planning-with-files`：总计划、证据、问题清单持续落盘
+- `Linus`：优先识别补丁驱动复杂度、边界分叉、共享 helper 污染
+- `testing-qa`：把测试本身当审查对象，核对门禁是否可信
+- `debugging-strategies`：针对失败门禁做最小复现与根因隔离
+- `performance-optimization`：性能问题按测量→归因→修复路径审查
+- `next-best-practices`：Next.js 16 / App Router / proxy / cache / route handler 边界复核
 
 ## Phase 3 Breakdown
 - [x] Phase 3.1: `src/app/api/**` 写接口深审（抗滥用/校验/错误链路）
@@ -57,6 +86,12 @@
 - 研究/证据与中间发现写入：`docs/code-review/notes.md`，避免在对话里堆上下文。
 - 代码审查产物以仓库内文件为准（`docs/code-review/*` 与 `task_plan.md`）；是否加入 git 跟踪待确认（当前仍未跟踪）。
 - Round 2 规划已按复审反馈调整（2026-03-05）：CR-009 升为 P1；PR 顺序改为“先 API P1/门禁 → 再架构减噪 → 再性能 → 再 CSP”；补充 CR-017 的 hash 保鲜 CI 检查与 CR-011 幂等的前后端联动提示。
+- Round 3（2026-03-06）正式交付文档固定为：`docs/code-review/round3-review.md`；新增问题继续写入 `docs/code-review/issues.md`，原根目录 `linus_review_round3.md` 视为历史口径参考。
+- Round 4（2026-03-06）继续沿用 `docs/code-review/issues.md` 作为最终权威问题清单；`docs/code-review/notes.md` 记录证据，避免再新增平行清单文件造成分叉。
+- Round 4（2026-03-06）正式采用的 skill 组合固定为：`planning-with-files` → `Linus` → `testing-qa` / `debugging-strategies` → `performance-optimization` / `next-best-practices`；`playwright` 与 `audit-website` 仅在静态/单测证据不足时补用。
+- Round 4 收尾交付文档固定为：`docs/code-review/round4-remediation-plan.md`，用于承接执行阶段的分波次处理。
+- Round 4（2026-03-09）：面对 `src/proxy.ts` 与当前 Cloudflare/OpenNext 链路冲突时，优先保障双平台部署支持；执行最小回退，仅把运行时入口恢复为 `src/middleware.ts`，保留 root layout / locale context 等 Wave D 收益。
+- Round 4（2026-03-09）：PR 拆分执行方案固定记录在 `docs/code-review/round4-pr-split-plan.md`，后续提交按该文档的 stacked PR 顺序推进。
 
 ## Findings (Phase 1 Snapshot)
 - ✅ `pnpm ci:local:quick` 全绿（type-check、lint、format、build、单测覆盖率、quality gate fast、安全审计、PII、i18n、架构检查）。
@@ -78,6 +113,13 @@
 - Round 2 / PR-05：将 `middleware.ts` 移至 `src/middleware.ts` 后，测试仍从 `../../middleware` 导入导致 `pnpm type-check:tests` 失败；已改为从 `@/middleware` 或 `src/middleware.ts` 相对路径导入。
 - Round 2 / PR-05：`src/lib/structured-data-generators.ts` 的 `generateArticleData()` publisher logo 使用了 `DEFAULT_BASE_URL`（在非 production 为 `undefined`）导致单测期望的 logo URL 变为 `undefined/next.svg`；已改用 `FALLBACK_BASE_URL`。
 - Round 2 / PR-05：`scripts/csp/check-inline-scripts.ts` 存在未触发的 `eslint-disable-next-line no-console` 导致 ESLint “unused directive” warning（项目配置为 warnings=0 会失败）；已移除该注释。
+- Round 4 / Wave B：首次复跑 `pnpm ci:local:quick` 时，Prettier 在 `src/app/__tests__/contact-integration.test.ts`、`src/app/api/whatsapp/send/route.ts`、`src/components/forms/contact-form-container.tsx`、`src/lib/actions/contact.ts` 报格式差异；已用 `pnpm exec prettier --write` 收口并复跑通过。
+- Round 4 / Wave C：已先完成“低风险删除波次”，删除了零生产引用且仅由测试保活的假入口：`src/app/api/contact/contact-api-utils.ts`、`src/lib/api-cache-utils.ts`、`src/lib/site-config.ts`、`src/lib/metadata.ts`、`src/types/index.ts`、`src/types/global.ts`、`src/lib/security-headers.ts`、`src/lib/translation-benchmarks.ts`、`src/lib/translation-quality-types.ts`、`src/lib/translation-validators.ts`，并同步删除/改写对应保活测试。
+- Round 4 / Wave C：`src/lib/validations.ts` 已被拆分并删除，生产链路分别迁移到 `src/lib/email/email-data-schema.ts`、`src/lib/airtable/record-schema.ts`、`src/lib/forms/form-submission-status.ts`、`src/lib/forms/validation-helpers.ts`；`security-validation.ts` 的 deprecated `sanitizeInput` alias 也已删除，`lead-pipeline/index.ts` 不再把 `sanitizeInput` 作为正式出口。
+- Round 4 / Wave D：`src/app/[locale]/layout.tsx` 已升为真正的 root layout，负责 `<html lang>` / `<body>` 与开发脚本注入；页面层 locale 补丁与 `LangUpdater` 已删除，客户端组件已改回 locale context。
+- Round 4 / Wave D Follow-up（2026-03-09）：实测 `src/proxy.ts` 可通过 `pnpm build`，但会阻塞 `pnpm build:cf`；已按最小回退方案恢复 `src/middleware.ts` 作为当前运行时入口，同时保留 Wave D 的 root layout / locale context 收益。
+- Round 4 / Wave D Follow-up（2026-03-09）：`src/__tests__/middleware-locale-cookie.test.ts` 与 `tests/unit/middleware.test.ts` 已改回以 `@/middleware` / `../middleware` 为准；`pnpm build` 与 `pnpm build:cf` 均通过。
+- Round 4 / Wave D Follow-up（2026-03-09）：并行执行 `pnpm build` 与 `pnpm build:cf` 时，OpenNext 曾因 `.next/lock` 失败；改为串行验证后恢复正常。该错误不代表兼容性问题。
 
 ## Round 2 Execution（落地修复）
 - [x] PR-01（2026-03-05）：CR-007 + CR-009 + CR-003
@@ -123,4 +165,4 @@
     - 验收：`pnpm perf:lighthouse`、`pnpm ci:local`
 
 ## Status
-**Currently in Round 3 / Phase R3.2** - 已确认第三轮既有口径，并完成首轮抽样复核：`vitest.config.mts` 的全局 retry / UI server 补丁已清理，`safeParseJson()` 与 `/api/contact`、`/api/inquiry` 已统一到 `errorCode` 路径；正在继续审查当前工作树里尚存的边界分叉、接口一致性与测试噪音问题。
+**Currently in Round 4 / Dual-platform compatibility restored** - 四个执行波次均已完成，随后已按“平台优先”的最小回退方案恢复 `src/middleware.ts`。当前保留了 Wave D 的 root layout、服务端 `<html lang>` 和 locale context 收益，并已通过 `pnpm build`、`pnpm build:cf` 以及 middleware 定向 Vitest 回归测试；`middleware` 弃用告警暂作为接受中的技术债保留。

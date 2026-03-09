@@ -1,5 +1,83 @@
 # Linus Code Review Round 3 - tianze-website
 
+## 2026-03-06 复审执行记录（当前工作树）
+
+本节覆盖的是 **Round 2 完成后、当前脏工作树** 的实际状态，不再照搬 2026-02-03 的历史问题清单。
+
+### 已确认关闭的旧问题
+
+- `vitest.config.mts`
+  - 全局 `retry: 2` 已删除。
+  - `ui: true` 已关闭为 `ui: false`。
+  - 不再有 `net.Server.listen/close` monkey patch。
+- `src/lib/api/safe-parse-json.ts`
+  - 已统一返回 `errorCode: API_ERROR_CODES.INVALID_JSON_BODY`。
+- `src/app/api/contact/route.ts`、`src/app/api/inquiry/route.ts`、`src/app/api/verify-turnstile/route.ts`
+  - JSON 解析失败已统一走 `errorCode` 协议。
+- `src/test/setup.env.ts`
+  - 已设置 `LOG_LEVEL=warn`，测试期 info 日志噪音明显收敛。
+- `src/components/layout/__tests__/mobile-navigation.test.tsx`
+  - `Button` mock 已显式剥离 `asChild`，旧 React DOM warning 路径已被处理。
+- `src/components/whatsapp/whatsapp-floating-button.tsx`
+  - 旧英文硬编码文案已切到 `next-intl`。
+- `src/lib/lead-pipeline/process-lead.ts`
+  - `hasEmailOperation` 已改成表驱动配置，旧的 if/else + flag 分叉已收敛。
+
+### 当前仍成立的 findings
+
+#### P1 - `withIdempotency()` 仍在中间件层打破统一 API 错误协议
+
+- 证据：`src/lib/idempotency.ts:291-300`
+  - 当 `required: true` 且缺少 `Idempotency-Key` 时，直接返回：
+    - `{ error: "Missing Idempotency-Key header", message: "..." }`
+- 证据：`tests/integration/api/subscribe.test.ts:66-78`
+  - 集成测试仍断言 `json` 只要“包含 `error` 字段”即可，说明这条旧协议已被测试固化。
+- 影响：
+  - 任何复用 `withIdempotency({ required: true })` 的接口，都会绕开项目已建立的 `errorCode` 约定。
+  - 客户端错误翻译链路无法复用，协议一致性再次被中间件层撕开。
+- 正确方向：
+  - `withIdempotency()` 的 required/mismatch/timeout/failure 分支统一改成 `errorCode` 返回。
+  - 同步修正调用它的集成测试，禁止继续用裸 `error` 文本做断言。
+
+#### P1 - API 错误模型仍在若干写接口中分裂，而且测试正在帮它固化
+
+- 证据：`src/app/api/csp-report/route.ts:82-86,143-160`
+  - 仍直接返回 `{ error: "Payload too large" }`、`{ error: "Invalid JSON format" }`、`{ error: "Invalid CSP report format" }`。
+- 证据：`src/app/api/csp-report/__tests__/route.test.ts:74-116`
+  - 测试仍以字符串 `data.error` 断言这些返回。
+- 证据：`src/app/api/whatsapp/webhook/route.ts:45-49,61-73,88-105,122-155`
+  - 缺参、验签失败、JSON 解析失败、429、500 全都还是裸 `{ error: "..." }`。
+- 证据：`src/app/api/whatsapp/webhook/__tests__/route.test.ts:256-334`
+  - 对 `"Payload too large"`、`"Invalid signature"` 的字符串断言已经写死。
+- 证据：`src/app/api/whatsapp/send/route.ts:41-75`
+  - 鉴权失败仍返回 `"Authentication required"` / `"Invalid credentials"` 这类自由文本，而同文件 post-auth rate limit 已经在用 `errorCode`。
+- 证据：`src/app/api/whatsapp/send/__tests__/route.test.ts:144-156`
+  - 对文本错误消息做断言，继续固化分裂协议。
+- 影响：
+  - 同一个项目里“中间件/新路由用 `errorCode`，老路由用 `error` 文本”的局面还在，前端只能为不同接口写分支。
+  - 一旦要做 i18n 或统一错误展示，这几条老路由会继续拖着系统后退。
+- 正确方向：
+  - 这些路由统一迁移到 `createApiErrorResponse()` 或等价 helper。
+  - 测试断言同步切到 `errorCode`，不要再把英文报错文案当协议的一部分。
+
+#### P1 - `mobile-navigation` 的“性能测试”现在是脆弱门禁，不是有效保护
+
+- 证据：`src/components/layout/__tests__/mobile-navigation-responsive-basic.test.tsx:291-305`
+  - 用 `Date.now()` 包裹 10 次 `fireEvent.click()`，要求 `< 1000ms`。
+- 证据：`src/components/layout/__tests__/mobile-navigation-responsive.test.tsx:345-358`
+  - 同样复制了一份 wall-clock 断言。
+- 复现实测（2026-03-06）：
+  - `pnpm vitest run src/components/layout/__tests__/mobile-navigation-responsive-basic.test.tsx -t "handles rapid interactions efficiently"`
+    - 失败：`expected 2238 to be less than 1000`
+  - `pnpm vitest run src/components/layout/__tests__/mobile-navigation-responsive.test.tsx -t "handles rapid interactions efficiently"`
+    - 失败：`expected 2397 to be less than 1000`
+- 影响：
+  - 这不是在验证组件行为，而是在拿当前机器负载、jsdom 调度和测试框架开销赌时间。
+  - 门禁会随机红，开发者会被迫忽略真正有价值的失败信号。
+- 正确方向：
+  - 删除 wall-clock 阈值断言，改成行为型断言（状态切换、无异常、无泄漏）。
+  - 如果真要做性能回归，移到专门的 benchmark/perf harness，别混在常规单测门禁里。
+
 目标：找出仍存在或新增的“边界分叉 / 补丁驱动复杂度 / 错误处理不一致 / 测试掩盖设计失败”，给出可直接开工的整改清单（拒绝补丁版）。
 
 时间：2026-02-03  
@@ -276,4 +354,3 @@
 
 原则：**优先删需求，而不是 patch 环境**。  
 落地：关掉 `ui`，删除 `net.Server.listen` monkey patch；让测试回到“纯 runner”，不要引入网络副作用。
-

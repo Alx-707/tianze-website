@@ -12,7 +12,8 @@
 - ✅ Phase 3.2：性能深审（Lighthouse `total-byte-weight`）完成定位与拆解（2026-03-05），新增条目 CR-015/CR-016。
 - ✅ Phase 3.3：可维护性深审（orphan/barrel/knip）已完成“落地方案”（2026-03-05），新增条目 CR-001~CR-003。
 - ✅ Phase 3.4：安全深审（CSP/nonce、Cache Components、XSS/注入）已完成第一轮（2026-03-05），新增条目 CR-017~CR-021。
-- ✅ Round 2：PR-01 ~ PR-06f 已完成（2026-03-06）；当前仅剩 CR-022（`middleware → proxy` 迁移）作为独立技术债。
+- ✅ Round 2：PR-01 ~ PR-06f 已完成（2026-03-06）。
+- ✅ Round 4：Wave A ~ Wave D 已完成（2026-03-09）；`CR-022`、`CR-023` ~ `CR-046` 已全部转为已修复记录，当前无未关闭的 Round 4 执行项。
 
 ## 建议落地顺序（优先处理 P1）
 - P1：CR-007（接口语义可被改写 / 可被外部利用）、CR-009（公开端点 body 无上限 → 资源耗尽面）、CR-015（prefetch/RSC 预取字节）、CR-016（`radix-ui` 统一包过重）、CR-017（strict CSP 闭环策略）
@@ -74,16 +75,42 @@
 #### CR-022 Next.js 对 `middleware` 的约定存在迁移告警（未来升级风险）
 - 优先级：P3
 - 标签：TECHDEBT/UPGRADE
-- 证据：在 Round 2 的 `pnpm build` 过程中出现 Next.js 迁移告警：`middleware` 约定未来可能被废弃，建议迁移到 `proxy`（具体文案见构建输出）。
-- 影响：
-  - 短期不影响当前功能，但会在未来升级 Next.js 时变成“硬阻断”风险（或迁移窗口变窄）。
-  - 若被动在升级期集中处理，会与其它变更耦合，增加回归风险。
-- 建议修复/排期：
-  - 将其作为“升级前置任务”排入技术债清单（建议与下一次 Next.js 升级绑在同一个波次）。
-  - 收敛 middleware 的职责边界：尽量只做安全头部与 i18n redirect 等轻逻辑；复杂逻辑优先下沉到 route handlers / edge proxy 层。
 - 验收命令：
-  - `pnpm build`（观察告警是否仍存在；若 Next 仍保留告警，则至少在文档中记录迁移路线与触发条件）
-- 状态：🟡 已记录（2026-03-05）
+  - `pnpm build`
+  - `pnpm build:cf`
+- 状态：⏸️ 临时接受（2026-03-09 更新）
+  - 现状：
+    - `src/proxy.ts` 方案已在 `pnpm build` 下验证过。
+    - 但当前 `@opennextjs/cloudflare@1.16.5` 仍要求保留 `src/middleware.ts`，否则 `pnpm build:cf` 无法通过。
+  - 当前处理：
+    - 运行时入口已回退为 `src/middleware.ts`
+    - `pnpm build` 与 `pnpm build:cf` 现均可通过
+  - 残余技术债：
+    - `pnpm build` 会重新出现 `middleware` 弃用告警
+    - 待 Cloudflare/OpenNext 支持稳定后，再重新迁回 `proxy.ts`
+
+#### CR-027 `html[lang]` 当前依赖客户端 hydration 后修正，SSR/无 JS 语义不正确
+- 优先级：P1
+- 标签：PROD/SEO/A11Y/NEXT
+- 关闭记录：
+  - `src/app/[locale]/layout.tsx` 已升为真正的 root layout
+  - 服务端直接输出 `<html lang={locale}>`
+  - `src/components/i18n/lang-updater.tsx` 已删除
+- 验收命令：
+  - `pnpm build`
+- 状态：✅ 已修复（2026-03-09，Wave D）
+  - 结果：`html[lang]` 已由服务端首包正确输出，客户端不再负责补写。
+
+#### CR-028 根路径 locale 重定向依赖页面层补丁，而不是统一路由边界
+- 优先级：P2
+- 标签：PROD/NEXT/ROUTING
+- 关闭记录：
+  - root path locale redirect 已收敛到单一运行时入口，当前入口为 `src/middleware.ts`
+  - 页面层补丁 `src/app/page.tsx` 已删除
+- 验收命令：
+  - `pnpm build`
+- 状态：✅ 已修复（2026-03-09，Wave D）
+  - 结果：locale redirect 已回到单一框架边界入口，当前由 `src/middleware.ts` 承接。
 
 #### CR-008 API routes 仅在 `OPTIONS` 返回 CORS header，实际响应未统一 `applyCorsHeaders`
 - 优先级：P2（若存在跨域调用需求则应视为 P1）
@@ -414,6 +441,400 @@
   - 代码变更：`next.config.ts`、`.devtools/react-grab-dev.mjs`、`package.json`
   - 验收：`pnpm unused:production`、`pnpm ci:local:quick`
 
+#### CR-029 `quality-gate` 将整个 `src/components/ui/**` 排除在 diff coverage 外，门禁信号失真
+- 优先级：P2
+- 标签：DEV/CI/QA
+- 关闭记录：
+  - `scripts/quality-gate.js` 不再对整个 `src/components/ui/**` 做目录级豁免
+  - 已改为文件级白名单
+- 验收命令：
+  - `pnpm quality:gate:json`
+  - 抽查修改 `src/components/ui/animated-counter.tsx` 或 `src/components/ui/navigation-menu.tsx` 后，确认 diff coverage 不再被整体跳过
+- 状态：✅ 已修复（2026-03-09，Wave B）
+  - 结果：diff coverage 恢复为真实信号，不再存在目录级黑洞。
+
+#### CR-030 `ci:local` 声称“完全模拟 CI”，但 Node 版本检查实际允许 20 以上任意主版本
+- 优先级：P2
+- 标签：DEV/CI
+- 关闭记录：
+  - `scripts/ci-local.sh` 已明确“本地支持版本”与“远程 CI 固定 Node 20”的差异
+  - 不再宣称“完全模拟 CI”
+- 验收命令：
+  - `pnpm ci:local`
+  - 在 Node 22 与 Node 20 环境分别执行，确认脚本输出口径与项目声明一致
+- 状态：✅ 已修复（2026-03-09，Wave B）
+  - 结果：本地门禁与 CI 差异已显式化，不再靠误导性口号承诺。
+
+#### CR-031 Vitest 默认输出过于嘈杂，正在稀释真实失败信号
+- 优先级：P3
+- 标签：DEV/CI/TEST
+- 关闭记录：
+  - 默认 `pnpm test` 已切回简洁输出
+  - `verbose + logHeapUsage` 已迁到显式 debug 模式
+- 验收命令：
+  - `pnpm test`
+  - 期望默认输出保留失败摘要与统计信息，不再逐用例附带 heap 行
+- 状态：✅ 已修复（2026-03-09，Wave B）
+  - 结果：默认输出回到可读状态，同时保留 `pnpm test:debug` 诊断入口。
+
+#### CR-032 联系表单 server action 与容器组件之间仍靠英文字符串做协议分支
+- 优先级：P2
+- 标签：PROD/DEV/FORM
+- 关闭记录：
+  - server action 已补齐稳定 `errorCode`
+  - 容器组件不再依赖英文字符串分支
+- 验收命令：
+  - `pnpm test -- src/components/forms/__tests__/contact-form-container-core.test.tsx`
+  - `pnpm test -- src/components/forms/__tests__/contact-form-validation.test.tsx`
+  - `pnpm test -- src/app/__tests__/actions.test.ts`
+- 状态：✅ 已修复（2026-03-09，Wave A）
+  - 结果：联系表单内部协议已回到稳定类型驱动。
+
+#### CR-033 `blog-newsletter` 客户端仍在消费 `message`，没有接上统一 `errorCode` 翻译链路
+- 优先级：P2
+- 标签：PROD/UX/API
+- 证据：
+  - `src/components/blog/blog-newsletter.tsx:272-275`
+    - 请求 `/api/subscribe` 后，失败分支读取 `result.message ?? t("error")`
+  - 但 `/api/subscribe` 当前失败响应返回的是 `errorCode`，例如：
+    - `src/app/api/subscribe/route.ts:83-131`
+  - 测试也仍在固化旧协议：
+    - `src/components/blog/__tests__/blog-newsletter.test.tsx:388-410`
+    - mock 返回 `{ success: false, message: "Invalid email" }`
+- 影响：
+  - 服务端即使给出精确 `errorCode`，客户端也只会降级成泛化错误文案，统一错误翻译链路在这一条用户路径上失效。
+  - 测试继续 mock `message`，会让这条断链长期不被发现。
+- 建议修复：
+  - 在客户端对 `/api/subscribe` 的失败响应改用 `errorCode` + `translateApiError()`。
+  - 测试同步改为 mock `errorCode`，不要再把 `message` 当协议字段。
+- 验收命令：
+  - `pnpm test -- src/components/blog/__tests__/blog-newsletter.test.tsx`
+  - `pnpm test -- tests/integration/api/subscribe.test.ts`
+- 状态：✅ 已修复（2026-03-09，Wave A）
+  - 修复点：`src/components/blog/blog-newsletter.tsx` 已切到 `errorCode` + `translateApiError()`。
+
+#### CR-034 `contact-api-utils.ts` 仍保留一整套旧工具实现，当前主要只被测试引用
+- 优先级：P2
+- 标签：DEV/MAINTAINABILITY
+- 证据：
+  - `src/app/api/contact/contact-api-utils.ts`
+    - 仍保留完整的 `verifyTurnstile()` / `verifyTurnstileDetailed()` / `validateEnvironmentConfig()` / `generateRequestId()` / `formatErrorResponse()`
+  - 但代码搜索显示该模块当前基本只被它自己的测试消费：
+    - `src/app/api/contact/__tests__/contact-api-utils.test.ts`
+  - 与此同时，共享实现已经在别处存在并被实际生产代码使用：
+    - Turnstile：`src/lib/turnstile.ts`
+  - 两者行为已经分叉：
+    - `src/lib/turnstile.ts` 对网络失败返回结构化 `errorCodes`（如 `timeout` / `network-error`）
+    - `src/app/api/contact/contact-api-utils.ts` 仍在 catch 中直接 re-throw
+- 影响：
+  - 仓库里同时维护两套看起来都“像真相源”的工具实现，后续修 bug 或改策略时极易只修一边。
+  - 测试继续覆盖这块旧模块，会制造“它很重要”的错觉，增加维护成本和认知噪音。
+- 建议修复：
+  - 如果这些能力仍需要，改为直接复用共享实现（尤其是 `src/lib/turnstile.ts`），不要在 route 目录下继续维护平行版本。
+  - 如果已经不再需要，删除该模块及其测试，减少假入口和假契约。
+- 验收命令：
+  - `rg -n 'contact-api-utils' src tests`
+  - `pnpm test -- src/app/api/contact/__tests__/route-post.test.ts`
+  - `pnpm test -- src/app/api/contact/__tests__/contact-api-utils.test.ts`
+- 状态：✅ 已修复（2026-03-09，Wave C）
+  - 修复点：`src/app/api/contact/contact-api-utils.ts` 与对应测试已删除。
+
+#### CR-035 `product-inquiry-form` 客户端仍读取 `result.error`，没有接上 `/api/inquiry` 的 `errorCode`
+- 优先级：P2
+- 标签：PROD/UX/API
+- 证据：
+  - `src/components/products/product-inquiry-form.tsx:299-305`
+    - `submitInquiry()` 读取 `response.json()` 后只返回 `result.error`
+  - `src/components/products/product-inquiry-form.tsx:349-350`
+    - 失败分支最终回退到 `result.error ?? t("error")`
+  - 但 `/api/inquiry` 的失败响应已经统一为 `createApiErrorResponse(errorCode, status)`：
+    - `src/app/api/inquiry/route.ts:60-74`
+- 影响：
+  - 服务端即使返回精确 `INQUIRY_VALIDATION_FAILED` / `INQUIRY_SECURITY_FAILED` 等 `errorCode`，客户端也只能显示笼统的 `Failed to send inquiry`。
+  - 统一错误协议在产品询盘这条用户路径上并未真正闭环。
+- 建议修复：
+  - `submitInquiry()` 改为读取 `result.errorCode`
+  - 客户端用 `translateApiError()` 或等价映射将 `errorCode` 翻译成用户文案
+  - 测试同步改为 mock `errorCode`，不要再默认只有泛化错误文案
+- 验收命令：
+  - `pnpm test -- src/components/products/__tests__/product-inquiry-form.test.tsx`
+  - `pnpm test -- src/app/api/inquiry/__tests__/route.test.ts`
+- 状态：✅ 已修复（2026-03-09，Wave A）
+  - 修复点：`src/components/products/product-inquiry-form.tsx` 已切到 `errorCode` + `translateApiError()`。
+
+#### CR-036 `translateApiError()` 已存在，但当前客户端主路径几乎没有实际接入
+- 优先级：P2
+- 标签：DEV/MAINTAINABILITY/I18N
+- 证据：
+  - 仓库存在统一工具：`src/lib/api/translate-error-code.ts`
+  - 全仓搜索 `translateApiError(`，当前只出现在注释/示例中，没有实际生产代码调用
+  - 同时多个客户端路径仍在消费旧协议：
+    - `src/components/blog/blog-newsletter.tsx` 读取 `result.message`
+    - `src/components/products/product-inquiry-form.tsx` 读取 `result.error`
+  - `src/lib/api/get-request-locale.ts:195` 甚至仍声称 `/api/contact`、`/api/inquiry`、`/api/verify-turnstile` “Currently used by” 旧 `getApiMessages()`，但代码搜索显示 `getApiMessages()` 已无生产调用
+- 影响：
+  - 仓库里同时存在“推荐的新方案”和“实际运行的旧消费模式”，会让后续开发者误判迁移已经完成。
+  - i18n 错误处理策略停留在“工具已存在但未落地”的中间态，最容易继续长出新分叉。
+- 建议修复：
+  - 选 1~2 条主要用户路径先真正接入 `translateApiError()`，形成可复制的标准模式。
+  - 清理 `getApiMessages()` 的过时“Currently used by” 注释，避免文档继续误导。
+  - 后续对外 API 客户端消费统一只认 `errorCode`，不再围绕 `message/error` 打补丁。
+- 验收命令：
+  - `rg -n 'translateApiError\\(' src`
+  - `rg -n 'getApiMessages\\(' src`
+- 状态：✅ 已修复（2026-03-09，Wave A）
+  - 修复点：newsletter / inquiry / contact form 主路径已接入 `translateApiError()`。
+
+#### CR-037 `security-headers.ts` 仍像“基础设施真相源”，但当前大部分导出只剩测试在用
+- 优先级：P2
+- 标签：DEV/MAINTAINABILITY/SECURITY
+- 证据：
+  - 文件自身已标注 `legacy helper`：`src/lib/security-headers.ts:27`
+  - 代码搜索显示其主要导出当前几乎只被测试引用：
+    - `getApiSecurityHeaders()` / `getWebSecurityHeaders()` / `getCORSHeaders()` / `verifyTurnstileToken()` / `checkSecurityConfig()` / `getSecurityMiddlewareHeaders()` / `validateSecurityHeaders()`
+    - 引用面几乎集中在：
+      - `src/lib/__tests__/security-headers.test.ts`
+      - `src/lib/__tests__/security.test.ts`
+      - `tests/unit/security/security-headers.test.ts`
+  - 其中 `verifyTurnstileToken()` 甚至还保留了对相对路径 `fetch("/api/verify-turnstile")` 的封装：
+    - `src/lib/security-headers.ts:71-89`
+- 影响：
+  - 这会让维护者误以为这里仍是安全头部和 Turnstile 验证的生产入口，但真实生产逻辑其实已经分散在 `src/config/security.ts`、`src/middleware.ts`、`src/lib/turnstile.ts`、`src/lib/api/cors-utils.ts`。
+  - 测试继续围绕这层遗留 helper 建模，会不断放大“假真相源”，增加未来安全改动时漏改和错改的概率。
+- 建议修复：
+  - 明确它是测试辅助层还是生产辅助层，二选一。
+  - 如果只是测试辅助，迁移到 `src/test/**` 或测试专用 helper，避免继续驻留在 `src/lib/` 冒充生产基础设施。
+  - 如果仍需保留部分能力，按真实生产职责拆回对应模块，不要把安全头/CORS/Turnstile/配置检查混在一个遗留工具包里。
+- 验收命令：
+  - `rg -n 'security-headers' src tests`
+  - `pnpm test -- src/lib/__tests__/security-headers.test.ts`
+  - `pnpm test -- tests/unit/security/security-headers.test.ts`
+- 状态：✅ 已修复（2026-03-09，Wave C）
+  - 修复点：`src/lib/security-headers.ts` 与对应遗留测试已删除。
+
+#### CR-038 `validations.ts` 混合了生产真类型与仅测试消费的旧 schema/helper，模块职责已经失焦
+- 优先级：P3
+- 标签：DEV/MAINTAINABILITY
+- 证据：
+  - 仍在生产使用的部分：
+    - `FormSubmissionStatus`
+    - `EmailTemplateData`
+    - `ProductInquiryEmailData`
+    - `AirtableRecord`
+  - 但同文件里还混着主要只被测试消费的旧层：
+    - `apiResponseSchema`
+    - `validationHelpers`
+    - `validationConfig`
+  - 代码搜索显示：
+    - `apiResponseSchema` / `validationHelpers` / `validationConfig` 的引用面基本集中在 `src/lib/__tests__/validations.test.ts`
+    - 与此同时，生产代码只在消费类型定义，而不是这些旧 helper/schema
+  - `apiResponseSchema` 仍编码的是旧式 `message/error/data` 响应结构：
+    - `src/lib/validations.ts:17-25`
+    - 与当前 API 主推的 `errorCode` 协议已经脱节
+- 影响：
+  - 维护者很容易把这个文件误判成“表单/响应校验的统一真相源”，但实际上它已经是一半活代码、一半历史残留。
+  - 这种混合模块会拖慢迁移：你不敢删，又不该继续扩展，最后只会越来越像杂物间。
+- 建议修复：
+  - 把仍在生产链路中的类型定义保留下来。
+  - 将仅测试消费、且已经偏离当前协议的 `apiResponseSchema` / `validationHelpers` / `validationConfig` 迁走或删除。
+  - 至少把“生产类型定义”和“测试/遗留 helper”拆成不同模块，避免继续共用一个入口。
+- 验收命令：
+  - `rg -n 'apiResponseSchema|validationHelpers|validationConfig' src tests`
+  - `rg -n 'FormSubmissionStatus|EmailTemplateData|ProductInquiryEmailData|AirtableRecord' src`
+- 状态：✅ 已修复（2026-03-09，Wave C）
+  - 修复点：`src/lib/validations.ts` 已拆分并删除，生产链路分别迁移到 email/Airtable/form status/helper 专用模块。
+
+#### CR-039 `sanitizeInput` 存在多层遗留薄封装，当前主要只被测试保活
+- 优先级：P3
+- 标签：DEV/MAINTAINABILITY/SECURITY
+- 证据：
+  - 仓库里当前至少存在 3 个同名/同义入口：
+    - `src/lib/security-validation.ts:89` 的 `sanitizeInput()`（已标 `@deprecated`，内部直接委托 `sanitizePlainText()`）
+    - `src/lib/validations.ts:149` 的 `validationHelpers.sanitizeInput()`（同样直接委托 `sanitizePlainText()`）
+    - `src/lib/lead-pipeline/utils.ts:106` 的 `sanitizeInput()`（委托 `sanitizePlainText()` 后再 `slice`）
+  - 代码搜索显示这些 wrapper 当前几乎都只剩测试引用；生产代码实际直接调用的是 `sanitizePlainText()`。
+- 影响：
+  - 看似有多个“可用入口”，实际只有一个底层真相源，这会持续误导后续开发者在新代码里继续挑错入口。
+  - 测试围绕不同 wrapper 建模，会把遗留薄封装长期保活，增加迁移成本和认知噪音。
+- 建议修复：
+  - 明确 `sanitizePlainText()` 是唯一主入口。
+  - 对仅测试消费的 wrapper 做清理或下沉到兼容层；至少停止在生产模块中继续导出多个同义入口。
+  - 如果某个 wrapper 需要保留特殊行为（例如长度裁剪），就给它起一个语义明确的新名字，而不是继续叫 `sanitizeInput()`。
+- 验收命令：
+  - `rg -n 'sanitizeInput\\(' src tests`
+  - `rg -n 'sanitizePlainText\\(' src`
+- 状态：✅ 已修复（2026-03-09，Wave C）
+  - 修复点：`security-validation.ts` 的 deprecated alias 与 `validationHelpers.sanitizeInput()` 已删除。
+  - 修复点：`lead-pipeline/index.ts` 不再导出 `sanitizeInput`。
+
+#### CR-040 `types/global.ts` 中的通用 `ApiResponse` / `PaginatedResponse` 被导出和测试覆盖，但几乎不在生产代码中使用
+- 优先级：P3
+- 标签：DEV/MAINTAINABILITY/TYPES
+- 证据：
+  - `src/types/global.ts:10-37`
+    - 定义了通用 `ApiResponse<T>` / `PaginatedResponse<T>`
+    - 结构仍是旧式 `message` / `errors`
+  - `src/types/index.ts:7-24`
+    - 继续把这套类型作为统一入口导出
+  - `src/types/__tests__/global.test.ts`
+    - 对这套类型做了完整测试覆盖
+  - 但对生产代码做搜索时：
+    - `rg -n 'from \"@/types/global\"|from \"@/types\"' src --glob '!**/__tests__/**' --glob '!src/types/**'`
+    - 基本没有实际生产消费方
+  - 与此同时，真实 API 路径已经在使用别的真相源：
+    - `src/lib/api/api-response.ts`
+- 影响：
+  - 这会让维护者误以为项目存在一套全局通用 API 响应类型，实际生产代码却并不依赖它。
+  - 类型被统一导出又被测试覆盖，会进一步放大“它仍是官方接口”的错觉，增加未来迁移和统一成本。
+- 建议修复：
+  - 如果这套类型不再服务生产代码，就不要继续从 `src/types/index.ts` 作为统一入口导出。
+  - 如果需要保留，应明确它只服务某个子域或模板，而不是冒充全局 API 真相源。
+  - 最好让真实 API 类型来源收敛到 `src/lib/api/api-response.ts`，避免再保留平行定义。
+- 验收命令：
+  - `rg -n 'from \"@/types/global\"|from \"@/types\"' src --glob '!**/__tests__/**' --glob '!src/types/**'`
+  - `rg -n 'ApiResponse<T>|PaginatedResponse<T>' src/types`
+- 状态：✅ 已修复（2026-03-09，Wave C）
+  - 修复点：`src/types/index.ts`、`src/types/global.ts` 及对应测试已删除；测试改为直接引用真实类型源。
+
+#### CR-041 `get-request-locale.ts` 整个 legacy i18n API 层当前已无生产引用，却仍在 `src/lib/api/` 冒充可用方案
+- 优先级：P2
+- 标签：DEV/MAINTAINABILITY/I18N
+- 证据：
+  - `src/lib/api/get-request-locale.ts`
+    - 定义了 `getRequestLocale()`、`ApiMessages`、`API_MESSAGES`、`getApiMessages()`
+    - 文件内反复标记 `@deprecated` / `legacy server-side i18n mechanism`
+    - 仍保留误导性注释：`Currently used by: /api/contact, /api/inquiry, /api/verify-turnstile`
+  - 代码搜索结果：
+    - `rg -n 'getRequestLocale\\(|getApiMessages\\(|API_MESSAGES|ApiMessages' src tests`
+    - 除本文件自引用外，没有实际生产消费方
+- 影响：
+  - 仓库里继续保留一整层已经退出生产链路的 API i18n 方案，会让维护者误以为当前 API 仍支持服务端消息本地化。
+  - 它与当前主推的 `errorCode` + `translateApiError()` 方案并存，会持续制造迁移完成度的错觉。
+- 建议修复：
+  - 如果确实已退出生产链路，就不要让这整层继续待在 `src/lib/api/` 冒充当前可用方案。
+  - 至少移除误导性的 “Currently used by” 注释；更理想的是将其删除、归档或下沉到迁移记录/测试辅助层。
+- 验收命令：
+  - `rg -n 'getRequestLocale\\(|getApiMessages\\(' src tests`
+  - `rg -n 'from \"@/lib/api/get-request-locale\"' src tests`
+- 状态：✅ 已修复（2026-03-09，Wave A）
+  - 修复点：`src/lib/api/get-request-locale.ts` 已删除。
+
+#### CR-042 `metadata.ts` 只是 `seo-metadata` 的兼容包装层，当前主要靠测试保活
+- 优先级：P3
+- 标签：DEV/MAINTAINABILITY/SEO
+- 证据：
+  - `src/lib/metadata.ts`
+    - 仅提供 `generatePageMetadata()` 薄封装，并重新导出 `createPageSEOConfig` / `generateLocalizedMetadata`
+  - 代码搜索：
+    - `rg -n 'from \"@/lib/metadata\"|generatePageMetadata\\(' src --glob '!**/__tests__/**'`
+    - 当前看不到实际生产消费方
+  - 但它仍有完整测试：
+    - `src/lib/__tests__/metadata.test.ts`
+  - 真正被生产代码直接使用的是：
+    - `src/lib/seo-metadata.ts`
+- 影响：
+  - 这会继续制造“还有一层兼容入口需要维护”的错觉，尤其在 metadata / SEO 改动时容易让人多想一层不存在的公共契约。
+  - 测试覆盖会进一步放大它仍是官方入口的假象。
+- 建议修复：
+  - 如果生产代码已经全面切到 `seo-metadata.ts`，就不要再保留这一层兼容包装。
+  - 至少停止把它当公共入口扩散；更理想的是删除或归档。
+- 验收命令：
+  - `rg -n 'from \"@/lib/metadata\"|generatePageMetadata\\(' src tests`
+  - `pnpm test -- src/lib/__tests__/metadata.test.ts`
+- 状态：✅ 已修复（2026-03-09，Wave C）
+  - 修复点：`src/lib/metadata.ts` 与对应测试已删除。
+
+#### CR-043 `api-cache-utils.ts` 当前看起来已经完全失活，却仍保留在 `src/lib/` 正式命名空间中
+- 优先级：P3
+- 标签：DEV/MAINTAINABILITY
+- 证据：
+  - 文件导出：
+    - `createCacheHeaders()`
+    - `createCachedResponse()`
+  - 代码搜索：
+    - `rg -n 'api-cache-utils|createCacheHeaders\\(|createCachedResponse\\(' src tests`
+    - 结果仅命中文件自身，没有生产代码，也没有测试引用
+- 影响：
+  - 这类“零引用但留在正式工具层”的文件，会让维护者误以为仓库里已经有缓存响应统一方案可复用。
+  - 长期会增加命名冲突和错误复用风险，尤其当后续有人再次造轮子时看不出哪层才是真入口。
+- 建议修复：
+  - 如果当前无实际使用场景，直接删除。
+  - 如果计划未来使用，就不要留在 `src/lib/` 主命名空间里静默发霉，至少要补实际消费方或迁到草稿/模板区。
+- 验收命令：
+  - `rg -n 'api-cache-utils|createCacheHeaders\\(|createCachedResponse\\(' src tests`
+- 状态：✅ 已修复（2026-03-09，Wave C）
+  - 修复点：`src/lib/api-cache-utils.ts` 已删除。
+
+#### CR-044 `site-config.ts` 提供了一套看似官方的项目常量，但当前主要只被测试消费
+- 优先级：P3
+- 标签：DEV/MAINTAINABILITY
+- 证据：
+  - `src/lib/site-config.ts` 导出：
+    - `PROJECT_STATS`
+    - `PROJECT_LINKS`
+    - `TECH_ARCHITECTURE`
+    - `RESPONSIVE_BREAKPOINTS`
+    - `THEME_CONFIG`
+    - `ANIMATION_CONFIG`
+  - 代码搜索：
+    - 生产代码实际直接使用的是 `@/config/paths/site-config` 下的 `SITE_CONFIG`
+    - `src/lib/site-config.ts` 的消费面当前基本集中在 `src/lib/__tests__/site-config.test.ts`
+- 影响：
+  - 这会让人误以为 `src/lib/site-config.ts` 是项目常量统一入口，但真实生产链路并不依赖它。
+  - 这类“测试保活的配置镜像层”特别容易在改配置时形成双份认知和双份维护。
+- 建议修复：
+  - 如果这些常量确实不在生产链路，就不要继续保留为正式库入口。
+  - 要么删除并合并测试目标，要么给出真实生产消费方，否则它就是一个误导层。
+- 验收命令：
+  - `rg -n 'PROJECT_STATS|PROJECT_LINKS|TECH_ARCHITECTURE|RESPONSIVE_BREAKPOINTS|THEME_CONFIG|ANIMATION_CONFIG' src tests`
+  - `pnpm test -- src/lib/__tests__/site-config.test.ts`
+- 状态：✅ 已修复（2026-03-09，Wave C）
+  - 修复点：`src/lib/site-config.ts` 与对应测试已删除。
+
+#### CR-045 `types/index.ts` 作为正式类型总入口，却直接导出测试专用类型与工具函数
+- 优先级：P3
+- 标签：DEV/MAINTAINABILITY/TYPES
+- 证据：
+  - `src/types/index.ts`
+    - 在“统一入口”里直接导出 `@/types/test-types` 的函数与类型
+    - 包括 `isMockDOMElement`、`isMockKeyboardEvent`、`MockDOMElement`、`MockKeyboardEvent` 等测试专用符号
+  - 代码搜索：
+    - `rg -n 'from \"@/types\"' src tests`
+    - 当前命中的消费方几乎只有测试：`src/lib/__tests__/colors.test.ts`
+- 影响：
+  - 生产命名空间 `@/types` 被测试专用类型污染，会误导后续开发者把测试辅助类型当作正式公共 API。
+  - 即使现在生产代码没滥用，它也在扩大错误的默认入口。
+- 建议修复：
+  - 不要从正式类型总入口导出测试类型与测试工具。
+  - 将 `@/types/test-types` 仅留给测试代码显式引用，避免继续污染公共 barrel。
+- 验收命令：
+  - `rg -n 'from \"@/types\"' src tests`
+  - `rg -n '@/types/test-types' src tests`
+- 状态：✅ 已修复（2026-03-09，Wave C）
+  - 修复点：`src/types/index.ts` 已删除，测试专用类型不再通过正式总入口暴露。
+
+#### CR-046 多个 i18n 质量/locale 辅助模块当前更像测试或离线分析工具，却仍驻留在 `src/lib/` 生产命名空间
+- 优先级：P3
+- 标签：DEV/MAINTAINABILITY/I18N
+- 证据：
+  - `src/lib/translation-benchmarks.ts`
+  - `src/lib/translation-validators.ts`
+  - `src/lib/translation-quality-types.ts`
+  - `src/lib/locale-constants.ts`
+  - 代码搜索显示：
+    - `translation-benchmarks` / `translation-validators` 的消费面基本集中在 `src/lib/__tests__/**`
+    - `locale-constants.ts` 当前基本没有实际引用
+- 影响：
+  - 这些模块继续待在 `src/lib/` 会让维护者误以为它们属于生产运行时依赖，而不是测试/分析/预备功能。
+  - 与前面几类“被测试保活的遗留层”叠加后，会进一步稀释 `src/lib/` 作为生产真相源的可信度。
+- 建议修复：
+  - 若它们主要服务测试、离线分析或未来计划，迁到更准确的命名空间（例如 `src/test/`、`scripts/`、`tools/` 或专门的 i18n-audit 模块）。
+  - 对 `locale-constants.ts` 这类零引用文件，优先删除或明确接入真实使用方。
+- 验收命令：
+  - `rg -n 'translation-benchmarks|translation-validators|translation-quality-types|locale-constants' src tests`
+- 状态：✅ 已修复（2026-03-09，Wave C）
+  - 修复点：`translation-benchmarks.ts`、`translation-quality-types.ts`、`translation-validators.ts` 已删除；`locale-constants.ts` 保留为真实生产类型常量模块。
+
 ### Security（Phase 3.4：安全深审已完成第一轮）
 
 #### CR-017 CSP strict + nonce 链路未完全闭环：存在未带 nonce 的 inline script（可能被阻断/产生噪声）
@@ -550,3 +971,12 @@
     - 补单测覆盖：拒绝不可信 host、允许的 redirect 链路
   - 代码变更：`src/lib/security/safe-third-party-fetch.ts`、`src/lib/whatsapp-media.ts`、`src/lib/__tests__/whatsapp-media.test.ts`
   - 验收：`pnpm test -- src/lib/__tests__/whatsapp-media.test.ts`
+
+## Round 3 复审新增问题（历史注记）
+
+Round 3 复审阶段新增的 `CR-023` ~ `CR-026` 已在 Round 4 的 Wave A / Wave B 中全部关闭。
+
+- `CR-023`、`CR-024`：已在 Wave A 完成协议统一
+- `CR-025`、`CR-026`：已在 Wave B 完成测试与门禁信号修复
+
+修复后的最终状态、修复点与验收方式，以上方正式问题条目为准；这里不再重复保留修复前长篇证据，避免同一问题在文件中出现两份历史快照。
