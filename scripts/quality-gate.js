@@ -193,6 +193,16 @@ class QualityGate {
           // 安全/业务逻辑文件禁止加入此列表
           diffCoverageExclude: [
             "src/components/forms/use-rate-limit.ts",
+            "src/components/ui/badge.tsx",
+            "src/components/ui/button.tsx",
+            "src/components/ui/card.tsx",
+            "src/components/ui/container.tsx",
+            "src/components/ui/input.tsx",
+            "src/components/ui/label.tsx",
+            "src/components/ui/section-head.tsx",
+            "src/components/ui/section.tsx",
+            "src/components/ui/separator.tsx",
+            "src/components/ui/textarea.tsx",
             "src/types/react19.ts",
             // error.tsx 已被 diffCoverageExcludeGlobs 中 src/app/**/error.tsx 覆盖
             "src/types/whatsapp-api-requests/api-types.ts",
@@ -213,7 +223,8 @@ class QualityGate {
             "src/testing/**",
             // 无逻辑代码：JSX 模板和数据声明被 Istanbul 计为可执行语句，
             // 但不含分支逻辑，测试价值极低
-            "src/components/ui/**", // shadcn/ui CLI 生成的 UI 原语
+            // 注意：禁止再按整个目录豁免 src/components/ui/**。
+            // 有行为/状态的 UI 组件必须继续接受 diff coverage 检查。
             "src/components/blocks/_templates/**", // 开发模板（无运行时逻辑）
             "src/constants/**", // 纯数据声明（as const 对象）
             "src/config/**", // 静态配置对象（零条件分支）

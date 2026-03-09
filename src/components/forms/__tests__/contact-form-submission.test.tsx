@@ -17,13 +17,13 @@ import { ContactFormContainer } from "@/components/forms/contact-form-container"
 
 // 确保使用真实的Zod库和validations模块
 vi.unmock("zod");
-vi.unmock("@/lib/validations");
 
 // Mock fetch
 global.fetch = vi.fn();
 
 // Mock useActionState for React 19 testing
 const mockUseActionState = vi.hoisted(() => vi.fn());
+const mockUseRateLimit = vi.hoisted(() => vi.fn());
 vi.mock("react", async () => {
   const actual = await vi.importActual("react");
   return {
@@ -31,6 +31,10 @@ vi.mock("react", async () => {
     useActionState: mockUseActionState,
   };
 });
+
+vi.mock("@/components/forms/use-rate-limit", () => ({
+  useRateLimit: mockUseRateLimit,
+}));
 
 // Mock Turnstile
 vi.mock("@marsidev/react-turnstile", () => ({
@@ -199,6 +203,12 @@ describe("ContactFormContainer - 提交和错误处理", () => {
       vi.fn(), // formAction
       false, // isPending
     ]);
+    mockUseRateLimit.mockReturnValue({
+      isRateLimited: false,
+      lastSubmissionTime: null,
+      recordSubmission: vi.fn(),
+      setLastSubmissionTime: vi.fn(),
+    });
   });
 
   afterEach(() => {
@@ -292,12 +302,17 @@ describe("ContactFormContainer - 提交和错误处理", () => {
 
   describe("速率限制功能", () => {
     it("应该在成功提交后显示速率限制", async () => {
-      // Mock useActionState to return success state
       mockUseActionState.mockReturnValue([
         { success: true }, // state
         vi.fn(), // formAction
         false, // isPending
       ]);
+      mockUseRateLimit.mockReturnValue({
+        isRateLimited: true,
+        lastSubmissionTime: new Date("2026-03-09T00:00:00.000Z"),
+        recordSubmission: vi.fn(),
+        setLastSubmissionTime: vi.fn(),
+      });
 
       await renderContactForm();
 
@@ -306,85 +321,49 @@ describe("ContactFormContainer - 提交和错误处理", () => {
         fireEvent.click(successButton);
       });
 
-      // 检查成功消息
       expect(
         screen.getByText(/message sent successfully/i),
       ).toBeInTheDocument();
+      expect(
+        screen.getByText(/wait before submitting again/i),
+      ).toBeInTheDocument();
 
-      // 等待速率限制提示 - 增加超时和重试间隔以适应 CI 环境
-      // CI 环境可能因资源竞争导致异步状态更新延迟
-      await waitFor(
-        () => {
-          expect(
-            screen.getByText(/wait before submitting again/i),
-          ).toBeInTheDocument();
-        },
-        {
-          timeout: 10000, // 从默认 1000ms 增加到 10000ms
-          interval: 500, // 每 500ms 重试一次
-        },
-      );
-
-      // 验证按钮禁用状态（可选，允许失败）
       const submitButton = screen.getByRole("button", { name: /submit/i });
-      try {
-        await waitFor(() => expect(submitButton).toBeDisabled(), {
-          timeout: 3000,
-        });
-      } catch {
-        // 忽略：在个别环境中，可能仅设置了 aria-disabled 或存在短暂时序差异
-        console.warn(
-          "Button disabled state check skipped due to timing differences",
-        );
-      }
-    }, 15000); // 增加整个测试的超时到 15 秒
+      expect(submitButton).toBeDisabled();
+    });
 
     it("should re-enable submission after cooldown duration elapses", async () => {
-      const originalCooldown = process.env.NEXT_PUBLIC_CONTACT_FORM_COOLDOWN_MS;
-      process.env.NEXT_PUBLIC_CONTACT_FORM_COOLDOWN_MS = "50";
+      mockUseActionState.mockReturnValue([{ success: true }, vi.fn(), false]);
 
-      try {
-        mockUseActionState.mockReturnValue([{ success: true }, vi.fn(), false]);
+      let isRateLimited = true;
+      mockUseRateLimit.mockImplementation(() => ({
+        isRateLimited,
+        lastSubmissionTime: isRateLimited
+          ? new Date("2026-03-09T00:00:00.000Z")
+          : null,
+        recordSubmission: vi.fn(),
+        setLastSubmissionTime: vi.fn(),
+      }));
 
-        await renderContactForm();
+      const { rerender } = await renderContactForm();
 
-        const successButton = await screen.findByTestId("turnstile-success");
-        await act(async () => {
-          fireEvent.click(successButton);
-        });
+      const successButton = await screen.findByTestId("turnstile-success");
+      await act(async () => {
+        fireEvent.click(successButton);
+      });
 
-        const submitButton = screen.getByRole("button", { name: /submit/i });
+      expect(
+        screen.getByText(/wait before submitting again/i),
+      ).toBeInTheDocument();
 
-        // 使用 findByText 自动等待速率限制提示出现 (符合 Testing Library 最佳实践)
-        // 这是主要的验证指标 - 速率限制消息的出现表明功能正常工作
-        await screen.findByText(
-          /wait before submitting again/i,
-          {},
-          { timeout: 3000 },
-        );
+      isRateLimited = false;
+      rerender(<ContactFormContainer />);
 
-        // 注意：由于不同测试环境中 DOM 更新时序的差异，
-        // 我们仅依赖速率限制消息作为主要验证指标。
-        // 按钮的 disabled 状态在某些环境中可能使用 aria-disabled 或有短暂延迟。
-
-        // 等待冷却时间过去
-        await act(async () => {
-          await new Promise((resolve) => {
-            setTimeout(resolve, 100);
-          });
-        });
-
-        // 验证按钮重新启用
-        await waitFor(() => expect(submitButton).not.toBeDisabled(), {
-          timeout: 3000,
-        });
-      } finally {
-        if (originalCooldown === undefined) {
-          delete process.env.NEXT_PUBLIC_CONTACT_FORM_COOLDOWN_MS;
-        } else {
-          process.env.NEXT_PUBLIC_CONTACT_FORM_COOLDOWN_MS = originalCooldown;
-        }
-      }
+      await waitFor(() => {
+        expect(
+          screen.queryByText(/wait before submitting again/i),
+        ).not.toBeInTheDocument();
+      });
     });
 
     it("速率限制应该在5分钟后解除", async () => {
