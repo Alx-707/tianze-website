@@ -2,6 +2,8 @@
 import { resolve } from "path";
 import { defineConfig } from "vitest/config";
 
+const debugTestOutput = process.env.VITEST_DEBUG_OUTPUT === "true";
+
 export default defineConfig({
   test: {
     // 测试环境配置 - 使用标准 jsdom 环境
@@ -152,7 +154,7 @@ export default defineConfig({
     // retry: 2, // 已移除全局 retry，遇到 flaky 测试应修复根因或局部声明
 
     // 报告器配置
-    reporters: ["verbose", "json"],
+    reporters: debugTestOutput ? ["verbose", "json"] : ["default", "json"],
     outputFile: {
       json: "./reports/test-results.json",
     },
@@ -163,7 +165,7 @@ export default defineConfig({
     },
 
     // 性能配置 - 增强缓存和性能监控
-    logHeapUsage: true,
+    logHeapUsage: debugTestOutput,
     isolate: true,
 
     // 依赖优化 - 提高模块解析性能

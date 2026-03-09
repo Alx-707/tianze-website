@@ -19,6 +19,7 @@
     "build:webpack": "next build --webpack",
     "start": "next start",
     "test": "vitest run",
+    "test:debug": "VITEST_DEBUG_OUTPUT=true vitest run",
     "prepare": "git rev-parse --git-dir > /dev/null 2>&1 && lefthook install || true",
     "type-check": "tsc --noEmit",
     "validate:translations": "node scripts/validate-translations.js",

@@ -293,16 +293,14 @@ describe("Mobile Navigation Responsive - Basic Tests", () => {
 
       const trigger = screen.getByRole("button");
 
-      // Rapid clicks should not cause performance issues
-      // Use fireEvent to avoid pointer-events issues
-      const _startTime = Date.now();
+      // Rapid clicks should remain functionally stable.
+      // Use fireEvent to avoid pointer-events issues.
       for (let i = 0; i < 10; i++) {
         fireEvent.click(trigger);
       }
-      const endTime = Date.now();
 
-      // Should complete within reasonable time
-      expect(endTime - _startTime).toBeLessThan(1000);
+      // Even number of toggles should return to the initial closed state.
+      expect(trigger).toHaveAttribute("aria-expanded", "false");
       expect(trigger).toBeInTheDocument();
     });
 

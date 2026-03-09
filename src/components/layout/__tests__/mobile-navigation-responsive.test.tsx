@@ -347,15 +347,13 @@ describe("Mobile Navigation Responsive - Main Tests", () => {
 
       const trigger = screen.getByRole("button");
 
-      // Rapid clicks should not cause performance issues - 使用 fireEvent 避免 pointer-events 问题
-      const _startTime = Date.now();
+      // Rapid clicks should remain functionally stable - 使用 fireEvent 避免 pointer-events 问题
       for (let i = 0; i < 10; i++) {
         fireEvent.click(trigger);
       }
-      const endTime = Date.now();
 
-      // Should complete within reasonable time
-      expect(endTime - _startTime).toBeLessThan(1000);
+      // 偶数次切换后应回到初始关闭状态，而不是依赖机器速度。
+      expect(trigger).toHaveAttribute("aria-expanded", "false");
       expect(trigger).toBeInTheDocument();
     });
 

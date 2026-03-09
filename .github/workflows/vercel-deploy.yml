@@ -10,7 +10,7 @@ on:
   push:
     branches: [main]
   pull_request:
-    branches: [main]
+    branches: [main, "pr/**"]
   workflow_dispatch:
 
 concurrency:
@@ -57,11 +57,18 @@ jobs:
           run_install: false
           standalone: true
 
-      - name: 设置 Node.js
+      - name: 设置 Node.js（启用 pnpm 缓存）
+        if: steps.vercel_secrets.outputs.configured == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: "pnpm"
+
+      - name: 设置 Node.js（跳过 pnpm 缓存）
+        if: steps.vercel_secrets.outputs.configured != 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
 
       - name: 安装 Vercel CLI
         if: steps.vercel_secrets.outputs.configured == 'true'
@@ -214,11 +221,18 @@ jobs:
           run_install: false
           standalone: true
 
-      - name: 设置 Node.js
+      - name: 设置 Node.js（启用 pnpm 缓存）
+        if: steps.vercel_secrets.outputs.configured == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: "pnpm"
+
+      - name: 设置 Node.js（跳过 pnpm 缓存）
+        if: steps.vercel_secrets.outputs.configured != 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
 
       - name: 安装 Vercel CLI
         run: |
