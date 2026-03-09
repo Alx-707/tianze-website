@@ -25,7 +25,6 @@ export {
   splitName,
   formatQuantity,
   generateProductInquiryMessage,
-  sanitizeInput,
   generateLeadReferenceId,
   type SplitNameResult,
 } from "@/lib/lead-pipeline/utils";

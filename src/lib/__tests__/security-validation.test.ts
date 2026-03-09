@@ -6,7 +6,6 @@ import {
   isValidUrl,
   sanitizeFilePath,
   sanitizeHtml,
-  sanitizeInput,
   sanitizePlainText,
   sanitizeUrl,
   validateCharacters,
@@ -109,47 +108,6 @@ describe("security-validation", () => {
       expect(sanitizeUrl("mailto:test@example.com", ["mailto:"])).toBe(
         "mailto:test@example.com",
       );
-    });
-  });
-
-  describe("sanitizeInput (deprecated alias)", () => {
-    it("should remove angle brackets", () => {
-      expect(sanitizeInput("<script>")).toBe("script");
-      expect(sanitizeInput("test<div>content</div>")).toBe(
-        "testdivcontent/div",
-      );
-    });
-
-    it("should remove javascript: protocol", () => {
-      expect(sanitizeInput("javascript:alert(1)")).toBe("alert(1)");
-      expect(sanitizeInput("JAVASCRIPT:void(0)")).toBe("void(0)");
-    });
-
-    it("should remove event handlers", () => {
-      expect(sanitizeInput("onclick=alert(1)")).toBe("alert(1)");
-      expect(sanitizeInput('onmouseover="evil()"')).toBe('"evil()"');
-      expect(sanitizeInput("ONERROR=hack")).toBe("hack");
-    });
-
-    it("should remove data: protocol", () => {
-      expect(sanitizeInput("data:text/html")).toBe("text/html");
-      expect(sanitizeInput("DATA:image/png")).toBe("image/png");
-    });
-
-    it("should trim whitespace", () => {
-      expect(sanitizeInput("  test  ")).toBe("test");
-    });
-
-    it("should return empty string for non-string input", () => {
-      expect(sanitizeInput(123 as unknown as string)).toBe("");
-      expect(sanitizeInput(null as unknown as string)).toBe("");
-      expect(sanitizeInput(undefined as unknown as string)).toBe("");
-    });
-
-    it("should handle combined malicious input", () => {
-      expect(
-        sanitizeInput("<script>javascript:onclick=alert(1)</script>"),
-      ).toBe("scriptalert(1)/script");
     });
   });
 

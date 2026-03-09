@@ -80,17 +80,6 @@ export function sanitizeUrl(
 }
 
 /**
- * Sanitize user input to prevent XSS attacks
- *
- * @deprecated Use sanitizePlainText for text fields, sanitizeUrl for URLs,
- *             or sanitizeFilePath for file paths. This function is kept for
- *             backward compatibility and delegates to sanitizePlainText.
- */
-export function sanitizeInput(input: string): string {
-  return sanitizePlainText(input);
-}
-
-/**
  * Validate email address format
  */
 export function isValidEmail(email: string): boolean {

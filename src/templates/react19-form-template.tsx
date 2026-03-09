@@ -10,9 +10,9 @@
  */
 import { useActionState, useOptimistic, useTransition } from "react";
 import { useTranslations } from "next-intl";
+import { type FormSubmissionStatus } from "@/lib/forms/form-submission-status";
 import { logger } from "@/lib/logger";
 import { type ServerActionResult } from "@/lib/server-action-utils";
-import { type FormSubmissionStatus } from "@/lib/validations";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";

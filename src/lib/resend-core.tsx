@@ -6,12 +6,12 @@
 import { render } from "@react-email/render";
 import { Resend } from "resend";
 import { env } from "@/lib/env";
-import { logger, sanitizeEmail } from "@/lib/logger";
-import { EMAIL_CONFIG, ResendUtils } from "@/lib/resend-utils";
 import type {
   EmailTemplateData,
   ProductInquiryEmailData,
-} from "@/lib/validations";
+} from "@/lib/email/email-data-schema";
+import { logger, sanitizeEmail } from "@/lib/logger";
+import { EMAIL_CONFIG, ResendUtils } from "@/lib/resend-utils";
 import { ConfirmationEmail } from "@/emails/ConfirmationEmail";
 import { ContactFormEmail } from "@/emails/ContactFormEmail";
 import { ProductInquiryEmail } from "@/emails/ProductInquiryEmail";

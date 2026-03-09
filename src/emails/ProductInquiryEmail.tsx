@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 import { Section, Text } from "@react-email/components";
-import type { ProductInquiryEmailData } from "@/lib/validations";
+import type { ProductInquiryEmailData } from "@/lib/email/email-data-schema";
 import { EmailField } from "@/emails/EmailField";
 import { EmailLayout } from "@/emails/EmailLayout";
 import { COLORS, FONT_SIZES, SPACING } from "@/emails/theme";

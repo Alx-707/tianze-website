@@ -14,6 +14,6 @@ export { ResendUtils } from "@/lib/resend-utils";
 
 // 导出配置和类型
 export { EMAIL_CONFIG } from "@/lib/resend-utils";
-export type { EmailTemplateData } from "@/lib/validations";
+export type { EmailTemplateData } from "@/lib/email/email-data-schema";
 
 export const resendService = new ResendService();

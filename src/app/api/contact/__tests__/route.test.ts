@@ -63,7 +63,6 @@ vi.mock("@/lib/security/distributed-rate-limit", () => ({
 
 // 移除全局validations Mock，使用真实的验证逻辑
 // 在需要的地方进行局部Mock
-// vi.mock('@/lib/validations', () => { ... });
 
 // Mock contact API validation (validateFormData, validateAdminAccess, getContactFormStats remain here)
 vi.mock("@/app/api/contact/contact-api-validation", async () => {
@@ -226,7 +225,8 @@ describe("Contact API Route", () => {
       });
 
       // 第一次请求应该成功 - use the global mock from setup.ts
-      const mockValidations = await import("@/lib/validations");
+      const mockValidations =
+        await import("@/lib/form-schema/contact-form-schema");
       const mockExtendedSchema = {
         safeParse: vi.fn().mockReturnValue({
           success: true,
@@ -521,7 +521,8 @@ describe("Contact API Route", () => {
       };
 
       // Mock validation error - use the global mock from setup.ts
-      const mockValidations = await import("@/lib/validations");
+      const mockValidations =
+        await import("@/lib/form-schema/contact-form-schema");
       const mockExtendedSchema = {
         safeParse: vi.fn().mockImplementation(() => {
           throw new Error("Validation error");
