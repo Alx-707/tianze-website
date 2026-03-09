@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { logger } from "@/lib/logger";
+import { API_ERROR_CODES } from "@/constants/api-error-codes";
+import { createApiErrorResponse } from "@/lib/api/api-response";
 import {
   checkDistributedRateLimit,
   createRateLimitHeaders,
@@ -10,7 +12,14 @@ import {
   verifyWebhook,
   verifyWebhookSignature,
 } from "@/lib/whatsapp-service";
-import { HTTP_PAYLOAD_TOO_LARGE } from "@/constants";
+import {
+  HTTP_BAD_REQUEST,
+  HTTP_INTERNAL_ERROR,
+  HTTP_PAYLOAD_TOO_LARGE,
+  HTTP_SERVICE_UNAVAILABLE,
+  HTTP_TOO_MANY_REQUESTS,
+  HTTP_UNAUTHORIZED,
+} from "@/constants";
 
 /**
  * WhatsApp Webhook Endpoint
@@ -27,6 +36,7 @@ import { HTTP_PAYLOAD_TOO_LARGE } from "@/constants";
  */
 
 const MAX_BODY_BYTES = 1_000_000; // 1 MB
+const HTTP_FORBIDDEN = 403;
 
 function getUtf8ByteLength(text: string): number {
   // Buffer.byteLength avoids allocating a full byte array; keep a fallback for edge-like runtimes.
@@ -43,9 +53,9 @@ export function GET(request: NextRequest) {
     const challenge = searchParams.get("hub.challenge");
 
     if (!mode || !token || !challenge) {
-      return NextResponse.json(
-        { error: "Missing required parameters" },
-        { status: 400 },
+      return createApiErrorResponse(
+        API_ERROR_CODES.INVALID_REQUEST,
+        HTTP_BAD_REQUEST,
       );
     }
 
@@ -58,19 +68,16 @@ export function GET(request: NextRequest) {
       });
     }
 
-    return NextResponse.json(
-      { error: "Webhook verification failed" },
-      { status: 403 },
-    );
+    return createApiErrorResponse(API_ERROR_CODES.FORBIDDEN, HTTP_FORBIDDEN);
   } catch (error) {
     logger.error(
       "WhatsApp webhook verification error",
       {},
       error instanceof Error ? error : new Error(String(error)),
     );
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
+    return createApiErrorResponse(
+      API_ERROR_CODES.INTERNAL_SERVER_ERROR,
+      HTTP_INTERNAL_ERROR,
     );
   }
 }
@@ -85,9 +92,9 @@ export async function POST(request: NextRequest) {
       contentLength !== null &&
       parseInt(contentLength, 10) > MAX_BODY_BYTES
     ) {
-      return NextResponse.json(
-        { error: "Payload too large" },
-        { status: HTTP_PAYLOAD_TOO_LARGE },
+      return createApiErrorResponse(
+        API_ERROR_CODES.PAYLOAD_TOO_LARGE,
+        HTTP_PAYLOAD_TOO_LARGE,
       );
     }
 
@@ -99,9 +106,19 @@ export async function POST(request: NextRequest) {
     );
     if (!rateLimitResult.allowed) {
       const headers = createRateLimitHeaders(rateLimitResult);
+      const status =
+        rateLimitResult.deniedReason === "storage_failure"
+          ? HTTP_SERVICE_UNAVAILABLE
+          : HTTP_TOO_MANY_REQUESTS;
       return NextResponse.json(
-        { error: "Too many requests" },
-        { status: 429, headers },
+        {
+          success: false,
+          errorCode:
+            rateLimitResult.deniedReason === "storage_failure"
+              ? API_ERROR_CODES.SERVICE_UNAVAILABLE
+              : API_ERROR_CODES.RATE_LIMIT_EXCEEDED,
+        },
+        { status, headers },
       );
     }
 
@@ -119,9 +136,9 @@ export async function POST(request: NextRequest) {
     // 3. Read body — safe now (rate limited); verify actual size
     const rawBody = await request.text();
     if (getUtf8ByteLength(rawBody) > MAX_BODY_BYTES) {
-      return NextResponse.json(
-        { error: "Payload too large" },
-        { status: HTTP_PAYLOAD_TOO_LARGE },
+      return createApiErrorResponse(
+        API_ERROR_CODES.PAYLOAD_TOO_LARGE,
+        HTTP_PAYLOAD_TOO_LARGE,
       );
     }
     const signature = request.headers.get("x-hub-signature-256");
@@ -129,7 +146,10 @@ export async function POST(request: NextRequest) {
     // 4. Verify webhook signature
     if (!verifyWebhookSignature(rawBody, signature)) {
       logger.warn("[WhatsAppWebhook] Invalid signature");
-      return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
+      return createApiErrorResponse(
+        API_ERROR_CODES.UNAUTHORIZED,
+        HTTP_UNAUTHORIZED,
+      );
     }
 
     // 5. Parse JSON body
@@ -137,7 +157,10 @@ export async function POST(request: NextRequest) {
     try {
       body = JSON.parse(rawBody);
     } catch {
-      return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+      return createApiErrorResponse(
+        API_ERROR_CODES.INVALID_JSON_BODY,
+        HTTP_BAD_REQUEST,
+      );
     }
 
     // 6. Handle incoming message with auto-reply
@@ -150,9 +173,9 @@ export async function POST(request: NextRequest) {
       {},
       error instanceof Error ? error : new Error(String(error)),
     );
-    return NextResponse.json(
-      { error: "Failed to process message" },
-      { status: 500 },
+    return createApiErrorResponse(
+      API_ERROR_CODES.INTERNAL_SERVER_ERROR,
+      HTTP_INTERNAL_ERROR,
     );
   }
 }

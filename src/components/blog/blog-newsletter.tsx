@@ -4,6 +4,10 @@ import { useActionState, useCallback, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { CheckCircle, Loader2, Mail, XCircle } from "lucide-react";
 import { useTranslations } from "next-intl";
+import {
+  API_ERROR_NAMESPACE,
+  translateApiError,
+} from "@/lib/api/translate-error-code";
 import { cn } from "@/lib/utils";
 import { getAttributionAsObject } from "@/lib/utm";
 import { generateIdempotencyKey } from "@/lib/idempotency-key";
@@ -42,6 +46,11 @@ export interface BlogNewsletterProps {
 interface FormState {
   success: boolean;
   error: string | undefined;
+}
+
+interface SubscribeApiResponse {
+  success?: boolean;
+  errorCode?: string;
 }
 
 const initialState: FormState = {
@@ -219,6 +228,7 @@ export function BlogNewsletter({
   variant = "default",
 }: BlogNewsletterProps) {
   const t = useTranslations("blog.newsletter");
+  const tApi = useTranslations(API_ERROR_NAMESPACE);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const turnstileTokenRef = useRef<string | null>(null);
@@ -269,9 +279,12 @@ export function BlogNewsletter({
           ...attribution,
         }),
       });
-      const result = await response.json();
+      const result = (await response.json()) as SubscribeApiResponse;
       if (!response.ok || result.success !== true) {
-        return { success: false, error: result.message ?? t("error") };
+        return {
+          success: false,
+          error: translateApiError(tApi, result.errorCode),
+        };
       }
       idempotencyKeyRef.current = null;
       return { success: true, error: undefined };

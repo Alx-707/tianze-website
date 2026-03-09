@@ -16,10 +16,13 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { logger } from "@/lib/logger";
+import { API_ERROR_CODES } from "@/constants/api-error-codes";
+import { createApiErrorResponse } from "@/lib/api/api-response";
 import {
   HOURS_PER_DAY,
   HTTP_BAD_REQUEST,
   HTTP_OK,
+  HTTP_SERVICE_UNAVAILABLE,
   MILLISECONDS_PER_HOUR,
 } from "@/constants";
 import {
@@ -28,6 +31,7 @@ import {
 } from "@/lib/security/stores/idempotency-store";
 
 const DEFAULT_TTL_MS = HOURS_PER_DAY * MILLISECONDS_PER_HOUR;
+const HTTP_CONFLICT = 409;
 
 /** Singleton store — persists across clearAllIdempotencyKeys() calls */
 let idempotencyStore: IdempotencyStore | null = null;
@@ -62,9 +66,9 @@ async function waitForCompletion(
     const entry = await store.get(key);
     if (!entry) {
       // Key expired or deleted — handler failed, allow retry
-      return NextResponse.json(
-        { error: "Request processing failed, please retry" },
-        { status: 503 },
+      return createApiErrorResponse(
+        API_ERROR_CODES.IDEMPOTENCY_REQUEST_FAILED,
+        HTTP_SERVICE_UNAVAILABLE,
       );
     }
     if (entry.status === "COMPLETED") {
@@ -74,9 +78,9 @@ async function waitForCompletion(
     }
   }
 
-  return NextResponse.json(
-    { error: "Request processing timed out, please retry" },
-    { status: 503 },
+  return createApiErrorResponse(
+    API_ERROR_CODES.IDEMPOTENCY_REQUEST_TIMEOUT,
+    HTTP_SERVICE_UNAVAILABLE,
   );
 }
 
@@ -126,8 +130,11 @@ function checkInFlight(
   const existingFingerprint = inFlightFingerprints.get(idempotencyKey);
   if (existingFingerprint && existingFingerprint !== fingerprint) {
     return NextResponse.json(
-      { error: "Idempotency key already used for a different endpoint" },
-      { status: 409 },
+      {
+        success: false,
+        errorCode: API_ERROR_CODES.IDEMPOTENCY_KEY_REUSED,
+      },
+      { status: HTTP_CONFLICT },
     );
   }
   return inFlight;
@@ -153,8 +160,11 @@ async function handleWithIdempotencyKey<T>(
     // Reject if the same key is used for a different endpoint
     if (existing.fingerprint && existing.fingerprint !== fingerprint) {
       return NextResponse.json(
-        { error: "Idempotency key already used for a different endpoint" },
-        { status: 409 },
+        {
+          success: false,
+          errorCode: API_ERROR_CODES.IDEMPOTENCY_KEY_REUSED,
+        },
+        { status: HTTP_CONFLICT },
       );
     }
 
@@ -292,9 +302,8 @@ export async function withIdempotency<T>(
     logger.warn("Missing required Idempotency-Key header");
     return NextResponse.json(
       {
-        error: "Missing Idempotency-Key header",
-        message:
-          "This endpoint requires an Idempotency-Key header to prevent duplicate requests",
+        success: false,
+        errorCode: API_ERROR_CODES.IDEMPOTENCY_KEY_REQUIRED,
       },
       { status: HTTP_BAD_REQUEST },
     );

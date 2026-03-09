@@ -114,7 +114,7 @@ describe("idempotency security properties", () => {
       // not silently return the cached /api/contact result.
       const data = (await response2.json()) as Record<string, unknown>;
       expect(response2.status).not.toBe(HTTP_OK);
-      expect(data).toHaveProperty("error");
+      expect(data).toHaveProperty("errorCode", "IDEMPOTENCY_KEY_REUSED");
     });
   });
 

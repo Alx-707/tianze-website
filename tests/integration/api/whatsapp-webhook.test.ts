@@ -49,6 +49,6 @@ describe("api/whatsapp/webhook", () => {
     const res = await route.POST(req);
     const body = await res.json();
     expect(res.status).toBe(400);
-    expect(body.error).toBe("Invalid JSON body");
+    expect(body.errorCode).toBe("INVALID_JSON_BODY");
   });
 });

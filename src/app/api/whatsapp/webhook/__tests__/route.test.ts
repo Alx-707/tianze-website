@@ -120,7 +120,7 @@ describe("WhatsApp Webhook Route", () => {
       const data = await response.json();
 
       expect(response.status).toBe(403);
-      expect(data.error).toBe("Webhook verification failed");
+      expect(data.errorCode).toBe("FORBIDDEN");
     });
 
     it("should return 400 when hub.mode is missing", async () => {
@@ -133,7 +133,7 @@ describe("WhatsApp Webhook Route", () => {
       const data = await response.json();
 
       expect(response.status).toBe(400);
-      expect(data.error).toBe("Missing required parameters");
+      expect(data.errorCode).toBe("INVALID_REQUEST");
     });
 
     it("should return 400 when hub.verify_token is missing", async () => {
@@ -146,7 +146,7 @@ describe("WhatsApp Webhook Route", () => {
       const data = await response.json();
 
       expect(response.status).toBe(400);
-      expect(data.error).toBe("Missing required parameters");
+      expect(data.errorCode).toBe("INVALID_REQUEST");
     });
 
     it("should return 400 when hub.challenge is missing", async () => {
@@ -159,7 +159,7 @@ describe("WhatsApp Webhook Route", () => {
       const data = await response.json();
 
       expect(response.status).toBe(400);
-      expect(data.error).toBe("Missing required parameters");
+      expect(data.errorCode).toBe("INVALID_REQUEST");
     });
 
     it("should return 400 when all parameters are missing", async () => {
@@ -169,7 +169,7 @@ describe("WhatsApp Webhook Route", () => {
       const data = await response.json();
 
       expect(response.status).toBe(400);
-      expect(data.error).toBe("Missing required parameters");
+      expect(data.errorCode).toBe("INVALID_REQUEST");
     });
 
     it("should return 500 when verification throws an error", async () => {
@@ -187,7 +187,7 @@ describe("WhatsApp Webhook Route", () => {
       const data = await response.json();
 
       expect(response.status).toBe(500);
-      expect(data.error).toBe("Internal server error");
+      expect(data.errorCode).toBe("INTERNAL_SERVER_ERROR");
     });
   });
 
@@ -256,7 +256,7 @@ describe("WhatsApp Webhook Route", () => {
       const response = await POST(request);
       expect(response.status).toBe(413);
       const data = await response.json();
-      expect(data.error).toBe("Payload too large");
+      expect(data.errorCode).toBe("PAYLOAD_TOO_LARGE");
       expect(mockVerifyWebhookSignature).not.toHaveBeenCalled();
     });
 
@@ -310,7 +310,7 @@ describe("WhatsApp Webhook Route", () => {
       const data = await response.json();
 
       expect(response.status).toBe(401);
-      expect(data.error).toBe("Invalid signature");
+      expect(data.errorCode).toBe("UNAUTHORIZED");
       expect(mockHandleIncomingMessage).not.toHaveBeenCalled();
     });
 
@@ -331,7 +331,7 @@ describe("WhatsApp Webhook Route", () => {
       const data = await response.json();
 
       expect(response.status).toBe(401);
-      expect(data.error).toBe("Invalid signature");
+      expect(data.errorCode).toBe("UNAUTHORIZED");
     });
 
     it("should verify signature with raw body and header", async () => {
@@ -376,7 +376,7 @@ describe("WhatsApp Webhook Route", () => {
       const result = await response.json();
 
       expect(response.status).toBe(500);
-      expect(result.error).toBe("Failed to process message");
+      expect(result.errorCode).toBe("INTERNAL_SERVER_ERROR");
     });
 
     it("should process empty entry array gracefully", async () => {
@@ -466,7 +466,7 @@ describe("WhatsApp Webhook Route", () => {
       const data = await response.json();
 
       expect(response.status).toBe(429);
-      expect(data.error).toBe("Too many requests");
+      expect(data.errorCode).toBe("RATE_LIMIT_EXCEEDED");
       expect(mockHandleIncomingMessage).not.toHaveBeenCalled();
     });
 
