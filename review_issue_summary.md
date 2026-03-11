@@ -39,7 +39,7 @@
 
 ### Fixed in Repair Phase
 - `CR-047` `pnpm lint:check` and downstream local CI gates were polluted by repo-local agent/skill directories
-- `CR-048` `/api/inquiry` lacked idempotency protection on the main inquiry write path
+- `CR-052` `/api/inquiry` lacked idempotency protection on the main inquiry write path
 - `CR-049` i18n runtime used split + flat dual truth sources and self-HTTP fallback coupling
 - `CR-050` shared JSON parsing path `safeParseJson()` had no body size gate across multiple public JSON endpoints
 - `CR-051` contact Server Action leaked literal English detail strings into localized UI

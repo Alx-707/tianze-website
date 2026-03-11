@@ -20,7 +20,7 @@ Complete a full delta-oriented code review on top of the current Round 4 baselin
 - Current worktree changes are mostly planning artifacts and user-local directories, so the review scope should focus on undiscovered issues in active production paths rather than diff-only code review.
 - Existing `docs/code-review/issues.md` remains the single findings ledger; new findings should follow its structure and avoid reopening closed items without new evidence.
 - Chain-based review remains the primary deep-review method.
-- Repair phase priority was executed as `CR-047 -> CR-048 -> CR-050 -> CR-051`, leaving `CR-049` intentionally deferred as a larger structural refactor.
+- Repair phase priority was executed as `CR-047 -> CR-052 -> CR-050 -> CR-051`, leaving `CR-049` intentionally deferred as a larger structural refactor.
 - `CR-049` was then completed as a separate runtime-only refactor: active locale/runtime loading now uses split sources directly and no longer depends on flat root files or self-HTTP fallback.
 
 ## Errors Encountered

@@ -796,7 +796,7 @@
 - `CR-047` 已关闭
   - `eslint.config.mjs` 已补齐 repo-local agent/skill 工作目录 ignore
   - `pnpm lint:check`、`pnpm ci:local:quick`、`pnpm quality:gate:full` 现已通过
-- `CR-048` 已关闭
+- `CR-052` 已关闭
   - `/api/inquiry` 已接入 `withIdempotency(..., { required: true })`
   - `product-inquiry-form` 已生成并发送 `Idempotency-Key`
   - route / integration / component 定向回归均通过

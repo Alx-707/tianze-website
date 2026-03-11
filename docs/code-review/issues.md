@@ -1055,7 +1055,7 @@ Round 3 复审阶段新增的 `CR-023` ~ `CR-026` 已在 Round 4 的 Wave A / Wa
     - `pnpm quality:gate:full`
 - 状态：✅ 已修复（2026-03-11，repair phase）
 
-#### CR-048 `/api/inquiry` 仍无幂等保护，但它既是主询盘写路径，又显式暴露了 `Idempotency-Key` 契约
+#### CR-052 `/api/inquiry` 仍无幂等保护，但它既是主询盘写路径，又显式暴露了 `Idempotency-Key` 契约
 - 优先级：P1
 - 标签：PROD
 - review chain：inquiry conversion chain

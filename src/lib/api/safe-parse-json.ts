@@ -18,14 +18,6 @@ export type SafeJsonParseResult<T> =
 
 const DEFAULT_MAX_JSON_BODY_BYTES = 64 * 1024;
 
-function getUtf8ByteLength(text: string): number {
-  if (typeof Buffer !== "undefined") {
-    return Buffer.byteLength(text, "utf8");
-  }
-
-  return new TextEncoder().encode(text).length;
-}
-
 function createPayloadTooLargeFailure(): SafeJsonParseFailure {
   return {
     ok: false,
@@ -46,6 +38,46 @@ function resolveMaxBytes(options?: { maxBytes?: number }): number {
   return typeof options?.maxBytes === "number" && options.maxBytes > 0
     ? options.maxBytes
     : DEFAULT_MAX_JSON_BODY_BYTES;
+}
+
+async function readBodyWithinLimit(
+  req: NextRequest,
+  route: string | undefined,
+  maxBytes: number,
+): Promise<string | SafeJsonParseFailure> {
+  if (!req.body) {
+    return "";
+  }
+
+  const reader = req.body.getReader();
+  const decoder = new TextDecoder();
+  let totalBytes = 0;
+  let text = "";
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      if (!value) continue;
+
+      totalBytes += value.byteLength;
+      if (totalBytes > maxBytes) {
+        logger.warn("JSON body exceeds byte-size limit", {
+          route,
+          maxBytes,
+        });
+        await reader.cancel();
+        return createPayloadTooLargeFailure();
+      }
+
+      text += decoder.decode(value, { stream: true });
+    }
+
+    text += decoder.decode();
+    return text;
+  } finally {
+    reader.releaseLock();
+  }
 }
 
 /**
@@ -82,14 +114,9 @@ export async function safeParseJson<T>(
   }
 
   try {
-    const rawText = await req.text();
-
-    if (getUtf8ByteLength(rawText) > maxBytes) {
-      logger.warn("JSON body exceeds byte-size limit", {
-        route,
-        maxBytes,
-      });
-      return createPayloadTooLargeFailure();
+    const rawText = await readBodyWithinLimit(req, route, maxBytes);
+    if (typeof rawText !== "string") {
+      return rawText;
     }
 
     const raw = JSON.parse(rawText) as unknown;

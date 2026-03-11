@@ -48,6 +48,15 @@ vi.mock("@/lib/lead-pipeline/lead-schema", () => ({
     PRODUCT: "PRODUCT",
     CONTACT: "CONTACT",
   },
+  productLeadSchema: {
+    safeParse: vi.fn((input: Record<string, unknown>) => ({
+      success: true,
+      data: {
+        ...input,
+        type: "PRODUCT",
+      },
+    })),
+  },
 }));
 
 vi.mock("@/lib/turnstile", () => ({
@@ -199,6 +208,32 @@ describe("/api/inquiry route", () => {
       expect(response.status).toBe(413);
       expect(data.success).toBe(false);
       expect(data.errorCode).toBe(API_ERROR_CODES.PAYLOAD_TOO_LARGE);
+    });
+
+    it("should replay cached response for duplicate idempotency key", async () => {
+      const sharedKey = "duplicate-key";
+      const firstRequest = createInquiryRequest(
+        JSON.stringify(validInquiryData),
+        {
+          "Idempotency-Key": sharedKey,
+        },
+      );
+      const secondRequest = createInquiryRequest(
+        JSON.stringify(validInquiryData),
+        {
+          "Idempotency-Key": sharedKey,
+        },
+      );
+
+      const firstResponse = await POST(firstRequest);
+      const secondResponse = await POST(secondRequest);
+      const firstData = await firstResponse.json();
+      const secondData = await secondResponse.json();
+
+      expect(firstResponse.status).toBe(200);
+      expect(secondResponse.status).toBe(200);
+      expect(secondData).toEqual(firstData);
+      expect(processLead).toHaveBeenCalledTimes(1);
     });
 
     it("should return 400 when turnstile token is missing", async () => {

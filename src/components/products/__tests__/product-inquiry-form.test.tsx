@@ -3,7 +3,7 @@
  * Tests for ProductInquiryForm component
  */
 import React from "react";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ProductInquiryForm } from "../product-inquiry-form";
 
@@ -509,15 +509,17 @@ describe("ProductInquiryForm", () => {
       expect(form).toBeTruthy();
       fireEvent.submit(form!);
 
-      expect(mockFetch).toHaveBeenCalledWith(
-        "/api/inquiry",
-        expect.objectContaining({
-          headers: expect.objectContaining({
-            "Content-Type": "application/json",
-            "Idempotency-Key": expect.any(String),
+      await waitFor(() => {
+        expect(mockFetch).toHaveBeenCalledWith(
+          "/api/inquiry",
+          expect.objectContaining({
+            headers: expect.objectContaining({
+              "Content-Type": "application/json",
+              "Idempotency-Key": expect.any(String),
+            }),
           }),
-        }),
-      );
+        );
+      });
     });
 
     it("calls onSuccess callback after successful submission", async () => {

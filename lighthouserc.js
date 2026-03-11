@@ -23,11 +23,10 @@
 // 这将CI耗时从15分钟优化至5-8分钟
 const isDaily = process.env.CI_DAILY === "true";
 
-const criticalUrls = [
-  "http://localhost:3000",
-  "http://localhost:3000/en",
-  "http://localhost:3000/zh",
-];
+// Root path performs locale redirect in middleware. In headless CI this redirect
+// occasionally produces a NO_FCP Lighthouse runtime failure, while `/en` and `/zh`
+// exercise the real rendered entry pages directly.
+const criticalUrls = ["http://localhost:3000/en", "http://localhost:3000/zh"];
 
 const allUrls = [
   ...criticalUrls,

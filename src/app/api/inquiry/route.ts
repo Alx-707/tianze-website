@@ -4,10 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import {
-  createApiErrorResponse,
-  createApiSuccessResponse,
-} from "@/lib/api/api-response";
+import { createApiErrorResponse } from "@/lib/api/api-response";
 import {
   applyCorsHeaders,
   createCorsPreflightResponse,
@@ -19,7 +16,11 @@ import {
 } from "@/lib/api/with-rate-limit";
 import { withIdempotency } from "@/lib/idempotency";
 import { processLead, type LeadResult } from "@/lib/lead-pipeline";
-import { LEAD_TYPES } from "@/lib/lead-pipeline/lead-schema";
+import {
+  LEAD_TYPES,
+  productLeadSchema,
+  type ProductLeadInput,
+} from "@/lib/lead-pipeline/lead-schema";
 import { logger, sanitizeIP } from "@/lib/logger";
 import { verifyTurnstile } from "@/lib/turnstile";
 import { API_ERROR_CODES } from "@/constants/api-error-codes";
@@ -32,9 +33,9 @@ interface SuccessResponseOptions {
 }
 
 /**
- * Create success response for product inquiry
+ * Create success payload for product inquiry
  */
-function createSuccessResponse(options: SuccessResponseOptions): NextResponse {
+function createSuccessPayload(options: SuccessResponseOptions) {
   const { result, clientIP, processingTime } = options;
   logger.info("Product inquiry submitted successfully", {
     referenceId: result.referenceId,
@@ -44,9 +45,12 @@ function createSuccessResponse(options: SuccessResponseOptions): NextResponse {
     recordCreated: result.recordCreated,
   });
 
-  return createApiSuccessResponse({
-    referenceId: result.referenceId,
-  });
+  return {
+    success: true as const,
+    data: {
+      referenceId: result.referenceId,
+    },
+  };
 }
 
 interface ErrorResponseOptions {
@@ -73,6 +77,24 @@ function createErrorResponse(options: ErrorResponseOptions): NextResponse {
       : API_ERROR_CODES.INQUIRY_PROCESSING_ERROR,
     isValidationError ? HTTP_BAD_REQUEST : HTTP_INTERNAL_ERROR,
   );
+}
+
+function validateLeadData(
+  data: Record<string, unknown>,
+): ProductLeadInput | null {
+  const parsed = productLeadSchema.safeParse({
+    type: LEAD_TYPES.PRODUCT,
+    fullName: data.fullName,
+    productSlug: data.productSlug,
+    productName: data.productName,
+    quantity: data.quantity,
+    requirements: data.requirements,
+    email: data.email,
+    company: data.company,
+    marketingConsent: data.marketingConsent,
+  });
+
+  return parsed.success ? parsed.data : null;
 }
 
 interface TurnstileValidationOptions {
@@ -137,32 +159,28 @@ const POST_RATE_LIMITED = withRateLimit(
             );
           }
 
+          const data = parsedBody.data ?? {};
+          const leadData = validateLeadData(data);
+          if (!leadData) {
+            return createApiErrorResponse(
+              API_ERROR_CODES.INQUIRY_VALIDATION_FAILED,
+              HTTP_BAD_REQUEST,
+            );
+          }
+
           const turnstileError = await validateTurnstile({
-            token: parsedBody.data?.turnstileToken,
+            token: data.turnstileToken,
             clientIP,
           });
           if (turnstileError) return turnstileError;
 
-          const data = parsedBody.data ?? {};
-          const pickedLeadData = {
-            fullName: data.fullName,
-            productSlug: data.productSlug,
-            productName: data.productName,
-            quantity: data.quantity,
-            requirements: data.requirements,
-            email: data.email,
-            company: data.company,
-            marketingConsent: data.marketingConsent,
-          };
           const result = await processLead({
-            ...pickedLeadData,
-            // Ensure route semantics cannot be overwritten by request body.
-            type: LEAD_TYPES.PRODUCT,
+            ...leadData,
           });
           const processingTime = Date.now() - startTime;
 
           return result.success
-            ? createSuccessResponse({
+            ? createSuccessPayload({
                 result,
                 clientIP,
                 processingTime,
