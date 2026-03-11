@@ -1,7 +1,7 @@
 import { generateLocaleMetadata } from "@/app/[locale]/layout-metadata";
 import { generatePageStructuredData } from "@/app/[locale]/layout-structured-data";
 import "@/app/globals.css";
-import { type ReactNode } from "react";
+import { Suspense, type ReactNode } from "react";
 import Script from "next/script";
 import { notFound } from "next/navigation";
 import { NextIntlClientProvider } from "next-intl";
@@ -35,6 +35,16 @@ interface LocaleLayoutProps {
 interface AsyncLocaleLayoutContentProps {
   locale: "en" | "zh";
   children: ReactNode;
+}
+
+function LayoutFallback() {
+  return (
+    <div
+      aria-hidden="true"
+      className="min-h-screen bg-background text-foreground"
+      data-testid="layout-fallback"
+    />
+  );
 }
 
 async function AsyncLocaleLayoutContent({
@@ -170,9 +180,11 @@ export default async function LocaleLayout({
             />
           </>
         )}
-        <AsyncLocaleLayoutContent locale={typedLocale}>
-          {children}
-        </AsyncLocaleLayoutContent>
+        <Suspense fallback={<LayoutFallback />}>
+          <AsyncLocaleLayoutContent locale={typedLocale}>
+            {children}
+          </AsyncLocaleLayoutContent>
+        </Suspense>
       </body>
     </html>
   );
