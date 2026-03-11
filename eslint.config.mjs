@@ -1052,6 +1052,13 @@ export default [
       ".dependency-cruiser.js", // 工具配置文件
       "docs/vercel-design-system/**", // 设计系统参考文件，非生产代码
       ".claude/skills/**", // agent skill 参考脚本，非生产代码
+      ".agent/**", // repo-local agent runtime assets
+      ".agents/**", // repo-local agent skill assets
+      ".continue/**", // local editor/agent workspace files
+      ".factory/**", // local factory outputs
+      ".kiro/**", // local IDE agent assets
+      "skills/**", // local skill workspace
+      "skills-lock.json", // local skill lockfile
       ".open-next/**", // OpenNext/Cloudflare 构建产物
       ".wrangler/**", // Wrangler 构建产物
     ],

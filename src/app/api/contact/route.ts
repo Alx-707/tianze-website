@@ -50,8 +50,8 @@ const POST_RATE_LIMITED = withRateLimit(
       });
       if (!parsedBody.ok) {
         return createApiErrorResponse(
-          API_ERROR_CODES.INVALID_JSON_BODY,
-          HTTP_BAD_REQUEST,
+          parsedBody.errorCode,
+          parsedBody.statusCode,
         );
       }
 

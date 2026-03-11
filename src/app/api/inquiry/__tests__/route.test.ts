@@ -82,6 +82,24 @@ vi.mock("@/lib/api/cors-utils", () => ({
 }));
 
 describe("/api/inquiry route", () => {
+  let idempotencyCounter = 0;
+
+  function createInquiryRequest(
+    body: BodyInit | null,
+    headers: Record<string, string> = {},
+  ): NextRequest {
+    idempotencyCounter += 1;
+    return new NextRequest("http://localhost:3000/api/inquiry", {
+      method: "POST",
+      body,
+      headers: {
+        "Content-Type": "application/json",
+        "Idempotency-Key": `test-inquiry-key-${idempotencyCounter}`,
+        ...headers,
+      },
+    });
+  }
+
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -104,11 +122,7 @@ describe("/api/inquiry route", () => {
     };
 
     it("should process valid inquiry successfully", async () => {
-      const request = new NextRequest("http://localhost:3000/api/inquiry", {
-        method: "POST",
-        body: JSON.stringify(validInquiryData),
-        headers: { "Content-Type": "application/json" },
-      });
+      const request = createInquiryRequest(JSON.stringify(validInquiryData));
 
       const response = await POST(request);
       const data = await response.json();
@@ -121,10 +135,8 @@ describe("/api/inquiry route", () => {
 
     it("should apply CORS headers on POST response when Origin is present", async () => {
       const origin = "http://localhost:3000";
-      const request = new NextRequest("http://localhost:3000/api/inquiry", {
-        method: "POST",
-        body: JSON.stringify(validInquiryData),
-        headers: { "Content-Type": "application/json", origin },
+      const request = createInquiryRequest(JSON.stringify(validInquiryData), {
+        origin,
       });
 
       const response = await POST(request);
@@ -141,11 +153,7 @@ describe("/api/inquiry route", () => {
         retryAfter: 60,
       });
 
-      const request = new NextRequest("http://localhost:3000/api/inquiry", {
-        method: "POST",
-        body: JSON.stringify(validInquiryData),
-        headers: { "Content-Type": "application/json" },
-      });
+      const request = createInquiryRequest(JSON.stringify(validInquiryData));
 
       const response = await POST(request);
       const data = await response.json();
@@ -156,11 +164,7 @@ describe("/api/inquiry route", () => {
     });
 
     it("should return 400 for invalid JSON", async () => {
-      const request = new NextRequest("http://localhost:3000/api/inquiry", {
-        method: "POST",
-        body: "invalid json",
-        headers: { "Content-Type": "application/json" },
-      });
+      const request = createInquiryRequest("invalid json");
 
       const response = await POST(request);
       const data = await response.json();
@@ -169,15 +173,39 @@ describe("/api/inquiry route", () => {
       expect(data.success).toBe(false);
     });
 
+    it("should return 400 when Idempotency-Key is missing", async () => {
+      const request = new NextRequest("http://localhost:3000/api/inquiry", {
+        method: "POST",
+        body: JSON.stringify(validInquiryData),
+        headers: { "Content-Type": "application/json" },
+      });
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(400);
+      expect(data.success).toBe(false);
+      expect(data.errorCode).toBe(API_ERROR_CODES.IDEMPOTENCY_KEY_REQUIRED);
+    });
+
+    it("should return 413 when payload exceeds the shared JSON body limit", async () => {
+      const request = createInquiryRequest(JSON.stringify(validInquiryData), {
+        "Content-Length": "70000",
+      });
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(413);
+      expect(data.success).toBe(false);
+      expect(data.errorCode).toBe(API_ERROR_CODES.PAYLOAD_TOO_LARGE);
+    });
+
     it("should return 400 when turnstile token is missing", async () => {
       const dataWithoutToken = { ...validInquiryData };
       delete (dataWithoutToken as { turnstileToken?: string }).turnstileToken;
 
-      const request = new NextRequest("http://localhost:3000/api/inquiry", {
-        method: "POST",
-        body: JSON.stringify(dataWithoutToken),
-        headers: { "Content-Type": "application/json" },
-      });
+      const request = createInquiryRequest(JSON.stringify(dataWithoutToken));
 
       const response = await POST(request);
       const data = await response.json();
@@ -190,11 +218,7 @@ describe("/api/inquiry route", () => {
     it("should return 400 when turnstile verification fails", async () => {
       vi.mocked(verifyTurnstile).mockResolvedValueOnce(false);
 
-      const request = new NextRequest("http://localhost:3000/api/inquiry", {
-        method: "POST",
-        body: JSON.stringify(validInquiryData),
-        headers: { "Content-Type": "application/json" },
-      });
+      const request = createInquiryRequest(JSON.stringify(validInquiryData));
 
       const response = await POST(request);
       const data = await response.json();
@@ -212,11 +236,7 @@ describe("/api/inquiry route", () => {
         recordCreated: false,
       });
 
-      const request = new NextRequest("http://localhost:3000/api/inquiry", {
-        method: "POST",
-        body: JSON.stringify(validInquiryData),
-        headers: { "Content-Type": "application/json" },
-      });
+      const request = createInquiryRequest(JSON.stringify(validInquiryData));
 
       const response = await POST(request);
       const data = await response.json();
@@ -234,11 +254,7 @@ describe("/api/inquiry route", () => {
         recordCreated: false,
       });
 
-      const request = new NextRequest("http://localhost:3000/api/inquiry", {
-        method: "POST",
-        body: JSON.stringify(validInquiryData),
-        headers: { "Content-Type": "application/json" },
-      });
+      const request = createInquiryRequest(JSON.stringify(validInquiryData));
 
       const response = await POST(request);
       const data = await response.json();
@@ -253,11 +269,7 @@ describe("/api/inquiry route", () => {
         new Error("Unexpected error"),
       );
 
-      const request = new NextRequest("http://localhost:3000/api/inquiry", {
-        method: "POST",
-        body: JSON.stringify(validInquiryData),
-        headers: { "Content-Type": "application/json" },
-      });
+      const request = createInquiryRequest(JSON.stringify(validInquiryData));
 
       const response = await POST(request);
       const data = await response.json();
@@ -268,11 +280,7 @@ describe("/api/inquiry route", () => {
     });
 
     it("should pass lead type PRODUCT to processLead", async () => {
-      const request = new NextRequest("http://localhost:3000/api/inquiry", {
-        method: "POST",
-        body: JSON.stringify(validInquiryData),
-        headers: { "Content-Type": "application/json" },
-      });
+      const request = createInquiryRequest(JSON.stringify(validInquiryData));
 
       await POST(request);
 
@@ -284,14 +292,12 @@ describe("/api/inquiry route", () => {
     });
 
     it("should not allow request body to override lead type", async () => {
-      const request = new NextRequest("http://localhost:3000/api/inquiry", {
-        method: "POST",
-        body: JSON.stringify({
+      const request = createInquiryRequest(
+        JSON.stringify({
           ...validInquiryData,
           type: "CONTACT",
         }),
-        headers: { "Content-Type": "application/json" },
-      });
+      );
 
       await POST(request);
 
@@ -303,11 +309,7 @@ describe("/api/inquiry route", () => {
     });
 
     it("should exclude turnstileToken from lead data", async () => {
-      const request = new NextRequest("http://localhost:3000/api/inquiry", {
-        method: "POST",
-        body: JSON.stringify(validInquiryData),
-        headers: { "Content-Type": "application/json" },
-      });
+      const request = createInquiryRequest(JSON.stringify(validInquiryData));
 
       await POST(request);
 

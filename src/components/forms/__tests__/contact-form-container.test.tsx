@@ -49,6 +49,10 @@ const mockT = vi.fn((key: string) => {
     submitSuccess: "Form submitted successfully!",
     submitError: "Failed to submit form. Please try again.",
     rateLimitMessage: "Please wait before submitting again.",
+    CONTACT_SUBMISSION_EXPIRED:
+      "This form expired. Please refresh the page and try again.",
+    TURNSTILE_VERIFICATION_FAILED:
+      "Security verification failed. Please try again.",
 
     // Checkboxes
     acceptPrivacy: "I accept the privacy policy",
@@ -329,6 +333,30 @@ describe("ContactFormContainer - ErrorDisplay", () => {
     render(<ContactFormContainer />);
 
     expect(screen.getByText("Server connection failed")).toBeInTheDocument();
+  });
+
+  it("should not render raw english details for translated error-code paths", () => {
+    mockUseActionState.mockReturnValue([
+      {
+        success: false,
+        errorCode: "CONTACT_SUBMISSION_EXPIRED",
+        error: "Form submission expired or invalid",
+        details: undefined,
+      },
+      vi.fn(),
+      false,
+    ]);
+
+    render(<ContactFormContainer />);
+
+    expect(
+      screen.getByText(
+        "This form expired. Please refresh the page and try again.",
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText("Please refresh the page and try again"),
+    ).toBeNull();
   });
 
   it("should not display ErrorDisplay when no error", () => {

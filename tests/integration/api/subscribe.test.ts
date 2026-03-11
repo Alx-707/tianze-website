@@ -63,6 +63,29 @@ describe("api/subscribe", () => {
     expect(json.errorCode).toBe(API_ERROR_CODES.INVALID_JSON_BODY);
   });
 
+  it("returns 413 when payload exceeds the shared JSON body limit", async () => {
+    const req = new NextRequest(
+      new Request("http://localhost/api/subscribe", {
+        method: "POST",
+        body: JSON.stringify({
+          email: "ok@example.com",
+          turnstileToken: "valid-token",
+        }),
+        headers: {
+          "Content-Type": "application/json",
+          "Idempotency-Key": "test-idempotency-key",
+          "Content-Length": "70000",
+        },
+      }),
+    );
+
+    const res = await route.POST(req);
+    expect(res.status).toBe(413);
+    const json = await res.json();
+    expect(json.success).toBe(false);
+    expect(json.errorCode).toBe(API_ERROR_CODES.PAYLOAD_TOO_LARGE);
+  });
+
   it("returns 400 when Idempotency-Key is missing", async () => {
     const req = new NextRequest(
       new Request("http://localhost/api/subscribe", {

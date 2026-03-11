@@ -28,12 +28,19 @@ public/messages/
 *.swo
 
 # AI Tools (personal config)
+.agent/
+.continue/
+.factory/
+.kiro/
+.claude/agents/
 .claude/skills/
 .claude/settings.local.json
 .claude/skills-backup-*/
 .claude/skills-reference-*/
 .claude-plugin/
 .agents/
+skills/
+skills-lock.json
 sessions/
 config.json
 views.json

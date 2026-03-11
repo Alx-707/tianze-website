@@ -179,6 +179,27 @@ describe("Verify Turnstile API Route", () => {
       expect(data.errorCode).toBe(API_ERROR_CODES.INVALID_JSON_BODY);
     });
 
+    it("应该在请求体超过共享 JSON 限制时返回 413", async () => {
+      const request = new NextRequest(
+        "http://localhost:3000/api/verify-turnstile",
+        {
+          method: "POST",
+          body: JSON.stringify(validRequestBody),
+          headers: {
+            "content-type": "application/json",
+            "content-length": "70000",
+          },
+        },
+      );
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(413);
+      expect(data.success).toBe(false);
+      expect(data.errorCode).toBe(API_ERROR_CODES.PAYLOAD_TOO_LARGE);
+    });
+
     it("应该处理Cloudflare API网络错误", async () => {
       // Mock network error
       mockFetch.mockRejectedValue(new Error("Network error"));

@@ -95,7 +95,7 @@ async function validateContactFormData(
       success: false,
       errorCode: API_ERROR_CODES.CONTACT_SUBMISSION_EXPIRED,
       error: "Form submission expired or invalid",
-      details: ["Please refresh the page and try again"],
+      details: null,
       data: null,
     };
   }
@@ -108,7 +108,7 @@ async function validateContactFormData(
       success: false,
       errorCode: API_ERROR_CODES.CONTACT_SUBMISSION_EXPIRED,
       error: "Form submission expired or invalid",
-      details: ["Please refresh the page and try again"],
+      details: null,
       data: null,
     };
   }
@@ -120,7 +120,7 @@ async function validateContactFormData(
       success: false,
       errorCode: API_ERROR_CODES.TURNSTILE_VERIFICATION_FAILED,
       error: "Security verification failed",
-      details: ["Please complete the security check"],
+      details: null,
       data: null,
     };
   }

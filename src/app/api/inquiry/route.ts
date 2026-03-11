@@ -17,6 +17,7 @@ import {
   withRateLimit,
   type RateLimitContext,
 } from "@/lib/api/with-rate-limit";
+import { withIdempotency } from "@/lib/idempotency";
 import { processLead, type LeadResult } from "@/lib/lead-pipeline";
 import { LEAD_TYPES } from "@/lib/lead-pipeline/lead-schema";
 import { logger, sanitizeIP } from "@/lib/logger";
@@ -117,66 +118,72 @@ async function validateTurnstile(
  */
 const POST_RATE_LIMITED = withRateLimit(
   "inquiry",
-  async (request: NextRequest, { clientIP }: RateLimitContext) => {
-    const startTime = Date.now();
+  (request: NextRequest, { clientIP }: RateLimitContext) => {
+    return withIdempotency(
+      request,
+      async () => {
+        const startTime = Date.now();
 
-    try {
-      const parsedBody = await safeParseJson<{
-        turnstileToken?: string;
-        [key: string]: unknown;
-      }>(request, { route: "/api/inquiry" });
+        try {
+          const parsedBody = await safeParseJson<{
+            turnstileToken?: string;
+            [key: string]: unknown;
+          }>(request, { route: "/api/inquiry" });
 
-      if (!parsedBody.ok) {
-        return createApiErrorResponse(
-          API_ERROR_CODES.INVALID_JSON_BODY,
-          HTTP_BAD_REQUEST,
-        );
-      }
+          if (!parsedBody.ok) {
+            return createApiErrorResponse(
+              parsedBody.errorCode,
+              parsedBody.statusCode,
+            );
+          }
 
-      const turnstileError = await validateTurnstile({
-        token: parsedBody.data?.turnstileToken,
-        clientIP,
-      });
-      if (turnstileError) return turnstileError;
-
-      const data = parsedBody.data ?? {};
-      const pickedLeadData = {
-        fullName: data.fullName,
-        productSlug: data.productSlug,
-        productName: data.productName,
-        quantity: data.quantity,
-        requirements: data.requirements,
-        email: data.email,
-        company: data.company,
-        marketingConsent: data.marketingConsent,
-      };
-      const result = await processLead({
-        ...pickedLeadData,
-        // Ensure route semantics cannot be overwritten by request body.
-        type: LEAD_TYPES.PRODUCT,
-      });
-      const processingTime = Date.now() - startTime;
-
-      return result.success
-        ? createSuccessResponse({
-            result,
+          const turnstileError = await validateTurnstile({
+            token: parsedBody.data?.turnstileToken,
             clientIP,
-            processingTime,
-          })
-        : createErrorResponse({ result, clientIP, processingTime });
-    } catch (error) {
-      logger.error("Product inquiry submission failed unexpectedly", {
-        error: error instanceof Error ? error.message : "Unknown error",
-        stack: error instanceof Error ? error.stack : undefined,
-        ip: sanitizeIP(clientIP),
-        processingTime: Date.now() - startTime,
-      });
+          });
+          if (turnstileError) return turnstileError;
 
-      return createApiErrorResponse(
-        API_ERROR_CODES.INQUIRY_PROCESSING_ERROR,
-        HTTP_INTERNAL_ERROR,
-      );
-    }
+          const data = parsedBody.data ?? {};
+          const pickedLeadData = {
+            fullName: data.fullName,
+            productSlug: data.productSlug,
+            productName: data.productName,
+            quantity: data.quantity,
+            requirements: data.requirements,
+            email: data.email,
+            company: data.company,
+            marketingConsent: data.marketingConsent,
+          };
+          const result = await processLead({
+            ...pickedLeadData,
+            // Ensure route semantics cannot be overwritten by request body.
+            type: LEAD_TYPES.PRODUCT,
+          });
+          const processingTime = Date.now() - startTime;
+
+          return result.success
+            ? createSuccessResponse({
+                result,
+                clientIP,
+                processingTime,
+              })
+            : createErrorResponse({ result, clientIP, processingTime });
+        } catch (error) {
+          logger.error("Product inquiry submission failed unexpectedly", {
+            error: error instanceof Error ? error.message : "Unknown error",
+            stack: error instanceof Error ? error.stack : undefined,
+            ip: sanitizeIP(clientIP),
+            processingTime: Date.now() - startTime,
+          });
+
+          return createApiErrorResponse(
+            API_ERROR_CODES.INQUIRY_PROCESSING_ERROR,
+            HTTP_INTERNAL_ERROR,
+          );
+        }
+      },
+      { required: true },
+    );
   },
 );
 

@@ -106,6 +106,7 @@ function createRequest(
     body: JSON.stringify(body),
     headers: {
       "Content-Type": "application/json",
+      "Idempotency-Key": `test-inquiry-key-${Date.now()}-${Math.random()}`,
       "x-forwarded-for": "203.0.113.50",
       ...headers,
     },
@@ -181,7 +182,10 @@ describe("/api/inquiry — integration (protection chain)", () => {
       const request = new NextRequest("http://localhost:3000/api/inquiry", {
         method: "POST",
         body: "not valid json {{{",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Idempotency-Key": "invalid-json-key",
+        },
       });
 
       const response = await POST(request);

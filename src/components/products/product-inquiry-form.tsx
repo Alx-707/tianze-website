@@ -8,6 +8,7 @@ import {
   API_ERROR_NAMESPACE,
   translateApiError,
 } from "@/lib/api/translate-error-code";
+import { generateIdempotencyKey } from "@/lib/idempotency-key";
 import { cn } from "@/lib/utils";
 import { getAttributionAsObject } from "@/lib/utm";
 import { Button } from "@/components/ui/button";
@@ -278,6 +279,7 @@ interface SubmitInquiryParams {
   productSlug: string;
   productName: string;
   token: string;
+  idempotencyKey: string;
 }
 
 interface InquiryApiResponse {
@@ -290,6 +292,7 @@ async function submitInquiry({
   productSlug,
   productName,
   token,
+  idempotencyKey,
 }: SubmitInquiryParams): Promise<{ ok: boolean; errorCode?: string }> {
   const attribution = getAttributionAsObject();
   const requestBody = {
@@ -307,7 +310,10 @@ async function submitInquiry({
 
   const response = await fetch("/api/inquiry", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      "Idempotency-Key": idempotencyKey,
+    },
     body: JSON.stringify(requestBody),
   });
   const result = (await response.json()) as InquiryApiResponse;
@@ -332,6 +338,7 @@ export function ProductInquiryForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const turnstileTokenRef = useRef<string | null>(null);
+  const idempotencyKeyRef = useRef<string | null>(null);
 
   const handleTurnstileSuccess = useCallback((token: string) => {
     turnstileTokenRef.current = token;
@@ -351,6 +358,9 @@ export function ProductInquiryForm({
     try {
       const token = turnstileTokenRef.current;
       if (!token) return { success: false, error: t("turnstileRequired") };
+      const idempotencyKey =
+        idempotencyKeyRef.current ?? generateIdempotencyKey();
+      idempotencyKeyRef.current = idempotencyKey;
 
       const data = extractFormData(formData);
       const result = await submitInquiry({
@@ -358,6 +368,7 @@ export function ProductInquiryForm({
         productSlug,
         productName,
         token,
+        idempotencyKey,
       });
       if (!result.ok)
         return {
@@ -365,6 +376,7 @@ export function ProductInquiryForm({
           error: translateApiError(tApi, result.errorCode),
         };
 
+      idempotencyKeyRef.current = null;
       onSuccess?.();
       return { success: true, error: undefined };
     } catch {
