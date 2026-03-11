@@ -4,6 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { createApiErrorResponse } from "@/lib/api/api-response";
 import {
   applyCorsHeaders,
@@ -37,13 +38,15 @@ interface SuccessResponseOptions {
  */
 function createSuccessPayload(options: SuccessResponseOptions) {
   const { result, clientIP, processingTime } = options;
-  logger.info("Product inquiry submitted successfully", {
-    referenceId: result.referenceId,
-    ip: sanitizeIP(clientIP),
-    processingTime,
-    emailSent: result.emailSent,
-    recordCreated: result.recordCreated,
-  });
+  if (process.env.NODE_ENV !== "production") {
+    logger.info("Product inquiry submitted successfully", {
+      referenceId: result.referenceId,
+      ip: sanitizeIP(clientIP),
+      processingTime,
+      emailSent: result.emailSent,
+      recordCreated: result.recordCreated,
+    });
+  }
 
   return {
     success: true as const,
@@ -101,6 +104,10 @@ interface TurnstileValidationOptions {
   token: string | undefined;
   clientIP: string;
 }
+
+const inquiryRequestSchema = z.object({
+  turnstileToken: z.string().min(1),
+});
 
 /**
  * Validate Turnstile token and return error response if invalid
@@ -167,9 +174,16 @@ const POST_RATE_LIMITED = withRateLimit(
               HTTP_BAD_REQUEST,
             );
           }
+          const parsedRequest = inquiryRequestSchema.safeParse(data);
+          if (!parsedRequest.success) {
+            return createApiErrorResponse(
+              API_ERROR_CODES.INQUIRY_VALIDATION_FAILED,
+              HTTP_BAD_REQUEST,
+            );
+          }
 
           const turnstileError = await validateTurnstile({
-            token: data.turnstileToken,
+            token: parsedRequest.data.turnstileToken,
             clientIP,
           });
           if (turnstileError) return turnstileError;

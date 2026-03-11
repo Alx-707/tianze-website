@@ -1,7 +1,7 @@
 import { generateLocaleMetadata } from "@/app/[locale]/layout-metadata";
 import { generatePageStructuredData } from "@/app/[locale]/layout-structured-data";
 import "@/app/globals.css";
-import { Suspense, type ReactNode } from "react";
+import { type ReactNode } from "react";
 import Script from "next/script";
 import { notFound } from "next/navigation";
 import { NextIntlClientProvider } from "next-intl";
@@ -170,11 +170,9 @@ export default async function LocaleLayout({
             />
           </>
         )}
-        <Suspense fallback={null}>
-          <AsyncLocaleLayoutContent locale={typedLocale}>
-            {children}
-          </AsyncLocaleLayoutContent>
-        </Suspense>
+        <AsyncLocaleLayoutContent locale={typedLocale}>
+          {children}
+        </AsyncLocaleLayoutContent>
       </body>
     </html>
   );

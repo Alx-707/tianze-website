@@ -354,9 +354,7 @@ describe("ContactFormContainer - ErrorDisplay", () => {
         "This form expired. Please refresh the page and try again.",
       ),
     ).toBeInTheDocument();
-    expect(
-      screen.queryByText("Please refresh the page and try again"),
-    ).toBeNull();
+    expect(screen.queryByText("Form submission expired or invalid")).toBeNull();
   });
 
   it("should not display ErrorDisplay when no error", () => {
