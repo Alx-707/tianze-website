@@ -25,6 +25,8 @@ grep -rn "rateLimit\|checkDistributedRateLimit\|429" src/app/api/ 2>/dev/null
 
 For each public write endpoint, must verify:
 - `Authenticated + Rate Limited` OR document why exempted
+- If request body is JSON: verify shared size-limited parsing path (for example `safeParseJson`) or document equivalent protection
+- If endpoint creates side effects and CORS exposes `Idempotency-Key`: verify both server and client actually implement the idempotency contract
 
 ### Production Build
 
@@ -75,3 +77,7 @@ grep -rn "All systems normal\|Loading\|Error\|Success" src/app/ src/components/ 
 ```
 
 Hardcoded user-facing strings should use translation keys.
+
+Also verify:
+- runtime code does not fall back to `messages/{locale}.json`
+- `src/lib/load-messages.ts` and `src/i18n/request.ts` use the same split runtime source semantics

@@ -728,4 +728,115 @@
   - `pnpm lint:check`
   - middleware / locale / language-toggle 定向 Vitest 回归测试通过
   - `pnpm build` 通过（会出现 `middleware -> proxy` 弃用告警）
-  - `pnpm build:cf` 通过
+- `pnpm build:cf` 通过
+
+## Delta Review 观察（2026-03-11）
+
+### Gate 信号观察
+
+#### `lint:check` 当前被工作区本地 agent 资产污染
+- 当前执行 `pnpm lint:check`，失败文件集中在 `.agents/skills/**`。
+- `.gitignore` 已忽略 `.agents/`，但 `eslint.config.mjs` 的 global ignores 只排除了 `.claude/skills/**`，没有排除 `.agents/**`、`skills/**` 等相邻本地资产目录。
+- 结论：
+  - 当前 lint gate 已经不是纯项目代码 gate。
+  - 这是新的 DEV/CI 信号问题，不是应用代码错误本身。
+
+#### `build` / `build:cf` 仍然通过
+- `pnpm build`：通过。
+- `pnpm build:cf`：顺序执行后通过；之前的失败来自 `.next/lock` 并发锁争用，不是产品缺陷。
+- `build:cf` 过程中可见 OpenNext bundling warning：`Applying code patches` 的 `console.time` label 重复，但未阻断构建。
+
+### 新发现：询盘链幂等契约缺口
+- `/api/inquiry` 当前没有使用 `withIdempotency`。
+- `product-inquiry-form` 也没有发送 `Idempotency-Key`。
+- 但系统又已经：
+  - 在 `CORS_CONFIG` 中允许 `Idempotency-Key`
+  - 在 `/api/inquiry` 的 preflight 测试里断言了这个 header
+  - 在 newsletter 链路中完整落地了幂等闭环
+- 结论：
+  - 这是一个主业务写路径上的契约漂移问题。
+  - 询盘链比 newsletter 链更接近主业务目标，却缺少同等级别的重复提交防护。
+
+### 新发现：i18n 运行时仍有 split/flat 双真相源
+- `load-messages.ts` 的主路径使用 split：`critical + deferred`。
+- `src/i18n/request.ts` 的 fallback 仍回退到 flat：`messages/${locale}.json`。
+- 生产态优先走自我 HTTP fetch，再回退到文件系统。
+- 结论：
+  - i18n 运行时主链与 fallback 链仍未完全共享单一真相源。
+  - 这不是立即爆炸的 bug，但属于真实的耦合和演进风险。
+
+### 新发现：共享 JSON 解析入口缺少 body size gate
+- `src/lib/api/safe-parse-json.ts` 直接 `await req.json()`，没有统一 body size 限制。
+- 该 helper 被 `contact`、`inquiry`、`subscribe`、`verify-turnstile`、`whatsapp/send` 等 JSON 路由复用。
+- 结论：
+  - 当前公开 JSON 端点仍然共享一个“无 body size gate”的解析入口。
+  - 这是共享边界未收口的问题，不应继续依赖每个路由自己补丁。
+
+### 新发现：contact Server Action 仍会把英文 detail 直接渲染到多语言 UI
+- `src/lib/actions/contact.ts` 在 submission expired / Turnstile 失败场景返回英文 `details`。
+- `src/components/forms/contact-form-container.tsx` 对非 `errors.*` detail 直接原样显示。
+- 结论：
+  - contact 主链在异常路径上仍会出现混合语言错误 UI。
+  - 这是 i18n 正确性和错误契约一致性问题，不是单纯文案问题。
+
+### 扩展 gate 结果
+- `pnpm security:check`: passed
+- `pnpm arch:check`: passed
+- `pnpm circular:check`: passed
+- `pnpm unused:production`: passed
+- `pnpm ci:local:quick`: failed
+  - 失败仍然收敛到 `.agents/skills/**` 导致的 lint gate 污染
+- `pnpm quality:gate:full`: failed
+  - 顺序单跑后确认 `Coverage`、`Performance`、`Security` 全部通过
+  - 当前唯一阻断项仍是 `Code Quality`，而其根因仍然是 `.agents/skills/**` lint 污染
+
+## Repair Phase（2026-03-11）
+
+### 已关闭问题
+- `CR-047` 已关闭
+  - `eslint.config.mjs` 已补齐 repo-local agent/skill 工作目录 ignore
+  - `pnpm lint:check`、`pnpm ci:local:quick`、`pnpm quality:gate:full` 现已通过
+- `CR-048` 已关闭
+  - `/api/inquiry` 已接入 `withIdempotency(..., { required: true })`
+  - `product-inquiry-form` 已生成并发送 `Idempotency-Key`
+  - route / integration / component 定向回归均通过
+- `CR-050` 已关闭
+  - `safeParseJson()` 已统一收口 body size gate
+  - 相关 JSON 路由已统一消费 `PAYLOAD_TOO_LARGE` / `INVALID_JSON_BODY` 的分流结果
+  - contact / inquiry / subscribe / verify-turnstile / whatsapp send 定向回归通过
+- `CR-051` 已关闭
+  - `contactFormAction` 不再为 submission expired / Turnstile failed 返回英文 detail
+  - `contact-form-container` 错误展示路径定向回归通过
+
+### 修复后 gate 结果
+- `pnpm lint:check`: passed
+- `pnpm ci:local:quick`: passed
+- `pnpm quality:gate:full`: passed
+
+### 当前剩余项
+- `CR-049` 已在独立 runtime refactor 中关闭
+  - `src/lib/load-messages.ts` 运行时已只读 split source
+  - `src/i18n/request.ts` fallback 已不再触达 flat root 文件
+  - 当前剩余 i18n 债务主要在 tooling/test 兼容层，而不在 active locale/runtime request path
+
+## CR-049 Runtime Refactor（2026-03-11）
+
+### Runtime changes made
+- `src/lib/load-messages.ts`
+  - replaced self-HTTP / fs fallback logic with split JSON module loaders
+  - runtime now reads only `@messages/{locale}/{critical,deferred}.json`
+- `src/i18n/request.ts`
+  - fallback path now uses split-source aggregation via `loadCompleteMessagesFromSource()`
+  - runtime no longer imports flat `messages/{locale}.json`
+
+### Verification
+- `pnpm exec vitest run src/lib/__tests__/load-messages.fallback.test.ts src/i18n/__tests__/request.test.ts`
+- `pnpm validate:translations`
+- `pnpm i18n:validate:code`
+- `pnpm build`
+- `pnpm build:cf`
+
+### Residual debt
+- flat message files still exist for tooling/tests
+- `src/lib/i18n-performance.ts` still fetches public message assets for client-side performance utilities
+- if needed, a later i18n-tooling migration can make split format the only source across scripts/tests too

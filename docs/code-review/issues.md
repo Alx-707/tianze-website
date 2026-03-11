@@ -89,6 +89,49 @@
     - `pnpm build` 会重新出现 `middleware` 弃用告警
     - 待 Cloudflare/OpenNext 支持稳定后，再重新迁回 `proxy.ts`
 
+#### CR-047 `pnpm lint:check` 当前会扫描 `.agents/skills/**` 等 repo-local agent 目录，导致门禁信号失真
+- 优先级：P2
+- 标签：DEV/CI
+- 审查链路：tooling / gate signal chain
+- 证据：
+  - `eslint.config.mjs:1034-1056` 的全局 ignore 仅排除了 `.claude/skills/**`，未排除仓库根目录实际存在的 `.agents/skills/**`。
+  - 本轮执行 `pnpm lint:check` 时，失败条目主要来自 `.agents/skills/debugging/**`、`.agents/skills/react-components/**`、`.agents/skills/style-extractor/**` 等非项目生产代码。
+- 影响：
+  - 本地 `lint:check` / `ci:local:quick` 不再稳定代表项目代码质量，而会被 repo-local agent 资产或用户工作目录噪音打穿。
+  - lint 信号失真会削弱 Round 4 已经收紧的 gate 可信度，导致“红灯不一定是项目问题”重新出现。
+- 建议修复：
+  - 将 ESLint ignore 与项目真实作用域对齐，至少补齐 `.agents/**`、`.agent/**`、`.continue/**`、`.factory/**`、`.kiro/**` 这类 repo-local 工作目录。
+  - 或者反向收口：让 `lint:check`/`quality-gate` 只对明确的项目代码路径生效（如 `src/`、`tests/`、`scripts/`、配置入口文件），避免工作台文件进入 gate。
+  - `scripts/ci-local.sh` 与 `scripts/quality-gate.js` 的 lint 口径应保持一致，防止“本地/聚合门禁”再次双轨。
+- 验收命令：
+  - `pnpm lint:check`
+  - `pnpm ci:local:quick`
+- 状态：🆕 新发现（2026-03-11，delta review）
+
+#### CR-048 共享 `safeParseJson()` 路径未限制 body size，多个公开 JSON 端点重新暴露资源消耗面
+- 优先级：P1
+- 标签：PROD/SECURITY/API
+- 审查链路：inquiry/contact/API/security chain
+- 证据：
+  - 共享 helper `src/lib/api/safe-parse-json.ts:23-49` 直接 `await req.json()`，没有 `Content-Length` 早拒绝或字节级兜底。
+  - 多个公开 JSON 入口直接走这条链：
+    - `src/app/api/contact/route.ts:48-50`
+    - `src/app/api/inquiry/route.ts:124-127`
+    - `src/app/api/verify-turnstile/route.ts:129-132`
+    - `src/app/api/whatsapp/send/route.ts:293-295`
+    - `src/app/api/subscribe/route.ts:22-26`（通过 wrapper 复用同一 helper）
+  - 对比之下，`/api/csp-report` 与 `/api/whatsapp/webhook` 已在历史审查中补齐了请求体大小防护，说明仓库已经接受“公开写接口需要 body size gate”这一安全前提。
+- 影响：
+  - 攻击者或异常客户端可以在这些公开写接口上提交超大 JSON，请求会在进入业务校验前就触发整包解析，增加内存/CPU 消耗面。
+  - 问题位于共享 helper，新路由继续复用 `safeParseJson()` 时会继承同样的风险。
+- 建议修复：
+  - 在 `safeParseJson()` 中增加可配置 `maxBytes`，统一做 `content-length` 早拒绝 + 读取后字节级兜底。
+  - 给公开写接口设默认阈值；对 webhook / report 这类特殊端点保留单独阈值。
+  - 为 `contact` / `inquiry` / `verify-turnstile` / `subscribe` / `whatsapp/send` 增加超大 body 回归测试。
+- 验收命令：
+  - `pnpm test -- src/app/api/contact/__tests__/route-post.test.ts src/app/api/inquiry/__tests__/route.test.ts src/app/api/verify-turnstile/__tests__/route.test.ts src/app/api/whatsapp/send/__tests__/route.test.ts tests/integration/api/subscribe.test.ts`
+- 状态：🆕 新发现（2026-03-11，delta review）
+
 #### CR-027 `html[lang]` 当前依赖客户端 hydration 后修正，SSR/无 JS 语义不正确
 - 优先级：P1
 - 标签：PROD/SEO/A11Y/NEXT
@@ -980,3 +1023,172 @@ Round 3 复审阶段新增的 `CR-023` ~ `CR-026` 已在 Round 4 的 Wave A / Wa
 - `CR-025`、`CR-026`：已在 Wave B 完成测试与门禁信号修复
 
 修复后的最终状态、修复点与验收方式，以上方正式问题条目为准；这里不再重复保留修复前长篇证据，避免同一问题在文件中出现两份历史快照。
+
+## 2026-03-11 Delta Review 新增问题
+
+### Stability（工程可复现性 / gate 信号可信度）
+
+#### CR-047 `pnpm lint:check` 会被仓库根目录的本地 agent/skill 资产污染，当前已不是纯项目代码 gate
+- 优先级：P2
+- 标签：DEV/CI
+- review chain：tooling/gate integrity chain
+- 证据：
+  - 当前执行 `pnpm lint:check` 失败，报错文件集中在 `.agents/skills/**`（例如 `.agents/skills/debugging/**`、`.agents/skills/react-components/**`、`.agents/skills/style-extractor/**`）。
+  - `.gitignore:36` 已忽略 `.agents/`，说明这类目录属于本地 agent 资产，而不是项目生产代码真相源。
+  - `eslint.config.mjs` 的 global ignores 仅排除了 `.claude/skills/**`，未排除 `.agents/**`、`skills/**`、`.continue/**`、`.kiro/**`、`.factory/**` 等同类本地目录。
+- 影响：
+  - `pnpm lint:check` 当前会被本地工具/agent 目录的内容污染，不再是“项目代码是否健康”的可靠信号。
+  - 新环境或不同协作工具组合下，开发者可能在未改动 `src/**` 的情况下被 gate 阻断，降低 `ci:local` / 本地排障的可信度。
+  - 这类噪音会掩盖真正的应用层 lint regressions。
+- 建议修复：
+  - 在 `eslint.config.mjs` 的 global ignores 中补齐本地 agent/tooling 目录：至少 `.agents/**`、`skills/**`、`.continue/**`、`.kiro/**`、`.factory/**`、`.agent/**`。
+  - 或者将 `lint:check` 收窄到项目代码边界（例如 `src/ tests/ scripts/`），避免扫描工作区级辅助资产。
+  - 修复后重新确认 `pnpm lint:check` 恢复为项目代码 gate，而不是工作区噪音 gate。
+- 验收命令：
+  - `pnpm lint:check`
+- 状态：❌ 未修复（2026-03-11）
+  - 修复点：
+    - `eslint.config.mjs` 已补齐 `.agent/**`、`.agents/**`、`.continue/**`、`.factory/**`、`.kiro/**`、`skills/**`、`skills-lock.json` 等 repo-local 工作目录忽略规则
+  - 验收：
+    - `pnpm lint:check`
+    - `pnpm ci:local:quick`
+    - `pnpm quality:gate:full`
+- 状态：✅ 已修复（2026-03-11，repair phase）
+
+#### CR-048 `/api/inquiry` 仍无幂等保护，但它既是主询盘写路径，又显式暴露了 `Idempotency-Key` 契约
+- 优先级：P1
+- 标签：PROD
+- review chain：inquiry conversion chain
+- 证据：
+  - `src/app/api/inquiry/route.ts` 当前只有 `withRateLimit("inquiry", ...)`，没有 `withIdempotency(...)` 包裹。
+  - `src/components/products/product-inquiry-form.tsx:308-316` 调用 `/api/inquiry` 时只发 `Content-Type`，没有生成或发送 `Idempotency-Key`。
+  - `src/config/cors.ts:141` 将 `Idempotency-Key` 列入 allowed headers。
+  - `src/app/api/inquiry/__tests__/route.test.ts:72` 的预检测试同样把 `Access-Control-Allow-Headers` 断言为包含 `Idempotency-Key`。
+  - 对比：`src/app/api/subscribe/route.ts` 已使用 `withIdempotency(..., { required: true })`，newsletter 主路径已形成幂等闭环。
+- 影响：
+  - 询盘是当前项目的主业务写路径，用户重复点击、前端重试、网络层重放都可能造成重复线索、重复邮件或重复 Airtable 记录。
+  - 当前接口对外宣告了 `Idempotency-Key` header 能力，但服务端和客户端都没有真正落实，属于契约漂移。
+  - 这会让“主询盘链”反而比 newsletter 这条次级写路径更脆弱。
+- 建议修复：
+  - 服务端：对 `/api/inquiry` 引入 `withIdempotency`，至少做到“同 key 同端点只处理一次”。
+  - 客户端：在 `product-inquiry-form` 中生成并复用 `Idempotency-Key`，与 newsletter 的做法对齐。
+  - 补回归测试：验证重复请求命中缓存、跨端点复用 key 被拒绝、同一次提交的重试不会重复落库。
+- 验收命令：
+  - `pnpm test -- src/app/api/inquiry/__tests__/route.test.ts`
+  - `pnpm test -- src/app/api/inquiry/__tests__/inquiry-integration.test.ts`
+  - `pnpm test -- src/components/products/__tests__/product-inquiry-form.test.tsx`
+- 状态：❌ 未修复（2026-03-11）
+  - 修复点：
+    - `/api/inquiry` 已接入 `withIdempotency(request, ..., { required: true })`
+    - `product-inquiry-form` 已生成并发送 `Idempotency-Key`，成功后清空，失败/重试时复用
+    - route / integration / component 定向测试已补齐
+  - 验收：
+    - `pnpm exec vitest run src/app/api/inquiry/__tests__/route.test.ts`
+    - `pnpm exec vitest run src/app/api/inquiry/__tests__/inquiry-integration.test.ts`
+    - `pnpm exec vitest run src/components/products/__tests__/product-inquiry-form.test.tsx`
+- 状态：✅ 已修复（2026-03-11，repair phase）
+
+### Maintainability（真相源 / 耦合 / 演进性）
+
+#### CR-049 i18n 运行时仍处于 split + flat 双真相源模式，且生产态消息加载先走自我 HTTP 再回退文件系统
+- 优先级：P2
+- 标签：PROD/TECHDEBT/I18N
+- review chain：locale/runtime entry chain
+- 证据：
+  - 修复前：`src/lib/load-messages.ts` 的生产态主路径优先自我 HTTP fetch，再回退到 `public/messages` 和 `messages` 文件系统读取。
+  - 修复前：`src/i18n/request.ts` 的 fallback response 仍直接导入 flat `messages/${locale}.json`。
+  - `docs/plans/2026-03-03-security-architecture-remediation/task-017-i18n-canonical-format.md` 已把这组 split/flat 并存明确标记为 drift 源，但当前主仓库尚未收敛。
+- 影响：
+  - 主运行时链和 fallback 链仍然依赖两套不同格式的消息源，继续放大“哪份文件才是真相源”的维护成本。
+  - 生产态消息加载先依赖对外可访问的 base URL；若 ingress、域名或平台网络路径异常，会先经历失败 fetch + error log，再落到文件系统回退，增加噪音和隐式性能开销。
+  - 这类问题在 happy path 下不一定暴露，但一旦进入 fallback/异常链，行为就容易与主链不一致。
+- 建议修复：
+  - 收敛单一 canonical：以 split (`messages/{locale}/{critical,deferred}.json`) 为唯一手工维护源，flat 仅保留为生成物或彻底退出运行时。
+  - 让 `src/i18n/request.ts` 的 fallback 也从 split 聚合结果构造，而不是回退到 flat `messages/{locale}.json`。
+  - 重新评估 `load-messages.ts` 的生产态“先自我 HTTP、后文件系统”策略；如果自我 HTTP 不是强需求，应优先使用本地可用源，避免把 i18n 主链耦合到外网可达性。
+- 验收命令：
+  - `pnpm validate:translations`
+  - `pnpm i18n:validate:code`
+  - `pnpm build`
+  - `pnpm build:cf`
+- 状态：✅ 已修复（2026-03-11，runtime refactor）
+  - 修复点：
+    - `src/lib/load-messages.ts` 已改为 split-only runtime source，运行时不再依赖 self-HTTP fetch、文件系统 fallback 或 flat root 文件。
+    - `src/i18n/request.ts` 的 fallback 已改为复用 split source 聚合结果，不再 `import('../../messages/${locale}.json')`。
+    - active locale/runtime request path 已收回到单一 split runtime source；flat 文件暂时仅保留给现有脚本/测试兼容。
+  - 验收：
+    - `pnpm exec vitest run src/lib/__tests__/load-messages.fallback.test.ts src/i18n/__tests__/request.test.ts`
+    - `pnpm validate:translations`
+    - `pnpm i18n:validate:code`
+    - `pnpm build`
+    - `pnpm build:cf`
+
+### Security / Abuse Resistance
+
+#### CR-050 共享 JSON 解析入口 `safeParseJson()` 未做 body size gate，多个公开 JSON 端点仍可无上限读取请求体
+- 优先级：P1
+- 标签：PROD/SECURITY
+- review chain：API contract chain
+- 证据：
+  - `src/lib/api/safe-parse-json.ts:23-49` 直接 `await req.json()`，没有 `Content-Length` 早拒绝或字节级兜底上限。
+  - 该 helper 当前被多个路由复用：
+    - `src/app/api/contact/route.ts:47-55`
+    - `src/app/api/inquiry/route.ts:123-133`
+    - `src/app/api/subscribe/route.ts:77-91`
+    - `src/app/api/verify-turnstile/route.ts:129-138`
+    - `src/app/api/whatsapp/send/route.ts:293-300`
+  - 对比：`/api/csp-report` 与 `/api/whatsapp/webhook` 已各自补过 body size 上限，但共享 JSON 主路径尚未收口。
+- 影响：
+  - 当前多个公开 JSON 写接口仍会在没有 body size gate 的情况下直接解析完整请求体，增加资源消耗面。
+  - 这会让“端点级修补”继续存在，系统对 body size 的防护取决于路由作者是否记得单独补丁，无法形成统一边界。
+  - 一旦未来新增 JSON 端点继续复用 `safeParseJson()`，相同问题会被批量复制。
+- 建议修复：
+  - 在 `safeParseJson()` 增加统一 body size gate：优先检查 `Content-Length`，读取后再做字节级兜底校验。
+  - 允许路由按需传入上限配置（例如公共表单接口较小、受保护后台接口可稍大），但默认值必须安全。
+  - 为共享 helper 补回归测试：超限 body、伪造过小 `Content-Length`、多字节字符场景。
+- 验收命令：
+  - `pnpm test -- src/app/api/contact/__tests__/route.test.ts`
+  - `pnpm test -- src/app/api/inquiry/__tests__/route.test.ts`
+  - `pnpm test -- src/app/api/verify-turnstile/__tests__/route.test.ts`
+  - `pnpm test -- tests/integration/api/subscribe.test.ts`
+- 状态：❌ 未修复（2026-03-11）
+  - 修复点：
+    - `safeParseJson()` 已增加共享 body size gate（`Content-Length` 早拒绝 + 读后字节级兜底）
+    - `contact` / `inquiry` / `subscribe` / `verify-turnstile` / `whatsapp/send` 已统一消费 `statusCode`
+    - 413 回归测试已补齐到对应路由/集成测试
+  - 验收：
+    - `pnpm exec vitest run src/app/api/contact/__tests__/route-post.test.ts`
+    - `pnpm exec vitest run src/app/api/inquiry/__tests__/route.test.ts`
+    - `pnpm exec vitest run src/app/api/verify-turnstile/__tests__/route.test.ts`
+    - `pnpm exec vitest run src/app/api/whatsapp/send/__tests__/route.test.ts`
+    - `pnpm exec vitest run tests/integration/api/subscribe.test.ts`
+- 状态：✅ 已修复（2026-03-11，repair phase）
+
+### Product / i18n Correctness
+
+#### CR-051 contact Server Action 在非校验失败路径仍返回英文 detail 文案，前端会原样渲染到多语言 UI
+- 优先级：P2
+- 标签：PROD/I18N
+- review chain：inquiry conversion chain
+- 证据：
+  - `src/lib/actions/contact.ts:93-99`、`106-112` 在 submission expired 场景返回 `details: ["Please refresh the page and try again"]`。
+  - `src/lib/actions/contact.ts:118-124` 在 Turnstile 验证失败场景返回 `details: ["Please complete the security check"]`。
+  - `src/components/forms/contact-form-container.tsx:212-214` 仅对以 `errors.` 开头的 detail 做翻译，其余 detail 直接原样显示。
+- 影响：
+  - 中文或其它 locale 用户在部分失败路径下会看到英文 detail bullet，形成混合语言 UI。
+  - 当前 API/message 主路径已经收敛到 `errorCode`，但 Server Action 这条主联系表单路径仍残留自由文本 detail，属于协议一致性回退。
+  - 这会让 i18n gate 看起来是绿的，但真实用户在异常链上仍可能拿到错误语言。
+- 建议修复：
+  - 将这些 detail 改成稳定的翻译 key，而不是英文句子。
+  - 或者彻底避免在这类非字段级错误里返回自由文本 detail，只返回稳定 `errorCode` 并由前端统一翻译。
+  - 补定向回归：中文 locale 下的过期提交 / Turnstile 失败应只显示中文错误。
+- 验收命令：
+  - `pnpm test -- src/components/forms/__tests__/contact-form-submission.test.tsx`
+  - `pnpm test -- tests/integration/api/contact.test.ts`
+- 状态：❌ 未修复（2026-03-11）
+  - 修复点：
+    - `contactFormAction` 对 submission expired / Turnstile 失败不再下发英文 `details`
+    - `contact-form-container` 定向测试已验证错误码路径不会再渲染原始英文 bullet
+  - 验收：
+    - `pnpm exec vitest run src/components/forms/__tests__/contact-form-container.test.tsx`
+- 状态：✅ 已修复（2026-03-11，repair phase）
