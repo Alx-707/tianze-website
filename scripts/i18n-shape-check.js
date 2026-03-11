@@ -2,10 +2,10 @@
  * i18n Shape Consistency Check
  *
  * Goals:
- * 1) Ensure messages/en.json and messages/zh.json have identical leaf key shapes (dot-paths)
- * 2) Ensure messages/{locale}/critical.json + deferred.json union equals messages/{locale}.json
+ * 1) Ensure messages/{locale}/critical.json and deferred.json are the canonical split source
+ * 2) Ensure en/critical.json keys match zh/critical.json keys (and same for deferred)
  * 3) Ensure public/messages/{locale}/{critical,deferred}.json union equals messages/{locale}/{critical,deferred}.json union
- * 4) Ensure en/critical.json keys match zh/critical.json keys (and same for deferred)
+ * 4) If flat files exist, ensure they are a generated parity view of split union
  *
  * Exit code: 0 on success, 1 on any mismatch
  *
@@ -128,37 +128,7 @@ async function main() {
   try {
     const locales = require("../i18n-locales.config").locales;
 
-    // Load full sources
-    const full = {};
-    for (const locale of locales) {
-      const p = path.join(ROOT, "messages", `${locale}.json`);
-      full[locale] = await readJson(p);
-    }
-
-    // Check 1: Compare full shapes (en.json vs zh.json)
-    result.summary.totalChecks++;
-    const enLeaf = asSet(collectLeafPaths(full.en));
-    const zhLeaf = asSet(collectLeafPaths(full.zh));
-
-    const enMinusZh = diffSets(enLeaf, zhLeaf);
-    const zhMinusEn = diffSets(zhLeaf, enLeaf);
-
-    if (enMinusZh.length || zhMinusEn.length) {
-      result.ok = false;
-      result.summary.failedChecks++;
-      result.issues.push({
-        type: "shape-mismatch-full",
-        message: "messages/en.json and messages/zh.json leaf key sets differ",
-        missingInZh: enMinusZh.slice(0, 50),
-        missingInEn: zhMinusEn.slice(0, 50),
-        missingInZhCount: enMinusZh.length,
-        missingInEnCount: zhMinusEn.length,
-      });
-    } else {
-      result.summary.passedChecks++;
-    }
-
-    // Check 2: Compare split files (critical/deferred) between locales
+    // Check 1: Compare split files (critical/deferred) between locales
     result.summary.totalChecks += 2; // critical + deferred
     const issueCountBefore = result.issues.length;
     await compareSplitFiles(result, locales);
@@ -166,9 +136,8 @@ async function main() {
     result.summary.passedChecks += 2 - newIssues;
     result.summary.failedChecks += newIssues;
 
-    // Check 3: For each locale, validate split (critical+deferred) matches full
+    // Check 2+: For each locale, validate split canonical source
     for (const locale of locales) {
-      result.summary.totalChecks++;
       const srcCriticalPath = path.join(
         ROOT,
         "messages",
@@ -203,28 +172,8 @@ async function main() {
         ...collectLeafPaths(srcCritical),
         ...collectLeafPaths(srcDeferred),
       ]);
-      const fullSet = asSet(collectLeafPaths(full[locale]));
 
-      // src split vs full
-      const srcMinusFull = diffSets(srcSet, fullSet);
-      const fullMinusSrc = diffSets(fullSet, srcSet);
-      if (srcMinusFull.length || fullMinusSrc.length) {
-        result.ok = false;
-        result.summary.failedChecks++;
-        result.issues.push({
-          type: "split-vs-full-mismatch",
-          locale,
-          message: `messages/${locale}/{critical,deferred}.json union != messages/${locale}.json`,
-          extraInSplit: srcMinusFull.slice(0, 50),
-          missingInSplit: fullMinusSrc.slice(0, 50),
-          extraInSplitCount: srcMinusFull.length,
-          missingInSplitCount: fullMinusSrc.length,
-        });
-      } else {
-        result.summary.passedChecks++;
-      }
-
-      // Check 4: public vs src split (optional if public not generated yet)
+      // Check 2: public vs src split (optional if public not generated yet)
       const hasPubCritical = fs.existsSync(pubCriticalPath);
       const hasPubDeferred = fs.existsSync(pubDeferredPath);
       if (hasPubCritical && hasPubDeferred) {
@@ -257,6 +206,32 @@ async function main() {
         console.warn(
           `[i18n-shape-check] public/messages/${locale} not found; skip public parity sub-check`,
         );
+      }
+
+      // Check 3: flat file parity (optional generated compatibility artifact)
+      const flatPath = path.join(ROOT, "messages", `${locale}.json`);
+      if (fs.existsSync(flatPath)) {
+        result.summary.totalChecks++;
+        const flat = await readJson(flatPath);
+        const flatSet = asSet(collectLeafPaths(flat));
+        const srcMinusFlat = diffSets(srcSet, flatSet);
+        const flatMinusSrc = diffSets(flatSet, srcSet);
+
+        if (srcMinusFlat.length || flatMinusSrc.length) {
+          result.ok = false;
+          result.summary.failedChecks++;
+          result.issues.push({
+            type: "flat-generated-parity-mismatch",
+            locale,
+            message: `messages/${locale}.json is not aligned with messages/${locale}/{critical,deferred}.json union`,
+            missingInFlat: srcMinusFlat.slice(0, 50),
+            extraInFlat: flatMinusSrc.slice(0, 50),
+            missingInFlatCount: srcMinusFlat.length,
+            extraInFlatCount: flatMinusSrc.length,
+          });
+        } else {
+          result.summary.passedChecks++;
+        }
       }
     }
 
@@ -303,6 +278,10 @@ async function main() {
           );
         if (issue.extraInPublicCount !== undefined)
           console.error("  Extra in public:", issue.extraInPublicCount, "keys");
+        if (issue.missingInFlatCount !== undefined)
+          console.error("  Missing in flat:", issue.missingInFlatCount, "keys");
+        if (issue.extraInFlatCount !== undefined)
+          console.error("  Extra in flat:", issue.extraInFlatCount, "keys");
 
         // Show sample keys for debugging
         if (issue.missingInZh?.length) {

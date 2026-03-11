@@ -648,16 +648,10 @@ function loadExistingTranslations() {
       }
     }
 
-    // Fallback to flat file structure (messages/{locale}.json)
     if (!loadedFromSubdir) {
-      const flatPath = path.join(CONFIG.MESSAGES_DIR, `${locale}.json`);
-      try {
-        const content = fs.readFileSync(flatPath, "utf8");
-        merged = JSON.parse(content);
-        console.log(`📖 加载翻译文件: ${locale}.json`);
-      } catch (error) {
-        console.warn(`⚠️  无法加载翻译文件: ${locale}.json - ${error.message}`);
-      }
+      console.warn(
+        `⚠️  未找到 split 翻译文件: ${locale}/critical.json + ${locale}/deferred.json`,
+      );
     }
 
     translations[locale] = merged;

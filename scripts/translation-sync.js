@@ -119,17 +119,15 @@ function loadTranslations() {
         `📖 加载翻译文件: ${locale}/critical.json + ${locale}/deferred.json`,
       );
     } catch (error) {
-      console.warn(
-        `⚠️  无法加载翻译文件: ${locale}/split files - ${error.message}`,
+      syncResults.errors.push({
+        type: "load_error",
+        locale,
+        error: error.message,
+      });
+      console.error(
+        `❌ 无法加载翻译文件: ${locale}/split files - ${error.message}`,
       );
-      // Fallback to flat file
-      const flatPath = path.join(CONFIG.MESSAGES_DIR, `${locale}.json`);
-      try {
-        translations[locale] = JSON.parse(fs.readFileSync(flatPath, "utf8"));
-        console.log(`📖 回退加载: ${locale}.json (flat)`);
-      } catch {
-        translations[locale] = {};
-      }
+      translations[locale] = {};
     }
   }
 
@@ -385,14 +383,14 @@ function saveTranslations(translations) {
         `💾 保存翻译文件: ${locale}/critical.json + ${locale}/deferred.json`,
       );
 
-      // Regenerate flat file from split (flat = merge of critical + deferred, with meta)
+      // Regenerate flat file from split (compatibility artifact only)
       const flatContent = deepMerge(newCritical, newDeferred);
       fs.writeFileSync(
         flatPath,
         `${JSON.stringify(flatContent, null, 2)}\n`,
         "utf8",
       );
-      console.log(`💾 重新生成 flat 文件: ${locale}.json`);
+      console.log(`💾 重新生成 flat 文件（兼容产物）: ${locale}.json`);
 
       syncResults.updated++;
     } catch (error) {

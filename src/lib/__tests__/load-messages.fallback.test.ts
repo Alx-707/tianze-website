@@ -1,87 +1,51 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
-// Test subject
+import { describe, expect, it, vi } from "vitest";
 import {
+  loadCompleteMessages,
+  loadCompleteMessagesFromSource,
   loadCriticalMessages,
   loadDeferredMessages,
 } from "@/lib/load-messages";
 
-// Hoisted mocks
 vi.mock("next/cache", () => ({
   unstable_cache: (fn: unknown) => fn,
 }));
 
-vi.mock("@/lib/logger", () => ({
-  logger: {
-    error: (..._args: unknown[]) => {},
-    warn: (..._args: unknown[]) => {},
-    info: (..._args: unknown[]) => {},
-    debug: (..._args: unknown[]) => {},
-  },
-}));
+describe("load-messages canonical runtime source", () => {
+  it("loads critical messages from split source", async () => {
+    const messages = await loadCriticalMessages("en");
 
-describe("Load Messages - Fallback Behavior", () => {
-  beforeEach(() => {
-    // Force network failure and ensure fs fallback cannot find file
-    vi.stubGlobal(
-      "fetch",
-      vi.fn().mockRejectedValue(new Error("network fail")),
-    );
-    vi.spyOn(process, "cwd").mockReturnValue("/__vitest_nonexistent__");
+    expect(messages).toBeTruthy();
+    expect(typeof messages).toBe("object");
+    expect(Object.keys(messages).length).toBeGreaterThan(0);
   });
 
-  it("should throw error when both fetch and file read fail", async () => {
-    await expect(loadCriticalMessages("en" as "en" | "zh")).rejects.toThrow(
-      "Cannot load critical messages for en",
-    );
+  it("loads deferred messages from split source", async () => {
+    const messages = await loadDeferredMessages("zh");
+
+    expect(messages).toBeTruthy();
+    expect(typeof messages).toBe("object");
+    expect(Object.keys(messages).length).toBeGreaterThan(0);
   });
 
-  it("should sanitize invalid locale and throw on failures", async () => {
-    // Invalid locale gets sanitized to default ('en'), then throws
-    await expect(
-      loadCriticalMessages("invalid-locale" as "en" | "zh"),
-    ).rejects.toThrow("Cannot load critical messages for en");
-  });
-});
+  it("sanitizes invalid locale to default locale when loading direct source", async () => {
+    const invalidLocaleMessages =
+      await loadCompleteMessagesFromSource("invalid-locale");
+    const defaultLocaleMessages = await loadCompleteMessagesFromSource("en");
 
-// Deferred messages fallback symmetry tests
-describe("Load Deferred Messages - Fallback Behavior", () => {
-  beforeEach(() => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn().mockRejectedValue(new Error("network fail")),
-    );
-    vi.spyOn(process, "cwd").mockReturnValue("/__vitest_nonexistent__");
+    expect(invalidLocaleMessages).toEqual(defaultLocaleMessages);
   });
 
-  it("should throw error when deferred fetch and file read both fail", async () => {
-    await expect(loadDeferredMessages("en" as "en" | "zh")).rejects.toThrow(
-      "Cannot load deferred messages for en",
-    );
+  it("returns merged complete messages from split source", async () => {
+    const messages = await loadCompleteMessagesFromSource("en");
+
+    expect(messages).toHaveProperty("apiErrors");
+    expect(messages).toHaveProperty("common");
   });
 
-  it("should sanitize invalid locale for deferred and throw on failures", async () => {
-    await expect(
-      loadDeferredMessages("invalid-locale" as "en" | "zh"),
-    ).rejects.toThrow("Cannot load deferred messages for en");
-  });
-});
+  it("keeps cached and direct source loading shape-compatible", async () => {
+    const direct = await loadCompleteMessagesFromSource("zh");
+    const cached = await loadCompleteMessages("zh");
 
-// Cache layer verification: unstable_cache passthrough should return fresh data on each call.
-// In test environment (isCiEnv=true), loadCore uses the filesystem path — this verifies that
-// the fallback chain works correctly without any additional caching layers.
-describe("Load Messages - Cache passthrough consistency", () => {
-  it("with unstable_cache bypassed, each call can return independently loaded data", async () => {
-    // unstable_cache is mocked as passthrough (fn) => fn, so each call invokes the real function.
-    // This confirms no hidden state accumulates between calls when cache is bypassed.
-    const cwdSpy = vi
-      .spyOn(process, "cwd")
-      .mockReturnValue("/__vitest_nonexistent__");
-    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("no network")));
-
-    // Both calls should independently throw (no stale data returned from a second cache layer)
-    await expect(loadCriticalMessages("en" as "en" | "zh")).rejects.toThrow();
-    await expect(loadDeferredMessages("zh" as "en" | "zh")).rejects.toThrow();
-
-    cwdSpy.mockRestore();
+    expect(cached).toEqual(direct);
   });
 });
