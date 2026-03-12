@@ -1,9 +1,6 @@
-"use client";
-
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/routing";
 import type { LinkHref } from "@/lib/i18n/route-parsing";
-import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { SectionHead } from "@/components/ui/section-head";
 
 const RESOURCE_COUNT = 4;
@@ -123,8 +120,8 @@ function ResourceCard({
   );
 }
 
-export function ResourcesSection() {
-  const t = useTranslations("home");
+export async function ResourcesSection() {
+  const t = await getTranslations("home");
 
   const resources = Array.from({ length: RESOURCE_COUNT }, (_, i) => {
     const key = `item${String(i + 1)}`;
@@ -138,7 +135,7 @@ export function ResourcesSection() {
 
   return (
     <section className="section-divider py-14 md:py-[72px]">
-      <ScrollReveal className="mx-auto max-w-[1080px] px-6">
+      <div className="mx-auto max-w-[1080px] px-6">
         <SectionHead
           title={t("resources.title")}
           subtitle={t("resources.subtitle")}
@@ -150,7 +147,7 @@ export function ResourcesSection() {
             ))}
           </div>
         </div>
-      </ScrollReveal>
+      </div>
     </section>
   );
 }

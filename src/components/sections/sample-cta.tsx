@@ -1,16 +1,13 @@
-"use client";
-
 import { Link } from "@/i18n/routing";
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import { Button } from "@/components/ui/button";
-import { ScrollReveal } from "@/components/ui/scroll-reveal";
 
-export function SampleCTA() {
-  const t = useTranslations("home");
+export async function SampleCTA() {
+  const t = await getTranslations("home");
 
   return (
     <section className="section-divider py-14 md:py-[72px]">
-      <ScrollReveal className="mx-auto max-w-[1080px] px-6">
+      <div className="mx-auto max-w-[1080px] px-6">
         <div className="flex flex-col items-start gap-6 rounded-xl border border-[var(--primary-light)] bg-[var(--primary-light)] p-8 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="text-2xl font-bold leading-tight">
@@ -26,7 +23,7 @@ export function SampleCTA() {
             </Link>
           </Button>
         </div>
-      </ScrollReveal>
+      </div>
     </section>
   );
 }

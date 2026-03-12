@@ -29,12 +29,16 @@ import { Link, usePathname } from "@/i18n/routing";
 
 interface MobileNavigationProps {
   className?: string;
+  initialOpen?: boolean;
 }
 
-export function MobileNavigation({ className }: MobileNavigationProps) {
+export function MobileNavigation({
+  className,
+  initialOpen = false,
+}: MobileNavigationProps) {
   const t = useTranslations();
   const pathname = usePathname();
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(initialOpen);
   const previousPathnameRef = useRef(pathname);
 
   useEffect(() => {

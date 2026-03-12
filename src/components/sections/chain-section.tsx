@@ -1,7 +1,4 @@
-"use client";
-
-import { useTranslations } from "next-intl";
-import { ScrollReveal } from "@/components/ui/scroll-reveal";
+import { getTranslations } from "next-intl/server";
 import { SectionHead } from "@/components/ui/section-head";
 
 const STEP_COUNT = 5;
@@ -54,8 +51,8 @@ function StatCard({ text }: { text: string }) {
   );
 }
 
-export function ChainSection() {
-  const t = useTranslations("home");
+export async function ChainSection() {
+  const t = await getTranslations("home");
 
   const steps = Array.from({ length: STEP_COUNT }, (_, i) => {
     const key = `step${String(i + 1)}`;
@@ -72,7 +69,7 @@ export function ChainSection() {
 
   return (
     <section className="section-divider py-14 md:py-[72px]">
-      <ScrollReveal className="mx-auto max-w-[1080px] px-6">
+      <div className="mx-auto max-w-[1080px] px-6">
         <SectionHead title={t("chain.title")} subtitle={t("chain.subtitle")} />
 
         {/* Steps grid */}
@@ -90,7 +87,7 @@ export function ChainSection() {
             <StatCard key={text} text={text} />
           ))}
         </div>
-      </ScrollReveal>
+      </div>
     </section>
   );
 }

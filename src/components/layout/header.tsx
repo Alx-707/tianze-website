@@ -4,7 +4,6 @@
  * 服务端渲染的头部，交互部件以客户端小岛方式注入，减少首屏 JS 体积。
  */
 import { Link } from "@/i18n/routing";
-import { getTranslations } from "next-intl/server";
 import { cn } from "@/lib/utils";
 import {
   LanguageToggleIsland,
@@ -13,6 +12,7 @@ import {
 } from "@/components/layout/header-client";
 import { HeaderScrollChrome } from "@/components/layout/header-scroll-chrome";
 import { Logo } from "@/components/layout/logo";
+import { ViewportClientGate } from "@/components/layout/viewport-client-gate";
 import { Idle } from "@/components/lazy/idle";
 import { Button } from "@/components/ui/button";
 
@@ -29,28 +29,22 @@ interface HeaderProps {
   variant?: "default" | "minimal" | "transparent";
   sticky?: boolean;
   locale?: "en" | "zh";
+  contactSalesLabel?: string;
 }
 
-export async function Header({
+export function Header({
   className,
   variant = "default",
   sticky = true,
   locale,
+  contactSalesLabel = "Contact Sales",
 }: HeaderProps) {
-  // 透明头部不吸顶
   const isSticky = variant === "transparent" ? false : sticky;
   const isMinimal = variant === "minimal";
   const isTransparent = variant === "transparent";
-
-  // Check if using Vercel navigation variant
   const isVercelNav = process.env.NEXT_PUBLIC_NAV_VARIANT !== "legacy";
-
-  // A/B 支持：可通过 NEXT_PUBLIC_IDLE_ROOTMARGIN='200px 0px 200px 0px' 等调整
   const VISIBLE_MARGIN =
     process.env.NEXT_PUBLIC_IDLE_ROOTMARGIN ?? "400px 0px 400px 0px";
-
-  // Get translations for CTA button
-  const t = await getTranslations("navigation");
 
   return (
     <header
@@ -84,41 +78,11 @@ export async function Header({
             VISIBLE_MARGIN={VISIBLE_MARGIN}
           />
 
-          {/* Right section: Utility Controls */}
-          <div
-            className="header-nav-right"
-            {...(!locale ? { "data-testid": "language-toggle-button" } : {})}
-          >
-            {/* Desktop: Language toggle */}
-            {locale ? (
-              <div className="header-desktop-only h-10 w-28 items-center justify-end">
-                <Idle strategy="visible" rootMargin={VISIBLE_MARGIN}>
-                  <LanguageToggleIsland locale={locale} />
-                </Idle>
-              </div>
-            ) : null}
-            {/* Desktop CTA Button */}
-            {locale && (
-              <Button
-                variant="default"
-                size="sm"
-                asChild
-                className="header-cta-desktop-only"
-              >
-                <Link href="/contact" prefetch={false} data-testid="header-cta">
-                  {t("contactSales")}
-                </Link>
-              </Button>
-            )}
-            {/* Mobile: Hamburger menu (right side per UX best practices) */}
-            {locale ? (
-              <div className="header-mobile-only h-10 w-10">
-                <Idle strategy="visible" rootMargin={VISIBLE_MARGIN}>
-                  <MobileNavigationIsland />
-                </Idle>
-              </div>
-            ) : null}
-          </div>
+          <HeaderUtilityControls
+            contactSalesLabel={contactSalesLabel}
+            locale={locale}
+            rootMargin={VISIBLE_MARGIN}
+          />
         </div>
       </div>
     </header>
@@ -141,9 +105,57 @@ function CenterNav({
       {...(!locale ? { "data-testid": "nav-switcher" } : {})}
     >
       {/* 客户端：导航切换器（更晚加载，避免首屏竞争） */}
-      <Idle strategy="visible" rootMargin={VISIBLE_MARGIN}>
-        {locale ? <NavSwitcherIsland /> : null}
-      </Idle>
+      <ViewportClientGate mode="desktop">
+        <Idle strategy="visible" rootMargin={VISIBLE_MARGIN}>
+          {locale ? <NavSwitcherIsland /> : null}
+        </Idle>
+      </ViewportClientGate>
+    </div>
+  );
+}
+
+function HeaderUtilityControls({
+  contactSalesLabel,
+  locale,
+  rootMargin,
+}: {
+  contactSalesLabel: string;
+  locale: "en" | "zh" | undefined;
+  rootMargin: string;
+}) {
+  return (
+    <div
+      className="header-nav-right"
+      {...(!locale ? { "data-testid": "language-toggle-button" } : {})}
+    >
+      {locale ? (
+        <>
+          <div className="header-desktop-only h-10 w-28 items-center justify-end">
+            <ViewportClientGate mode="desktop">
+              <Idle strategy="visible" rootMargin={rootMargin}>
+                <LanguageToggleIsland locale={locale} />
+              </Idle>
+            </ViewportClientGate>
+          </div>
+          <Button
+            variant="default"
+            size="sm"
+            asChild
+            className="header-cta-desktop-only"
+          >
+            <Link href="/contact" prefetch={false} data-testid="header-cta">
+              {contactSalesLabel}
+            </Link>
+          </Button>
+          <div className="header-mobile-only h-10 w-10">
+            <ViewportClientGate mode="mobile">
+              <Idle strategy="visible" rootMargin={rootMargin}>
+                <MobileNavigationIsland />
+              </Idle>
+            </ViewportClientGate>
+          </div>
+        </>
+      ) : null}
     </div>
   );
 }

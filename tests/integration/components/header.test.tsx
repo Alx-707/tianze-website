@@ -83,6 +83,12 @@ vi.mock("@/components/layout/header-scroll-chrome", () => ({
   HeaderScrollChrome: () => null,
 }));
 
+vi.mock("@/components/layout/viewport-client-gate", () => ({
+  ViewportClientGate: ({ children }: { children: React.ReactNode }) => (
+    <>{children}</>
+  ),
+}));
+
 vi.mock("@/components/ui/button", () => ({
   Button: ({
     children,
@@ -103,9 +109,9 @@ vi.mock("@/components/ui/button", () => ({
  * Awaits the component and renders the resolved JSX.
  */
 async function renderAsyncComponent(
-  asyncComponent: Promise<React.JSX.Element>,
+  asyncComponent: React.JSX.Element | Promise<React.JSX.Element>,
 ) {
-  const resolvedElement = await asyncComponent;
+  const resolvedElement = await Promise.resolve(asyncComponent);
   return render(resolvedElement);
 }
 

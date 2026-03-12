@@ -3,7 +3,7 @@
  * Tests for header client components (Island components)
  */
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import {
   LanguageToggleIsland,
@@ -53,8 +53,18 @@ vi.mock("@/components/language-toggle", () => ({
 }));
 
 describe("MobileNavigationIsland", () => {
-  it("renders dynamic component with ssr false", () => {
+  it("renders deferred trigger before loading dynamic component", () => {
     render(<MobileNavigationIsland />);
+
+    const trigger = screen.getByTestId("header-mobile-menu-button");
+    expect(trigger).toBeInTheDocument();
+    expect(screen.queryByTestId("dynamic-component")).not.toBeInTheDocument();
+  });
+
+  it("loads dynamic component after trigger click", () => {
+    render(<MobileNavigationIsland />);
+
+    fireEvent.click(screen.getByTestId("header-mobile-menu-button"));
 
     const dynamicComponent = screen.getByTestId("dynamic-component");
     expect(dynamicComponent).toHaveAttribute("data-ssr", "false");
@@ -114,7 +124,8 @@ describe("Island components integration", () => {
     const dynamicComponents = container.querySelectorAll(
       '[data-testid="dynamic-component"]',
     );
-    expect(dynamicComponents.length).toBe(3);
+    expect(dynamicComponents.length).toBe(2);
+    expect(screen.getByTestId("header-mobile-menu-button")).toBeInTheDocument();
   });
 
   it("all islands accept zh locale", () => {

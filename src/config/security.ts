@@ -76,6 +76,19 @@ export function generateCSP(nonce?: string): string {
       "https://www.googletagmanager.com",
       "https://www.google-analytics.com",
     ],
+    // App Router static/prerendered responses still emit inline framework/data
+    // scripts that cannot receive a request nonce. Keep `script-src` strict for
+    // non-<script> execution paths, but explicitly allow inline <script> blocks
+    // so prerendered routes hydrate correctly under CSP.
+    "script-src-elem": [
+      "'self'",
+      "'unsafe-inline'",
+      ...(isDevelopment ? ["'unsafe-eval'", "https://unpkg.com"] : []),
+      "https://va.vercel-scripts.com",
+      "https://challenges.cloudflare.com",
+      "https://www.googletagmanager.com",
+      "https://www.google-analytics.com",
+    ],
     "style-src": [
       "'self'",
       // Allow unsafe-inline for Tailwind CSS (required for both dev and prod)
@@ -83,6 +96,19 @@ export function generateCSP(nonce?: string): string {
       ...(nonce ? [`'nonce-${nonce}'`] : []),
       "https://fonts.googleapis.com",
     ],
+    // Runtime style tags injected by framework/client libraries cannot reliably
+    // receive a request nonce on prerendered routes. Keep element-level policy
+    // explicit so browsers don't ignore `unsafe-inline` via the fallback list.
+    "style-src-elem": [
+      "'self'",
+      "'unsafe-inline'",
+      "https://fonts.googleapis.com",
+    ],
+    // The app intentionally renders style attributes in several server components
+    // (grid decorations, responsive placeholders, and streamed fallback shells).
+    // Make this explicit to stop browsers from treating style attributes as an
+    // implicit fallback violation.
+    "style-src-attr": ["'unsafe-inline'"],
     "img-src": [
       "'self'",
       "data:",

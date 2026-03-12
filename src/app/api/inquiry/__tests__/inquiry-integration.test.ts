@@ -17,6 +17,8 @@ import { processLead } from "@/lib/lead-pipeline";
 import { verifyTurnstile } from "@/lib/turnstile";
 import { POST } from "../route";
 
+vi.unmock("zod");
+
 // ── External service mocks ──────────────────────────────────────────
 
 vi.mock("@/lib/logger", () => ({
@@ -68,6 +70,15 @@ vi.mock("@/lib/lead-pipeline/lead-schema", () => ({
     PRODUCT: "PRODUCT",
     CONTACT: "CONTACT",
   },
+  productLeadSchema: {
+    safeParse: vi.fn((input: Record<string, unknown>) => ({
+      success: true,
+      data: {
+        ...input,
+        type: "PRODUCT",
+      },
+    })),
+  },
 }));
 
 // CORS utilities
@@ -103,9 +114,10 @@ function createRequest(
 ): NextRequest {
   return new NextRequest("http://localhost:3000/api/inquiry", {
     method: "POST",
-    body: JSON.stringify(body),
+    body: typeof body === "string" ? body : JSON.stringify(body),
     headers: {
       "Content-Type": "application/json",
+      "Idempotency-Key": `test-inquiry-key-${Date.now()}-${Math.random()}`,
       "x-forwarded-for": "203.0.113.50",
       ...headers,
     },
@@ -178,10 +190,8 @@ describe("/api/inquiry — integration (protection chain)", () => {
     });
 
     it("invalid JSON returns 400 before turnstile check", async () => {
-      const request = new NextRequest("http://localhost:3000/api/inquiry", {
-        method: "POST",
-        body: "not valid json {{{",
-        headers: { "Content-Type": "application/json" },
+      const request = createRequest("not valid json {{{", {
+        "Idempotency-Key": "invalid-json-key",
       });
 
       const response = await POST(request);
@@ -189,6 +199,7 @@ describe("/api/inquiry — integration (protection chain)", () => {
 
       expect(response.status).toBe(400);
       expect(data.success).toBe(false);
+      expect(data.errorCode).toBe(API_ERROR_CODES.INVALID_JSON_BODY);
       expect(verifyTurnstile).not.toHaveBeenCalled();
       expect(processLead).not.toHaveBeenCalled();
     });

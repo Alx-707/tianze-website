@@ -3,7 +3,7 @@
  * Tests for ProductInquiryForm component
  */
 import React from "react";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ProductInquiryForm } from "../product-inquiry-form";
 
@@ -477,6 +477,51 @@ describe("ProductInquiryForm", () => {
   });
 
   describe("form submission", () => {
+    it("sends Idempotency-Key when submitting inquiry", async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ success: true }),
+      });
+
+      render(
+        <ProductInquiryForm
+          productName="Test Product"
+          productSlug="test-product"
+        />,
+      );
+
+      fireEvent.click(screen.getByTestId("turnstile-success-trigger"));
+      fireEvent.change(screen.getByLabelText(/Name/i), {
+        target: { value: "John Doe" },
+      });
+      fireEvent.change(screen.getByLabelText(/Email/i), {
+        target: { value: "john@example.com" },
+      });
+      fireEvent.change(screen.getByLabelText(/Quantity/i), {
+        target: { value: "100 pcs" },
+      });
+
+      const form = screen
+        .getByRole("button", {
+          name: /Send Inquiry/i,
+        })
+        .closest("form");
+      expect(form).toBeTruthy();
+      fireEvent.submit(form!);
+
+      await waitFor(() => {
+        expect(mockFetch).toHaveBeenCalledWith(
+          "/api/inquiry",
+          expect.objectContaining({
+            headers: expect.objectContaining({
+              "Content-Type": "application/json",
+              "Idempotency-Key": expect.any(String),
+            }),
+          }),
+        );
+      });
+    });
+
     it("calls onSuccess callback after successful submission", async () => {
       const onSuccessMock = vi.fn();
       mockFetch.mockResolvedValueOnce({

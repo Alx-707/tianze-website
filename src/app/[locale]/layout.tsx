@@ -16,7 +16,7 @@ import { Header } from "@/components/layout/header";
 import { LazyToaster } from "@/components/lazy/lazy-toaster";
 import { LazyTopLoader } from "@/components/lazy/lazy-top-loader";
 import { ThemeProvider } from "@/components/theme-provider";
-import { ThemeSwitcher } from "@/components/ui/theme-switcher";
+import { LazyThemeSwitcher } from "@/components/ui/lazy-theme-switcher";
 import { LazyWhatsAppButton } from "@/components/whatsapp/lazy-whatsapp-button";
 import { getAppConfig } from "@/config/app";
 import { FOOTER_COLUMNS, FOOTER_STYLE_TOKENS } from "@/config/footer-links";
@@ -37,18 +37,53 @@ interface AsyncLocaleLayoutContentProps {
   children: ReactNode;
 }
 
+function LayoutFallback({ locale }: { locale: "en" | "zh" }) {
+  const loadingLabel = locale === "zh" ? "页面加载中" : "Loading page";
+  const supportLabel =
+    locale === "zh" ? "工业弯管与管件解决方案" : "Industrial pipe systems";
+
+  return (
+    <div
+      aria-label={loadingLabel}
+      className="min-h-screen bg-background text-foreground"
+      data-testid="layout-fallback"
+      role="status"
+    >
+      <div className="mx-auto flex min-h-screen max-w-7xl flex-col px-6 py-10 md:px-8 md:py-12">
+        <div className="flex items-center justify-between border-b border-border/15 pb-5">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-[0.24em] text-muted-foreground">
+              Tianze Pipe
+            </p>
+            <p className="mt-2 text-sm text-muted-foreground">{supportLabel}</p>
+          </div>
+          <div className="h-9 w-24 rounded-full border border-border/30 bg-muted/40" />
+        </div>
+
+        <div className="flex flex-1 items-center">
+          <div className="max-w-2xl space-y-4">
+            <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
+              {loadingLabel}
+            </p>
+            <div className="space-y-3">
+              <div className="h-10 w-full max-w-xl rounded bg-muted/60" />
+              <div className="h-10 w-[82%] max-w-lg rounded bg-muted/45" />
+            </div>
+            <div className="space-y-2 pt-2">
+              <div className="h-4 w-full max-w-2xl rounded bg-muted/40" />
+              <div className="h-4 w-[88%] max-w-xl rounded bg-muted/30" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 async function AsyncLocaleLayoutContent({
   locale,
   children,
 }: AsyncLocaleLayoutContentProps) {
-  // Load translations for layout-level strings inside Suspense boundary
-  const tFooter = await getTranslations({
-    locale,
-    namespace: "footer",
-  });
-
-  const footerSystemStatus = tFooter("systemStatus");
-
   const appConfig = getAppConfig();
   const showWhatsAppButton =
     appConfig.features.ENABLE_WHATSAPP_CHAT &&
@@ -58,12 +93,23 @@ async function AsyncLocaleLayoutContent({
   // JSON-LD scripts are data-only and don't require nonce for CSP compliance.
   // For client-side scripts that need nonce, consider using a dynamic island component.
 
-  // Load complete messages for root provider (eliminates need for nested providers)
-  const messages = await loadCompleteMessages(locale);
+  const [tFooter, tNavigation, messages, structuredData] = await Promise.all([
+    getTranslations({
+      locale,
+      namespace: "footer",
+    }),
+    getTranslations({
+      locale,
+      namespace: "navigation",
+    }),
+    // Load complete messages for root provider (eliminates need for nested providers)
+    loadCompleteMessages(locale),
+    generatePageStructuredData(locale),
+  ]);
 
-  // 生成结构化数据
-  const { organizationData, websiteData } =
-    await generatePageStructuredData(locale);
+  const footerSystemStatus = tFooter("systemStatus");
+  const contactSalesLabel = tNavigation("contactSales");
+  const { organizationData, websiteData } = structuredData;
 
   return (
     <>
@@ -96,7 +142,7 @@ async function AsyncLocaleLayoutContent({
           <LazyTopLoader />
 
           {/* 导航栏 */}
-          <Header locale={locale} />
+          <Header locale={locale} contactSalesLabel={contactSalesLabel} />
 
           {/* 主要内容 */}
           <main className="flex-1">{children}</main>
@@ -111,7 +157,7 @@ async function AsyncLocaleLayoutContent({
               </span>
             }
             themeToggleSlot={
-              <ThemeSwitcher data-testid="footer-theme-toggle" />
+              <LazyThemeSwitcher data-testid="footer-theme-toggle" />
             }
           />
 
@@ -170,7 +216,7 @@ export default async function LocaleLayout({
             />
           </>
         )}
-        <Suspense fallback={null}>
+        <Suspense fallback={<LayoutFallback locale={typedLocale} />}>
           <AsyncLocaleLayoutContent locale={typedLocale}>
             {children}
           </AsyncLocaleLayoutContent>

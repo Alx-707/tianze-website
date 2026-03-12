@@ -154,6 +154,21 @@ describe("WhatsApp Send Route", () => {
       expect(response.status).toBe(400);
       expect(data.errorCode).toBe("INVALID_REQUEST");
     });
+
+    it("should return 413 when payload exceeds the shared JSON body limit", async () => {
+      const request = createMockRequest("POST", {
+        to: "+1234567890",
+        type: "text",
+        content: { body: "Hello World!" },
+      });
+      request.headers.set("Content-Length", "70000");
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(413);
+      expect(data.errorCode).toBe("PAYLOAD_TOO_LARGE");
+    });
   });
 
   describe("POST - Template Messages", () => {

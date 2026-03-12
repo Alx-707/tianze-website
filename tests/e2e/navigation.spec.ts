@@ -233,8 +233,9 @@ test.describe("Navigation System", () => {
       });
       await expect(mobileMenuButton).toBeVisible();
 
-      // Verify hamburger icon
-      const menuIcon = mobileMenuButton.locator(".lucide-menu");
+      // Verify the menu trigger still renders an icon even after moving away
+      // from lucide-react for the lightweight pre-hydration button.
+      const menuIcon = mobileMenuButton.locator("svg[aria-hidden='true']");
       await expect(menuIcon).toBeVisible();
     });
 

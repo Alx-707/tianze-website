@@ -8,35 +8,6 @@ import { describe, expect, it, vi } from "vitest";
 import { SITE_CONFIG } from "@/config/paths/site-config";
 import { Logo, LogoCompact, LogoLarge } from "../logo";
 
-// Mock next/image
-vi.mock("next/image", () => ({
-  default: ({
-    src,
-    alt,
-    width,
-    height,
-    className,
-    priority,
-  }: {
-    src: string;
-    alt: string;
-    width: number;
-    height: number;
-    className?: string;
-    priority?: boolean;
-  }) => (
-    <img
-      src={src}
-      alt={alt}
-      width={width}
-      height={height}
-      className={className}
-      data-testid="logo-image"
-      data-priority={priority ? "true" : undefined}
-    />
-  ),
-}));
-
 // Mock @/i18n/routing Link (locale-aware navigation)
 vi.mock("@/i18n/routing", () => ({
   Link: ({
@@ -73,7 +44,9 @@ describe("Logo", () => {
     it("renders logo image", () => {
       render(<Logo />);
 
-      const image = screen.getByTestId("logo-image");
+      const image = screen.getByRole("img", {
+        name: `${SITE_CONFIG.name} Logo`,
+      });
       expect(image).toBeInTheDocument();
       expect(image).toHaveAttribute("alt", `${SITE_CONFIG.name} Logo`);
     });
@@ -91,11 +64,13 @@ describe("Logo", () => {
       expect(link).toHaveAttribute("aria-label", SITE_CONFIG.name);
     });
 
-    it("has priority attribute on image", () => {
+    it("loads logo eagerly", () => {
       render(<Logo />);
 
-      const image = screen.getByTestId("logo-image");
-      expect(image).toHaveAttribute("data-priority", "true");
+      const image = screen.getByRole("img", {
+        name: `${SITE_CONFIG.name} Logo`,
+      });
+      expect(image).toHaveAttribute("loading", "eager");
     });
   });
 
@@ -117,21 +92,27 @@ describe("Logo", () => {
     it("applies sm size class to image", () => {
       render(<Logo size="sm" />);
 
-      const image = screen.getByTestId("logo-image");
+      const image = screen.getByRole("img", {
+        name: `${SITE_CONFIG.name} Logo`,
+      });
       expect(image).toHaveClass("h-6");
     });
 
     it("applies md size class to image (default)", () => {
       render(<Logo size="md" />);
 
-      const image = screen.getByTestId("logo-image");
+      const image = screen.getByRole("img", {
+        name: `${SITE_CONFIG.name} Logo`,
+      });
       expect(image).toHaveClass("h-8");
     });
 
     it("applies lg size class to image", () => {
       render(<Logo size="lg" />);
 
-      const image = screen.getByTestId("logo-image");
+      const image = screen.getByRole("img", {
+        name: `${SITE_CONFIG.name} Logo`,
+      });
       expect(image).toHaveClass("h-10");
     });
 
@@ -188,21 +169,27 @@ describe("Logo", () => {
     it("uses correct src path", () => {
       render(<Logo />);
 
-      const image = screen.getByTestId("logo-image");
+      const image = screen.getByRole("img", {
+        name: `${SITE_CONFIG.name} Logo`,
+      });
       expect(image).toHaveAttribute("src", "/next.svg");
     });
 
     it("has dark mode invert class", () => {
       render(<Logo />);
 
-      const image = screen.getByTestId("logo-image");
+      const image = screen.getByRole("img", {
+        name: `${SITE_CONFIG.name} Logo`,
+      });
       expect(image).toHaveClass("dark:invert");
     });
 
     it("has transition class", () => {
       render(<Logo />);
 
-      const image = screen.getByTestId("logo-image");
+      const image = screen.getByRole("img", {
+        name: `${SITE_CONFIG.name} Logo`,
+      });
       expect(image).toHaveClass("transition-all");
     });
   });
@@ -251,14 +238,18 @@ describe("LogoCompact", () => {
   it("renders Logo with showText false", () => {
     render(<LogoCompact />);
 
-    expect(screen.getByTestId("logo-image")).toBeInTheDocument();
+    expect(
+      screen.getByRole("img", { name: `${SITE_CONFIG.name} Logo` }),
+    ).toBeInTheDocument();
     expect(screen.queryByText(SITE_CONFIG.name)).not.toBeInTheDocument();
   });
 
   it("uses sm size", () => {
     render(<LogoCompact />);
 
-    const image = screen.getByTestId("logo-image");
+    const image = screen.getByRole("img", {
+      name: `${SITE_CONFIG.name} Logo`,
+    });
     expect(image).toHaveClass("h-6");
   });
 
@@ -274,14 +265,18 @@ describe("LogoLarge", () => {
   it("renders Logo with showText true", () => {
     render(<LogoLarge />);
 
-    expect(screen.getByTestId("logo-image")).toBeInTheDocument();
+    expect(
+      screen.getByRole("img", { name: `${SITE_CONFIG.name} Logo` }),
+    ).toBeInTheDocument();
     expect(screen.getByText(SITE_CONFIG.name)).toBeInTheDocument();
   });
 
   it("uses lg size", () => {
     render(<LogoLarge />);
 
-    const image = screen.getByTestId("logo-image");
+    const image = screen.getByRole("img", {
+      name: `${SITE_CONFIG.name} Logo`,
+    });
     expect(image).toHaveClass("h-10");
   });
 

@@ -3,7 +3,10 @@ import {
   I18nPerformanceMonitor,
   TranslationCache,
 } from "@/lib/i18n-performance";
-import { loadCompleteMessages } from "@/lib/load-messages";
+import {
+  loadCompleteMessages,
+  loadCompleteMessagesFromSource,
+} from "@/lib/load-messages";
 import { COUNT_FIVE, ONE } from "@/constants";
 import { routing } from "@/i18n/routing";
 
@@ -119,7 +122,7 @@ async function createFallbackResponse(locale: string, startTime: number) {
 
   return {
     locale,
-    messages: (await import(`../../messages/${locale}.json`)).default,
+    messages: await loadCompleteMessagesFromSource(locale),
     timeZone: locale === "zh" ? "Asia/Shanghai" : "UTC",
     formats: getFormats(locale),
     strictMessageTypeSafety: true,

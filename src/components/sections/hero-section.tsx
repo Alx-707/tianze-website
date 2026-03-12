@@ -1,13 +1,11 @@
-"use client";
+import { getTranslations } from "next-intl/server";
 
-import { useTranslations } from "next-intl";
-
-import { AnimatedCounter, formatters } from "@/components/ui/animated-counter";
 import { Button } from "@/components/ui/button";
+import { DesktopDecorationGate } from "@/components/grid/desktop-decoration-gate";
 import { HeroGuideOverlay } from "@/components/grid";
+import { HeroProofCounter } from "@/components/sections/hero-proof-counter";
 import { Link } from "@/i18n/routing";
 
-const COUNTUP_DURATION = 1200;
 const PROOF_COUNTRIES_END = 20;
 const PROOF_EST_END = 2006;
 
@@ -43,24 +41,17 @@ function HeroEyebrow({ text }: { text: string }) {
   );
 }
 
-function ProofBar({ t }: { t: ReturnType<typeof useTranslations<"home">> }) {
+function ProofBar({ t }: { t: Awaited<ReturnType<typeof getTranslations>> }) {
   return (
     <div className="hero-stagger-5 mt-7 flex flex-wrap gap-6 border-t border-border-light pt-6 md:gap-8">
       {PROOF_ITEMS.map(({ valueKey, labelKey, countUp }) => (
         <div key={valueKey} className="flex flex-col gap-1.5">
           <span className="text-xl font-semibold tabular-nums">
             {countUp ? (
-              <AnimatedCounter
+              <HeroProofCounter
+                ariaLabel={t(valueKey)}
                 to={countUp.end}
-                duration={COUNTUP_DURATION}
-                formatter={
-                  countUp.suffix
-                    ? (v: number) => `${formatters.default(v)}${countUp.suffix}`
-                    : formatters.default
-                }
-                triggerOnVisible
-                role="text"
-                aria-label={t(valueKey)}
+                {...(countUp.suffix ? { suffix: countUp.suffix } : {})}
               />
             ) : (
               t(valueKey)
@@ -85,15 +76,17 @@ function HeroVisual() {
   );
 }
 
-export function HeroSection() {
-  const t = useTranslations("home");
+export async function HeroSection() {
+  const t = await getTranslations("home");
 
   return (
     <section
       data-testid="hero-section"
       className="relative px-6 py-10 pb-14 md:py-16 md:pb-[72px]"
     >
-      <HeroGuideOverlay />
+      <DesktopDecorationGate>
+        <HeroGuideOverlay />
+      </DesktopDecorationGate>
       <div className="relative z-[1] mx-auto grid max-w-[1080px] grid-cols-1 items-center gap-12 md:grid-cols-2">
         {/* Left column — Copy */}
         <div className="flex flex-col">

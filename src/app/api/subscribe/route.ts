@@ -17,7 +17,7 @@ import { HTTP_BAD_REQUEST, HTTP_INTERNAL_ERROR } from "@/constants";
 import { API_ERROR_CODES } from "@/constants/api-error-codes";
 
 type SafeParseSuccess<T> = { ok: true; data: T };
-type SafeParseFailure = { ok: false; errorCode: string };
+type SafeParseFailure = { ok: false; errorCode: string; statusCode: number };
 
 function safeParseJson<T>(
   req: NextRequest,
@@ -84,9 +84,9 @@ function handlePost(
         return NextResponse.json(
           {
             success: false,
-            errorCode: API_ERROR_CODES.INVALID_JSON_BODY,
+            errorCode: parsedBody.errorCode,
           },
-          { status: HTTP_BAD_REQUEST },
+          { status: parsedBody.statusCode },
         );
       }
 

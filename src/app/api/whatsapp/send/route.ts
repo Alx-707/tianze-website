@@ -295,7 +295,10 @@ async function parseSendMessageRequest(
   });
   if (!parsedBody.ok) {
     return {
-      error: createApiErrorResponse(parsedBody.errorCode, HTTP_BAD_REQUEST),
+      error: createApiErrorResponse(
+        parsedBody.errorCode,
+        parsedBody.statusCode,
+      ),
     };
   }
   const body = parsedBody.data;

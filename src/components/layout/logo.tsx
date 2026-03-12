@@ -5,8 +5,6 @@
  * Supports both text and image logos with automatic dark mode handling.
  * P0-2 Fix: Converted to Server Component (no interactivity needed)
  */
-
-import Image from "next/image";
 import { Link } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
 import { SITE_CONFIG } from "@/config/paths/site-config";
@@ -63,8 +61,9 @@ export function Logo({
       )}
       aria-label={ariaLabel}
     >
-      {/* Logo Image - Using Next.js logo as placeholder */}
-      <Image
+      {/* Static logo asset does not need next/image client runtime. */}
+      {/* eslint-disable-next-line @next/next/no-img-element -- static local SVG logo should not pull next/image runtime into the shared layout chunk */}
+      <img
         src="/next.svg"
         alt={`${SITE_CONFIG.name} Logo`}
         width={COUNT_120}
@@ -73,7 +72,8 @@ export function Logo({
           "transition-all duration-200 dark:invert",
           getSizeClass(size),
         )}
-        priority
+        decoding="async"
+        loading="eager"
       />
 
       {/* Logo Text */}

@@ -28,6 +28,8 @@ See `/.claude/rules/threat-modeling.md` for STRIDE analysis on new/changed API r
 - API routes must call `schema.parse(body)` before processing
 - Query params: explicitly validate type (may be string/array/object)
 - File paths: use allowlist or `path.resolve()` + prefix check (symlinks may escape)
+- Public JSON endpoints must have an explicit **body size gate** before or during parsing
+- Shared JSON parsers (for example `safeParseJson`) are preferred over per-route ad hoc parsing so size/error behavior stays consistent
 
 ## Static Analysis (Semgrep)
 
@@ -40,6 +42,7 @@ See `/.claude/rules/threat-modeling.md` for STRIDE analysis on new/changed API r
 |---------|--------|
 | Rate Limiting | Default 10/min/IP, Contact API 5/min/IP |
 | Anti-abuse / Bot 过滤 | Cloudflare Turnstile（human 校验，非 CSRF token） |
+| Idempotency | Required for side-effectful public write paths where duplicate submission matters |
 | CSRF | 当前架构无需（无 cookie-based session auth）；若引入后必须加 Origin 校验 + SameSite + CSRF token |
 
 Rate limit utility: `src/lib/security/distributed-rate-limit.ts`
@@ -50,15 +53,24 @@ Rate limit utility: `src/lib/security/distributed-rate-limit.ts`
 |----------|---------------------|--------|
 | `/api/whatsapp/send` | API Key Auth + Rate Limit | ✅ |
 | `/api/whatsapp/webhook` | Signature Verify + Rate Limit | ✅ |
-| `/api/contact` | Rate Limit | ✅ |
-| `/api/inquiry` | Turnstile + Rate Limit | ✅ |
-| `/api/subscribe` | Rate Limit | ✅ |
+| `/api/contact` | Rate Limit + JSON body size gate | ✅ |
+| `/api/inquiry` | Turnstile + Rate Limit + Idempotency + JSON body size gate | ✅ |
+| `/api/subscribe` | Rate Limit + Idempotency + JSON body size gate | ✅ |
 | `/api/cache/invalidate` | Secret Auth + Pre/Post Rate Limit | ✅ |
-| `/api/csp-report` | Rate Limit | ✅ |
-| `/api/verify-turnstile` | (Verification endpoint) | - |
+| `/api/csp-report` | Rate Limit + Body size gate | ✅ |
+| `/api/verify-turnstile` | JSON body size gate | ✅ |
 | `/api/health` | (Public healthcheck) | - |
 
 New write endpoints (POST/PUT/PATCH/DELETE) must have explicit anti-abuse strategy before merge: auth, OR Turnstile + rate-limit + input validation（公开提交类接口如 contact/subscribe 适用后者）。
+
+### Public Write Endpoint Rule
+
+For public write endpoints, verify all applicable controls:
+- rate limit
+- body size gate
+- input validation
+- Turnstile or equivalent anti-abuse check when exposed to browsers
+- idempotency when duplicate submissions would create duplicate side effects
 
 ### Security Headers
 - `Strict-Transport-Security: max-age=63072000; includeSubDomains; preload`

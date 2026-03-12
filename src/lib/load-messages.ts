@@ -1,15 +1,13 @@
 /**
  * Translation Message Loader
  *
- * Loads externalized translation files from public/messages/ using Next.js caching.
- * Translation files are copied to public/ during build (prebuild script).
+ * Runtime canonical source is split message files under `messages/{locale}/`.
+ * Flat locale files may still exist for tooling/tests, but server runtime must
+ * not depend on them.
  */
 
-import { readFile } from "fs/promises";
-import { join } from "path";
 import { unstable_cache } from "next/cache";
 import { i18nTags } from "@/lib/cache/cache-tags";
-import { logger } from "@/lib/logger";
 import { mergeObjects } from "@/lib/merge-objects";
 import { MONITORING_INTERVALS } from "@/constants/performance-constants";
 import { routing } from "@/i18n/routing";
@@ -21,8 +19,21 @@ type MessageType = "critical" | "deferred";
 const isCiEnv =
   process.env.CI === "true" || process.env.PLAYWRIGHT_TEST === "true";
 const isDev = () => process.env.NODE_ENV === "development";
-const isBuild = () => process.env.NEXT_PHASE === "phase-production-build";
 const revalidate = () => (isDev() ? 1 : MONITORING_INTERVALS.CACHE_CLEANUP);
+
+const MESSAGE_LOADERS: Record<
+  Locale,
+  Record<MessageType, () => Promise<{ default: Messages }>>
+> = {
+  en: {
+    critical: () => import("@messages/en/critical.json"),
+    deferred: () => import("@messages/en/deferred.json"),
+  },
+  zh: {
+    critical: () => import("@messages/zh/critical.json"),
+    deferred: () => import("@messages/zh/deferred.json"),
+  },
+};
 
 function sanitizeLocale(input: string): Locale {
   return ["en", "zh"].includes(input)
@@ -30,71 +41,18 @@ function sanitizeLocale(input: string): Locale {
     : (routing.defaultLocale as Locale);
 }
 
-function getBaseUrl(): string {
-  return (
-    process.env.NEXT_PUBLIC_BASE_URL ??
-    `http://localhost:${process.env.PORT || 3000}`
-  );
-}
-
-async function loadFromPath(
-  locale: Locale,
-  type: MessageType,
-  base: string,
-): Promise<Messages> {
-  // eslint-disable-next-line security/detect-non-literal-fs-filename -- locale is sanitized
-  const content = await readFile(
-    join(process.cwd(), base, locale, `${type}.json`),
-    "utf-8",
-  );
-  return JSON.parse(content) as Messages;
-}
-
-async function loadWithFallback(
+async function loadMessageSource(
   locale: Locale,
   type: MessageType,
 ): Promise<Messages> {
-  try {
-    return await loadFromPath(locale, type, "public/messages");
-  } catch (e) {
-    logger.error(`Failed to read ${type} from public for ${locale}:`, e);
-  }
-  try {
-    return await loadFromPath(locale, type, "messages");
-  } catch (e) {
-    logger.error(`Failed to read ${type} from source for ${locale}:`, e);
-    throw new Error(`Cannot load ${type} messages for ${locale}`);
-  }
-}
-
-async function fetchWithFallback(
-  locale: Locale,
-  type: MessageType,
-): Promise<Messages> {
-  const url = `${getBaseUrl()}/messages/${locale}/${type}.json`;
-  try {
-    // cache: "no-store" prevents a second independent fetch-cache layer.
-    // Caching is handled entirely by the outer unstable_cache wrapper, so
-    // revalidateTag("i18n:...") can fully invalidate the translation data.
-    const res = await fetch(url, { cache: "no-store" });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return (await res.json()) as Messages;
-  } catch (e) {
-    logger.error(`HTTP fetch of ${type} failed for ${locale}:`, e);
-    return loadWithFallback(locale, type);
-  }
-}
-
-function loadCore(locale: Locale, type: MessageType): Promise<Messages> {
-  const safe = sanitizeLocale(locale);
-  return isBuild() || isDev() || isCiEnv
-    ? loadWithFallback(safe, type)
-    : fetchWithFallback(safe, type);
+  const safeLocale = sanitizeLocale(locale);
+  const loadedMessages = await MESSAGE_LOADERS[safeLocale][type]();
+  return loadedMessages.default;
 }
 
 function createCached(locale: Locale, type: MessageType) {
   return unstable_cache(
-    () => loadCore(locale, type),
+    () => loadMessageSource(locale, type),
     [`i18n-${type}`, locale],
     {
       revalidate: revalidate(),
@@ -107,7 +65,10 @@ function createCached(locale: Locale, type: MessageType) {
 }
 
 function load(locale: Locale, type: MessageType): Promise<Messages> {
-  return isCiEnv ? loadCore(locale, type) : createCached(locale, type)();
+  const safeLocale = sanitizeLocale(locale);
+  return isCiEnv
+    ? loadMessageSource(safeLocale, type)
+    : createCached(safeLocale, type)();
 }
 
 export function loadCriticalMessages(locale: Locale): Promise<Messages> {
@@ -118,14 +79,22 @@ export function loadDeferredMessages(locale: Locale): Promise<Messages> {
   return load(locale, "deferred");
 }
 
-export async function loadCompleteMessages(locale: Locale): Promise<Messages> {
+export async function loadCompleteMessagesFromSource(
+  locale: string,
+): Promise<Messages> {
+  const safeLocale = sanitizeLocale(locale);
   const [critical, deferred] = await Promise.all([
-    isBuild()
-      ? loadFromPath(locale, "critical", "messages")
-      : loadCriticalMessages(locale),
-    isBuild()
-      ? loadFromPath(locale, "deferred", "messages")
-      : loadDeferredMessages(locale),
+    loadMessageSource(safeLocale, "critical"),
+    loadMessageSource(safeLocale, "deferred"),
+  ]);
+  return mergeObjects(critical ?? {}, deferred ?? {}) as Messages;
+}
+
+export async function loadCompleteMessages(locale: Locale): Promise<Messages> {
+  const safeLocale = sanitizeLocale(locale);
+  const [critical, deferred] = await Promise.all([
+    loadCriticalMessages(safeLocale),
+    loadDeferredMessages(safeLocale),
   ]);
   return mergeObjects(critical ?? {}, deferred ?? {}) as Messages;
 }

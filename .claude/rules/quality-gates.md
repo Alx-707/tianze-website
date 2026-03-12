@@ -56,6 +56,12 @@ pnpm ci:local  # One-command local CI
 
 Flow: type-check → lint → format → test → security → build → lighthouse
 
+## Lint Scope Integrity
+
+- ESLint / local CI must target project code, not repo-local workspace noise
+- Repo-local agent/tooling directories (for example `.agent/`, `.agents/`, `.continue/`, `.factory/`, `.kiro/`, `skills/`) must stay outside lint gates unless intentionally brought under project governance
+- If `lint:check` fails on local workspace assets rather than project code, fix scope before trusting the gate result
+
 ## Dependency Upgrade Gate
 
 When upgrading `next` / `react` / `typescript` or dependencies with security alerts, run validation:
