@@ -17,6 +17,8 @@ import { processLead } from "@/lib/lead-pipeline";
 import { verifyTurnstile } from "@/lib/turnstile";
 import { POST } from "../route";
 
+vi.unmock("zod");
+
 // ── External service mocks ──────────────────────────────────────────
 
 vi.mock("@/lib/logger", () => ({

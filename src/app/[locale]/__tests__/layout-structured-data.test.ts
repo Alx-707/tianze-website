@@ -83,10 +83,10 @@ describe("Layout Structured Data Generation", () => {
   it("forwards the translator to both generators", async () => {
     await generatePageStructuredData("en");
 
-    const [[orgTranslator], [siteTranslator]] = [
-      mockGenerateOrganizationData.mock.calls[0],
-      mockGenerateWebSiteData.mock.calls[0],
-    ];
+    const orgCall = mockGenerateOrganizationData.mock.calls[0];
+    const siteCall = mockGenerateWebSiteData.mock.calls[0];
+    const orgTranslator = orgCall![0] as (key: string) => string;
+    const siteTranslator = siteCall![0] as (key: string) => string;
 
     expect(orgTranslator("organization.name")).toBe("organization.name");
     expect(siteTranslator("website.name")).toBe("website.name");

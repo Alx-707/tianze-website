@@ -3,8 +3,8 @@
  * Handles product-specific inquiries via product page drawer
  */
 
+import "server-only";
 import { NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
 import { createApiErrorResponse } from "@/lib/api/api-response";
 import {
   applyCorsHeaders,
@@ -105,10 +105,6 @@ interface TurnstileValidationOptions {
   clientIP: string;
 }
 
-const inquiryRequestSchema = z.object({
-  turnstileToken: z.string().min(1),
-});
-
 /**
  * Validate Turnstile token and return error response if invalid
  */
@@ -174,16 +170,12 @@ const POST_RATE_LIMITED = withRateLimit(
               HTTP_BAD_REQUEST,
             );
           }
-          const parsedRequest = inquiryRequestSchema.safeParse(data);
-          if (!parsedRequest.success) {
-            return createApiErrorResponse(
-              API_ERROR_CODES.INQUIRY_VALIDATION_FAILED,
-              HTTP_BAD_REQUEST,
-            );
-          }
 
           const turnstileError = await validateTurnstile({
-            token: parsedRequest.data.turnstileToken,
+            token:
+              typeof data.turnstileToken === "string"
+                ? data.turnstileToken
+                : undefined,
             clientIP,
           });
           if (turnstileError) return turnstileError;

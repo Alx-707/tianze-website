@@ -5,6 +5,8 @@ import { processLead } from "@/lib/lead-pipeline";
 import { verifyTurnstile } from "@/lib/turnstile";
 import { OPTIONS, POST } from "../route";
 
+vi.unmock("zod");
+
 // Mock dependencies before imports
 vi.mock("@/lib/logger", () => ({
   logger: {
