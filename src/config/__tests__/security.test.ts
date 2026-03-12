@@ -31,8 +31,11 @@ describe("Security Configuration", () => {
       expect(csp).toContain("default-src 'self'");
       // style-src allows 'unsafe-inline' for Tailwind CSS compatibility
       expect(csp).toMatch(/style-src[^;]*'unsafe-inline'/);
+      expect(csp).toMatch(/style-src-elem[^;]*'unsafe-inline'/);
       // script-src should NOT contain unsafe-inline in production
-      expect(csp).not.toMatch(/script-src[^;]*'unsafe-inline'/);
+      expect(csp).not.toMatch(/script-src(?!-elem)[^;]*'unsafe-inline'/);
+      // script-src-elem is explicitly relaxed for prerendered App Router output
+      expect(csp).toMatch(/script-src-elem[^;]*'unsafe-inline'/);
       expect(csp).not.toContain("'unsafe-eval'");
       expect(csp).toContain("upgrade-insecure-requests");
     });

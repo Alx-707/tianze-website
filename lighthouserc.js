@@ -23,9 +23,10 @@
 // 这将CI耗时从15分钟优化至5-8分钟
 const isDaily = process.env.CI_DAILY === "true";
 
-// Root path performs locale redirect in middleware. In headless CI this redirect
-// occasionally produces a NO_FCP Lighthouse runtime failure, while `/en` and `/zh`
-// exercise the real rendered entry pages directly.
+// Root path redirects to the locale entry page. Lighthouse can audit it now, but
+// still reports the redirect as a warning and adds redirect latency noise.
+// `/en` and `/zh` exercise the real rendered entry pages directly and keep CI
+// signals stable.
 const criticalUrls = ["http://localhost:3000/en", "http://localhost:3000/zh"];
 
 const allUrls = [
