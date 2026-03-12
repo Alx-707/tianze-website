@@ -4,12 +4,13 @@ import { useEffect, useState, type ComponentType } from "react";
 import { usePathname } from "next/navigation";
 import { FIVE_SECONDS_MS, THIRTY_SECONDS_MS } from "@/constants/time";
 import { useIdleRender } from "@/hooks/use-idle-render";
+import type { ThemeSwitcherProps } from "@/components/ui/theme-switcher";
 
-type ToasterModule = {
-  Component: ComponentType;
+type ThemeSwitcherModule = {
+  Component: ComponentType<ThemeSwitcherProps>;
 };
 
-export function LazyToaster() {
+export function LazyThemeSwitcher(props: ThemeSwitcherProps) {
   const pathname = usePathname();
   const isHomePage = pathname === "/en" || pathname === "/zh";
   const shouldRenderOnOtherPages = useIdleRender({
@@ -17,7 +18,7 @@ export function LazyToaster() {
     fallbackDelay: FIVE_SECONDS_MS,
   });
   const [homeDelayElapsed, setHomeDelayElapsed] = useState(false);
-  const [module, setModule] = useState<ToasterModule | null>(null);
+  const [module, setModule] = useState<ThemeSwitcherModule | null>(null);
 
   useEffect(() => {
     if (!isHomePage) {
@@ -40,15 +41,15 @@ export function LazyToaster() {
 
     let cancelled = false;
 
-    const loadToaster = async () => {
-      const importedModule = await import("@/components/ui/toaster");
+    const loadThemeSwitcher = async () => {
+      const importedModule = await import("@/components/ui/theme-switcher");
       if (!cancelled) {
-        setModule({ Component: importedModule.Toaster });
+        setModule({ Component: importedModule.ThemeSwitcher });
       }
     };
 
-    loadToaster().catch(() => {
-      // Ignore lazy import failures; the page can function without the toaster.
+    loadThemeSwitcher().catch(() => {
+      // Ignore lazy import failures; theme switching is non-critical.
     });
 
     return () => {
@@ -58,5 +59,6 @@ export function LazyToaster() {
 
   if (!shouldRender) return null;
   if (!module) return null;
-  return <module.Component />;
+
+  return <module.Component {...props} />;
 }

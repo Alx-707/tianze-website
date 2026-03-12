@@ -1,6 +1,9 @@
-@import "tailwindcss";
-@source not "../../.claude";
-@source not "../../.agents";
+@import "tailwindcss" source(none);
+@source "../app";
+@source "../components";
+@source "../lib/content";
+@source "../../content";
+@source "../../mdx-components.tsx";
 
 /* Tailwind v4 Plugins (order: animate before typography)
    - tailwindcss-animate: UI animation keyframes (animate-in, fade-in, slide-in-*)

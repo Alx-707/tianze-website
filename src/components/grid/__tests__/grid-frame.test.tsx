@@ -2,7 +2,7 @@
  * @vitest-environment jsdom
  */
 
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { GridFrame } from "@/components/grid/grid-frame";
 
@@ -17,19 +17,25 @@ describe("GridFrame", () => {
     expect(screen.getByTestId("child")).toBeInTheDocument();
   });
 
-  it("renders outer frame border element with hidden lg:block", () => {
+  it("renders outer frame border element with hidden lg:block", async () => {
     const { container } = render(
       <GridFrame>
         <div>Content</div>
       </GridFrame>,
     );
 
+    await waitFor(() => {
+      expect(
+        container.querySelector("[aria-hidden='true']"),
+      ).toBeInTheDocument();
+    });
+
     const frame = container.querySelector("[aria-hidden='true']");
     expect(frame).toBeInTheDocument();
     expect(frame).toHaveClass("hidden", "lg:block");
   });
 
-  it("renders crosshairs matching provided count", () => {
+  it("renders crosshairs matching provided count", async () => {
     const { container } = render(
       <GridFrame
         crosshairs={[
@@ -41,17 +47,25 @@ describe("GridFrame", () => {
       </GridFrame>,
     );
 
+    await waitFor(() => {
+      expect(container.querySelectorAll(".z-20").length).toBe(2);
+    });
+
     // 2 crosshair wrapper divs (z-20) — direct children of the root
     const crosshairWrappers = container.querySelectorAll(".z-20");
     expect(crosshairWrappers.length).toBe(2);
   });
 
-  it("renders no crosshairs when none provided", () => {
+  it("renders no crosshairs when none provided", async () => {
     const { container } = render(
       <GridFrame>
         <div>Content</div>
       </GridFrame>,
     );
+
+    await waitFor(() => {
+      expect(container.querySelectorAll("[aria-hidden='true']").length).toBe(1);
+    });
 
     // Only the frame element should have aria-hidden
     const ariaHiddenElements = container.querySelectorAll(
@@ -60,12 +74,18 @@ describe("GridFrame", () => {
     expect(ariaHiddenElements.length).toBe(1);
   });
 
-  it("applies pointer-events-none on decorative elements", () => {
+  it("applies pointer-events-none on decorative elements", async () => {
     const { container } = render(
       <GridFrame crosshairs={[{ top: 0, left: 0 }]}>
         <div>Content</div>
       </GridFrame>,
     );
+
+    await waitFor(() => {
+      expect(
+        container.querySelectorAll(".pointer-events-none").length,
+      ).toBeGreaterThanOrEqual(2);
+    });
 
     const decorativeElements = container.querySelectorAll(
       ".pointer-events-none",

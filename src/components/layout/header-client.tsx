@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import dynamic from "next/dynamic";
 
 const MobileNavigation = dynamic(
@@ -21,7 +22,37 @@ const LanguageToggle = dynamic(
 );
 
 export function MobileNavigationIsland() {
-  return <MobileNavigation />;
+  const [isActivated, setIsActivated] = useState(false);
+
+  if (isActivated) {
+    return <MobileNavigation initialOpen />;
+  }
+
+  return (
+    <button
+      type="button"
+      className="relative inline-flex h-9 w-9 items-center justify-center rounded-[6px] text-foreground transition-colors duration-150 hover:bg-accent"
+      aria-label="Toggle mobile menu"
+      data-testid="header-mobile-menu-button"
+      onClick={() => setIsActivated(true)}
+    >
+      <svg
+        aria-hidden="true"
+        className="h-5 w-5"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          d="M4 7h16M4 12h16M4 17h16"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="2"
+        />
+      </svg>
+      <span className="sr-only">Open menu</span>
+    </button>
+  );
 }
 
 export function NavSwitcherIsland() {

@@ -1,10 +1,7 @@
-"use client";
-
 import { Link } from "@/i18n/routing";
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import type { LinkHref } from "@/lib/i18n/route-parsing";
 import { Button } from "@/components/ui/button";
-import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { SectionHead } from "@/components/ui/section-head";
 
 const PRODUCT_COUNT = 4;
@@ -56,8 +53,8 @@ function ProductCard({
   );
 }
 
-export function ProductsSection() {
-  const t = useTranslations("home");
+export async function ProductsSection() {
+  const t = await getTranslations("home");
 
   const products = Array.from({ length: PRODUCT_COUNT }, (_, i) => {
     const key = `item${String(i + 1)}`;
@@ -82,24 +79,18 @@ export function ProductsSection() {
 
   return (
     <section className="section-divider py-14 md:py-[72px]">
-      <ScrollReveal className="mx-auto max-w-[1080px] px-6">
+      <div className="mx-auto max-w-[1080px] px-6">
         <SectionHead
           title={t("products.title")}
           subtitle={t("products.subtitle")}
           action={action}
         />
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          {products.map((product, index) => (
-            <ScrollReveal
-              key={product.tag}
-              direction="scale"
-              staggerIndex={index}
-            >
-              <ProductCard {...product} />
-            </ScrollReveal>
+          {products.map((product) => (
+            <ProductCard key={product.tag} {...product} />
           ))}
         </div>
-      </ScrollReveal>
+      </div>
     </section>
   );
 }

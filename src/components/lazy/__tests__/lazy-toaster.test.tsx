@@ -4,19 +4,19 @@
  */
 import { act, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import {
-  IDLE_CALLBACK_FALLBACK_DELAY,
-  IDLE_CALLBACK_TIMEOUT_LONG,
-} from "@/constants/time";
+import { FIVE_SECONDS_MS, THIRTY_SECONDS_MS } from "@/constants/time";
 import { LazyToaster } from "../lazy-toaster";
 
-// Mock next/dynamic
-vi.mock("next/dynamic", () => ({
-  default: vi.fn((_fn: () => Promise<unknown>) => {
-    const Component = () => <div data-testid="toaster">Toaster Component</div>;
-    Component.displayName = "DynamicToaster";
-    return Component;
-  }),
+const { mockUsePathname } = vi.hoisted(() => ({
+  mockUsePathname: vi.fn(() => "/about"),
+}));
+
+vi.mock("next/navigation", () => ({
+  usePathname: mockUsePathname,
+}));
+
+vi.mock("@/components/ui/toaster", () => ({
+  Toaster: () => <div data-testid="toaster">Toaster Component</div>,
 }));
 
 describe("LazyToaster", () => {
@@ -26,6 +26,7 @@ describe("LazyToaster", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.useFakeTimers();
+    mockUsePathname.mockReturnValue("/about");
 
     // Mock requestIdleCallback
     mockRequestIdleCallback = vi.fn(
@@ -74,7 +75,11 @@ describe("LazyToaster", () => {
 
       // Fire idle callback (idle timeout)
       await act(async () => {
-        vi.advanceTimersByTime(IDLE_CALLBACK_TIMEOUT_LONG);
+        vi.advanceTimersByTime(FIVE_SECONDS_MS);
+      });
+
+      await act(async () => {
+        await vi.dynamicImportSettled();
       });
 
       expect(screen.getByTestId("toaster")).toBeInTheDocument();
@@ -87,7 +92,7 @@ describe("LazyToaster", () => {
 
       expect(mockRequestIdleCallback).toHaveBeenCalledWith(
         expect.any(Function),
-        { timeout: IDLE_CALLBACK_TIMEOUT_LONG },
+        { timeout: FIVE_SECONDS_MS },
       );
     });
 
@@ -97,6 +102,26 @@ describe("LazyToaster", () => {
       unmount();
 
       expect(mockCancelIdleCallback).toHaveBeenCalled();
+    });
+  });
+
+  describe("homepage delay behavior", () => {
+    it("defers rendering longer on the homepage", async () => {
+      mockUsePathname.mockReturnValue("/en");
+      render(<LazyToaster />);
+
+      await act(async () => {
+        vi.advanceTimersByTime(FIVE_SECONDS_MS);
+      });
+
+      expect(screen.queryByTestId("toaster")).not.toBeInTheDocument();
+
+      await act(async () => {
+        vi.advanceTimersByTime(THIRTY_SECONDS_MS);
+        await vi.dynamicImportSettled();
+      });
+
+      expect(screen.getByTestId("toaster")).toBeInTheDocument();
     });
   });
 
@@ -112,12 +137,13 @@ describe("LazyToaster", () => {
 
       expect(setTimeoutSpy).toHaveBeenCalledWith(
         expect.any(Function),
-        IDLE_CALLBACK_FALLBACK_DELAY,
+        FIVE_SECONDS_MS,
       );
 
       // Advance timer
       await act(async () => {
-        vi.advanceTimersByTime(IDLE_CALLBACK_FALLBACK_DELAY);
+        vi.advanceTimersByTime(FIVE_SECONDS_MS);
+        await vi.dynamicImportSettled();
       });
 
       expect(screen.getByTestId("toaster")).toBeInTheDocument();

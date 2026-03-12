@@ -1,5 +1,3 @@
-"use client";
-
 import { heroGuides } from "@/components/grid/grid-section";
 
 const HERO_COLS = 12;
