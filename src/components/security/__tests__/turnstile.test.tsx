@@ -209,7 +209,7 @@ describe("TurnstileWidget", () => {
   describe("错误处理", () => {
     it("应该处理空的onSuccess回调", () => {
       expect(() => {
-        render(<TurnstileWidget onSuccess={undefined} />);
+        render(<TurnstileWidget />);
       }).not.toThrow();
     });
   });

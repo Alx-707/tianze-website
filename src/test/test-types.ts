@@ -273,7 +273,7 @@ export interface DynamicImportModule {
  * Mock 函数类型
  * 用于类型化 Vitest 风格的 mock（也兼容 Jest 风格结构）
  */
-export type MockFunction<T extends (..._args: unknown[]) => unknown> = T & {
+export type MockFunction<T extends (..._args: never[]) => unknown> = T & {
   mock: {
     calls: unknown[][];
     results: Array<{ type: "return" | "throw"; value: unknown }>;
