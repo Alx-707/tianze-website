@@ -8,7 +8,6 @@
  */
 
 import type { ThemeColors } from "@/lib/colors/types";
-import { _TEST_CONSTANTS } from "@/constants/test-constants";
 import {
   checkContrastCompliance,
   darkThemeColors,

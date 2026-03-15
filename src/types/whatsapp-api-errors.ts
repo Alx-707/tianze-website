@@ -1,6 +1,6 @@
 import {
   ANIMATION_DURATION_VERY_SLOW,
-  COUNT_PAIR,
+  COUNT_TWO,
   SHORT_ID_LENGTH,
   BASE36_RADIX,
   ONE,
@@ -514,7 +514,7 @@ export const ErrorUtils = {
   calculateRetryDelay(
     attempt: number,
     baseDelay: number = ANIMATION_DURATION_VERY_SLOW,
-    multiplier: number = COUNT_PAIR,
+    multiplier: number = COUNT_TWO,
     maxDelay: number = THIRTY_SECONDS_MS,
   ): number {
     const delay = baseDelay * multiplier ** (attempt - ONE);
@@ -546,7 +546,7 @@ export const ErrorUtils = {
           const buf = new Uint32Array(3);
           crypto.getRandomValues(buf);
           const randomPart = Array.from(buf, (value) =>
-            value.toString(BASE36_RADIX).padStart(COUNT_PAIR, "0"),
+            value.toString(BASE36_RADIX).padStart(COUNT_TWO, "0"),
           ).join("");
           return `error_${timestamp}_${randomPart.substring(0, SHORT_ID_LENGTH)}`;
         }

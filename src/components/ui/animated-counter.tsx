@@ -7,7 +7,7 @@ import { AccessibilityUtils } from "@/lib/accessibility-utils";
 import { logger } from "@/lib/logger";
 import { cn } from "@/lib/utils";
 import { animationUtils } from "@/components/ui/animated-counter-helpers";
-import { COUNT_PAIR, COUNT_TRIPLE, ONE, ZERO } from "@/constants";
+import { COUNT_TWO, COUNT_THREE, ONE, ZERO } from "@/constants";
 import { COUNT_4 } from "@/constants/count";
 import { DEC_0_3, DEC_0_5 } from "@/constants/decimal";
 import { ANIMATION_DURATIONS } from "@/constants/performance-constants";
@@ -25,15 +25,15 @@ export type EasingFunction = (_t: number) => number;
 // 缓动函数常量
 const EASING_CONSTANTS = {
   /** 立方幂次 */
-  CUBIC_POWER: COUNT_TRIPLE,
+  CUBIC_POWER: COUNT_THREE,
   /** 缓动阈值 */
   THRESHOLD: DEC_0_5,
   /** 缓动倍数 */
   MULTIPLIER: COUNT_4,
   /** 缓动偏移 */
-  OFFSET: -COUNT_PAIR,
+  OFFSET: -COUNT_TWO,
   /** 缓动除数 */
-  DIVISOR: COUNT_PAIR,
+  DIVISOR: COUNT_TWO,
 } as const;
 
 export const easingFunctions = {

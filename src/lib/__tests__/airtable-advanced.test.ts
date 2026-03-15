@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type {
   AirtableBaseLike,
   AirtableServicePrivate,
-} from "@/types/test-types";
+} from "@/test/test-types";
 import type { AirtableService as AirtableServiceType } from "../airtable/service";
 import {
   configureServiceForTesting,

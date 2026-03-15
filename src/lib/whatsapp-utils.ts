@@ -1,8 +1,8 @@
 import {
   BYTES_PER_KB,
-  COUNT_PAIR,
+  COUNT_TWO,
   COUNT_TEN,
-  COUNT_TRIPLE,
+  COUNT_THREE,
   HOURS_PER_DAY,
   HTTP_OK,
   MAX_WA_BUTTON_ID_LENGTH,
@@ -67,7 +67,7 @@ export class WhatsAppUtils {
   static validateButtons(
     buttons: Array<{ id: string; title: string }>,
   ): boolean {
-    if (buttons.length === ZERO || buttons.length > COUNT_TRIPLE) {
+    if (buttons.length === ZERO || buttons.length > COUNT_THREE) {
       return false;
     }
 
@@ -124,7 +124,7 @@ export class WhatsAppUtils {
       const buf = new Uint32Array(3);
       crypto.getRandomValues(buf);
       const randomPart = Array.from(buf, (value) =>
-        value.toString(BASE36_RADIX).padStart(COUNT_PAIR, "0"),
+        value.toString(BASE36_RADIX).padStart(COUNT_TWO, "0"),
       ).join("");
       return `msg_${timestamp}_${randomPart.substring(0, SHORT_ID_LENGTH)}`;
     }

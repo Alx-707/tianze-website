@@ -1,5 +1,5 @@
-import { COUNT_PAIR, HEX_RADIX } from "../constants/count";
-import { ZERO } from "../constants/magic-numbers";
+import { COUNT_TWO, HEX_RADIX } from "../constants/count";
+import { ZERO } from "../constants/core";
 
 export type SecurityHeader = {
   key: string;
@@ -261,7 +261,7 @@ export function getSecurityHeaders(
  * - Must pass isValidNonce validation
  */
 const NONCE_BYTE_LENGTH = HEX_RADIX; // 16 bytes = 128 bits = 32 hex characters
-const NONCE_HEX_PAD = COUNT_PAIR;
+const NONCE_HEX_PAD = COUNT_TWO;
 
 export function generateNonce(): string {
   if (typeof crypto !== "undefined" && crypto.randomUUID) {

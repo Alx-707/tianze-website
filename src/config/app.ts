@@ -7,7 +7,7 @@
  */
 
 import { env } from "@/lib/env";
-import { COUNT_PAIR, ONE } from "@/constants";
+import { COUNT_TWO, ONE } from "@/constants";
 import { DEC_0_1 } from "@/constants/decimal";
 import { WEB_VITALS_THRESHOLDS } from "@/constants/performance-constants";
 import {
@@ -111,7 +111,7 @@ export const CACHE_CONFIG = {
   /** 用户会话缓存时间 (秒) */
   SESSION_CACHE_TTL: env.SESSION_CACHE_TTL ?? SECONDS_PER_HOUR,
   /** 国际化缓存时间 (秒) */
-  I18N_CACHE_TTL: env.I18N_CACHE_TTL ?? SECONDS_PER_HOUR / COUNT_PAIR,
+  I18N_CACHE_TTL: env.I18N_CACHE_TTL ?? SECONDS_PER_HOUR / COUNT_TWO,
 } as const;
 
 /**
@@ -176,7 +176,7 @@ export const SECURITY_CONFIG = {
   /** CSRF令牌长度 */
   CSRF_TOKEN_LENGTH: env.CSRF_TOKEN_LENGTH ?? 32,
   /** 会话超时时间 (秒) */
-  SESSION_TIMEOUT: env.SESSION_TIMEOUT ?? SECONDS_PER_HOUR / COUNT_PAIR,
+  SESSION_TIMEOUT: env.SESSION_TIMEOUT ?? SECONDS_PER_HOUR / COUNT_TWO,
 } as const;
 
 // ============================================================================

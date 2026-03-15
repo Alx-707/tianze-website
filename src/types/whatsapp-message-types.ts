@@ -9,7 +9,7 @@ import type { ContactData, LocationData } from "@/types/whatsapp-base-types";
 import type { TemplateMessage } from "@/types/whatsapp-template-types";
 import {
   COUNT_TEN,
-  COUNT_TRIPLE,
+  COUNT_THREE,
   MAX_WA_BUTTON_TITLE_LENGTH,
   MAX_WA_MESSAGE_LENGTH,
   ONE,
@@ -365,9 +365,9 @@ export function validateInteractiveMessage(
     const action = message.interactive.action as InteractiveButtonAction;
     if (!action.buttons || action.buttons.length === ZERO) {
       errors.push("Button interactive message must have at least one button");
-    } else if (action.buttons.length > COUNT_TRIPLE) {
+    } else if (action.buttons.length > COUNT_THREE) {
       errors.push(
-        "Button interactive message cannot have more than COUNT_TRIPLE buttons",
+        "Button interactive message cannot have more than COUNT_THREE buttons",
       );
     }
 

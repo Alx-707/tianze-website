@@ -462,10 +462,6 @@ export const TEST_CONSTANTS = {
   PERFORMANCE_TIMESTAMPS: TEST_PERFORMANCE_TIMESTAMPS,
 } as const;
 
-// 兼容旧版测试用到的下划线命名
-// eslint-disable-next-line no-underscore-dangle -- legacy alias for backward compatibility with older test imports
-export const _TEST_CONSTANTS = TEST_CONSTANTS;
-
 // ==================== 单独导出常用常量 ====================
 
 // 导出常用的测试常量以便直接使用

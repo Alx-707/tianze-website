@@ -106,39 +106,6 @@ export interface FooterStyleTokens {
   hover: FooterHoverTokens;
 }
 
-interface ThemedSurfaceTokens {
-  background: string;
-  foreground: string;
-  border: string;
-  hoverBackground: string;
-  hoverBorder: string;
-  hoverForeground: string;
-  shadow: string;
-}
-
-/**
- * @deprecated Use `WhatsAppStyleTokens` from `@/config/footer-style-tokens` instead.
- * This interface is kept for backwards compatibility.
- */
-export interface WhatsAppStyleTokensLegacy {
-  sizePx: number;
-  iconSizePx: number;
-  borderRadiusPx: number;
-  borderWidthPx: number;
-  transition: string;
-  focusRing: string;
-  tooltip: {
-    background: string;
-    text: string;
-  };
-  pulse: {
-    background: string;
-    overlay: string;
-  };
-  light: ThemedSurfaceTokens;
-  dark: ThemedSurfaceTokens;
-}
-
 export const FOOTER_COLUMNS: FooterColumnConfig[] = [
   {
     key: "navigation",

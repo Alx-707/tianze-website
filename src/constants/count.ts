@@ -25,19 +25,6 @@ export const COUNT_NINE = 9 as const;
 export const COUNT_TEN = 10 as const;
 
 // ============================================================================
-// 语义化计数别名
-// ============================================================================
-
-/** @deprecated Use COUNT_TWO instead */
-export const COUNT_PAIR = 2 as const;
-/** @deprecated Use COUNT_THREE instead */
-export const COUNT_TRIPLE = 3 as const;
-/** @deprecated Use COUNT_4 instead */
-export const COUNT_QUAD = 4 as const;
-/** @deprecated Use COUNT_4 instead */
-export const COUNT_FOUR = COUNT_4;
-
-// ============================================================================
 // 常用数值常量 (按使用场景分组)
 // ============================================================================
 

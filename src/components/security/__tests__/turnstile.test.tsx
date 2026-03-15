@@ -41,7 +41,7 @@ describe("TurnstileWidget", () => {
 
   describe("基础渲染", () => {
     it("应该正确渲染TurnstileWidget组件", () => {
-      const { container } = render(<TurnstileWidget onVerify={vi.fn()} />);
+      const { container } = render(<TurnstileWidget onSuccess={vi.fn()} />);
 
       // 检查是否有任何内容被渲染
       expect(container.firstChild).not.toBeNull();
@@ -56,13 +56,13 @@ describe("TurnstileWidget", () => {
     });
 
     it("应该调用Turnstile组件", () => {
-      render(<TurnstileWidget onVerify={vi.fn()} />);
+      render(<TurnstileWidget onSuccess={vi.fn()} />);
 
       expect(getMockTurnstile()).toHaveBeenCalled();
     });
 
     it("应该传递正确的siteKey", () => {
-      render(<TurnstileWidget onVerify={vi.fn()} />);
+      render(<TurnstileWidget onSuccess={vi.fn()} />);
 
       const mockCall = getMockTurnstile().mock.calls[0];
       expect(mockCall?.[0]).toMatchObject({
@@ -73,7 +73,7 @@ describe("TurnstileWidget", () => {
 
   describe("组件配置", () => {
     it("应该处理自定义主题", () => {
-      render(<TurnstileWidget onVerify={vi.fn()} theme="dark" />);
+      render(<TurnstileWidget onSuccess={vi.fn()} theme="dark" />);
 
       const mockCall = getMockTurnstile().mock.calls[0];
       expect(mockCall?.[0]).toMatchObject({
@@ -84,7 +84,7 @@ describe("TurnstileWidget", () => {
     });
 
     it("应该处理自定义尺寸", () => {
-      render(<TurnstileWidget onVerify={vi.fn()} size="compact" />);
+      render(<TurnstileWidget onSuccess={vi.fn()} size="compact" />);
 
       const mockCall = getMockTurnstile().mock.calls[0];
       expect(mockCall?.[0]).toMatchObject({
@@ -95,7 +95,7 @@ describe("TurnstileWidget", () => {
     });
 
     it("应该处理自定义className", () => {
-      render(<TurnstileWidget onVerify={vi.fn()} className="custom-class" />);
+      render(<TurnstileWidget onSuccess={vi.fn()} className="custom-class" />);
 
       // className应该传递给外层容器，而不是内层的turnstile-widget
       const container = screen.getByTestId("turnstile-widget").parentElement;
@@ -104,7 +104,7 @@ describe("TurnstileWidget", () => {
     });
 
     it("应该处理自定义ID", () => {
-      render(<TurnstileWidget onVerify={vi.fn()} id="custom-id" />);
+      render(<TurnstileWidget onSuccess={vi.fn()} id="custom-id" />);
 
       const mockCall = getMockTurnstile().mock.calls[0];
       expect(mockCall?.[0]).toMatchObject({
@@ -114,19 +114,9 @@ describe("TurnstileWidget", () => {
   });
 
   describe("回调处理", () => {
-    it("应该接受onVerify回调", () => {
-      const onVerify = vi.fn();
-      render(<TurnstileWidget onVerify={onVerify} />);
-
-      const mockCall = getMockTurnstile().mock.calls[0];
-      expect(mockCall?.[0]).toMatchObject({
-        onSuccess: expect.any(Function),
-      });
-    });
-
     it("应该接受onError回调", () => {
       const onError = vi.fn();
-      render(<TurnstileWidget onVerify={vi.fn()} onError={onError} />);
+      render(<TurnstileWidget onSuccess={vi.fn()} onError={onError} />);
 
       const mockCall = getMockTurnstile().mock.calls[0];
       expect(mockCall?.[0]).toMatchObject({
@@ -136,7 +126,7 @@ describe("TurnstileWidget", () => {
 
     it("应该接受onExpire回调", () => {
       const onExpire = vi.fn();
-      render(<TurnstileWidget onVerify={vi.fn()} onExpire={onExpire} />);
+      render(<TurnstileWidget onSuccess={vi.fn()} onExpire={onExpire} />);
 
       const mockCall = getMockTurnstile().mock.calls[0];
       expect(mockCall?.[0]).toMatchObject({
@@ -155,20 +145,9 @@ describe("TurnstileWidget", () => {
       expect(onSuccess).toHaveBeenCalledWith("test-token-123");
     });
 
-    it("应该在成功时调用onVerify回调（向后兼容）", () => {
-      const onVerify = vi.fn();
-      render(<TurnstileWidget onVerify={onVerify} />);
-
-      const mockCall = getMockTurnstile().mock.calls[0];
-      const handleSuccess = mockCall?.[0]?.onSuccess;
-      handleSuccess?.("test-token-456");
-
-      expect(onVerify).toHaveBeenCalledWith("test-token-456");
-    });
-
     it("应该在错误时调用onError回调", () => {
       const onError = vi.fn();
-      render(<TurnstileWidget onVerify={vi.fn()} onError={onError} />);
+      render(<TurnstileWidget onSuccess={vi.fn()} onError={onError} />);
 
       const mockCall = getMockTurnstile().mock.calls[0];
       const handleError = mockCall?.[0]?.onError;
@@ -179,7 +158,7 @@ describe("TurnstileWidget", () => {
 
     it("应该在过期时调用onExpire回调", () => {
       const onExpire = vi.fn();
-      render(<TurnstileWidget onVerify={vi.fn()} onExpire={onExpire} />);
+      render(<TurnstileWidget onSuccess={vi.fn()} onExpire={onExpire} />);
 
       const mockCall = getMockTurnstile().mock.calls[0];
       const handleExpire = mockCall?.[0]?.onExpire;
@@ -190,7 +169,7 @@ describe("TurnstileWidget", () => {
 
     it("应该在加载时调用onLoad回调", () => {
       const onLoad = vi.fn();
-      render(<TurnstileWidget onVerify={vi.fn()} onLoad={onLoad} />);
+      render(<TurnstileWidget onSuccess={vi.fn()} onLoad={onLoad} />);
 
       const mockCall = getMockTurnstile().mock.calls[0];
       const handleLoad = mockCall?.[0]?.onLoad;
@@ -200,7 +179,7 @@ describe("TurnstileWidget", () => {
     });
 
     it("应该处理没有onError回调的错误", () => {
-      render(<TurnstileWidget onVerify={vi.fn()} />);
+      render(<TurnstileWidget onSuccess={vi.fn()} />);
 
       const mockCall = getMockTurnstile().mock.calls[0];
       const handleError = mockCall?.[0]?.onError;
@@ -209,7 +188,7 @@ describe("TurnstileWidget", () => {
     });
 
     it("应该处理没有onExpire回调的过期", () => {
-      render(<TurnstileWidget onVerify={vi.fn()} />);
+      render(<TurnstileWidget onSuccess={vi.fn()} />);
 
       const mockCall = getMockTurnstile().mock.calls[0];
       const handleExpire = mockCall?.[0]?.onExpire;
@@ -218,7 +197,7 @@ describe("TurnstileWidget", () => {
     });
 
     it("应该处理没有onLoad回调的加载", () => {
-      render(<TurnstileWidget onVerify={vi.fn()} />);
+      render(<TurnstileWidget onSuccess={vi.fn()} />);
 
       const mockCall = getMockTurnstile().mock.calls[0];
       const handleLoad = mockCall?.[0]?.onLoad;
@@ -228,13 +207,9 @@ describe("TurnstileWidget", () => {
   });
 
   describe("错误处理", () => {
-    it("应该处理空的onVerify回调", () => {
+    it("应该处理空的onSuccess回调", () => {
       expect(() => {
-        render(
-          <TurnstileWidget
-            onVerify={undefined as unknown as (_token: string) => void}
-          />,
-        );
+        render(<TurnstileWidget onSuccess={undefined} />);
       }).not.toThrow();
     });
   });
