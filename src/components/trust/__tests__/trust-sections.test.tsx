@@ -5,13 +5,14 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import {
   CertificationBadges,
-  PartnerLogos,
-  TestimonialCard,
-  TestimonialsSection,
   type Certification,
-  type Partner,
+} from "@/components/trust/certification-badges";
+import { PartnerLogos, type Partner } from "@/components/trust/partner-logos";
+import {
+  TestimonialCard,
   type Testimonial,
-} from "@/components/trust";
+} from "@/components/trust/testimonial-card";
+import { TestimonialsSection } from "@/components/trust/testimonials-section";
 
 vi.mock("next/image", () => ({
   default: ({

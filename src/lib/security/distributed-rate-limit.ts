@@ -12,7 +12,7 @@
 import { logger } from "@/lib/logger";
 import {
   COUNT_FIVE,
-  COUNT_PAIR,
+  COUNT_TWO,
   COUNT_TEN,
   COUNT_THREE,
   MINUTE_MS,
@@ -66,7 +66,7 @@ export const RATE_LIMIT_PRESETS = {
     failureMode: "closed" as const,
   },
   cacheInvalidatePreAuth: {
-    maxRequests: COUNT_TEN * COUNT_PAIR,
+    maxRequests: COUNT_TEN * COUNT_TWO,
     windowMs: MINUTE_MS,
     failureMode: "closed" as const,
   },

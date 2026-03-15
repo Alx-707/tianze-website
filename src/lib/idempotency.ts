@@ -48,6 +48,7 @@ function getIdempotencyStore(): IdempotencyStore {
  * Cleared by clearAllIdempotencyKeys() — does NOT affect the persistent store.
  */
 const pendingRequests = new Map<string, Promise<NextResponse>>();
+const pendingResults = new Map<string, Promise<unknown>>();
 
 /**
  * Poll the store until the entry transitions from PENDING to COMPLETED.
@@ -271,6 +272,212 @@ async function handleWithoutIdempotencyKey<T>(
   }
 }
 
+type IdempotentResultReason = "missing" | "reused" | "timeout" | "failed";
+
+export type IdempotentResult<T> =
+  | { ok: true; result: T; cached?: boolean }
+  | { ok: false; reason: IdempotentResultReason };
+
+async function waitForCompletionResult<T>(
+  key: string,
+  store: IdempotencyStore,
+): Promise<IdempotentResult<T>> {
+  const POLL_INTERVAL_MS = 50;
+  const TIMEOUT_MS = 10_000;
+  const start = Date.now();
+
+  while (Date.now() - start < TIMEOUT_MS) {
+    await new Promise<void>((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
+    const entry = await store.get(key);
+    if (!entry) {
+      return { ok: false, reason: "failed" };
+    }
+    if (entry.status === "COMPLETED") {
+      return { ok: true, result: entry.result as T, cached: true };
+    }
+  }
+
+  return { ok: false, reason: "timeout" };
+}
+
+function resolveIdempotentResultTtl(ttl?: number): number {
+  return typeof ttl === "number" && ttl > 0 ? ttl : DEFAULT_TTL_MS;
+}
+
+function getRequiredMissingResult<T>(
+  required: boolean,
+  idempotencyKey: string | null,
+): IdempotentResult<T> | null {
+  if (!required || idempotencyKey) {
+    return null;
+  }
+
+  logger.warn("Missing required idempotency key");
+  return { ok: false, reason: "missing" };
+}
+
+async function getInFlightIdempotentResult<T>(
+  idempotencyKey: string,
+  fingerprint: string,
+): Promise<IdempotentResult<T> | null> {
+  const inFlight = pendingResults.get(idempotencyKey);
+  if (!inFlight) {
+    return null;
+  }
+
+  const existingFingerprint = inFlightFingerprints.get(idempotencyKey);
+  if (existingFingerprint && existingFingerprint !== fingerprint) {
+    return { ok: false, reason: "reused" };
+  }
+
+  return { ok: true, result: (await inFlight) as T, cached: true };
+}
+
+async function getStoredIdempotentResult<T>(
+  idempotencyKey: string,
+  fingerprint: string,
+  store: IdempotencyStore,
+): Promise<IdempotentResult<T> | null> {
+  const existing = await store.get(idempotencyKey);
+  if (!existing) {
+    return null;
+  }
+
+  if (existing.fingerprint && existing.fingerprint !== fingerprint) {
+    return { ok: false, reason: "reused" };
+  }
+
+  if (existing.status === "COMPLETED") {
+    return { ok: true, result: existing.result as T, cached: true };
+  }
+
+  return waitForCompletionResult<T>(idempotencyKey, store);
+}
+
+function claimIdempotentResultKey(
+  idempotencyKey: string,
+  context: {
+    fingerprint: string;
+    ttlMs: number;
+    store: IdempotencyStore;
+  },
+): Promise<boolean> {
+  const { fingerprint, ttlMs, store } = context;
+  const now = Date.now();
+  return store.setIfNotExists(
+    idempotencyKey,
+    {
+      status: "PENDING",
+      fingerprint,
+      createdAt: now,
+      expiresAt: now + ttlMs,
+    },
+    ttlMs,
+  );
+}
+
+function completeIdempotentResultWork<T>(
+  idempotencyKey: string,
+  context: {
+    fingerprint: string;
+    handler: () => Promise<T>;
+    store: IdempotencyStore;
+    shouldCache: (result: T) => boolean;
+  },
+): Promise<T> {
+  const { fingerprint, handler, store, shouldCache } = context;
+  const work = (async (): Promise<T> => {
+    try {
+      const result = await handler();
+      if (shouldCache(result)) {
+        await store.complete(idempotencyKey, result, HTTP_OK);
+      } else {
+        await store.delete(idempotencyKey);
+      }
+      return result;
+    } catch (error) {
+      try {
+        await store.delete(idempotencyKey);
+      } catch (deleteError) {
+        logger.error(
+          "Failed to delete PENDING idempotency key after result failure",
+          { deleteError, idempotencyKey },
+        );
+      }
+      throw error;
+    } finally {
+      pendingResults.delete(idempotencyKey);
+      inFlightFingerprints.delete(idempotencyKey);
+    }
+  })();
+
+  pendingResults.set(idempotencyKey, work);
+  inFlightFingerprints.set(idempotencyKey, fingerprint);
+
+  return work;
+}
+
+export async function withIdempotentResult<T>(
+  idempotencyKey: string | null,
+  handler: () => Promise<T>,
+  options: {
+    fingerprint: string;
+    required?: boolean;
+    ttl?: number;
+    shouldCache?: (result: T) => boolean;
+  },
+): Promise<IdempotentResult<T>> {
+  const { fingerprint, required = false, shouldCache = () => true } = options;
+  const ttlMs = resolveIdempotentResultTtl(options.ttl);
+  const missingKeyResult = getRequiredMissingResult<T>(
+    required,
+    idempotencyKey,
+  );
+  if (missingKeyResult) return missingKeyResult;
+
+  if (!idempotencyKey) {
+    return { ok: true, result: await handler() };
+  }
+
+  const inFlightResult = await getInFlightIdempotentResult<T>(
+    idempotencyKey,
+    fingerprint,
+  );
+  if (inFlightResult) return inFlightResult;
+
+  const store = getIdempotencyStore();
+  const storedResult = await getStoredIdempotentResult<T>(
+    idempotencyKey,
+    fingerprint,
+    store,
+  );
+  if (storedResult) return storedResult;
+
+  const claimed = await claimIdempotentResultKey(idempotencyKey, {
+    fingerprint,
+    ttlMs,
+    store,
+  });
+
+  if (!claimed) {
+    return waitForCompletionResult<T>(idempotencyKey, store);
+  }
+
+  try {
+    return {
+      ok: true,
+      result: await completeIdempotentResultWork(idempotencyKey, {
+        fingerprint,
+        handler,
+        store,
+        shouldCache,
+      }),
+    };
+  } catch {
+    return { ok: false, reason: "failed" };
+  }
+}
+
 /**
  * 幂等键中间件
  *
@@ -327,6 +534,7 @@ export { generateIdempotencyKey } from "@/lib/idempotency-key";
  */
 export function clearIdempotencyKey(key: string): void {
   pendingRequests.delete(key);
+  pendingResults.delete(key);
   inFlightFingerprints.delete(key);
 }
 
@@ -337,7 +545,16 @@ export function clearIdempotencyKey(key: string): void {
  */
 export function clearAllIdempotencyKeys(): void {
   pendingRequests.clear();
+  pendingResults.clear();
   inFlightFingerprints.clear();
+}
+
+/**
+ * Reset the backing idempotency store and hot caches (testing only).
+ */
+export function resetIdempotencyState(): void {
+  idempotencyStore = null;
+  clearAllIdempotencyKeys();
 }
 
 /**
@@ -345,7 +562,9 @@ export function clearAllIdempotencyKeys(): void {
  */
 export function getIdempotencyCacheStats() {
   return {
-    size: pendingRequests.size,
-    keys: Array.from(pendingRequests.keys()),
+    size: pendingRequests.size + pendingResults.size,
+    keys: Array.from(
+      new Set([...pendingRequests.keys(), ...pendingResults.keys()]),
+    ),
   };
 }

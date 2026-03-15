@@ -241,6 +241,7 @@ class QualityGate {
             eslintErrors: 0,
             eslintWarnings: 10,
             typeErrors: 0,
+            reviewHygieneErrors: 0,
           },
           blocking: true, // 代码质量问题阻塞部署
         },
@@ -874,11 +875,16 @@ class QualityGate {
       // ESLint 检查
       gate.checks.eslint = await this.runESLintCheck();
 
+      // Review hygiene 检查
+      gate.checks.reviewHygiene = await this.runReviewHygieneCheck();
+
       // 汇总代码质量结果
       const hasErrors =
         gate.checks.typeCheck.errors > 0 ||
         gate.checks.eslint.errors >
-          this.config.gates.codeQuality.thresholds.eslintErrors;
+          this.config.gates.codeQuality.thresholds.eslintErrors ||
+        gate.checks.reviewHygiene.errors >
+          this.config.gates.codeQuality.thresholds.reviewHygieneErrors;
 
       const hasWarnings =
         gate.checks.eslint.warnings >
@@ -887,6 +893,13 @@ class QualityGate {
       if (hasErrors) {
         gate.status = "failed";
         gate.issues.push("代码质量检查发现错误");
+        if (gate.checks.reviewHygiene.errors > 0) {
+          gate.issues.push(
+            ...gate.checks.reviewHygiene.issues.map(
+              (issue) => `review hygiene: ${issue}`,
+            ),
+          );
+        }
       } else if (hasWarnings) {
         gate.status = "warning";
         gate.issues.push("代码质量检查发现警告");
@@ -1394,6 +1407,49 @@ class QualityGate {
         warnings: 0,
         status: "error",
         message: error.message,
+      };
+    }
+  }
+
+  async runReviewHygieneCheck() {
+    const result = spawnSync(
+      process.execPath,
+      [
+        path.join(process.cwd(), "scripts", "check-review-hygiene.js"),
+        "--json",
+      ],
+      {
+        encoding: "utf8",
+        maxBuffer: 10 * 1024 * 1024,
+      },
+    );
+
+    const rawOutput = (result.stdout || result.stderr || "").toString().trim();
+
+    try {
+      const parsed = JSON.parse(rawOutput || "{}");
+      return {
+        errors: parsed.issueCount || 0,
+        status: parsed.status || (result.status === 0 ? "passed" : "failed"),
+        issues: Array.isArray(parsed.issues)
+          ? parsed.issues.map(
+              (issue) =>
+                `${issue.file}: ${issue.message}${
+                  issue.consumers?.length
+                    ? ` (${issue.consumers.join(", ")})`
+                    : ""
+                }`,
+            )
+          : [],
+      };
+    } catch (error) {
+      return {
+        errors: result.status === 0 ? 0 : 1,
+        status: result.status === 0 ? "passed" : "error",
+        issues: [
+          rawOutput ||
+            `Unable to parse review hygiene output: ${error.message}`,
+        ],
       };
     }
   }

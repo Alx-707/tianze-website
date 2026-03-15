@@ -1,8 +1,5 @@
 import { getRequestConfig } from "next-intl/server";
-import {
-  I18nPerformanceMonitor,
-  TranslationCache,
-} from "@/lib/i18n-performance";
+import { I18nPerformanceMonitor } from "@/lib/i18n-performance";
 import {
   loadCompleteMessages,
   loadCompleteMessagesFromSource,
@@ -48,19 +45,9 @@ function getFormats(locale: string) {
   };
 }
 
-// 辅助函数：处理缓存性能监控
-function handleCacheMetrics(locale: string, loadTime: number) {
+// 辅助函数：记录请求级消息加载指标
+function recordRequestMetrics(loadTime: number) {
   I18nPerformanceMonitor.recordLoadTime(loadTime);
-
-  const cache = TranslationCache.getInstance();
-  const cached = cache.get(`messages-${locale}-critical`);
-  if (cached) {
-    I18nPerformanceMonitor.recordCacheHit();
-  } else {
-    I18nPerformanceMonitor.recordCacheMiss();
-  }
-
-  return Boolean(cached);
 }
 
 // 辅助函数：创建成功响应
@@ -68,14 +55,12 @@ interface SuccessResponseArgs {
   locale: string;
   messages: Record<string, unknown>;
   loadTime: number;
-  cacheUsed: boolean;
 }
 
 function createSuccessResponse({
   locale,
   messages,
   loadTime,
-  cacheUsed,
 }: SuccessResponseArgs) {
   if (
     process.env.I18N_DEBUG_BUILD === "1" &&
@@ -86,7 +71,6 @@ function createSuccessResponse({
     console.error("[i18n-debug] createSuccessResponse snapshot", {
       locale,
       loadTime,
-      cacheUsed,
       topLevelKeys,
       hasProducts: Object.prototype.hasOwnProperty.call(messages, "products"),
       hasFaq: Object.prototype.hasOwnProperty.call(messages, "faq"),
@@ -102,7 +86,6 @@ function createSuccessResponse({
     strictMessageTypeSafety: true,
     metadata: {
       loadTime,
-      cacheUsed,
     },
   };
 }
@@ -128,7 +111,6 @@ async function createFallbackResponse(locale: string, startTime: number) {
     strictMessageTypeSafety: true,
     metadata: {
       loadTime: performance.now() - startTime,
-      cacheUsed: false,
       error: true,
     },
   };
@@ -147,13 +129,12 @@ export default getRequestConfig(async ({ requestLocale }) => {
   try {
     const messages = await loadCompleteMessages(locale as "en" | "zh");
     const loadTime = performance.now() - startTime;
-    const cacheUsed = handleCacheMetrics(locale, loadTime);
+    recordRequestMetrics(loadTime);
 
     return createSuccessResponse({
       locale,
       messages,
       loadTime,
-      cacheUsed,
     });
   } catch {
     I18nPerformanceMonitor.recordError();

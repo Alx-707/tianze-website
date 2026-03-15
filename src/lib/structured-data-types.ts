@@ -1,4 +1,6 @@
-export type Locale = "en" | "zh";
+import type { Locale } from "@/i18n/routing-config";
+
+export type { Locale };
 
 // 严格的结构化数据接口定义
 export interface OrganizationData {

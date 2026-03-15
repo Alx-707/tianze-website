@@ -1,5 +1,5 @@
 import * as React from "react";
-import { COUNT_PAIR, ONE, ZERO } from "@/constants";
+import { COUNT_TWO, ONE, ZERO } from "@/constants";
 import { COUNT_4, HEX_RADIX } from "@/constants/count";
 import { DEC_0_5 } from "@/constants/decimal";
 
@@ -8,9 +8,9 @@ import { DEC_0_5 } from "@/constants/decimal";
  */
 const ANIMATION_CONSTANTS = {
   HALF_POINT: DEC_0_5,
-  DOUBLE_MULTIPLIER: COUNT_PAIR,
+  DOUBLE_MULTIPLIER: COUNT_TWO,
   CUBIC_MULTIPLIER: COUNT_4,
-  EASE_ADJUSTMENT: COUNT_PAIR,
+  EASE_ADJUSTMENT: COUNT_TWO,
 } as const;
 
 /**

@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { resetIdempotencyState } from "@/lib/idempotency";
 import * as contactRoute from "@/app/api/contact/route";
 
 vi.mock("@/lib/security/distributed-rate-limit", () => ({
@@ -17,8 +18,7 @@ vi.mock("@/lib/contact-form-processing", () => ({
     success: true,
     emailSent: true,
     recordCreated: true,
-    emailMessageId: "msg-1",
-    airtableRecordId: "rec-1",
+    referenceId: "ref-1",
   })),
 }));
 
@@ -34,6 +34,7 @@ vi.mock("@/app/api/contact/contact-api-validation", () => ({
 describe("api/contact", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    resetIdempotencyState();
   });
 
   const makeRequest = (body: unknown) =>
@@ -41,6 +42,10 @@ describe("api/contact", () => {
       new Request("http://localhost/api/contact", {
         method: "POST",
         body: JSON.stringify(body),
+        headers: {
+          "Content-Type": "application/json",
+          "Idempotency-Key": "test-contact-idempotency-key",
+        },
       }),
     );
 
@@ -52,7 +57,7 @@ describe("api/contact", () => {
     const json = await res.json();
     expect(res.status).toBe(200);
     expect(json.success).toBe(true);
-    expect(json.data.messageId).toBe("msg-1");
+    expect(json.data.referenceId).toBe("ref-1");
   });
 
   it("returns 400 for invalid JSON body", async () => {
@@ -60,6 +65,10 @@ describe("api/contact", () => {
       new Request("http://localhost/api/contact", {
         method: "POST",
         body: "invalid json",
+        headers: {
+          "Content-Type": "application/json",
+          "Idempotency-Key": "test-contact-idempotency-key",
+        },
       }),
     );
 
@@ -85,6 +94,23 @@ describe("api/contact", () => {
       makeRequest({ email: "a@example.com" }),
     );
     expect(res.status).toBe(429);
+  });
+
+  it("returns 400 when Idempotency-Key is missing", async () => {
+    const req = new NextRequest(
+      new Request("http://localhost/api/contact", {
+        method: "POST",
+        body: JSON.stringify({ email: "a@example.com", company: "Acme" }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }),
+    );
+
+    const res = await contactRoute.POST(req);
+    const json = await res.json();
+    expect(res.status).toBe(400);
+    expect(json.errorCode).toBe("IDEMPOTENCY_KEY_REQUIRED");
   });
 
   it("rejects invalid form data", async () => {

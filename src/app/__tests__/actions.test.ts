@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { API_ERROR_CODES } from "@/constants/api-error-codes";
+import { resetIdempotencyState } from "@/lib/idempotency";
 import { checkDistributedRateLimit } from "@/lib/security/distributed-rate-limit";
 import { verifyTurnstile } from "@/lib/turnstile";
 import { contactFormAction } from "../actions";
@@ -46,8 +47,7 @@ vi.mock("@/lib/contact-form-processing", () => ({
     Promise.resolve({
       emailSent: true,
       recordCreated: true,
-      emailMessageId: "msg-123",
-      airtableRecordId: "rec-123",
+      referenceId: "ref-123",
     }),
   ),
 }));
@@ -55,6 +55,7 @@ vi.mock("@/lib/contact-form-processing", () => ({
 describe("actions.ts", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    resetIdempotencyState();
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2024-06-15T12:00:00Z"));
     vi.stubEnv("VERCEL", "1");
@@ -91,7 +92,19 @@ describe("actions.ts", () => {
       marketingConsent: "false",
       turnstileToken: "valid-token",
       submittedAt: new Date().toISOString(),
+      idempotencyKey: "contact-action-key",
     };
+
+    it("should return error when idempotency key is missing", async () => {
+      const dataWithoutKey = { ...validFormData };
+      delete (dataWithoutKey as { idempotencyKey?: string }).idempotencyKey;
+      const formData = createFormData(dataWithoutKey);
+
+      const result = await contactFormAction(null, formData);
+
+      expect(result.success).toBe(false);
+      expect(result.errorCode).toBe(API_ERROR_CODES.IDEMPOTENCY_KEY_REQUIRED);
+    });
 
     it("should return error when turnstile token is missing", async () => {
       const dataWithoutToken = { ...validFormData };
@@ -165,6 +178,24 @@ describe("actions.ts", () => {
       // Result depends on whether validation passes before turnstile check
       // The test verifies the action runs without throwing
       expect(result).toBeDefined();
+    });
+
+    it("should dedupe duplicate submissions with the same idempotency key", async () => {
+      const freshData = {
+        ...validFormData,
+        submittedAt: new Date().toISOString(),
+        idempotencyKey: "contact-action-dedupe-key",
+      };
+      const formData = createFormData(freshData);
+      const duplicateFormData = createFormData(freshData);
+
+      const firstResult = await contactFormAction(null, formData);
+      const secondResult = await contactFormAction(null, duplicateFormData);
+
+      expect(firstResult.success).toBe(true);
+      expect(secondResult.success).toBe(true);
+      const processing = await import("@/lib/contact-form-processing");
+      expect(processing.processFormSubmission).toHaveBeenCalledTimes(1);
     });
 
     it("should return error when submittedAt is not provided", async () => {
@@ -243,6 +274,7 @@ describe("actions.ts", () => {
         marketingConsent: "false",
         turnstileToken: "valid-token",
         submittedAt: new Date().toISOString(),
+        idempotencyKey: "contact-security-key",
       };
     }
 

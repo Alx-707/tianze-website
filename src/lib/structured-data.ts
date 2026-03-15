@@ -22,7 +22,7 @@ import type {
 } from "@/lib/structured-data-types";
 import { type PageType } from "@/config/paths";
 // 导入需要的函数
-import { COUNT_PAIR } from "@/constants";
+import { COUNT_TWO } from "@/constants";
 
 // 重新导出类型
 export type { Locale } from "@/lib/structured-data-types";
@@ -77,7 +77,7 @@ export async function generateLocalizedStructuredData(
  * @see https://nextjs.org/docs/app/guides/json-ld
  */
 export function generateJSONLD(structuredData: unknown): string {
-  const JSON_INDENT = COUNT_PAIR;
+  const JSON_INDENT = COUNT_TWO;
   const jsonString = JSON.stringify(structuredData, null, JSON_INDENT);
   // 转义 < 字符防止 </script> 截断攻击（Next.js 官方推荐）
   return jsonString.replace(/</g, "\\u003c");

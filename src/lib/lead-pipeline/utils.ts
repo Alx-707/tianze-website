@@ -3,7 +3,6 @@
  */
 
 import { randomBytes } from "crypto";
-import { sanitizePlainText } from "@/lib/security-validation";
 import { ONE, ZERO } from "@/constants";
 
 /**
@@ -92,20 +91,6 @@ export function generateProductInquiryMessage(
   }
 
   return lines.join("\n");
-}
-
-/**
- * Sanitize string input by trimming and removing dangerous characters
- *
- * @deprecated Use sanitizePlainText from security-validation for new code.
- *             This wrapper is kept for backward compatibility.
- *
- * @param input - Raw input string
- * @returns Sanitized string
- */
-export function sanitizeInput(input: string): string {
-  // Delegate to sanitizePlainText and apply length limit
-  return sanitizePlainText(input).slice(ZERO, 5000);
 }
 
 /**

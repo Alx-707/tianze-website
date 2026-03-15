@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { DynamicImportModule } from "@/types/test-types";
+import type { DynamicImportModule } from "@/test/test-types";
 import { SITE_CONFIG } from "@/config/paths/site-config";
 import type { ResendService as ResendServiceInstance } from "../resend-core";
 

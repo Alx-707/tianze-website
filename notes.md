@@ -1,506 +1,933 @@
-# Notes: 代码质量审查证据库
+# Notes: Delta Code Review Cycle
 
 ## Sources
 
-### Repo scan (local)
-- Commands:
-  - `pwd`
-  - `ls`
-  - `find . -maxdepth 3 -type f ...`
-  - `cat CLAUDE.md`
-  - `ls .claude/rules && sed -n '1,200p' ...`
-  - `cat package.json`
-  - `pnpm|npm|bun` 脚本：`lint`/`typecheck`/`test`/`build`
-
-## Evidence Log
-
-### Project rules
-- `CLAUDE.md`: 明确 stack、约束（TS strict / i18n 必须 / Server Components first / complexity limits）。证据：`CLAUDE.md`
-- `.claude/rules/`: 存在细化规则：`architecture.md`, `coding-standards.md`, `quality-gates.md`, `i18n.md`, `security.md`, `testing.md`, `ui-system.md`。证据：`.claude/rules/*`
-
-### Tooling & scripts
-- `package.json` scripts：`type-check`, `lint:check`, `test`, `ci:local`, `quality:gate*`, `security:check`, `arch:check`, `unused:check`, `i18n:*`。证据：`package.json`
-- 质量护栏具备“零容忍”（0 warnings/0 TS errors/CI gate）。证据：`.claude/rules/quality-gates.md`
-- 本地运行结果（2026-02-03，整改前快照）：
-  - `pnpm type-check` exit=0（无 TS 错误）
-  - `pnpm lint:check` exit=0（ESLint 0 warnings；但输出提示 baseline-browser-mapping 版本过旧）
-  - `pnpm test` exit=0（341 files / 5754 tests passed；输出包含少量 stderr 日志噪音）
-  - `pnpm test:coverage` exit=0（All files：Stmts 74.09% / Branch 69.24% / Funcs 70.24% / Lines 74.9%）
-  - `pnpm build` exit=0（Next.js build + 静态页面生成成功）
-  - `pnpm quality:gate:fast` exit=0（Code Quality/Security passed；Coverage/Performance skipped；报告：`reports/quality-gate-*.json`）
-  - `pnpm arch:check` exit=0（dependency-cruiser：no violations）
-  - `pnpm circular:check` exit=0（madge：no circular deps；但报告“358 warnings”且未输出明细）
-  - `pnpm validate:translations` exit=0（en/zh key 数一致：847）
-  - `pnpm i18n:shape:check` exit=0（报告：`reports/i18n-shape-report.json`）
-  - `pnpm i18n:validate:code` exit=0（418 files checked，no issues）
-  - `pnpm security:check` exit=0（pnpm audit: no vulns；semgrep: 12 findings(12 blocking)）
-  - `pnpm unused:check` exit=1（knip 报告 2 个“Unused devDependencies”；提示 knip.jsonc 中有冗余 entry pattern）
-  - `pnpm unused:production` exit=1（knip 报告 28 个“Unused dependencies”+ unlisted binary `next`，与 `unused:check` 结果明显不一致）
-
-### P0/P1 整改落地（2026-02-03，分支：codex/fix-p0p1-security-gates）
-- P0：`next` 移动到 `dependencies`（`package.json` + `pnpm-lock.yaml` 同步）
-  - 复核：`pnpm unused:production` 不再出现 `Unlisted binaries next`（整改前曾出现）
-- P1：安全信噪比与门禁对齐
-  - ESLint：关闭 `security/detect-object-injection`（该规则在 TS 项目里误报过高，且会导致“为 lint 写代码”）
-  - Semgrep：`object-injection-sink-spread-operator` 降级为 `INFO`（默认 WARNING 扫描不再刷屏）
-  - 门禁：`scripts/quality-gate.js` 的 Security gate 纳入 Semgrep(ERROR) 统计（本地可见/可阻断；CI 由 `.github/workflows/ci.yml` 的 `security` job 执行）
-  - 执行脚本：`scripts/semgrep-scan.js` 统一本地扫描与落盘（输出 `reports/semgrep-*-latest.json`）
-- 回归命令（均 exit=0）：
-  - `pnpm lint:check`
-  - `pnpm type-check`
-  - `pnpm test`
-  - `pnpm security:check`（audit 0；Semgrep ERROR=0，WARNING=0）
-  - `pnpm quality:gate:fast`
-
-### P2 整改落地（2026-02-03）——测试 stderr/log 降噪（保持断言力度不变）
-- 目标：默认不把业务侧 `console.*`/`logger.*` 直接喷到 stdout/stderr；测试仍可通过 `vi.spyOn(console, ...)` 捕获并断言；需要调试时可显式开启日志。
-- 变更点：
-  - 全局测试 setup 增加 console/stderr 降噪：
-    - `src/test/setup.console.ts`：默认将 `console.debug/info/log/warn/error` 置为 noop；并过滤 jsdom 固定噪音 `"Not implemented: navigation to another Document"`（该噪音会绕过普通 console mock 直接写 stderr）。
-    - `src/test/setup.ts`：新增 `import "./setup.console";`，确保在其它 setup 前生效。
-  - 修复一个会触发 Node.js `TimeoutOverflowWarning` 的真实代码路径：
-    - `src/components/ui/animated-counter.tsx`：对 `delay` 做上限 clamp（`MAX_SET_TIMEOUT_DELAY_MS`），避免 `setTimeout(delay=Number.MAX_SAFE_INTEGER)` 被 Node 截断并报警。
-    - `src/constants/time.ts`：新增 `MAX_SET_TIMEOUT_DELAY_MS`（JS timers 的 32-bit signed 上限）。
-- 复核命令（均 exit=0，且无上述 stderr 噪音）：
-  - `pnpm vitest run src/components/ui/__tests__/navigation-menu.test.tsx`（此前会在末尾输出 jsdom navigation 噪音；整改后不再出现）
-  - `pnpm vitest run src/components/ui/__tests__/animated-counter-accessibility.test.tsx`（此前会出现 `TimeoutOverflowWarning`；整改后不再出现）
-  - `pnpm test`（全量回归通过）
-  - `pnpm lint:check`
-  - `pnpm type-check`
-- 调试开关：
-  - `VITEST_SHOW_LOGS=1 pnpm test`：恢复 console 输出 + 不过滤 jsdom navigation 噪音（用于本地排查）。
-
-### Architecture & module boundaries
-- (pending)
-
-### Type safety
-- (pending)
-
-### i18n (next-intl)
-- (pending)
-
-### Performance (Next.js)
-- (pending)
-
-### Security
-- (pending)
-
-### DX (developer experience)
-- (pending)
-
-### P3 整改落地（2026-02-03）——工具链噪音/一致性（knip + madge）
-- knip（整改前问题复现）：
-  - `pnpm unused:check`：Unused devDependencies (2) + Configuration hints (4)（冗余 entry pattern），exit=1
-  - `pnpm unused:production`：Unused dependencies (27)，exit=1（与实际使用严重不符）
-- knip（整改策略）：
-  - `knip.jsonc`：
-    - 移除 knip 自动识别/插件已覆盖的冗余 entry（避免 config hints）
-    - 将 Prettier 自动加载的插件依赖加入 `ignoreDependencies`（避免误报 unused devDependencies）
-  - `package.json`：
-    - `unused:production` 改为使用 `--use-tsconfig-files -t tsconfig.knip.json`（用 TS 编译单元的 include/exclude 做“生产源文件集合”的权威边界，避免把测试/脚本消费当成生产依赖使用）
-  - 新增 `tsconfig.knip.json`：
-    - 生产侧需要纳入 `next.config.ts` 等“构建期入口”的依赖使用（例如 MDX），但不希望污染主 `tsconfig.json` 的 type-check 范围
-- madge（整改前问题复现）：
-  - `pnpm circular:check`：`Processed 742 files ... (358 warnings)`，但不输出明细（warnings 不可执行）
-- madge（整改策略）：
-  - `package.json`：`circular:check` 增加 `--ts-config tsconfig.json`，让 madge 按 TS path alias/解析规则工作，减少 “skipped file” 类 warnings
-- 回归命令（均 exit=0）：
-  - `pnpm unused:check`（整改后无输出，代表 0 issues + 0 config hints）
-  - `pnpm unused:production`（整改后无输出，代表 0 issues）
-  - `pnpm circular:check`（warnings 从 358 降到 2，且无循环依赖）
-  - `pnpm lint:check`
-  - `pnpm type-check`
-
-## Cloudflare Workers Bundle 基线（2026-02-14）
-
-### Build 输出基线
-- 执行命令：`pnpm build:cf`
-- 结果：构建成功，`opennextjs-cloudflare build` 阶段完成，`OpenNext build complete.`
-- 关键现象：
-  - `handler.mjs` 作为 Cloudflare 单 Worker 入口之一；
-  - `.open-next/server-functions` 下存在唯一 `default` 服务入口，未出现多入口并行拆分。
-
-### 体积快照
-- 根目录总量：
-  - `.open-next`: `56M`
-  - `.open-next/worker.js`: `4.0K`（入口壳，仅 4 KiB）
-  - `.open-next/assets`: `8.1M`
-  - `.open-next/server-functions`: `46M`
-  - `.open-next/server-functions/default`: `46M`
-- 关键大文件：
-  - `.open-next/server-functions/default/handler.mjs`: `9.1M`
-  - `.open-next/server-functions/default/node_modules`: `19M`
-  - `.open-next/server-functions/default/.next`: `6.9M`
-  - `.open-next/server-functions/default/reports`: `9.4M`
-  - `.open-next/middleware/handler.mjs`: `400K`
-
-### 与目标相关的观察
-- 当前基线里 `reports` 目录占用了约 `9.4M`，且包含历史 `coverage`/`semgrep`/`quality-gate` 等产物；在 `build:cf` 复用时更像“非运行时依赖污染”而非应用功能资产。
-- 最大 5 项候选文件中，`next` 相关的运行时 chunk 与 map 文件仍占主导，但 `reports` 的高占比说明本地历史产物与构建污染值得纳入优化优先级。
-
-### 附录：Top 大文件（`find -size +200k`）
-- `.open-next/server-functions/default/handler.mjs`: `9,528,890` B
-- `.open-next/server-functions/default/node_modules/.pnpm/next@16.1.5_@babel+core@7.28.5_@opentelemetry+api@1.9.0_@playwright+test@1.57.0_react-d_a53f2870d0aa003340665cf8f6ee65d0/node_modules/next/dist/server/capsize-font-metrics.json`: `4,301,622` B
-- `.open-next/server-functions/default/reports/coverage/coverage-final.json`: `1,978,820` B
-- `.open-next/server-functions/default/reports/ci-artifacts/coverage-report-run21630516904/coverage-final.json`: `1,969,328` B
-- `.open-next/server-functions/default/reports/test-results.json`: `1,705,936` B
-- `.open-next/assets/_next/static/chunks/f0d3f9e60c9ec637.js.map`: `1,037,219` B
-- `.open-next/server-functions/default/node_modules/.pnpm/next@16.1.5_@babel+core@7.28.5_@opentelemetry+api@1.9.0_@playwright+test@1.57.0_react-d_a53f2870d0aa003340665cf8f6ee65d0/node_modules/next/dist/compiled/@edge-runtime/primitives/load.js`: `800,754` B
-- `.open-next/server-functions/default/handler.mjs.meta.json`: `751,322` B
-- `.open-next/assets/_next/static/chunks/680883925547a38b.js.map`: `692,317` B
-
-### 后续 Phase 2 入口
-- 已确认 `phase1` 的基线输入：将围绕 `handler.mjs` / `node_modules` / `reports` / `.next` 的可剥离性，继续做“可无损瘦身”设计。  
-
-## Cloudflare Workers Bundle 体积剖析（Phase 2）
-
-### 实验：排除构建污染文件
-
-- 修改文件：`next.config.ts`
-- 变更：新增 `outputFileTracingExcludes`（route `/*`）
-  - `./reports/**`
-  - `./coverage/**`
-  - `./test-results/**`
-  - `./.lighthouseci/**`
-  - `./.next-docs/**`
-  - `./tests/e2e/.playwright/**`
-  - `./playwright-report/**`
-  - `./.playwright/**`
-
-### 复现与验证命令
-
-- `pnpm build:cf`
-- `du -sh .open-next`
-- `du -sh .open-next/server-functions/default`
-- `ls .open-next/server-functions/default | sed -n '1,120p'`
-- `find .open-next/server-functions/default -maxdepth 1 -type f -exec stat -f '%z %N' {} \; | sort -nr | head -n 20`
-
-### 改造后（2026-02-15）体积归因结果
-- `.open-next`: `46M`（从 `56M` 下降）
-- `.open-next/server-functions`: `36M`（从 `46M` 下降）
-- `.open-next/server-functions/default`: `36M`（从 `46M` 下降）
-- `handler.mjs`: `~9305.6KB`（变化很小，基本保持）
-- `node_modules`: `19M`（稳定）
-- `reports`: 已完全不在 `.open-next/server-functions/default` 中出现（高优先级污染项移除）
-- `middleware/handler.mjs`: `~400K`（无明显变化）
-
-### 关键归因
-- 最大可控收益点来自 `reports` 污染清单；其 9.4M 几乎全部是历史构建/质量产物，属于“构建污染”非运行时业务资产。
-- `next/dist/server/capsize-font-metrics.json` 与 Next 内部 OG 相关产物仍在 `next` 运行时代码集中，属于依赖层面的体积，不会因 `reports` 排除而消失。
-- 接下来 `Phase 3` 重点应转向：
-  - `next` 运行时高体积文件的不可移除项清单（如 `capsize-font-metrics.json` 与 OG/compiled 大文件）；
-  - 评估是否能通过运行时策略（`optimizePackageImports` 已启用）或路由裁剪继续压实，而不是硬切割。
-
-## Cloudflare Workers Bundle 优化方案（Phase 3）与验证（Phase 4）
-
-### Phase 3 方案分层
-
-- 低风险（MVP，直接落地）
-  - `open-next.config.ts`：开启 `default.minify = true`
-  - `next.config.ts`：Cloudflare 构建关闭 `productionBrowserSourceMaps`
-- 中风险（本轮未启用）
-  - Cloudflare 条件下关闭 `cacheComponents`
-  - 按路由裁剪 `outputFileTracingExcludes` 到更激进范围
-- 高风险（架构级）
-  - 基于 OpenNext `functions` 做拆分函数部署，并配合 origin/service routing
-  - 业务路由拆分为多 Worker（而非单 `default` server function）
-
-### 本轮执行改动（MVP）
-
-- `open-next.config.ts`
-  - 从直接导出改为变量配置，设置 `cloudflareConfig.default.minify = true`
-- `next.config.ts`
-  - `productionBrowserSourceMaps` 改为 `!isCloudflare`
-  - 目的：Cloudflare 目标下优先减小部署工件
-
-### 验证命令
-
-- `pnpm build:cf`
-- `du -sh .open-next .open-next/server-functions/default .open-next/server-functions/default/node_modules .open-next/server-functions/default/.next .open-next/assets`
-- `stat -f '%z %N' .open-next/server-functions/default/handler.mjs .open-next/server-functions/default/handler.mjs.meta.json`
-
-### Phase 4 验证结果（2026-02-15）
-
-- 总量对比（相对 Phase 2 后基线）
-  - `.open-next`: `46M -> 34M`（再降 `12M`）
-  - `.open-next/server-functions/default`: `36M -> 30M`
-  - `.open-next/server-functions/default/node_modules`: `19M -> 13M`
-  - `.open-next/assets`: `8.1M -> 2.1M`
-- 关键文件
-  - `handler.mjs`: `~9305.6KB -> ~9053.6KB`（小幅下降）
-  - `handler.mjs.meta.json`: 约 `733.6KB`（基本持平）
-  - `next/dist/server/capsize-font-metrics.json`: `~4200.8KB -> ~2520.9KB`
-- sourcemap 观测
-  - `.open-next/assets` 中 `.map` 文件数量降到 `1`（此前为多份）
-- 污染目录
-  - `reports` 仍保持剔除状态（不存在于 `.open-next/server-functions/default`）
-
-### 当前结论
-
-- MVP 低风险方案已验证有效，且收益显著（从原始 56M 已累计降到 34M）。
-- 但若目标是 Free Plan `3 MiB` 级别，当前仍有数量级差距，瓶颈已转为 Next 运行时与 server function 结构本身，而非构建污染。
-
-## Cloudflare Workers 架构级 Phase 5 原型（函数拆分 + 网关分发）
-
-### 目标
-
-- 验证 OpenNext `functions` 在当前 Cloudflare 适配链路的可用性。
-- 在不改第三方包源码的前提下，实现“按路径分流到拆分函数”的可运行原型。
-
-### 代码改动
-
-- `open-next.config.ts`
-  - 新增 `cloudflareConfig.functions`：
-    - `apiLead`: `contact/inquiry/subscribe/verify-turnstile/health`
-    - `apiOps`: `cache/invalidate` + `csp-report`
-    - `apiWhatsapp`: `whatsapp/send` + `whatsapp/webhook`
-  - 保持 `cloudflareConfig.default.minify = true`。
-- `scripts/cloudflare/build-phase5-worker.mjs`
-  - 新增“构建后生成器”，产出 `.open-next/worker.phase5.mjs`。
-  - 网关规则：`/api/whatsapp/* -> apiWhatsapp`，`/api/cache/invalidate|/api/csp-report -> apiOps`，其余已列 API -> `apiLead`，其他路径 -> `default`。
-  - 分发前仍保留 middleware/image/skew-protection 处理链。
-- `package.json`
-  - 新增 `build:cf:phase5 = pnpm build:cf && node scripts/cloudflare/build-phase5-worker.mjs`。
-
-### 验证命令
-
-- `pnpm build:cf:phase5`
-- `du -sh .open-next .open-next/server-functions .open-next/server-functions/* .open-next/assets`
-- `find .open-next/server-functions -maxdepth 2 -type f \\( -name 'handler.mjs' -o -name 'index.mjs' -o -name 'handler.mjs.meta.json' \\) -exec stat -f '%z %N' {} \\; | sort -nr`
-- `node --check .open-next/worker.phase5.mjs`
-- `pnpm type-check`
-
-### 关键结果（2026-02-15）
-
-- 构建阶段明确出现：
-  - `Building server function: apiLead...`
-  - `Building server function: apiOps...`
-  - `Building server function: apiWhatsapp...`
-  - `Building server function: default...`
-- 体积快照：
-  - `.open-next`: `82M`
-  - `.open-next/server-functions`: `78M`
-  - `.open-next/server-functions/default`: `27M`
-  - `.open-next/server-functions/apiLead`: `18M`
-  - `.open-next/server-functions/apiOps`: `17M`
-  - `.open-next/server-functions/apiWhatsapp`: `17M`
-  - `.open-next/assets`: `2.1M`
-- 关键文件：
-  - `default/handler.mjs`: `7,706,719` B
-  - `apiLead/index.mjs`: `1,825,564` B
-  - `apiOps/index.mjs`: `1,825,563` B
-  - `apiWhatsapp/index.mjs`: `1,825,568` B
-- 语法/类型：
-  - `.open-next/worker.phase5.mjs` `node --check` 通过
-  - `pnpm type-check` 通过
-
-### 结论
-
-- Phase 5 原型达成：函数拆分 + 分发层已跑通，证明当前项目可沿“路由分治”继续演进。
-- 但该原型仍是“单 worker 内部分流”，部署体积不会天然满足 Free Plan；下一步要进入“多 worker + service binding/origin routing”实装，才会形成真实体积隔离。
-
-### 异常记录
-
-- `pnpm lint:check` 在扫描 `.open-next` 生成文件时触发 `eslint-plugin-security-node` 崩溃（`detect-unhandled-event-errors` 读取 `loc` 报错）。
-- 处置：本轮改为定向校验改动源文件（`open-next.config.ts`）和新脚本语法检查，避免把生成产物纳入 lint 流程。
-
-## Cloudflare Workers 架构级 Phase 6（多 Worker + bindings/origin routing）
-
-### 目标
-
-- 将 Phase 5 的单 Worker 网关分流升级为“多 Worker 可部署架构骨架”。
-- 生成可直接用于 wrangler 的 phase6 配置，并提供部署顺序脚本（含 dry-run）。
-
-### 代码改动
-
-- 新增 `scripts/cloudflare/build-phase6-workers.mjs`
-  - 读取 `wrangler.jsonc`（使用 TypeScript JSONC 解析）；
-  - 生成 `.open-next/workers/`：
-    - `gateway.mjs`
-    - `web.mjs`
-    - `apiLead.mjs`
-    - `apiOps.mjs`
-    - `apiWhatsapp.mjs`
-  - 生成 `.open-next/wrangler/phase6/`：
-    - `gateway.jsonc`
-    - `web.jsonc`
-    - `api-lead.jsonc`
-    - `api-ops.jsonc`
-    - `api-whatsapp.jsonc`
-- 新增 `scripts/cloudflare/deploy-phase6.mjs`
-  - 部署顺序：`web -> api-lead -> api-ops -> api-whatsapp -> gateway`
-  - 支持环境：`preview|production`
-  - 支持 `--dry-run`
-- 更新 `package.json`
-  - `build:cf:phase6`
-  - `deploy:cf:phase6:preview`
-  - `deploy:cf:phase6:production`
-  - `deploy:cf:phase6:dry-run`
-
-### 路由与绑定设计
-
-- Gateway Worker（`gateway.mjs`）：
-  - 先执行 `middlewareHandler`；
-  - 按重写后的 pathname 做 origin routing：
-    - `/api/whatsapp/* -> WORKER_API_WHATSAPP`
-    - `/api/cache/invalidate|/api/csp-report -> WORKER_API_OPS`
-    - `/api/contact|inquiry|subscribe|verify-turnstile|health -> WORKER_API_LEAD`
-    - 其他 -> `WORKER_WEB`
-  - 通过 service bindings 转发请求，并打 `x-phase6-origin-target` 观测头。
-- 服务 Worker（`web/api*`）：
-  - 直接加载对应 OpenNext handler；
-  - 执行 handler 后打 `x-phase6-worker` 观测头；
-  - 继承缓存相关绑定（R2/D1/DO/self-reference）。
-
-### 验证命令
-
-- `node --check scripts/cloudflare/build-phase6-workers.mjs`
-- `node --check scripts/cloudflare/deploy-phase6.mjs`
-- `pnpm build:cf:phase6`
-- `for f in .open-next/workers/*.mjs; do node --check "$f"; done`
-- `node -e "JSON.parse(...)"`（校验 `.open-next/wrangler/phase6/*.jsonc`）
-- `pnpm run deploy:cf:phase6:dry-run`
-
-### 关键结果（2026-02-15）
-
-- `build:cf:phase6` 成功并输出：
-  - `[phase6] generated workers and wrangler configs`
-- 生成产物：
-  - `.open-next/workers`（5 个入口）
-  - `.open-next/wrangler/phase6`（5 个配置）
-- `deploy:cf:phase6:dry-run` 输出了完整顺序部署命令（preview 环境），未执行真实部署。
-
-### 当前结论
-
-- Phase 6 原型已从“逻辑分流”升级为“可部署拓扑骨架”，实现了多 Worker、service bindings 与 origin routing 的端到端链路。
-- 下一步重点应是：真实环境分阶段发布（preview -> production）与按 Worker 维度体积门禁。
-
-## Cloudflare Phase 6 实网验证收口（2026-02-17）
-
-### 执行命令
-
-- `pnpm build:cf:phase6`
-- `pnpm run deploy:cf:phase6:preview`
-- `curl -sS -o /tmp/resp_body -D /tmp/resp_headers https://preview.tianze-pipe.com/api/health`
-- `dig +short preview.tianze-pipe.com A`
-- `openssl s_client -connect preview.tianze-pipe.com:443 -servername preview.tianze-pipe.com -brief < /dev/null`
-- `dig +short tianze-pipe.com A`
-- `dig +short workers.dev A`
-
-### 结果摘要
-
-- 构建阶段成功：
-  - `build:cf:phase6` 完成，并输出 `[phase6] generated workers and wrangler configs`。
-- 真实部署失败（阻塞 1：凭据）：
-  - 在 `deploy:cf:phase6:preview` 的首个目标 `web.jsonc` 失败；
-  - wrangler 明确报错：非交互环境必须设置 `CLOUDFLARE_API_TOKEN`。
-- 在线探活失败（阻塞 2：域名链路）：
-  - `preview.tianze-pipe.com`、`tianze-pipe.com` 与尝试的 `*.workers.dev` 在本机均解析到 `198.18.45.x`；
-  - `curl` 报错：`LibreSSL SSL_connect: SSL_ERROR_SYSCALL`；
-  - `openssl s_client` 报错：`unexpected eof while reading`。
-
-### 诊断结论
-
-- 当前环境不满足“实网验证收口”的前提条件：
-  - 缺少可用于 wrangler 发布的 Cloudflare API token；
-  - 域名访问链路在 TLS 握手前已失败，无法验证 `x-phase6-origin-target` / `x-phase6-worker` 头。
-- 因此本轮只能确认“构建与部署脚本可执行”，不能确认“公网请求路径已闭环”。
-
-## 2026-02-26 vinext 迁移阶段一审计笔记
-
-### 输入约束与上下文
-- 目标：对当前 Next.js 项目做 vinext 迁移可行性审计（阶段一），先报告后暂停。
-- 现状：仓库已有未提交改动（非本次任务产生），本次仅新增审计文件。
-- 用户给定的两个文档路径不存在：
-  - `docs/migration/vendor-lock-in-audit.md`
-  - `docs/known-issue/phase6-api-worker-bundle-failure.md`
-- 替代参考：
-  - `docs/migration/cloudflare-workers-migration-report.md`
-  - `cloudflare_bundle_phase6.md`
-
-### 项目结构与框架快照
-- Next.js 版本：`16.1.6`
-- 路由模式：仅 `App Router`（`src/app` 存在，`src/pages` 不存在）
-- 页面文件（`page.tsx`）数量：11
-- API Route Handlers（`app/api/**/route.ts`）数量：9
-- Middleware：`middleware.ts` 存在
-
-### 关键特性扫描结果（摘要）
-- `use client`：82 个文件
-- `use server`：2 个文件（含 `src/app/actions.ts`）
-- `generateStaticParams`：10 个页面文件使用
-- `generateMetadata`：10 个页面文件使用
-- `next/cache`：使用 `unstable_cache`、`cacheLife`、`cacheTag`、`revalidateTag`、`revalidatePath`
-- `next/headers`：`headers()` 在 `src/app/actions.ts` 中使用
-
-### UI 组件能力使用
-- `next/image`：10 处导入
-- `next/link`：5 处导入
-- `next/font/google`：1 处导入
-- `next/script`：1 处导入
-- `next/head`：0 处导入（业务代码）
-
-### Next 配置扫描
-- 配置文件：`next.config.ts`
-- 主要配置键：
-  - `outputFileTracingExcludes`
-  - `cacheComponents`
-  - `turbopack`
-  - `pageExtensions`
-  - `productionBrowserSourceMaps`
-  - `images`
-  - `compiler`
-  - `experimental`
-  - `webpack`
-  - `headers`
-- 注意：存在 `webpack` 与 `turbopack` 定制（vinext 官方标注不支持该类配置）
-
-### Node.js API 使用（server-side 重点）
-- `fs/path`：内容读取与路径处理（`src/lib/content-*`, `src/lib/load-messages.ts`, `src/app/[locale]/head.tsx`）
-- `crypto`：Webhook 签名、限流 key 计算（`src/lib/whatsapp-service.ts`, `src/lib/security/rate-limit-key-strategies.ts`）
-- `net`：IP 校验（`src/lib/security/client-ip.ts`）
-- `Buffer`：WhatsApp 与图片占位符数据 URL 处理
-- `node:` 前缀：`src/app/[locale]/head.tsx` (`node:fs`, `node:path`)
-
-### 外部资料核验（2026-02-26）
-- vinext README（`cloudflare/vinext`）：
-  - 声称 Next.js 16 API 覆盖约 94%
-  - `next/image`、`next/font` 为部分支持
-  - `webpack`/`turbopack` 配置不支持（Vite 路线）
-  - `generateStaticParams`、`generateMetadata`、`next/cache`、Middleware、Route Handlers 标注支持
-- Cloudflare Workers Node.js compatibility 文档（2026-02-02 更新）：
-  - `fs`、`path`、`crypto`、`net`、`process`、`Buffer` 标注为支持（在 `nodejs_compat` 下）
-
-### 初步风险判断
-- 高风险：`next.config.ts` 中 `webpack` / `turbopack` 自定义在 vinext 下需要重构到 `vite.config.ts` 或替代实现。
-- 中风险：`next/font` 与 `next/image` 行为差异（运行时注入/无构建期优化）。
-- 中风险：存在 `generateStaticParams` 使用，若采用 vinext 的默认 SSR 路径，需确认是否继续静态导出策略。
-- 低~中风险：server-side Node API 使用较多，但 Workers 文档显示相关 API 已支持（需以 `vinext dev/build` 实测收口）。
-
-## 2026-03-06 Round 3 复审工作笔记
-
-### 本轮目标
-- 将第三轮审查方案正式落到仓库文档
-- 复核“旧问题是否真的修掉”
-- 只把当前工作树里仍然活着的问题继续挂单
-
-### 已确认关闭的旧条目
-- `vitest.config.mts`：全局 `retry: 2` 已去除，`ui: false`，也不再有 `net.Server.listen` monkey patch
-- `src/lib/api/safe-parse-json.ts`：已改为统一 `errorCode`
-- `/api/contact`、`/api/inquiry`、`/api/verify-turnstile`：已接入统一 API response helper
-- `src/components/whatsapp/whatsapp-floating-button.tsx`：已走 i18n
-- `src/lib/lead-pipeline/process-lead.ts`：已从 if/else + flag 收敛为表驱动配置
-
-### 当前仍存的 findings（详见 `docs/code-review/round3-review.md`）
-- `src/lib/idempotency.ts` 仍返回自由文本 `error/message`，导致 `/api/subscribe` 没真正回到统一错误协议
-- `/api/whatsapp/send`、`/api/whatsapp/webhook`、`/api/csp-report` 仍绕开统一 response helper，存在 `{ error: "..." }`、`{ success: true, data }`、`{ success: true, errorCode }` 混用
-- 单测仍存在 wall-clock 阈值断言，当前复现命令已命中 `src/components/layout/__tests__/mobile-navigation-responsive.test.tsx:345-358` 失败：`expected 2066 to be less than 1000`
-- `src/components/forms/__tests__/contact-form-submission.test.tsx:342-380` 还在等待一个当前实现根本不会自动出现的 cooldown 文案，属于错误前提测试
-
-### 本轮命令记录
-- `pnpm type-check`
-  - 结果：通过
+### Source 1: Existing review baseline
+- Path: `docs/code-review/round4-execution-summary.md`
+- Key points:
+  - Round 4 Wave A to D is already complete.
+  - Current accepted runtime boundary is `src/middleware.ts`.
+  - `html[lang]`, locale redirect, API error contract, and truth-source cleanup have already been addressed.
+
+### Source 2: Existing issue ledger
+- Path: `docs/code-review/issues.md`
+- Key points:
+  - Existing findings use `priority + labels + evidence + impact + recommended fix + acceptance command + status`.
+  - Many previously critical API/security and framework issues are already closed.
+
+### Source 3: Project brief
+- Path: `docs/content/PROJECT-BRIEF.md`
+- Key points:
+  - Primary goal is inquiry conversion.
+  - Secondary goals are product presentation and brand building.
+  - Product priorities are tiered, with PETG pneumatic tube systems and PVC conduit lines carrying different strategic weight.
+  - The company differentiator is upstream bending-machine capability plus in-house pipe production.
+
+### Source 4: Project runtime and tooling
+- Path: `package.json`
+- Key points:
+  - Dual build targets exist: `build` and `build:cf`.
+  - The repository already has strong review hooks: lint, type-check, security, architecture, i18n, translation validation, quality gate.
+  - The codebase uses Next.js 16, React 19, next-intl, Airtable, Resend, Turnstile, and Cloudflare OpenNext.
+
+### Source 5: Middleware and locale runtime
+- Path: `src/middleware.ts`
+- Key points:
+  - Middleware handles locale logic, cookie synchronization, redirect correction, nonce propagation, and security headers.
+  - This is a high-risk integration point because it mixes routing, i18n, and security behavior.
+
+### Source 6: Contact form configuration
+- Path: `src/config/contact-form-config.ts`
+- Key points:
+  - The contact form is intentionally configurable.
+  - Some fields are disabled or optional for lead pipeline reasons.
+  - Anti-spam and consent behavior are configured here and must match business intent.
+
+### Source 7: Site facts and content boundaries
+- Path: `src/config/site-facts.ts`
+- Key points:
+  - Business facts are separated from translatable marketing copy.
+  - This creates a useful review seam for checking whether facts, messages, and presentation responsibilities are staying clean.
+
+### Source 8: Quality gate implementation
+- Path: `scripts/quality-gate.js`
+- Key points:
+  - The repo already encodes quality expectations.
+  - Review should inspect not just what is checked, but also what is excluded and why.
+
+## Synthesized Findings
+
+### Business-fit review implications
+- Review must validate that inquiry conversion is not being undermined by form friction, broken handoff paths, or misplaced content priorities.
+- Review must check that product hierarchy in the brief is reflected in code structure, routing, and content emphasis.
+- Review must treat i18n as a business feature, not just a translation layer.
+
+### Delta-scope implications
+- This cycle cannot behave like a fresh audit because Round 4 already closed major framework, API contract, and truth-source issues.
+- New review work should focus on active chains that remain high leverage: middleware/runtime entry, form submission, content/SEO, config/integration seams, and any blind spots in current gates.
+
+### Code-quality review implications
+- The review must explicitly include simplicity and elegance, not just correctness.
+- Temporary implementation is acceptable only when it does not distort boundaries or lock in bad structure.
+- Middleware, form handling, and external integrations are the most likely places for patch-like code growth.
+
+### Baseline gate results
+- `pnpm type-check`: passed.
+- `pnpm lint:check`: failed for repository-root `.agents/skills/**` files and related local skill assets rather than `src/**` production code.
+- `pnpm build`: passed.
+- `pnpm build:cf`: passed when run sequentially after `build`; parallel invocation caused `.next/lock` contention and is not a product issue.
+- `pnpm build:cf` emitted OpenNext bundling warnings about duplicate `console.time` labels (`Applying code patches`) inside the build chain.
+
+### Baseline gate implications
+- Current lint signal is polluted by repo-local non-product files, so it cannot be treated as a pure application-health gate in this working tree.
+- The runtime entry chain remains build-valid for both standard Next and Cloudflare targets.
+- The next review pass should prioritize:
+  - tooling/gate integrity
+  - locale/runtime chain for subtle regressions not covered by builds
+  - form/API/security chain for remaining contract or abuse blind spots
+
+### Coupling and integration review implications
+- Strong attention is needed on the seams between config, content, messages, middleware, API routes, security utilities, and external services.
+- Tests must be evaluated for production realism, not just breadth.
+- Build parity between standard Next.js output and Cloudflare output is part of code health for this project.
+
+## Review Log
+
+### Phase 2: Baseline gate results
+- `pnpm type-check`: passed
+- `pnpm lint:check`: failed
+  - Failure source is repo-local `.agents/skills/**` content that is not ignored by ESLint.
+  - This is a gate-signal issue, not a production runtime failure.
+- `pnpm build`: passed
+- `pnpm build:cf`: passed when run sequentially
+  - Parallel run previously failed on `.next/lock`; this was execution noise, not a product issue.
+- `pnpm validate:translations`: passed
+- `pnpm i18n:validate:code`: passed
+
+### Candidate findings with supporting evidence
+- Gate signal drift:
+  - `eslint.config.mjs` globally ignores `.claude/skills/**` but not `.agents/skills/**`.
+  - Local repo state can therefore break `pnpm lint:check` and `pnpm ci:local:quick` without touching production code.
+- Public JSON body-size gap:
+  - `src/lib/api/safe-parse-json.ts` reads `req.json()` with no `content-length` gate or byte cap.
+  - Public write endpoints using it include contact, inquiry, verify-turnstile, subscribe, and WhatsApp send.
+  - Existing body-size fixes only cover `csp-report` and `whatsapp/webhook`, so the shared JSON path remains open.
+- Contact form i18n regression:
+  - `src/lib/actions/contact.ts` still returns hardcoded English detail strings for expired submission and failed Turnstile verification.
+  - `src/components/forms/contact-form-container.tsx` renders non-key details verbatim.
+  - Result: localized UI can still display English detail bullets on non-validation failures.
+
+## Current Cycle Notes
+
+### Baseline gate results
+- `pnpm type-check`: passed.
+- `pnpm lint:check`: failed, but the failure is currently dominated by repository-root local skill content under `.agents/skills/**`, not by `src/**` production code.
+- `pnpm build`: passed.
+- `pnpm build:cf`: passed when run sequentially after `build`; the earlier failure was only a `.next/lock` contention caused by parallel execution.
+
+### Candidate findings confirmed
+- Candidate A: ESLint global ignore scope does not exclude `.agents/skills/**`, so repo-local skill content can break `pnpm lint:check` and downstream local CI signals.
+- Candidate B: shared JSON parsing path has no body size gate; several public JSON endpoints still read unbounded request bodies through `request.json()`.
+- Candidate C: contact server action still emits literal English `details` strings for some non-validation errors, and the client renders non-key details verbatim, causing mixed-language error UI.
+
+## CR-085 Candidate Notes (2026-03-15)
+
+### Scope scanned
+- `src/types/whatsapp-service-types.ts`
+- `src/types/whatsapp.ts`
+- `src/lib/content.ts`
+- `src/lib/whatsapp/index.ts`
+- remaining `src/**/index.ts` barrels
+
+### Consumer check summary
+- `src/lib/content.ts` still has active production consumers (`@/lib/content` in locale pages), so it remains a real entrypoint.
+- `src/lib/whatsapp/index.ts` still has active consumers (`@/lib/whatsapp`), so it remains a real entrypoint.
+- remaining `src/**/index.ts` barrels still have importers after the CR-084 cleanup; none of the survivors are zero-consumer barrels.
+- `src/types/whatsapp-service-types.ts` has no confirmed direct consumers in `src/**` or `tests/**`.
+
+### Why `src/types/whatsapp-service-types.ts` is different
+- It is a standalone facade that only re-exports submodules.
+- Its direct import surface is dead even though the underlying service type modules remain live through `@/types/whatsapp` and direct submodule imports.
+- This matches the same class of issue as prior dead barrel and dead compatibility-surface cleanups: documented-looking entrypoint, but no real consumer keeps it on the production path.
+
+### Verification
+- `rg -n 'whatsapp-service-types' src tests` returned no consumer hits before and after the cleanup.
+- `pnpm type-check` passed after deleting `src/types/whatsapp-service-types.ts`.
+
+## CR-086 Candidate Notes (2026-03-15)
+
+### Scope scanned
+- `src/lib/api/api-response-schema.ts`
+- `src/lib/i18n-message-cache.ts`
+- related test files under `src/lib/__tests__/**`
+
+### Consumer check summary
+- `src/lib/api/api-response-schema.ts` is only imported by `src/lib/__tests__/validations.test.ts`.
+- No production code imports `@/lib/api/api-response-schema`.
+- `src/lib/i18n-message-cache.ts` also currently appears test-only, but it touches a larger cluster of i18n performance tests and is better treated as a separate cleanup item after the smaller dead helper is removed.
+
+### Current decision
+- Promote `api-response-schema.ts` first because it is a narrow, zero-production-consumer helper with a simple test dependency edge.
+- Keep `i18n-message-cache.ts` as the next likely candidate rather than batching both into one change without a more deliberate test rewrite.
+
+### Verification
+- `rg -n 'api-response-schema|apiResponseSchema' src tests` returned no remaining references after the cleanup.
+- `pnpm exec vitest run src/lib/__tests__/validations.test.ts` passed after removing the dead helper assertions.
+- `pnpm type-check` passed after deleting `src/lib/api/api-response-schema.ts`.
+
+## CR-087 Candidate Notes (2026-03-15)
+
+### Scope scanned
+- `src/lib/i18n-message-cache.ts`
+- `src/lib/__tests__/i18n-performance.test.ts`
+- `src/lib/__tests__/i18n-performance-cache.test.ts`
+- `src/lib/__tests__/i18n-performance.network-failure.test.ts`
+
+### Consumer check summary
+- `src/lib/i18n-message-cache.ts` had no production consumers.
+- All imports of `TranslationCache`, `getCachedMessages`, `getCachedTranslations`, and `preloadTranslations` came from the i18n performance test files themselves.
+- The file comment already described it as a legacy/test-side helper rather than an active runtime truth source.
+
+### Cleanup decision
+- Delete the dead helper and the tests that only preserved its fetch-based cache semantics.
+- Keep a smaller focused test file for the still-live `I18nPerformanceMonitor` and `evaluatePerformance()` logic.
+
+### Verification
+- `rg -n 'i18n-message-cache|TranslationCache|getCachedMessages|getCachedTranslations|preloadTranslations' src tests` returned no remaining references after the cleanup.
+- `pnpm exec vitest run src/lib/__tests__/i18n-performance.test.ts` passed with the reduced monitor-focused suite.
+- `pnpm type-check` passed after deleting `src/lib/i18n-message-cache.ts`.
+
+## CR-088 Candidate Notes (2026-03-15)
+
+### Scope scanned
+- `src/lib/security-file-upload.ts`
+- `src/lib/security-tokens.ts`
+- their dedicated tests under `src/lib/__tests__/**` and `tests/unit/security/**`
+- `src/lib/__tests__/security.test.ts`
+
+### Consumer check summary
+- `src/lib/security-file-upload.ts` had no production consumers; imports only came from test files.
+- `src/lib/security-tokens.ts` had no production consumers; imports only came from test files.
+- `src/lib/__tests__/security.test.ts` mixed live `security-validation` assertions with dead helper-preservation assertions.
+
+### Cleanup decision
+- Delete both dead helper modules and their dedicated tests.
+- Trim `src/lib/__tests__/security.test.ts` down to the still-live `security-validation` coverage.
+
+### Verification
+- `rg -n '@/lib/security-file-upload|@/lib/security-tokens|security-file-upload|security-tokens' src tests` returned no remaining references after the cleanup.
+- `pnpm exec vitest run src/lib/__tests__/security.test.ts` passed after removing the dead-helper sections.
+- `pnpm type-check` passed after deleting both modules.
+
+## CR-089 Candidate Notes (2026-03-15)
+
+### Scope scanned
+- `src/types/test-types.ts`
+- all imports from `@/types/test-types`
+
+### Consumer check summary
+- `src/types/test-types.ts` was only imported by test files and test helpers.
+- No production code depended on this file; the issue was namespace placement, not runtime coupling.
+
+### Cleanup decision
+- Move the file from `src/types/test-types.ts` to `src/test/test-types.ts`.
+- Update all test and test-helper imports to the new test-only namespace.
+
+### Verification
+- `rg -n '@/types/test-types|@/test/test-types' src tests` showed the old path was fully removed and all consumers now point at the test namespace.
+- `pnpm exec vitest run src/lib/__tests__/airtable.test.ts src/lib/__tests__/resend.test.ts` passed after the import rewrite.
+- `pnpm type-check` passed after the move.
+
+## Review Hygiene Guardrail (2026-03-15)
+
+### Goal
+- Prevent the reintroduction of top-level production-namespace entrypoints that are either zero-consumer or test-only.
+
+### Implementation
+- Added `scripts/check-review-hygiene.js`.
+- Added `pnpm review:hygiene`.
+- Wired the new check into `scripts/quality-gate.js` as part of the code-quality gate.
+
+### Detection scope
+- Top-level files under:
+  - `src/lib/*.ts`
+  - `src/types/*.ts`
+  - `src/config/*.ts`
+- Excludes:
+  - declaration files
+  - generated files
+- The script resolves both alias imports (`@/...`) and relative imports, then classifies consumers as production or test paths.
+
+### Verification
+- `pnpm review:hygiene` passed on the current tree.
+- `node scripts/quality-gate.js --mode=fast --output=json` showed `reviewHygiene.errors = 0` and `reviewHygiene.status = "passed"`, confirming the gate integration is active.
+
+### Current limitation
+- `quality:gate:fast` still exits non-zero in this working tree because the existing ESLint step reports unrelated errors.
+- The new hygiene guard itself is not the failing gate.
+
+## ESLint Gate Recovery (2026-03-15)
+
+### Blocking errors captured
+- `src/lib/__tests__/colors-contrast-compliance.test.ts`
+  - unused `TEST_CONSTANTS` import
+- `src/lib/i18n/route-parsing.ts`
+  - dynamic `RegExp` constructor triggered `security/detect-non-literal-regexp`
+- `src/lib/idempotency.ts`
+  - `withIdempotentResult` exceeded `max-statements` and `complexity`
+- `src/test/test-types.ts`
+  - stale `eslint-disable` directives became warnings
+
+### Fixes applied
+- Removed the unused import from the color contrast test.
+- Moved the `route-parsing` lint suppression to the actual `RegExp` construction site.
+- Split `withIdempotentResult` support logic into smaller helpers and normalized helper signatures so ESLint no longer flags complexity, statement count, or helper parameter shape.
+- Removed stale `eslint-disable` directives from `src/test/test-types.ts`.
+
+### Verification
 - `pnpm lint:check`
-  - 结果：通过（无新的 warning / 噪音信号）
-- `pnpm test -- src/app/api/whatsapp/send/__tests__/route.test.ts src/app/api/csp-report/__tests__/route.test.ts src/app/api/whatsapp/webhook/__tests__/route.test.ts src/lib/__tests__/idempotency.test.ts`
-  - 结果：最终 `3 failed | 352 passed`；其中两条是 wall-clock 断言失败，另一条是 `contact-form-submission` 的错误前提测试失败
+- `pnpm quality:gate:fast -- --silent`
+
+### Result
+- The fast quality gate is green again.
+- The new review hygiene guard remains integrated and passing inside the code-quality gate.
+
+## Six-Dimension Review Planning (2026-03-13)
+
+### Planning inputs
+- Existing framework file:
+  - `code_review_framework.md`
+- Existing review baseline:
+  - `docs/code-review/round4-execution-summary.md`
+- Existing findings ledger:
+  - `docs/code-review/issues.md`
+- Existing project review rules:
+  - `.claude/rules/review-checklist.md`
+  - `.claude/rules/security.md`
+
+### Why the next planning pass should use six explicit dimensions
+- The current framework is already strong on correctness, security, contracts, boundaries, and gate integrity.
+- The missing step is not another broad quality slogan, but explicit review work organized by failure class:
+  - data invariants and state transitions
+  - concurrency, retry, and timing
+  - migration and compatibility
+  - test validity and assertion truthfulness
+  - ownership and single source of truth
+  - abnormal-path semantics
+
+### Repository-specific mapping
+- Data invariants / state transitions:
+  - most relevant to `contact`, `inquiry`, `subscribe`, server actions, lead pipeline, and form helpers
+- Concurrency / retry / timing:
+  - most relevant to idempotency, rate limit, retries, webhook/send flows, and side-effectful writes
+- Migration / compatibility:
+  - most relevant to middleware/runtime entry, i18n message loading, API error contract consumers, and compatibility artifacts under `messages/`
+- Test validity / assertion truthfulness:
+  - most relevant to route tests, integration tests, `vitest.config.mts`, and quality gate behavior
+- Ownership / single source of truth:
+  - most relevant to config, i18n, security helpers, API helpers, and legacy/deprecated entrypoints
+- Abnormal-path semantics:
+  - most relevant to public write APIs, translation/error presentation, and runtime fallback behavior
+
+### Planning decision
+- The next review cycle should be organized into waves, not six isolated scans.
+- Wave 1 should cover business write paths using dimensions 1, 2, and 6.
+- Wave 2 should cover runtime/i18n/shared truth-source paths using dimensions 3, 5, and 6.
+- Wave 3 should audit tests and gates through dimension 4 and cross-check the earlier conclusions.
+- Findings should still land in `docs/code-review/issues.md`; the six dimensions are planning lenses, not a new findings format.
+
+## Wave 1 Execution Notes (2026-03-13)
+
+### Scope executed
+- `src/app/api/contact/route.ts`
+- `src/app/api/inquiry/route.ts`
+- `src/app/api/subscribe/route.ts`
+- `src/lib/actions/contact.ts`
+- `src/lib/contact-form-processing.ts`
+- `src/lib/idempotency.ts`
+- `src/lib/security/distributed-rate-limit.ts`
+- targeted tests around contact/inquiry/subscribe and the contact form container
+
+### Findings summary
+- Contact flow data semantics are currently inconsistent:
+  - `processFormSubmission()` rewrites the synthetic lead `referenceId` into both `emailMessageId` and `airtableRecordId`.
+  - `/api/contact` then returns those fields as if they were real downstream service identifiers.
+  - Existing tests mostly mock `processFormSubmission()` and therefore miss the bug.
+- Contact path concurrency protection is weaker than inquiry/subscribe:
+  - both the Server Action and `/api/contact` route perform rate limiting
+  - neither path uses idempotency protection
+  - real downstream side effects still occur through the lead pipeline
+- Contact form abnormal-path UX is currently wrong:
+  - the client records cooldown before the Server Action outcome is known
+  - failed submissions can still trigger local cooldown and disable the submit button
+  - existing tests cover the success cooldown path but not failed-submit cooldown
+
+### Deliverable written
+- `wave1_review_findings.md`
+
+## Ledger Update and Wave 2 Kickoff (2026-03-13)
+
+### Wave 1 findings promoted to official ledger
+- `CR-053` contact path exposes synthetic `referenceId` as provider-specific IDs
+- `CR-054` contact path lacks idempotency protection despite side effects
+- `CR-055` contact client cooldown starts before server acceptance
+
+### Wave 2 kickoff observation
+- `src/i18n/request.ts` still computes `metadata.cacheUsed` via `TranslationCache` using the key `messages-${locale}-critical`
+- the actual runtime message path now goes through `loadCompleteMessages(locale)` from `src/lib/load-messages.ts`
+- the only production writer for the old cache key lives in `src/lib/i18n-performance.ts`, which represents a separate fetch-based helper path
+- this looks like a new single-source-of-truth / metric-semantics drift candidate and is recorded in `wave2_review_findings.md`
+
+## CR-055 Repair (2026-03-13)
+
+### Scope
+- `src/components/forms/contact-form-container.tsx`
+- `src/components/forms/__tests__/contact-form-submission.test.tsx`
+
+### Fix summary
+- Removed the eager `recordSubmission()` call from the enhanced contact form action.
+- Cooldown now remains tied to the existing success-state effect that calls `setLastSubmissionTime(new Date())`.
+
+### Verification
+- `pnpm exec vitest run src/components/forms/__tests__/contact-form-submission.test.tsx`
+- `pnpm exec vitest run src/components/forms/__tests__/contact-form-container.test.tsx`
+
+### Result
+- Success path still starts cooldown.
+- Error path no longer eagerly records a cooldown timestamp.
+- `CR-055` can be treated as repaired.
+
+## CR-053 Repair (2026-03-13)
+
+### Scope
+- `src/lib/contact-form-processing.ts`
+- `src/lib/actions/contact.ts`
+- `src/app/api/contact/route.ts`
+- contact route / processing / action / integration tests
+
+### Fix summary
+- Removed the fake provider-ID contract from the contact path.
+- The contact chain now returns and propagates `referenceId` explicitly.
+- Tests were updated so they stop preserving `messageId` / `recordId` semantics for contact.
+
+### Verification
+- `pnpm exec vitest run src/app/api/contact/__tests__/contact-api-validation.test.ts`
+- `pnpm exec vitest run src/app/api/contact/__tests__/route-post.test.ts`
+- `pnpm exec vitest run src/app/api/contact/__tests__/route.test.ts`
+- `pnpm exec vitest run src/app/__tests__/actions.test.ts src/app/__tests__/contact-integration.test.ts tests/integration/api/contact.test.ts`
+
+### Result
+- Contact success payload semantics now match the actual data the chain owns.
+- `CR-053` can be treated as repaired.
+
+## CR-054 Repair (2026-03-13)
+
+### Scope
+- `src/app/api/contact/route.ts`
+- `src/lib/idempotency.ts`
+- `src/lib/actions/contact.ts`
+- `src/components/forms/contact-form-container.tsx`
+- contact route / action / integration tests
+
+### Fix summary
+- Added a reusable non-HTTP idempotency helper, `withIdempotentResult()`, on top of the existing store/state machine.
+- `/api/contact` now requires `Idempotency-Key` and caches successful responses.
+- `contactFormAction` now requires an `idempotencyKey` form field and dedupes successful submissions under a contact-specific fingerprint.
+- `ContactFormContainer` now generates and reuses the form idempotency key until a successful submission clears it.
+
+### Verification
+- `pnpm exec vitest run src/app/api/contact/__tests__/route-post.test.ts`
+- `pnpm exec vitest run src/app/api/contact/__tests__/route.test.ts`
+- `pnpm exec vitest run src/app/__tests__/actions.test.ts src/app/__tests__/contact-integration.test.ts`
+- `pnpm exec vitest run tests/integration/api/contact.test.ts`
+
+### Result
+- Contact API and Server Action paths now both have real duplicate-submission protection.
+- `CR-054` can be treated as repaired.
+
+## Wave 2 Review Promotion (2026-03-13)
+
+### Confirmed issue
+- `CR-056`:
+  - `src/i18n/request.ts` still infers `metadata.cacheUsed` from `TranslationCache`
+  - the real runtime message path is now `loadCompleteMessages(locale)`
+  - the old cache key is only written by `src/lib/i18n-performance.ts`, which looks largely test-kept on the fetch-based helper side
+
+### Why this was promoted
+- This is no longer just a “maybe stale comment” level concern.
+- It is a concrete single-source-of-truth drift in runtime metadata semantics.
+- The repository now has a documented Wave 2 issue to either fix directly or use as the anchor for the next runtime/i18n cleanup pass.
+
+## CR-056 Repair (2026-03-13)
+
+### Scope
+- `src/i18n/request.ts`
+- `src/i18n/__tests__/request.test.ts`
+- `src/lib/__tests__/load-messages.fallback.test.ts`
+
+### Fix summary
+- Removed `TranslationCache` from the request-time runtime config path.
+- Request metadata no longer infers `cacheUsed` from the obsolete fetch-based translation cache seam.
+- The request layer now records load time only and uses a conservative `cacheUsed: false` value.
+
+### Verification
+- `pnpm exec vitest run src/i18n/__tests__/request.test.ts`
+- `pnpm exec vitest run src/lib/__tests__/load-messages.fallback.test.ts`
+
+### Result
+- `CR-056` can be treated as repaired.
+
+## Wave 2 Follow-up Promotion (2026-03-13)
+
+### Confirmed issue
+- `CR-057`:
+  - `src/lib/i18n-performance.ts` still exposes a fetch-based translation helper stack that now has almost no real production consumers
+  - comments still describe a missing production consumer (`translation-preloader.tsx`)
+  - the helper path remains in a formal runtime namespace even though the canonical runtime source has moved to `src/lib/load-messages.ts`
+
+### Why this was promoted
+- This is another concrete migration / single-source-of-truth drift issue, not just code cleanup taste.
+- It explains how Wave 2 runtime i18n drift can grow back even after `CR-056` is fixed.
+
+## CR-057 Repair (2026-03-13)
+
+### Scope
+- `src/lib/i18n-performance.ts`
+- `src/lib/i18n-message-cache.ts`
+- i18n performance/cache-related tests
+
+### Fix summary
+- Removed the fetch-based translation helper stack from `i18n-performance.ts`.
+- Introduced `src/lib/i18n-message-cache.ts` as the explicit non-canonical helper boundary.
+- Updated the test suite to depend on the new module instead of preserving the old formal runtime namespace.
+
+### Verification
+- `pnpm exec vitest run src/lib/__tests__/i18n-performance.test.ts`
+- `pnpm exec vitest run src/lib/__tests__/i18n-performance.network-failure.test.ts src/lib/__tests__/i18n-performance-cache.test.ts`
+- `pnpm exec vitest run src/i18n/__tests__/request.test.ts`
+
+### Result
+- `CR-057` can be treated as repaired.
+
+## CR-058 Repair (2026-03-13)
+
+### Scope
+- `src/middleware.ts`
+- `tests/unit/middleware.test.ts`
+- `src/__tests__/middleware-locale-cookie.test.ts`
+
+### Fix summary
+- Removed the explicit locale early-return branch that bypassed `next-intl` just to resync `NEXT_LOCALE`.
+- Explicit locale requests now stay on the canonical `intlMiddleware(request)` path.
+- Cookie/security behavior remains in the shared post-processing logic.
+
+### Verification
+- `pnpm exec vitest run tests/unit/middleware.test.ts`
+- `pnpm exec vitest run src/__tests__/middleware-locale-cookie.test.ts`
+
+### Result
+- `CR-058` can be treated as repaired.
+
+## CR-059 Cleanup (2026-03-13)
+
+### Scope
+- `src/app/[locale]/layout-test.tsx`
+- `src/lib/i18n/server/getMessagesComplete.ts`
+
+### Cleanup summary
+- Repository-wide reference search showed `layout-test.tsx` had no active consumers.
+- `getMessagesComplete()` was only consumed by `layout-test.tsx` and added no runtime value beyond wrapping `loadCompleteMessages()`.
+- Both files were removed to keep test-only/dead i18n entrypoints out of formal runtime namespaces.
+
+## CR-060 Repair (2026-03-13)
+
+### Scope
+- `src/lib/i18n/route-parsing.ts`
+- `src/lib/i18n/__tests__/route-parsing.test.ts`
+- `src/components/__tests__/language-toggle.test.tsx`
+
+### Fix summary
+- Removed the hardcoded `en|zh` locale regex from `route-parsing.ts`.
+- `LOCALE_PREFIX_RE` now derives from `routing.locales`, eliminating the duplicated locale list.
+
+### Verification
+- `pnpm exec vitest run src/lib/i18n/__tests__/route-parsing.test.ts`
+- `pnpm exec vitest run src/components/__tests__/language-toggle.test.tsx`
+
+### Result
+- `CR-060` can be treated as repaired.
+
+## CR-061 Repair (2026-03-13)
+
+### Scope
+- `src/i18n/request.ts`
+- `src/i18n/__tests__/request.test.ts`
+
+### Fix summary
+- Removed the `cacheUsed` field from request metadata after it had already lost any trustworthy runtime meaning.
+- Simplified the request test suite to match the reduced metadata contract.
+
+### Verification
+- `pnpm exec vitest run src/i18n/__tests__/request.test.ts`
+
+### Result
+- `CR-061` can be treated as repaired.
+
+## CR-062 Repair (2026-03-13)
+
+### Scope
+- `src/lib/structured-data-types.ts`
+- structured-data-related tests
+
+### Fix summary
+- Removed the duplicated locale union from the structured-data type layer.
+- Structured-data locale typing now reuses the canonical `routing-config` locale source.
+
+### Verification
+- `pnpm exec vitest run src/app/[locale]/__tests__/layout-structured-data.test.ts`
+- `pnpm exec vitest run src/lib/__tests__/structured-data.test.ts`
+
+### Result
+- `CR-062` can be treated as repaired.
+
+## CR-063 Repair (2026-03-13)
+
+### Scope
+- `src/lib/load-messages.ts`
+- `src/lib/__tests__/load-messages.fallback.test.ts`
+- `src/i18n/__tests__/request.test.ts`
+
+### Fix summary
+- Removed the duplicated locale union from the canonical runtime message loader.
+- `load-messages.ts` now reuses the routing layer’s `Locale` type.
+
+### Verification
+- `pnpm exec vitest run src/lib/__tests__/load-messages.fallback.test.ts src/i18n/__tests__/request.test.ts`
+
+### Result
+- `CR-063` can be treated as repaired.
+
+## CR-064 Repair (2026-03-13)
+
+### Scope
+- `src/config/paths/types.ts`
+- `src/types/content.types.ts`
+- `src/types/i18n.ts`
+
+### Fix summary
+- Removed the remaining duplicated shared locale unions from the paths/content/i18n type layers.
+- Those layers now reuse the canonical routing locale type instead of maintaining parallel `"en" | "zh"` declarations.
+
+### Verification
+- `pnpm exec vitest run src/config/__tests__/paths.test.ts`
+- `pnpm exec vitest run src/lib/content/__tests__/products-source.test.ts src/lib/content/__tests__/products-wrapper.test.ts`
+- `pnpm exec vitest run tests/integration/i18n-components.test.tsx`
+
+### Result
+- `CR-064` can be treated as repaired.
+
+## CR-065 Repair (2026-03-13)
+
+### Scope
+- `src/i18n/__tests__/request.test.ts`
+
+### Fix summary
+- Rewrote the request test suite around the real `getRequestConfig` callback path.
+- Removed stale assertions for fields that the implementation no longer returns.
+- Eliminated module-cache false positives by resetting modules per test.
+
+### Verification
+- `pnpm exec vitest run src/i18n/__tests__/request.test.ts`
+
+### Result
+- `CR-065` can be treated as repaired.
+
+## CR-066 Repair (2026-03-13)
+
+### Scope
+- `src/components/responsive-layout.tsx`
+- `src/components/__tests__/responsive-layout.test.tsx`
+
+### Fix summary
+- Removed the deprecated prop compatibility layer from `ResponsiveLayout`.
+- The component now only supports the current CSS-first slot API.
+- Tests were updated to stop preserving the legacy contract.
+
+### Verification
+- `pnpm exec vitest run src/components/__tests__/responsive-layout.test.tsx`
+
+### Result
+- `CR-066` can be treated as repaired.
+
+## CR-067 Repair (2026-03-13)
+
+### Scope
+- `src/components/security/turnstile.tsx`
+- `src/components/security/__tests__/turnstile.test.tsx`
+
+### Fix summary
+- Removed the deprecated `onVerify` compatibility path from `TurnstileWidget`.
+- Removed the legacy `handlers.onVerify` alias from `useTurnstile`.
+- Updated the test suite to rely only on the current `onSuccess` API.
+
+### Verification
+- `pnpm exec vitest run src/components/security/__tests__/turnstile.test.tsx`
+
+### Result
+- `CR-067` can be treated as repaired.
+
+## CR-068 Repair (2026-03-13)
+
+### Scope
+- `src/config/footer-links.ts`
+
+### Fix summary
+- Removed the dead deprecated `WhatsAppStyleTokensLegacy` type from the footer config layer.
+
+### Verification
+- `pnpm exec vitest run src/components/footer/__tests__/Footer.test.tsx`
+- `pnpm exec vitest run src/components/whatsapp/__tests__/whatsapp-floating-button.test.tsx`
+
+### Result
+- `CR-068` can be treated as repaired.
+
+## CR-069 Repair (2026-03-13)
+
+### Scope
+- `src/lib/lead-pipeline/utils.ts`
+- `src/lib/lead-pipeline/__tests__/utils.test.ts`
+
+### Fix summary
+- Removed the deprecated `sanitizeInput()` wrapper from the lead-pipeline utility layer.
+- Updated the utils test suite to stop preserving that wrapper as public API.
+
+### Verification
+- `pnpm exec vitest run src/lib/lead-pipeline/__tests__/utils.test.ts`
+
+### Result
+- `CR-069` can be treated as repaired.
+
+## CR-070 Cleanup (2026-03-13)
+
+### Scope
+- `src/lib/locale-constants.ts`
+
+### Cleanup summary
+- Removed the dead locale constants module after confirming it had no active production or test consumers.
+
+### Result
+- `CR-070` can be treated as repaired.
+
+## CR-071 Repair (2026-03-13)
+
+### Scope
+- `src/app/[locale]/layout-fonts.ts`
+- `src/app/[locale]/__tests__/layout-fonts.test.ts`
+
+### Fix summary
+- Removed the dead `ibmPlexSans` compatibility alias from the locale layout font module.
+- Updated the test suite to validate only the active font exports.
+
+### Verification
+- `pnpm exec vitest run src/app/[locale]/__tests__/layout-fonts.test.ts`
+
+### Result
+- `CR-071` can be treated as repaired.
+
+## CR-073 Cleanup (2026-03-13)
+
+### Scope
+- `src/constants/magic-numbers.ts`
+
+### Cleanup summary
+- Removed the dead constants facade after confirming it had no active imports.
+
+### Result
+- `CR-073` can be treated as repaired.
+
+## CR-074 Repair (2026-03-13)
+
+### Scope
+- `src/types/whatsapp.ts`
+- `src/constants/core.ts`
+- `src/constants/index.ts`
+- `src/config/security.ts`
+
+### Fix summary
+- Removed dead backward-compatibility alias exports from the top-level WhatsApp type entrypoint.
+- Introduced `src/constants/core.ts` to keep shared core constants explicit after the earlier facade deletion.
+- Repaired the resulting compile-level fallout so the tree stays type-safe.
+
+### Verification
+- `pnpm type-check`
+
+### Result
+- `CR-074` can be treated as repaired.
+
+## CR-075 Repair (2026-03-13)
+
+### Scope
+- `src/types/whatsapp-webhook-types.ts`
+
+### Fix summary
+- Removed the dead backward-compatibility alias exports from the webhook type entrypoint.
+- Cleaned up the unused imports that only existed to support that alias layer.
+
+### Verification
+- `pnpm exec vitest run src/app/api/whatsapp/webhook/__tests__/route.test.ts`
+- `pnpm type-check`
+
+### Result
+- `CR-075` can be treated as repaired.
+
+## CR-076 Repair (2026-03-13)
+
+### Scope
+- `src/types/whatsapp-api-types.ts`
+
+### Fix summary
+- Removed the dead backward-compatibility alias exports from the WhatsApp API type entrypoint.
+- Cleaned up the now-unused import groups left behind by that alias layer.
+
+### Verification
+- `pnpm exec vitest run src/app/api/whatsapp/send/__tests__/route.test.ts`
+- `pnpm type-check`
+
+### Result
+- `CR-076` can be treated as repaired.
+
+## CR-077 Repair (2026-03-13)
+
+### Scope
+- `src/types/whatsapp-service-types.ts`
+
+### Fix summary
+- Removed the dead convenience factory helper block from the WhatsApp service type entrypoint.
+- Cleaned up the import fallout left behind by that block.
+
+### Verification
+- `pnpm exec vitest run src/lib/__tests__/whatsapp-service.test.ts`
+- `pnpm type-check`
+
+### Result
+- `CR-077` can be treated as repaired.
+
+## CR-078 Repair (2026-03-13)
+
+### Scope
+- `src/types/whatsapp-service-types.ts`
+
+### Fix summary
+- Removed the dead default type export alias from the WhatsApp service type entrypoint.
+
+### Verification
+- `pnpm type-check`
+
+### Result
+- `CR-078` can be treated as repaired.
+
+## CR-079 Repair (2026-03-13)
+
+### Scope
+- `src/types/whatsapp-service-types.ts`
+
+### Fix summary
+- Removed the dead import groups left behind after the earlier compatibility cleanup.
+- The module now more honestly reflects its remaining role as a re-export surface.
+
+### Verification
+- `pnpm type-check`
+
+### Result
+- `CR-079` can be treated as repaired.
+
+## CR-080 Repair (2026-03-13)
+
+### Scope
+- `src/types/whatsapp.ts`
+
+### Fix summary
+- Removed the next narrow set of dead top-level alias re-exports from the WhatsApp type entrypoint.
+
+### Verification
+- `pnpm exec vitest run src/lib/__tests__/whatsapp-service.test.ts src/app/api/whatsapp/send/__tests__/route.test.ts src/app/api/whatsapp/webhook/__tests__/route.test.ts`
+- `pnpm type-check`
+
+### Result
+- `CR-080` can be treated as repaired.
+
+## CR-081 Repair (2026-03-13)
+
+### Scope
+- `src/constants/test-constants.ts`
+- `src/types/i18n.ts`
+- `src/lib/__tests__/colors-contrast-compliance.test.ts`
+
+### Fix summary
+- Removed the dead underscore legacy aliases `_TEST_CONSTANTS` and `_Locale`.
+- Updated the only remaining `_TEST_CONSTANTS` consumer to use `TEST_CONSTANTS`.
+
+### Verification
+- `pnpm exec vitest run src/lib/__tests__/colors-contrast-compliance.test.ts`
+- `pnpm type-check`
+- `rg -n "_TEST_CONSTANTS\\b|_Locale\\b" src tests -S`
+
+### Result
+- `CR-081` can be treated as repaired.
+
+## CR-082 Cleanup (2026-03-13)
+
+### Scope
+- `src/components/blog/index.ts`
+
+### Cleanup summary
+- Removed the dead blog barrel after confirming it had no active imports.
+
+### Result
+- `CR-082` can be treated as repaired.
+
+## CR-083 Cleanup (2026-03-13)
+
+### Scope
+- `src/components/seo/index.ts`
+
+### Cleanup summary
+- Removed the dead SEO barrel after confirming it had no active imports.
+
+### Result
+- `CR-083` can be treated as repaired.
+
+## CR-084 Cleanup (2026-03-15)
+
+### Scope
+- dead barrel batch:
+  - `src/components/blocks/index.ts`
+  - `src/components/trust/index.ts`
+  - `src/emails/index.ts`
+  - `src/lib/security/stores/index.ts`
+
+### Cleanup summary
+- Removed the next batch of confirmed zero-consumer barrel files from the source tree.
+- Restored `components/mdx` / `components/seo` / `lib/cache` / `lib/cookie-consent` / `lib/image` barrels after `type-check` proved they still had active consumers.
+
+### Result
+- `CR-084` can be treated as repaired.
+
+## CR-072 Repair (2026-03-13)
+
+### Scope
+- `src/constants/count.ts`
+- `src/constants/index.ts`
+- active production consumers of deprecated count aliases
+
+### Fix summary
+- Replaced deprecated count aliases in production code with the canonical count constants.
+- Removed the deprecated alias exports from the constants layer.
+- Repaired the small compile leftovers exposed by that cleanup.
+
+### Verification
+- `pnpm type-check`
+- `pnpm exec vitest run src/config/__tests__/paths.test.ts src/lib/__tests__/structured-data.test.ts src/components/security/__tests__/turnstile.test.tsx src/lib/lead-pipeline/__tests__/utils.test.ts`
+
+### Result
+- `CR-072` can be treated as repaired.

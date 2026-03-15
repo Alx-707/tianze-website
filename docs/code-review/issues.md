@@ -1188,7 +1188,897 @@ Round 3 复审阶段新增的 `CR-023` ~ `CR-026` 已在 Round 4 的 Wave A / Wa
 - 状态：❌ 未修复（2026-03-11）
   - 修复点：
     - `contactFormAction` 对 submission expired / Turnstile 失败不再下发英文 `details`
-    - `contact-form-container` 定向测试已验证错误码路径不会再渲染原始英文 bullet
+  - `contact-form-container` 定向测试已验证错误码路径不会再渲染原始英文 bullet
   - 验收：
     - `pnpm exec vitest run src/components/forms/__tests__/contact-form-container.test.tsx`
 - 状态：✅ 已修复（2026-03-11，repair phase）
+
+## 2026-03-13 Wave 1 新增问题
+
+### Business Write Paths（数据不变量 / 并发时序 / 异常路径语义）
+
+#### CR-053 contact 提交链将合成 `referenceId` 伪装成 `emailMessageId` / `airtableRecordId`
+- 优先级：P1
+- 标签：PROD/DATA/CONTRACT
+- review chain：contact submission chain
+- 证据：
+  - `src/lib/contact-form-processing.ts:54-60` 在 `result.success` 时，将同一个 `result.referenceId` 同时赋值给 `emailMessageId` 和 `airtableRecordId`。
+  - `src/app/api/contact/route.ts:81-84` 把这两个字段作为 `messageId` / `recordId` 返回给调用方。
+  - 当前 contact 相关测试大多 mock `processFormSubmission()` 直接返回真实风格的 `msg-*` / `rec-*` 值，因此没有覆盖到真实实现的映射语义。
+- 影响：
+  - 该链路对外暴露的是“看起来像下游服务真实 ID”的字段，但实际承载的是内部合成的 lead reference。
+  - 任何调试流程、日志分析或未来调用方若信任 `messageId` / `recordId` 语义，都会读到错误数据。
+  - 这是数据不变量和接口语义同时失真，不是纯命名问题。
+- 建议修复：
+  - 若当前只有 `referenceId` 可用，就显式返回 `referenceId`，不要伪装成下游 provider ID。
+  - 若需要 provider-specific ID，则扩展 lead pipeline / service result，把真实 `emailMessageId` 与 `airtableRecordId` 贯通到 contact 返回值。
+  - 补一条不 mock `processFormSubmission()` 映射层语义的定向测试，防止再次回归。
+- 验收命令：
+  - `pnpm test -- src/app/api/contact/__tests__/contact-api-validation.test.ts`
+  - `pnpm test -- src/app/api/contact/__tests__/route-post.test.ts`
+- 状态：❌ 未修复（2026-03-13，Wave 1）
+  - 修复点：
+    - `contact-form-processing.ts` 不再伪造 `emailMessageId` / `airtableRecordId`，统一返回 `referenceId`
+    - `contact` Server Action 与 `/api/contact` 成功响应已对齐到 `referenceId`
+    - contact 链定向测试已改为断言 `referenceId`，不再保活错误的 provider-ID 语义
+  - 验收：
+    - `pnpm exec vitest run src/app/api/contact/__tests__/contact-api-validation.test.ts`
+    - `pnpm exec vitest run src/app/api/contact/__tests__/route-post.test.ts`
+    - `pnpm exec vitest run src/app/api/contact/__tests__/route.test.ts`
+    - `pnpm exec vitest run src/app/__tests__/actions.test.ts src/app/__tests__/contact-integration.test.ts tests/integration/api/contact.test.ts`
+- 状态：✅ 已修复（2026-03-13，repair phase）
+
+#### CR-054 contact 主提交链缺少幂等保护，重复提交会产生重复副作用
+- 优先级：P1
+- 标签：PROD/CONCURRENCY
+- review chain：contact submission chain
+- 证据：
+  - `src/lib/actions/contact.ts:176-245` 只做 rate limit + honeypot，再直接进入 `processFormSubmission()`。
+  - `src/app/api/contact/route.ts:39-84` 只使用 `withRateLimit("contact", ...)`，没有 `withIdempotency(...)`。
+  - `src/lib/contact-form-processing.ts:52-69` 会进入统一 lead pipeline，产生 CRM 记录与邮件发送等副作用。
+  - 对比：`/api/inquiry` 与 `/api/subscribe` 已显式引入 `withIdempotency(..., { required: true })`，contact 路径没有对应保护。
+- 影响：
+  - 浏览器重试、网络层重放或用户双击提交，都可能在 contact 主路径上产生重复记录和重复通知。
+  - rate limit 只能限制频率，不能保证“同一次业务提交只处理一次”。
+  - 这让 contact 这条核心写路径在并发/重试语义上比 inquiry / subscribe 更脆弱。
+- 建议修复：
+  - 为 contact 路径补齐幂等契约：API route 侧可直接引入 `withIdempotency`；Server Action 路径需要配套的 tokenized dedupe 方案。
+  - 前端提交链需要能生成并复用同一次提交的幂等 key。
+  - 补定向回归：重复提交应命中缓存/去重，而不是二次落库。
+- 验收命令：
+  - `pnpm test -- src/app/__tests__/contact-integration.test.ts`
+  - `pnpm test -- tests/integration/api/contact.test.ts`
+- 状态：❌ 未修复（2026-03-13，Wave 1）
+  - 修复点：
+    - `/api/contact` 已强制 `Idempotency-Key`，并通过 `withIdempotency(..., { required: true })` 缓存成功结果
+    - `contactFormAction` 已接入 `withIdempotentResult()`，主 Server Action 链不再缺少幂等保护
+    - `contact-form-container.tsx` 已生成并复用 `idempotencyKey` 表单字段，成功后清空
+    - 测试隔离已补 `resetIdempotencyState()`，避免跨用例残留已完成 key
+  - 验收：
+    - `pnpm exec vitest run src/app/api/contact/__tests__/route-post.test.ts`
+    - `pnpm exec vitest run src/app/api/contact/__tests__/route.test.ts`
+    - `pnpm exec vitest run src/app/__tests__/actions.test.ts src/app/__tests__/contact-integration.test.ts`
+    - `pnpm exec vitest run tests/integration/api/contact.test.ts`
+- 状态：✅ 已修复（2026-03-13，repair phase）
+
+#### CR-055 contact 前端 cooldown 在服务端接受前就启动，失败提交也会锁住用户
+- 优先级：P2
+- 标签：PROD/UX
+- review chain：contact submission chain
+- 证据：
+  - `src/components/forms/contact-form-container.tsx:169-181` 在调用 `formAction(formData)` 之前就执行 `recordSubmission()`。
+  - `src/components/forms/use-rate-limit.ts:27-77` 仅根据本地时间戳推导 `isRateLimited`，与服务端实际成功/失败无关。
+  - `src/components/forms/contact-form-container.tsx:408-445` 在 `isRateLimited` 为真时直接禁用提交按钮并显示 cooldown 文案。
+  - 当前测试只覆盖“成功提交后进入 cooldown”，没有覆盖“失败提交不应进入 cooldown”。
+- 影响：
+  - 表单校验失败、Turnstile 失败或临时服务错误都可能让真实用户在本地被锁住整个 cooldown 窗口。
+  - 这把异常路径重试变成了对合法用户的本地拒绝服务。
+- 建议修复：
+  - 只在服务端确认成功后再记录 cooldown，或者显式区分“attempted” 与 “accepted” 两种状态。
+  - 补失败路径回归测试：失败提交不应触发 cooldown 提示，也不应禁用提交按钮。
+- 验收命令：
+  - `pnpm test -- src/components/forms/__tests__/contact-form-submission.test.tsx`
+  - `pnpm test -- src/components/forms/__tests__/contact-form-container.test.tsx`
+- 状态：❌ 未修复（2026-03-13，Wave 1）
+  - 修复点：
+    - `contact-form-container.tsx` 已移除提交前的 `recordSubmission()`，cooldown 只在成功状态 effect 中通过 `setLastSubmissionTime()` 启动
+    - `contact-form-submission.test.tsx` 已补“成功才启动 cooldown / 失败不启动 cooldown”回归覆盖
+  - 验收：
+    - `pnpm exec vitest run src/components/forms/__tests__/contact-form-submission.test.tsx`
+    - `pnpm exec vitest run src/components/forms/__tests__/contact-form-container.test.tsx`
+- 状态：✅ 已修复（2026-03-13，repair phase）
+
+## 2026-03-13 Wave 2 新增问题
+
+### Runtime / i18n / Single Source of Truth
+
+#### CR-056 `src/i18n/request.ts` 仍从过期的 `TranslationCache` 推导 `cacheUsed`，运行时指标语义已与真实消息链脱钩
+- 优先级：P2
+- 标签：PROD/I18N/TECHDEBT
+- review chain：locale/runtime entry chain
+- 证据：
+  - `src/i18n/request.ts:52-63` 通过 `TranslationCache.getInstance().get("messages-${locale}-critical")` 推导 `cacheUsed`，并据此记录 cache hit/miss。
+  - `src/i18n/request.ts:148-156` 当前真实运行时消息链已经走 `loadCompleteMessages(locale)`。
+  - `src/lib/i18n-performance.ts:111-140` 才会写入 `messages-${locale}-critical` 这条 cache key，但这是一条 fetch-based performance helper 路径，不是当前 runtime canonical message loader。
+  - 全仓搜索显示 `getCachedMessages` / `getCachedTranslations` / `preloadTranslations` 已无明确生产消费方，主要剩测试和注释在保活这套路径；注释里提到的 `translation-preloader.tsx` 也不在当前生产代码中。
+- 影响：
+  - `metadata.cacheUsed` 与 request-time cache hit/miss 统计已不再反映真实运行时消息加载行为。
+  - 当前 request 配置层仍依赖一条与 canonical runtime source 分离的旧 cache seam，形成单一真相源漂移。
+  - 这类问题不会立刻打挂页面，但会让调试与性能判断信号失真，未来继续误导维护者。
+- 建议修复：
+  - 让 `src/i18n/request.ts` 停止从 `TranslationCache` 推导 runtime `cacheUsed`，除非能证明它就是 canonical loader 的真实缓存来源。
+  - 若无法可靠判断 runtime cache hit，优先去掉或降级该 metadata，而不是继续输出伪精确布尔值。
+  - 重新审视 `src/lib/i18n-performance.ts` 中 fetch-based cache helper 的生产引用面；若主要靠测试保活，应明确降级为 test/dev helper 或进一步收口。
+- 验收命令：
+  - `pnpm exec vitest run src/i18n/__tests__/request.test.ts`
+  - `pnpm exec vitest run src/lib/__tests__/load-messages.fallback.test.ts`
+- 状态：❌ 未修复（2026-03-13，Wave 2）
+  - 修复点：
+    - `src/i18n/request.ts` 已移除对 `TranslationCache` 的 runtime `cacheUsed` 推导
+    - request 层现在只记录 load time，不再从过期 cache seam 伪报命中语义
+    - 成功路径 metadata 统一回到保守值 `cacheUsed: false`
+  - 验收：
+    - `pnpm exec vitest run src/i18n/__tests__/request.test.ts`
+    - `pnpm exec vitest run src/lib/__tests__/load-messages.fallback.test.ts`
+- 状态：✅ 已修复（2026-03-13，repair phase）
+
+#### CR-057 `src/lib/i18n-performance.ts` 仍保留 fetch-based translation helper 这条近乎失活的旧链路，继续放大 runtime 真相源误导
+- 优先级：P2
+- 标签：PROD/I18N/TECHDEBT
+- review chain：locale/runtime entry chain
+- 证据：
+  - 全仓引用搜索显示 `getCachedMessages` / `getCachedTranslations` / `preloadTranslations` 目前几乎只出现在测试中，以及之前已收敛掉的 `request.ts` 旧 seam 上。
+  - `src/lib/i18n-performance.ts:110` 的注释仍声称该模块被客户端组件 `translation-preloader.tsx` 使用，但当前生产代码中不存在这个组件。
+  - 当前剩余的生产引用主要是 `I18nPerformanceMonitor` 这一监控类（如 `src/i18n/request.ts`、`src/lib/structured-data.ts`、`src/lib/structured-data-helpers.ts`），而不是 fetch-based 取消息 helper 本身。
+- 影响：
+  - 仓库里仍存在一套看起来像“生产消息加载方案”的 fetch-based helper 链，但它已不再是 canonical runtime source。
+  - 这会误导后续维护者继续在一条近乎失活的旧链路上加逻辑，重新制造 split brain i18n truth source。
+  - 结合 `CR-056`，这说明 Wave 2 不是单点指标问题，而是 runtime i18n 旧 helper 仍在名义上占据正式命名空间。
+- 建议修复：
+  - 明确给 `src/lib/i18n-performance.ts` 降级：保留监控职责时，应拆掉或隔离 fetch-based message helper；若 helper 仅供测试/实验使用，应迁出正式 runtime 命名空间。
+  - 更新过期注释，删除对不存在组件（如 `translation-preloader.tsx`）的引用。
+  - 重新定义该模块的生产边界，避免未来再被当成 active runtime loader 扩展。
+- 验收命令：
+  - `pnpm exec vitest run src/lib/__tests__/i18n-performance.test.ts`
+  - `pnpm exec vitest run src/i18n/__tests__/request.test.ts`
+- 状态：❌ 未修复（2026-03-13，Wave 2）
+  - 修复点：
+    - `src/lib/i18n-performance.ts` 已收敛为监控/评分职责
+    - fetch-based translation helper 已拆到 `src/lib/i18n-message-cache.ts`
+    - 相关测试已改为显式依赖新 helper 模块，而不是继续保活旧 runtime namespace
+  - 验收：
+    - `pnpm exec vitest run src/lib/__tests__/i18n-performance.test.ts`
+    - `pnpm exec vitest run src/lib/__tests__/i18n-performance.network-failure.test.ts src/lib/__tests__/i18n-performance-cache.test.ts`
+    - `pnpm exec vitest run src/i18n/__tests__/request.test.ts`
+- 状态：✅ 已修复（2026-03-13，repair phase）
+
+#### CR-058 `src/middleware.ts` 对显式 locale 请求保留了只为补 cookie 的 early return，旁路 canonical `next-intl` 路径
+- 优先级：P2
+- 标签：PROD/I18N/TECHDEBT
+- review chain：locale/runtime entry chain
+- 证据：
+  - 修复前：`src/middleware.ts` 的 `tryHandleExplicitLocalizedRequest()` 在 locale path 与现有 cookie 不一致时直接 `NextResponse.next()` 并提前返回。
+  - 同文件后半段对 `intlMiddleware(request)` 的正常分支里，已经有相同的 `locale && existingLocale !== locale -> setLocaleCookie(response, locale)` 逻辑。
+  - 这意味着显式 locale 请求会为“同步 cookie”这一个目的绕开 canonical `next-intl` 运行路径。
+- 影响：
+  - locale/runtime 入口在显式 locale 请求上被拆成两条分支，增加未来修 locale 行为时只改一边的风险。
+  - 这类重复分支会重新制造 Wave 2 正在清理的 split truth source / split runtime path 问题。
+- 建议修复：
+  - 删除显式 locale 的 early return，让请求始终经过 `intlMiddleware(request)`。
+  - 继续在共享后置逻辑中统一补 locale cookie 和安全头，保持单一路径。
+  - 补单测确认：显式 locale 请求仍能设置 cookie，但不会旁路 `next-intl` middleware。
+- 验收命令：
+  - `pnpm exec vitest run tests/unit/middleware.test.ts`
+  - `pnpm exec vitest run src/__tests__/middleware-locale-cookie.test.ts`
+- 状态：❌ 未修复（2026-03-13，Wave 2）
+  - 修复点：
+    - `src/middleware.ts` 已移除显式 locale 的 early return 分支
+    - 显式 locale 请求现在统一经过 `intlMiddleware(request)`，再由共享后置逻辑补 cookie / 安全头
+    - middleware 单测已更新为符合 `createMiddleware()` 工厂形态的 mock，并验证不再旁路 canonical path
+  - 验收：
+    - `pnpm exec vitest run tests/unit/middleware.test.ts`
+    - `pnpm exec vitest run src/__tests__/middleware-locale-cookie.test.ts`
+- 状态：✅ 已修复（2026-03-13，repair phase）
+
+#### CR-060 `src/lib/i18n/route-parsing.ts` 仍硬编码 `en|zh`，与 `routing-config` 的 locale 列表形成第二真相源
+- 优先级：P2
+- 标签：PROD/I18N/TECHDEBT
+- review chain：locale/runtime entry chain
+- 证据：
+  - 修复前：`src/lib/i18n/route-parsing.ts` 中 `LOCALE_PREFIX_RE` 直接写死为 `^\/(en|zh)(?=\/|$)`。
+  - 同时，实际 locale 真相源已在 `src/i18n/routing-config.ts` 的 `routing.locales` 中维护。
+  - `src/components/language-toggle.tsx` 通过 `parsePathnameForLink()` 消费这条路径解析逻辑，因此这不是纯测试代码。
+- 影响：
+  - 一旦后续调整 locale 列表，路径解析层可能和 routing config 脱节，导致语言切换或链接构造出现局部失效。
+  - 这类问题属于典型的单一真相源漂移，符合 Wave 2 正在收敛的 runtime/i18n 风险面。
+- 建议修复：
+  - 让 `LOCALE_PREFIX_RE` 由 `routing.locales` 派生，而不是手写字符串。
+  - 保持现有 API 不变，只消除 locale 列表的重复声明。
+- 验收命令：
+  - `pnpm exec vitest run src/lib/i18n/__tests__/route-parsing.test.ts`
+  - `pnpm exec vitest run src/components/__tests__/language-toggle.test.tsx`
+- 状态：❌ 未修复（2026-03-13，Wave 2）
+  - 修复点：
+    - `LOCALE_PREFIX_RE` 已改为从 `routing.locales` 动态生成
+    - `route-parsing.ts` 不再保留独立的 locale 硬编码列表
+  - 验收：
+    - `pnpm exec vitest run src/lib/i18n/__tests__/route-parsing.test.ts`
+    - `pnpm exec vitest run src/components/__tests__/language-toggle.test.tsx`
+- 状态：✅ 已修复（2026-03-13，repair phase）
+
+#### CR-061 `src/i18n/request.ts` 在 `cacheUsed` 已失真后仍继续输出该 metadata 字段，形成空信号接口
+- 优先级：P3
+- 标签：PROD/I18N/TECHDEBT
+- review chain：locale/runtime entry chain
+- 证据：
+  - `CR-056` 修复后，`src/i18n/request.ts` 已不再有可信依据判断 canonical runtime cache hit。
+  - 全仓搜索显示 `cacheUsed` 已无真实生产消费者，主要剩 `src/i18n/__tests__/request.test.ts` 在断言其存在。
+- 影响：
+  - 保留一个没有真实语义支撑的字段，会继续误导后续维护者把它当成有效 runtime 信号。
+  - 这会让 request metadata 接口比真实可观测信息更“宽”，形成空信号技术债。
+- 建议修复：
+  - 直接删除 `cacheUsed`，不要把它留作永远为 `false` 的占位字段。
+  - 同步简化 request 测试对 metadata 结构的断言。
+- 验收命令：
+  - `pnpm exec vitest run src/i18n/__tests__/request.test.ts`
+- 状态：❌ 未修复（2026-03-13，Wave 2）
+  - 修复点：
+    - `src/i18n/request.ts` 已删除 `cacheUsed` 字段
+    - request 测试已改为断言精简后的 metadata 结构
+  - 验收：
+    - `pnpm exec vitest run src/i18n/__tests__/request.test.ts`
+- 状态：✅ 已修复（2026-03-13，repair phase）
+
+#### CR-062 `structured-data` 层仍单独声明 `Locale = "en" | "zh"`，与 `routing-config` 再次形成 locale 真相源分叉
+- 优先级：P3
+- 标签：PROD/I18N/TECHDEBT
+- review chain：locale/runtime entry chain
+- 证据：
+  - 修复前：`src/lib/structured-data-types.ts` 仍定义 `export type Locale = "en" | "zh"`;
+  - 同时，canonical locale source 已在 `src/i18n/routing-config.ts` 中维护。
+  - `structured-data.ts` / `structured-data-helpers.ts` / locale layout structured-data 链都依赖这套类型，因此它不只是孤立 dead code。
+- 影响：
+  - 这让 structured-data 层再次成为 locale 列表的第二真相源。
+  - 一旦未来 locale 扩展，这条链可能在类型层先于 runtime 配置发生漂移。
+- 建议修复：
+  - 让 `structured-data-types.ts` 复用 `routing-config` 的 `Locale` 类型，不再维护独立字面量联合。
+- 验收命令：
+  - `pnpm exec vitest run src/app/[locale]/__tests__/layout-structured-data.test.ts`
+  - `pnpm exec vitest run src/lib/__tests__/structured-data.test.ts`
+- 状态：❌ 未修复（2026-03-13，Wave 2）
+  - 修复点：
+    - `structured-data-types.ts` 已改为复用 `routing-config` 的 `Locale` 类型
+  - 验收：
+    - `pnpm exec vitest run src/app/[locale]/__tests__/layout-structured-data.test.ts`
+    - `pnpm exec vitest run src/lib/__tests__/structured-data.test.ts`
+- 状态：✅ 已修复（2026-03-13，repair phase）
+
+#### CR-063 `src/lib/load-messages.ts` 仍单独声明 `Locale = "en" | "zh"`，继续在 runtime loader 层复制 locale 真相源
+- 优先级：P3
+- 标签：PROD/I18N/TECHDEBT
+- review chain：locale/runtime entry chain
+- 证据：
+  - 修复前：`src/lib/load-messages.ts` 内仍有 `type Locale = "en" | "zh"`;
+  - 同时，canonical locale source 已在 `src/i18n/routing-config.ts` 中维护，并通过 `src/i18n/routing.ts` 暴露。
+  - `load-messages.ts` 属于当前 runtime canonical message loader，因此这里的重复类型声明比测试层更接近真实运行边界。
+- 影响：
+  - runtime loader 层继续复制 locale 列表，会让后续 locale 扩展在类型层先于运行配置发生漂移。
+  - 这与 Wave 2 已修复的 `CR-060`、`CR-062` 属于同类单一真相源问题。
+- 建议修复：
+  - 让 `load-messages.ts` 直接复用 routing 层导出的 `Locale` 类型。
+- 验收命令：
+  - `pnpm exec vitest run src/lib/__tests__/load-messages.fallback.test.ts src/i18n/__tests__/request.test.ts`
+- 状态：❌ 未修复（2026-03-13，Wave 2）
+  - 修复点：
+    - `load-messages.ts` 已改为导入 routing 层的 `Locale` 类型
+  - 验收：
+    - `pnpm exec vitest run src/lib/__tests__/load-messages.fallback.test.ts src/i18n/__tests__/request.test.ts`
+- 状态：✅ 已修复（2026-03-13，repair phase）
+
+#### CR-064 共享类型层仍在多处重复声明 `Locale = "en" | "zh"`，继续放大 locale 真相源扩散
+- 优先级：P3
+- 标签：PROD/I18N/TECHDEBT
+- review chain：locale/runtime entry chain
+- 证据：
+  - 修复前仍有多处共享类型文件保留独立 locale union：
+    - `src/config/paths/types.ts`
+    - `src/types/content.types.ts`
+    - `src/types/i18n.ts`
+  - 这些文件都处于共享类型层，消费面覆盖 paths/content/i18n，属于更容易持续扩散的真相源复制点。
+- 影响：
+  - locale 列表继续在共享类型层横向扩散，会让未来 locale 扩展时产生多点同步成本和类型层漂移。
+  - 这与 `CR-060`、`CR-062`、`CR-063` 属于同一类系统性问题。
+- 建议修复：
+  - 让这些共享类型文件全部复用 `routing-config` 的 canonical `Locale`。
+- 验收命令：
+  - `pnpm exec vitest run src/config/__tests__/paths.test.ts`
+  - `pnpm exec vitest run src/lib/content/__tests__/products-source.test.ts src/lib/content/__tests__/products-wrapper.test.ts`
+  - `pnpm exec vitest run tests/integration/i18n-components.test.tsx`
+- 状态：❌ 未修复（2026-03-13，Wave 2）
+  - 修复点：
+    - `src/config/paths/types.ts`、`src/types/content.types.ts`、`src/types/i18n.ts` 已统一复用 canonical `Locale`
+  - 验收：
+    - `pnpm exec vitest run src/config/__tests__/paths.test.ts`
+    - `pnpm exec vitest run src/lib/content/__tests__/products-source.test.ts src/lib/content/__tests__/products-wrapper.test.ts`
+    - `pnpm exec vitest run tests/integration/i18n-components.test.tsx`
+- 状态：✅ 已修复（2026-03-13，repair phase）
+
+#### CR-065 `src/i18n/__tests__/request.test.ts` 仍在断言已删除字段，并受模块缓存影响而脱离真实实现
+- 优先级：P2
+- 标签：TEST/I18N
+- review chain：verification and guardrails chain
+- 证据：
+  - 修复前的测试仍断言 `metadata.smartDetection`、`metadata.cacheUsed`、`metadata.timestamp` 等当前实现已不存在的字段。
+  - 测试使用重复 `await import("../request")` 但未重置模块，后续 case 受模块缓存影响，并未可靠重新执行模块初始化。
+  - 在实现已多次演进后，这组测试仍能全绿，说明断言目标与真实实现已经脱钩。
+- 影响：
+  - 这会给 request/runtime i18n 链提供错误的测试安全感。
+  - 后续修改 `request.ts` 时，测试既可能放过真实回归，也可能为了不存在的旧语义阻碍正确重构。
+- 建议修复：
+  - 基于 `getRequestConfig` callback 重写测试入口，按 case 显式执行真实配置函数。
+  - 删除对已删除字段和旧缓存语义的断言。
+  - 用定向 mock 覆盖 fallback/error path，而不是保活已经不存在的旧行为。
+- 验收命令：
+  - `pnpm exec vitest run src/i18n/__tests__/request.test.ts`
+- 状态：❌ 未修复（2026-03-13，Wave 3）
+  - 修复点：
+    - `request.test.ts` 已按真实 callback 执行路径重写
+    - 旧字段与模块缓存伪覆盖问题已清除
+  - 验收：
+    - `pnpm exec vitest run src/i18n/__tests__/request.test.ts`
+- 状态：✅ 已修复（2026-03-13，repair phase）
+
+#### CR-066 `ResponsiveLayout` 仍保留只靠测试保活的 deprecated props，继续放大假兼容层
+- 优先级：P2
+- 标签：PROD/MAINTAINABILITY/TEST
+- review chain：code quality and elegance chain
+- 证据：
+  - 生产代码搜索显示 `mobileLayout` / `tabletLayout` / `desktopLayout` / `mobileNavigation` / `tabletSidebar` / `desktopSidebar` / `onLayoutChange` 没有真实消费者，只有 `ResponsiveLayout` 自身和测试在引用。
+  - `src/components/responsive-layout.tsx` 仍保留一整套 deprecated props 及其解析逻辑。
+  - `src/components/__tests__/responsive-layout.test.tsx` 明确在保活这些 legacy props。
+- 影响：
+  - 正式组件 API 继续背着一层无生产消费者的兼容壳，会误导后续使用者并增加实现复杂度。
+  - 这是典型的“测试把旧入口保活”问题。
+- 建议修复：
+  - 删除 deprecated props 和对应解析逻辑，只保留当前 slot API。
+  - 同步收敛测试，停止把 legacy prop contract 当成产品真相。
+- 验收命令：
+  - `pnpm exec vitest run src/components/__tests__/responsive-layout.test.tsx`
+- 状态：❌ 未修复（2026-03-13，Wave 3）
+  - 修复点：
+    - `ResponsiveLayout` 已删除 deprecated prop 层，只保留当前 API
+    - 测试已改为断言当前正式 API，不再保活 legacy props
+  - 验收：
+    - `pnpm exec vitest run src/components/__tests__/responsive-layout.test.tsx`
+- 状态：✅ 已修复（2026-03-13，repair phase）
+
+#### CR-067 `TurnstileWidget` 仍保留只靠测试保活的 deprecated `onVerify` 回调兼容层
+- 优先级：P2
+- 标签：PROD/MAINTAINABILITY/TEST
+- review chain：code quality and elegance chain
+- 证据：
+  - 生产代码搜索显示实际消费者都已使用 `onSuccess` / `onError` / `onExpire`，没有真实生产调用方再传 `onVerify`。
+  - `src/components/security/turnstile.tsx` 仍保留 `onVerify` deprecated prop，并在成功与 dev bypass 路径里做 `onSuccess ?? onVerify` 回退。
+  - 对应测试还在明确保活 `onVerify` 向后兼容行为。
+- 影响：
+  - 正式组件 API 持续暴露无真实消费者的旧回调，会误导后续使用者并增加实现复杂度。
+  - 这与 `CR-066` 属于同类“测试保活旧入口”问题。
+- 建议修复：
+  - 删除 `onVerify` 和 `handlers.onVerify`，只保留当前 `onSuccess` 路径。
+  - 同步收敛测试，不再把 deprecated callback 当成产品契约。
+- 验收命令：
+  - `pnpm exec vitest run src/components/security/__tests__/turnstile.test.tsx`
+- 状态：❌ 未修复（2026-03-13，Wave 3）
+  - 修复点：
+    - `TurnstileWidget` 已删除 deprecated `onVerify` 路径
+    - `useTurnstile` 已删除 `handlers.onVerify`
+    - 测试已改为断言当前 `onSuccess` API
+  - 验收：
+    - `pnpm exec vitest run src/components/security/__tests__/turnstile.test.tsx`
+- 状态：✅ 已修复（2026-03-13，repair phase）
+
+#### CR-068 `footer-links.ts` 仍保留无任何消费者的 `WhatsAppStyleTokensLegacy`，继续放大假兼容配置面
+- 优先级：P3
+- 标签：PROD/MAINTAINABILITY
+- review chain：code quality and elegance chain
+- 证据：
+  - `src/config/footer-links.ts` 仍声明 `WhatsAppStyleTokensLegacy` 并标注为 deprecated。
+  - 仓库搜索显示 `WhatsAppStyleTokensLegacy` 没有任何实际消费者。
+- 影响：
+  - 正式配置模块继续暴露一个并不存在实际兼容需求的旧类型，会误导后续维护者。
+  - 这是另一种“无消费者兼容层”技术债。
+- 建议修复：
+  - 删除该 legacy 类型，保留当前真实使用的 `WhatsAppStyleTokens`。
+- 验收命令：
+  - `pnpm exec vitest run src/components/footer/__tests__/Footer.test.tsx`
+  - `pnpm exec vitest run src/components/whatsapp/__tests__/whatsapp-floating-button.test.tsx`
+- 状态：❌ 未修复（2026-03-13，Wave 3）
+  - 修复点：
+    - `WhatsAppStyleTokensLegacy` 已从 `footer-links.ts` 删除
+  - 验收：
+    - `pnpm exec vitest run src/components/footer/__tests__/Footer.test.tsx`
+    - `pnpm exec vitest run src/components/whatsapp/__tests__/whatsapp-floating-button.test.tsx`
+- 状态：✅ 已修复（2026-03-13，repair phase）
+
+#### CR-069 `lead-pipeline/utils.ts` 仍保留只靠测试保活的 deprecated `sanitizeInput()` wrapper
+- 优先级：P2
+- 标签：PROD/MAINTAINABILITY/TEST
+- review chain：code quality and elegance chain
+- 证据：
+  - `src/lib/lead-pipeline/utils.ts` 仍保留 `@deprecated` 的 `sanitizeInput()` 包装层。
+  - 生产代码搜索显示该 wrapper 没有真实消费者，只剩 `src/lib/lead-pipeline/__tests__/utils.test.ts` 在保活它。
+- 影响：
+  - 正式 utility 模块继续暴露无消费者的旧 helper，会误导维护者并增加 API 面。
+  - 这同样属于“测试把旧入口保活”的问题。
+- 建议修复：
+  - 删除该 deprecated wrapper，改由真实仍在使用的 sanitization helper 承担职责。
+  - 同步收敛测试，停止把它当成公开契约。
+- 验收命令：
+  - `pnpm exec vitest run src/lib/lead-pipeline/__tests__/utils.test.ts`
+- 状态：❌ 未修复（2026-03-13，Wave 3）
+  - 修复点：
+    - `sanitizeInput()` 已从 `lead-pipeline/utils.ts` 删除
+    - 对应测试已改为只验证当前正式 API
+  - 验收：
+    - `pnpm exec vitest run src/lib/lead-pipeline/__tests__/utils.test.ts`
+- 状态：✅ 已修复（2026-03-13，repair phase）
+
+#### CR-070 `src/lib/locale-constants.ts` 已无任何消费者，却仍保留一整份 locale 常量与映射真相源
+- 优先级：P2
+- 标签：PROD/I18N/MAINTAINABILITY
+- review chain：locale/runtime entry chain
+- 证据：
+  - 仓库搜索显示 `src/lib/locale-constants.ts` 中的 `SUPPORTED_LOCALES`、`DEFAULT_LOCALE`、`GEO_LOCALE_MAP`、`BROWSER_LOCALE_MAP` 没有任何真实生产或测试消费者。
+  - 当前生产链已经以 `routing-config`、`LOCALES_CONFIG`、`env` 等为主，这个模块处于完全脱链状态。
+- 影响：
+  - 继续保留这类无消费者 locale 常量模块，会制造新的 locale 真相源错觉。
+  - 后续维护者可能误把它当成可用入口继续扩展，重新制造 Wave 2 正在清理的分叉。
+- 建议修复：
+  - 删除该 dead module，不再把它保留在正式 runtime namespace 下。
+- 验收命令：
+  - `rg -n "from '@/lib/locale-constants'|from \\\"@/lib/locale-constants\\\"" src tests -S`
+- 状态：❌ 未修复（2026-03-13，Wave 3）
+  - 修复点：
+    - `src/lib/locale-constants.ts` 已删除
+  - 验收：
+    - `rg -n "from '@/lib/locale-constants'|from \\\"@/lib/locale-constants\\\"" src tests -S`
+- 状态：✅ 已修复（2026-03-13，repair phase）
+
+#### CR-073 `src/constants/magic-numbers.ts` 已无任何消费者，却仍保留死掉的 constants facade 入口
+- 优先级：P3
+- 标签：PROD/MAINTAINABILITY
+- review chain：code quality and elegance chain
+- 证据：
+  - 仓库搜索显示 `src/constants/magic-numbers.ts` 没有任何真实 import 消费方，只剩测试注释中提及它。
+  - 文件本身仍以正式 constants facade 入口的姿态存在。
+- 影响：
+  - 继续保留这类 dead facade 会误导维护者以为这是受支持的常量入口。
+  - 这会增加 constants 体系的表面积和理解成本。
+- 建议修复：
+  - 删除该 dead facade 文件。
+- 验收命令：
+  - `rg -n "from '@/constants/magic-numbers'|from \\\"@/constants/magic-numbers\\\"" src tests -S`
+- 状态：❌ 未修复（2026-03-13，Wave 3）
+  - 修复点：
+    - `src/constants/magic-numbers.ts` 已删除
+  - 验收：
+    - `rg -n "from '@/constants/magic-numbers'|from \\\"@/constants/magic-numbers\\\"" src tests -S`
+- 状态：✅ 已修复（2026-03-13，repair phase）
+
+#### CR-074 `src/types/whatsapp.ts` 仍暴露无消费者的 backward-compatibility alias exports，继续放大顶层类型入口噪音
+- 优先级：P3
+- 标签：PROD/MAINTAINABILITY
+- review chain：code quality and elegance chain
+- 证据：
+  - `src/types/whatsapp.ts` 顶层聚合入口仍保留一批旧 alias re-exports。
+  - 仓库搜索未发现这些 alias 名字有真实 top-level import 消费方。
+- 影响：
+  - 顶层 WhatsApp 类型入口继续暴露无消费者旧别名，会误导使用者并扩大正式 API 面。
+  - 这属于和前面 dead compatibility surface 同类的“旧名词汇还挂在主入口”问题。
+- 建议修复：
+  - 删除这些无消费者 alias re-exports，只保留当前真实使用的类型导出。
+- 验收命令：
+  - `pnpm type-check`
+- 状态：❌ 未修复（2026-03-13，Wave 3）
+  - 修复点：
+    - `src/types/whatsapp.ts` 已删除无消费者 alias re-exports
+    - 清理过程中暴露的 constants entry 悬挂问题已通过 `src/constants/core.ts` 收平
+  - 验收：
+    - `pnpm type-check`
+- 状态：✅ 已修复（2026-03-13，repair phase）
+
+#### CR-075 `whatsapp-webhook-types.ts` 仍保留无消费者的 backward-compatibility type aliases
+- 优先级：P3
+- 标签：PROD/MAINTAINABILITY
+- review chain：code quality and elegance chain
+- 证据：
+  - `src/types/whatsapp-webhook-types.ts` 仍保留一整块 backward-compatibility alias exports。
+  - 仓库搜索未发现这些 alias 名字的真实消费者。
+- 影响：
+  - webhook 类型入口继续暴露无消费者 alias，会扩大正式 API 面并误导维护者。
+- 建议修复：
+  - 删除这些 dead alias exports，并收掉留下的 unused imports。
+- 验收命令：
+  - `pnpm exec vitest run src/app/api/whatsapp/webhook/__tests__/route.test.ts`
+  - `pnpm type-check`
+- 状态：❌ 未修复（2026-03-13，Wave 3）
+  - 修复点：
+    - `whatsapp-webhook-types.ts` 已删除 dead alias layer
+    - 相关 unused imports 已清理
+  - 验收：
+    - `pnpm exec vitest run src/app/api/whatsapp/webhook/__tests__/route.test.ts`
+    - `pnpm type-check`
+- 状态：✅ 已修复（2026-03-13，repair phase）
+
+#### CR-076 `whatsapp-api-types.ts` 仍保留无消费者的 backward-compatibility type aliases
+- 优先级：P3
+- 标签：PROD/MAINTAINABILITY
+- review chain：code quality and elegance chain
+- 证据：
+  - `src/types/whatsapp-api-types.ts` 仍保留一整块 backward-compatibility alias exports。
+  - 仓库搜索未发现这些 alias 名字的真实消费者。
+- 影响：
+  - API types 入口继续暴露 dead alias，会扩大正式类型表面积并误导维护者。
+- 建议修复：
+  - 删除这些 dead alias exports，并清理留下的 unused imports。
+- 验收命令：
+  - `pnpm exec vitest run src/app/api/whatsapp/send/__tests__/route.test.ts`
+  - `pnpm type-check`
+- 状态：❌ 未修复（2026-03-13，Wave 3）
+  - 修复点：
+    - `whatsapp-api-types.ts` 已删除 dead alias block
+    - 相关 unused imports 已清理
+  - 验收：
+    - `pnpm exec vitest run src/app/api/whatsapp/send/__tests__/route.test.ts`
+    - `pnpm type-check`
+- 状态：✅ 已修复（2026-03-13，repair phase）
+
+#### CR-077 `whatsapp-service-types.ts` 仍保留无消费者的 convenience factory helpers，继续扩大死入口表面积
+- 优先级：P3
+- 标签：PROD/MAINTAINABILITY
+- review chain：code quality and elegance chain
+- 证据：
+  - `src/types/whatsapp-service-types.ts` 中的 `createDefaultConfig`、`createDefaultServiceOptions`、`createDefaultServiceStatus` 没有任何真实消费者。
+  - 其中 `createDefaultServiceStatus` 在 `whatsapp-service-interface.ts` 已有真正定义，继续在顶层入口再挂一份只会增加噪音。
+- 影响：
+  - 这类 dead helper 会扩大共享类型入口的表面积并误导维护者。
+- 建议修复：
+  - 删除这些无消费者 convenience helpers，保持顶层入口只暴露真实有用的契约。
+- 验收命令：
+  - `pnpm exec vitest run src/lib/__tests__/whatsapp-service.test.ts`
+  - `pnpm type-check`
+- 状态：❌ 未修复（2026-03-13，Wave 3）
+  - 修复点：
+    - `whatsapp-service-types.ts` 已删除 dead convenience helpers
+    - 删除 helper 后留下的 unused imports 已清理
+  - 验收：
+    - `pnpm exec vitest run src/lib/__tests__/whatsapp-service.test.ts`
+    - `pnpm type-check`
+- 状态：✅ 已修复（2026-03-13，repair phase）
+
+#### CR-078 `whatsapp-service-types.ts` 仍保留无消费者的 default type export alias
+- 优先级：P3
+- 标签：PROD/MAINTAINABILITY
+- review chain：code quality and elegance chain
+- 证据：
+  - `src/types/whatsapp-service-types.ts` 仍存在 `export type { WhatsAppConfig as default }`。
+  - 仓库搜索未发现任何 default import 消费方。
+- 影响：
+  - 继续保留无消费者 default alias 会扩大入口噪音并误导维护者。
+- 建议修复：
+  - 删除该 dead default alias。
+- 验收命令：
+  - `pnpm type-check`
+- 状态：❌ 未修复（2026-03-13，Wave 3）
+  - 修复点：
+    - `whatsapp-service-types.ts` 已删除 dead default type export alias
+  - 验收：
+    - `pnpm type-check`
+- 状态：✅ 已修复（2026-03-13，repair phase）
+
+#### CR-079 `whatsapp-service-types.ts` 在兼容层删除后仍保留死掉的 import 结构，文件边界与职责不一致
+- 优先级：P3
+- 标签：PROD/MAINTAINABILITY
+- review chain：code quality and elegance chain
+- 证据：
+  - 在前序兼容层删除后，`whatsapp-service-types.ts` 中仍残留大块只为旧 alias/helper 服务的 import。
+  - 这些 import 不再对应任何真实导出职责，导致模块边界与实际角色不一致。
+- 影响：
+  - 继续保留这类 dead import 结构会增加误导和维护成本。
+  - 它会让文件看起来像“逻辑模块”，而不是实际的 re-export 入口。
+- 建议修复：
+  - 删除旧兼容层遗留的 import，收敛成纯 re-export surface。
+- 验收命令：
+  - `pnpm type-check`
+- 状态：❌ 未修复（2026-03-13，Wave 3）
+  - 修复点：
+    - `whatsapp-service-types.ts` 已删除 compatibility cleanup 后遗留的 dead imports
+  - 验收：
+    - `pnpm type-check`
+- 状态：✅ 已修复（2026-03-13，repair phase）
+
+#### CR-080 `src/types/whatsapp.ts` 仍继续二次转手一批无消费者的顶层 alias 名称，扩大正式入口噪音
+- 优先级：P3
+- 标签：PROD/MAINTAINABILITY
+- review chain：code quality and elegance chain
+- 证据：
+  - `src/types/whatsapp.ts` 顶层入口仍转手一些旧 alias 名字。
+  - 对其中 `ServiceMessageType`、`ServiceMessageStatus`、`WhatsAppApiErrorClass`、`Config`、`ServiceOptions`、`Status`、`Health`、`Metrics`、`ServiceInterface` 的搜索未发现任何直接消费者。
+- 影响：
+  - 顶层类型入口继续暴露无消费者旧名，会增加 API 面并误导维护者。
+- 建议修复：
+  - 删除这组无消费者 alias，维持顶层入口只暴露当前真实使用的名称。
+- 验收命令：
+  - `pnpm exec vitest run src/lib/__tests__/whatsapp-service.test.ts src/app/api/whatsapp/send/__tests__/route.test.ts src/app/api/whatsapp/webhook/__tests__/route.test.ts`
+  - `pnpm type-check`
+- 状态：❌ 未修复（2026-03-13，Wave 3）
+  - 修复点：
+    - 上述无消费者 alias 已从 `src/types/whatsapp.ts` 删除
+  - 验收：
+    - `pnpm exec vitest run src/lib/__tests__/whatsapp-service.test.ts src/app/api/whatsapp/send/__tests__/route.test.ts src/app/api/whatsapp/webhook/__tests__/route.test.ts`
+    - `pnpm type-check`
+- 状态：✅ 已修复（2026-03-13，repair phase）
+
+#### CR-081 `_TEST_CONSTANTS` / `_Locale` 仍保留旧下划线 alias，继续放大无价值兼容命名
+- 优先级：P3
+- 标签：TEST/MAINTAINABILITY
+- review chain：verification and guardrails chain
+- 证据：
+  - `src/constants/test-constants.ts` 仍导出 `_TEST_CONSTANTS`
+  - `src/types/i18n.ts` 仍导出 `_Locale`
+  - 仓库搜索显示 `_TEST_CONSTANTS` 仅有一个测试消费者，`_Locale` 无真实消费者
+- 影响：
+  - 这类 alias 继续保留只会扩大旧命名噪音，不提供真实兼容价值。
+- 建议修复：
+  - 删除这两个 underscore alias，并把剩余消费者切到 canonical 名称。
+- 验收命令：
+  - `pnpm exec vitest run src/lib/__tests__/colors-contrast-compliance.test.ts`
+  - `pnpm type-check`
+  - `rg -n "_TEST_CONSTANTS\\b|_Locale\\b" src tests -S`
+- 状态：❌ 未修复（2026-03-13，Wave 3）
+  - 修复点：
+    - `_TEST_CONSTANTS` 与 `_Locale` 已删除
+    - 唯一剩余消费者已切到 canonical 名称
+  - 验收：
+    - `pnpm exec vitest run src/lib/__tests__/colors-contrast-compliance.test.ts`
+    - `pnpm type-check`
+    - `rg -n "_TEST_CONSTANTS\\b|_Locale\\b" src tests -S`
+- 状态：✅ 已修复（2026-03-13，repair phase）
+
+#### CR-082 `src/components/blog/index.ts` 已无任何消费者，却仍保留 dead barrel 入口
+- 优先级：P3
+- 标签：PROD/MAINTAINABILITY
+- review chain：code quality and elegance chain
+- 证据：
+  - 仓库搜索未发现 `@/components/blog` 的真实 import 消费方。
+  - `src/components/blog/index.ts` 只是在重复导出该目录下组件。
+- 影响：
+  - dead barrel 会增加组件入口表面积和导入路径歧义。
+- 建议修复：
+  - 删除该 dead barrel。
+- 验收命令：
+  - `rg -n "from '@/components/blog'|from \\\"@/components/blog\\\"" src tests -S`
+- 状态：❌ 未修复（2026-03-13，Wave 3）
+  - 修复点：
+    - `src/components/blog/index.ts` 已删除
+  - 验收：
+    - `rg -n "from '@/components/blog'|from \\\"@/components/blog\\\"" src tests -S`
+- 状态：✅ 已修复（2026-03-13，repair phase）
+
+#### CR-083 `src/components/seo/index.ts` 已无任何消费者，却仍保留 dead barrel 入口
+- 优先级：P3
+- 标签：PROD/MAINTAINABILITY
+- review chain：code quality and elegance chain
+- 证据：
+  - 仓库搜索未发现 `@/components/seo` 的真实 import 消费方。
+  - `src/components/seo/index.ts` 仅重复导出 `JsonLdScript`。
+- 影响：
+  - dead barrel 会增加组件入口表面积和导入路径歧义。
+- 建议修复：
+  - 删除该 dead barrel。
+- 验收命令：
+  - `rg -n "from '@/components/seo'|from \\\"@/components/seo\\\"" src tests -S`
+- 状态：❌ 未修复（2026-03-13，Wave 3）
+  - 修复点：
+    - `src/components/seo/index.ts` 已删除
+  - 验收：
+    - `rg -n "from '@/components/seo'|from \\\"@/components/seo\\\"" src tests -S`
+- 状态：✅ 已修复（2026-03-13，repair phase）
+
+#### CR-084 多个零消费者 barrel 仍保留在正式源码树中，继续放大 dead entrypoint surface
+- 优先级：P3
+- 标签：PROD/MAINTAINABILITY
+- review chain：code quality and elegance chain
+- 证据：
+  - 仓库搜索未发现以下 barrel 的真实 import 消费方：
+    - `src/components/blocks/index.ts`
+    - `src/components/trust/index.ts`
+    - `src/emails/index.ts`
+    - `src/lib/security/stores/index.ts`
+- 影响：
+  - dead barrel 会持续增加入口表面积、导入路径歧义和维护噪音。
+- 建议修复：
+  - 删除这批 zero-consumer barrel。
+- 验收命令：
+  - `pnpm type-check`
+- 状态：❌ 未修复（2026-03-15，Wave 3）
+  - 修复点：
+    - 上述 zero-consumer barrel 已删除
+    - 误删但存在真实消费者的 `components/mdx` / `components/seo` / `lib/cache` / `lib/cookie-consent` / `lib/image` barrel 已恢复
+  - 验收：
+    - `pnpm type-check`
+- 状态：✅ 已修复（2026-03-15，cleanup phase）
+
+#### CR-085 `src/types/whatsapp-service-types.ts` 没有任何真实消费者，却继续保留单独 facade 入口
+- 优先级：P3
+- 标签：PROD/MAINTAINABILITY
+- review chain：code quality and elegance chain
+- 证据：
+  - 仓库搜索没有发现 `@/types/whatsapp-service-types` 的真实消费者，`rg -n 'whatsapp-service-types' src tests` 返回空结果。
+  - `src/types/whatsapp-service-types.ts` 本身只是在重新导出 `whatsapp-service-config`、`whatsapp-service-errors`、`whatsapp-service-monitoring`、`whatsapp-service-interface` 的现有内容。
+  - 同一领域的真实入口仍然存在：
+    - `@/types/whatsapp` 仍被生产代码使用。
+    - 更细粒度的 `@/types/whatsapp-service-*` 子模块也仍然保留。
+- 影响：
+  - 继续保留零消费者 facade，会扩大类型入口表面积并误导维护者，以为这里仍是正式真相源。
+  - 这属于与 `CR-082` ~ `CR-084` 相同的 dead compatibility surface 问题，只是这次落点在类型 facade 而不是 barrel。
+- 建议修复：
+  - 删除 `src/types/whatsapp-service-types.ts`，让消费者只依赖真实仍在使用的入口。
+- 验收命令：
+  - `pnpm type-check`
+- 状态：❌ 未修复（2026-03-15，Wave 3 continuation）
+  - 修复点：
+    - `src/types/whatsapp-service-types.ts` 已删除
+  - 验收：
+    - `pnpm type-check`
+- 状态：✅ 已修复（2026-03-15，cleanup phase）
+
+#### CR-086 `src/lib/api/api-response-schema.ts` 只剩测试在引用，却仍保留在正式 API 命名空间中
+- 优先级：P3
+- 标签：PROD/MAINTAINABILITY
+- review chain：test validity and truth-source chain
+- 证据：
+  - `src/lib/api/api-response-schema.ts` 注释已明确写成 `legacy/test-side validation` helper。
+  - 仓库搜索显示它没有任何生产消费者；修复前唯一引用来自 `src/lib/__tests__/validations.test.ts`。
+  - 文件本身只提供一个宽松的 `zod` 响应 schema，并不是当前 API 返回契约的正式真相源。
+- 影响：
+  - 继续把 test-only helper 放在 `src/lib/api/` 正式命名空间下，会误导维护者以为它仍代表当前 API contract。
+  - 这会让测试继续保活一个已经脱离真实生产协议的旧入口。
+- 建议修复：
+  - 删除 `src/lib/api/api-response-schema.ts`，并移除对应的 test-only 断言。
+- 验收命令：
+  - `pnpm exec vitest run src/lib/__tests__/validations.test.ts`
+  - `pnpm type-check`
+- 状态：❌ 未修复（2026-03-15，Wave 3 continuation）
+  - 修复点：
+    - `src/lib/api/api-response-schema.ts` 已删除
+    - `src/lib/__tests__/validations.test.ts` 已移除仅用于保活该 helper 的断言
+  - 验收：
+    - `pnpm exec vitest run src/lib/__tests__/validations.test.ts`
+    - `pnpm type-check`
+- 状态：✅ 已修复（2026-03-15，cleanup phase）
+
+#### CR-087 `src/lib/i18n-message-cache.ts` 没有任何生产消费者，却继续保留旧 fetch-based cache helper 与自保活测试
+- 优先级：P3
+- 标签：PROD/MAINTAINABILITY
+- review chain：migration and test-validity chain
+- 证据：
+  - `src/lib/i18n-message-cache.ts` 文件注释已经明确标记为 `Legacy/test-side translation cache helper`。
+  - 仓库搜索显示它没有任何生产消费者；修复前所有 `TranslationCache` / `getCachedMessages` / `getCachedTranslations` / `preloadTranslations` 的引用都来自 `src/lib/__tests__/i18n-performance*.test.ts`。
+  - 当前生产代码仍在使用的是 `I18nPerformanceMonitor`，而不是这个旧 fetch-based cache 路径。
+- 影响：
+  - 继续把这类 test-only helper 放在 `src/lib/` 正式命名空间下，会误导维护者，以为仓库仍存在一条活跃的 i18n 缓存加载链。
+  - 测试继续围绕它构建，只会保活已经退出真实 runtime 的旧语义。
+- 建议修复：
+  - 删除 `src/lib/i18n-message-cache.ts`。
+  - 删除只为它存在的测试，并保留针对仍在使用的 `I18nPerformanceMonitor` 的小型定向测试。
+- 验收命令：
+  - `pnpm exec vitest run src/lib/__tests__/i18n-performance.test.ts`
+  - `pnpm type-check`
+- 状态：❌ 未修复（2026-03-15，Wave 3 continuation）
+  - 修复点：
+    - `src/lib/i18n-message-cache.ts` 已删除
+    - `src/lib/__tests__/i18n-performance-cache.test.ts` 与 `src/lib/__tests__/i18n-performance.network-failure.test.ts` 已删除
+    - `src/lib/__tests__/i18n-performance.test.ts` 已收敛为 monitor/scoring 定向测试
+  - 验收：
+    - `pnpm exec vitest run src/lib/__tests__/i18n-performance.test.ts`
+    - `pnpm type-check`
+- 状态：✅ 已修复（2026-03-15，cleanup phase）
+
+#### CR-088 `src/lib/security-file-upload.ts` 与 `src/lib/security-tokens.ts` 没有任何生产消费者，却继续驻留在正式安全命名空间
+- 优先级：P3
+- 标签：PROD/MAINTAINABILITY
+- review chain：test validity and dead helper surface
+- 证据：
+  - 仓库搜索显示这两个模块都没有生产消费者；修复前所有导入都来自 `src/lib/__tests__/**` 与 `tests/unit/security/**`。
+  - `src/lib/__tests__/security.test.ts` 也混入了针对这两个 dead helper 的断言，继续保活它们。
+  - 仍在使用的安全逻辑是 `src/lib/security-validation.ts`，而不是这两个 helper。
+- 影响：
+  - 把 test-only helper 留在 `src/lib/` 正式安全命名空间，会误导维护者，以为这些文件仍是活跃的安全能力入口。
+  - 测试继续围绕它们构建，只会放大死代码表面积和维护噪音。
+- 建议修复：
+  - 删除这两个模块及其自保活测试。
+  - 保留只覆盖仍在使用的 `security-validation` 行为的测试。
+- 验收命令：
+  - `pnpm exec vitest run src/lib/__tests__/security.test.ts`
+  - `pnpm type-check`
+- 状态：❌ 未修复（2026-03-15，candidate discovery）
+  - 修复点：
+    - `src/lib/security-file-upload.ts` 与 `src/lib/security-tokens.ts` 已删除
+    - dedicated tests 已删除
+    - `src/lib/__tests__/security.test.ts` 已移除 dead helper 断言，仅保留 active validation coverage
+  - 验收：
+    - `pnpm exec vitest run src/lib/__tests__/security.test.ts`
+    - `pnpm type-check`
+- 状态：✅ 已修复（2026-03-15，cleanup phase）
+
+#### CR-089 `src/types/test-types.ts` 是纯测试类型入口，却继续驻留在正式 `src/types` 命名空间
+- 优先级：P3
+- 标签：PROD/MAINTAINABILITY
+- review chain：ownership and namespace boundary
+- 证据：
+  - 仓库搜索显示 `src/types/test-types.ts` 的所有消费者都来自测试和测试辅助文件。
+  - 没有任何生产代码依赖该文件；问题在于它挂在正式类型命名空间下，而不是测试命名空间。
+- 影响：
+  - 把 test-only 类型入口放在 `src/types` 下，会误导维护者，以为它属于生产类型 surface。
+  - 这会继续放大“正式入口里混有测试专用资产”的边界噪音。
+- 建议修复：
+  - 将该文件迁到 `src/test/` 之类的测试命名空间，并同步改掉所有测试导入。
+- 验收命令：
+  - `pnpm exec vitest run src/lib/__tests__/airtable.test.ts src/lib/__tests__/resend.test.ts`
+  - `pnpm type-check`
+- 状态：❌ 未修复（2026-03-15，candidate discovery）
+  - 修复点：
+    - `src/types/test-types.ts` 已迁移到 `src/test/test-types.ts`
+    - 所有测试导入已切换到 `@/test/test-types`
+  - 验收：
+    - `pnpm exec vitest run src/lib/__tests__/airtable.test.ts src/lib/__tests__/resend.test.ts`
+    - `pnpm type-check`
+- 状态：✅ 已修复（2026-03-15，cleanup phase）
+
+#### CR-071 `layout-fonts.ts` 仍保留无消费者的 `ibmPlexSans` 字体 alias，继续放大假兼容入口
+- 优先级：P3
+- 标签：PROD/MAINTAINABILITY
+- review chain：code quality and elegance chain
+- 证据：
+  - `src/app/[locale]/layout-fonts.ts` 仍导出 `ibmPlexSans = figtree` 的 backwards-compatibility alias。
+  - 仓库搜索显示 `ibmPlexSans` 没有任何真实消费者，只剩 `layout-fonts.test.ts` 在保活它。
+- 影响：
+  - 字体模块继续暴露无消费者 alias，会误导后续维护者并增加 API 面。
+  - 这与 `CR-066`、`CR-067`、`CR-068`、`CR-069` 属于同类 dead compatibility surface 问题。
+- 建议修复：
+  - 删除该 dead alias，并同步收敛测试。
+- 验收命令：
+  - `pnpm exec vitest run src/app/[locale]/__tests__/layout-fonts.test.ts`
+- 状态：❌ 未修复（2026-03-13，Wave 3）
+  - 修复点：
+    - `ibmPlexSans` alias 已从 `layout-fonts.ts` 删除
+    - layout fonts 测试已停止保活该 alias
+  - 验收：
+    - `pnpm exec vitest run src/app/[locale]/__tests__/layout-fonts.test.ts`
+- 状态：✅ 已修复（2026-03-13，repair phase）
+
+#### CR-072 生产代码仍在广泛使用 deprecated count aliases，继续放大旧常量词汇面
+- 优先级：P2
+- 标签：PROD/MAINTAINABILITY
+- review chain：code quality and elegance chain
+- 证据：
+  - 修复前的生产代码仍广泛使用 `COUNT_PAIR`、`COUNT_TRIPLE`、`COUNT_QUAD`、`COUNT_FOUR`。
+  - 这些别名在 `src/constants/count.ts` 中已被明确标记为 deprecated，但依然通过 `src/constants/index.ts` 继续对外导出。
+- 影响：
+  - 旧别名继续存在，会让常量命名体系保持双轨，增加阅读和维护成本。
+  - 这属于另一类“兼容层长期不收口”的问题，会持续污染新代码。
+- 建议修复：
+  - 将生产代码统一替换为 canonical count constants。
+  - 删除 deprecated alias exports，避免新代码继续引用它们。
+- 验收命令：
+  - `pnpm type-check`
+  - `pnpm exec vitest run src/config/__tests__/paths.test.ts src/lib/__tests__/structured-data.test.ts src/components/security/__tests__/turnstile.test.tsx src/lib/lead-pipeline/__tests__/utils.test.ts`
+- 状态：❌ 未修复（2026-03-13，Wave 3）
+  - 修复点：
+    - 生产代码中的 deprecated count alias 已全部替换为 canonical constants
+    - `count.ts` 和常量 barrel 中的 deprecated alias exports 已删除
+  - 验收：
+    - `pnpm type-check`
+    - `pnpm exec vitest run src/config/__tests__/paths.test.ts src/lib/__tests__/structured-data.test.ts src/components/security/__tests__/turnstile.test.tsx src/lib/lead-pipeline/__tests__/utils.test.ts`
+- 状态：✅ 已修复（2026-03-13，repair phase）

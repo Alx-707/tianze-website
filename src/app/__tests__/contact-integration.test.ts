@@ -14,6 +14,7 @@
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { API_ERROR_CODES } from "@/constants/api-error-codes";
+import { resetIdempotencyState } from "@/lib/idempotency";
 import { checkDistributedRateLimit } from "@/lib/security/distributed-rate-limit";
 import { verifyTurnstile } from "@/lib/turnstile";
 import { processFormSubmission } from "@/lib/contact-form-processing";
@@ -68,8 +69,7 @@ vi.mock("@/lib/contact-form-processing", () => ({
     Promise.resolve({
       emailSent: true,
       recordCreated: true,
-      emailMessageId: "msg-integration-001",
-      airtableRecordId: "rec-integration-001",
+      referenceId: "ref-integration-001",
     }),
   ),
 }));
@@ -97,6 +97,7 @@ function validContactFields(): Record<string, string> {
     marketingConsent: "false",
     turnstileToken: "valid-turnstile-token",
     submittedAt: new Date().toISOString(),
+    idempotencyKey: "contact-integration-key",
   };
 }
 
@@ -105,6 +106,7 @@ function validContactFields(): Record<string, string> {
 describe("Contact form — integration (happy path chain)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    resetIdempotencyState();
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-03-03T12:00:00Z"));
     vi.stubEnv("VERCEL", "1");
@@ -135,6 +137,18 @@ describe("Contact form — integration (happy path chain)", () => {
         "valid-turnstile-token",
         expect.any(String),
       );
+      expect(processFormSubmission).toHaveBeenCalledTimes(1);
+    });
+
+    it("dedupes duplicate successful submissions with the same idempotency key", async () => {
+      const firstFormData = createFormData(validContactFields());
+      const secondFormData = createFormData(validContactFields());
+
+      const firstResult = await contactFormAction(null, firstFormData);
+      const secondResult = await contactFormAction(null, secondFormData);
+
+      expect(firstResult.success).toBe(true);
+      expect(secondResult.success).toBe(true);
       expect(processFormSubmission).toHaveBeenCalledTimes(1);
     });
   });

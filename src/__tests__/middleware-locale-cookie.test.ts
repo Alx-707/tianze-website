@@ -1,12 +1,12 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { describe, expect, it, vi } from "vitest";
 
-// Avoid importing next-intl's real middleware implementation in unit tests.
-// It relies on Next.js runtime-specific module resolution that isn't available in Vitest.
+const { intlMiddlewareMock } = vi.hoisted(() => ({
+  intlMiddlewareMock: vi.fn(() => NextResponse.next()),
+}));
+
 vi.mock("next-intl/middleware", () => ({
-  default: () => () => {
-    throw new Error("next-intl middleware should not be invoked in this test");
-  },
+  default: () => intlMiddlewareMock,
 }));
 
 import middleware from "../middleware";
@@ -27,6 +27,7 @@ describe("middleware locale cookie", () => {
 
     const setCookie = response.headers.get("set-cookie") ?? "";
     expect(countOccurrences(setCookie, "NEXT_LOCALE=")).toBe(1);
+    expect(intlMiddlewareMock).toHaveBeenCalledTimes(1);
   });
 
   it("sets NEXT_LOCALE cookie with max-age (persisted preference)", () => {
@@ -42,6 +43,7 @@ describe("middleware locale cookie", () => {
     expect(setCookie).toContain("next_locale=");
     expect(setCookie).toContain("max-age=31536000");
     expect(setCookie).toContain("samesite=lax");
+    expect(intlMiddlewareMock).toHaveBeenCalledTimes(1);
   });
 
   it("redirects invalid locale prefix to default locale and persists cookie", () => {

@@ -18,10 +18,10 @@ import {
   COUNT_SEVEN,
   COUNT_EIGHT,
   COUNT_NINE,
-  COUNT_PAIR,
-  COUNT_QUAD,
+  COUNT_TWO,
+  COUNT_4,
   COUNT_TEN,
-  COUNT_TRIPLE,
+  COUNT_THREE,
   HOURS_PER_DAY,
   ONE,
   SECONDS_PER_MINUTE,
@@ -400,11 +400,11 @@ export function getEventPriority(event: WebhookEvent): number {
     case "security_event":
       return ONE; // Highest priority
     case "webhook_error":
-      return COUNT_PAIR;
+      return COUNT_TWO;
     case "message_received":
-      return COUNT_TRIPLE;
+      return COUNT_THREE;
     case "message_status":
-      return COUNT_QUAD;
+      return COUNT_4;
     case "template_status":
       return COUNT_FIVE;
     case "phone_number_quality":
@@ -428,7 +428,7 @@ export function shouldRetryEvent(event: WebhookEvent, error: Error): boolean {
   }
 
   // Don't retry on client errors (4xx)
-  if (error.message.includes("COUNT_QUAD")) {
+  if (error.message.includes("COUNT_4")) {
     return false;
   }
 

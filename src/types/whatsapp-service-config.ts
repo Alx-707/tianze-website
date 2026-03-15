@@ -1,9 +1,9 @@
 import {
   ANIMATION_DURATION_VERY_SLOW,
   COUNT_FIVE,
-  COUNT_PAIR,
+  COUNT_TWO,
   COUNT_TEN,
-  COUNT_TRIPLE,
+  COUNT_THREE,
   FIVE_MINUTES_MS,
   MINUTE_MS,
   PERCENTAGE_FULL,
@@ -267,10 +267,10 @@ export type LogLevel = "debug" | "info" | "warn" | "error";
  */
 export const DEFAULT_SERVICE_OPTIONS: Required<WhatsAppServiceOptions> = {
   timeout: THIRTY_SECONDS_MS,
-  retries: COUNT_TRIPLE,
+  retries: COUNT_THREE,
   retryDelay: ANIMATION_DURATION_VERY_SLOW,
   maxRetryDelay: TEN_SECONDS_MS,
-  retryMultiplier: COUNT_PAIR,
+  retryMultiplier: COUNT_TWO,
   enableLogging: true,
   logLevel: "info",
   validateMessages: true,
@@ -283,10 +283,10 @@ export const DEFAULT_SERVICE_OPTIONS: Required<WhatsAppServiceOptions> = {
  * Sensible defaults for retry logic
  */
 export const DEFAULT_RETRY_CONFIG: RetryConfig = {
-  maxAttempts: COUNT_TRIPLE,
+  maxAttempts: COUNT_THREE,
   baseDelay: ANIMATION_DURATION_VERY_SLOW,
   maxDelay: TEN_SECONDS_MS,
-  multiplier: COUNT_PAIR,
+  multiplier: COUNT_TWO,
   jitter: true,
 };
 

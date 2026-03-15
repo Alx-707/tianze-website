@@ -1,5 +1,5 @@
 import { vi } from "vitest";
-import type { AccessibilityManagerPrivate } from "@/types/test-types";
+import type { AccessibilityManagerPrivate } from "@/test/test-types";
 import { AccessibilityManager, useAccessibility } from "@/lib/accessibility";
 import type { ScreenReaderConfig } from "@/lib/accessibility-types";
 import {

@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 import {
   figtree,
   jetbrainsMono,
-  ibmPlexSans,
   getFontClassNames,
 } from "@/app/[locale]/layout-fonts";
 
@@ -35,12 +34,6 @@ describe("Layout Fonts Configuration", () => {
       expect(jetbrainsMono).toHaveProperty("variable");
       expect(jetbrainsMono).toHaveProperty("className");
       expect(jetbrainsMono).toHaveProperty("style");
-    });
-  });
-
-  describe("backwards compatibility", () => {
-    it("ibmPlexSans should alias figtree", () => {
-      expect(ibmPlexSans).toBe(figtree);
     });
   });
 

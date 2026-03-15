@@ -2,12 +2,13 @@
  * 路径配置相关类型定义
  */
 
-export type Locale = "en" | "zh";
+import { LOCALES_CONFIG } from "@/config/paths/locales-config";
+
+export type Locale = (typeof LOCALES_CONFIG.locales)[number];
 
 // 路径映射接口定义
 export interface LocalizedPath {
-  en: string;
-  zh: string;
+  [locale: string]: string;
 }
 
 // 页面类型定义 (静态路由)
