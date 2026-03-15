@@ -17,6 +17,7 @@ import {
   withRateLimit,
   type RateLimitContext,
 } from "@/lib/api/with-rate-limit";
+import { withIdempotency } from "@/lib/idempotency";
 import { logger, sanitizeIP, sanitizeLogContext } from "@/lib/logger";
 import {
   getContactFormStats,
@@ -38,64 +39,68 @@ import {
  */
 const POST_RATE_LIMITED = withRateLimit(
   "contact",
-  async (
-    request: NextRequest,
-    { clientIP }: RateLimitContext,
-  ): Promise<NextResponse> => {
-    const startTime = Date.now();
+  (request: NextRequest, { clientIP }: RateLimitContext) =>
+    withIdempotency(
+      request,
+      async () => {
+        const startTime = Date.now();
 
-    try {
-      const parsedBody = await safeParseJson<unknown>(request, {
-        route: "/api/contact",
-      });
-      if (!parsedBody.ok) {
-        return createApiErrorResponse(
-          parsedBody.errorCode,
-          parsedBody.statusCode,
-        );
-      }
+        try {
+          const parsedBody = await safeParseJson<unknown>(request, {
+            route: "/api/contact",
+          });
+          if (!parsedBody.ok) {
+            return createApiErrorResponse(
+              parsedBody.errorCode,
+              parsedBody.statusCode,
+            );
+          }
 
-      const validation = await validateFormData(parsedBody.data, clientIP);
-      if (!validation.success || !validation.data) {
-        return createApiErrorResponse(
-          API_ERROR_CODES.CONTACT_VALIDATION_FAILED,
-          HTTP_BAD_REQUEST,
-        );
-      }
+          const validation = await validateFormData(parsedBody.data, clientIP);
+          if (!validation.success || !validation.data) {
+            return createApiErrorResponse(
+              API_ERROR_CODES.CONTACT_VALIDATION_FAILED,
+              HTTP_BAD_REQUEST,
+            );
+          }
 
-      const submissionResult = await processFormSubmission(validation.data);
-      const processingTime = Date.now() - startTime;
+          const submissionResult = await processFormSubmission(validation.data);
+          const processingTime = Date.now() - startTime;
 
-      logger.info(
-        "Contact form submitted successfully",
-        sanitizeLogContext({
-          email: validation.data.email,
-          company: validation.data.company,
-          ip: clientIP,
-          processingTime,
-          emailSent: submissionResult.emailSent,
-          recordCreated: submissionResult.recordCreated,
-        }),
-      );
+          logger.info(
+            "Contact form submitted successfully",
+            sanitizeLogContext({
+              email: validation.data.email,
+              company: validation.data.company,
+              ip: clientIP,
+              processingTime,
+              emailSent: submissionResult.emailSent,
+              recordCreated: submissionResult.recordCreated,
+            }),
+          );
 
-      return createApiSuccessResponse({
-        messageId: submissionResult.emailMessageId,
-        recordId: submissionResult.airtableRecordId,
-      });
-    } catch (error) {
-      logger.error("Contact form submission failed", {
-        error: error instanceof Error ? error.message : "Unknown error",
-        stack: error instanceof Error ? error.stack : undefined,
-        ip: sanitizeIP(clientIP),
-        processingTime: Date.now() - startTime,
-      });
+          return {
+            success: true as const,
+            data: {
+              referenceId: submissionResult.referenceId,
+            },
+          };
+        } catch (error) {
+          logger.error("Contact form submission failed", {
+            error: error instanceof Error ? error.message : "Unknown error",
+            stack: error instanceof Error ? error.stack : undefined,
+            ip: sanitizeIP(clientIP),
+            processingTime: Date.now() - startTime,
+          });
 
-      return createApiErrorResponse(
-        API_ERROR_CODES.CONTACT_PROCESSING_ERROR,
-        HTTP_INTERNAL_ERROR,
-      );
-    }
-  },
+          return createApiErrorResponse(
+            API_ERROR_CODES.CONTACT_PROCESSING_ERROR,
+            HTTP_INTERNAL_ERROR,
+          );
+        }
+      },
+      { required: true },
+    ),
 );
 
 export async function POST(request: NextRequest) {

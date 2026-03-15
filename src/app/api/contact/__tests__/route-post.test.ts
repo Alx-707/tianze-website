@@ -12,6 +12,7 @@
 import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { API_ERROR_CODES } from "@/constants/api-error-codes";
+import { resetIdempotencyState } from "@/lib/idempotency";
 import { POST } from "@/app/api/contact/route";
 
 // Mock配置 - 使用vi.hoisted确保Mock在模块导入前设置
@@ -190,6 +191,7 @@ describe("Contact API Route - POST Tests", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    resetIdempotencyState();
 
     // Reset default mock implementations
     mockAirtableService.isReady.mockReturnValue(true);
@@ -224,8 +226,7 @@ describe("Contact API Route - POST Tests", () => {
     mockProcessFormSubmission.mockResolvedValue({
       emailSent: true,
       recordCreated: true,
-      emailMessageId: "test-email-id",
-      airtableRecordId: "test-record-id",
+      referenceId: "test-reference-id",
     });
 
     // Mock fetch for Turnstile verification
@@ -248,6 +249,7 @@ describe("Contact API Route - POST Tests", () => {
         body: JSON.stringify(validFormData),
         headers: {
           "content-type": "application/json",
+          "Idempotency-Key": "contact-route-post-key",
         },
       });
 
@@ -256,7 +258,7 @@ describe("Contact API Route - POST Tests", () => {
 
       expect(response.status).toBe(200);
       expect(data.success).toBe(true);
-      expect(data.data.messageId).toBeDefined();
+      expect(data.data.referenceId).toBe("test-reference-id");
     });
 
     it("应该处理无效的表单数据", async () => {
@@ -273,6 +275,7 @@ describe("Contact API Route - POST Tests", () => {
         body: JSON.stringify({ email: "invalid-email" }),
         headers: {
           "content-type": "application/json",
+          "Idempotency-Key": "contact-route-post-key",
         },
       });
 
@@ -290,6 +293,7 @@ describe("Contact API Route - POST Tests", () => {
         body: "invalid-json",
         headers: {
           "content-type": "application/json",
+          "Idempotency-Key": "contact-route-post-key",
         },
       });
 
@@ -309,6 +313,7 @@ describe("Contact API Route - POST Tests", () => {
         headers: {
           "content-type": "application/json",
           "content-length": "70000",
+          "Idempotency-Key": "contact-route-post-key",
         },
       });
 
@@ -336,6 +341,7 @@ describe("Contact API Route - POST Tests", () => {
         body: JSON.stringify(validFormData),
         headers: {
           "content-type": "application/json",
+          "Idempotency-Key": "contact-route-post-key",
         },
       });
 
@@ -356,6 +362,7 @@ describe("Contact API Route - POST Tests", () => {
         body: JSON.stringify(validFormData),
         headers: {
           "content-type": "application/json",
+          "Idempotency-Key": "contact-route-post-key",
         },
       });
 
@@ -385,6 +392,7 @@ describe("Contact API Route - POST Tests", () => {
         body: JSON.stringify(validFormData),
         headers: {
           "content-type": "application/json",
+          "Idempotency-Key": "contact-route-post-key",
         },
       });
 
@@ -404,8 +412,7 @@ describe("Contact API Route - POST Tests", () => {
       mockProcessFormSubmission.mockResolvedValue({
         emailSent: true,
         recordCreated: false, // Airtable failed
-        emailMessageId: "test-email-id",
-        airtableRecordId: null,
+        referenceId: "test-reference-id",
       });
 
       // Expect error to be logged
@@ -416,6 +423,7 @@ describe("Contact API Route - POST Tests", () => {
         body: JSON.stringify(validFormData),
         headers: {
           "content-type": "application/json",
+          "Idempotency-Key": "contact-route-post-key",
         },
       });
 
@@ -433,8 +441,7 @@ describe("Contact API Route - POST Tests", () => {
       mockProcessFormSubmission.mockResolvedValue({
         emailSent: false, // Resend failed
         recordCreated: true,
-        emailMessageId: null,
-        airtableRecordId: "test-record-id",
+        referenceId: "test-reference-id",
       });
 
       // Expect error to be logged
@@ -445,6 +452,7 @@ describe("Contact API Route - POST Tests", () => {
         body: JSON.stringify(validFormData),
         headers: {
           "content-type": "application/json",
+          "Idempotency-Key": "contact-route-post-key",
         },
       });
 
@@ -455,6 +463,39 @@ describe("Contact API Route - POST Tests", () => {
       expect(response.status).toBe(200);
       expect(data.success).toBe(true);
       // Note: Error logging happens inside processFormSubmission which is mocked
+    });
+
+    it("should replay cached success for duplicate idempotency key", async () => {
+      const headers = {
+        "content-type": "application/json",
+        "Idempotency-Key": "contact-duplicate-key",
+      };
+      const firstRequest = new NextRequest(
+        "http://localhost:3000/api/contact",
+        {
+          method: "POST",
+          body: JSON.stringify(validFormData),
+          headers,
+        },
+      );
+      const secondRequest = new NextRequest(
+        "http://localhost:3000/api/contact",
+        {
+          method: "POST",
+          body: JSON.stringify(validFormData),
+          headers,
+        },
+      );
+
+      const firstResponse = await POST(firstRequest);
+      const secondResponse = await POST(secondRequest);
+      const firstData = await firstResponse.json();
+      const secondData = await secondResponse.json();
+
+      expect(firstResponse.status).toBe(200);
+      expect(secondResponse.status).toBe(200);
+      expect(secondData).toEqual(firstData);
+      expect(mockProcessFormSubmission).toHaveBeenCalledTimes(1);
     });
   });
 });

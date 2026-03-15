@@ -56,8 +56,7 @@ export async function processFormSubmission(formData: ContactFormWithToken) {
       success: true,
       emailSent: result.emailSent,
       recordCreated: result.recordCreated,
-      emailMessageId: result.referenceId,
-      airtableRecordId: result.referenceId,
+      referenceId: result.referenceId,
     };
   }
 

@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { API_ERROR_CODES } from "@/constants/api-error-codes";
+import { resetIdempotencyState } from "@/lib/idempotency";
 import { GET, POST } from "@/app/api/contact/route";
 
 // Mock配置 - 使用vi.hoisted确保Mock在模块导入前设置
@@ -82,8 +83,7 @@ vi.mock("@/lib/contact-form-processing", () => ({
   processFormSubmission: vi.fn().mockResolvedValue({
     emailSent: true,
     recordCreated: true,
-    emailMessageId: "email-123",
-    airtableRecordId: "record-123",
+    referenceId: "ref-123",
   }),
 }));
 
@@ -100,6 +100,7 @@ describe("Contact API Route", () => {
   beforeEach(async () => {
     // Vitest v4: ensure mock implementations are reset between tests
     vi.resetAllMocks();
+    resetIdempotencyState();
 
     // Reset default mock implementations
     mockAirtableService.isReady.mockReturnValue(true);
@@ -113,8 +114,7 @@ describe("Contact API Route", () => {
       success: true,
       emailSent: true,
       recordCreated: true,
-      emailMessageId: "email-123",
-      airtableRecordId: "record-123",
+      referenceId: "ref-123",
     } as any);
   });
 
@@ -152,8 +152,7 @@ describe("Contact API Route", () => {
         success: true,
         emailSent: true,
         recordCreated: true,
-        emailMessageId: "email-123",
-        airtableRecordId: "record-123",
+        referenceId: "ref-123",
       } as any);
 
       // Mock successful service responses
@@ -175,6 +174,7 @@ describe("Contact API Route", () => {
         headers: {
           "content-type": "application/json",
           "x-forwarded-for": "127.0.0.1",
+          "Idempotency-Key": "contact-route-key",
         },
       });
 
@@ -183,7 +183,7 @@ describe("Contact API Route", () => {
 
       expect(response.status).toBe(200);
       expect(data.success).toBe(true);
-      expect(data.data.messageId).toBe("email-123");
+      expect(data.data.referenceId).toBe("ref-123");
     });
 
     it("应该处理无效的表单数据", async () => {
@@ -202,6 +202,7 @@ describe("Contact API Route", () => {
         body: JSON.stringify({ email: "invalid-email" }),
         headers: {
           "content-type": "application/json",
+          "Idempotency-Key": "contact-route-key",
         },
       });
 
@@ -221,6 +222,7 @@ describe("Contact API Route", () => {
         headers: {
           "content-type": "application/json",
           "x-forwarded-for": "127.0.0.1",
+          "Idempotency-Key": "contact-route-key",
         },
       });
 
@@ -292,6 +294,7 @@ describe("Contact API Route", () => {
         body: JSON.stringify(validFormData),
         headers: {
           "content-type": "application/json",
+          "Idempotency-Key": "contact-route-key",
         },
       });
 
@@ -325,8 +328,7 @@ describe("Contact API Route", () => {
         success: true,
         emailSent: false,
         recordCreated: false,
-        emailMessageId: undefined,
-        airtableRecordId: undefined,
+        referenceId: undefined,
       });
 
       global.fetch = vi.fn().mockResolvedValue({
@@ -339,6 +341,7 @@ describe("Contact API Route", () => {
         body: JSON.stringify(validFormData),
         headers: {
           "content-type": "application/json",
+          "Idempotency-Key": "contact-route-key",
         },
       });
 
@@ -358,6 +361,7 @@ describe("Contact API Route", () => {
         body: "invalid-json",
         headers: {
           "content-type": "application/json",
+          "Idempotency-Key": "contact-route-key",
         },
       });
 
@@ -368,6 +372,31 @@ describe("Contact API Route", () => {
       expect(response.status).toBe(400);
       expect(data.success).toBe(false);
       expect(data.errorCode).toBe(API_ERROR_CODES.INVALID_JSON_BODY);
+    });
+
+    it("应该在缺少 Idempotency-Key 时返回 400", async () => {
+      const { validateFormData } =
+        await import("@/app/api/contact/contact-api-validation");
+      vi.mocked(validateFormData).mockResolvedValue({
+        success: true,
+        error: null,
+        details: null,
+        data: validFormData,
+      });
+
+      const request = new NextRequest("http://localhost:3000/api/contact", {
+        method: "POST",
+        body: JSON.stringify(validFormData),
+        headers: {
+          "content-type": "application/json",
+        },
+      });
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(400);
+      expect(data.errorCode).toBe(API_ERROR_CODES.IDEMPOTENCY_KEY_REQUIRED);
     });
   });
 
@@ -541,6 +570,7 @@ describe("Contact API Route", () => {
         body: JSON.stringify(testFormData),
         headers: {
           "content-type": "application/json",
+          "Idempotency-Key": "contact-route-error-key",
         },
       });
 
