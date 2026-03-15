@@ -2,12 +2,13 @@
  * 路径配置相关类型定义
  */
 
-export type Locale = "en" | "zh";
+import type { Locale } from "@/i18n/routing-config";
+
+export type { Locale };
 
 // 路径映射接口定义
 export interface LocalizedPath {
-  en: string;
-  zh: string;
+  [locale: string]: string;
 }
 
 // 页面类型定义 (静态路由)

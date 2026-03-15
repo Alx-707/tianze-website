@@ -10,9 +10,8 @@ import { unstable_cache } from "next/cache";
 import { i18nTags } from "@/lib/cache/cache-tags";
 import { mergeObjects } from "@/lib/merge-objects";
 import { MONITORING_INTERVALS } from "@/constants/performance-constants";
-import { routing } from "@/i18n/routing";
+import { routing, type Locale } from "@/i18n/routing";
 
-type Locale = "en" | "zh";
 type Messages = Record<string, unknown>;
 type MessageType = "critical" | "deferred";
 

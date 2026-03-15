@@ -6,6 +6,7 @@
  */
 
 import type { ProductStandardId } from "@/constants/product-standards";
+import type { Locale } from "@/i18n/routing-config";
 
 // Base content metadata interface
 export interface ContentMetadata {
@@ -86,7 +87,7 @@ export interface Product extends ParsedContent<ProductMetadata> {
 // Content collection types
 export type ContentType = "posts" | "pages" | "products";
 export type _ContentType = ContentType;
-export type Locale = "en" | "zh";
+export type { Locale };
 
 // Content query options
 export interface ContentQueryOptions {

@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 // Mock next-intl/middleware
 vi.mock("next-intl/middleware", () => ({
-  default: vi.fn(() => NextResponse.next()),
+  default: vi.fn(() => vi.fn(() => NextResponse.next())),
 }));
 
 // Mock security config
@@ -56,7 +56,7 @@ describe("Middleware Cookie Security", () => {
 
       // Re-mock dependencies after reset
       vi.doMock("next-intl/middleware", () => ({
-        default: vi.fn(() => NextResponse.next()),
+        default: vi.fn(() => vi.fn(() => NextResponse.next())),
       }));
       vi.doMock("@/config/security", () => ({
         generateNonce: vi.fn(() => "test-nonce-123"),
@@ -87,7 +87,7 @@ describe("Middleware Cookie Security", () => {
       vi.resetModules();
 
       vi.doMock("next-intl/middleware", () => ({
-        default: vi.fn(() => NextResponse.next()),
+        default: vi.fn(() => vi.fn(() => NextResponse.next())),
       }));
       vi.doMock("@/config/security", () => ({
         generateNonce: vi.fn(() => "test-nonce-123"),
@@ -143,9 +143,10 @@ describe("Middleware Cookie Security", () => {
   describe("cookie security in different scenarios", () => {
     it("should apply security attributes when handling explicit localized request", async () => {
       vi.resetModules();
+      const intlMock = vi.fn(() => NextResponse.next());
 
       vi.doMock("next-intl/middleware", () => ({
-        default: vi.fn(() => NextResponse.next()),
+        default: vi.fn(() => intlMock),
       }));
       vi.doMock("@/config/security", () => ({
         generateNonce: vi.fn(() => "test-nonce-123"),
@@ -173,13 +174,14 @@ describe("Middleware Cookie Security", () => {
           expect(setCookieHeader).toMatch(/SameSite=Lax/i);
         }
       }
+      expect(intlMock).toHaveBeenCalledTimes(1);
     });
 
     it("should apply security attributes when redirecting invalid locale prefix", async () => {
       vi.resetModules();
 
       vi.doMock("next-intl/middleware", () => ({
-        default: vi.fn(() => NextResponse.next()),
+        default: vi.fn(() => vi.fn(() => NextResponse.next())),
       }));
       vi.doMock("@/config/security", () => ({
         generateNonce: vi.fn(() => "test-nonce-123"),

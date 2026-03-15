@@ -67,21 +67,6 @@ function setLocaleCookie(resp: NextResponse, locale: Locale): void {
   }
 }
 
-function tryHandleExplicitLocalizedRequest(
-  request: NextRequest,
-  nonce: string,
-): NextResponse | null {
-  const locale = extractLocaleCandidate(request.nextUrl.pathname);
-  const existingLocale = request.cookies.get("NEXT_LOCALE")?.value;
-  if (locale && existingLocale !== locale) {
-    const resp = NextResponse.next();
-    setLocaleCookie(resp, locale);
-    addSecurityHeaders(resp, nonce);
-    return resp;
-  }
-  return null;
-}
-
 function tryHandleInvalidLocalePrefix(
   request: NextRequest,
   nonce: string,
@@ -130,12 +115,6 @@ export default function middleware(request: NextRequest) {
       nonce,
     );
     return invalidLocaleHandled;
-  }
-
-  const early = tryHandleExplicitLocalizedRequest(request, nonce);
-  if (early) {
-    applyRequestHeaderOverride(early, NONCE_REQUEST_HEADER_KEY, nonce);
-    return early;
   }
 
   const response = intlMiddleware(request);
