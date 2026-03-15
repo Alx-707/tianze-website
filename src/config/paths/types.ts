@@ -2,9 +2,9 @@
  * 路径配置相关类型定义
  */
 
-import type { Locale } from "@/i18n/routing-config";
+import { LOCALES_CONFIG } from "@/config/paths/locales-config";
 
-export type { Locale };
+export type Locale = (typeof LOCALES_CONFIG.locales)[number];
 
 // 路径映射接口定义
 export interface LocalizedPath {
