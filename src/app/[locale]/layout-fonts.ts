@@ -30,9 +30,6 @@ export const jetbrainsMono = JetBrains_Mono({
   preload: false,
 });
 
-// Backwards compatibility alias
-export const ibmPlexSans = figtree;
-
 /**
  * Get font class names string for html element.
  * Returns CSS variable classes for Figtree + JetBrains Mono.

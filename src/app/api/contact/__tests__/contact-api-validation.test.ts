@@ -241,6 +241,7 @@ describe("contact-api-validation", () => {
       expect(result.success).toBe(true);
       expect(result.emailSent).toBe(true);
       expect(result.recordCreated).toBe(true);
+      expect(result.referenceId).toBe("ref-123");
       expect(processLead).toHaveBeenCalled();
     });
 

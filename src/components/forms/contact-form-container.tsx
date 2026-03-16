@@ -18,6 +18,7 @@ import {
 } from "@/lib/api/translate-error-code";
 import { logger } from "@/lib/logger";
 import { type ServerActionResult } from "@/lib/server-action-utils";
+import { generateIdempotencyKey } from "@/lib/idempotency-key";
 import { appendAttributionToFormData } from "@/lib/utm";
 import { LazyTurnstile } from "@/components/forms/lazy-turnstile";
 import { useOptimisticFormState } from "@/components/forms/use-optimistic-form-state";
@@ -125,12 +126,12 @@ function useContactForm() {
     null,
   );
   const [turnstileToken, setTurnstileToken] = useState<string>("");
+  const idempotencyKeyRef = useRef<string | null>(null);
   const lastRecordedSuccessRef = useRef(false);
   const [isPendingTransition, startTransition] = useTransition();
 
   // 使用提取的 hooks
-  const { isRateLimited, recordSubmission, setLastSubmissionTime } =
-    useRateLimit();
+  const { isRateLimited, setLastSubmissionTime } = useRateLimit();
   const { optimisticState, setOptimisticState, optimisticMessage } =
     useOptimisticFormState();
 
@@ -144,13 +145,24 @@ function useContactForm() {
 
   // 成功提交后记录时间
   useEffect(() => {
+    const isTerminal =
+      Boolean(state?.success) ||
+      Boolean(state?.error) ||
+      Boolean(state?.errorCode);
+    if (!isTerminal) return;
+
     if (state?.success && !lastRecordedSuccessRef.current) {
       queueMicrotask(() => {
         setLastSubmissionTime(new Date());
       });
     }
+
+    // Idempotency keys are single-attempt tokens. Once we have a terminal result
+    // (success or failure), rotate the key so the next submission represents a
+    // new attempt.
+    idempotencyKeyRef.current = null;
     lastRecordedSuccessRef.current = Boolean(state?.success);
-  }, [state?.success, setLastSubmissionTime]);
+  }, [state?.success, state?.error, state?.errorCode, setLastSubmissionTime]);
 
   // 创建增强的formAction，使用React 19原生乐观更新
   const enhancedFormAction = (formData: FormData) => {
@@ -172,9 +184,10 @@ function useContactForm() {
 
     // Append marketing attribution data
     appendAttributionToFormData(formData);
-
-    // 记录提交时间
-    recordSubmission();
+    const idempotencyKey =
+      idempotencyKeyRef.current ?? generateIdempotencyKey();
+    idempotencyKeyRef.current = idempotencyKey;
+    formData.append("idempotencyKey", idempotencyKey);
 
     // 使用useTransition的startTransition包装Server Action调用
     startTransition(() => {

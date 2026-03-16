@@ -2,7 +2,7 @@
 
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { TrustStats, type TrustStat } from "@/components/trust";
+import { TrustStats, type TrustStat } from "@/components/trust/trust-stats";
 
 describe("TrustStats", () => {
   it("stats 为空时不渲染 section", () => {

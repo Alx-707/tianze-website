@@ -273,8 +273,7 @@ export interface DynamicImportModule {
  * Mock 函数类型
  * 用于类型化 Vitest 风格的 mock（也兼容 Jest 风格结构）
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- mock function generic must accept any callable signature
-export type MockFunction<T extends (..._args: any[]) => any> = T & {
+export type MockFunction<T extends (..._args: never[]) => unknown> = T & {
   mock: {
     calls: unknown[][];
     results: Array<{ type: "return" | "throw"; value: unknown }>;
@@ -517,8 +516,7 @@ export interface MockGeolocation {
  * 支持更复杂的模拟场景
  */
 export type ExtendedMockFunction<
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- mock function generic must accept any callable signature
-  T extends (..._args: any[]) => any = (..._args: any[]) => any,
+  T extends (..._args: never[]) => unknown = (..._args: never[]) => unknown,
 > = MockFunction<T> & {
   mockReturnValueOnce: (_value: ReturnType<T>) => ExtendedMockFunction<T>;
   mockResolvedValueOnce: (

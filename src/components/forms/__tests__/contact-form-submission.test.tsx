@@ -301,6 +301,50 @@ describe("ContactFormContainer - 提交和错误处理", () => {
   });
 
   describe("速率限制功能", () => {
+    it("should start cooldown only after successful submission state", async () => {
+      const recordSubmission = vi.fn();
+      const setLastSubmissionTime = vi.fn();
+
+      mockUseActionState.mockReturnValue([{ success: true }, vi.fn(), false]);
+      mockUseRateLimit.mockReturnValue({
+        isRateLimited: false,
+        lastSubmissionTime: null,
+        recordSubmission,
+        setLastSubmissionTime,
+      });
+
+      await renderContactForm();
+
+      await waitFor(() => {
+        expect(setLastSubmissionTime).toHaveBeenCalledTimes(1);
+      });
+      expect(recordSubmission).not.toHaveBeenCalled();
+    });
+
+    it("should not start cooldown when submission state is error", async () => {
+      const recordSubmission = vi.fn();
+      const setLastSubmissionTime = vi.fn();
+
+      mockUseActionState.mockReturnValue([
+        { success: false, error: "Validation failed" },
+        vi.fn(),
+        false,
+      ]);
+      mockUseRateLimit.mockReturnValue({
+        isRateLimited: false,
+        lastSubmissionTime: null,
+        recordSubmission,
+        setLastSubmissionTime,
+      });
+
+      await renderContactForm();
+
+      await waitFor(() => {
+        expect(setLastSubmissionTime).not.toHaveBeenCalled();
+      });
+      expect(recordSubmission).not.toHaveBeenCalled();
+    });
+
     it("应该在成功提交后显示速率限制", async () => {
       mockUseActionState.mockReturnValue([
         { success: true }, // state

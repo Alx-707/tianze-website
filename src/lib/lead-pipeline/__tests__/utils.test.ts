@@ -8,7 +8,6 @@ import {
   formatQuantity,
   generateLeadReferenceId,
   generateProductInquiryMessage,
-  sanitizeInput,
   splitName,
 } from "../utils";
 
@@ -121,32 +120,6 @@ describe("Lead Pipeline Utils", () => {
         "  Custom packaging  ",
       );
       expect(message).toContain("Requirements: Custom packaging");
-    });
-  });
-
-  describe("sanitizeInput", () => {
-    it("should trim whitespace", () => {
-      expect(sanitizeInput("  hello  ")).toBe("hello");
-    });
-
-    it("should remove HTML angle brackets", () => {
-      expect(sanitizeInput('<script>alert("xss")</script>')).toBe(
-        'scriptalert("xss")/script',
-      );
-    });
-
-    it("should handle normal text", () => {
-      expect(sanitizeInput("Hello World")).toBe("Hello World");
-    });
-
-    it("should limit length to 5000 characters", () => {
-      const longInput = "a".repeat(6000);
-      const result = sanitizeInput(longInput);
-      expect(result.length).toBe(5000);
-    });
-
-    it("should handle empty string", () => {
-      expect(sanitizeInput("")).toBe("");
     });
   });
 

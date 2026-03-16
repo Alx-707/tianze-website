@@ -6,7 +6,7 @@
 import type {
   AirtableBaseLike,
   AirtableServicePrivate,
-} from "@/types/test-types";
+} from "@/test/test-types";
 
 export const createMockBase = <Fields = Record<string, unknown>>(
   tableFactory: AirtableBaseLike<Fields>["table"],

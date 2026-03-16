@@ -139,16 +139,12 @@ export {
   COUNT_TWO,
   COUNT_THREE,
   COUNT_4,
-  COUNT_FOUR,
   COUNT_FIVE,
   COUNT_SIX,
   COUNT_SEVEN,
   COUNT_EIGHT,
   COUNT_NINE,
   COUNT_TEN,
-  COUNT_PAIR,
-  COUNT_TRIPLE,
-  COUNT_QUAD,
   // 进制和编码
   HEX_RADIX,
   BASE36_RADIX,
@@ -259,7 +255,7 @@ export {
   BYTES_PER_KB,
   ANGLE_90_DEG,
   ANGLE_360_DEG,
-} from "./magic-numbers";
+} from "./core";
 
 // ============================================================================
 // 单位工具常量

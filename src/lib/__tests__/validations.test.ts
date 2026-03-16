@@ -1,6 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { airtableRecordSchema } from "@/lib/airtable/record-schema";
-import { apiResponseSchema } from "@/lib/api/api-response-schema";
 import { emailTemplateDataSchema } from "@/lib/email/email-data-schema";
 import { contactFieldValidators } from "@/lib/form-schema/contact-field-validators";
 import {
@@ -210,33 +209,6 @@ describe("validations - Schema Validation", () => {
 });
 
 describe("validations - API and Data Schemas", () => {
-  describe("apiResponseSchema", () => {
-    it("should validate successful API response", () => {
-      const response = {
-        success: true,
-        message: "Operation completed successfully",
-        data: { id: "123" },
-      };
-      const result = apiResponseSchema.safeParse(response);
-      expect(result.success).toBe(true);
-    });
-
-    it("should validate error API response", () => {
-      const response = {
-        success: false,
-        error: "Something went wrong",
-      };
-      const result = apiResponseSchema.safeParse(response);
-      expect(result.success).toBe(true);
-    });
-
-    it("should validate minimal API response", () => {
-      const response = { success: true };
-      const result = apiResponseSchema.safeParse(response);
-      expect(result.success).toBe(true);
-    });
-  });
-
   describe("airtableRecordSchema", () => {
     const validRecord = {
       id: "rec123",

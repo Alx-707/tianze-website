@@ -25,6 +25,7 @@ import {
   type ServerAction,
   type ServerActionResult,
 } from "@/lib/server-action-utils";
+import { withIdempotentResult } from "@/lib/idempotency";
 import { verifyTurnstile } from "@/lib/turnstile";
 import { processFormSubmission } from "@/lib/contact-form-processing";
 import { mapZodIssueToErrorKey } from "@/lib/contact-form-error-utils";
@@ -41,10 +42,8 @@ export interface ContactFormResult {
   emailSent: boolean;
   /** 记录是否创建成功 */
   recordCreated: boolean;
-  /** 邮件消息ID */
-  emailMessageId?: string | null;
-  /** Airtable记录ID */
-  airtableRecordId?: string | null;
+  /** 统一线索引用ID */
+  referenceId?: string | null;
 }
 
 /**
@@ -55,7 +54,11 @@ export interface ContactFormWithToken extends ContactFormData {
   turnstileToken: string;
   /** 提交时间戳 */
   submittedAt: string;
+  /** 幂等键 */
+  idempotencyKey?: string;
 }
+
+const CONTACT_FORM_IDEMPOTENCY_FINGERPRINT = "SERVER_ACTION:contactFormAction";
 
 const contactFormSchema = createContactFormSchemaFromConfig(
   CONTACT_FORM_CONFIG,
@@ -145,8 +148,7 @@ async function processContactFormSubmission(
   return {
     emailSent: result.emailSent,
     recordCreated: result.recordCreated,
-    emailMessageId: result.emailMessageId || null,
-    airtableRecordId: result.airtableRecordId || null,
+    referenceId: result.referenceId || null,
   };
 }
 
@@ -166,6 +168,7 @@ function extractContactFormData(formData: FormData): ContactFormWithToken {
     marketingConsent: getFormDataBoolean(formData, "marketingConsent"),
     turnstileToken: getFormDataString(formData, "turnstileToken"),
     submittedAt: getFormDataString(formData, "submittedAt"),
+    idempotencyKey: getFormDataString(formData, "idempotencyKey"),
   };
 }
 
@@ -199,8 +202,7 @@ async function performSecurityChecks(
       {
         emailSent: false,
         recordCreated: false,
-        emailMessageId: null,
-        airtableRecordId: null,
+        referenceId: null,
       } satisfies ContactFormResult,
       "Thank you for your message.",
       logger,
@@ -246,51 +248,109 @@ export const contactFormAction: ServerAction<FormData, ContactFormResult> =
 
       // 提取表单数据
       const contactData = extractContactFormData(formData);
+      const idempotentResult = await withIdempotentResult(
+        contactData.idempotencyKey ?? null,
+        async () => {
+          // 验证必需的Turnstile token
+          if (!contactData.turnstileToken) {
+            return createErrorResultWithLogging(
+              {
+                code: API_ERROR_CODES.TURNSTILE_MISSING_TOKEN,
+                message: "Security verification required",
+              },
+              undefined,
+              logger,
+            );
+          }
 
-      // 验证必需的Turnstile token
-      if (!contactData.turnstileToken) {
-        return createErrorResultWithLogging(
-          {
-            code: API_ERROR_CODES.TURNSTILE_MISSING_TOKEN,
-            message: "Security verification required",
-          },
-          undefined,
-          logger,
-        );
-      }
+          // 使用现有的验证逻辑
+          const validation = await validateContactFormData(
+            contactData,
+            clientIP,
+          );
+          if (!validation.success || !validation.data) {
+            return createErrorResultWithLogging(
+              {
+                code:
+                  validation.errorCode ??
+                  API_ERROR_CODES.CONTACT_VALIDATION_FAILED,
+                message: validation.error || "Validation failed",
+              },
+              validation.details || undefined,
+              logger,
+            );
+          }
 
-      // 使用现有的验证逻辑
-      const validation = await validateContactFormData(contactData, clientIP);
-      if (!validation.success || !validation.data) {
-        return createErrorResultWithLogging(
-          {
-            code:
-              validation.errorCode ?? API_ERROR_CODES.CONTACT_VALIDATION_FAILED,
-            message: validation.error || "Validation failed",
-          },
-          validation.details || undefined,
-          logger,
-        );
-      }
+          // 处理表单提交
+          const submissionResult =
+            await processContactFormSubmission(contactData);
 
-      // 处理表单提交
-      const submissionResult = await processContactFormSubmission(contactData);
+          // 记录成功提交
+          const processingTime = performance.now() - startTime;
+          if (process.env.NODE_ENV !== "production") {
+            logger.info("Contact form submitted via Server Action", {
+              processingTime,
+              emailSent: submissionResult.emailSent,
+              recordCreated: submissionResult.recordCreated,
+              referenceId: submissionResult.referenceId,
+            });
+          }
 
-      // 记录成功提交
-      const processingTime = performance.now() - startTime;
-      logger.info("Contact form submitted via Server Action", {
-        processingTime,
-        emailSent: submissionResult.emailSent,
-        recordCreated: submissionResult.recordCreated,
-        emailMessageId: submissionResult.emailMessageId,
-        airtableRecordId: submissionResult.airtableRecordId,
-      });
-
-      return createSuccessResultWithLogging(
-        submissionResult,
-        "Thank you for your message. We will get back to you soon.",
-        logger,
+          return createSuccessResultWithLogging(
+            submissionResult,
+            "Thank you for your message. We will get back to you soon.",
+            logger,
+          );
+        },
+        {
+          required: true,
+          fingerprint: CONTACT_FORM_IDEMPOTENCY_FINGERPRINT,
+        },
       );
+
+      if (idempotentResult.ok) {
+        return idempotentResult.result;
+      }
+
+      switch (idempotentResult.reason) {
+        case "missing":
+          return createErrorResultWithLogging(
+            {
+              code: API_ERROR_CODES.IDEMPOTENCY_KEY_REQUIRED,
+              message: "Idempotency key required",
+            },
+            undefined,
+            logger,
+          );
+        case "reused":
+          return createErrorResultWithLogging(
+            {
+              code: API_ERROR_CODES.IDEMPOTENCY_KEY_REUSED,
+              message: "Idempotency key reused",
+            },
+            undefined,
+            logger,
+          );
+        case "timeout":
+          return createErrorResultWithLogging(
+            {
+              code: API_ERROR_CODES.IDEMPOTENCY_REQUEST_TIMEOUT,
+              message: "Request timeout",
+            },
+            undefined,
+            logger,
+          );
+        case "failed":
+        default:
+          return createErrorResultWithLogging(
+            {
+              code: API_ERROR_CODES.IDEMPOTENCY_REQUEST_FAILED,
+              message: "Request failed",
+            },
+            undefined,
+            logger,
+          );
+      }
     } catch (error) {
       const processingTime = performance.now() - startTime;
       logger.error("Contact form Server Action failed", {

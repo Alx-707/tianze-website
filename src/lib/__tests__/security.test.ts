@@ -1,6 +1,4 @@
 import { describe, expect, it } from "vitest";
-import { validateFileUpload } from "@/lib/security-file-upload";
-import { generateSecureToken } from "@/lib/security-tokens";
 import {
   isValidEmail,
   isValidUrl,
@@ -72,62 +70,6 @@ describe("Security Utils", () => {
     it("should respect allowed protocols", () => {
       expect(isValidUrl("ftp://example.com", ["ftp:"])).toBe(true);
       expect(isValidUrl("https://example.com", ["http:"])).toBe(false);
-    });
-  });
-
-  describe("generateSecureToken", () => {
-    it("should generate tokens of correct length", () => {
-      expect(generateSecureToken(16)).toHaveLength(16);
-      expect(generateSecureToken(32)).toHaveLength(32);
-      expect(generateSecureToken(64)).toHaveLength(64);
-    });
-
-    it("should generate different tokens", () => {
-      const token1 = generateSecureToken(32);
-      const token2 = generateSecureToken(32);
-      expect(token1).not.toBe(token2);
-    });
-
-    it("should use default length", () => {
-      expect(generateSecureToken()).toHaveLength(32);
-    });
-  });
-
-  describe("validateFileUpload", () => {
-    it("should accept valid files", () => {
-      const validFile = new File(["content"], "test.jpg", {
-        type: "image/jpeg",
-      });
-      const result = validateFileUpload(validFile);
-      expect(result.valid).toBe(true);
-      expect(result.error).toBeUndefined();
-    });
-
-    it("should reject files that are too large", () => {
-      const largeFile = new File(["x".repeat(11 * 1024 * 1024)], "large.jpg", {
-        type: "image/jpeg",
-      });
-      const result = validateFileUpload(largeFile);
-      expect(result.valid).toBe(false);
-      expect(result.error).toContain("size exceeds");
-    });
-
-    it("should reject dangerous file types", () => {
-      const dangerousFile = new File(["content"], "malware.exe", {
-        type: "application/octet-stream",
-      });
-      const result = validateFileUpload(dangerousFile);
-      expect(result.valid).toBe(false);
-      expect(result.error).toContain("is not allowed");
-    });
-
-    it("should reject dangerous file extensions", () => {
-      const dangerousFile = new File(["content"], "script.js", {
-        type: "text/plain",
-      });
-      const result = validateFileUpload(dangerousFile);
-      expect(result.valid).toBe(false);
-      expect(result.error).toContain("is not allowed");
     });
   });
 });

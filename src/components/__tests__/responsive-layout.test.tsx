@@ -60,7 +60,7 @@ describe("ResponsiveLayout (CSS-First)", () => {
       const mobileNav = <nav data-testid="mobile-nav">Mobile Navigation</nav>;
 
       render(
-        <ResponsiveLayout mobileNavigation={mobileNav}>
+        <ResponsiveLayout mobileContent={mobileNav}>
           {mockChildren}
         </ResponsiveLayout>,
       );
@@ -77,7 +77,7 @@ describe("ResponsiveLayout (CSS-First)", () => {
       );
 
       render(
-        <ResponsiveLayout tabletSidebar={tabletSidebar}>
+        <ResponsiveLayout tabletContent={tabletSidebar}>
           {mockChildren}
         </ResponsiveLayout>,
       );
@@ -97,7 +97,7 @@ describe("ResponsiveLayout (CSS-First)", () => {
       );
 
       render(
-        <ResponsiveLayout desktopSidebar={desktopSidebar}>
+        <ResponsiveLayout desktopContent={desktopSidebar}>
           {mockChildren}
         </ResponsiveLayout>,
       );
@@ -204,58 +204,6 @@ describe("ResponsiveLayout (CSS-First)", () => {
     });
   });
 
-  describe("Legacy Props Compatibility", () => {
-    it("should support mobileLayout (deprecated)", () => {
-      render(
-        <ResponsiveLayout
-          mobileLayout={<div data-testid="mobile-legacy">Mobile Legacy</div>}
-        >
-          {mockChildren}
-        </ResponsiveLayout>,
-      );
-
-      expect(screen.getByTestId("mobile-legacy")).toBeInTheDocument();
-    });
-
-    it("should support tabletLayout (deprecated)", () => {
-      render(
-        <ResponsiveLayout
-          tabletLayout={<div data-testid="tablet-legacy">Tablet Legacy</div>}
-        >
-          {mockChildren}
-        </ResponsiveLayout>,
-      );
-
-      expect(screen.getByTestId("tablet-legacy")).toBeInTheDocument();
-    });
-
-    it("should support desktopLayout (deprecated)", () => {
-      render(
-        <ResponsiveLayout
-          desktopLayout={<div data-testid="desktop-legacy">Desktop Legacy</div>}
-        >
-          {mockChildren}
-        </ResponsiveLayout>,
-      );
-
-      expect(screen.getByTestId("desktop-legacy")).toBeInTheDocument();
-    });
-
-    it("should prefer new props over legacy props", () => {
-      render(
-        <ResponsiveLayout
-          mobileContent={<div data-testid="mobile-new">New Mobile</div>}
-          mobileLayout={<div data-testid="mobile-legacy">Legacy Mobile</div>}
-        >
-          {mockChildren}
-        </ResponsiveLayout>,
-      );
-
-      expect(screen.getByTestId("mobile-new")).toBeInTheDocument();
-      expect(screen.queryByTestId("mobile-legacy")).not.toBeInTheDocument();
-    });
-  });
-
   describe("Edge Cases", () => {
     it("should handle null children", () => {
       expect(() => {
@@ -267,9 +215,9 @@ describe("ResponsiveLayout (CSS-First)", () => {
       expect(() => {
         render(
           <ResponsiveLayout
-            mobileNavigation={undefined}
-            tabletSidebar={undefined}
-            desktopSidebar={undefined}
+            mobileContent={undefined}
+            tabletContent={undefined}
+            desktopContent={undefined}
           >
             {mockChildren}
           </ResponsiveLayout>,

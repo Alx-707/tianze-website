@@ -34,7 +34,7 @@ function createMockTranslations() {
   const translations: Record<string, string> = {
     title: "Cookie Consent",
     description: "We use cookies to improve your experience.",
-    learnMore: "Learn more",
+    learnMore: "Privacy policy",
     manage: "Manage",
     rejectAll: "Reject All",
     acceptAll: "Accept All",
@@ -128,7 +128,7 @@ describe("CookieBanner", () => {
     it("renders privacy policy link", () => {
       render(<CookieBanner />);
 
-      const link = screen.getByRole("link", { name: "Learn more" });
+      const link = screen.getByRole("link", { name: "Privacy policy" });
       expect(link).toHaveAttribute("href", "/privacy");
     });
 

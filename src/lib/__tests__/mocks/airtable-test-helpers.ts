@@ -8,7 +8,7 @@ import type {
   AirtableBaseLike,
   AirtableServicePrivate,
   AirtableTableLike,
-} from "@/types/test-types";
+} from "@/test/test-types";
 
 /**
  * 创建Mock的Airtable Base

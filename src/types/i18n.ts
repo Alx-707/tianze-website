@@ -3,6 +3,10 @@
  * 提供完整的翻译键类型检查和自动补全支持
  */
 
+import type { Locale } from "@/i18n/routing-config";
+
+export type { Locale };
+
 // 基础翻译消息结构
 export interface Messages {
   common: {
@@ -159,11 +163,6 @@ export interface Messages {
 // 翻译键路径类型
 export type TranslationKey = keyof Messages | `${keyof Messages}.${string}`;
 
-// 支持的语言类型
-export type Locale = "en" | "zh";
-// 兼容旧测试代码中的别名
-export type _Locale = Locale;
-
 // 翻译参数类型
 export interface TranslationParams {
   [key: string]: string | number | boolean | Date;
@@ -301,5 +300,4 @@ export interface TranslationQuality {
   freshness: number;
   score: number;
 }
-
 export {};

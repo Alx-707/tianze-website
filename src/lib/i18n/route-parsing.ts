@@ -6,6 +6,7 @@
  */
 import type { ComponentProps } from "react";
 import type { Link } from "@/i18n/routing";
+import { routing } from "@/i18n/routing-config";
 
 /**
  * Type for Link href prop, extracted from next-intl's Link component.
@@ -63,7 +64,19 @@ export const DYNAMIC_ROUTE_PATTERNS: readonly DynamicRoutePattern[] = [
  * "/zh/blog/post".replace(LOCALE_PREFIX_RE, "") // → "/blog/post"
  * "/about".replace(LOCALE_PREFIX_RE, "") // → "/about" (no change)
  */
-export const LOCALE_PREFIX_RE = /^\/(en|zh)(?=\/|$)/;
+function escapeRegExp(input: string): string {
+  return input.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+const LOCALE_PREFIX_PATTERN = routing.locales
+  .map((locale) => escapeRegExp(locale))
+  .join("|");
+
+// nosemgrep: javascript.lang.security.audit.detect-non-literal-regexp.detect-non-literal-regexp
+// eslint-disable-next-line security/detect-non-literal-regexp -- locales come from trusted static routing config
+export const LOCALE_PREFIX_RE = new RegExp(
+  `^\\/(${LOCALE_PREFIX_PATTERN})(?=\\/|$)`,
+);
 
 /**
  * Normalizes a pathname by stripping the locale prefix and handling edge cases.

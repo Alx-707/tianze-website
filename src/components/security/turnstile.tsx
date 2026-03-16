@@ -10,10 +10,6 @@ import { logger } from "@/lib/logger";
  */
 
 interface TurnstileProps {
-  /**
-   * @deprecated Use onSuccess instead. Maintained for backward compatibility.
-   */
-  onVerify?: (_token: string) => void;
   onSuccess?: (_token: string) => void;
   onError?: (_error: string) => void;
   onExpire?: () => void;
@@ -31,7 +27,6 @@ interface TurnstileProps {
  * Cloudflare Turnstile CAPTCHA component
  */
 export function TurnstileWidget({
-  onVerify,
   onSuccess,
   onError,
   onExpire,
@@ -54,11 +49,10 @@ export function TurnstileWidget({
     if (!isBypassMode || bypassTriggeredRef.current) return;
     bypassTriggeredRef.current = true;
     logger.warn("[DEV] Turnstile bypass mode enabled");
-    const handler = onSuccess ?? onVerify;
-    if (handler) {
-      handler("TURNSTILE_BYPASS_TOKEN");
+    if (onSuccess) {
+      onSuccess("TURNSTILE_BYPASS_TOKEN");
     }
-  }, [isBypassMode, onSuccess, onVerify]);
+  }, [isBypassMode, onSuccess]);
 
   useEffect(() => {
     if (!siteKey && !isBypassMode) {
@@ -115,9 +109,8 @@ export function TurnstileWidget({
   }
 
   const handleSuccess = (token: string) => {
-    const handler = onSuccess ?? onVerify;
-    if (handler) {
-      handler(token);
+    if (onSuccess) {
+      onSuccess(token);
     }
   };
 
@@ -210,7 +203,6 @@ export function useTurnstile() {
     error,
     isLoading,
     handlers: {
-      onVerify: handleSuccessCallback,
       onSuccess: handleSuccessCallback,
       onError: handleError,
       onExpire: handleExpire,

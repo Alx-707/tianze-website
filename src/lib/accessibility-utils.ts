@@ -10,7 +10,7 @@ import {
 } from "@/lib/accessibility-types";
 import { checkContrastCompliance, type OKLCHColor } from "@/lib/colors";
 import { logger } from "@/lib/logger";
-import { COUNT_TRIPLE, ONE, ZERO } from "@/constants";
+import { COUNT_THREE, ONE, ZERO } from "@/constants";
 import { OPACITY_CONSTANTS } from "@/constants/app-constants";
 
 /**
@@ -166,7 +166,7 @@ export class AccessibilityUtils {
    */
   private static parseOKLCHString(trimmed: string): OKLCHColor | null {
     const OKLCH_PREFIX_LENGTH = "oklch(".length;
-    const MIN_OKLCH_PARTS = COUNT_TRIPLE;
+    const MIN_OKLCH_PARTS = COUNT_THREE;
 
     if (!trimmed.startsWith("oklch(") || !trimmed.endsWith(")")) {
       return null;

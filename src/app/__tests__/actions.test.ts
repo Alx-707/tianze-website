@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { API_ERROR_CODES } from "@/constants/api-error-codes";
+import { resetIdempotencyState } from "@/lib/idempotency";
 import { checkDistributedRateLimit } from "@/lib/security/distributed-rate-limit";
 import { verifyTurnstile } from "@/lib/turnstile";
 import { contactFormAction } from "../actions";
@@ -46,8 +47,7 @@ vi.mock("@/lib/contact-form-processing", () => ({
     Promise.resolve({
       emailSent: true,
       recordCreated: true,
-      emailMessageId: "msg-123",
-      airtableRecordId: "rec-123",
+      referenceId: "ref-123",
     }),
   ),
 }));
@@ -55,6 +55,7 @@ vi.mock("@/lib/contact-form-processing", () => ({
 describe("actions.ts", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    resetIdempotencyState();
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2024-06-15T12:00:00Z"));
     vi.stubEnv("VERCEL", "1");
@@ -79,7 +80,9 @@ describe("actions.ts", () => {
   }
 
   describe("contactFormAction", () => {
-    const validFormData = {
+    const createValidFormData = (
+      overrides: Partial<Record<string, string>> = {},
+    ): Record<string, string> => ({
       firstName: "John",
       lastName: "Doe",
       email: "john@example.com",
@@ -91,10 +94,23 @@ describe("actions.ts", () => {
       marketingConsent: "false",
       turnstileToken: "valid-token",
       submittedAt: new Date().toISOString(),
-    };
+      idempotencyKey: "contact-action-key",
+      ...overrides,
+    });
+
+    it("should return error when idempotency key is missing", async () => {
+      const dataWithoutKey = { ...createValidFormData() };
+      delete (dataWithoutKey as { idempotencyKey?: string }).idempotencyKey;
+      const formData = createFormData(dataWithoutKey);
+
+      const result = await contactFormAction(null, formData);
+
+      expect(result.success).toBe(false);
+      expect(result.errorCode).toBe(API_ERROR_CODES.IDEMPOTENCY_KEY_REQUIRED);
+    });
 
     it("should return error when turnstile token is missing", async () => {
-      const dataWithoutToken = { ...validFormData };
+      const dataWithoutToken = { ...createValidFormData() };
       delete (dataWithoutToken as { turnstileToken?: string }).turnstileToken;
       const formData = createFormData(dataWithoutToken);
 
@@ -106,20 +122,19 @@ describe("actions.ts", () => {
 
     it("should return error when turnstile verification fails", async () => {
       vi.mocked(verifyTurnstile).mockResolvedValueOnce(false);
-      const formData = createFormData(validFormData);
+      const formData = createFormData(createValidFormData());
 
       const result = await contactFormAction(null, formData);
 
       expect(result.success).toBe(false);
-      expect([
+      expect(result.errorCode).toBe(
         API_ERROR_CODES.TURNSTILE_VERIFICATION_FAILED,
-        API_ERROR_CODES.CONTACT_SUBMISSION_EXPIRED,
-      ]).toContain(result.errorCode);
+      );
     });
 
     it("should return error when submittedAt is expired", async () => {
       const expiredData = {
-        ...validFormData,
+        ...createValidFormData(),
         submittedAt: new Date(Date.now() - 15 * 60 * 1000).toISOString(), // 15 minutes ago
       };
       const formData = createFormData(expiredData);
@@ -130,35 +145,11 @@ describe("actions.ts", () => {
       expect(result.errorCode).toBe(API_ERROR_CODES.CONTACT_SUBMISSION_EXPIRED);
     });
 
-    it("should return error when form validation fails for missing field", async () => {
-      const invalidData = { ...validFormData, firstName: "" };
-      const formData = createFormData(invalidData);
-
-      const result = await contactFormAction(null, formData);
-
-      expect(result.success).toBe(false);
-    });
-
-    it("should return error when acceptPrivacy is false", async () => {
-      const invalidData = { ...validFormData, acceptPrivacy: "false" };
-      const formData = createFormData(invalidData);
-
-      const result = await contactFormAction(null, formData);
-
-      expect(result.success).toBe(false);
-    });
-
-    it("should return error when email is invalid", async () => {
-      const invalidData = { ...validFormData, email: "invalid-email" };
-      const formData = createFormData(invalidData);
-
-      const result = await contactFormAction(null, formData);
-
-      expect(result.success).toBe(false);
-    });
+    // Note: form-field validation is covered by `src/lib/__tests__/validations.test.ts`.
+    // This suite keeps Zod mocked for speed and focuses on action control flow.
 
     it("should attempt verification with valid form data", async () => {
-      const formData = createFormData(validFormData);
+      const formData = createFormData(createValidFormData());
 
       const result = await contactFormAction(null, formData);
 
@@ -167,8 +158,26 @@ describe("actions.ts", () => {
       expect(result).toBeDefined();
     });
 
+    it("should dedupe duplicate submissions with the same idempotency key", async () => {
+      const freshData = {
+        ...createValidFormData(),
+        submittedAt: new Date().toISOString(),
+        idempotencyKey: "contact-action-dedupe-key",
+      };
+      const formData = createFormData(freshData);
+      const duplicateFormData = createFormData(freshData);
+
+      const firstResult = await contactFormAction(null, formData);
+      const secondResult = await contactFormAction(null, duplicateFormData);
+
+      expect(firstResult.success).toBe(true);
+      expect(secondResult.success).toBe(true);
+      const processing = await import("@/lib/contact-form-processing");
+      expect(processing.processFormSubmission).toHaveBeenCalledTimes(1);
+    });
+
     it("should return error when submittedAt is not provided", async () => {
-      const dataWithoutSubmittedAt = { ...validFormData };
+      const dataWithoutSubmittedAt = { ...createValidFormData() };
       delete (dataWithoutSubmittedAt as { submittedAt?: string }).submittedAt;
       const formData = createFormData(dataWithoutSubmittedAt);
 
@@ -181,7 +190,7 @@ describe("actions.ts", () => {
 
     it("should return error when submittedAt is not-a-date", async () => {
       const invalidDateData = {
-        ...validFormData,
+        ...createValidFormData(),
         submittedAt: "not-a-date",
       };
       const formData = createFormData(invalidDateData);
@@ -194,30 +203,12 @@ describe("actions.ts", () => {
     });
 
     it("should return result object with expected structure", async () => {
-      const formData = createFormData(validFormData);
+      const formData = createFormData(createValidFormData());
 
       const result = await contactFormAction(null, formData);
 
       expect(result).toHaveProperty("success");
       expect(typeof result.success).toBe("boolean");
-    });
-
-    it("should handle missing lastName", async () => {
-      const invalidData = { ...validFormData, lastName: "" };
-      const formData = createFormData(invalidData);
-
-      const result = await contactFormAction(null, formData);
-
-      expect(result.success).toBe(false);
-    });
-
-    it("should handle missing message", async () => {
-      const invalidData = { ...validFormData, message: "" };
-      const formData = createFormData(invalidData);
-
-      const result = await contactFormAction(null, formData);
-
-      expect(result.success).toBe(false);
     });
 
     it("should handle empty form data", async () => {
@@ -243,6 +234,7 @@ describe("actions.ts", () => {
         marketingConsent: "false",
         turnstileToken: "valid-token",
         submittedAt: new Date().toISOString(),
+        idempotencyKey: "contact-security-key",
       };
     }
 

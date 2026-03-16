@@ -1,6 +1,6 @@
 import {
   AES_KEY_LENGTH_BITS,
-  COUNT_PAIR,
+  COUNT_TWO,
   AES_GCM_IV_BYTES,
   HEX_RADIX,
   PBKDF2_ITERATIONS,
@@ -17,9 +17,9 @@ import {
  */
 const CRYPTO_CONSTANTS = {
   SALT_BYTE_LENGTH: HEX_RADIX,
-  HEX_CHARS_PER_BYTE: COUNT_PAIR,
+  HEX_CHARS_PER_BYTE: COUNT_TWO,
   HEX_BASE: HEX_RADIX,
-  HEX_PAD_LENGTH: COUNT_PAIR,
+  HEX_PAD_LENGTH: COUNT_TWO,
 } as const;
 
 /**
@@ -75,9 +75,9 @@ export async function verifyPassword(
 
     const salt = (() => {
       const pairs: string[] = [];
-      for (let i = 0; i < saltHex.length; i += COUNT_PAIR) {
-        const seg = saltHex.slice(i, i + COUNT_PAIR);
-        if (seg.length === COUNT_PAIR) pairs.push(seg);
+      for (let i = 0; i < saltHex.length; i += COUNT_TWO) {
+        const seg = saltHex.slice(i, i + COUNT_TWO);
+        if (seg.length === COUNT_TWO) pairs.push(seg);
       }
       return pairs.map((byte) => parseInt(byte, HEX_RADIX));
     })();
@@ -244,13 +244,13 @@ export async function encryptData(
 
   return {
     encrypted: Array.from(new Uint8Array(encrypted))
-      .map((b) => b.toString(HEX_RADIX).padStart(COUNT_PAIR, "0"))
+      .map((b) => b.toString(HEX_RADIX).padStart(COUNT_TWO, "0"))
       .join(""),
     iv: Array.from(iv)
-      .map((b) => b.toString(HEX_RADIX).padStart(COUNT_PAIR, "0"))
+      .map((b) => b.toString(HEX_RADIX).padStart(COUNT_TWO, "0"))
       .join(""),
     salt: Array.from(salt)
-      .map((b) => b.toString(HEX_RADIX).padStart(COUNT_PAIR, "0"))
+      .map((b) => b.toString(HEX_RADIX).padStart(COUNT_TWO, "0"))
       .join(""),
   };
 }
@@ -271,9 +271,9 @@ export async function decryptData(params: {
   const encrypted = new Uint8Array(
     (() => {
       const out: number[] = [];
-      for (let i = 0; i < encryptedHex.length; i += COUNT_PAIR) {
-        const seg = encryptedHex.slice(i, i + COUNT_PAIR);
-        if (seg.length === COUNT_PAIR) out.push(parseInt(seg, HEX_RADIX));
+      for (let i = 0; i < encryptedHex.length; i += COUNT_TWO) {
+        const seg = encryptedHex.slice(i, i + COUNT_TWO);
+        if (seg.length === COUNT_TWO) out.push(parseInt(seg, HEX_RADIX));
       }
       return out;
     })(),
@@ -281,9 +281,9 @@ export async function decryptData(params: {
   const iv = new Uint8Array(
     (() => {
       const out: number[] = [];
-      for (let i = 0; i < ivHex.length; i += COUNT_PAIR) {
-        const seg = ivHex.slice(i, i + COUNT_PAIR);
-        if (seg.length === COUNT_PAIR) out.push(parseInt(seg, HEX_RADIX));
+      for (let i = 0; i < ivHex.length; i += COUNT_TWO) {
+        const seg = ivHex.slice(i, i + COUNT_TWO);
+        if (seg.length === COUNT_TWO) out.push(parseInt(seg, HEX_RADIX));
       }
       return out;
     })(),
@@ -291,9 +291,9 @@ export async function decryptData(params: {
   const salt = new Uint8Array(
     (() => {
       const out: number[] = [];
-      for (let i = 0; i < saltHex.length; i += COUNT_PAIR) {
-        const seg = saltHex.slice(i, i + COUNT_PAIR);
-        if (seg.length === COUNT_PAIR) out.push(parseInt(seg, HEX_RADIX));
+      for (let i = 0; i < saltHex.length; i += COUNT_TWO) {
+        const seg = saltHex.slice(i, i + COUNT_TWO);
+        if (seg.length === COUNT_TWO) out.push(parseInt(seg, HEX_RADIX));
       }
       return out;
     })(),
@@ -348,7 +348,7 @@ export function generateEncryptionKey(): Promise<CryptoKey> {
 export async function exportKey(key: CryptoKey): Promise<string> {
   const exported = await crypto.subtle.exportKey("raw", key);
   return Array.from(new Uint8Array(exported))
-    .map((b) => b.toString(HEX_RADIX).padStart(COUNT_PAIR, "0"))
+    .map((b) => b.toString(HEX_RADIX).padStart(COUNT_TWO, "0"))
     .join("");
 }
 
@@ -359,9 +359,9 @@ export function importKey(keyHex: string): Promise<CryptoKey> {
   const keyBytes = new Uint8Array(
     (() => {
       const out: number[] = [];
-      for (let i = 0; i < keyHex.length; i += COUNT_PAIR) {
-        const seg = keyHex.slice(i, i + COUNT_PAIR);
-        if (seg.length === COUNT_PAIR) out.push(parseInt(seg, HEX_RADIX));
+      for (let i = 0; i < keyHex.length; i += COUNT_TWO) {
+        const seg = keyHex.slice(i, i + COUNT_TWO);
+        if (seg.length === COUNT_TWO) out.push(parseInt(seg, HEX_RADIX));
       }
       return out;
     })(),

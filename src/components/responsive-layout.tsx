@@ -29,26 +29,11 @@ interface ResponsiveLayoutProps {
   tabletContent?: ReactNode;
   /** Content shown only on desktop (>= lg breakpoint) */
   desktopContent?: ReactNode;
-  // Legacy props for backwards compatibility
-  /** @deprecated Use mobileContent instead */
-  mobileLayout?: ReactNode;
-  /** @deprecated Use tabletContent instead */
-  tabletLayout?: ReactNode;
-  /** @deprecated Use desktopContent instead */
-  desktopLayout?: ReactNode;
-  /** @deprecated Use mobileContent instead */
-  mobileNavigation?: ReactNode;
-  /** @deprecated Use tabletContent instead */
-  tabletSidebar?: ReactNode;
-  /** @deprecated Use desktopContent instead */
-  desktopSidebar?: ReactNode;
   // Event handlers (JS-required use cases)
   onTouchStart?: () => void;
   onTouchEnd?: () => void;
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
-  /** @deprecated Layout detection is now CSS-based; callback provided for migration period */
-  onLayoutChange?: (_layout: string) => void;
   // Accessibility
   role?: string;
   "aria-label"?: string;
@@ -96,29 +81,20 @@ export function ResponsiveLayout({
   mobileContent,
   tabletContent,
   desktopContent,
-  // Legacy props mapping
-  mobileLayout,
-  tabletLayout,
-  desktopLayout,
-  mobileNavigation,
-  tabletSidebar,
-  desktopSidebar,
   // Event handlers
   onTouchStart,
   onTouchEnd,
   onMouseEnter,
   onMouseLeave,
-  onLayoutChange: _onLayoutChange,
   // Accessibility
   role,
   "aria-label": ariaLabel,
   "data-testid": dataTestId,
   tabIndex,
 }: ResponsiveLayoutProps) {
-  // Resolve legacy props to new props
-  const resolvedMobile = mobileContent ?? mobileLayout ?? mobileNavigation;
-  const resolvedTablet = tabletContent ?? tabletLayout ?? tabletSidebar;
-  const resolvedDesktop = desktopContent ?? desktopLayout ?? desktopSidebar;
+  const resolvedMobile = mobileContent;
+  const resolvedTablet = tabletContent;
+  const resolvedDesktop = desktopContent;
 
   const hasSlottedContent = resolvedMobile || resolvedTablet || resolvedDesktop;
 

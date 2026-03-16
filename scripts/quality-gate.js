@@ -205,6 +205,7 @@ class QualityGate {
             "src/components/ui/separator.tsx",
             "src/components/ui/textarea.tsx",
             "src/types/react19.ts",
+            "src/types/i18n.ts",
             // error.tsx 已被 diffCoverageExcludeGlobs 中 src/app/**/error.tsx 覆盖
             "src/types/whatsapp-api-requests/api-types.ts",
             "src/types/whatsapp-webhook-utils/functions.ts",
@@ -241,6 +242,7 @@ class QualityGate {
             eslintErrors: 0,
             eslintWarnings: 10,
             typeErrors: 0,
+            reviewHygieneErrors: 0,
           },
           blocking: true, // 代码质量问题阻塞部署
         },
@@ -874,11 +876,16 @@ class QualityGate {
       // ESLint 检查
       gate.checks.eslint = await this.runESLintCheck();
 
+      // Review hygiene 检查
+      gate.checks.reviewHygiene = await this.runReviewHygieneCheck();
+
       // 汇总代码质量结果
       const hasErrors =
         gate.checks.typeCheck.errors > 0 ||
         gate.checks.eslint.errors >
-          this.config.gates.codeQuality.thresholds.eslintErrors;
+          this.config.gates.codeQuality.thresholds.eslintErrors ||
+        gate.checks.reviewHygiene.errors >
+          this.config.gates.codeQuality.thresholds.reviewHygieneErrors;
 
       const hasWarnings =
         gate.checks.eslint.warnings >
@@ -887,6 +894,13 @@ class QualityGate {
       if (hasErrors) {
         gate.status = "failed";
         gate.issues.push("代码质量检查发现错误");
+        if (gate.checks.reviewHygiene.errors > 0) {
+          gate.issues.push(
+            ...gate.checks.reviewHygiene.issues.map(
+              (issue) => `review hygiene: ${issue}`,
+            ),
+          );
+        }
       } else if (hasWarnings) {
         gate.status = "warning";
         gate.issues.push("代码质量检查发现警告");
@@ -1394,6 +1408,74 @@ class QualityGate {
         warnings: 0,
         status: "error",
         message: error.message,
+      };
+    }
+  }
+
+  async runReviewHygieneCheck() {
+    const result = spawnSync(
+      process.execPath,
+      [
+        path.join(process.cwd(), "scripts", "check-review-hygiene.js"),
+        "--json",
+      ],
+      {
+        encoding: "utf8",
+        maxBuffer: 10 * 1024 * 1024,
+      },
+    );
+
+    const rawOutput = (result.stdout || result.stderr || "").toString().trim();
+
+    try {
+      if (!rawOutput) {
+        return {
+          errors: 1,
+          status: "error",
+          issues: ["Review hygiene check produced empty output"],
+        };
+      }
+
+      const parsed = JSON.parse(rawOutput);
+      const hasValidIssueCount =
+        typeof parsed.issueCount === "number" &&
+        Number.isInteger(parsed.issueCount) &&
+        parsed.issueCount >= 0;
+      const hasValidStatus =
+        parsed.status === "passed" || parsed.status === "failed";
+      const hasValidIssues = Array.isArray(parsed.issues);
+
+      if (!hasValidIssueCount || !hasValidStatus || !hasValidIssues) {
+        return {
+          errors: 1,
+          status: "error",
+          issues: [
+            "Review hygiene output did not match the expected JSON contract",
+          ],
+        };
+      }
+
+      return {
+        errors: parsed.issueCount,
+        status: parsed.status,
+        issues: parsed.issues.map((issue) =>
+          typeof issue === "string"
+            ? issue
+            : `${issue.file}: ${issue.message}${
+                issue.consumers?.length
+                  ? ` (${issue.consumers.join(", ")})`
+                  : ""
+              }`,
+        ),
+      };
+    } catch (error) {
+      return {
+        errors: 1,
+        status: "error",
+        issues: [
+          rawOutput ||
+            `Unable to parse review hygiene output: ${error.message}`,
+        ],
       };
     }
   }

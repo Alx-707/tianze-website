@@ -62,6 +62,7 @@
     "i18n:full": "pnpm scan:translations && pnpm sync:translations:enhanced && pnpm validate:translations && pnpm content:slug-check && pnpm cache:invalidate:i18n",
     "quality:monitor": "node scripts/quality-monitor.js",
     "quality:report:local": "node scripts/quality-monitor.js && open reports/quality/latest-quality-summary.json",
+    "review:hygiene": "node scripts/check-review-hygiene.js",
     "quality:gate": "node scripts/quality-gate.js",
     "quality:gate:ci": "node scripts/quality-gate.js --mode=ci",
     "quality:gate:fast": "node scripts/quality-gate.js --mode=fast",
