@@ -9,7 +9,7 @@
 **Tech Stack:** @opennextjs/cloudflare + wrangler + Cloudflare Workers (R2 / D1 / Durable Objects)
 
 **Design Support:**
-- [迁移可行性报告](../../migration/cloudflare-workers-migration-report.md)
+- [迁移可行性报告](../../archive/migration/2026-03-16-active-migration-docs/cloudflare-workers-migration-report.md)
 
 **核心原则:**
 1. Vercel 零影响 — 所有改动通过 `DEPLOY_TARGET` 环境变量条件隔离
@@ -63,7 +63,7 @@ Task 003 与 Task 004 可并行（互不依赖文件）。
 | **修改** | `src/lib/env.ts` | +5 行 (schema + runtimeEnv) |
 | **修改** | `src/components/monitoring/enterprise-analytics-island.tsx` | +3 行 |
 | **修改** | `next.config.ts` | +3 行 |
-| **修改** | `docs/migration/cloudflare-workers-migration-report.md` | 更新修正章节 |
+| **修改** | `docs/archive/migration/2026-03-16-active-migration-docs/cloudflare-workers-migration-report.md` | 更新修正章节 |
 
 **总计：4 个新文件 + 6 个修改文件，约 190 行新增代码**
 

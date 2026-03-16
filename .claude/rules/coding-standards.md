@@ -40,7 +40,7 @@ Always use `@/` alias. No deep relative imports.
 
 ### Import Order (Convention — not yet enforced)
 
-`@ianvs/prettier-plugin-sort-imports` 已安装，但项目无 `.prettierrc` 配置文件，排序规则尚未落地。以下为约定顺序，手动维护：
+`@ianvs/prettier-plugin-sort-imports` is installed, but the project does not currently ship a `.prettierrc`, so the ordering rules are not enforced yet. Maintain the following order manually:
 
 1. `react`, `react/*`
 2. `next`, `next/*`
@@ -69,13 +69,13 @@ Always use `@/` alias. No deep relative imports.
 
 ### Behavior-Driven Development
 
-项目采用 BDD 全流程：Discovery → Formulation → Automation。
+The project uses full BDD workflow: Discovery → Formulation → Automation.
 
-- **Discovery**: 通过 `brainstorming` 澄清需求
-- **Formulation**: 输出 `bdd-specs.md`（Given/When/Then 场景）
-- **Automation**: Red-Green-Refactor（TDD 循环）
+- **Discovery**: clarify requirements through `brainstorming`
+- **Formulation**: write `bdd-specs.md` with Given/When/Then scenarios
+- **Automation**: Red-Green-Refactor (TDD loop)
 
-### 测试编写原则
+### Test Writing Principles
 
 Write tests from the user's perspective, not the implementation's perspective. Describe **what the user does and sees**, not what the component renders internally.
 
@@ -97,7 +97,7 @@ Rules:
 - Interactive elements (Button, Link, Form) must verify **behavior** (navigation target, submission), not just presence
 - Link tests must verify `href` resolves to a known route
 - Test descriptions use "user does X → Y happens" language
-- 每个 BDD scenario 对应 2 个 task：Red（写失败测试）+ Green（最小实现）
+- Each BDD scenario maps to 2 tasks: Red (write the failing test) + Green (implement the minimal fix)
 
 ### [2026-02-08] Origin — Codex review found 4 functional bugs (dead CTA buttons, broken links) that existing presence-only tests failed to catch.
 
@@ -118,8 +118,8 @@ Breaking changes: add `!` before `:` (e.g., `feat(api)!: migrate to oauth`)
 
 ## Git Branching (GitHub Flow)
 
-- **`main`**: 唯一长期分支，始终可部署
-- **`feature/*`**: 功能分支 → PR 合并到 `main`
-- **`hotfix/*`**: 紧急修复 → PR 合并到 `main`
+- **`main`**: the only long-lived branch, always deployable
+- **`feature/*`**: feature branches merged into `main` via PR
+- **`hotfix/*`**: emergency fix branches merged into `main` via PR
 
-流程：`main` → 创建 feature 分支 → 开发 → PR → CI 通过 → 合并 → 删除分支。
+Flow: `main` → create feature branch → develop → open PR → pass CI → merge → delete branch.

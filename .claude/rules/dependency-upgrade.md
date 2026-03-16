@@ -59,7 +59,7 @@ For vulnerabilities (`pnpm audit`):
 ### Next.js Major Upgrades
 1. Read migration guide: `https://nextjs.org/docs/app/guides/upgrading`
 2. Run codemods: `npx @next/codemod@latest [codemod-name] .`
-3. Check `docs/known-issue/` for project-specific issues
+3. Check `docs/known-issues/` for project-specific issues
 
 ### React Major Upgrades
 1. Check compatibility with UI libraries (Radix, shadcn)

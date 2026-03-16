@@ -14,7 +14,7 @@ See `/.claude/rules/threat-modeling.md` for STRIDE analysis on new/changed API r
 ## Server Code Protection
 
 - Add `import "server-only"` at top of sensitive server files
-- Server Actions / Route Handlers 内部必须自行做 authn/authz（DAL 模式）；proxy/middleware 仅可选做前置拦截，不能作为唯一 auth 层
+- Server Actions / Route Handlers must perform authn/authz internally (DAL-style); proxy/middleware may act as optional front-line filtering only and must not be the sole auth layer
 
 ## XSS Prevention
 
@@ -33,17 +33,25 @@ See `/.claude/rules/threat-modeling.md` for STRIDE analysis on new/changed API r
 
 ## Static Analysis (Semgrep)
 
-- 代码级安全扫描以 Semgrep 为准（`semgrep.yml`），CI 会在 `.github/workflows/ci.yml` 的 `security` job 执行 baseline 扫描。
-- `eslint-plugin-security` 的 `security/detect-object-injection` 在本项目中默认关闭：该规则无法理解 TypeScript 的类型约束，误报会迫使代码为工具服务；对象注入相关检查由 Semgrep 的 object-injection 规则承担。
+- Code-level security scanning is governed by Semgrep (`semgrep.yml`); CI runs baseline scanning in the `security` job of `.github/workflows/ci.yml`.
+- `eslint-plugin-security`'s `security/detect-object-injection` is disabled by default in this project because it cannot understand TypeScript type constraints and creates tool-driven code noise; object-injection coverage is handled by Semgrep rules instead.
 
 ## API Security
+
+### API Error Contract
+
+- Public API routes must expose a stable machine-readable error contract.
+- Prefer `errorCode` + shared response helpers (for example `createApiErrorResponse()` / `createApiSuccessResponse()`) over free-text `error` / `message` fields.
+- Do not treat English literals as protocol.
+- Do not return raw validation internals or ad hoc `details` payloads to clients unless the endpoint explicitly defines that contract.
+- When server routes move to `errorCode`, client consumers and tests must move with them; do not keep dual contracts alive.
 
 | Measure | Config |
 |---------|--------|
 | Rate Limiting | Default 10/min/IP, Contact API 5/min/IP |
-| Anti-abuse / Bot 过滤 | Cloudflare Turnstile（human 校验，非 CSRF token） |
+| Anti-abuse / Bot filtering | Cloudflare Turnstile (human verification, not a CSRF token) |
 | Idempotency | Required for side-effectful public write paths where duplicate submission matters |
-| CSRF | 当前架构无需（无 cookie-based session auth）；若引入后必须加 Origin 校验 + SameSite + CSRF token |
+| CSRF | Not required in the current architecture (no cookie-based session auth); if that changes, add Origin validation + SameSite + CSRF token |
 
 Rate limit utility: `src/lib/security/distributed-rate-limit.ts`
 
@@ -61,7 +69,7 @@ Rate limit utility: `src/lib/security/distributed-rate-limit.ts`
 | `/api/verify-turnstile` | JSON body size gate | ✅ |
 | `/api/health` | (Public healthcheck) | - |
 
-New write endpoints (POST/PUT/PATCH/DELETE) must have explicit anti-abuse strategy before merge: auth, OR Turnstile + rate-limit + input validation（公开提交类接口如 contact/subscribe 适用后者）。
+New write endpoints (POST/PUT/PATCH/DELETE) must define an explicit anti-abuse strategy before merge: auth, OR Turnstile + rate-limit + input validation (the latter applies to public submission flows such as contact/subscribe).
 
 ### Public Write Endpoint Rule
 

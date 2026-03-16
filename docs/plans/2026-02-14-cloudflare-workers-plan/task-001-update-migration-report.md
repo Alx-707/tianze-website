@@ -4,7 +4,7 @@
 
 ## Description
 
-将 Codex 审查反馈和讨论修正纳入 `docs/migration/cloudflare-workers-migration-report.md`，使报告成为最新的决策底稿。涵盖脚本修正、Cron 延后、wrangler 配置补全、env.ts runtimeEnv 映射要求、.dev.vars 和 env 分层等 7 项修正。
+将 Codex 审查反馈和讨论修正纳入 `docs/archive/migration/2026-03-16-active-migration-docs/cloudflare-workers-migration-report.md`，使报告成为最新的决策底稿。涵盖脚本修正、Cron 延后、wrangler 配置补全、env.ts runtimeEnv 映射要求、.dev.vars 和 env 分层等 7 项修正。
 
 ## Execution Context
 
@@ -20,7 +20,7 @@
 
 ## Files to Modify/Create
 
-- Modify: `docs/migration/cloudflare-workers-migration-report.md`
+- Modify: `docs/archive/migration/2026-03-16-active-migration-docs/cloudflare-workers-migration-report.md`
 
 ## Steps
 
@@ -50,11 +50,11 @@
 
 ```bash
 # 确认报告包含修正关键词
-grep -c "opennextjs-cloudflare build" docs/migration/cloudflare-workers-migration-report.md
-grep -c "global_fetch_strictly_public" docs/migration/cloudflare-workers-migration-report.md
-grep -c "WORKER_SELF_REFERENCE" docs/migration/cloudflare-workers-migration-report.md
-grep -c "runtimeEnv" docs/migration/cloudflare-workers-migration-report.md
-grep -c ".dev.vars" docs/migration/cloudflare-workers-migration-report.md
+grep -c "opennextjs-cloudflare build" docs/archive/migration/2026-03-16-active-migration-docs/cloudflare-workers-migration-report.md
+grep -c "global_fetch_strictly_public" docs/archive/migration/2026-03-16-active-migration-docs/cloudflare-workers-migration-report.md
+grep -c "WORKER_SELF_REFERENCE" docs/archive/migration/2026-03-16-active-migration-docs/cloudflare-workers-migration-report.md
+grep -c "runtimeEnv" docs/archive/migration/2026-03-16-active-migration-docs/cloudflare-workers-migration-report.md
+grep -c ".dev.vars" docs/archive/migration/2026-03-16-active-migration-docs/cloudflare-workers-migration-report.md
 ```
 
 ## Success Criteria

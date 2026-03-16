@@ -25,7 +25,7 @@ All limits are **function-level** (cyclomatic complexity measured per function).
 
 No bare numbers allowed. Use constants from `src/constants/`.
 
-**ESLint allowlist**: 见 `eslint.config.mjs` 中 `no-magic-numbers.ignore`（列表已大幅扩展，以配置文件为准）
+**ESLint allowlist**: see `no-magic-numbers.ignore` in `eslint.config.mjs` (the list has been expanded significantly; the config file is the source of truth)
 
 Constants organization:
 - `src/constants/performance-constants.ts` — Performance thresholds
@@ -85,7 +85,7 @@ When upgrading `next` / `react` / `typescript` or dependencies with security ale
 | Phase 2 | ≥75% | +3 months |
 | Phase 3 | ≥80% | +6 months |
 
-**Current Status**: 运行 `pnpm test:coverage` 查看实时数据
+**Current Status**: run `pnpm test:coverage` to inspect the latest live numbers
 
 | Module Type | Target | Enforcement |
 |-------------|--------|-------------|
@@ -120,17 +120,17 @@ Lighthouse CI enforces progressive thresholds:
 
 ### Bypass Policy
 
-**`RUN_FAST_PUSH=1`（/pr 去重专用）**：当 `/pr` 已运行 `pnpm ci:local:quick` 作为 preflight，推送时用 `RUN_FAST_PUSH=1` 跳过 lefthook pre-push 中已验证的检查（build-check, quality-gate, arch-check, security-check）。`translation-check` 仍然运行（~2s）。
+**`RUN_FAST_PUSH=1` (only for `/pr` preflight dedupe)**: when `/pr` has already run `pnpm ci:local:quick` as preflight, use `RUN_FAST_PUSH=1` during push to skip checks that have already been validated in lefthook pre-push (`build-check`, `quality-gate`, `arch-check`, `security-check`). `translation-check` still runs (~2s).
 
-规则：`RUN_FAST_PUSH=1` 必须**绝不**跳过尚未运行的检查。仅在同一 `/pr` 会话中 preflight 已通过时使用。
+Rule: `RUN_FAST_PUSH=1` must **never** skip checks that have not already been run. Use it only when preflight has passed in the same `/pr` session.
 
-**紧急绕过**：不存在。所有检查必须通过才能推送。如果 preflight 失败且 self-heal 无法修复，流程中止，报告给用户。
+**Emergency bypass**: none. All checks must pass before push. If preflight fails and self-heal cannot fix it, stop the workflow and report back to the user.
 
 ## Security Gate Clarification
 
-- 依赖漏洞：`pnpm audit --prod`（阻断）。
-- 代码级安全：Semgrep 的 `ERROR` 级规则（阻断，PR 使用 baseline 仅检测新增问题）。
-- `scripts/quality-gate.js --mode=ci` 默认不重复执行 Semgrep（CI 已在独立 `security` job 运行）；本地 `quality:gate` 会纳入 Semgrep(ERROR) 统计以保持反馈闭环。
+- Dependency vulnerabilities: `pnpm audit --prod` (blocking).
+- Code-level security: Semgrep `ERROR` rules (blocking; PRs use baseline mode to detect only newly introduced findings).
+- `scripts/quality-gate.js --mode=ci` does not re-run Semgrep by default because CI already runs it in a dedicated `security` job; local `quality:gate` still includes Semgrep(ERROR) counts to keep feedback closed-loop.
 
 ## ESLint Disable Usage
 

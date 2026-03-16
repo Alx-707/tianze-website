@@ -9,9 +9,9 @@
 - **圆角**: 8px 基础 (vs 旧 20px Twitter rounded)
 
 ## 完整设计规范
-- `docs/S/tokens.md` — 色彩、字体、间距、阴影、交互状态
-- `docs/S/grid.md` — Vercel CSS Grid 装饰系统规范
-- `docs/S/components.md` — 16 个组件映射表
+- `docs/design/archive/2026-03-16-s-legacy/tokens.md` — 色彩、字体、间距、阴影、交互状态
+- `docs/design/system/GRID-SYSTEM.md` — Vercel CSS Grid 装饰系统规范
+- `docs/design/system/COMPONENT-INVENTORY.md` — 16 个组件映射表
 
 ## 原型
 - `docs/design/homepage/prototype/v6-swagelok-vercel/index.html`
