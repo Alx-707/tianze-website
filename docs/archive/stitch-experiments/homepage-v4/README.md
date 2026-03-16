@@ -91,7 +91,7 @@ Section 6: Final CTA ───── Dark background
 | File | Description |
 |------|-------------|
 | `docs/copywriter/homepage/v4-final.md` | Complete V4 copy (English) |
-| `docs/design/stitch/prompt/homepage-v4-prompt.md` | Stitch generation prompt |
+| `docs/design/archive/2026-03-16-stitch-workflow/homepage-stitch/prompt/homepage-v4-prompt.md` | Stitch generation prompt |
 
 ---
 

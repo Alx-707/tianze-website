@@ -191,11 +191,11 @@
 
 ### 最终产物
 
-- Prompt: `docs/design/stitch/home-prompt.md`
-- 截图: `docs/design/stitch/home-final.png`
-- HTML: `docs/design/stitch/home-final.html`
+- Prompt: `docs/design/archive/2026-03-16-stitch-workflow/homepage-stitch/prompt/homepage-v4-prompt.md`
+- 截图: `docs/design/archive/2026-03-16-stitch-workflow/design-stitch/output/hero-existing.png`
+- HTML: `docs/design/archive/2026-03-16-stitch-workflow/design-stitch/output/hero-existing.html`
 
 ### 代码落地
 
 - 变更文件: `src/components/blocks/hero/hero-split-block.tsx`
-- 变更清单: `docs/design/stitch/home-changes.md`
+- 变更清单: archive-only artifact, no standalone changes file retained

@@ -112,11 +112,11 @@
 
 ### 最终产物
 
-- Prompt: `docs/design/stitch/[page]-prompt.md`
-- 截图: `docs/design/stitch/[page]-final.png`
-- HTML: `docs/design/stitch/[page]-final.html`
+- Prompt: `docs/design/archive/2026-03-16-stitch-workflow/homepage-stitch/prompt/[page]-prompt.md`
+- 截图: `docs/design/archive/2026-03-16-stitch-workflow/design-stitch/output/[page]-final.png`
+- HTML: `docs/design/archive/2026-03-16-stitch-workflow/design-stitch/output/[page]-final.html`
 
 ### 代码落地
 
 - 变更文件:
-- 变更清单: `docs/design/stitch/[page]-changes.md`
+- 变更清单: archive-only artifact, store alongside this archived workflow if needed
