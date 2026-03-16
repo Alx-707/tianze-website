@@ -69,17 +69,19 @@ const POST_RATE_LIMITED = withRateLimit(
           const submissionResult = await processFormSubmission(validation.data);
           const processingTime = Date.now() - startTime;
 
-          logger.info(
-            "Contact form submitted successfully",
-            sanitizeLogContext({
-              email: validation.data.email,
-              company: validation.data.company,
-              ip: clientIP,
-              processingTime,
-              emailSent: submissionResult.emailSent,
-              recordCreated: submissionResult.recordCreated,
-            }),
-          );
+          if (process.env.NODE_ENV !== "production") {
+            logger.info(
+              "Contact form submitted successfully",
+              sanitizeLogContext({
+                email: validation.data.email,
+                company: validation.data.company,
+                ip: clientIP,
+                processingTime,
+                emailSent: submissionResult.emailSent,
+                recordCreated: submissionResult.recordCreated,
+              }),
+            );
+          }
 
           return {
             success: true as const,

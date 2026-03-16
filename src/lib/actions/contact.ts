@@ -287,12 +287,14 @@ export const contactFormAction: ServerAction<FormData, ContactFormResult> =
 
           // 记录成功提交
           const processingTime = performance.now() - startTime;
-          logger.info("Contact form submitted via Server Action", {
-            processingTime,
-            emailSent: submissionResult.emailSent,
-            recordCreated: submissionResult.recordCreated,
-            referenceId: submissionResult.referenceId,
-          });
+          if (process.env.NODE_ENV !== "production") {
+            logger.info("Contact form submitted via Server Action", {
+              processingTime,
+              emailSent: submissionResult.emailSent,
+              recordCreated: submissionResult.recordCreated,
+              referenceId: submissionResult.referenceId,
+            });
+          }
 
           return createSuccessResultWithLogging(
             submissionResult,

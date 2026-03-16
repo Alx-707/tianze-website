@@ -1428,25 +1428,50 @@ class QualityGate {
     const rawOutput = (result.stdout || result.stderr || "").toString().trim();
 
     try {
-      const parsed = JSON.parse(rawOutput || "{}");
+      if (!rawOutput) {
+        return {
+          errors: 1,
+          status: "error",
+          issues: ["Review hygiene check produced empty output"],
+        };
+      }
+
+      const parsed = JSON.parse(rawOutput);
+      const hasValidIssueCount =
+        typeof parsed.issueCount === "number" &&
+        Number.isInteger(parsed.issueCount) &&
+        parsed.issueCount >= 0;
+      const hasValidStatus =
+        parsed.status === "passed" || parsed.status === "failed";
+      const hasValidIssues = Array.isArray(parsed.issues);
+
+      if (!hasValidIssueCount || !hasValidStatus || !hasValidIssues) {
+        return {
+          errors: 1,
+          status: "error",
+          issues: [
+            "Review hygiene output did not match the expected JSON contract",
+          ],
+        };
+      }
+
       return {
-        errors: parsed.issueCount || 0,
-        status: parsed.status || (result.status === 0 ? "passed" : "failed"),
-        issues: Array.isArray(parsed.issues)
-          ? parsed.issues.map(
-              (issue) =>
-                `${issue.file}: ${issue.message}${
-                  issue.consumers?.length
-                    ? ` (${issue.consumers.join(", ")})`
-                    : ""
-                }`,
-            )
-          : [],
+        errors: parsed.issueCount,
+        status: parsed.status,
+        issues: parsed.issues.map((issue) =>
+          typeof issue === "string"
+            ? issue
+            : `${issue.file}: ${issue.message}${
+                issue.consumers?.length
+                  ? ` (${issue.consumers.join(", ")})`
+                  : ""
+              }`,
+        ),
       };
     } catch (error) {
       return {
-        errors: result.status === 0 ? 0 : 1,
-        status: result.status === 0 ? "passed" : "error",
+        errors: 1,
+        status: "error",
         issues: [
           rawOutput ||
             `Unable to parse review hygiene output: ${error.message}`,

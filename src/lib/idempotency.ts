@@ -487,7 +487,11 @@ export async function withIdempotentResult<T>(
   if (missingKeyResult) return missingKeyResult;
 
   if (!idempotencyKey) {
-    return { ok: true, result: await handler() };
+    try {
+      return { ok: true, result: await handler() };
+    } catch {
+      return { ok: false, reason: "failed" };
+    }
   }
 
   const inFlightResult = await getInFlightIdempotentResult<T>(
