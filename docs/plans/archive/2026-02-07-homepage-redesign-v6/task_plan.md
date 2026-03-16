@@ -8,16 +8,16 @@
 
 ## 设计来源
 - 原型: `docs/design/homepage/prototype/v6-swagelok-vercel/index.html`
-- Tokens: `docs/S/tokens.md`
-- Grid: `docs/S/grid.md`
-- Components: `docs/S/components.md`
+- Tokens: `docs/design/archive/2026-03-16-s-legacy/tokens.md`
+- Grid: `docs/design/system/GRID-SYSTEM.md`
+- Components: `docs/design/system/COMPONENT-INVENTORY.md`
 
 ## Tasks
 
 ### Task 1: 替换设计 Token (globals.css)
 - 状态: completed
 - 文件: `src/app/globals.css`
-- 描述: 用 docs/S/tokens.md 的新设计系统替换 Twitter-inspired tokens。保留 Tailwind v4 @import/@plugin/@theme 结构，替换 :root 变量为 Figtree/JetBrains Mono 字体 + #004D9E 色系 + 8px radius。移除 Twitter 特定样式（.twitter-bg, .hover-card, .twitter-divider, .precision-grid-*）。保留 a11y/reduced-motion/高对比度规则。保留 @layer base 的 focus-visible, sr-only, skip-link。保留 CLS 优化和 content-visibility 工具。删除旧的 header responsive contract 和 Vercel Line Design System 工具（将在 Task 9 重建）。
+- 描述: 用 `docs/design/archive/2026-03-16-s-legacy/tokens.md` 的 v6 设计系统替换 Twitter-inspired tokens。保留 Tailwind v4 @import/@plugin/@theme 结构，替换 :root 变量为 Figtree/JetBrains Mono 字体 + #004D9E 色系 + 8px radius。移除 Twitter 特定样式（.twitter-bg, .hover-card, .twitter-divider, .precision-grid-*）。保留 a11y/reduced-motion/高对比度规则。保留 @layer base 的 focus-visible, sr-only, skip-link。保留 CLS 优化和 content-visibility 工具。删除旧的 header responsive contract 和 Vercel Line Design System 工具（将在 Task 9 重建）。
 - TDD: 无测试（纯 CSS token 替换）
 - 验证: `pnpm type-check && pnpm build`
 
@@ -92,7 +92,7 @@
   - `src/components/grid/grid-system.tsx`
   - `src/components/grid/grid-section.tsx`
   - `src/components/grid/grid-block.tsx`
-- 描述: 按 docs/S/grid.md 规范实现三层 CSS Grid 装饰系统。GridSystem (外框+crosshairs) → GridSection (display:grid + guides) → GridBlock (z-index:2 + 1px margin)。>1024px 显示, ≤1024px 隐藏。
+- 描述: 按 `docs/design/system/GRID-SYSTEM.md` 规范实现三层 CSS Grid 装饰系统。GridSystem (外框+crosshairs) → GridSection (display:grid + guides) → GridBlock (z-index:2 + 1px margin)。>1024px 显示, ≤1024px 隐藏。
 - 依赖: Task 8
 - TDD: grid 组件测试
 - 验证: `pnpm test -- grid/`
