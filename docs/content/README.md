@@ -94,7 +94,7 @@ copywriter/
 | 文档 | 路径 | 用途 |
 |------|------|------|
 | 产品营销上下文 | `.claude/product-marketing-context.md` | 文案撰写的基础信息源 |
-| 企业信息 | `docs/corporate-Info/` | 公司数据、产品信息 |
+| 企业信息 | `docs/content/company/` | 公司数据、产品信息 |
 | 工作流说明 | `docs/workflow/` | Stitch 设计流程、文案流程 |
 
 ---
