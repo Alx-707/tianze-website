@@ -7,9 +7,9 @@ import { LOCALES_CONFIG } from "@/config/paths/locales-config";
 export type Locale = (typeof LOCALES_CONFIG.locales)[number];
 
 // 路径映射接口定义
-export interface LocalizedPath {
-  [locale: string]: string;
-}
+export type LocalizedPath = {
+  [locale in Locale]: string;
+};
 
 // 页面类型定义 (静态路由)
 export type PageType =

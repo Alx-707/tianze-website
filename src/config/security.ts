@@ -1,5 +1,5 @@
-import { COUNT_TWO, HEX_RADIX } from "../constants/count";
-import { ZERO } from "../constants/core";
+import { COUNT_TWO, HEX_RADIX } from "@/constants/count";
+import { ZERO } from "@/constants/core";
 
 export type SecurityHeader = {
   key: string;

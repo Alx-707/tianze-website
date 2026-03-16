@@ -516,7 +516,7 @@ export interface MockGeolocation {
  * 支持更复杂的模拟场景
  */
 export type ExtendedMockFunction<
-  T extends (..._args: unknown[]) => unknown = (..._args: unknown[]) => unknown,
+  T extends (..._args: never[]) => unknown = (..._args: never[]) => unknown,
 > = MockFunction<T> & {
   mockReturnValueOnce: (_value: ReturnType<T>) => ExtendedMockFunction<T>;
   mockResolvedValueOnce: (

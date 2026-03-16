@@ -303,7 +303,6 @@ export const contactFormAction: ServerAction<FormData, ContactFormResult> =
         {
           required: true,
           fingerprint: CONTACT_FORM_IDEMPOTENCY_FINGERPRINT,
-          shouldCache: (result) => result.success === true,
         },
       );
 

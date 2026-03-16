@@ -145,14 +145,24 @@ function useContactForm() {
 
   // 成功提交后记录时间
   useEffect(() => {
+    const isTerminal =
+      Boolean(state?.success) ||
+      Boolean(state?.error) ||
+      Boolean(state?.errorCode);
+    if (!isTerminal) return;
+
     if (state?.success && !lastRecordedSuccessRef.current) {
       queueMicrotask(() => {
         setLastSubmissionTime(new Date());
       });
-      idempotencyKeyRef.current = null;
     }
+
+    // Idempotency keys are single-attempt tokens. Once we have a terminal result
+    // (success or failure), rotate the key so the next submission represents a
+    // new attempt.
+    idempotencyKeyRef.current = null;
     lastRecordedSuccessRef.current = Boolean(state?.success);
-  }, [state?.success, setLastSubmissionTime]);
+  }, [state?.success, state?.error, state?.errorCode, setLastSubmissionTime]);
 
   // 创建增强的formAction，使用React 19原生乐观更新
   const enhancedFormAction = (formData: FormData) => {

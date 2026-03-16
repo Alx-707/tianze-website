@@ -428,7 +428,19 @@ export function shouldRetryEvent(event: WebhookEvent, error: Error): boolean {
   }
 
   // Don't retry on client errors (4xx)
-  if (error.message.includes("COUNT_4")) {
+  const errorWithStatus = error as Error & {
+    statusCode?: number;
+    status?: number;
+    code?: number;
+  };
+  const statusLike =
+    errorWithStatus.statusCode ??
+    errorWithStatus.status ??
+    errorWithStatus.code;
+  if (typeof statusLike === "number" && statusLike >= 400 && statusLike < 500) {
+    return false;
+  }
+  if (/\b4\d{2}\b/.test(error.message)) {
     return false;
   }
 

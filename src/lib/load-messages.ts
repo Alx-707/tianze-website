@@ -35,7 +35,8 @@ const MESSAGE_LOADERS: Record<
 };
 
 function sanitizeLocale(input: string): Locale {
-  return ["en", "zh"].includes(input)
+  const supportedLocales = routing.locales as readonly string[];
+  return supportedLocales.includes(input)
     ? (input as Locale)
     : (routing.defaultLocale as Locale);
 }

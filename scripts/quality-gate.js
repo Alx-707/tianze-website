@@ -205,6 +205,7 @@ class QualityGate {
             "src/components/ui/separator.tsx",
             "src/components/ui/textarea.tsx",
             "src/types/react19.ts",
+            "src/types/i18n.ts",
             // error.tsx 已被 diffCoverageExcludeGlobs 中 src/app/**/error.tsx 覆盖
             "src/types/whatsapp-api-requests/api-types.ts",
             "src/types/whatsapp-webhook-utils/functions.ts",

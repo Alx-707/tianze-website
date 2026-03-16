@@ -221,10 +221,51 @@ async function handleWithIdempotencyKey<T>(
         return result;
       }
 
-      // Cache successful result — PENDING → COMPLETED transition
-      await store.complete(idempotencyKey, result, HTTP_OK);
+      const normalized = (() => {
+        if (typeof result !== "object" || result === null) {
+          return { body: result, statusCode: HTTP_OK };
+        }
 
-      return NextResponse.json(result, { status: HTTP_OK });
+        if (Array.isArray(result)) {
+          return { body: result, statusCode: HTTP_OK };
+        }
+
+        const record = result as Record<string, unknown>;
+        if (!Object.prototype.hasOwnProperty.call(record, "statusCode")) {
+          return { body: result, statusCode: HTTP_OK };
+        }
+
+        const { statusCode } = record;
+        if (typeof statusCode !== "number") {
+          return { body: result, statusCode: HTTP_OK };
+        }
+
+        // Strip statusCode from the JSON payload; keep it on the stored entry.
+        // This mirrors `createApiErrorResponse()` which communicates status via HTTP,
+        // not via a redundant JSON field.
+        const { statusCode: _statusCode, ...rest } = record;
+        return { body: rest, statusCode };
+      })();
+
+      // PENDING → COMPLETED transition.
+      // Important: never delete a claimed key after the handler has finished, even
+      // if the store write fails — failing closed avoids duplicate-write risk.
+      try {
+        await store.complete(
+          idempotencyKey,
+          normalized.body,
+          normalized.statusCode,
+        );
+      } catch (completeError) {
+        logger.error(
+          "Failed to persist COMPLETED idempotency result — key remains PENDING until TTL expires",
+          { completeError, idempotencyKey },
+        );
+      }
+
+      return NextResponse.json(normalized.body, {
+        status: normalized.statusCode,
+      });
     } catch (error) {
       logger.error("Request handler failed", {
         error: error as Error,
@@ -330,7 +371,11 @@ async function getInFlightIdempotentResult<T>(
     return { ok: false, reason: "reused" };
   }
 
-  return { ok: true, result: (await inFlight) as T, cached: true };
+  try {
+    return { ok: true, result: (await inFlight) as T, cached: true };
+  } catch {
+    return { ok: false, reason: "failed" };
+  }
 }
 
 async function getStoredIdempotentResult<T>(
@@ -382,19 +427,13 @@ function completeIdempotentResultWork<T>(
     fingerprint: string;
     handler: () => Promise<T>;
     store: IdempotencyStore;
-    shouldCache: (result: T) => boolean;
   },
 ): Promise<T> {
-  const { fingerprint, handler, store, shouldCache } = context;
+  const { fingerprint, handler, store } = context;
   const work = (async (): Promise<T> => {
+    let result: T;
     try {
-      const result = await handler();
-      if (shouldCache(result)) {
-        await store.complete(idempotencyKey, result, HTTP_OK);
-      } else {
-        await store.delete(idempotencyKey);
-      }
-      return result;
+      result = await handler();
     } catch (error) {
       try {
         await store.delete(idempotencyKey);
@@ -409,6 +448,19 @@ function completeIdempotentResultWork<T>(
       pendingResults.delete(idempotencyKey);
       inFlightFingerprints.delete(idempotencyKey);
     }
+
+    // Handler finished. Fail closed: do not delete the claim after success, even
+    // if persisting the COMPLETED record fails.
+    try {
+      await store.complete(idempotencyKey, result, HTTP_OK);
+    } catch (completeError) {
+      logger.error(
+        "Failed to persist COMPLETED idempotency result — key remains PENDING until TTL expires",
+        { completeError, idempotencyKey },
+      );
+    }
+
+    return result;
   })();
 
   pendingResults.set(idempotencyKey, work);
@@ -424,10 +476,9 @@ export async function withIdempotentResult<T>(
     fingerprint: string;
     required?: boolean;
     ttl?: number;
-    shouldCache?: (result: T) => boolean;
   },
 ): Promise<IdempotentResult<T>> {
-  const { fingerprint, required = false, shouldCache = () => true } = options;
+  const { fingerprint, required = false } = options;
   const ttlMs = resolveIdempotentResultTtl(options.ttl);
   const missingKeyResult = getRequiredMissingResult<T>(
     required,
@@ -470,7 +521,6 @@ export async function withIdempotentResult<T>(
         fingerprint,
         handler,
         store,
-        shouldCache,
       }),
     };
   } catch {

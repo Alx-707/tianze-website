@@ -215,16 +215,32 @@ describe("Contact API Route", () => {
     });
 
     it("应该处理速率限制", async () => {
-      // 模拟多次快速请求来触发速率限制
-      const request = new NextRequest("http://localhost:3000/api/contact", {
-        method: "POST",
-        body: JSON.stringify(validFormData),
-        headers: {
-          "content-type": "application/json",
-          "x-forwarded-for": "127.0.0.1",
-          "Idempotency-Key": "contact-route-key",
+      const rateLimitModule =
+        await import("@/lib/security/distributed-rate-limit");
+      let callCount = 0;
+      vi.mocked(rateLimitModule.checkDistributedRateLimit).mockImplementation(
+        async () => {
+          callCount += 1;
+          const allowed = callCount < 6;
+          return {
+            allowed,
+            remaining: allowed ? 5 : 0,
+            resetTime: Date.now() + 60000,
+            retryAfter: allowed ? null : 60,
+          };
         },
-      });
+      );
+
+      const createRequest = (attempt: number) =>
+        new NextRequest("http://localhost:3000/api/contact", {
+          method: "POST",
+          body: JSON.stringify(validFormData),
+          headers: {
+            "content-type": "application/json",
+            "x-forwarded-for": "127.0.0.1",
+            "Idempotency-Key": `contact-route-key-${attempt}`,
+          },
+        });
 
       // 第一次请求应该成功 - use the global mock from setup.ts
       const mockValidations =
@@ -251,21 +267,18 @@ describe("Contact API Route", () => {
       mockAirtableService.createContact.mockResolvedValue("record-123");
       mockResendService.sendContactFormEmail.mockResolvedValue("email-123");
 
-      // 执行多次请求
-      await POST(request);
-      await POST(request);
-      await POST(request);
-      await POST(request);
-      await POST(request);
-
-      // 第6次请求应该被速率限制
-      const response = await POST(request);
-
-      if (response.status === 429) {
-        const data = await response.json();
-        expect(data.success).toBe(false);
-        expect(data.errorCode).toBe(API_ERROR_CODES.RATE_LIMIT_EXCEEDED);
+      // 前 5 次请求允许通过
+      for (let i = 0; i < 5; i += 1) {
+        const response = await POST(createRequest(i));
+        expect(response.status).not.toBe(429);
       }
+
+      // 第 6 次请求必须被限制
+      const response = await POST(createRequest(5));
+      expect(response.status).toBe(429);
+      const data = await response.json();
+      expect(data.success).toBe(false);
+      expect(data.errorCode).toBe(API_ERROR_CODES.RATE_LIMIT_EXCEEDED);
     });
 
     it("应该处理Turnstile验证失败", async () => {

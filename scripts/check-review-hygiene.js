@@ -110,6 +110,8 @@ function extractSpecifiers(content) {
   const specifiers = new Set();
   const patterns = [
     /\bimport\s+(?:type\s+)?(?:[^"'`]+?\s+from\s+)?["'`]([^"'`]+)["'`]/g,
+    // Side-effect-only imports: `import "some-polyfill";`
+    /\bimport\s+["'`]([^"'`]+)["'`]/g,
     /\bexport\s+(?:type\s+)?[^"'`]*?\sfrom\s+["'`]([^"'`]+)["'`]/g,
     /\brequire\(\s*["'`]([^"'`]+)["'`]\s*\)/g,
     /\bimport\(\s*["'`]([^"'`]+)["'`]\s*\)/g,

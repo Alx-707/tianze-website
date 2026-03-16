@@ -50,18 +50,20 @@ const POST_RATE_LIMITED = withRateLimit(
             route: "/api/contact",
           });
           if (!parsedBody.ok) {
-            return createApiErrorResponse(
-              parsedBody.errorCode,
-              parsedBody.statusCode,
-            );
+            return {
+              success: false as const,
+              errorCode: parsedBody.errorCode,
+              statusCode: parsedBody.statusCode,
+            };
           }
 
           const validation = await validateFormData(parsedBody.data, clientIP);
           if (!validation.success || !validation.data) {
-            return createApiErrorResponse(
-              API_ERROR_CODES.CONTACT_VALIDATION_FAILED,
-              HTTP_BAD_REQUEST,
-            );
+            return {
+              success: false as const,
+              errorCode: API_ERROR_CODES.CONTACT_VALIDATION_FAILED,
+              statusCode: HTTP_BAD_REQUEST,
+            };
           }
 
           const submissionResult = await processFormSubmission(validation.data);
@@ -93,10 +95,11 @@ const POST_RATE_LIMITED = withRateLimit(
             processingTime: Date.now() - startTime,
           });
 
-          return createApiErrorResponse(
-            API_ERROR_CODES.CONTACT_PROCESSING_ERROR,
-            HTTP_INTERNAL_ERROR,
-          );
+          return {
+            success: false as const,
+            errorCode: API_ERROR_CODES.CONTACT_PROCESSING_ERROR,
+            statusCode: HTTP_INTERNAL_ERROR,
+          };
         }
       },
       { required: true },

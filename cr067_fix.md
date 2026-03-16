@@ -11,3 +11,4 @@
 
 ## Verification
 - `pnpm exec vitest run src/components/security/__tests__/turnstile.test.tsx`
+- `pnpm type-check:tests`

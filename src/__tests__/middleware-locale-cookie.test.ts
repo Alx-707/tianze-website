@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const { intlMiddlewareMock } = vi.hoisted(() => ({
-  intlMiddlewareMock: vi.fn(() => NextResponse.next()),
+  intlMiddlewareMock: vi.fn(),
 }));
 
 vi.mock("next-intl/middleware", () => ({
@@ -10,6 +10,11 @@ vi.mock("next-intl/middleware", () => ({
 }));
 
 import middleware from "../middleware";
+
+beforeEach(() => {
+  vi.clearAllMocks();
+  intlMiddlewareMock.mockImplementation(() => NextResponse.next());
+});
 
 function countOccurrences(haystack: string, needle: string): number {
   return haystack.split(needle).length - 1;

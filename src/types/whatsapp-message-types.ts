@@ -367,7 +367,7 @@ export function validateInteractiveMessage(
       errors.push("Button interactive message must have at least one button");
     } else if (action.buttons.length > COUNT_THREE) {
       errors.push(
-        "Button interactive message cannot have more than COUNT_THREE buttons",
+        `Button interactive message cannot have more than ${COUNT_THREE} buttons`,
       );
     }
 
