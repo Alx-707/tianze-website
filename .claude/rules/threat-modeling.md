@@ -52,8 +52,8 @@ Before implementing, answer:
 
 | Threat | Implementation |
 |--------|----------------|
-| Anti-abuse / Bot 过滤 | Cloudflare Turnstile（human 校验，非 CSRF token） |
-| CSRF | 当前架构无需（无 cookie-based session auth）；若引入后必须加 Origin 校验 + SameSite + CSRF token |
+| Anti-abuse / Bot filtering | Cloudflare Turnstile (human verification, not a CSRF token) |
+| CSRF | Not required in the current architecture (no cookie-based session auth); if that changes, add Origin validation + SameSite + CSRF token |
 | Rate Limiting | `src/lib/security/distributed-rate-limit.ts` |
 | Input Validation | Zod schemas |
 | XSS | CSP headers, DOMPurify |

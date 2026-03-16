@@ -5,10 +5,10 @@
 
 ## Project Decisions
 
-- `cacheComponents: true` enabled in `next.config.ts` — 启用 Cache Components (`"use cache"` 指令)
-- **PPR** (`experimental.ppr`): Not enabled — 需要 canary，已注释。注意：`dynamicIO` 是 Next.js 15 canary 阶段的旧实验 flag，已由 `cacheComponents` 取代，不是两个独立功能。
+- `cacheComponents: true` enabled in `next.config.ts` — Cache Components (`"use cache"`) are enabled
+- **PPR** (`experimental.ppr`): Not enabled — it still requires canary and remains commented out. Note: `dynamicIO` was an older Next.js 15 canary flag that has already been superseded by `cacheComponents`; they are not two separate features.
 - **Optional Cache APIs** (not yet used): `cacheTag()`, `revalidateTag()`, `updateTag()`
-- 迁移说明: `docs/known-issue/cache-i18n-upgrade-status.md`
+- Migration record: `docs/known-issues/cache-i18n-upgrade-status.md`
 
 ### Page Props Convention
 
@@ -31,6 +31,15 @@ interface PageProps {
 **Project data**: Cached functions in `src/lib/content/` (e.g., `getAllProductsCached()`)
 
 ## Project-Specific Pitfalls
+
+### Production Truth-Source Hygiene
+
+- Do not trust labels like `legacy`, `deprecated`, or "currently used by" without checking actual production references.
+- Before keeping, deleting, or migrating a shared helper / top-level entrypoint, distinguish:
+  - production consumers under `src/**`
+  - test-only consumers under `__tests__`, `tests/**`, or test helpers
+- Zero-consumer or test-only top-level files should not remain in formal production namespaces such as `src/lib/*`, `src/types/*`, or `src/config/*`.
+- If a module survives only because tests still import it, treat that as a migration smell, not as proof that the module is still part of the runtime truth.
 
 ### Radix UI + Dynamic Import
 
@@ -61,7 +70,7 @@ Notes:
 - `src/components/language-toggle.tsx` and `src/components/layout/mobile-navigation.tsx` still consume locale from `next-intl` context.
 - Re-migrating to `src/proxy.ts` stays a future task after Cloudflare/OpenNext support is verified.
 
-**Compatibility record**: See `docs/known-issue/middleware-to-proxy-migration.md`
+**Compatibility record**: See `docs/known-issues/middleware-to-proxy-migration.md`
 
 ## Key Files
 

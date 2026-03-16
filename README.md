@@ -1,19 +1,15 @@
 # B2B Web Template
 
-[![Test Coverage](https://img.shields.io/badge/coverage-85%25-brightgreen)](./reports/coverage/)
-[![CI/CD](https://github.com/user/b2b-web-template/actions/workflows/ci.yml/badge.svg)](https://github.com/user/b2b-web-template/actions/workflows/ci.yml)
-
-现代化B2B企业网站模板，采用Next.js 16 + React 19 + TypeScript 5.9 + Tailwind CSS
-4技术栈，实现英中双语国际化、主题切换、响应式设计，确保企业级质量标准。
+现代化 B2B 企业网站模板，采用 Next.js 16.1.6、React 19、TypeScript 5.9 和 Tailwind CSS 4，内置英中双语国际化、MDX 内容管理、质量门禁，以及 Vercel / Cloudflare 双部署路径。
 
 ## ✨ 特性
 
-- 🎯 **现代技术栈**: Next.js 16.1.5 + React 19.2.3 + TypeScript 5.9.3
+- 🎯 **现代技术栈**: Next.js 16.1.6 + React 19.2.3 + TypeScript 5.9.3
 - 🎨 **现代化UI**: Tailwind CSS 4.1.18 + 响应式设计
 - 📝 **内容管理**: MDX + Git-based 工作流
 - 🌍 **国际化支持**: 英中双语切换 + next-intl
 - 🎭 **主题系统**: 明亮/暗黑/系统主题
-- 📊 **错误监控（可选）**: 默认不启用客户端 Sentry；支持“服务端/边缘优先”的可选接入，兼顾性能与可观测性
+- ☁️ **双部署目标**: 默认 Next.js / Vercel 构建 + Cloudflare OpenNext 构建链路
 - 🔒 **企业级安全**: ESLint 9生态 + 安全扫描
 - ⚡ **性能优化**: 包大小控制 + 性能预算
 - 🏗️ **架构检查**: 循环依赖检测 + 架构一致性
@@ -78,7 +74,7 @@ NEXT_PUBLIC_TURNSTILE_SITE_KEY=你的站点公钥
 TURNSTILE_SECRET_KEY=你的服务端私钥
 ```
 
-> ⚠️ 请勿将真实密钥提交到版本库。若需要示例值，可在本地 `.env.example` 中添加占位符，实际密钥通过环境变量注入。
+> ⚠️ 请勿将真实密钥提交到版本库。请在本地 `.env.local` 或部署平台的环境变量管理中注入真实值。
 
 针对额外安全策略（如限制域名、Action 值）可使用：`TURNSTILE_ALLOWED_HOSTS`、`TURNSTILE_EXPECTED_ACTION`、`NEXT_PUBLIC_TURNSTILE_ACTION`。
 
@@ -88,17 +84,14 @@ TURNSTILE_SECRET_KEY=你的服务端私钥
 - **WhatsApp 支持**：`FEATURE_FLAGS.ENABLE_WHATSAPP_CHAT`（可通过 `ENABLE_WHATSAPP_CHAT` 环境变量关闭）配合 `SITE_CONFIG.contact.whatsappNumber`（可通过 `NEXT_PUBLIC_WHATSAPP_NUMBER` 覆盖）自动在右下角注入 `WhatsAppFloatingButton`。
 - **主题与变量**：`src/app/globals.css` 定义品牌色、布局与 CSS 变量，通过 Tailwind CSS 4 的 `@theme inline` 和 `:root/.dark` 实现明暗主题切换。
 
-## 🔧 二次开发
+## 🔧 二次开发要点
 
-如果您计划基于此模板进行二次开发，请参阅 **[DEVELOPMENT.md](./DEVELOPMENT.md)** 了解：
-
-- **快速定制清单** - 品牌、SEO、功能模块配置指南
-- **已知问题与遗留事项** - 生产就绪检查项、测试覆盖率说明
-- **架构约束与最佳实践** - 路由注册、i18n 规范、Server Components 原则
-- **质量门禁说明** - Git hooks、commit 规范、紧急推送方式
-- **部署检查清单** - 环境变量、SEO 资源、构建验证步骤
-
----
+- **品牌与站点信息**：优先修改 `src/config/paths/site-config.ts`、`messages/[locale]/critical.json`、`src/app/globals.css`
+- **路由与页面**：新增页面时，同时更新 `src/i18n/routing.ts` 与 `src/app/sitemap.ts`
+- **翻译约束**：所有用户可见文本必须走 `next-intl`；修改翻译后执行 `pnpm validate:translations`
+- **表单配置**：联系表单字段和必填规则集中在 `src/config/contact-form-config.ts`
+- **质量门禁**：提交前至少跑一次 `pnpm lint:check`、`pnpm type-check`、`pnpm test`，必要时补 `pnpm build` 和 `pnpm build:cf`
+  - `pnpm build` 和 `pnpm build:cf` 是两条独立门禁，前者通过不代表后者通过
 
 ## 🚀 快速开始
 
@@ -119,8 +112,8 @@ pnpm install
 
 ```bash
 pnpm dev          # 开发服务器（默认 Turbopack）
-# 或显式使用 Turbopack
-pnpm dev:turbopack
+# 或使用 Webpack 回退
+pnpm dev:webpack
 ```
 
 ### 4. 访问应用
@@ -137,22 +130,25 @@ pnpm start
 ## 📁 项目结构
 
 ```
+src/__tests__/    # 仓库级测试
 src/
 ├── app/          # Next.js App Router 入口、布局、路由
 ├── components/   # 共享 UI 组件
 ├── config/       # 配置与常量（feature flags、主题等）
 ├── constants/    # 常量定义
+├── emails/       # React Email 模板
 ├── hooks/        # 自定义 hooks
 ├── i18n/         # 国际化辅助
 ├── lib/          # 工具函数与通用逻辑
 ├── services/     # 后端/第三方集成
-├── shared/       # 共享类型与工具
+├── styles/       # 全局样式与 tokens
 ├── templates/    # 模板片段
 ├── test/         # 测试辅助
 ├── testing/      # 测试基建
 └── types/        # TypeScript 类型
 
 content/          # MDX 内容文件
+├── config/       # 内容清单与配置
 ├── posts/        # 博客文章
 │   ├── en/       # 英文博客
 │   └── zh/       # 中文博客
@@ -178,7 +174,7 @@ messages/         # 国际化翻译文件
 
 ```bash
 pnpm dev               # 启动开发服务器（默认 Turbopack）
-pnpm dev:turbopack     # 显式使用 Turbopack
+pnpm dev:webpack       # 使用 Webpack 启动开发服务器
 pnpm build             # 构建生产版本（默认 Turbopack）
 pnpm build:webpack     # 使用 Webpack 构建（回退/对比）
 pnpm build:analyze     # 生成 Turbopack 构建分析
@@ -231,6 +227,24 @@ pnpm perf:lighthouse  # Lighthouse CI（性能）
 ```
 
 > 覆盖率、关键组件清单请以最新 `pnpm test:coverage` 输出为准。
+>
+> 首次运行 `pnpm test:e2e` 或 `pnpm ci:local` 前，请先安装 Playwright browsers：
+>
+> ```bash
+> pnpm exec playwright install
+> ```
+
+### Cloudflare 相关
+
+```bash
+pnpm build:cf                 # Cloudflare OpenNext 构建
+pnpm preview:cf               # 本地预览 Cloudflare 构建
+pnpm deploy:cf                # 标准 Cloudflare 部署
+pnpm build:cf:phase6          # Phase 6 多 Worker 构建
+pnpm deploy:cf:phase6:dry-run # Phase 6 dry-run
+```
+
+> 当前 Cloudflare 兼容路径仍以 `src/middleware.ts` 为准；`src/proxy.ts` 虽能通过 `pnpm build`，但不应视为已通过 `pnpm build:cf` 验证。
 
 ## 📝 内容管理系统
 
@@ -332,9 +346,9 @@ Page content in MDX format...
 
 ### 核心框架
 
-- **Next.js 16.1.5** - React全栈框架，App Router架构
+- **Next.js 16.1.6** - React 全栈框架，App Router 架构
 - **React 19.2.3** - 用户界面库，支持服务器组件
-- **TypeScript 5.9.3** - 类型安全的JavaScript超集
+- **TypeScript 5.9.3** - 类型安全的 JavaScript 超集
 
 ### 样式和UI
 
@@ -351,7 +365,7 @@ Page content in MDX format...
 
 - **ESLint 9** - 代码质量检查 (9个插件)
 - **Prettier** - 代码格式化
-- **TypeScript严格模式** - 最严格的类型检查
+- **TypeScript 严格模式** - 最严格的类型检查
 - **React Scan** - React 组件性能监控和渲染分析
 
 ### 质量保障
@@ -359,17 +373,7 @@ Page content in MDX format...
 - **dependency-cruiser** - 架构一致性检查
 - **eslint-plugin-security / semgrep** - 安全扫描
 - **npm audit** - 依赖安全基线
-- **Sentry（可选）** - 默认禁用客户端；服务端/边缘可按需启用
-
-## ✅ 架构重构成果
-
-项目已完成系统性架构重构，显著提升了代码质量、构建性能和开发体验：
-
-### 重构成果
-- **Export * 数量**: 97个 → 7个 ✅（减少 93%）
-- **TypeScript错误**: 3093个 → 0个 ✅（100% 解决）
-- **ESLint 问题**: 2075个 → 2个 ✅（减少 99.9%）
-- **文件总数**: 786个 → 719个（减少 8.5%，持续优化中）
+- **Lefthook + quality gate** - 本地提交与推送前检查
 
 ## 📚 学习资源
 
@@ -380,16 +384,38 @@ Page content in MDX format...
 
 ## 🚀 部署
 
-推荐使用 [Vercel平台](https://vercel.com) 部署，由Next.js创建者提供：
+仓库当前支持两条部署链路：
 
 ```bash
-# 使用Vercel CLI部署
+# Vercel / 标准 Next.js 构建
+pnpm build
+
+# Cloudflare OpenNext 构建
+pnpm build:cf
+pnpm preview:cf
+```
+
+`pnpm build` 和 `pnpm build:cf` 不能互相替代。前者代表标准 Next.js 构建通过，后者代表 OpenNext Cloudflare 适配链路通过。
+
+### Vercel
+
+```bash
+# 使用 Vercel CLI 部署
 npx vercel
 
-# 或连接GitHub自动部署
-# 1. 推送代码到GitHub
-# 2. 在Vercel导入项目
+# 或连接 GitHub 自动部署
+# 1. 推送代码到 GitHub
+# 2. 在 Vercel 导入项目
 # 3. 自动部署和CI/CD
+```
+
+### Cloudflare
+
+```bash
+pnpm deploy:cf
+
+# 如需 Phase 6 多 Worker dry-run
+pnpm deploy:cf:phase6:dry-run
 ```
 
 ### 生产环境 Rate Limiting
@@ -409,35 +435,6 @@ KV_REST_API_TOKEN=your_token
 查看
 [Next.js部署文档](https://nextjs.org/docs/app/building-your-application/deploying)
 了解更多部署选项。
-
-## 🧭 错误监控策略（Sentry）
-
-本模板以“内容/营销站点”为默认定位，强调性能与首屏体验：
-
-- 默认不启用客户端 Sentry，避免增加 vendors 包与 CWV 风险。
-- 支持“服务端/边缘优先”的可选接入，用于 API/Server Actions/Edge 的异常上报与发布健康。
-- 通过环境变量门控可快速开启/关闭：
-
-```bash
-# 关闭 Sentry 打包与客户端使用（默认建议）
-DISABLE_SENTRY_BUNDLE=1
-NEXT_PUBLIC_DISABLE_SENTRY=1
-
-# 如需启用（建议仅在生产且有清晰告警流程时）
-unset DISABLE_SENTRY_BUNDLE
-unset NEXT_PUBLIC_DISABLE_SENTRY
-
-# 并配置必要的凭据
-SENTRY_DSN=...
-SENTRY_ORG=...
-SENTRY_PROJECT=...
-```
-
-启用时建议采用“最小化”策略：仅服务端/边缘，客户端按需动态加载、低采样、禁用 Replay/Feedback/Tracing 等重功能，并受同意（Consent）管理控制。
-
-## 📄 许可证
-
-MIT License - 查看 [LICENSE](LICENSE) 文件了解详情。
 
 <!-- auto-deploy test:  -->
 <!-- auto-deploy test: 2025-10-31T05:58:07Z -->

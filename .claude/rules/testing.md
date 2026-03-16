@@ -20,6 +20,12 @@ pnpm test:coverage     # With coverage report
 pnpm test:e2e          # Playwright E2E tests
 ```
 
+## Reliability Rules
+
+- Do not use wall-clock thresholds (`Date.now()`, `performance.now()`, "< 1000ms", etc.) in normal unit/integration gate tests.
+- If performance must be checked, use a dedicated benchmark/perf harness or an explicit opt-in test path.
+- Stateful UI tests must explicitly create the state they assert against; do not rely on implicit cooldowns, shared state leakage, or timing side effects.
+
 ## Test File Organization
 
 - Unit tests: `src/[module]/__tests__/[file].test.tsx`
