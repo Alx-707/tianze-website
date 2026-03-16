@@ -8,7 +8,7 @@
 > Round 1 产物：
 > - 问题清单：`docs/code-review/issues.md`
 > - 证据/过程：`docs/code-review/notes.md`
-> - 总体计划：`task_plan.md`
+> - 总体计划：`docs/plans/archive/2026-03-16-root-planning-files/task_plan.md`
 
 ---
 
@@ -217,7 +217,7 @@ Round 2 的“完成”以可验证门禁为准（建议全部满足）：
 - 前端：订阅表单提交逻辑需要生成并复用同一个 `Idempotency-Key`（同一次提交的重试/重复点击要复用；“用户下一次新提交”才生成新 key），否则服务端 required 只会导致误拒绝或幂等形同虚设。
 
 补充（DEV 夹带项，低成本高收益）：
-- CR-004：`scripts/ci-local.sh` 在 E2E 前检测 Playwright browsers 缺失并给出可操作提示；`DEVELOPMENT.md` 补安装说明
+- CR-004：`scripts/ci-local.sh` 在 E2E 前检测 Playwright browsers 缺失并给出可操作提示；`README.md` 补安装说明
 - CR-018：development CSP `script-src` allowlist 纳入 `https://unpkg.com`，并将 dev-only script URL 改为显式 `https://`
 
 ---

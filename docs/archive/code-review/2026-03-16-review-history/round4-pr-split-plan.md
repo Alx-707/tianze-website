@@ -35,13 +35,13 @@
 
 - `docs/code-review/issues.md`
 - `docs/code-review/notes.md`
-- `task_plan.md`
+- `docs/plans/archive/2026-03-16-root-planning-files/task_plan.md`
 - `docs/code-review/round4-execution-summary.md`
 - `docs/code-review/round4-remediation-plan.md`
 - `docs/code-review/round3-review.md`
 - `docs/code-review/round2-plan.md`
-- `linus_review_round3.md`
-- `notes.md`
+- `docs/code-review/archive/2026-03-16-root-review-artifacts/linus_review_round3.md`
+- `docs/plans/archive/2026-03-16-root-planning-files/notes.md`
 
 这些文件统一放到 PR-E。
 
@@ -240,7 +240,7 @@
 - `AGENTS.md`
 - `.claude/rules/architecture.md`
 - `.claude/rules/review-checklist.md`
-- `docs/known-issue/middleware-to-proxy-migration.md`
+- `docs/known-issues/middleware-to-proxy-migration.md`
 - `docs/known-issues/middleware-to-proxy-migration.md`
 
 ### 需要手工拆 hunk 的文件
@@ -275,9 +275,9 @@
 - `docs/code-review/round3-review.md`
 - `docs/code-review/round4-execution-summary.md`
 - `docs/code-review/round4-remediation-plan.md`
-- `task_plan.md`
-- `linus_review_round3.md`
-- `notes.md`
+- `docs/plans/archive/2026-03-16-root-planning-files/task_plan.md`
+- `docs/code-review/archive/2026-03-16-root-review-artifacts/linus_review_round3.md`
+- `docs/plans/archive/2026-03-16-root-planning-files/notes.md`
 
 ### 说明
 
@@ -296,7 +296,7 @@
 
 - `docs/code-review/issues.md`
 - `docs/code-review/notes.md`
-- `task_plan.md`
+- `docs/plans/archive/2026-03-16-root-planning-files/task_plan.md`
 
 ## 实操建议
 

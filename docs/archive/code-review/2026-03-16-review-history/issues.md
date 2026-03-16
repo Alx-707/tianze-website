@@ -63,13 +63,13 @@
 - 证据：`pnpm test:e2e` 报错提示 Executable 不存在，要求运行 `pnpm exec playwright install`
 - 影响：新环境/新同事/CI 镜像切换时，本地 CI 无法“一键跑通”，降低稳定性与可复现性。
 - 建议修复（任选其一或组合）：
-  - 在 `DEVELOPMENT.md`/README 的本地检查章节增加明确前置步骤
+  - 在 `README.md` 的本地检查章节增加明确前置步骤
   - 在 `scripts/ci-local.sh` 的 E2E 步骤前做浏览器存在性检测，缺失时给出可操作提示（或自动执行安装，需权衡耗时/网络依赖）
 - 验收命令：`pnpm ci:local`（在全新环境下验证）
 - 状态：✅ 已修复（2026-03-05，本地未提交/未开 PR）
   - 修复点：
     - `scripts/ci-local.sh` 在执行 `pnpm test:e2e` 前检测 Playwright browsers（chromium）是否存在，缺失时给出可执行修复命令
-    - `DEVELOPMENT.md` 补充 “Playwright browsers 安装” 说明
+    - `README.md` 补充 “Playwright browsers 安装” 说明
   - 验收：`pnpm ci:local`（在未安装 browsers 的新环境下应给出明确提示；安装后应可继续跑通）
 
 #### CR-022 Next.js 对 `middleware` 的约定存在迁移告警（未来升级风险）

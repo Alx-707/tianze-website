@@ -6,7 +6,7 @@ Plan the next code review cycle around six explicit defect-finding dimensions so
 ## Baseline
 - Review baseline: post-Round-4 state documented in `docs/code-review/round4-execution-summary.md`
 - Findings ledger: `docs/code-review/issues.md`
-- Existing framework input: `code_review_framework.md`
+- Existing framework input: `docs/code-review/archive/2026-03-16-root-review-docs/code_review_framework.md`
 - Review should stay delta-oriented and avoid reopening already-closed items without new evidence
 
 ## The Six Review Dimensions
@@ -228,7 +228,7 @@ Plan the next code review cycle around six explicit defect-finding dimensions so
 4. Consolidate only delta findings; do not reopen closed Round 4 items without new evidence.
 
 ## Deliverables
-- updated `task_plan.md`
-- updated `notes.md`
-- this review package: `six_dimension_review_plan.md`
+- updated `docs/plans/archive/2026-03-16-root-planning-files/task_plan.md`
+- updated `docs/plans/archive/2026-03-16-root-planning-files/notes.md`
+- this review package: `docs/code-review/archive/2026-03-16-root-review-docs/six_dimension_review_plan.md`
 - future findings, if executed: `docs/code-review/issues.md`

@@ -57,7 +57,7 @@
 - `src/lib/env.ts`（+5 行）
 - `src/components/monitoring/enterprise-analytics-island.tsx`（+3 行）
 - `next.config.ts`（+3 行）
-- `docs/migration/cloudflare-workers-migration-report.md`（更新）
+- `docs/archive/migration/2026-03-16-active-migration-docs/cloudflare-workers-migration-report.md`（更新）
 - `docs/plans/2026-02-14-cloudflare-workers-plan/`（计划文件）
 
 不在此列表中的文件改动需要审查和解释。

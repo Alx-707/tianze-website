@@ -8,7 +8,7 @@
 
 - `docs/code-review/round4-remediation-plan.md`
 - `docs/code-review/issues.md`
-- `task_plan.md`
+- `docs/plans/archive/2026-03-16-root-planning-files/task_plan.md`
 
 ## 执行结果总览
 

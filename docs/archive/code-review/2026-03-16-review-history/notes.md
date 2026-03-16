@@ -37,7 +37,7 @@
 ### 本轮交付口径
 - 证据与命令输出摘要：`docs/code-review/notes.md`
 - 当前权威问题清单：`docs/code-review/issues.md`
-- 总体进度与轮次状态：`task_plan.md`
+- 总体进度与轮次状态：`docs/plans/archive/2026-03-16-root-planning-files/task_plan.md`
 - 收尾执行入口：`docs/code-review/round4-remediation-plan.md`
 
 ### 审查原则
@@ -65,7 +65,7 @@
 #### 工作树与环境
 - `git status --short`
   - 当前工作树为脏状态。
-  - 已见变更：`docs/code-review/issues.md`、`docs/code-review/notes.md`、`linus_review_round3.md`、`notes.md`、`task_plan.md`
+  - 已见变更：`docs/code-review/issues.md`、`docs/code-review/notes.md`、`docs/code-review/archive/2026-03-16-root-review-artifacts/linus_review_round3.md`、`docs/plans/archive/2026-03-16-root-planning-files/notes.md`、`docs/plans/archive/2026-03-16-root-planning-files/task_plan.md`
   - 未跟踪：`docs/code-review/round3-review.md`
 - `node -v`
   - 当前本机 Node 为 `v22.22.0`
