@@ -181,7 +181,7 @@ export function validateAdminAccess(authHeader: string | null): boolean {
   const adminToken = process.env.ADMIN_API_TOKEN;
 
   if (!adminToken) {
-    logger.warn("Admin API token not configured");
+    logger.error("Admin API token not configured — admin endpoint unavailable");
     return false;
   }
 

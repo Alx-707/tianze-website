@@ -198,6 +198,9 @@ export default async function LocaleLayout({
       suppressHydrationWarning
     >
       <body className="flex min-h-screen flex-col antialiased">
+        {/* Dev-only scripts: never loaded in production (NODE_ENV gate).
+            SRI omitted intentionally — unpinned CDN URLs would break on update.
+            Security note: these scripts have zero production attack surface. */}
         {process.env.NODE_ENV === "development" && (
           <>
             <Script

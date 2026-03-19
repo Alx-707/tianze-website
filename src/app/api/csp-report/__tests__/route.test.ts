@@ -1,21 +1,27 @@
 import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-// Unmock zod to use real validation in this test file
-vi.unmock("zod");
+// Force real zod in this file, overriding the lightweight global test mock.
+vi.mock("zod", async () => {
+  return vi.importActual<typeof import("zod")>("zod");
+});
+
+async function importRouteModule() {
+  return import("../route");
+}
 
 async function callPOST(request: NextRequest) {
-  const { POST } = await import("../route");
+  const { POST } = await importRouteModule();
   return POST(request);
 }
 
 async function callGET() {
-  const { GET } = await import("../route");
+  const { GET } = await importRouteModule();
   return GET();
 }
 
 async function callOPTIONS() {
-  const { OPTIONS } = await import("../route");
+  const { OPTIONS } = await importRouteModule();
   return OPTIONS();
 }
 

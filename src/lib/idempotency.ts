@@ -85,11 +85,25 @@ async function waitForCompletion(
   );
 }
 
+/** Maximum allowed length for an Idempotency-Key header (prevents memory abuse) */
+const MAX_IDEMPOTENCY_KEY_LENGTH = 256;
+
+/** Maximum in-flight entries across all Maps (prevents unbounded memory growth) */
+const MAX_IN_FLIGHT_ENTRIES = 1000;
+
 /**
  * 从请求中提取幂等键
+ * Rejects keys exceeding MAX_IDEMPOTENCY_KEY_LENGTH to prevent memory exhaustion.
  */
 export function getIdempotencyKey(request: NextRequest): string | null {
-  return request.headers.get("Idempotency-Key");
+  const key = request.headers.get("Idempotency-Key");
+  if (key && key.length > MAX_IDEMPOTENCY_KEY_LENGTH) {
+    logger.warn("Idempotency-Key exceeds max length, treating as missing", {
+      keyLength: key.length,
+    });
+    return null;
+  }
+  return key;
 }
 
 /**
@@ -121,6 +135,21 @@ const inFlightFingerprints = new Map<string, string>();
  * Fast path: check if an in-flight promise exists for this key.
  * Returns the in-flight promise, a 409 conflict response, or null to continue.
  */
+/**
+ * Register an in-flight promise for fast duplicate detection.
+ * Guarded by MAX_IN_FLIGHT_ENTRIES to prevent unbounded memory growth.
+ */
+function registerInFlight(
+  idempotencyKey: string,
+  fingerprint: string,
+  work: Promise<NextResponse>,
+): void {
+  if (pendingRequests.size < MAX_IN_FLIGHT_ENTRIES) {
+    pendingRequests.set(idempotencyKey, work);
+    inFlightFingerprints.set(idempotencyKey, fingerprint);
+  }
+}
+
 function checkInFlight(
   idempotencyKey: string,
   fingerprint: string,
@@ -288,9 +317,7 @@ async function handleWithIdempotencyKey<T>(
     }
   })();
 
-  // Register in-flight to short-circuit concurrent duplicates in this process
-  pendingRequests.set(idempotencyKey, work);
-  inFlightFingerprints.set(idempotencyKey, fingerprint);
+  registerInFlight(idempotencyKey, fingerprint, work);
 
   return work;
 }
@@ -463,8 +490,10 @@ function completeIdempotentResultWork<T>(
     return result;
   })();
 
-  pendingResults.set(idempotencyKey, work);
-  inFlightFingerprints.set(idempotencyKey, fingerprint);
+  if (pendingResults.size < MAX_IN_FLIGHT_ENTRIES) {
+    pendingResults.set(idempotencyKey, work as Promise<unknown>);
+    inFlightFingerprints.set(idempotencyKey, fingerprint);
+  }
 
   return work;
 }
