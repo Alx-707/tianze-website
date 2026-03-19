@@ -227,7 +227,9 @@ function getIPFromTrustedHeaders(
 export function getClientIP(request: NextRequest): string {
   const platform = getDeploymentPlatform();
 
-  // If no platform configured, don't trust proxy headers (security)
+  // If no platform configured, don't trust proxy headers (security).
+  // Falls back to 0.0.0.0 which collapses all unknown IPs into one rate-limit bucket.
+  // DEPLOYMENT_PLATFORM must be set in production to enable proper per-IP rate limiting.
   if (!platform) {
     return getNextJsIP(request) ?? FALLBACK_IP;
   }

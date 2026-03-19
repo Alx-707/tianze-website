@@ -1,94 +1,66 @@
 # Dependency Upgrade Protocol
 
+Primary reference:
+- `docs/guides/dependency-upgrade-playbook.md`
+
+Use this rule file for execution-time guardrails only.
+Do not duplicate the full upgrade narrative here.
+
+## Mandatory Validation
+
+For dependency upgrades that affect runtime, framework, lint, build, deployment, or shared tooling, run:
+
+```bash
+pnpm install
+pnpm ci:local:quick
+pnpm type-check
+pnpm lint:check
+pnpm build
+pnpm build:cf
+```
+
+Recommended extras when relevant:
+
+```bash
+pnpm test
+pnpm test:e2e
+pnpm perf:lighthouse
+```
+
+Do not run `pnpm build` and `pnpm build:cf` in parallel.
+
+## Project Constraints
+
+- `@types/node` must align with `package.json > engines.node`, not npm `latest`
+- `eslint@10` is currently blocked by the active Next/React ESLint plugin chain
+- `@opennextjs/cloudflare@1.17.1` currently requires OpenNext `minify` to remain disabled in `open-next.config.ts`
+
 ## Core Dependencies
 
-These require full validation:
-- `next` — Framework
-- `react` / `react-dom` — Runtime
-- `typescript` — Type system
-- `next-intl` — i18n
-- `tailwindcss` — Styling
+These require full validation and careful batching:
+- `next`
+- `react` / `react-dom`
+- `typescript`
+- `next-intl`
+- `tailwindcss`
+- `@opennextjs/cloudflare`
+- `wrangler`
 
-## Upgrade Checklist
+## Practical Rules
 
-### Pre-Upgrade
-```bash
-git checkout -b chore/upgrade-[package]-[version]
-git stash  # Save uncommitted work
-```
+- Upgrade in small batches, not all at once
+- Keep low-risk patch/minor upgrades separate from higher-risk major upgrades
+- Treat Cloudflare deploy-path changes as incomplete until `pnpm build:cf` passes
+- If a package also drives a CDN asset, update the CDN version together
 
-### Validation Steps
-
-| Step | Command | Must Pass |
-|------|---------|-----------|
-| 1. Install | `pnpm install` | ✓ |
-| 2. Types | `pnpm type-check` | ✓ |
-| 3. Lint | `pnpm lint:check` | ✓ |
-| 4. Tests | `pnpm test` | ✓ |
-| 5. Build | `pnpm build` | ✓ |
-| 6. E2E | `pnpm test:e2e` | Recommended |
-| 7. Lighthouse | `pnpm perf:lighthouse` | Recommended |
-
-### Quick Validation (Minor/Patch)
-```bash
-pnpm ci:local:quick && pnpm build
-```
-
-### Full Validation (Major)
-```bash
-pnpm ci:local
-```
-
-## Security Patches
-
-For vulnerabilities (`pnpm audit`):
-
-1. Check if patch exists: `pnpm audit --fix`
-2. If no patch, add override in `package.json`:
-   ```json
-   "pnpm": {
-     "overrides": {
-       "vulnerable-package": ">=safe-version"
-     }
-   }
-   ```
-3. Document in commit message
-
-## Breaking Changes
-
-### Next.js Major Upgrades
-1. Read migration guide: `https://nextjs.org/docs/app/guides/upgrading`
-2. Run codemods: `npx @next/codemod@latest [codemod-name] .`
-3. Check `docs/known-issues/` for project-specific issues
-
-### React Major Upgrades
-1. Check compatibility with UI libraries (Radix, shadcn)
-2. Verify server component boundaries
-3. Test hydration behavior
-
-## CDN-Linked Dependencies
-
-Some dev tools load via CDN but have a corresponding npm package for version tracking.
-When upgrading these packages, **must also update the CDN URL version** in `src/app/layout.tsx`.
-
-| Package | CDN URL Pattern |
-|---------|----------------|
-| `react-scan` | `https://unpkg.com/react-scan@{version}/dist/auto.global.js` |
+Current example:
+- `react-scan` CDN version in `src/app/[locale]/layout.tsx`
 
 ## Rollback
 
-If validation fails:
+If an upgrade batch fails validation:
+
 ```bash
 git checkout package.json pnpm-lock.yaml
 pnpm install
-```
-
-## Commit Convention
-
-```
-chore(deps): upgrade [package] to [version]
-
-- [Breaking change handled]
-- [Migration step applied]
-- Closes #[issue] (if applicable)
 ```

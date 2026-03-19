@@ -22,7 +22,7 @@ Owner is non-technical. Communication uses business language, not technical term
 
 ## Stack
 
-Next.js 16 (App Router, Cache Components) + React 19 + TypeScript 5 + Tailwind CSS 4 + next-intl
+Next.js 16.2 (App Router, Cache Components) + React 19.2 + TypeScript 5.9 + Tailwind CSS 4.2 + next-intl 4.8
 
 ## Structure
 
@@ -44,7 +44,7 @@ STOP. Your training data for project dependencies may be outdated.
 Before writing ANY code:
 1. **ACE Search** (`ace-tool-search_context`) — Understand how this project implements similar patterns
 2. **`.next-docs/`** — Next.js API docs (local, version-locked). See index at the end of this file
-3. **Context7** (`cotext7-query-docs`) — Other dependencies (next-intl, Tailwind, Radix, etc.)
+3. **Context7 / dependency docs** — Other dependencies (next-intl, Tailwind, Radix, etc.). If Context7 is unavailable, fall back to official docs or version-locked local docs.
 
 This is not optional. Even familiar APIs may have changed.
 
@@ -54,9 +54,11 @@ This is not optional. Even familiar APIs may have changed.
 pnpm dev          # Dev server
 pnpm build        # Production build
 pnpm type-check   # TypeScript
-pnpm lint         # ESLint
+pnpm lint:check   # ESLint
 pnpm test         # Vitest
 pnpm ci:local     # Full CI
+pnpm build:cf     # Cloudflare/OpenNext build
+pnpm tech:check   # Stack-wide dependency/config/build check
 ```
 
 ## Constraints

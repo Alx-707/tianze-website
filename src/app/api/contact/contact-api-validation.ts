@@ -45,6 +45,8 @@ const SUBMISSION_EXPIRED_RESPONSE = {
   data: null,
 } as const;
 
+let hasLoggedMissingAdminToken = false;
+
 /**
  * 验证提交时间（防止重放攻击）
  * Must validate NaN before arithmetic: NaN comparisons always return false,
@@ -181,7 +183,16 @@ export function validateAdminAccess(authHeader: string | null): boolean {
   const adminToken = process.env.ADMIN_API_TOKEN;
 
   if (!adminToken) {
-    logger.warn("Admin API token not configured");
+    if (!hasLoggedMissingAdminToken) {
+      logger.error(
+        "Admin API token not configured — admin endpoint unavailable",
+        {
+          missingEnv: "ADMIN_API_TOKEN",
+          endpoint: "contact-admin-stats",
+        },
+      );
+      hasLoggedMissingAdminToken = true;
+    }
     return false;
   }
 

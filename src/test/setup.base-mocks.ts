@@ -37,3 +37,11 @@ vi.mock("next/font/google", () => ({
     style: { fontFamily: "JetBrains Mono" },
   })),
 }));
+
+vi.mock("next/font/local", () => ({
+  default: vi.fn(() => ({
+    variable: "--font-figtree",
+    className: "font-local",
+    style: { fontFamily: "Geist Sans" },
+  })),
+}));

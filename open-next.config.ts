@@ -15,7 +15,9 @@ const splitFunctions: Record<string, SplittedFunctionOptions> = {
   apiLead: {
     runtime: "node",
     placement: "regional",
-    minify: true,
+    // OpenNext 1.17.x hits an ENOENT during Cloudflare minification with pnpm-style node_modules.
+    // TODO: Re-enable after upstream OpenNext minifier support for this packaging shape is fixed and `pnpm build:cf` passes cleanly again.
+    minify: false,
     routes: [
       "app/api/contact/route",
       "app/api/inquiry/route",
@@ -34,20 +36,22 @@ const splitFunctions: Record<string, SplittedFunctionOptions> = {
   apiOps: {
     runtime: "node",
     placement: "regional",
-    minify: true,
+    // TODO: Keep aligned with the default worker minify workaround until upstream fix lands.
+    minify: false,
     routes: ["app/api/cache/invalidate/route", "app/api/csp-report/route"],
     patterns: ["/api/cache/invalidate", "/api/csp-report"],
   },
   apiWhatsapp: {
     runtime: "node",
     placement: "regional",
-    minify: true,
+    // TODO: Keep aligned with the default worker minify workaround until upstream fix lands.
+    minify: false,
     routes: ["app/api/whatsapp/send/route", "app/api/whatsapp/webhook/route"],
     patterns: ["/api/whatsapp/*"],
   },
 };
 
 cloudflareConfig.functions = splitFunctions;
-cloudflareConfig.default.minify = true;
+cloudflareConfig.default.minify = false;
 
 export default cloudflareConfig;

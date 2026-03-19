@@ -406,10 +406,7 @@ function handleServiceError(error: unknown): NextResponse {
     error instanceof Error ? error : new Error(String(error)),
   );
 
-  if (
-    error instanceof Error &&
-    error.message.includes("WHATSAPP_ACCESS_TOKEN")
-  ) {
+  if (error instanceof Error && error.message.includes("not configured")) {
     return createApiErrorResponse(
       API_ERROR_CODES.SERVICE_UNAVAILABLE,
       HTTP_SERVICE_UNAVAILABLE,

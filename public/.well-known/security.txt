@@ -1,0 +1,8 @@
+# Security Policy for Tianze Pipe (tianzepipe.com)
+# https://securitytxt.org/
+
+Contact: mailto:security@tianzepipe.com
+Expires: 2027-03-17T00:00:00.000Z
+Preferred-Languages: en, zh
+Canonical: https://tianze-pipe.com/.well-known/security.txt
+Policy: https://tianze-pipe.com/security-policy.txt

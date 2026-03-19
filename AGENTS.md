@@ -34,14 +34,28 @@
   - 至少执行一次 `pnpm validate:translations`
 
 ### 4. 当前双平台部署下，优先保留 `src/middleware.ts`
-- 截至 2026-03-09，本仓库为了兼容 `@opennextjs/cloudflare@1.16.5`，运行时入口已临时保留为 `src/middleware.ts`。
+- 截至 2026-03-19，本仓库为了兼容当前 Cloudflare 链路，运行时入口仍保留为 `src/middleware.ts`。
 - 原因是：`src/proxy.ts` 虽然能通过 `next build`，但会阻塞 `pnpm build:cf`。
 - 默认动作：
   - 当前修改 locale redirect / CSP nonce / 安全头部时，优先改 `src/middleware.ts`
   - 每次涉及该入口文件的改动，至少执行一次 `pnpm build` 和 `pnpm build:cf`
   - 如果未来再次迁移 `middleware -> proxy`，`config.matcher` 仍必须只写静态字面量；不能引用常量、拼装数组或动态值，否则 Turbopack 会报 `matcher[...] need to be static strings or static objects`
 
-### 5. 不要再用客户端补丁修正 `html[lang]`
+### 5. 当前 `@opennextjs/cloudflare@1.17.1` 下，先不要重新打开 OpenNext `minify`
+- 本仓库已验证：升级到 `next@16.2.0` + `@opennextjs/cloudflare@1.17.1` 后，Cloudflare 打包链路在 OpenNext 的 minify 阶段会因为 pnpm 风格 `node_modules` 触发 `ENOENT`。
+- 当前稳定做法是：在 `open-next.config.ts` 中把 split functions 和 default worker 的 `minify` 关闭。
+- 默认动作：
+  - 如果有人想重新打开 `minify`，必须先重新执行 `pnpm build:cf`
+  - 只有在确认上游修复后，才允许恢复
+  - 不要把这个开关当作“纯性能优化”随手改动
+
+### 6. 不要并行执行 `pnpm build` 和 `pnpm build:cf`
+- `build:cf` 会内部调用 `pnpm build`。
+- 如果把两者并行跑，会得到假的失败结果，例如 `Another next build process is already running`。
+- 默认动作：
+  - 需要验证双链路时，先跑 `pnpm build`，再串行跑 `pnpm build:cf`
+
+### 7. 不要再用客户端补丁修正 `html[lang]`
 - 本仓库已经验证过：`LangUpdater + document.documentElement.lang` 会把语言语义推迟到 hydration 后，SSR / 无 JS / 爬虫首包都是错的。
 - 正确做法：
   - 让真正的 root layout 在服务端直接输出 `<html lang={locale}>`

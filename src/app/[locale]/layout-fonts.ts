@@ -1,34 +1,33 @@
-import { Figtree, JetBrains_Mono } from "next/font/google";
+import localFont from "next/font/local";
 
 /**
- * Figtree — Primary typeface
+ * Primary sans token
  *
- * Geometric sans-serif with technical precision.
- * Weights: 400 (body), 500 (medium), 600 (semi), 700 (bold), 800 (extra-bold for H1)
+ * Uses the checked-in Geist Sans Latin subset so builds stay deterministic
+ * without depending on the Google Fonts network path.
  */
-export const figtree = Figtree({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
+export const figtree = localFont({
+  src: "./GeistSans-Latin.woff2",
   variable: "--font-figtree",
   display: "swap",
+  preload: true,
 });
 
 /**
- * JetBrains Mono — Monospace typeface
+ * Monospace fallback token
  *
  * Used for spec values, step numbers, standards, proof metrics.
- * Weights: 400, 500
+ * We intentionally avoid a network-fetched secondary font here so builds
+ * remain stable when Google Fonts is unreachable in CI or pre-push hooks.
  */
-export const jetbrainsMono = JetBrains_Mono({
-  subsets: ["latin"],
-  weight: ["400", "500"],
+export const jetbrainsMono = {
   variable: "--font-jetbrains-mono",
-  display: "swap",
-  // Perf: avoid preloading a second font on critical routes (e.g. /en, /zh).
-  // If a page actually uses monospace above the fold, the browser will still
-  // fetch it when needed; otherwise it won't inflate Lighthouse total bytes.
-  preload: false,
-});
+  className: "",
+  style: {
+    fontFamily:
+      'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace',
+  },
+} as const;
 
 /**
  * Get font class names string for html element.

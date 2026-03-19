@@ -173,6 +173,9 @@ async function parseAndValidateCSPReport(
 
   // Check for empty csp-report (browser quirk) — acknowledge with 204 No Content
   if (Object.keys(result.data["csp-report"]).length === 0) {
+    logger.warn(
+      "Empty CSP report received (browser quirk or misconfiguration)",
+    );
     return new NextResponse(null, { status: 204 });
   }
 
