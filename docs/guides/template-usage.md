@@ -10,7 +10,7 @@ git clone <repo> client-project-name
 cd client-project-name
 
 # 2. Update business data
-# Edit src/config/site-facts.ts with client information
+# Edit src/config/paths/site-config.ts as the primary source of truth
 
 # 3. Update translations
 # Edit messages/en/*.json and messages/zh/*.json
@@ -22,9 +22,37 @@ pnpm dev
 
 ## Key Configuration Files
 
-### 1. Site Facts (`src/config/site-facts.ts`)
+### 1. Site Configuration (`src/config/paths/site-config.ts`)
 
-Non-translatable business data that stays constant across languages:
+Primary source of truth for brand, SEO, contact, and social links:
+
+```typescript
+export const SITE_CONFIG = {
+  baseUrl: 'https://your-domain.com',
+  name: 'Your Company Name',
+  description: 'Your company description',
+  seo: {
+    titleTemplate: '%s | Your Company',
+    defaultTitle: 'Your Company',
+    defaultDescription: 'Your default SEO description',
+    keywords: ['keyword-1', 'keyword-2'],
+  },
+  social: {
+    twitter: 'https://x.com/your-company',
+    linkedin: 'https://linkedin.com/company/your-company',
+    github: 'https://github.com/your-company',
+  },
+  contact: {
+    phone: '+86-xxx-xxxx-xxxx',
+    email: 'sales@client.com',
+    whatsappNumber: '+86xxxxxxxxxx',
+  },
+} as const;
+```
+
+### 2. Derived Site Facts (`src/config/site-facts.ts`)
+
+Derived business data used by blocks and content interpolation:
 
 ```typescript
 export const siteFacts: SiteFacts = {
@@ -51,7 +79,9 @@ export const siteFacts: SiteFacts = {
 };
 ```
 
-### 2. Translation Files (`messages/[locale]/`)
+Prefer updating `site-config.ts` first. Adjust `site-facts.ts` only when the derived business narrative itself needs to change.
+
+### 3. Translation Files (`messages/[locale]/`)
 
 User-facing text that changes per language:
 
@@ -166,10 +196,11 @@ pnpm test          # Unit tests
 pnpm build         # Production build
 ```
 
-Or run all at once:
+Or run a wider local gate:
 
 ```bash
 pnpm ci:local:quick
+pnpm build:cf
 ```
 
 ## Directory Structure

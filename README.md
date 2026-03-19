@@ -3,13 +3,12 @@
 [![Test Coverage](https://img.shields.io/badge/coverage-85%25-brightgreen)](./reports/coverage/)
 [![CI/CD](https://github.com/user/b2b-web-template/actions/workflows/ci.yml/badge.svg)](https://github.com/user/b2b-web-template/actions/workflows/ci.yml)
 
-现代化B2B企业网站模板，采用Next.js 16 + React 19 + TypeScript 5.9 + Tailwind CSS
-4技术栈，实现英中双语国际化、主题切换、响应式设计，确保企业级质量标准。
+现代化 B2B 企业网站模板，采用 Next.js 16 + React 19 + TypeScript 5.9 + Tailwind CSS 4 技术栈，实现英中双语国际化、主题切换、响应式设计，确保企业级质量标准。
 
 ## ✨ 特性
 
-- 🎯 **现代技术栈**: Next.js 16.1.5 + React 19.2.3 + TypeScript 5.9.3
-- 🎨 **现代化UI**: Tailwind CSS 4.1.18 + 响应式设计
+- 🎯 **现代技术栈**: Next.js 16.2.0 + React 19.2.4 + TypeScript 5.9.3
+- 🎨 **现代化UI**: Tailwind CSS 4.2.2 + 响应式设计
 - 📝 **内容管理**: MDX + Git-based 工作流
 - 🌍 **国际化支持**: 英中双语切换 + next-intl
 - 🎭 **主题系统**: 明亮/暗黑/系统主题
@@ -63,7 +62,7 @@ pnpm validate:translations
 
 ## 🛠️ 环境要求
 
-- **Node.js**: 20.x（与 CI/Vercel 一致，已在 `.nvmrc` 固定为 20）
+- **Node.js**: 20.x（默认开发版本；项目声明支持 `>=20 <23`，已在 `.nvmrc` 固定为 20）
 - **包管理器**: pnpm 10.13.1（已在 `.npmrc` 与 CI 固定）
 - **操作系统**: macOS, Linux, Windows
 
@@ -119,8 +118,6 @@ pnpm install
 
 ```bash
 pnpm dev          # 开发服务器（默认 Turbopack）
-# 或显式使用 Turbopack
-pnpm dev:turbopack
 ```
 
 ### 4. 访问应用
@@ -178,7 +175,6 @@ messages/         # 国际化翻译文件
 
 ```bash
 pnpm dev               # 启动开发服务器（默认 Turbopack）
-pnpm dev:turbopack     # 显式使用 Turbopack
 pnpm build             # 构建生产版本（默认 Turbopack）
 pnpm build:webpack     # 使用 Webpack 构建（回退/对比）
 pnpm build:analyze     # 生成 Turbopack 构建分析
@@ -332,13 +328,13 @@ Page content in MDX format...
 
 ### 核心框架
 
-- **Next.js 16.1.5** - React全栈框架，App Router架构
-- **React 19.2.3** - 用户界面库，支持服务器组件
+- **Next.js 16.2.0** - React全栈框架，App Router架构
+- **React 19.2.4** - 用户界面库，支持服务器组件
 - **TypeScript 5.9.3** - 类型安全的JavaScript超集
 
 ### 样式和UI
 
-- **Tailwind CSS 4.1.18** - 原子化CSS框架，CSS-first配置
+- **Tailwind CSS 4.2.2** - 原子化CSS框架，CSS-first配置
 - **Geist字体** - Vercel设计的现代字体系列
 
 ### 内容管理
