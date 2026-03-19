@@ -7,7 +7,7 @@
 
 ### Middleware & Security Headers
 
-> 当前使用 `src/middleware.ts`。这是为了兼容当前 Cloudflare/OpenNext 构建链路；`next-intl` 仍通过 `createMiddleware(routing)` 工作。兼容记录见 `docs/known-issue/middleware-to-proxy-migration.md`。
+> The project currently uses `src/middleware.ts`. This is required for compatibility with the current Cloudflare/OpenNext build chain; `next-intl` still runs through `createMiddleware(routing)`. Compatibility record: `docs/known-issues/middleware-to-proxy-migration.md`.
 
 ```bash
 ls -la middleware.ts src/middleware.ts proxy.ts src/proxy.ts 2>/dev/null

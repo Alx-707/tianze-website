@@ -47,7 +47,7 @@
 
 ### 布局骨架：采纳 Vercel 布局规范
 
-**来源**: `docs/vercel-design-system/`
+**来源**: `docs/design/external/vercel-design-system/`
 
 | 规范 | 值 | 说明 |
 |------|-----|------|
