@@ -23,6 +23,8 @@ Recommended order:
 4. Keep runtime-aligned packages pinned to supported runtime majors, not npm `latest`.
 
 Validation checklist for each batch:
+- `pnpm install`
+- `pnpm ci:local:quick` for validated patch/minor batches, Next/React/TypeScript changes, or security-sensitive changes
 - `pnpm type-check`
 - `pnpm lint:check`
 - `pnpm build`

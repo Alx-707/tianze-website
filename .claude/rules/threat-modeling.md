@@ -67,7 +67,13 @@ Before implementing, answer:
 2. **Turnstile 验证** — 公开表单端点要求 Turnstile token（人机校验）
 3. **CORS 白名单** — `src/config/cors.ts` 基于白名单，非通配符
 4. **SameSite cookie** — `NEXT_LOCALE` cookie 设置 `sameSite: "lax"`
-5. **幂等性保护** — 所有写入端点要求 `Idempotency-Key` header
+5. **幂等性保护** — 仅用户发起且会产生事务性副作用的表单端点要求 `Idempotency-Key` header（如 `contact` / `inquiry` / `subscribe`）
+
+其他写入端点的当前保护方式：
+- `verify-turnstile` — 无状态 token 校验
+- `csp-report` — fire-and-forget 安全日志
+- `whatsapp/webhook` — 签名校验 + 重放防护
+- `cache/invalidate` — Bearer token 管理接口鉴权
 
 **触发条件**：若未来引入 cookie-based 认证或开放跨域 API，**必须**补充 CSRF token 验证。
 
@@ -78,11 +84,13 @@ Before implementing, answer:
 - **单实例部署**（Vercel Serverless / Cloudflare Worker 单 isolate）：✅ 有效
 - **多实例部署**：⚠️ 各实例独立计数，总限制为 `preset × 实例数`
 - **生产建议**：配置 Upstash Redis 作为分布式后端（环境变量 `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN`）
+- **运维建议**：若生产环境明确是多实例部署，应在启动期至少输出 loud warning；若后续引入强制策略，可增加 fail-fast 开关（例如 `REQUIRE_DISTRIBUTED_RATE_LIMIT=true`）
 
 ## Client IP Extraction
 
 `DEPLOYMENT_PLATFORM` 环境变量必须在生产环境中设置（`vercel` 或 `cloudflare`）。
-未设置时回退到 `0.0.0.0`，所有请求共享同一速率限制桶。
+未设置时当前实现会回退到 `0.0.0.0`，导致所有请求共享同一速率限制桶。
+这只能作为临时降级行为，不能被视为有效的生产级 per-IP 速率限制。
 
 ## File Locations
 

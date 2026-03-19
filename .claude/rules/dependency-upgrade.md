@@ -11,6 +11,8 @@ Do not duplicate the full upgrade narrative here.
 For dependency upgrades that affect runtime, framework, lint, build, deployment, or shared tooling, run:
 
 ```bash
+pnpm install
+pnpm ci:local:quick
 pnpm type-check
 pnpm lint:check
 pnpm build

@@ -21,6 +21,7 @@ function runCommand(label, command, args, options = {}) {
 
   const result = spawnSync(command, args, {
     encoding: "utf8",
+    maxBuffer: 50 * 1024 * 1024,
     ...options,
   });
 
@@ -58,15 +59,28 @@ function safeJsonParse(text) {
     // Fall back to extracting the JSON object from mixed stdout/stderr content.
   }
 
-  const firstBrace = trimmed.indexOf("{");
-  const lastBrace = trimmed.lastIndexOf("}");
+  const firstObject = trimmed.indexOf("{");
+  const firstArray = trimmed.indexOf("[");
+  const firstJsonStart =
+    firstObject === -1
+      ? firstArray
+      : firstArray === -1
+        ? firstObject
+        : Math.min(firstObject, firstArray);
+  const lastObject = trimmed.lastIndexOf("}");
+  const lastArray = trimmed.lastIndexOf("]");
+  const lastJsonEnd = Math.max(lastObject, lastArray);
 
-  if (firstBrace === -1 || lastBrace === -1 || lastBrace <= firstBrace) {
+  if (
+    firstJsonStart === -1 ||
+    lastJsonEnd === -1 ||
+    lastJsonEnd <= firstJsonStart
+  ) {
     return null;
   }
 
   try {
-    return JSON.parse(trimmed.slice(firstBrace, lastBrace + 1));
+    return JSON.parse(trimmed.slice(firstJsonStart, lastJsonEnd + 1));
   } catch {
     return null;
   }
@@ -74,8 +88,17 @@ function safeJsonParse(text) {
 
 function parseOutdated(stdout) {
   const data = safeJsonParse(stdout);
-  if (!data || Array.isArray(data)) {
+  if (!data) {
     return [];
+  }
+
+  if (Array.isArray(data)) {
+    return data.map((details) => ({
+      name: details.name,
+      current: details.current,
+      latest: details.latest,
+      dependencyType: details.dependencyType,
+    }));
   }
 
   return Object.entries(data).map(([name, details]) => ({
@@ -242,6 +265,8 @@ const auditResult = runCommand("dependency audit", "pnpm", [
   "audit",
   "--prod",
   "--json",
+  "--audit-level",
+  "moderate",
 ]);
 stepResults.push(auditResult);
 
