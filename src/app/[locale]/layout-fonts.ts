@@ -1,16 +1,16 @@
-import { Figtree } from "next/font/google";
+import localFont from "next/font/local";
 
 /**
- * Figtree — Primary typeface
+ * Primary sans token
  *
- * Geometric sans-serif with technical precision.
- * Weights: 400 (body), 500 (medium), 600 (semi), 700 (bold), 800 (extra-bold for H1)
+ * Uses the checked-in Geist Sans Latin subset so builds stay deterministic
+ * without depending on the Google Fonts network path.
  */
-export const figtree = Figtree({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
+export const figtree = localFont({
+  src: "./GeistSans-Latin.woff2",
   variable: "--font-figtree",
   display: "swap",
+  preload: true,
 });
 
 /**
