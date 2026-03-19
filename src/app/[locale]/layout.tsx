@@ -199,7 +199,7 @@ export default async function LocaleLayout({
     >
       <body className="flex min-h-screen flex-col antialiased">
         {/* Dev-only scripts: never loaded in production (NODE_ENV gate).
-            SRI omitted intentionally — unpinned CDN URLs would break on update.
+            SRI omitted intentionally — versioned CDN URLs would break on update if integrity drifts.
             Security note: these scripts have zero production attack surface. */}
         {process.env.NODE_ENV === "development" && (
           <>
@@ -209,12 +209,14 @@ export default async function LocaleLayout({
               strategy="beforeInteractive"
             />
             <Script
-              src="https://unpkg.com/react-grab/dist/index.global.js"
+              src="https://unpkg.com/react-grab@0.1.28/dist/index.global.js"
               crossOrigin="anonymous"
               strategy="beforeInteractive"
             />
             <Script
-              src="https://unpkg.com/@react-grab/claude-code/dist/client.global.js"
+              // Track the same release line as `react-grab` until this client is
+              // versioned from a locally-managed dependency instead of CDN.
+              src="https://unpkg.com/@react-grab/claude-code@0.1.28/dist/client.global.js"
               strategy="lazyOnload"
             />
           </>
