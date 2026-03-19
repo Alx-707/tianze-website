@@ -29,7 +29,9 @@ function runCommand(label, command, args, options = {}) {
   printOutput(result.stderr, process.stderr);
 
   const ok =
-    !result.error && !result.signal && (result.status === 0 || result.status === null);
+    !result.error &&
+    !result.signal &&
+    (result.status === 0 || result.status === null);
 
   if (result.error) {
     console.error(result.error.message);
@@ -300,27 +302,32 @@ const runtimeAlignmentRisk = needsUpdate
   .map((item) => detectRuntimeAlignmentRisk(item, supportedNodeMajors))
   .filter(Boolean);
 
-const failedChecks = stepResults.filter((step) => !step.ok).map((step) => step.label);
+const failedChecks = stepResults
+  .filter((step) => !step.ok)
+  .map((step) => step.label);
 
 const needsFix = stepResults
   .filter(
     (step) =>
       !step.ok &&
-      ["config consistency", "production config", "type check", "lint check"].includes(
-        step.label,
-      ),
+      [
+        "config consistency",
+        "production config",
+        "type check",
+        "lint check",
+      ].includes(step.label),
   )
   .map((step) => step.label);
 
 const needsInvestigation = stepResults
   .filter(
-    (step) =>
-      !step.ok &&
-      ["build", "cloudflare build"].includes(step.label),
+    (step) => !step.ok && ["build", "cloudflare build"].includes(step.label),
   )
   .map((step) => step.label);
 
-const passedChecks = stepResults.filter((step) => step.ok).map((step) => step.label);
+const passedChecks = stepResults
+  .filter((step) => step.ok)
+  .map((step) => step.label);
 const vulnerableModules = unique(vulnerabilities.map((item) => item.module));
 
 console.log("\n=== summary ===");
@@ -349,7 +356,9 @@ printList("breaking_change_risk", breakingChangeRisk, (item) => {
 });
 printList("runtime_alignment_risk", runtimeAlignmentRisk, (item) => {
   const supported = item.supportedNodeMajors.join(", ");
-  const currentNote = item.currentAligned ? "current_aligned" : "current_not_aligned";
+  const currentNote = item.currentAligned
+    ? "current_aligned"
+    : "current_not_aligned";
   return `${item.name} ${item.current} -> ${item.latest} (supported_node_majors=${supported}, ${currentNote}, latest_not_aligned)`;
 });
 
@@ -358,15 +367,21 @@ printList("needs_investigation", needsInvestigation);
 printList("vulnerable_modules", vulnerableModules);
 
 console.log("\nclassification:");
-console.log("- `needs_update` means package versions should be reviewed or upgraded.");
-console.log("- `recommended_update` means patch/minor upgrades with lower compatibility risk.");
+console.log(
+  "- `needs_update` means package versions should be reviewed or upgraded.",
+);
+console.log(
+  "- `recommended_update` means patch/minor upgrades with lower compatibility risk.",
+);
 console.log(
   "- `breaking_change_risk` means major upgrades, or `0.x` minor upgrades that should be validated more carefully.",
 );
 console.log(
   "- `runtime_alignment_risk` means the package should track the project's declared runtime support rather than npm `latest`.",
 );
-console.log("- `needs_fix` means code or config is failing without implying a package upgrade.");
+console.log(
+  "- `needs_fix` means code or config is failing without implying a package upgrade.",
+);
 console.log(
   "- `needs_investigation` means the build chain failed and may be caused by code, config, env, or version compatibility.",
 );
