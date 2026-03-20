@@ -37,26 +37,49 @@ describe("route-parsing", () => {
         p.pattern.test("/blog/my-post"),
       );
       expect(blogPattern).toBeDefined();
-      expect(blogPattern?.buildHref("my-post")).toEqual({
+      const match = "/blog/my-post".match(blogPattern!.pattern)!;
+      expect(blogPattern?.buildHref(match)).toEqual({
         pathname: "/blog/[slug]",
         params: { slug: "my-post" },
       });
     });
 
-    it("includes products pattern", () => {
-      const productsPattern = DYNAMIC_ROUTE_PATTERNS.find((p) =>
-        p.pattern.test("/products/pipe-fitting"),
+    it("includes product market pattern", () => {
+      const marketPattern = DYNAMIC_ROUTE_PATTERNS.find((p) =>
+        p.pattern.test("/products/north-america"),
       );
-      expect(productsPattern).toBeDefined();
-      expect(productsPattern?.buildHref("pipe-fitting")).toEqual({
-        pathname: "/products/[slug]",
-        params: { slug: "pipe-fitting" },
+      expect(marketPattern).toBeDefined();
+      const match = "/products/north-america".match(marketPattern!.pattern)!;
+      expect(marketPattern?.buildHref(match)).toEqual({
+        pathname: "/products/[market]",
+        params: { market: "north-america" },
       });
     });
 
-    it("does not match nested paths", () => {
+    it("includes product family pattern", () => {
+      const familyPattern = DYNAMIC_ROUTE_PATTERNS.find((p) =>
+        p.pattern.test("/products/north-america/conduit-sweeps-elbows"),
+      );
+      expect(familyPattern).toBeDefined();
+      const match = "/products/north-america/conduit-sweeps-elbows".match(
+        familyPattern!.pattern,
+      )!;
+      expect(familyPattern?.buildHref(match)).toEqual({
+        pathname: "/products/[market]/[family]",
+        params: { market: "north-america", family: "conduit-sweeps-elbows" },
+      });
+    });
+
+    it("does not match nested blog paths", () => {
       const match = DYNAMIC_ROUTE_PATTERNS.find((p) =>
         p.pattern.test("/blog/category/post"),
+      );
+      expect(match).toBeUndefined();
+    });
+
+    it("does not match three-segment product paths", () => {
+      const match = DYNAMIC_ROUTE_PATTERNS.find((p) =>
+        p.pattern.test("/products/north-america/bends/extra"),
       );
       expect(match).toBeUndefined();
     });
@@ -129,19 +152,38 @@ describe("route-parsing", () => {
         });
       });
 
-      it("returns products dynamic route object", () => {
-        expect(parsePathnameForLink("/en/products/pipe-fitting")).toEqual({
-          pathname: "/products/[slug]",
-          params: { slug: "pipe-fitting" },
+      it("returns market dynamic route object", () => {
+        expect(parsePathnameForLink("/en/products/north-america")).toEqual({
+          pathname: "/products/[market]",
+          params: { market: "north-america" },
         });
       });
 
-      it("handles slugs with hyphens", () => {
+      it("returns family dynamic route object", () => {
         expect(
-          parsePathnameForLink("/en/products/full-auto-bending-machine"),
+          parsePathnameForLink("/en/products/australia-new-zealand/bellmouths"),
         ).toEqual({
-          pathname: "/products/[slug]",
-          params: { slug: "full-auto-bending-machine" },
+          pathname: "/products/[market]/[family]",
+          params: {
+            market: "australia-new-zealand",
+            family: "bellmouths",
+          },
+        });
+      });
+
+      it("handles market route without locale prefix", () => {
+        expect(parsePathnameForLink("/products/europe")).toEqual({
+          pathname: "/products/[market]",
+          params: { market: "europe" },
+        });
+      });
+
+      it("handles family route for zh locale", () => {
+        expect(
+          parsePathnameForLink("/zh/products/mexico/conduit-bends"),
+        ).toEqual({
+          pathname: "/products/[market]/[family]",
+          params: { market: "mexico", family: "conduit-bends" },
         });
       });
 
@@ -162,7 +204,7 @@ describe("route-parsing", () => {
         expect(parsePathnameForLink("/en/blog")).toBe("/blog");
       });
 
-      it("does not match /products without slug", () => {
+      it("does not match /products without market", () => {
         expect(parsePathnameForLink("/zh/products")).toBe("/products");
       });
     });

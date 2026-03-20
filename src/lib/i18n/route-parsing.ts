@@ -21,8 +21,8 @@ export type LinkHref = ComponentProps<typeof Link>["href"];
 interface DynamicRoutePattern {
   /** Regex pattern to match the URL */
   pattern: RegExp;
-  /** Function to build the Link href from captured groups */
-  buildHref: (param: string) => LinkHref;
+  /** Function to build the Link href from regex match groups */
+  buildHref: (match: RegExpMatchArray) => LinkHref;
 }
 
 /**
@@ -31,24 +31,36 @@ interface DynamicRoutePattern {
  * When a user navigates between locales, the current URL (e.g., `/blog/my-post`)
  * needs to be mapped back to its route pattern (e.g., `/blog/[slug]`) with params.
  *
+ * Order matters: more-specific patterns (more segments) must come first
+ * to avoid false matches by shorter patterns.
+ *
  * @example
  * // URL: /blog/my-post
  * // Matches pattern: /^\/blog\/([^/]+)$/
  * // Returns: { pathname: "/blog/[slug]", params: { slug: "my-post" } }
  */
 export const DYNAMIC_ROUTE_PATTERNS: readonly DynamicRoutePattern[] = [
+  // Two-segment: /products/{market}/{family} — must come before one-segment
   {
-    pattern: /^\/blog\/([^/]+)$/,
-    buildHref: (slug: string): LinkHref => ({
-      pathname: "/blog/[slug]",
-      params: { slug },
+    pattern: /^\/products\/([^/]+)\/([^/]+)$/,
+    buildHref: (match: RegExpMatchArray): LinkHref => ({
+      pathname: "/products/[market]/[family]",
+      params: { market: match[1]!, family: match[2]! },
+    }),
+  },
+  // One-segment: /products/{market}
+  {
+    pattern: /^\/products\/([^/]+)$/,
+    buildHref: (match: RegExpMatchArray): LinkHref => ({
+      pathname: "/products/[market]",
+      params: { market: match[1]! },
     }),
   },
   {
-    pattern: /^\/products\/([^/]+)$/,
-    buildHref: (slug: string): LinkHref => ({
-      pathname: "/products/[slug]",
-      params: { slug },
+    pattern: /^\/blog\/([^/]+)$/,
+    buildHref: (match: RegExpMatchArray): LinkHref => ({
+      pathname: "/blog/[slug]",
+      params: { slug: match[1]! },
     }),
   },
 ] as const;
@@ -122,7 +134,7 @@ export function parsePathnameForLink(currentPathname: string): LinkHref {
   for (const { pattern, buildHref } of DYNAMIC_ROUTE_PATTERNS) {
     const match = pathname.match(pattern);
     if (match?.[1]) {
-      return buildHref(match[1]);
+      return buildHref(match);
     }
   }
 

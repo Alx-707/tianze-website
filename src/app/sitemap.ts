@@ -1,19 +1,17 @@
 import type { MetadataRoute } from "next";
-import type {
-  Locale,
-  PostSummary,
-  ProductSummary,
-} from "@/types/content.types";
+import type { Locale, PostSummary } from "@/types/content.types";
 import { getAllPostsCached } from "@/lib/content/blog";
-import { getAllProductsCached } from "@/lib/content/products";
 import {
   getContentLastModified,
-  getProductLastModified,
   getStaticPageLastModified,
   type StaticPageLastModConfig,
 } from "@/lib/sitemap-utils";
 import { SITE_CONFIG } from "@/config/paths";
 import { routing } from "@/i18n/routing";
+import {
+  PRODUCT_CATALOG,
+  getAllMarketFamilyParams,
+} from "@/constants/product-catalog";
 
 // Base URL for the site - uses centralized SITE_CONFIG for consistency
 const BASE_URL = SITE_CONFIG.baseUrl;
@@ -54,8 +52,9 @@ const PAGE_CONFIG_MAP = new Map<string, PageConfig>([
   ["/blog", { changeFrequency: "weekly", priority: 0.7 }],
   ["/faq", { changeFrequency: "monthly", priority: 0.6 }],
   ["/privacy", { changeFrequency: "monthly", priority: 0.7 }],
-  ["product", { changeFrequency: "weekly", priority: 0.8 }],
   ["blogPost", { changeFrequency: "monthly", priority: 0.6 }],
+  ["productMarket", { changeFrequency: "weekly", priority: 0.8 }],
+  ["productFamily", { changeFrequency: "weekly", priority: 0.7 }],
 ]);
 
 const DEFAULT_CONFIG: PageConfig = {
@@ -131,88 +130,6 @@ function generateStaticPageEntries(): MetadataRoute.Sitemap {
       const url = `${BASE_URL}/${locale}${page}`;
       const alternates = buildAlternateLanguages(page);
       const lastModified = getStaticPageLastModified(page, STATIC_PAGE_LASTMOD);
-
-      entries.push(
-        createSitemapEntry({ url, lastModified, config, alternates }),
-      );
-    }
-  }
-
-  return entries;
-}
-
-// Build alternate languages for a product across locales
-function buildProductAlternates(
-  slug: string,
-  currentLocale: string,
-  allProductsByLocale: Map<string, ProductSummary[]>,
-): Record<string, string> {
-  const productPath = `/products/${slug}`;
-
-  const entries = routing.locales
-    .filter((locale) => {
-      const products = allProductsByLocale.get(locale);
-      if (products === undefined) return false;
-      return locale === currentLocale || products.some((p) => p.slug === slug);
-    })
-    .map((locale) => [locale, `${BASE_URL}/${locale}${productPath}`]);
-
-  // x-default 指向默认语言版本
-  const defaultLocaleProducts = allProductsByLocale.get(routing.defaultLocale);
-  if (defaultLocaleProducts?.some((p) => p.slug === slug)) {
-    entries.push([
-      "x-default",
-      `${BASE_URL}/${routing.defaultLocale}${productPath}`,
-    ]);
-  }
-
-  return Object.fromEntries(entries);
-}
-
-// Fetch all products for all locales
-async function fetchAllProductsByLocale(): Promise<
-  Map<string, ProductSummary[]>
-> {
-  const productsByLocale = new Map<string, ProductSummary[]>();
-
-  for (const locale of routing.locales) {
-    try {
-      const products = await getAllProductsCached(locale as Locale);
-      productsByLocale.set(locale, products);
-    } catch {
-      productsByLocale.set(locale, []);
-    }
-  }
-
-  return productsByLocale;
-}
-
-// Generate product page entries for all locales
-async function generateProductEntries(): Promise<MetadataRoute.Sitemap> {
-  const entries: MetadataRoute.Sitemap = [];
-  const config = getPageConfig("product");
-  const allProductsByLocale = await fetchAllProductsByLocale();
-
-  // Track processed product slugs to avoid duplicates
-  const processedSlugs = new Set<string>();
-
-  for (const locale of routing.locales) {
-    const products = allProductsByLocale.get(locale);
-    if (products === undefined) continue;
-
-    for (const product of products) {
-      const entryKey = `${locale}:${product.slug}`;
-      if (processedSlugs.has(entryKey)) continue;
-      processedSlugs.add(entryKey);
-
-      const url = `${BASE_URL}/${locale}/products/${product.slug}`;
-      const alternates = buildProductAlternates(
-        product.slug,
-        locale,
-        allProductsByLocale,
-      );
-      // Use real product timestamps for lastmod
-      const lastModified = getProductLastModified(product);
 
       entries.push(
         createSitemapEntry({ url, lastModified, config, alternates }),
@@ -307,16 +224,55 @@ async function generateBlogEntries(): Promise<MetadataRoute.Sitemap> {
   return entries;
 }
 
+// Generate product catalog entries (market + family pages) for all locales
+function generateCatalogEntries(): MetadataRoute.Sitemap {
+  const entries: MetadataRoute.Sitemap = [];
+  const now = new Date();
+
+  // Market landing pages
+  const marketConfig = getPageConfig("productMarket");
+  for (const market of PRODUCT_CATALOG.markets) {
+    const path = `/products/${market.slug}`;
+    for (const locale of routing.locales) {
+      entries.push(
+        createSitemapEntry({
+          url: `${BASE_URL}/${locale}${path}`,
+          lastModified: now,
+          config: marketConfig,
+          alternates: buildAlternateLanguages(path),
+        }),
+      );
+    }
+  }
+
+  // Family pages
+  const familyConfig = getPageConfig("productFamily");
+  const combos = getAllMarketFamilyParams();
+  for (const { market, family } of combos) {
+    const path = `/products/${market}/${family}`;
+    for (const locale of routing.locales) {
+      entries.push(
+        createSitemapEntry({
+          url: `${BASE_URL}/${locale}${path}`,
+          lastModified: now,
+          config: familyConfig,
+          alternates: buildAlternateLanguages(path),
+        }),
+      );
+    }
+  }
+
+  return entries;
+}
+
 /**
  * Dynamic sitemap generation for Next.js.
- * Includes all static pages and dynamic product pages with proper i18n alternates.
+ * Includes static pages, product catalog pages, and blog pages with i18n alternates.
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticEntries = generateStaticPageEntries();
-  const [productEntries, blogEntries] = await Promise.all([
-    generateProductEntries(),
-    generateBlogEntries(),
-  ]);
+  const catalogEntries = generateCatalogEntries();
+  const blogEntries = await generateBlogEntries();
 
-  return [...staticEntries, ...productEntries, ...blogEntries];
+  return [...staticEntries, ...catalogEntries, ...blogEntries];
 }

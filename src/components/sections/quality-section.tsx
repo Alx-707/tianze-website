@@ -1,3 +1,12 @@
+import {
+  type LucideIcon,
+  Check,
+  Clock,
+  FileText,
+  LayoutGrid,
+  Package,
+  User,
+} from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { SectionHead } from "@/components/ui/section-head";
 
@@ -11,108 +20,13 @@ const COMMITMENT_KEYS = [
 
 const CERT_KEYS = ["cert1", "cert2", "cert3", "cert4"] as const;
 
-/** Simple inline SVG icons for each commitment slot. */
-const COMMITMENT_ICONS: Record<string, React.ReactNode> = {
-  commitment1: (
-    <svg
-      width="32"
-      height="32"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="text-primary"
-    >
-      <circle cx="12" cy="12" r="10" />
-      <polyline points="12 6 12 12 16 14" />
-    </svg>
-  ),
-  commitment2: (
-    <svg
-      width="32"
-      height="32"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="text-primary"
-    >
-      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-      <polyline points="14 2 14 8 20 8" />
-    </svg>
-  ),
-  commitment3: (
-    <svg
-      width="32"
-      height="32"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="text-primary"
-    >
-      <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
-    </svg>
-  ),
-  commitment4: (
-    <svg
-      width="32"
-      height="32"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="text-primary"
-    >
-      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-      <circle cx="12" cy="7" r="4" />
-    </svg>
-  ),
-  commitment5: (
-    <svg
-      width="32"
-      height="32"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="text-primary"
-    >
-      <rect x="3" y="3" width="7" height="7" />
-      <rect x="14" y="3" width="7" height="7" />
-      <rect x="3" y="14" width="7" height="7" />
-      <rect x="14" y="14" width="7" height="7" />
-    </svg>
-  ),
+const COMMITMENT_ICONS: Record<string, LucideIcon> = {
+  commitment1: Clock,
+  commitment2: FileText,
+  commitment3: Package,
+  commitment4: User,
+  commitment5: LayoutGrid,
 };
-
-function CheckIcon() {
-  return (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="shrink-0 text-primary"
-    >
-      <polyline points="20 6 9 17 4 12" />
-    </svg>
-  );
-}
 
 export async function QualitySection() {
   const t = await getTranslations("home.quality");
@@ -122,20 +36,29 @@ export async function QualitySection() {
       <div className="mx-auto max-w-[1080px] px-6">
         <SectionHead title={t("title")} subtitle={t("subtitle")} />
 
-        {/* Commitments grid */}
-        <div className="grid grid-cols-1 gap-[2px] overflow-hidden rounded-lg border bg-border sm:grid-cols-3 lg:grid-cols-5">
-          {COMMITMENT_KEYS.map((key) => (
-            <div
-              key={key}
-              className="bg-white p-5 transition-colors duration-150 hover:bg-[var(--primary-50)]"
-            >
-              <div className="mb-3">{COMMITMENT_ICONS[key]}</div>
-              <strong className="block text-sm">{t(`${key}.title`)}</strong>
-              <p className="mt-1 text-[13px] text-muted-foreground">
-                {t(`${key}.desc`)}
-              </p>
-            </div>
-          ))}
+        {/* Commitment list — stacked on mobile, 2 columns on desktop */}
+        <div className="grid grid-cols-1 gap-px overflow-hidden rounded-lg border bg-border lg:grid-cols-2">
+          {COMMITMENT_KEYS.map((key) => {
+            const Icon = COMMITMENT_ICONS[key];
+            return (
+              <div
+                key={key}
+                className="flex items-start gap-4 bg-card px-6 py-5 transition-colors duration-150 hover:bg-[var(--primary-50)]"
+              >
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[var(--primary-light)] text-primary">
+                  {Icon ? <Icon size={20} /> : null}
+                </div>
+                <div>
+                  <h3 className="text-[15px] font-semibold">
+                    {t(`${key}.title`)}
+                  </h3>
+                  <p className="mt-1 text-[13px] leading-relaxed text-muted-foreground">
+                    {t(`${key}.desc`)}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
         </div>
 
         {/* Cert badges */}
@@ -145,7 +68,7 @@ export async function QualitySection() {
               key={key}
               className="flex items-center gap-1.5 rounded-md bg-muted/50 px-3 py-1.5 text-[13px] font-medium"
             >
-              <CheckIcon />
+              <Check size={16} className="shrink-0 text-primary" aria-hidden />
               <span>{t(key)}</span>
             </div>
           ))}

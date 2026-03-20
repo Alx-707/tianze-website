@@ -15,35 +15,6 @@ vi.mock("@/i18n/routing", () => ({
   },
 }));
 
-vi.mock("@/lib/content/products", () => ({
-  getAllProductsCached: vi.fn(async (locale: string) => {
-    if (locale === "en") {
-      return [
-        {
-          slug: "product-a",
-          title: "Product A",
-          updatedAt: "2024-06-01T00:00:00Z",
-        },
-        {
-          slug: "product-b",
-          title: "Product B",
-          createdAt: "2024-05-01T00:00:00Z",
-        },
-      ];
-    }
-    if (locale === "zh") {
-      return [
-        {
-          slug: "product-a",
-          title: "产品A",
-          updatedAt: "2024-06-01T00:00:00Z",
-        },
-      ];
-    }
-    return [];
-  }),
-}));
-
 vi.mock("@/lib/content/blog", () => ({
   getAllPostsCached: vi.fn(async (locale: string) => {
     if (locale === "en") {
@@ -74,15 +45,6 @@ vi.mock("@/lib/sitemap-utils", () => ({
   getContentLastModified: vi.fn(({ updatedAt, publishedAt }) => {
     if (updatedAt) return new Date(updatedAt);
     if (publishedAt) return new Date(publishedAt);
-    return new Date("2024-01-01T00:00:00Z");
-  }),
-  getProductLastModified: vi.fn((product) => {
-    if (product.updatedAt) {
-      return new Date(product.updatedAt);
-    }
-    if (product.createdAt) {
-      return new Date(product.createdAt);
-    }
     return new Date("2024-01-01T00:00:00Z");
   }),
   getStaticPageLastModified: vi.fn((page) => {
@@ -138,19 +100,35 @@ describe("sitemap.ts", () => {
       expect(urls).toContain("https://example.com/en/terms");
     });
 
-    it("should include product pages", async () => {
+    it("should include blog post pages", async () => {
       const result = await sitemap();
       const urls = result.map((entry) => entry.url);
 
-      expect(urls).toContain("https://example.com/en/products/product-a");
-      expect(urls).toContain("https://example.com/en/products/product-b");
+      expect(urls).toContain("https://example.com/en/blog/post-a");
+      expect(urls).toContain("https://example.com/zh/blog/post-a");
     });
 
-    it("should include Chinese product pages", async () => {
+    it("should include product catalog market pages", async () => {
       const result = await sitemap();
       const urls = result.map((entry) => entry.url);
 
-      expect(urls).toContain("https://example.com/zh/products/product-a");
+      expect(urls).toContain("https://example.com/en/products/north-america");
+      expect(urls).toContain(
+        "https://example.com/en/products/australia-new-zealand",
+      );
+      expect(urls).toContain("https://example.com/zh/products/north-america");
+    });
+
+    it("should include product catalog family pages", async () => {
+      const result = await sitemap();
+      const urls = result.map((entry) => entry.url);
+
+      expect(urls).toContain(
+        "https://example.com/en/products/north-america/conduit-sweeps-elbows",
+      );
+      expect(urls).toContain(
+        "https://example.com/en/products/australia-new-zealand/bellmouths",
+      );
     });
 
     it("should have lastModified for entries", async () => {

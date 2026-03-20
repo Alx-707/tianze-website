@@ -227,7 +227,6 @@ describe("paths configuration", () => {
       const pathnames = getPathnames();
 
       expect(pathnames["/blog/[slug]"]).toBe("/blog/[slug]");
-      expect(pathnames["/products/[slug]"]).toBe("/products/[slug]");
     });
 
     it("should have consistent paths", () => {
