@@ -52,6 +52,12 @@ Because bellmouths only exists in the australia-new-zealand market
 Given the user navigates to /en/products/australia-new-zealand/bellmouths/
 Then the page renders with the Bellmouths family information
 
+### Scenario: Legacy product detail routes are removed
+Given the old route /en/products/pvc-conduit-bend existed
+When running pnpm build
+Then no /products/[slug] pages are generated
+And navigating to /en/products/pvc-conduit-bend/ returns 404
+
 ## Feature: Locale Support
 
 ### Scenario: Products pages work in both locales
@@ -74,12 +80,6 @@ Then 10 market landing pages are generated (5 markets x 2 locales)
 ### Scenario: All family pages are statically generated
 When running pnpm build
 Then approximately 30 family pages are generated (~15 combos x 2 locales)
-
-### Scenario: Existing product detail pages still work
-Given the legacy route /en/products/pvc-conduit-bend exists
-When running pnpm build
-Then the legacy product detail page is generated successfully
-And does not conflict with the new market routes
 
 ## Feature: Breadcrumb Navigation
 

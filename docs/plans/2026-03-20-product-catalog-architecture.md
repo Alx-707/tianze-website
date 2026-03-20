@@ -1,8 +1,10 @@
 # Product Catalog Architecture Plan
 
+> **SUPERSEDED**: This document's routing strategy (Section 4) claimed `[slug]` and `[market]` could coexist via `generateStaticParams`. This is incorrect — Next.js App Router does not allow two dynamic segments at the same directory level. The authoritative plan is `docs/plans/2026-03-20-product-catalog-plan/_index.md` (v2), which requires deleting `[slug]` before creating `[market]`. All other sections (config structure, components, types) remain valid reference material.
+
 > Date: 2026-03-20
 > Scope: Route skeleton + basic usable pages (title, breadcrumb, product list placeholder)
-> Status: Architecture design (pre-implementation)
+> Status: Superseded by v2 plan (routing section invalid)
 
 ---
 
@@ -225,9 +227,7 @@ src/app/[locale]/products/
       page.tsx                       ← Product family page
 ```
 
-The existing `src/app/[locale]/products/[slug]/page.tsx` (individual MDX product detail) stays in place for now. It serves the legacy `/products/[slug]` routes. These two routing trees do not conflict because `[market]` and `[slug]` both capture one segment, but `[market]` has a nested `[family]` child while `[slug]` does not. Next.js resolves `/products/north-america` to `[market]/page.tsx` only if `generateStaticParams` yields it; otherwise it falls to `[slug]/page.tsx`. We control this via `generateStaticParams` on both routes.
-
-**Collision avoidance strategy**: `[market]/page.tsx` statically generates params from `getAllMarketSlugs()`. `[slug]/page.tsx` statically generates from `getStaticParamsForType("products")` (MDX slugs). If a collision ever occurs (an MDX product slug equals a market slug), the build will fail with a duplicate route error — which is the correct behavior. The admin (us) ensures slugs don't collide.
+**[CORRECTED in v2]** The legacy `src/app/[locale]/products/[slug]/page.tsx` must be **deleted before** creating the `[market]` route. Next.js App Router does not allow two different dynamic segments (`[slug]` and `[market]`) at the same directory level — `generateStaticParams` cannot resolve this collision. Task 000 in the v2 plan handles the full removal of `[slug]`, its MDX content, config references, and sitemap entries. See `docs/plans/2026-03-20-product-catalog-plan/_index.md` for the authoritative execution plan.
 
 ### `generateStaticParams` for Each Route
 
