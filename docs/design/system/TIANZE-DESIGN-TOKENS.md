@@ -1,6 +1,9 @@
 # Tianze Design Token System
 
 > Industrial Steel Blue | B2B Manufacturing | Modern Minimalist
+>
+> **Authority**: `src/app/globals.css` is always the production truth.
+> This document is a reference spec. If any value here conflicts with globals.css, globals.css wins.
 
 ---
 
@@ -20,9 +23,9 @@ Tianze is a B2B manufacturing enterprise. The design system reflects:
 |--------|------------------|-----------------|
 | Primary Blue | Tech blue (hue 210-220) | Industrial Steel Blue (hue 230) |
 | Background | Pure white (#fff) | Blue-tinted white (oklch 0.99 0.005 230) |
-| Typography | Inter, Roboto | Geist Sans (distinctive, variable) |
+| Typography | Inter, Roboto | Figtree (modern, variable weight) |
 | Shadows | Gray shadows | Slate-toned shadows (rgb 15 23 42) |
-| Radius | Generic 8-12px | Micro precision 4-8px |
+| Radius | Generic 12-16px | Precision 4-12px, 8px base |
 
 ---
 
@@ -80,11 +83,14 @@ sRGB-safe chroma (capped at 0.090) for consistent cross-browser rendering:
 
 ### 3.2 Semantic Colors (Light Theme)
 
+> **Note**: globals.css uses hex values. The OKLCH values below are approximate equivalents for reference.
+> When in doubt, defer to `src/app/globals.css`.
+
 ```css
 :root {
   /* Foundation */
-  --background: oklch(0.99 0.005 230);
-  --foreground: oklch(0.15 0.030 230);
+  --background: #fafafa;              /* oklch(0.98 0 0) — neutral, no blue tint */
+  --foreground: #36424a;              /* oklch(0.35 0.015 230) */
 
   /* Surfaces */
   --card: oklch(1 0 0);
@@ -97,8 +103,8 @@ sRGB-safe chroma (capped at 0.090) for consistent cross-browser rendering:
   --primary-foreground: oklch(0.98 0.005 230);
 
   /* Secondary */
-  --secondary: oklch(0.96 0.015 230);
-  --secondary-foreground: oklch(0.25 0.040 230);
+  --secondary: #ffffff;
+  --secondary-foreground: #36424a;
 
   /* Muted */
   --muted: oklch(0.96 0.015 230);
@@ -177,12 +183,12 @@ sRGB-safe chroma (capped at 0.090) for consistent cross-browser rendering:
 
 | Token | Light Mode | Dark Mode | Usage |
 |-------|------------|-----------|-------|
-| `--shadow-sm` | `0 1px 2px 0 rgb(15 23 42 / 0.05)` | `0 1px 2px 0 rgb(0 0 0 / 0.30)` | Subtle elevation |
-| `--shadow-md` | `0 4px 6px -1px rgb(15 23 42 / 0.08), 0 2px 4px -2px rgb(15 23 42 / 0.06)` | `0 4px 6px -1px rgb(0 0 0 / 0.40), 0 2px 4px -2px rgb(0 0 0 / 0.30)` | Cards, dropdowns |
-| `--shadow-lg` | `0 10px 15px -3px rgb(15 23 42 / 0.08), 0 4px 6px -4px rgb(15 23 42 / 0.04)` | `0 10px 15px -3px rgb(0 0 0 / 0.40), 0 4px 6px -4px rgb(0 0 0 / 0.20)` | Modals, popovers |
-| `--shadow-xl` | `0 20px 25px -5px rgb(15 23 42 / 0.10), 0 8px 10px -6px rgb(15 23 42 / 0.04)` | `0 20px 25px -5px rgb(0 0 0 / 0.50), 0 8px 10px -6px rgb(0 0 0 / 0.25)` | Floating elements |
+| `--shadow-sm` | `0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.03)` | — | Subtle elevation |
+| `--shadow-md` | `0 4px 6px rgba(0,0,0,0.06), 0 2px 4px rgba(0,0,0,0.03)` | — | Cards, dropdowns |
+| `--shadow-lg` | `0 10px 15px rgba(0,0,0,0.06), 0 4px 6px rgba(0,0,0,0.03)` | — | Modals, popovers |
+| `--shadow-xl` | `0 20px 25px rgba(0,0,0,0.06), 0 8px 10px rgba(0,0,0,0.03)` | — | Floating elements |
 
-**Design Note**: Light mode uses slate-toned shadows (rgb 15 23 42) for cohesion with the steel blue theme. Dark mode uses pure black for proper contrast.
+**Design Note**: Production uses pure black alpha shadows (rgba 0,0,0) for simplicity and cross-browser consistency.
 
 ---
 
@@ -190,7 +196,7 @@ sRGB-safe chroma (capped at 0.090) for consistent cross-browser rendering:
 
 | Token | Value | Usage |
 |-------|-------|-------|
-| `--radius` | `0.375rem` (6px) | Base radius |
+| `--radius` | `0.5rem` (8px) | Base radius |
 | `--radius-none` | `0` | No radius |
 | `--radius-sm` | `0.25rem` (4px) | Small elements, badges |
 | `--radius-md` | `0.375rem` (6px) | Buttons, inputs |
@@ -209,28 +215,27 @@ sRGB-safe chroma (capped at 0.090) for consistent cross-browser rendering:
 |-------|-------|-------|
 | `--duration-instant` | `50ms` | Immediate feedback |
 | `--duration-fast` | `150ms` | Micro-interactions |
-| `--duration-normal` | `250ms` | Standard transitions |
-| `--duration-slow` | `350ms` | Complex animations |
+| `--duration-normal` | `200ms` | Standard transitions |
+| `--duration-slow` | `300ms` | Complex animations |
 
 ### Easing Functions
 
 | Token | Value | Character |
 |-------|-------|-----------|
-| `--ease-default` | `cubic-bezier(0.2, 0, 0, 1)` | Industrial precision |
-| `--ease-in` | `cubic-bezier(0.4, 0, 1, 1)` | Accelerating |
-| `--ease-out` | `cubic-bezier(0, 0, 0.2, 1)` | Decelerating |
+| `--ease-out` | `cubic-bezier(0, 0, 0.2, 1)` | Default (decelerating) |
 | `--ease-in-out` | `cubic-bezier(0.4, 0, 0.2, 1)` | Balanced |
-| `--ease-spring` | `cubic-bezier(0.175, 0.885, 0.32, 1.275)` | Playful overshoot |
+| `--ease-spring` | `cubic-bezier(0.34, 1.56, 0.64, 1)` | Hero entrance overshoot |
+| `--ease-smooth` | `cubic-bezier(0.25, 0.1, 0.25, 1)` | Gentle transitions |
 
 ### Composite Transitions
 
 ```css
---transition-colors: color var(--duration-fast) var(--ease-default),
-                     background-color var(--duration-fast) var(--ease-default),
-                     border-color var(--duration-fast) var(--ease-default);
---transition-transform: transform var(--duration-normal) var(--ease-default);
---transition-opacity: opacity var(--duration-normal) var(--ease-default);
---transition-shadow: box-shadow var(--duration-normal) var(--ease-default);
+--transition-colors: color var(--duration-fast) var(--ease-out),
+                     background-color var(--duration-fast) var(--ease-out),
+                     border-color var(--duration-fast) var(--ease-out);
+--transition-transform: transform var(--duration-normal) var(--ease-out);
+--transition-opacity: opacity var(--duration-normal) var(--ease-smooth);
+--transition-shadow: box-shadow var(--duration-fast) var(--ease-out);
 ```
 
 ---
@@ -274,7 +279,7 @@ Based on 4px base unit, following Tailwind conventions:
 /* Common */
 --button-radius: var(--radius-md);
 --button-transition: var(--transition-colors);
---button-font-weight: 500;
+--button-font-weight: 600;
 
 /* Primary */
 --button-primary-bg: var(--primary);
@@ -310,21 +315,21 @@ Based on 4px base unit, following Tailwind conventions:
 
 ```css
 /* Common */
---card-radius: var(--radius-xl);
---card-padding: var(--space-6);
+--card-radius: var(--radius);    /* 8px — matches base radius */
+--card-padding: 1.5rem;
 --card-gap: var(--space-4);
 
 /* Default */
 --card-default-bg: var(--card);
 --card-default-fg: var(--card-foreground);
 --card-default-border: var(--border);
---card-default-shadow: var(--shadow-sm);
+--card-default-shadow: none;     /* production: no shadow by default */
 
 /* Interactive */
 --card-interactive-hover-shadow: var(--shadow-md);
 --card-interactive-hover-border: var(--primary-200);
---card-interactive-transition: box-shadow var(--duration-normal) var(--ease-default),
-                                border-color var(--duration-fast) var(--ease-default);
+--card-interactive-transition: box-shadow var(--duration-normal) var(--ease-out),
+                                border-color var(--duration-fast) var(--ease-out);
 
 /* Elevated */
 --card-elevated-shadow: var(--shadow-md);
@@ -531,7 +536,7 @@ All chroma values are capped at 0.090 to prevent browser gamut-mapping inconsist
 |--------------|--------------|------------------|
 | Using `--primary` for warnings | Confuses brand with status | Use `--warning` |
 | Pure white background | Looks generic, no brand cohesion | Use blue-tinted white |
-| Large border radius (16px+) | Doesn't fit industrial precision | Use micro radius (4-8px) |
+| Large border radius (16px+) | Doesn't fit industrial precision | Use precision radius (8px base) |
 | Gray shadows | Feels disconnected | Use slate-toned shadows |
 | Bright saturated colors | Looks cheap, gamut issues | Use muted, sRGB-safe values |
 | Emojis as icons | Unprofessional | Use Lucide icons |
@@ -572,7 +577,7 @@ The main changes:
 
 1. **Primary color**: From neutral gray to Steel Blue (hue 230)
 2. **Background**: From pure white to blue-tinted white
-3. **Border radius**: Reduced from 0.625rem to 0.375rem
+3. **Border radius**: Set to 0.5rem (8px base)
 4. **Shadows**: Added 4-tier system with slate tones
 5. **Animation**: Added standardized duration/easing tokens
 
@@ -589,33 +594,33 @@ The main changes:
 
 ```css
 /* Brand */
---primary: oklch(0.45 0.090 230);  /* Steel Blue - buttons, links */
+--primary: #004d9e;                /* Steel Blue - buttons, links, CTA */
 
 /* Surfaces */
---background: oklch(0.99 0.005 230);  /* Blue-tinted white */
---card: oklch(1 0 0);                  /* Pure white cards */
+--background: #fafafa;             /* Neutral warm white */
+--card: #ffffff;                   /* Pure white cards */
 
 /* Text */
---foreground: oklch(0.15 0.030 230);  /* Near-black with blue tint */
---muted-foreground: oklch(0.50 0.040 230);  /* Secondary text */
+--foreground: #36424a;             /* Body text */
+--muted-foreground: #5f6b73;       /* Secondary text */
 
 /* Status */
---success: oklch(0.60 0.150 145);  /* Green */
---warning: oklch(0.75 0.150 65);   /* Amber */
---error: oklch(0.55 0.200 27);     /* Red */
+--success: #0f7b5f;               /* Green */
+--warning: #d97706;               /* Amber */
+--error: #dc2626;                  /* Red */
 
 /* Radius */
---radius: 0.375rem;  /* 6px base */
+--radius: 0.5rem;  /* 8px base */
 
 /* Shadow */
---shadow-md: 0 4px 6px -1px rgb(15 23 42 / 0.08), ...;
+--shadow-md: 0 4px 6px rgba(0,0,0,0.06), 0 2px 4px rgba(0,0,0,0.03);
 
 /* Animation */
 --duration-fast: 150ms;
---ease-default: cubic-bezier(0.2, 0, 0, 1);
+--ease-out: cubic-bezier(0, 0, 0.2, 1);  /* default easing */
 ```
 
 ---
 
-*Generated by Tianze Design System v1.0*
-*Based on: ui-ux-pro-max + frontend-aesthetics + shadcn-ui*
+*Tianze Design System v1.1 — synced with globals.css (2026-03-19)*
+*Authority: src/app/globals.css*

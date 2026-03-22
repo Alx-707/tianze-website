@@ -61,9 +61,14 @@ export const DYNAMIC_PATHS_CONFIG = Object.freeze({
     pattern: "/blog/[slug]",
     paramName: "slug",
   }),
-  productDetail: Object.freeze({
-    pattern: "/products/[slug]",
-    paramName: "slug",
+  productMarket: Object.freeze({
+    pattern: "/products/[market]",
+    paramName: "market",
+  }),
+  productFamily: Object.freeze({
+    pattern: "/products/[market]/[family]",
+    paramName: "market",
+    paramNames: ["market", "family"] as const,
   }),
 } as const satisfies Record<DynamicPageType, DynamicRoutePattern>);
 

@@ -536,6 +536,7 @@ English
 
 3. 提示下一步
    - "文案定稿完成，可运行 /dwf 进入设计流程"
+   - "注意: 设计阶段会对文案做 i18n 空间验证（预留 30-40%），过长文案可能被标记"
 ```
 
 ---
@@ -584,6 +585,22 @@ English
 ---
 
 ## Section N: ...
+
+---
+
+## Microcopy
+
+### Buttons & CTAs
+| Element | English | Note |
+|---------|---------|------|
+
+### Form Labels
+| Field | Label | Placeholder | Error |
+|-------|-------|-------------|-------|
+
+### States
+| State | Message |
+|-------|---------|
 ```
 
 ---

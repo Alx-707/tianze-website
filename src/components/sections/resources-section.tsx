@@ -1,3 +1,10 @@
+import {
+  type LucideIcon,
+  Award,
+  FileText,
+  FolderOpen,
+  PencilRuler,
+} from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/routing";
 import type { LinkHref } from "@/lib/i18n/route-parsing";
@@ -5,100 +12,15 @@ import { SectionHead } from "@/components/ui/section-head";
 
 const RESOURCE_COUNT = 4;
 
-const ICONS = [
-  /* Catalog */
-  <svg
-    key="catalog"
-    width="20"
-    height="20"
-    viewBox="0 0 20 20"
-    fill="none"
-    aria-hidden
-  >
-    <path
-      d="M3 4h5l2 2h7v10H3V4z"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinejoin="round"
-    />
-  </svg>,
-  /* Specs */
-  <svg
-    key="specs"
-    width="20"
-    height="20"
-    viewBox="0 0 20 20"
-    fill="none"
-    aria-hidden
-  >
-    <rect
-      x="4"
-      y="3"
-      width="12"
-      height="14"
-      rx="1.5"
-      stroke="currentColor"
-      strokeWidth="1.5"
-    />
-    <path
-      d="M7 7h6M7 10h6M7 13h4"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-    />
-  </svg>,
-  /* CAD */
-  <svg
-    key="cad"
-    width="20"
-    height="20"
-    viewBox="0 0 20 20"
-    fill="none"
-    aria-hidden
-  >
-    <rect
-      x="3"
-      y="3"
-      width="14"
-      height="14"
-      rx="2"
-      stroke="currentColor"
-      strokeWidth="1.5"
-    />
-    <path
-      d="M7 13l3-4 3 4"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>,
-  /* Certs */
-  <svg
-    key="certs"
-    width="20"
-    height="20"
-    viewBox="0 0 20 20"
-    fill="none"
-    aria-hidden
-  >
-    <circle cx="10" cy="9" r="5" stroke="currentColor" strokeWidth="1.5" />
-    <path
-      d="M7.5 13.5L7 18l3-1.5L13 18l-.5-4.5"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinejoin="round"
-    />
-  </svg>,
-] as const;
+const ICONS: LucideIcon[] = [FolderOpen, FileText, PencilRuler, Award];
 
 function ResourceCard({
-  icon,
+  Icon,
   title,
   desc,
   link,
 }: {
-  icon: React.ReactNode;
+  Icon: LucideIcon;
   title: string;
   desc: string;
   link: LinkHref;
@@ -106,10 +28,10 @@ function ResourceCard({
   return (
     <Link
       href={link}
-      className="group flex flex-col gap-3 bg-background p-6 transition-colors hover:bg-[var(--primary-50)]"
+      className="group flex flex-col gap-3 bg-background p-6 transition-colors hover:bg-[var(--primary-50)] focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:outline-none"
     >
       <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--primary-light)] text-primary">
-        {icon}
+        <Icon size={20} aria-hidden />
       </div>
       <h3 className="text-[15px] font-semibold leading-snug">{title}</h3>
       <p className="text-sm leading-relaxed text-muted-foreground">{desc}</p>
@@ -125,8 +47,10 @@ export async function ResourcesSection() {
 
   const resources = Array.from({ length: RESOURCE_COUNT }, (_, i) => {
     const key = `item${String(i + 1)}`;
+    // ICONS length matches RESOURCE_COUNT — safe access
+    const Icon = ICONS[i]!;
     return {
-      icon: ICONS[i],
+      Icon,
       title: t(`resources.${key}.title`),
       desc: t(`resources.${key}.desc`),
       link: t(`resources.${key}.link`) as LinkHref,

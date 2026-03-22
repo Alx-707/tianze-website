@@ -44,17 +44,14 @@ describe("HeroSection", () => {
     expect(secondaryLink).toHaveAttribute("href", "/products");
   });
 
-  it("renders 4 proof bar items with values and labels", async () => {
+  it("user sees proof line showing establishment, countries, range, and production data", async () => {
     await renderAsyncComponent(HeroSection());
-    // CountUp items render via AnimatedCounter with aria-label
-    expect(screen.getByLabelText("hero.proof.countries")).toBeInTheDocument();
+    expect(screen.getByText("hero.proof.est")).toBeInTheDocument();
+    expect(screen.getByText("hero.proof.countries")).toBeInTheDocument();
     expect(screen.getByText("hero.proof.countriesLabel")).toBeInTheDocument();
-    // Static items render as text
     expect(screen.getByText("hero.proof.range")).toBeInTheDocument();
     expect(screen.getByText("hero.proof.rangeLabel")).toBeInTheDocument();
     expect(screen.getByText("hero.proof.production")).toBeInTheDocument();
     expect(screen.getByText("hero.proof.productionLabel")).toBeInTheDocument();
-    expect(screen.getByLabelText("hero.proof.est")).toBeInTheDocument();
-    expect(screen.getByText("hero.proof.estLabel")).toBeInTheDocument();
   });
 });

@@ -1,13 +1,13 @@
 import localFont from "next/font/local";
 
 /**
- * Primary sans token
+ * Primary sans token — Figtree (variable, 300-900)
  *
- * Uses the checked-in Geist Sans Latin subset so builds stay deterministic
+ * Uses a checked-in Latin subset so builds stay deterministic
  * without depending on the Google Fonts network path.
  */
 export const figtree = localFont({
-  src: "./GeistSans-Latin.woff2",
+  src: "./Figtree-Latin.woff2",
   variable: "--font-figtree",
   display: "swap",
   preload: true,

@@ -206,12 +206,12 @@ export default async function LocaleLayout({
             <Script
               src="https://unpkg.com/react-scan@0.5.3/dist/auto.global.js"
               crossOrigin="anonymous"
-              strategy="beforeInteractive"
+              strategy="afterInteractive"
             />
             <Script
               src="https://unpkg.com/react-grab@0.1.28/dist/index.global.js"
               crossOrigin="anonymous"
-              strategy="beforeInteractive"
+              strategy="afterInteractive"
             />
             <Script
               // Track the same release line as `react-grab` until this client is

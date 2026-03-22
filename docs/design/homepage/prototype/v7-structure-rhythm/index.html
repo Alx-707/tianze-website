@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tianze Homepage v7 — Structure &amp; Rhythm</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    /* ===== Design Tokens (from globals.css) ===== */
+    :root {
+      --primary: #004d9e;
+      --primary-dark: #003b7a;
+      --primary-light: #e8f0fe;
+      --primary-50: #f0f6ff;
+      --background: #fafafa;
+      --foreground: #36424a;
+      --card: #ffffff;
+      --muted-foreground: #5f6b73;
+      --border: #e2e5e9;
+      --border-light: #ebebeb;
+      --success-light: #ecfdf5;
+      --radius: 8px;
+      --button-radius: 6px;
+      --shadow-border: 0 0 0 1px rgba(0,0,0,0.08);
+      --shadow-card: 0 0 0 1px rgba(0,0,0,0.08), 0px 1px 1px rgba(0,0,0,0.02), 0px 4px 8px rgba(0,0,0,0.04);
+      --ease-out: cubic-bezier(0, 0, 0.2, 1);
+      --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+      --grid-guide: rgba(0,0,0,0.05);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Figtree', -apple-system, sans-serif;
+      background: var(--background);
+      color: var(--foreground);
+      -webkit-font-smoothing: antialiased;
+    }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+    .container { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+
+    /* ===== S3: Spacing Rhythm System ===== */
+    /* 3 tiers instead of uniform py-72px */
+    .spacing-compact   { padding: 40px 0; }   /* Tight: logically connected */
+    .spacing-normal    { padding: 56px 0; }   /* Standard: most content */
+    .spacing-spacious  { padding: 80px 0; }   /* Generous: before CTAs */
+
+    @media (min-width: 768px) {
+      .spacing-compact   { padding: 56px 0; }
+      .spacing-normal    { padding: 72px 0; }
+      .spacing-spacious  { padding: 112px 0; }
+    }
+
+    .section-divider { border-top: 1px solid var(--border-light); }
+
+    /* ===== Change Markers ===== */
+    .change-marker {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      background: #fef3c7;
+      color: #92400e;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-bottom: 12px;
+    }
+    .unchanged-marker {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      background: #f0f1f3;
+      color: #5f6b73;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-bottom: 12px;
+    }
+
+    /* ===== Button ===== */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      padding: 10px 20px;
+      border-radius: var(--button-radius);
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background 150ms var(--ease-out);
+      cursor: pointer;
+      border: none;
+    }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-secondary {
+      background: var(--card);
+      color: var(--foreground);
+      border: 1px solid var(--border);
+    }
+
+    /* ===== Section Head ===== */
+    .section-head { margin-bottom: 36px; }
+    .section-head h2 {
+      font-size: 32px;
+      font-weight: 700;
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+    }
+    .section-head p {
+      margin-top: 8px;
+      max-width: 560px;
+      color: var(--muted-foreground);
+      line-height: 1.6;
+    }
+
+    /* ===== HERO (unchanged structure) ===== */
+    .hero { padding: 40px 0 56px; position: relative; }
+    @media (min-width: 768px) { .hero { padding: 64px 0 72px; } }
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 48px;
+      align-items: center;
+    }
+    @media (min-width: 768px) { .hero-grid { grid-template-columns: 1fr 1fr; } }
+    .hero-eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .hero-eyebrow .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--primary);
+    }
+    .hero-eyebrow span {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--primary);
+    }
+    .hero h1 {
+      margin-top: 16px;
+      font-size: 36px;
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+    }
+    @media (min-width: 768px) {
+      .hero h1 { font-size: 48px; line-height: 1.0; letter-spacing: -0.05em; }
+    }
+    .hero-subtitle {
+      margin-top: 16px;
+      font-size: 18px;
+      color: var(--muted-foreground);
+      max-width: 480px;
+      line-height: 1.6;
+    }
+    .hero-ctas {
+      margin-top: 28px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    /* ===== S4: Proof Line (CHANGED from stat grid) ===== */
+    .proof-line {
+      margin-top: 28px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border-light);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px 20px;
+    }
+    .proof-line .proof-item {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--muted-foreground);
+      letter-spacing: 0.01em;
+    }
+    .proof-line .proof-value {
+      color: var(--foreground);
+      font-weight: 600;
+    }
+    .proof-line .proof-sep {
+      color: var(--border);
+      user-select: none;
+    }
+
+    /* Hero visual placeholder */
+    .hero-visual {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 180px 160px;
+      gap: 12px;
+    }
+    .hero-visual > div {
+      border-radius: var(--radius);
+      background: var(--card);
+      box-shadow: var(--shadow-border);
+    }
+    .hero-visual > div:first-child { grid-column: 1 / -1; }
+
+    /* ===== S1: Chain as Process Flow (CHANGED from card grid) ===== */
+    .process-flow {
+      position: relative;
+    }
+    .process-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    @media (min-width: 768px) {
+      .process-steps {
+        flex-direction: row;
+        align-items: flex-start;
+      }
+    }
+    .process-step {
+      flex: 1;
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      padding: 20px 0;
+      border-bottom: 1px solid var(--border-light);
+    }
+    @media (min-width: 768px) {
+      .process-step {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 12px;
+        padding: 0 12px;
+        border-bottom: none;
+        position: relative;
+      }
+    }
+    .step-number {
+      width: 40px;
+      height: 40px;
+      min-width: 40px;
+      border-radius: 50%;
+      border: 2px solid var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--primary);
+      background: var(--card);
+      position: relative;
+      z-index: 2;
+    }
+    .step-content h3 {
+      font-size: 15px;
+      font-weight: 600;
+      line-height: 1.4;
+    }
+    .step-content p {
+      margin-top: 4px;
+      font-size: 13px;
+      color: var(--muted-foreground);
+      line-height: 1.5;
+    }
+
+    /* Connecting line between steps (desktop only) */
+    @media (min-width: 768px) {
+      .process-step:not(:last-child)::after {
+        content: '';
+        position: absolute;
+        top: 20px;
+        left: calc(50% + 28px);
+        right: calc(-50% + 28px);
+        height: 2px;
+        background: var(--border);
+        z-index: 1;
+      }
+    }
+
+    /* Mobile: vertical connecting line */
+    @media (max-width: 767px) {
+      .process-steps {
+        padding-left: 20px;
+        position: relative;
+      }
+      .process-steps::before {
+        content: '';
+        position: absolute;
+        left: 39px;
+        top: 40px;
+        bottom: 40px;
+        width: 2px;
+        background: var(--border);
+      }
+    }
+
+    .process-stats {
+      margin-top: 24px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .stat-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--success-light);
+      border: 1px solid #d1fae5;
+      border-radius: var(--radius);
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    .stat-badge svg { color: #059669; }
+
+    /* ===== Products (unchanged) ===== */
+    .products-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+    @media (min-width: 640px) { .products-grid { grid-template-columns: 1fr 1fr; } }
+    .product-card {
+      background: var(--card);
+      padding: 24px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-card);
+      transition: transform 150ms var(--ease-out), box-shadow 150ms var(--ease-out);
+    }
+    .product-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 0 1px var(--primary), 0 0 0 4px rgba(0,77,158,0.12);
+    }
+    .product-tag {
+      display: inline-block;
+      background: var(--primary-light);
+      color: var(--primary);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 4px;
+    }
+    .product-card h3 {
+      margin-top: 12px;
+      font-size: 18px;
+      font-weight: 600;
+    }
+    .product-specs {
+      margin-top: 12px;
+      list-style: none;
+    }
+    .product-specs li {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 14px;
+      color: var(--muted-foreground);
+      padding: 3px 0;
+    }
+    .product-specs li::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      min-width: 6px;
+      border-radius: 50%;
+      background: rgba(95,107,115,0.4);
+      margin-top: 7px;
+    }
+    .product-footer {
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border-light);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .product-footer .standard {
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      color: var(--muted-foreground);
+    }
+    .product-footer a {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--primary);
+      text-decoration: none;
+    }
+    .product-footer a:hover { text-decoration: underline; }
+
+    /* ===== Resources (unchanged) ===== */
+    .resources-grid-wrapper {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: var(--border);
+    }
+    .resources-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1px;
+    }
+    @media (min-width: 640px) { .resources-grid { grid-template-columns: 1fr 1fr; } }
+    @media (min-width: 1024px) { .resources-grid { grid-template-columns: repeat(4, 1fr); } }
+    .resource-card {
+      background: var(--background);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: background 150ms var(--ease-out);
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+    }
+    .resource-card:hover { background: var(--primary-50); }
+    .resource-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius);
+      background: var(--primary-light);
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .resource-card h3 { font-size: 15px; font-weight: 600; }
+    .resource-card p { font-size: 14px; color: var(--muted-foreground); line-height: 1.5; }
+    .resource-arrow {
+      margin-top: auto;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--primary);
+      transition: transform 150ms var(--ease-out);
+    }
+    .resource-card:hover .resource-arrow { transform: translateX(4px); }
+
+    /* ===== S5: SampleCTA (CHANGED — enhanced) ===== */
+    .sample-cta-section {
+      position: relative;
+    }
+    .sample-cta {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      padding: 48px 40px;
+      border-radius: 12px;
+      background: var(--primary-50);
+      border: 1px solid rgba(0,77,158,0.08);
+      overflow: hidden;
+    }
+    @media (min-width: 640px) {
+      .sample-cta {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        padding: 56px 48px;
+      }
+    }
+    .sample-cta h2 {
+      font-size: 28px;
+      font-weight: 700;
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+    }
+    @media (min-width: 768px) {
+      .sample-cta h2 { font-size: 32px; }
+    }
+    .sample-cta .sample-desc {
+      margin-top: 8px;
+      font-size: 15px;
+      color: var(--muted-foreground);
+      max-width: 420px;
+      line-height: 1.6;
+    }
+    .sample-cta .sample-trust {
+      margin-top: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--muted-foreground);
+      letter-spacing: 0.02em;
+    }
+    /* Decorative crosshair accent */
+    .sample-cta::before {
+      content: '';
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      width: 24px;
+      height: 24px;
+      border-top: 2px solid rgba(0,77,158,0.15);
+      border-right: 2px solid rgba(0,77,158,0.15);
+    }
+    .sample-cta::after {
+      content: '';
+      position: absolute;
+      bottom: 16px;
+      left: 16px;
+      width: 24px;
+      height: 24px;
+      border-bottom: 2px solid rgba(0,77,158,0.15);
+      border-left: 2px solid rgba(0,77,158,0.15);
+    }
+
+    /* ===== Scenarios (unchanged) ===== */
+    .scenarios-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+    @media (min-width: 768px) { .scenarios-grid { grid-template-columns: repeat(3, 1fr); } }
+    .scenario-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-card);
+      overflow: hidden;
+      transition: transform 150ms var(--ease-out), box-shadow 150ms var(--ease-out);
+    }
+    .scenario-card:hover { transform: translateY(-2px); }
+    .scenario-img {
+      height: 160px;
+      background: linear-gradient(135deg, #e2e5e9, #e2e5e9cc);
+    }
+    .scenario-body { padding: 20px; }
+    .scenario-body h3 { font-size: 18px; font-weight: 700; }
+    .scenario-body > p { margin-top: 8px; font-size: 14px; color: var(--muted-foreground); }
+    .scenario-quote {
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border-light);
+      font-size: 13px;
+      font-style: italic;
+      color: var(--muted-foreground);
+    }
+
+    /* ===== S2: Quality as Stacked List (CHANGED from card grid) ===== */
+    .commitment-list {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .commitment-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      padding: 20px 24px;
+      background: var(--card);
+      transition: background 150ms var(--ease-out);
+    }
+    .commitment-item:hover { background: var(--primary-50); }
+    .commitment-item:not(:last-child) {
+      border-bottom: 1px solid var(--border-light);
+    }
+    .commitment-icon {
+      width: 40px;
+      height: 40px;
+      min-width: 40px;
+      border-radius: var(--radius);
+      background: var(--primary-light);
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .commitment-text h3 {
+      font-size: 15px;
+      font-weight: 600;
+    }
+    .commitment-text p {
+      margin-top: 2px;
+      font-size: 13px;
+      color: var(--muted-foreground);
+      line-height: 1.5;
+    }
+    .cert-badges {
+      margin-top: 24px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .cert-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(0,0,0,0.03);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .cert-badge svg { color: var(--primary); }
+    .logo-wall {
+      margin-top: 32px;
+      height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      font-size: 14px;
+      color: var(--muted-foreground);
+    }
+
+    /* ===== Final CTA (unchanged) ===== */
+    .final-cta {
+      background: var(--primary);
+      text-align: center;
+    }
+    .final-cta h2 {
+      font-size: 36px;
+      font-weight: 700;
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+      color: #fff;
+    }
+    .final-cta .desc {
+      margin-top: 16px;
+      max-width: 560px;
+      margin-left: auto;
+      margin-right: auto;
+      color: rgba(255,255,255,0.9);
+      line-height: 1.6;
+    }
+    .final-cta .ctas {
+      margin-top: 32px;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .btn-on-dark {
+      background: #fff;
+      color: var(--primary);
+      font-weight: 600;
+      padding: 12px 24px;
+      border-radius: var(--button-radius);
+      text-decoration: none;
+      font-size: 14px;
+    }
+    .btn-ghost-dark {
+      background: transparent;
+      color: rgba(255,255,255,0.9);
+      border: 1px solid rgba(255,255,255,0.3);
+      padding: 12px 24px;
+      border-radius: var(--button-radius);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    .final-cta .trust {
+      margin-top: 24px;
+      font-size: 13px;
+      color: rgba(255,255,255,0.75);
+    }
+
+    /* Check icon inline */
+    .icon-check { display: inline-flex; }
+  </style>
+</head>
+<body>
+
+<!-- ============================================================
+     HERO SECTION (structure unchanged)
+     Change: S4 — ProofBar redesigned as inline proof line
+     ============================================================ -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-grid">
+      <div>
+        <span class="unchanged-marker">Hero — unchanged</span>
+        <span class="change-marker">S4 — Proof Line</span>
+
+        <div class="hero-eyebrow">
+          <span class="dot"></span>
+          <span>ISO 9001 Certified Manufacturer</span>
+        </div>
+
+        <h1>PVC Conduit Bends &amp; Fittings. Factory Direct.</h1>
+
+        <p class="hero-subtitle">
+          From the manufacturer that designs and builds its own bending machines.
+          Full vertical integration from equipment R&D to finished product.
+        </p>
+
+        <div class="hero-ctas">
+          <a href="#" class="btn btn-primary">Get a Quote</a>
+          <a href="#" class="btn btn-secondary">View Product Catalog</a>
+        </div>
+
+        <!-- S4: CHANGED — Proof Line replaces stat grid -->
+        <div class="proof-line">
+          <span class="proof-item"><span class="proof-value">Est. 2006</span></span>
+          <span class="proof-sep">·</span>
+          <span class="proof-item"><span class="proof-value">20+</span> Countries</span>
+          <span class="proof-sep">·</span>
+          <span class="proof-item"><span class="proof-value">16–168mm</span> Range</span>
+          <span class="proof-sep">·</span>
+          <span class="proof-item"><span class="proof-value">24/7</span> Production</span>
+        </div>
+      </div>
+
+      <div class="hero-visual">
+        <div></div>
+        <div></div>
+        <div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================
+     S1: CHAIN SECTION — Process Flow (CHANGED from card grid)
+     S3: spacing-compact (tighter — logically connected to hero)
+     ============================================================ -->
+<section class="section-divider spacing-compact">
+  <div class="container">
+    <span class="change-marker">S1 — Process Flow</span>
+    <span class="change-marker">S3 — Compact spacing</span>
+
+    <div class="section-head">
+      <h2>Full-Chain Control. All In-House.</h2>
+      <p>We design and build our own bending machines. That upstream control is how we maintain consistent quality from raw material to finished conduit.</p>
+    </div>
+
+    <div class="process-flow">
+      <div class="process-steps">
+        <div class="process-step">
+          <div class="step-number mono">01</div>
+          <div class="step-content">
+            <h3>Bending Machine R&amp;D</h3>
+            <p>Proprietary equipment design and engineering</p>
+          </div>
+        </div>
+        <div class="process-step">
+          <div class="step-number mono">02</div>
+          <div class="step-content">
+            <h3>Equipment Manufacturing</h3>
+            <p>In-house assembly and precision calibration</p>
+          </div>
+        </div>
+        <div class="process-step">
+          <div class="step-number mono">03</div>
+          <div class="step-content">
+            <h3>Mold Fabrication</h3>
+            <p>Custom tooling with rapid turnaround</p>
+          </div>
+        </div>
+        <div class="process-step">
+          <div class="step-number mono">04</div>
+          <div class="step-content">
+            <h3>Conduit Production</h3>
+            <p>24/7 extrusion and bending operations</p>
+          </div>
+        </div>
+        <div class="process-step">
+          <div class="step-number mono">05</div>
+          <div class="step-content">
+            <h3>Quality Control</h3>
+            <p>Batch documentation and traceability</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="process-stats">
+      <div class="stat-badge">
+        <svg class="icon-check" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        Patented bending technology
+      </div>
+      <div class="stat-badge">
+        <svg class="icon-check" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        5-step vertical integration
+      </div>
+      <div class="stat-badge">
+        <svg class="icon-check" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        In-house mold manufacturing
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================
+     PRODUCTS SECTION (unchanged)
+     S3: spacing-normal
+     ============================================================ -->
+<section class="section-divider spacing-normal">
+  <div class="container">
+    <span class="unchanged-marker">Products — unchanged</span>
+    <span class="change-marker">S3 — Normal spacing</span>
+
+    <div class="section-head" style="display:flex; justify-content:space-between; align-items:flex-end;">
+      <div>
+        <h2>Product Lines</h2>
+        <p>Four categories covering 16mm to 168mm diameter. Custom OD, wall thickness, and length available.</p>
+      </div>
+      <a href="#" class="btn btn-secondary">Full Catalog</a>
+    </div>
+
+    <div class="products-grid">
+      <div class="product-card">
+        <span class="product-tag">Core Product</span>
+        <h3>Standard PVC Conduit Bends</h3>
+        <ul class="product-specs">
+          <li>90°, 45°, and custom bend angles</li>
+          <li>Schedule 40 & Schedule 80 wall thickness</li>
+          <li>16mm to 168mm outer diameter range</li>
+        </ul>
+        <div class="product-footer">
+          <span class="standard">ASTM · UL651</span>
+          <a href="#">Standard PVC Conduit Bends →</a>
+        </div>
+      </div>
+      <div class="product-card">
+        <span class="product-tag">Push-Fit Design</span>
+        <h3>Bell End & Expansion Joints</h3>
+        <ul class="product-specs">
+          <li>Double-socket integrated design</li>
+          <li>No separate couplings required</li>
+          <li>30% faster field installation</li>
+        </ul>
+        <div class="product-footer">
+          <span class="standard">ASTM · SCH40/80</span>
+          <a href="#">Bell End & Expansion Joints →</a>
+        </div>
+      </div>
+      <div class="product-card">
+        <span class="product-tag">AU Standard</span>
+        <h3>Flared Fittings</h3>
+        <ul class="product-specs">
+          <li>AS/NZS 2053 aligned flared entry</li>
+          <li>Reduces cable abrasion during pull</li>
+          <li>Smooth internal surface finish</li>
+        </ul>
+        <div class="product-footer">
+          <span class="standard">AS/NZS 2053</span>
+          <a href="#">Flared Fittings →</a>
+        </div>
+      </div>
+      <div class="product-card">
+        <span class="product-tag">Low MOQ</span>
+        <h3>Custom & OEM Projects</h3>
+        <ul class="product-specs">
+          <li>Custom angles, OD, and wall thickness</li>
+          <li>Private labeling and packaging</li>
+          <li>Prototype to mass production support</li>
+        </ul>
+        <div class="product-footer">
+          <span class="standard">Per your spec</span>
+          <a href="#">Custom & OEM Projects →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================
+     RESOURCES SECTION (unchanged)
+     S3: spacing-normal
+     ============================================================ -->
+<section class="section-divider spacing-normal">
+  <div class="container">
+    <span class="unchanged-marker">Resources — unchanged</span>
+
+    <div class="section-head">
+      <h2>Product Resources</h2>
+      <p>Technical documentation, CAD files, and certification details for engineering and procurement teams.</p>
+    </div>
+
+    <div class="resources-grid-wrapper">
+      <div class="resources-grid">
+        <a href="#" class="resource-card">
+          <div class="resource-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 4h4l3 3h7v13H5V4z"/></svg>
+          </div>
+          <h3>Product Catalog</h3>
+          <p>Complete product listings with dimensions, materials, and ordering codes.</p>
+          <span class="resource-arrow">→</span>
+        </a>
+        <a href="#" class="resource-card">
+          <div class="resource-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 10h8M8 14h5"/></svg>
+          </div>
+          <h3>Technical Specifications</h3>
+          <p>Detailed datasheets with tolerances, material grades, and test reports.</p>
+          <span class="resource-arrow">→</span>
+        </a>
+        <a href="#" class="resource-card">
+          <div class="resource-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 17l10 5 10-5M2 12l10 5 10-5M12 2L2 7l10 5 10-5L12 2z"/></svg>
+          </div>
+          <h3>CAD Downloads</h3>
+          <p>2D and 3D drawings in DWG, STEP, and IGES formats.</p>
+          <span class="resource-arrow">→</span>
+        </a>
+        <a href="#" class="resource-card">
+          <div class="resource-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M8.5 13.5L8 21l4-2 4 2-.5-7.5"/></svg>
+          </div>
+          <h3>Certifications</h3>
+          <p>ISO 9001, test reports, and compliance documentation.</p>
+          <span class="resource-arrow">→</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================
+     S5: SAMPLE CTA (CHANGED — enhanced visual weight)
+     S3: spacing-spacious (generous before CTA)
+     ============================================================ -->
+<section class="spacing-spacious sample-cta-section">
+  <div class="container">
+    <span class="change-marker">S5 — Enhanced CTA</span>
+    <span class="change-marker">S3 — Spacious spacing</span>
+
+    <div class="sample-cta">
+      <div>
+        <h2>Test Before You Commit.</h2>
+        <p class="sample-desc">Verify the quality yourself. Free samples ship within 3 business days — you only pay freight.</p>
+        <p class="sample-trust mono">Free samples · 3-day turnaround · You pay freight only</p>
+      </div>
+      <a href="#" class="btn btn-primary" style="padding: 14px 28px; font-size: 15px; flex-shrink: 0;">Request Free Samples</a>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================
+     SCENARIOS SECTION (unchanged)
+     S3: spacing-normal
+     ============================================================ -->
+<section class="spacing-normal">
+  <div class="container">
+    <span class="unchanged-marker">Scenarios — unchanged</span>
+
+    <div class="section-head">
+      <h2>Where Our Conduits Work</h2>
+      <p>Field-proven in construction, infrastructure, and industrial installations across 20+ countries.</p>
+    </div>
+
+    <div class="scenarios-grid">
+      <div class="scenario-card">
+        <div class="scenario-img"></div>
+        <div class="scenario-body">
+          <h3>Underground Pre-Burial</h3>
+          <p>Pre-bent conduits for direct burial. Consistent bend radius eliminates field cracking.</p>
+          <div class="scenario-quote">"The bends arrived ready to install. Saved us 2 days on site." — Project Manager, UAE</div>
+        </div>
+      </div>
+      <div class="scenario-card">
+        <div class="scenario-img"></div>
+        <div class="scenario-body">
+          <h3>Commercial &amp; Data Center</h3>
+          <p>Complete conduit solutions for high-density electrical infrastructure.</p>
+          <div class="scenario-quote">"Consistent quality across 3 data center builds." — Project Director, UAE</div>
+        </div>
+      </div>
+      <div class="scenario-card">
+        <div class="scenario-img"></div>
+        <div class="scenario-body">
+          <h3>Municipal Infrastructure</h3>
+          <p>Up to 168mm diameter for underground cable protection.</p>
+          <div class="scenario-quote">"Big pipes, tight tolerances. They delivered." — City Engineer, SE Asia</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================
+     S2: QUALITY SECTION — Stacked List (CHANGED from card grid)
+     S3: spacing-normal
+     ============================================================ -->
+<section class="spacing-normal">
+  <div class="container">
+    <span class="change-marker">S2 — Stacked List</span>
+
+    <div class="section-head">
+      <h2>Our Commitments</h2>
+      <p>Written guarantees backed by process control and documentation.</p>
+    </div>
+
+    <div class="commitment-list">
+      <div class="commitment-item">
+        <div class="commitment-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <div class="commitment-text">
+          <h3>48-Hour Drawings</h3>
+          <p>Technical drawings delivered within 2 business days of spec confirmation.</p>
+        </div>
+      </div>
+      <div class="commitment-item">
+        <div class="commitment-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        </div>
+        <div class="commitment-text">
+          <h3>Batch Traceability</h3>
+          <p>Every shipment documented with material source and QC test records.</p>
+        </div>
+      </div>
+      <div class="commitment-item">
+        <div class="commitment-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+        </div>
+        <div class="commitment-text">
+          <h3>Export-Ready Packaging</h3>
+          <p>Palletized, labeled, and optimized for container loading.</p>
+        </div>
+      </div>
+      <div class="commitment-item">
+        <div class="commitment-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <div class="commitment-text">
+          <h3>Dedicated Contact</h3>
+          <p>Single point of contact from quotation through delivery and after-sales.</p>
+        </div>
+      </div>
+      <div class="commitment-item">
+        <div class="commitment-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        </div>
+        <div class="commitment-text">
+          <h3>Flexible MOQ</h3>
+          <p>Low minimums for first orders. Scale volumes as your projects grow.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="cert-badges">
+      <div class="cert-badge">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        ISO 9001:2015
+      </div>
+      <div class="cert-badge">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        UL651 / SCH40-80
+      </div>
+      <div class="cert-badge">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        AS/NZS 2053
+      </div>
+      <div class="cert-badge">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        ASTM Standards
+      </div>
+    </div>
+
+    <div class="logo-wall">Customer and partner logo placeholders</div>
+  </div>
+</section>
+
+
+<!-- ============================================================
+     FINAL CTA (unchanged)
+     S3: spacing-spacious
+     ============================================================ -->
+<section class="final-cta spacing-spacious">
+  <div class="container">
+    <span class="unchanged-marker" style="background:rgba(255,255,255,0.15);color:rgba(255,255,255,0.7);">FinalCTA — unchanged</span>
+    <span class="change-marker" style="background:rgba(255,200,50,0.2);color:rgba(255,200,50,0.9);">S3 — Spacious spacing</span>
+
+    <h2>Ready to Get Started?</h2>
+    <p class="desc">Get a quote, request samples, or book a technical consultation. We respond within 24 hours.</p>
+    <div class="ctas">
+      <a href="#" class="btn-on-dark">Get Factory-Direct Quote</a>
+      <a href="#" class="btn-ghost-dark">Book Technical Consultation</a>
+    </div>
+    <p class="trust">24-hour response · Factory direct · 20+ countries served</p>
+  </div>
+</section>
+
+</body>
+</html>

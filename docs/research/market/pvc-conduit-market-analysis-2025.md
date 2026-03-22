@@ -41,7 +41,7 @@ Tianze operates in a high-growth global market with strong tailwinds from infras
 ### Serviceable Addressable Market (SAM)
 
 Applying filters:
-- Geographic focus: Export markets (100+ countries) + China domestic
+- Geographic focus: Export markets (20+ countries) + China domestic
 - Product category: PVC conduit fittings (electrical applications)
 - Customer segment: B2B distributors, contractors, OEM
 
@@ -94,7 +94,7 @@ Based on:
 | **Vertical Integration** | Own bending machine manufacturing — cost control, quality assurance |
 | **Technical Expertise** | Not a trader; genuine manufacturing know-how |
 | **Cost Position** | China manufacturing base |
-| **Export Experience** | 100+ countries served |
+| **Export Experience** | 20+ countries served |
 | **Agility** | Mid-size company, faster decision-making |
 
 ---

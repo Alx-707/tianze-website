@@ -347,7 +347,7 @@ describe("LanguageToggle Integration Tests", () => {
     });
 
     it("should preserve current pathname during language switch", async () => {
-      const testPaths = ["/about", "/contact", "/products/item-1"];
+      const testPaths = ["/about", "/contact", "/faq"];
 
       for (const path of testPaths) {
         mockUsePathname.mockReturnValue(path);
@@ -366,19 +366,16 @@ describe("LanguageToggle Integration Tests", () => {
       }
     });
 
-    it("should handle complex pathnames with parameters", async () => {
+    it("should handle product catalog dynamic routes", async () => {
       mockUsePathname.mockReturnValue(
-        "/products/category/electronics?sort=price",
+        "/products/north-america/conduit-sweeps-elbows",
       );
 
       render(<LanguageToggle />);
 
       const links = screen.getAllByTestId(/language-link-/);
       links.forEach((link) => {
-        expect(link).toHaveAttribute(
-          "href",
-          "/products/category/electronics?sort=price",
-        );
+        expect(link).toHaveAttribute("href", "/products/[market]/[family]");
       });
     });
   });

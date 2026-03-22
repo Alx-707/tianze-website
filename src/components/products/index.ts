@@ -1,3 +1,8 @@
+// Catalog components
+export { CatalogBreadcrumb } from "@/components/products/catalog-breadcrumb";
+export { MarketSeriesCard } from "@/components/products/market-series-card";
+export { FamilyCard } from "@/components/products/family-card";
+
 // Product display components
 export {
   ProductCard,

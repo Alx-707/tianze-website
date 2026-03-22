@@ -23,10 +23,11 @@ export type PageType =
   | "terms";
 
 // 动态路由类型定义
-export type DynamicPageType = "blogDetail" | "productDetail";
+export type DynamicPageType = "blogDetail" | "productMarket" | "productFamily";
 
 // 动态路由路径模式
 export interface DynamicRoutePattern {
   pattern: string;
   paramName: string;
+  paramNames?: readonly string[];
 }
