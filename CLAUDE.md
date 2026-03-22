@@ -2,7 +2,7 @@
 
 ## Project
 
-**Tianze (天泽管业)** — PVC conduit fittings manufacturer based in Lianyungang, Jiangsu. Exports to 100+ countries.
+**Tianze (天泽管业)** — PVC conduit fittings manufacturer based in Lianyungang, Jiangsu. Exports to 20+ countries.
 
 **Goal**: Inquiry conversion + product showcase for overseas buyers selecting suppliers.
 
@@ -91,6 +91,41 @@ Project-specific rules in `.claude/rules/` — read when relevant:
 - `testing.md` — Vitest/Playwright standards, mock system
 - `threat-modeling.md` — STRIDE analysis for API routes
 - `ui-system.md` — shadcn/ui, Tailwind v4, image optimization
+
+## Design Context
+
+### Users
+Overseas B2B buyers (distributors, importers, contractors) evaluating PVC conduit fittings suppliers. They visit the site during supplier comparison — needing quick confidence in factory capability, product range, and communication reliability. Job to be done: "Find a trustworthy manufacturer I can start a trial order with."
+
+### Brand Personality
+**Precise. Substantial. Trustworthy.**
+
+Voice: Technical authority with engineering confidence. Not salesy, not boastful — let the manufacturing capability speak. Tone conveys "we make the machines that make the pipes" gravitas.
+
+Emotional goals: Professional confidence, engineering credibility, reliability assurance.
+
+### Aesthetic Direction
+**Industrial Steel Blue + Vercel craft.** Primary `#004d9e` (Steel Blue) for CTA and brand. Neutral gray scale for text and structure. Figtree for modern, clean typography; JetBrains Mono for specs/data.
+
+- **Theme**: Light mode primary (dark mode tokens exist but not primary focus)
+- **References**: Swagelok (B2B industrial structure); Linear/Vercel (modern digital craft, shadow-border technique)
+- **Anti-references**: Alibaba storefront aesthetic, generic SaaS templates, oversaturated colors
+- **Radius**: 8px base (Vercel precision), buttons 6px
+- **Motion**: ease-out default, spring easing for hero entrances. Interactions < 300ms
+
+### Design Principles
+1. **Substance over decoration** — Every visual element must communicate manufacturing capability or product quality. No decorative flourishes.
+2. **Precision communicates quality** — Consistent spacing, shadow-border technique, clean grid. The site's visual precision reflects the factory's manufacturing precision.
+3. **Engineering as identity** — Grid lines, monospace specs, technical callouts are the decorative language — borrowed from engineering drawings, not design trends.
+4. **Restraint signals confidence** — Limited color palette, controlled animation, no visual noise. A factory that makes its own machines doesn't need to shout.
+5. **Function drives form** — Every interaction serves inquiry conversion or product understanding. If it doesn't help the buyer decide, remove it.
+
+### Design System References
+- Production truth: `src/app/globals.css` (always authoritative)
+- Token spec: `docs/design/system/TIANZE-DESIGN-TOKENS.md`
+- Motion: `docs/design/system/MOTION-PRINCIPLES.md`
+- Grid: `docs/design/system/GRID-SYSTEM.md`
+- Page Patterns: `docs/design/system/PAGE-PATTERNS.md`
 
 ## Error-Driven Rules
 

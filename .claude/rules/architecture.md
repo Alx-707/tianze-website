@@ -56,6 +56,7 @@ For LCP-critical content, avoid `dynamic` and use direct import.
 | Radix UI + dynamic | `ssr: false` (see above) |
 | Date/Time rendering | Use `useEffect` in Client Component |
 | Invalid HTML nesting (div inside p) | Fix DOM structure |
+| `next/script` `beforeInteractive` + CSP nonce | Use `afterInteractive` or `lazyOnload` |
 
 ## Middleware / Proxy
 

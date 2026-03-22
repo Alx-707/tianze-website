@@ -68,7 +68,7 @@ content/
 
 ### 字体与排版
 - **@tailwindcss/typography 0.5.19** - 排版系统
-- **next/font/local** - 本地字体（Geist Sans Latin 子集）
+- **next/font/local** - 本地字体（Figtree Latin 子集）
 - **PingFang SC** - 中文系统字体
 - **智能字体回退** - 中英文混排优化
 
@@ -305,7 +305,7 @@ messages/              # next-intl 国际化文件
 ### 设计系统
 - **主题系统** - Light/Dark/System 三模式切换
 - **组件库** - shadcn/ui New York 风格
-- **字体系统** - Geist Sans + Geist Mono + 中文字体回退
+- **字体系统** - Figtree + 系统 monospace + 中文字体回退
 - **命名规范** - 组件：PascalCase，文件：kebab-case，变量：camelCase
 
 ## 11. 配置与最佳实践

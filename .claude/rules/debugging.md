@@ -14,6 +14,7 @@ Common causes:
 - Browser APIs in SSR (`window`, `localStorage`)
 - Date/time rendering without client-side `useEffect`
 - Radix UI + `dynamic()` without `ssr: false`
+- `next/script` with `strategy="beforeInteractive"` + CSP nonce middleware → nonce is server-only, client sees `undefined`. Fix: use `afterInteractive` or `lazyOnload`
 
 ### Cache Components Errors
 - `headers()`/`cookies()` in `"use cache"` → Move to Suspense boundary
