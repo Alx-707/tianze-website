@@ -3,32 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { Button } from "@/components/ui/button";
 import { DesktopDecorationGate } from "@/components/grid/desktop-decoration-gate";
 import { HeroGuideOverlay } from "@/components/grid";
-import { HeroProofCounter } from "@/components/sections/hero-proof-counter";
 import { Link } from "@/i18n/routing";
-
-const PROOF_COUNTRIES_END = 20;
-const PROOF_EST_END = 2006;
-
-interface ProofItemConfig {
-  valueKey: string;
-  labelKey: string;
-  countUp?: { end: number; suffix?: string };
-}
-
-const PROOF_ITEMS: ProofItemConfig[] = [
-  {
-    valueKey: "hero.proof.countries",
-    labelKey: "hero.proof.countriesLabel",
-    countUp: { end: PROOF_COUNTRIES_END, suffix: "+" },
-  },
-  { valueKey: "hero.proof.range", labelKey: "hero.proof.rangeLabel" },
-  { valueKey: "hero.proof.production", labelKey: "hero.proof.productionLabel" },
-  {
-    valueKey: "hero.proof.est",
-    labelKey: "hero.proof.estLabel",
-    countUp: { end: PROOF_EST_END },
-  },
-];
 
 function HeroEyebrow({ text }: { text: string }) {
   return (
@@ -41,27 +16,41 @@ function HeroEyebrow({ text }: { text: string }) {
   );
 }
 
-function ProofBar({ t }: { t: Awaited<ReturnType<typeof getTranslations>> }) {
+function ProofLine({ t }: { t: Awaited<ReturnType<typeof getTranslations>> }) {
   return (
-    <div className="hero-stagger-5 mt-7 flex flex-wrap gap-6 border-t border-border-light pt-6 md:gap-8">
-      {PROOF_ITEMS.map(({ valueKey, labelKey, countUp }) => (
-        <div key={valueKey} className="flex flex-col gap-1.5">
-          <span className="text-xl font-semibold tabular-nums">
-            {countUp ? (
-              <HeroProofCounter
-                ariaLabel={t(valueKey)}
-                to={countUp.end}
-                {...(countUp.suffix ? { suffix: countUp.suffix } : {})}
-              />
-            ) : (
-              t(valueKey)
-            )}
-          </span>
-          <span className="text-[13px] text-muted-foreground">
-            {t(labelKey)}
-          </span>
-        </div>
-      ))}
+    <div className="hero-stagger-5 mt-7 flex flex-wrap items-center gap-x-5 gap-y-1 border-t border-border-light pt-5 font-mono text-[13px] text-muted-foreground">
+      <span>
+        <span className="font-semibold text-foreground">
+          {t("hero.proof.est")}
+        </span>
+      </span>
+      <span aria-hidden="true" className="text-border">
+        ·
+      </span>
+      <span>
+        <span className="font-semibold text-foreground">
+          {t("hero.proof.countries")}
+        </span>{" "}
+        {t("hero.proof.countriesLabel")}
+      </span>
+      <span aria-hidden="true" className="text-border">
+        ·
+      </span>
+      <span>
+        <span className="font-semibold text-foreground">
+          {t("hero.proof.range")}
+        </span>{" "}
+        {t("hero.proof.rangeLabel")}
+      </span>
+      <span aria-hidden="true" className="text-border">
+        ·
+      </span>
+      <span>
+        <span className="font-semibold text-foreground">
+          {t("hero.proof.production")}
+        </span>{" "}
+        {t("hero.proof.productionLabel")}
+      </span>
     </div>
   );
 }
@@ -69,9 +58,9 @@ function ProofBar({ t }: { t: Awaited<ReturnType<typeof getTranslations>> }) {
 function HeroVisual() {
   return (
     <div className="hero-stagger-6 grid grid-cols-2 grid-rows-[180px_160px] gap-3">
-      <div className="col-span-2 rounded-lg bg-white shadow-border" />
-      <div className="rounded-lg bg-white shadow-border" />
-      <div className="rounded-lg bg-white shadow-border" />
+      <div className="col-span-2 rounded-lg bg-card shadow-border" />
+      <div className="rounded-lg bg-card shadow-border" />
+      <div className="rounded-lg bg-card shadow-border" />
     </div>
   );
 }
@@ -113,7 +102,7 @@ export async function HeroSection() {
             </Button>
           </div>
 
-          <ProofBar t={t} />
+          <ProofLine t={t} />
         </div>
 
         {/* Right column — Visual grid */}

@@ -21,7 +21,7 @@ function ProductCard({
   link: LinkHref;
 }) {
   return (
-    <div className="group rounded-lg bg-background p-6 shadow-card transition-[box-shadow,transform] duration-150 hover:-translate-y-0.5 hover:shadow-[var(--shadow-card-active)]">
+    <div className="group rounded-lg bg-background p-6 shadow-card transition-[box-shadow,transform] duration-150 hover:-translate-y-0.5 hover:shadow-[var(--shadow-card-active)] focus-within:-translate-y-0.5 focus-within:shadow-[var(--shadow-card-active)]">
       <span className="inline-block rounded bg-[var(--primary-light)] px-2.5 py-1 text-xs font-semibold text-primary">
         {tag}
       </span>
@@ -44,7 +44,7 @@ function ProductCard({
         <Link
           href={link}
           prefetch={false}
-          className="text-sm font-medium text-primary hover:underline"
+          className="text-sm font-medium text-primary hover:underline focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:outline-none rounded-sm"
         >
           {title} &rarr;
         </Link>

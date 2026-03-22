@@ -1,50 +1,59 @@
+import { Check } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { SectionHead } from "@/components/ui/section-head";
 
 const STEP_COUNT = 5;
 const STAT_COUNT = 3;
 
-function CheckIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden>
-      <path
-        d="M6 10l3 3 5-6"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function StepCard({
+function ProcessStep({
   num,
   title,
   desc,
+  isLast,
 }: {
   num: string;
   title: string;
   desc: string;
+  isLast: boolean;
 }) {
   return (
-    <div className="bg-background p-6 transition-colors hover:bg-[var(--primary-50)]">
-      <span className="text-sm font-medium tabular-nums text-muted-foreground">
+    <div className="relative flex flex-1 items-start gap-4 py-5 md:flex-col md:items-center md:py-0 md:text-center">
+      {/* Connecting line — horizontal on desktop, vertical on mobile */}
+      {!isLast && (
+        <>
+          {/* Desktop: horizontal line from circle right edge to next circle left edge */}
+          <span
+            aria-hidden="true"
+            className="absolute left-[calc(50%+24px)] top-5 hidden h-0.5 w-[calc(100%-48px)] bg-border md:block"
+          />
+          {/* Mobile: vertical line below circle */}
+          <span
+            aria-hidden="true"
+            className="absolute bottom-0 left-[19px] top-[52px] w-0.5 bg-border md:hidden"
+          />
+        </>
+      )}
+
+      {/* Numbered circle */}
+      <div className="relative z-[1] flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-primary bg-card font-mono text-sm font-semibold text-primary">
         {num}
-      </span>
-      <h3 className="mt-2 text-[15px] font-semibold leading-snug">{title}</h3>
-      <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
-        {desc}
-      </p>
+      </div>
+
+      <div className="md:mt-3">
+        <h3 className="text-[15px] font-semibold leading-snug">{title}</h3>
+        <p className="mt-1 text-[13px] leading-relaxed text-muted-foreground">
+          {desc}
+        </p>
+      </div>
     </div>
   );
 }
 
-function StatCard({ text }: { text: string }) {
+function StatBadge({ text }: { text: string }) {
   return (
     <div className="flex items-center gap-3 rounded-lg border border-[var(--success-light)] bg-[var(--success-light)] px-5 py-4">
       <span className="text-green-600">
-        <CheckIcon />
+        <Check size={20} aria-hidden />
       </span>
       <span className="text-sm font-medium">{text}</span>
     </div>
@@ -68,23 +77,25 @@ export async function ChainSection() {
   );
 
   return (
-    <section className="section-divider py-14 md:py-[72px]">
+    <section className="section-divider py-10 md:py-14">
       <div className="mx-auto max-w-[1080px] px-6">
         <SectionHead title={t("chain.title")} subtitle={t("chain.subtitle")} />
 
-        {/* Steps grid */}
-        <div className="overflow-hidden rounded-lg border bg-border">
-          <div className="grid grid-cols-1 gap-[2px] sm:grid-cols-3 lg:grid-cols-5">
-            {steps.map((step) => (
-              <StepCard key={step.num} {...step} />
-            ))}
-          </div>
+        {/* Process flow */}
+        <div className="flex flex-col md:flex-row">
+          {steps.map((step, i) => (
+            <ProcessStep
+              key={step.num}
+              {...step}
+              isLast={i === STEP_COUNT - 1}
+            />
+          ))}
         </div>
 
         {/* Stats */}
         <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
           {stats.map((text) => (
-            <StatCard key={text} text={text} />
+            <StatBadge key={text} text={text} />
           ))}
         </div>
       </div>

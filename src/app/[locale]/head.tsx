@@ -8,7 +8,7 @@ interface SubsetSource {
   weight: number;
 }
 
-// 注意：项目使用本地字体（Geist Sans/Mono + PingFang SC子集），不需要Google Fonts
+// 注意：项目使用本地字体（Figtree + 系统 monospace + PingFang SC子集），不需要Google Fonts
 // Analytics 连接优化策略：
 // - 仅在生产环境且显式开启开关时使用 preconnect（更激进，可能占用早期连接）
 // - 默认使用 dns-prefetch（更保守，低成本）
@@ -40,7 +40,7 @@ const ANALYTICS_DNS_PREFETCHES: string[] = enableAnalyticsPreconnect
   ? []
   : [ANALYTICS_ORIGIN];
 
-// P2-1 Phase 3：Geist Sans Latin 子集由 next/font/local 自动处理预加载
+// P2-1 Phase 3：Figtree Latin 子集由 next/font/local 自动处理预加载
 // 不再需要手动 preload，避免重复请求
 const GEIST_FONT_PRELOADS: Array<{
   href: string;

@@ -15,7 +15,7 @@ export async function ScenariosSection() {
           {SCENARIO_KEYS.map((key) => (
             <div
               key={key}
-              className="group overflow-hidden rounded-lg bg-white shadow-card transition-[box-shadow,transform] duration-150 hover:-translate-y-0.5 hover:shadow-card-hover"
+              className="group overflow-hidden rounded-lg bg-card shadow-card transition-[box-shadow,transform] duration-150 hover:-translate-y-0.5 hover:shadow-card-hover"
             >
               {/* Image placeholder */}
               <div className="h-40 bg-gradient-to-br from-muted to-muted/60 transition-transform duration-300 group-hover:scale-[1.02]" />
