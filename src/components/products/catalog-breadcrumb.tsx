@@ -13,10 +13,10 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 
-interface CatalogBreadcrumbProps {
-  market?: MarketDefinition;
-  family?: ProductFamilyDefinition;
-}
+type CatalogBreadcrumbProps =
+  | { market?: undefined; family?: undefined }
+  | { market: MarketDefinition; family?: undefined }
+  | { market: MarketDefinition; family: ProductFamilyDefinition };
 
 interface BreadcrumbEntry {
   name: string;
@@ -34,6 +34,11 @@ function buildJsonLd(items: BreadcrumbEntry[]) {
       item: item.url,
     })),
   };
+}
+
+/** Escape JSON string for safe embedding in <script> tags */
+function safeJsonLd(data: ReturnType<typeof buildJsonLd>): string {
+  return JSON.stringify(data).replace(/</g, "\\u003c");
 }
 
 export function CatalogBreadcrumb({ market, family }: CatalogBreadcrumbProps) {
@@ -57,7 +62,7 @@ export function CatalogBreadcrumb({ market, family }: CatalogBreadcrumbProps) {
   if (family) {
     entries.push({
       name: family.label,
-      url: `${canonicalBase}/products/${market?.slug}/${family.slug}`,
+      url: `${canonicalBase}/products/${market.slug}/${family.slug}`,
     });
   }
 
@@ -122,7 +127,7 @@ export function CatalogBreadcrumb({ market, family }: CatalogBreadcrumbProps) {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(buildJsonLd(entries)),
+          __html: safeJsonLd(buildJsonLd(entries)),
         }}
       />
     </>

@@ -1,6 +1,6 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mockNotFound = vi.fn();
 
@@ -49,6 +49,10 @@ vi.mock("@/components/products/catalog-breadcrumb", () => ({
 }));
 
 describe("Product Family Page", () => {
+  beforeEach(() => {
+    mockNotFound.mockClear();
+  });
+
   async function renderPage(market: string, family: string, locale = "en") {
     const { default: FamilyPage } = await import("../page");
     const page = await FamilyPage({

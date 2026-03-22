@@ -63,7 +63,7 @@ export default async function MarketPage({ params }: MarketPageProps) {
   const families = getFamiliesForMarket(marketSlug);
 
   return (
-    <main className="container mx-auto px-4 py-8 md:py-12">
+    <main className="mx-auto max-w-[1080px] px-6 py-8 md:py-12">
       <CatalogBreadcrumb market={market} />
 
       <header className="mb-8 md:mb-12">

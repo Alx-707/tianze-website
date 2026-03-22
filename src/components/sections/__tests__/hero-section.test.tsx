@@ -44,7 +44,7 @@ describe("HeroSection", () => {
     expect(secondaryLink).toHaveAttribute("href", "/products");
   });
 
-  it("renders proof line with all data points", async () => {
+  it("user sees proof line showing establishment, countries, range, and production data", async () => {
     await renderAsyncComponent(HeroSection());
     expect(screen.getByText("hero.proof.est")).toBeInTheDocument();
     expect(screen.getByText("hero.proof.countries")).toBeInTheDocument();

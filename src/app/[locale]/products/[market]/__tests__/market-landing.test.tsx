@@ -1,6 +1,6 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mockNotFound = vi.fn();
 
@@ -57,6 +57,10 @@ vi.mock("@/components/products/family-card", () => ({
 }));
 
 describe("Market Landing Page", () => {
+  beforeEach(() => {
+    mockNotFound.mockClear();
+  });
+
   async function renderPage(market: string, locale = "en") {
     const { default: MarketPage } = await import("../page");
     const page = await MarketPage({
