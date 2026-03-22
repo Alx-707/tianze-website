@@ -63,8 +63,8 @@ describe("CatalogBreadcrumb", () => {
       standardLabel: "UL 651 / ASTM D1785",
       description: "test",
       sizeSystem: "inch" as const,
-      standardIds: [] as string[],
-      familySlugs: [] as string[],
+      standardIds: [],
+      familySlugs: [],
     };
 
     render(<CatalogBreadcrumb market={market} />);
@@ -90,8 +90,8 @@ describe("CatalogBreadcrumb", () => {
       standardLabel: "UL 651 / ASTM D1785",
       description: "test",
       sizeSystem: "inch" as const,
-      standardIds: [] as string[],
-      familySlugs: [] as string[],
+      standardIds: [],
+      familySlugs: [],
     };
     const family = {
       slug: "conduit-sweeps-elbows",
@@ -123,8 +123,8 @@ describe("CatalogBreadcrumb", () => {
       standardLabel: "UL 651 / ASTM D1785",
       description: "test",
       sizeSystem: "inch" as const,
-      standardIds: [] as string[],
-      familySlugs: [] as string[],
+      standardIds: [],
+      familySlugs: [],
     };
 
     const { container } = render(<CatalogBreadcrumb market={market} />);

@@ -38,8 +38,12 @@ describe("MarketSeriesCard", () => {
     standardLabel: "UL 651 / ASTM D1785",
     description: "PVC conduit fittings for North American market.",
     sizeSystem: "inch" as const,
-    standardIds: [] as string[],
-    familySlugs: ["conduit-sweeps-elbows", "couplings", "conduit-pipes"],
+    standardIds: [] as const,
+    familySlugs: [
+      "conduit-sweeps-elbows",
+      "couplings",
+      "conduit-pipes",
+    ] as const,
   };
 
   it("renders market label as heading", async () => {
