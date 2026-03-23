@@ -179,39 +179,39 @@
     },
     "products": {
       "title": "Product Lines",
-      "subtitle": "Four categories covering 16mm to 168mm diameter. Custom OD, wall thickness, and length available.",
-      "cta": "Full Catalog",
+      "subtitle": "From the manufacturer that designs and builds its own bending machines. Full vertical integration from equipment R&D to finished product.",
+      "cta": "View All Products",
       "item1": {
-        "tag": "Core Product",
-        "title": "Standard PVC Conduit Bends",
-        "spec1": "90°, 45°, and custom bend angles",
-        "spec2": "Schedule 40 & Schedule 80 wall thickness",
-        "spec3": "16mm to 168mm outer diameter range",
-        "standard": "ASTM · UL651",
+        "tag": "4 Market Standards",
+        "title": "PVC Conduit Fittings",
+        "spec1": "UL/ASTM, AS/NZS, NOM, IEC series",
+        "spec2": "Bends, couplings, and conduit pipes",
+        "spec3": "16mm to 168mm full size range",
+        "standard": "International Standards",
         "link": "/products"
       },
       "item2": {
-        "tag": "Push-Fit Design",
-        "title": "Bell End & Expansion Joints",
-        "spec1": "Double-socket integrated design",
-        "spec2": "No separate couplings required",
-        "spec3": "30% faster field installation",
-        "standard": "ASTM · SCH40/80",
-        "link": "/products"
+        "tag": "Hospital Logistics",
+        "title": "PETG Pneumatic Tubes",
+        "spec1": "110mm and 160mm outer diameter",
+        "spec2": "Clear, durable PETG material",
+        "spec3": "R650 to R1000 bend radius",
+        "standard": "PETG",
+        "link": "/products/pneumatic-tube-systems"
       },
       "item3": {
-        "tag": "AU Standard",
-        "title": "Flared Fittings",
-        "spec1": "AS/NZS 2053 aligned flared entry",
-        "spec2": "Reduces cable abrasion during pull",
-        "spec3": "Smooth internal surface finish",
-        "standard": "AS/NZS 2053",
-        "link": "/products"
+        "tag": "Core Capability",
+        "title": "Bending Machines",
+        "spec1": "Full-auto and semi-auto models",
+        "spec2": "DN25 to DN160mm pipe range",
+        "spec3": "150-200 pcs/hour production speed",
+        "standard": "Self-developed",
+        "link": "/contact"
       },
       "item4": {
-        "tag": "Low MOQ",
-        "title": "Custom & OEM Projects",
-        "spec1": "Custom angles, OD, and wall thickness",
+        "tag": "Service",
+        "title": "OEM & Custom Manufacturing",
+        "spec1": "Your specifications, our production",
         "spec2": "Private labeling and packaging",
         "spec3": "Prototype to mass production support",
         "standard": "Per your spec",
@@ -946,6 +946,66 @@
     "generic": "Something went wrong. Please try again later.",
     "translationMissing": "Translation not available",
     "loadingFailed": "Failed to load content"
+  },
+  "catalog": {
+    "breadcrumb": {
+      "products": "Products"
+    },
+    "overview": {
+      "title": "Products",
+      "description": "PVC conduit fittings and pipes manufactured to international standards. Select your market to view products by compliance standard.",
+      "byStandard": "By Market Standard",
+      "specialty": "Specialty & Equipment",
+      "equipmentTitle": "Bending Machines",
+      "equipmentDescription": "Self-developed full-auto and semi-auto PVC conduit bending machines. Our core manufacturing capability.",
+      "equipmentCta": "Learn More"
+    },
+    "market": {
+      "familyNav": {
+        "jumpTo": "Jump to"
+      },
+      "technical": {
+        "title": "Technical Properties"
+      },
+      "certifications": {
+        "title": "Certifications & Compliance"
+      },
+      "trade": {
+        "title": "Trade Information",
+        "moq": "Minimum Order",
+        "leadTime": "Lead Time",
+        "supplyCapacity": "Supply Capacity",
+        "packaging": "Packaging",
+        "portOfLoading": "Port of Loading"
+      },
+      "cta": {
+        "heading": "Need {marketLabel} conduit fittings?",
+        "description": "Request a quote or ask about specifications, MOQ, and lead times.",
+        "button": "Request a Quote"
+      }
+    },
+    "specTable": {
+      "size": "Size",
+      "angle": "Angle",
+      "wallThickness": "Wall Thickness",
+      "endType": "End Type",
+      "radius": "Radius",
+      "type": "Type",
+      "length": "Length",
+      "schedule": "Schedule"
+    },
+    "familyCount": "{count} product families",
+    "highlights": {
+      "ul651Certified": "UL 651 Certified",
+      "virginPvc": "100% Virgin PVC",
+      "customAngles": "45°/90°/Custom Angles",
+      "doubleBell": "Double-Bell Design",
+      "secureJoints": "Secure Conduit Joints",
+      "multiSize": "Multi-Size Range",
+      "sch40Sch80": "Schedule 40 & 80",
+      "standardLengths": "Standard Lengths",
+      "straightRuns": "Straight Conduit Runs"
+    }
   },
   "errorBoundary": {
     "title": "An error occurred",

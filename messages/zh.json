@@ -179,39 +179,39 @@
     },
     "products": {
       "title": "产品线",
-      "subtitle": "四大品类覆盖16mm至168mm口径。可定制外径、壁厚和长度。",
-      "cta": "完整目录",
+      "subtitle": "自主研发弯管设备的制造商，从设备研发到成品制造的全产业链垂直整合。",
+      "cta": "查看全部产品",
       "item1": {
-        "tag": "核心产品",
-        "title": "标准PVC电工弯管",
-        "spec1": "90°、45°及自定义弯曲角度",
-        "spec2": "Schedule 40 & Schedule 80 壁厚",
-        "spec3": "16mm至168mm外径范围",
-        "standard": "ASTM · UL651",
+        "tag": "4大市场标准",
+        "title": "PVC电工套管配件",
+        "spec1": "UL/ASTM、AS/NZS、NOM、IEC系列",
+        "spec2": "弯管、接头、直管全系列",
+        "spec3": "16mm至168mm全尺寸覆盖",
+        "standard": "国际标准",
         "link": "/products"
       },
       "item2": {
-        "tag": "免胶设计",
-        "title": "喇叭口与扩口接头",
-        "spec1": "双承口一体化设计",
-        "spec2": "无需额外连接件",
-        "spec3": "现场安装提速30%",
-        "standard": "ASTM · SCH40/80",
-        "link": "/products"
+        "tag": "医院物流",
+        "title": "PETG气动物流管",
+        "spec1": "110mm和160mm外径",
+        "spec2": "高透明、高耐久PETG材质",
+        "spec3": "R650至R1000弯曲半径",
+        "standard": "PETG",
+        "link": "/products/pneumatic-tube-systems"
       },
       "item3": {
-        "tag": "澳标",
-        "title": "扩口管件",
-        "spec1": "符合AS/NZS 2053扩口标准",
-        "spec2": "降低穿线时电缆磨损",
-        "spec3": "内壁光滑处理",
-        "standard": "AS/NZS 2053",
-        "link": "/products"
+        "tag": "核心能力",
+        "title": "弯管设备",
+        "spec1": "全自动和半自动机型",
+        "spec2": "DN25至DN160mm管径范围",
+        "spec3": "150-200件/小时产速",
+        "standard": "自主研发",
+        "link": "/contact"
       },
       "item4": {
-        "tag": "低起订量",
-        "title": "定制与OEM项目",
-        "spec1": "定制角度、外径和壁厚",
+        "tag": "服务",
+        "title": "OEM定制生产",
+        "spec1": "您的规格，我们的产能",
         "spec2": "贴牌包装服务",
         "spec3": "从打样到量产全程支持",
         "standard": "按您的规格",
@@ -946,6 +946,66 @@
     "generic": "出现了一些问题，请稍后重试",
     "translationMissing": "翻译不可用",
     "loadingFailed": "内容加载失败"
+  },
+  "catalog": {
+    "breadcrumb": {
+      "products": "产品中心"
+    },
+    "overview": {
+      "title": "产品中心",
+      "description": "按国际标准生产的PVC电工套管配件。选择您的市场查看符合当地合规标准的产品。",
+      "byStandard": "按市场标准",
+      "specialty": "特种产品与设备",
+      "equipmentTitle": "弯管设备",
+      "equipmentDescription": "自主研发的全自动和半自动PVC弯管机。我们的核心制造能力。",
+      "equipmentCta": "了解更多"
+    },
+    "market": {
+      "familyNav": {
+        "jumpTo": "跳转至"
+      },
+      "technical": {
+        "title": "技术参数"
+      },
+      "certifications": {
+        "title": "认证与合规"
+      },
+      "trade": {
+        "title": "贸易信息",
+        "moq": "最小起订量",
+        "leadTime": "交货周期",
+        "supplyCapacity": "供应能力",
+        "packaging": "包装方式",
+        "portOfLoading": "装运港"
+      },
+      "cta": {
+        "heading": "需要{marketLabel}电工套管配件？",
+        "description": "获取报价或咨询规格、起订量和交期。",
+        "button": "获取报价"
+      }
+    },
+    "specTable": {
+      "size": "尺寸",
+      "angle": "角度",
+      "wallThickness": "壁厚",
+      "endType": "端口类型",
+      "radius": "弯曲半径",
+      "type": "类型",
+      "length": "长度",
+      "schedule": "壁厚等级"
+    },
+    "familyCount": "{count} 个产品系列",
+    "highlights": {
+      "ul651Certified": "UL 651 认证",
+      "virginPvc": "100% 全新料 PVC",
+      "customAngles": "45°/90°/自定义角度",
+      "doubleBell": "双承口设计",
+      "secureJoints": "安全牢固连接",
+      "multiSize": "全尺寸覆盖",
+      "sch40Sch80": "Schedule 40 和 80",
+      "standardLengths": "标准长度",
+      "straightRuns": "直管段"
+    }
   },
   "errorBoundary": {
     "title": "发生错误",
