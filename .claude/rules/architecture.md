@@ -26,9 +26,21 @@ interface PageProps {
 - **Locale layout**: Fonts, metadata, providers
 - **Rule**: Push Client boundaries as low as possible in component tree
 
+## Content Strategy
+
+The project uses **dual content strategies** (details in `.claude/rules/content.md`):
+
+| Content type | Strategy | Location |
+|-------------|----------|----------|
+| Blog, About, FAQ, Legal | MDX | `content/{posts,pages}/{locale}/` |
+| Product catalog (specs, markets, families) | TypeScript constants | `src/constants/product-{catalog,specs,standards}.ts` |
+
+**Decision rule**: Structured/tabular data consumed by multiple components → TypeScript. Narrative/editorial content → MDX.
+
 ## Data Fetching
 
-**Project data**: Cached functions in `src/lib/content/` (e.g., `getAllProductsCached()`)
+**Blog/pages**: Content query system in `src/lib/content-query/`
+**Product catalog**: Direct imports from `src/constants/product-catalog.ts` + `src/constants/product-specs/`
 
 ## Project-Specific Pitfalls
 
@@ -72,6 +84,22 @@ Notes:
 - Re-migrating to `src/proxy.ts` stays a future task after Cloudflare/OpenNext support is verified.
 
 **Compatibility record**: See `docs/known-issues/middleware-to-proxy-migration.md`
+
+## Route Deletion Checklist
+
+When removing any route (page), grep and clean ALL of these:
+
+| Location | What to check |
+|----------|--------------|
+| `src/app/sitemap.ts` | Remove URL generation for deleted route |
+| `src/config/paths/paths-config.ts` | Remove route from `DYNAMIC_PATHS_CONFIG` |
+| `src/config/paths/types.ts` | Remove from `DynamicPageType` union |
+| `src/lib/i18n/route-parsing.ts` | Remove from `DYNAMIC_ROUTE_PATTERNS` |
+| Test files | Remove/update test cases referencing the route |
+| Navigation components | Remove links to the deleted route |
+| `src/constants/` | Remove helper functions for the deleted route's params |
+
+> [2026-03-23] Origin — PR #41 Codex review caught sitemap dead links after family route deletion.
 
 ## Key Files
 
