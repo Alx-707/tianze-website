@@ -1,6 +1,18 @@
 // Catalog components
 export { CatalogBreadcrumb } from "@/components/products/catalog-breadcrumb";
 export { MarketSeriesCard } from "@/components/products/market-series-card";
+export {
+  SpecTable,
+  type SpecTableProps,
+} from "@/components/products/spec-table";
+export {
+  FamilySection,
+  type FamilySectionProps,
+} from "@/components/products/family-section";
+export {
+  StickyFamilyNav,
+  type StickyFamilyNavProps,
+} from "@/components/products/sticky-family-nav";
 
 // Product display components
 export {
