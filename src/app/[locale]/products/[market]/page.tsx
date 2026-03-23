@@ -9,7 +9,6 @@ import {
 } from "@/constants/product-catalog";
 import { SITE_CONFIG } from "@/config/paths";
 import { CatalogBreadcrumb } from "@/components/products/catalog-breadcrumb";
-import { FamilyCard } from "@/components/products/family-card";
 import { routing } from "@/i18n/routing";
 
 export function generateStaticParams() {
@@ -78,11 +77,17 @@ export default async function MarketPage({ params }: MarketPageProps) {
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         {families.map((family) => (
-          <FamilyCard
+          <div
             key={family.slug}
-            family={family}
-            marketSlug={marketSlug}
-          />
+            className="rounded-lg border border-border bg-card p-6 shadow-sm"
+          >
+            <h2 className="mb-2 text-lg font-semibold text-foreground">
+              {family.label}
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              {family.description}
+            </p>
+          </div>
         ))}
       </div>
     </main>

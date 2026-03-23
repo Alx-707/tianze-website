@@ -1,9 +1,6 @@
 import { Link, routing } from "@/i18n/routing";
 import { SITE_CONFIG } from "@/config/paths";
-import type {
-  MarketDefinition,
-  ProductFamilyDefinition,
-} from "@/constants/product-catalog";
+import type { MarketDefinition } from "@/constants/product-catalog";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -14,9 +11,8 @@ import {
 } from "@/components/ui/breadcrumb";
 
 type CatalogBreadcrumbProps =
-  | { market?: undefined; family?: undefined }
-  | { market: MarketDefinition; family?: undefined }
-  | { market: MarketDefinition; family: ProductFamilyDefinition };
+  | { market?: undefined }
+  | { market: MarketDefinition };
 
 interface BreadcrumbEntry {
   name: string;
@@ -41,7 +37,7 @@ function safeJsonLd(data: ReturnType<typeof buildJsonLd>): string {
   return JSON.stringify(data).replace(/</g, "\\u003c");
 }
 
-export function CatalogBreadcrumb({ market, family }: CatalogBreadcrumbProps) {
+export function CatalogBreadcrumb({ market }: CatalogBreadcrumbProps) {
   const { baseUrl } = SITE_CONFIG;
 
   // JSON-LD URLs use default locale for canonical representation
@@ -56,13 +52,6 @@ export function CatalogBreadcrumb({ market, family }: CatalogBreadcrumbProps) {
     entries.push({
       name: market.label,
       url: `${canonicalBase}/products/${market.slug}`,
-    });
-  }
-
-  if (family) {
-    entries.push({
-      name: family.label,
-      url: `${canonicalBase}/products/${market.slug}/${family.slug}`,
     });
   }
 
@@ -94,30 +83,7 @@ export function CatalogBreadcrumb({ market, family }: CatalogBreadcrumbProps) {
             <>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                {family ? (
-                  <BreadcrumbLink asChild>
-                    <Link
-                      href={{
-                        pathname: "/products/[market]",
-                        params: { market: market.slug },
-                      }}
-                    >
-                      {market.label}
-                    </Link>
-                  </BreadcrumbLink>
-                ) : (
-                  <BreadcrumbPage>{market.label}</BreadcrumbPage>
-                )}
-              </BreadcrumbItem>
-            </>
-          )}
-
-          {/* Family */}
-          {family && (
-            <>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>{family.label}</BreadcrumbPage>
+                <BreadcrumbPage>{market.label}</BreadcrumbPage>
               </BreadcrumbItem>
             </>
           )}

@@ -48,14 +48,6 @@ vi.mock("@/components/products/catalog-breadcrumb", () => ({
   CatalogBreadcrumb: () => <nav aria-label="breadcrumb">Breadcrumb</nav>,
 }));
 
-vi.mock("@/components/products/family-card", () => ({
-  FamilyCard: ({ family }: { family: { label: string; slug: string } }) => (
-    <div>
-      <h2>{family.label}</h2>
-    </div>
-  ),
-}));
-
 describe("Market Landing Page", () => {
   beforeEach(() => {
     mockNotFound.mockClear();
