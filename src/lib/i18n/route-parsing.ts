@@ -40,14 +40,6 @@ interface DynamicRoutePattern {
  * // Returns: { pathname: "/blog/[slug]", params: { slug: "my-post" } }
  */
 export const DYNAMIC_ROUTE_PATTERNS: readonly DynamicRoutePattern[] = [
-  // Two-segment: /products/{market}/{family} — must come before one-segment
-  {
-    pattern: /^\/products\/([^/]+)\/([^/]+)$/,
-    buildHref: (match: RegExpMatchArray): LinkHref => ({
-      pathname: "/products/[market]/[family]",
-      params: { market: match[1]!, family: match[2]! },
-    }),
-  },
   // One-segment: /products/{market}
   {
     pattern: /^\/products\/([^/]+)$/,

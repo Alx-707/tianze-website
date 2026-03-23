@@ -8,10 +8,7 @@ import {
 } from "@/lib/sitemap-utils";
 import { SITE_CONFIG } from "@/config/paths";
 import { routing } from "@/i18n/routing";
-import {
-  PRODUCT_CATALOG,
-  getAllMarketFamilyParams,
-} from "@/constants/product-catalog";
+import { PRODUCT_CATALOG } from "@/constants/product-catalog";
 
 // Base URL for the site - uses centralized SITE_CONFIG for consistency
 const BASE_URL = SITE_CONFIG.baseUrl;
@@ -54,7 +51,6 @@ const PAGE_CONFIG_MAP = new Map<string, PageConfig>([
   ["/privacy", { changeFrequency: "monthly", priority: 0.7 }],
   ["blogPost", { changeFrequency: "monthly", priority: 0.6 }],
   ["productMarket", { changeFrequency: "weekly", priority: 0.8 }],
-  ["productFamily", { changeFrequency: "weekly", priority: 0.7 }],
 ]);
 
 const DEFAULT_CONFIG: PageConfig = {
@@ -239,23 +235,6 @@ function generateCatalogEntries(): MetadataRoute.Sitemap {
           url: `${BASE_URL}/${locale}${path}`,
           lastModified: now,
           config: marketConfig,
-          alternates: buildAlternateLanguages(path),
-        }),
-      );
-    }
-  }
-
-  // Family pages
-  const familyConfig = getPageConfig("productFamily");
-  const combos = getAllMarketFamilyParams();
-  for (const { market, family } of combos) {
-    const path = `/products/${market}/${family}`;
-    for (const locale of routing.locales) {
-      entries.push(
-        createSitemapEntry({
-          url: `${BASE_URL}/${locale}${path}`,
-          lastModified: now,
-          config: familyConfig,
           alternates: buildAlternateLanguages(path),
         }),
       );

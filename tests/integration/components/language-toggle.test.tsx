@@ -366,16 +366,14 @@ describe("LanguageToggle Integration Tests", () => {
       }
     });
 
-    it("should handle product catalog dynamic routes", async () => {
-      mockUsePathname.mockReturnValue(
-        "/products/north-america/conduit-sweeps-elbows",
-      );
+    it("should handle product market dynamic routes", async () => {
+      mockUsePathname.mockReturnValue("/products/north-america");
 
       render(<LanguageToggle />);
 
       const links = screen.getAllByTestId(/language-link-/);
       links.forEach((link) => {
-        expect(link).toHaveAttribute("href", "/products/[market]/[family]");
+        expect(link).toHaveAttribute("href", "/products/[market]");
       });
     });
   });

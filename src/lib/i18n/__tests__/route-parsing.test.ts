@@ -56,20 +56,6 @@ describe("route-parsing", () => {
       });
     });
 
-    it("includes product family pattern", () => {
-      const familyPattern = DYNAMIC_ROUTE_PATTERNS.find((p) =>
-        p.pattern.test("/products/north-america/conduit-sweeps-elbows"),
-      );
-      expect(familyPattern).toBeDefined();
-      const match = "/products/north-america/conduit-sweeps-elbows".match(
-        familyPattern!.pattern,
-      )!;
-      expect(familyPattern?.buildHref(match)).toEqual({
-        pathname: "/products/[market]/[family]",
-        params: { market: "north-america", family: "conduit-sweeps-elbows" },
-      });
-    });
-
     it("does not match nested blog paths", () => {
       const match = DYNAMIC_ROUTE_PATTERNS.find((p) =>
         p.pattern.test("/blog/category/post"),
@@ -159,31 +145,10 @@ describe("route-parsing", () => {
         });
       });
 
-      it("returns family dynamic route object", () => {
-        expect(
-          parsePathnameForLink("/en/products/australia-new-zealand/bellmouths"),
-        ).toEqual({
-          pathname: "/products/[market]/[family]",
-          params: {
-            market: "australia-new-zealand",
-            family: "bellmouths",
-          },
-        });
-      });
-
       it("handles market route without locale prefix", () => {
         expect(parsePathnameForLink("/products/europe")).toEqual({
           pathname: "/products/[market]",
           params: { market: "europe" },
-        });
-      });
-
-      it("handles family route for zh locale", () => {
-        expect(
-          parsePathnameForLink("/zh/products/mexico/conduit-bends"),
-        ).toEqual({
-          pathname: "/products/[market]/[family]",
-          params: { market: "mexico", family: "conduit-bends" },
         });
       });
 

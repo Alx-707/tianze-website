@@ -82,39 +82,6 @@ describe("CatalogBreadcrumb", () => {
     expect(marketEl).toHaveAttribute("aria-current", "page");
   });
 
-  it("renders three-level breadcrumb for family page", async () => {
-    const CatalogBreadcrumb = await importComponent();
-    const market = {
-      slug: "north-america",
-      label: "UL / ASTM Series",
-      standardLabel: "UL 651 / ASTM D1785",
-      description: "test",
-      sizeSystem: "inch" as const,
-      standardIds: [],
-      familySlugs: [],
-    };
-    const family = {
-      slug: "conduit-sweeps-elbows",
-      label: "Conduit Sweeps & Elbows",
-      description: "test",
-      marketSlug: "north-america",
-    };
-
-    render(<CatalogBreadcrumb market={market} family={family} />);
-
-    // Products links to /products
-    const productsLink = screen.getByText("Products").closest("a");
-    expect(productsLink).toHaveAttribute("href", "/products");
-
-    // Market links to /products/north-america
-    const marketLink = screen.getByText("UL / ASTM Series").closest("a");
-    expect(marketLink).toHaveAttribute("href", "/products/north-america");
-
-    // Family is current page
-    const familyEl = screen.getByText("Conduit Sweeps & Elbows");
-    expect(familyEl).toHaveAttribute("aria-current", "page");
-  });
-
   it("renders JSON-LD BreadcrumbList structured data", async () => {
     const CatalogBreadcrumb = await importComponent();
     const market = {
