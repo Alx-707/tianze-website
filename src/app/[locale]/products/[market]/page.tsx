@@ -172,9 +172,13 @@ export default async function MarketPage({ params }: MarketPageProps) {
         </p>
       </header>
 
-      <StickyFamilyNav
-        families={families.map((f) => ({ slug: f.slug, label: f.label }))}
-      />
+      {marketSpecs && (
+        <StickyFamilyNav
+          families={families
+            .filter((f) => familySpecsMap.has(f.slug))
+            .map((f) => ({ slug: f.slug, label: f.label }))}
+        />
+      )}
 
       <div className="space-y-16">
         {families.map((family) => {

@@ -74,7 +74,6 @@ Family Section #2: Couplings  (#couplings)
 
 Family Section #3: Conduit Pipes  (#conduit-pipes)
   - Same structure, different columns:
-  - Same structure, different columns:
     Size | Length | Wall Thickness | Schedule
 
 Technical Properties (shared across market)
