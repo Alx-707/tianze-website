@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { setRequestLocale } from "next-intl/server";
+import Image from "next/image";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import {
   generateMetadataForPath,
   type Locale as SeoLocale,
@@ -10,6 +11,7 @@ import {
 } from "@/constants/product-catalog";
 import { CatalogBreadcrumb } from "@/components/products/catalog-breadcrumb";
 import { MarketSeriesCard } from "@/components/products/market-series-card";
+import { Link } from "@/i18n/routing";
 import { generateLocaleStaticParams } from "@/app/[locale]/generate-static-params";
 
 export function generateStaticParams() {
@@ -35,28 +37,78 @@ export async function generateMetadata({
 export default async function ProductsPage({ params }: ProductsPageProps) {
   const { locale } = await params;
   setRequestLocale(locale);
+  const t = await getTranslations("catalog");
+
+  const pvcMarkets = PRODUCT_CATALOG.markets.filter(
+    (m) => m.slug !== "pneumatic-tube-systems",
+  );
+  const pneumaticMarket = PRODUCT_CATALOG.markets.find(
+    (m) => m.slug === "pneumatic-tube-systems",
+  );
 
   return (
     <main className="mx-auto max-w-[1080px] px-6 py-8 md:py-12">
       <CatalogBreadcrumb />
 
       <header className="mb-8 md:mb-12">
-        <h1 className="text-heading mb-4">Products</h1>
+        <h1 className="text-heading mb-4">{t("overview.title")}</h1>
         <p className="text-body max-w-2xl text-muted-foreground">
-          PVC conduit fittings and pipes manufactured to international
-          standards. Select your market to view products by compliance standard.
+          {t("overview.description")}
         </p>
       </header>
 
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {PRODUCT_CATALOG.markets.map((market) => (
-          <MarketSeriesCard
-            key={market.slug}
-            market={market}
-            familyCount={getFamiliesForMarket(market.slug).length}
-          />
-        ))}
-      </div>
+      {/* Section 1: By Market Standard */}
+      <section className="mb-16">
+        <h2 className="mb-6 text-xl font-semibold">
+          {t("overview.byStandard")}
+        </h2>
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          {pvcMarkets.map((market) => (
+            <MarketSeriesCard
+              key={market.slug}
+              market={market}
+              familyCount={getFamiliesForMarket(market.slug).length}
+            />
+          ))}
+        </div>
+      </section>
+
+      {/* Section 2: Specialty & Equipment */}
+      <section>
+        <h2 className="mb-6 text-xl font-semibold">
+          {t("overview.specialty")}
+        </h2>
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          {/* PETG Pneumatic Tubes card */}
+          {pneumaticMarket && (
+            <MarketSeriesCard
+              market={pneumaticMarket}
+              familyCount={getFamiliesForMarket(pneumaticMarket.slug).length}
+            />
+          )}
+          {/* Bending Machines card — links to /contact as placeholder */}
+          <Link
+            href="/contact"
+            className="group block rounded-lg border border-border bg-card p-6 shadow-sm transition-shadow hover:shadow-md"
+          >
+            <div className="relative mb-4 aspect-[16/9] w-full overflow-hidden rounded-md bg-muted">
+              <Image
+                src="/images/products/placeholder-conduit.svg"
+                alt={t("overview.equipmentTitle")}
+                fill
+                sizes="(max-width: 640px) 100vw, 50vw"
+                className="object-cover"
+              />
+            </div>
+            <h3 className="mb-2 text-lg font-semibold text-foreground group-hover:text-primary">
+              {t("overview.equipmentTitle")}
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              {t("overview.equipmentDescription")}
+            </p>
+          </Link>
+        </div>
+      </section>
     </main>
   );
 }
