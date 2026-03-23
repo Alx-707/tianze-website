@@ -37,7 +37,7 @@ export async function generateMetadata({
 export default async function ProductsPage({ params }: ProductsPageProps) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const t = await getTranslations("catalog");
+  const t = await getTranslations({ locale, namespace: "catalog" });
 
   const pvcMarkets = PRODUCT_CATALOG.markets.filter(
     (m) => m.slug !== "pneumatic-tube-systems",

@@ -151,7 +151,7 @@ export default async function MarketPage({ params }: MarketPageProps) {
   const market = getMarketBySlug(marketSlug)!;
   const families = getFamiliesForMarket(marketSlug);
   const marketSpecs = getMarketSpecs(marketSlug);
-  const t = await getTranslations("catalog");
+  const t = await getTranslations({ locale, namespace: "catalog" });
 
   // Build family specs lookup for FamilySection rendering
   const familySpecsMap = new Map(
