@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import { Link, routing } from "@/i18n/routing";
 import { SITE_CONFIG } from "@/config/paths";
 import type { MarketDefinition } from "@/constants/product-catalog";
@@ -37,8 +38,10 @@ function safeJsonLd(data: ReturnType<typeof buildJsonLd>): string {
   return JSON.stringify(data).replace(/</g, "\\u003c");
 }
 
-export function CatalogBreadcrumb({ market }: CatalogBreadcrumbProps) {
+export async function CatalogBreadcrumb({ market }: CatalogBreadcrumbProps) {
   const { baseUrl } = SITE_CONFIG;
+  const tCommon = await getTranslations("common");
+  const tBreadcrumb = await getTranslations("catalog.breadcrumb");
 
   // JSON-LD URLs use default locale for canonical representation
   const canonicalBase = `${baseUrl}/${routing.defaultLocale}`;
@@ -62,7 +65,7 @@ export function CatalogBreadcrumb({ market }: CatalogBreadcrumbProps) {
           {/* Home */}
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
-              <Link href="/">Home</Link>
+              <Link href="/">{tCommon("home")}</Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
@@ -71,10 +74,10 @@ export function CatalogBreadcrumb({ market }: CatalogBreadcrumbProps) {
           <BreadcrumbItem>
             {market ? (
               <BreadcrumbLink asChild>
-                <Link href="/products">Products</Link>
+                <Link href="/products">{tBreadcrumb("products")}</Link>
               </BreadcrumbLink>
             ) : (
-              <BreadcrumbPage>Products</BreadcrumbPage>
+              <BreadcrumbPage>{tBreadcrumb("products")}</BreadcrumbPage>
             )}
           </BreadcrumbItem>
 

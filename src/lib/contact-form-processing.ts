@@ -10,6 +10,7 @@ import { logger, sanitizeEmail } from "@/lib/logger";
 import { contactFieldValidators } from "@/lib/form-schema/contact-field-validators";
 import { verifyTurnstile } from "@/lib/turnstile";
 import { mapZodIssueToErrorKey } from "@/lib/contact-form-error-utils";
+import { z } from "zod";
 import {
   CONTACT_FORM_CONFIG,
   createContactFormSchemaFromConfig,
@@ -21,6 +22,10 @@ const contactFormSchema = createContactFormSchemaFromConfig(
   CONTACT_FORM_CONFIG,
   contactFieldValidators,
 );
+const contactSubmissionSchema = contactFormSchema.extend({
+  turnstileToken: z.string().min(1, "Security verification required"),
+  submittedAt: z.string(),
+});
 
 export type ContactFormWithToken = ContactFormFieldValues & {
   turnstileToken: string;
@@ -77,7 +82,22 @@ export async function validateContactSubmission(
   body: unknown,
   clientIP: string,
 ): Promise<ContactValidationResult> {
-  const validationResult = contactFormSchema.safeParse(body);
+  if (
+    !body ||
+    typeof body !== "object" ||
+    typeof (body as { turnstileToken?: unknown }).turnstileToken !== "string" ||
+    (body as { turnstileToken: string }).turnstileToken.length === 0
+  ) {
+    return {
+      success: false,
+      errorCode: "TURNSTILE_MISSING_TOKEN",
+      error: "Security verification required",
+      details: null,
+      data: null,
+    };
+  }
+
+  const validationResult = contactSubmissionSchema.safeParse(body);
 
   if (!validationResult.success) {
     return {
@@ -89,17 +109,7 @@ export async function validateContactSubmission(
     };
   }
 
-  const formData = validationResult.data as ContactFormWithToken;
-  if (!formData.turnstileToken) {
-    return {
-      success: false,
-      errorCode: "TURNSTILE_MISSING_TOKEN",
-      error: "Security verification required",
-      details: null,
-      data: null,
-    };
-  }
-
+  const formData: ContactFormWithToken = validationResult.data;
   const timeValidationError = validateSubmissionTime(formData.submittedAt);
   if (timeValidationError) {
     return timeValidationError;

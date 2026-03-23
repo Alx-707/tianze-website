@@ -191,7 +191,9 @@ export async function isDuplicateEmailAddress(params: {
   const { base, tableName, email } = params;
 
   try {
-    const normalizedEmail = escapeAirtableFormulaValue(email.toLowerCase());
+    const normalizedEmail = escapeAirtableFormulaValue(
+      email.trim().toLowerCase(),
+    );
     const records = await base
       .table(tableName)
       .select({

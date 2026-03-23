@@ -120,17 +120,6 @@ async function executeContactSubmissionAttempt(
   clientIP: string,
   startTime: number,
 ): Promise<ServerActionResult<ContactFormResult>> {
-  if (!contactData.turnstileToken) {
-    return createErrorResultWithLogging(
-      {
-        code: API_ERROR_CODES.TURNSTILE_MISSING_TOKEN,
-        message: "Security verification required",
-      },
-      undefined,
-      logger,
-    );
-  }
-
   const validation = await validateContactSubmission(contactData, clientIP);
   if (!validation.success || !validation.data) {
     return createErrorResultWithLogging(
@@ -143,7 +132,7 @@ async function executeContactSubmissionAttempt(
     );
   }
 
-  const submissionResult = await processFormSubmission(contactData);
+  const submissionResult = await processFormSubmission(validation.data);
   const normalizedSubmissionResult: ContactFormResult = {
     emailSent: submissionResult.emailSent,
     recordCreated: submissionResult.recordCreated,

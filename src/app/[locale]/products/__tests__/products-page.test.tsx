@@ -3,6 +3,11 @@ import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import ProductsPage from "../page";
 
+vi.mock("next-intl/server", () => ({
+  getTranslations: vi.fn(async () => (key: string) => key),
+  setRequestLocale: vi.fn(),
+}));
+
 // Mock sub-components
 vi.mock("@/components/products/market-series-card", () => ({
   MarketSeriesCard: ({

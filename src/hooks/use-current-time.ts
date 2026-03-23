@@ -41,7 +41,12 @@ export function useCurrentTime(
       return undefined;
     }
 
-    // ✅ Good: Date.now() called in effect, not during render
+    // Re-sync as soon as the timer becomes active so consumers do not wait for
+    // the first interval tick.
+    queueMicrotask(() => {
+      setTime(Date.now());
+    });
+
     const id = setInterval(() => {
       setTime(Date.now());
     }, updateInterval);
