@@ -8,11 +8,9 @@
  * @version 1.0.0
  */
 import { headers } from "next/headers";
-import { contactFieldValidators } from "@/lib/form-schema/contact-field-validators";
 import { type ContactFormData } from "@/lib/form-schema/contact-form-schema";
 import { logger } from "@/lib/logger";
 import { checkDistributedRateLimit } from "@/lib/security/distributed-rate-limit";
-import { TEN_MINUTES_MS } from "@/constants/time";
 import { API_ERROR_CODES } from "@/constants/api-error-codes";
 import { getClientIPFromHeaders } from "@/lib/security/client-ip";
 import { hmacKey } from "@/lib/security/rate-limit-key-strategies";
@@ -26,13 +24,10 @@ import {
   type ServerActionResult,
 } from "@/lib/server-action-utils";
 import { withIdempotentResult } from "@/lib/idempotency";
-import { verifyTurnstile } from "@/lib/turnstile";
-import { processFormSubmission } from "@/lib/contact-form-processing";
-import { mapZodIssueToErrorKey } from "@/lib/contact-form-error-utils";
 import {
-  CONTACT_FORM_CONFIG,
-  createContactFormSchemaFromConfig,
-} from "@/config/contact-form-config";
+  processFormSubmission,
+  validateContactSubmission,
+} from "@/lib/contact-form-processing";
 
 /**
  * 联系表单提交结果类型
@@ -59,98 +54,6 @@ export interface ContactFormWithToken extends ContactFormData {
 }
 
 const CONTACT_FORM_IDEMPOTENCY_FINGERPRINT = "SERVER_ACTION:contactFormAction";
-
-const contactFormSchema = createContactFormSchemaFromConfig(
-  CONTACT_FORM_CONFIG,
-  contactFieldValidators,
-);
-
-/**
- * 验证联系表单数据（包含Turnstile验证）
- */
-async function validateContactFormData(
-  data: ContactFormWithToken,
-  clientIP: string,
-) {
-  // 首先验证基础表单数据
-  const baseValidation = contactFormSchema.safeParse(data);
-  if (!baseValidation.success) {
-    const errorMessages = baseValidation.error.issues.map(
-      mapZodIssueToErrorKey,
-    );
-
-    return {
-      success: false,
-      errorCode: API_ERROR_CODES.CONTACT_VALIDATION_FAILED,
-      error: "Validation failed",
-      details: errorMessages,
-      data: null,
-    };
-  }
-
-  // 验证提交时间（防止重放攻击）
-  // Must validate before arithmetic: NaN comparisons always return false,
-  // allowing an attacker to bypass the time window check with "not-a-date".
-  const submittedAt = new Date(data.submittedAt);
-  const submittedAtMs = submittedAt.getTime();
-  if (!data.submittedAt || isNaN(submittedAtMs)) {
-    return {
-      success: false,
-      errorCode: API_ERROR_CODES.CONTACT_SUBMISSION_EXPIRED,
-      error: "Form submission expired or invalid",
-      details: null,
-      data: null,
-    };
-  }
-  const now = new Date();
-  const timeDiff = now.getTime() - submittedAtMs;
-  const maxAge = TEN_MINUTES_MS;
-
-  if (timeDiff > maxAge || timeDiff < 0) {
-    return {
-      success: false,
-      errorCode: API_ERROR_CODES.CONTACT_SUBMISSION_EXPIRED,
-      error: "Form submission expired or invalid",
-      details: null,
-      data: null,
-    };
-  }
-
-  // 验证Turnstile token
-  const turnstileValid = await verifyTurnstile(data.turnstileToken, clientIP);
-  if (!turnstileValid) {
-    return {
-      success: false,
-      errorCode: API_ERROR_CODES.TURNSTILE_VERIFICATION_FAILED,
-      error: "Security verification failed",
-      details: null,
-      data: null,
-    };
-  }
-
-  return {
-    success: true,
-    error: null,
-    details: null,
-    data: baseValidation.data,
-  };
-}
-
-/**
- * 处理联系表单提交
- */
-async function processContactFormSubmission(
-  formData: ContactFormWithToken,
-): Promise<ContactFormResult> {
-  // 调用现有的表单处理逻辑
-  const result = await processFormSubmission(formData);
-
-  return {
-    emailSent: result.emailSent,
-    recordCreated: result.recordCreated,
-    referenceId: result.referenceId || null,
-  };
-}
 
 /**
  * Extract contact form data from FormData
@@ -212,6 +115,58 @@ async function performSecurityChecks(
   return null;
 }
 
+async function executeContactSubmissionAttempt(
+  contactData: ContactFormWithToken,
+  clientIP: string,
+  startTime: number,
+): Promise<ServerActionResult<ContactFormResult>> {
+  if (!contactData.turnstileToken) {
+    return createErrorResultWithLogging(
+      {
+        code: API_ERROR_CODES.TURNSTILE_MISSING_TOKEN,
+        message: "Security verification required",
+      },
+      undefined,
+      logger,
+    );
+  }
+
+  const validation = await validateContactSubmission(contactData, clientIP);
+  if (!validation.success || !validation.data) {
+    return createErrorResultWithLogging(
+      {
+        code: validation.errorCode ?? API_ERROR_CODES.CONTACT_VALIDATION_FAILED,
+        message: validation.error || "Validation failed",
+      },
+      validation.details || undefined,
+      logger,
+    );
+  }
+
+  const submissionResult = await processFormSubmission(contactData);
+  const normalizedSubmissionResult: ContactFormResult = {
+    emailSent: submissionResult.emailSent,
+    recordCreated: submissionResult.recordCreated,
+    referenceId: submissionResult.referenceId ?? null,
+  };
+
+  const processingTime = performance.now() - startTime;
+  if (process.env.NODE_ENV !== "production") {
+    logger.info("Contact form submitted via Server Action", {
+      processingTime,
+      emailSent: normalizedSubmissionResult.emailSent,
+      recordCreated: normalizedSubmissionResult.recordCreated,
+      referenceId: normalizedSubmissionResult.referenceId,
+    });
+  }
+
+  return createSuccessResultWithLogging(
+    normalizedSubmissionResult,
+    "Thank you for your message. We will get back to you soon.",
+    logger,
+  );
+}
+
 /**
  * 联系表单 Server Action
  * 处理联系表单提交，集成Zod验证、Turnstile验证和现有的业务逻辑
@@ -250,58 +205,7 @@ export const contactFormAction: ServerAction<FormData, ContactFormResult> =
       const contactData = extractContactFormData(formData);
       const idempotentResult = await withIdempotentResult(
         contactData.idempotencyKey ?? null,
-        async () => {
-          // 验证必需的Turnstile token
-          if (!contactData.turnstileToken) {
-            return createErrorResultWithLogging(
-              {
-                code: API_ERROR_CODES.TURNSTILE_MISSING_TOKEN,
-                message: "Security verification required",
-              },
-              undefined,
-              logger,
-            );
-          }
-
-          // 使用现有的验证逻辑
-          const validation = await validateContactFormData(
-            contactData,
-            clientIP,
-          );
-          if (!validation.success || !validation.data) {
-            return createErrorResultWithLogging(
-              {
-                code:
-                  validation.errorCode ??
-                  API_ERROR_CODES.CONTACT_VALIDATION_FAILED,
-                message: validation.error || "Validation failed",
-              },
-              validation.details || undefined,
-              logger,
-            );
-          }
-
-          // 处理表单提交
-          const submissionResult =
-            await processContactFormSubmission(contactData);
-
-          // 记录成功提交
-          const processingTime = performance.now() - startTime;
-          if (process.env.NODE_ENV !== "production") {
-            logger.info("Contact form submitted via Server Action", {
-              processingTime,
-              emailSent: submissionResult.emailSent,
-              recordCreated: submissionResult.recordCreated,
-              referenceId: submissionResult.referenceId,
-            });
-          }
-
-          return createSuccessResultWithLogging(
-            submissionResult,
-            "Thank you for your message. We will get back to you soon.",
-            logger,
-          );
-        },
+        () => executeContactSubmissionAttempt(contactData, clientIP, startTime),
         {
           required: true,
           fingerprint: CONTACT_FORM_IDEMPOTENCY_FINGERPRINT,
