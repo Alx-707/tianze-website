@@ -106,11 +106,24 @@ describe("MarketSeriesCard", () => {
     expect(link).toHaveAttribute("href", "/products/north-america");
   });
 
-  it("displays family count", async () => {
+  it("displays family count with default label", async () => {
     const MarketSeriesCard = await importComponent();
     render(<MarketSeriesCard market={market} familyCount={3} />);
 
-    expect(screen.getByText(/3/)).toBeInTheDocument();
+    expect(screen.getByText("3 product families")).toBeInTheDocument();
+  });
+
+  it("displays translated family count label when provided", async () => {
+    const MarketSeriesCard = await importComponent();
+    render(
+      <MarketSeriesCard
+        market={market}
+        familyCount={3}
+        familyCountLabel="3 个产品系列"
+      />,
+    );
+
+    expect(screen.getByText("3 个产品系列")).toBeInTheDocument();
   });
 
   it("renders a placeholder image", async () => {

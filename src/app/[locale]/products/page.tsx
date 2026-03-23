@@ -63,13 +63,17 @@ export default async function ProductsPage({ params }: ProductsPageProps) {
           {t("overview.byStandard")}
         </h2>
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          {pvcMarkets.map((market) => (
-            <MarketSeriesCard
-              key={market.slug}
-              market={market}
-              familyCount={getFamiliesForMarket(market.slug).length}
-            />
-          ))}
+          {pvcMarkets.map((market) => {
+            const count = getFamiliesForMarket(market.slug).length;
+            return (
+              <MarketSeriesCard
+                key={market.slug}
+                market={market}
+                familyCount={count}
+                familyCountLabel={t("familyCount", { count })}
+              />
+            );
+          })}
         </div>
       </section>
 
@@ -84,6 +88,9 @@ export default async function ProductsPage({ params }: ProductsPageProps) {
             <MarketSeriesCard
               market={pneumaticMarket}
               familyCount={getFamiliesForMarket(pneumaticMarket.slug).length}
+              familyCountLabel={t("familyCount", {
+                count: getFamiliesForMarket(pneumaticMarket.slug).length,
+              })}
             />
           )}
           {/* Bending Machines card — links to /contact as placeholder */}

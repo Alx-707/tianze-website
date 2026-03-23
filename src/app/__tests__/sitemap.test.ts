@@ -119,15 +119,12 @@ describe("sitemap.ts", () => {
       expect(urls).toContain("https://example.com/zh/products/north-america");
     });
 
-    it("should include product catalog family pages", async () => {
+    it("should not include product catalog family pages (removed route)", async () => {
       const result = await sitemap();
       const urls = result.map((entry) => entry.url);
 
-      expect(urls).toContain(
+      expect(urls).not.toContain(
         "https://example.com/en/products/north-america/conduit-sweeps-elbows",
-      );
-      expect(urls).toContain(
-        "https://example.com/en/products/australia-new-zealand/bellmouths",
       );
     });
 

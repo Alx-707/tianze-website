@@ -5,11 +5,13 @@ import type { MarketDefinition } from "@/constants/product-catalog";
 interface MarketSeriesCardProps {
   market: MarketDefinition;
   familyCount: number;
+  familyCountLabel?: string;
 }
 
 export function MarketSeriesCard({
   market,
   familyCount,
+  familyCountLabel,
 }: MarketSeriesCardProps) {
   return (
     <Link
@@ -33,7 +35,7 @@ export function MarketSeriesCard({
       </h2>
       <p className="mb-4 text-sm text-muted-foreground">{market.description}</p>
       <span className="text-sm text-muted-foreground">
-        {familyCount} product families
+        {familyCountLabel ?? `${familyCount} product families`}
       </span>
     </Link>
   );
