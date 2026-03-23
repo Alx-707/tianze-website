@@ -120,7 +120,7 @@ describe("Feature: Product Overview Page", () => {
       ).toBeInTheDocument();
     });
 
-    it("equipment card links to /contact", async () => {
+    it("equipment card links to /capabilities/bending-machines", async () => {
       await renderAsyncComponent(
         ProductsPage({ params: Promise.resolve(mockParams) }),
       );
@@ -129,7 +129,7 @@ describe("Feature: Product Overview Page", () => {
       const equipmentHeading = screen.getByText("overview.equipmentTitle");
       const link = equipmentHeading.closest("a");
       expect(link).not.toBeNull();
-      expect(link).toHaveAttribute("href", "/contact");
+      expect(link).toHaveAttribute("href", "/capabilities/bending-machines");
     });
   });
 

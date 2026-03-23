@@ -50,6 +50,7 @@ export const PATHNAMES = {
   "/faq": "/faq",
   "/privacy": "/privacy",
   "/terms": "/terms",
+  "/capabilities/bending-machines": "/capabilities/bending-machines",
 } as const;
 
 export function getPathnames(): typeof PATHNAMES {
