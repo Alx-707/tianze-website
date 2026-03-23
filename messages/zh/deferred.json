@@ -441,5 +441,53 @@
       "disputes": "争议解决",
       "contact": "联系方式"
     }
+  },
+  "capabilities": {
+    "meta": {
+      "title": "PVC线管弯管机 | 天泽",
+      "description": "自主研发的全自动和半自动PVC线管弯管机。管件背后的核心制造技术。"
+    },
+    "hero": {
+      "title": "PVC线管弯管机",
+      "subtitle": "自主研发，自主制造，管件背后的核心技术。"
+    },
+    "why": {
+      "title": "为什么重要",
+      "card1": {
+        "title": "我们制造机器",
+        "desc": "作为上游弯管机制造商，我们掌控塑造每一个管件的核心技术。"
+      },
+      "card2": {
+        "title": "精密控制",
+        "desc": "CNC控制弯管确保每批次生产的角度、壁厚和表面处理一致。"
+      },
+      "card3": {
+        "title": "定制能力",
+        "desc": "自主模具开发意味着我们可以按您的要求生产非标尺寸、角度和规格。"
+      }
+    },
+    "machines": {
+      "title": "机型阵列"
+    },
+    "capability": {
+      "title": "生产能力",
+      "monthlyCapacity": {
+        "value": "50,000+",
+        "label": "月产管件"
+      },
+      "countries": {
+        "value": "20+",
+        "label": "出口国家"
+      },
+      "experience": {
+        "value": "10+",
+        "label": "年经验"
+      }
+    },
+    "cta": {
+      "heading": "对我们的弯管技术感兴趣？",
+      "description": "无论您需要OEM制造还是讨论定制规格，我们随时准备帮助。",
+      "button": "联系我们"
+    }
   }
 }

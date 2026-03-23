@@ -441,5 +441,53 @@
       "disputes": "Dispute Resolution",
       "contact": "Contact Information"
     }
+  },
+  "capabilities": {
+    "meta": {
+      "title": "PVC Conduit Bending Machines | Tianze",
+      "description": "Self-developed full-auto and semi-auto PVC conduit bending machines. The core manufacturing technology behind our fittings."
+    },
+    "hero": {
+      "title": "PVC Conduit Bending Machines",
+      "subtitle": "Self-developed. In-house manufactured. The technology behind our fittings."
+    },
+    "why": {
+      "title": "Why It Matters",
+      "card1": {
+        "title": "We Make the Machines",
+        "desc": "As an upstream bending machine manufacturer, we control the core technology that shapes every fitting."
+      },
+      "card2": {
+        "title": "Precision Control",
+        "desc": "CNC-controlled bending ensures consistent angles, wall thickness, and finish across every production run."
+      },
+      "card3": {
+        "title": "Custom Capability",
+        "desc": "In-house mold development means we can produce non-standard sizes, angles, and specifications to your requirements."
+      }
+    },
+    "machines": {
+      "title": "Machine Lineup"
+    },
+    "capability": {
+      "title": "Production Capability",
+      "monthlyCapacity": {
+        "value": "50,000+",
+        "label": "Fittings per Month"
+      },
+      "countries": {
+        "value": "20+",
+        "label": "Countries Served"
+      },
+      "experience": {
+        "value": "10+",
+        "label": "Years of Experience"
+      }
+    },
+    "cta": {
+      "heading": "Interested in our bending technology?",
+      "description": "Whether you need OEM manufacturing or want to discuss custom specifications, we're ready to help.",
+      "button": "Contact Us"
+    }
   }
 }
