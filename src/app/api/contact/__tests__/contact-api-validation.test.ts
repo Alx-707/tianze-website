@@ -44,6 +44,7 @@ vi.mock("@/lib/lead-pipeline/process-lead", () => ({
   processLead: vi.fn(() =>
     Promise.resolve({
       success: true,
+      partialSuccess: false,
       emailSent: true,
       recordCreated: true,
       referenceId: "ref-123",
@@ -274,6 +275,7 @@ describe("contact-api-validation", () => {
     it("should throw error on processLead failure", async () => {
       vi.mocked(processLead).mockResolvedValueOnce({
         success: false,
+        partialSuccess: false,
         error: "Processing failed",
         emailSent: false,
         recordCreated: false,

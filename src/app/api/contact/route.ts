@@ -12,12 +12,12 @@ import {
   applyCorsHeaders,
   createCorsPreflightResponse,
 } from "@/lib/api/cors-utils";
-import { safeParseJson } from "@/lib/api/safe-parse-json";
+import { readAndHashJsonBody } from "@/lib/api/read-and-hash-body";
 import {
   withRateLimit,
   type RateLimitContext,
 } from "@/lib/api/with-rate-limit";
-import { withIdempotency } from "@/lib/idempotency";
+import { createRequestFingerprint, withIdempotency } from "@/lib/idempotency";
 import { logger, sanitizeIP, sanitizeLogContext } from "@/lib/logger";
 import {
   getContactFormStats,
@@ -39,29 +39,30 @@ import {
  */
 const POST_RATE_LIMITED = withRateLimit(
   "contact",
-  (request: NextRequest, { clientIP }: RateLimitContext) =>
-    withIdempotency(
+  async (request: NextRequest, { clientIP }: RateLimitContext) => {
+    const parsedBody = await readAndHashJsonBody<unknown>(request, {
+      route: "/api/contact",
+    });
+    if (!parsedBody.ok) {
+      return createApiErrorResponse(
+        parsedBody.errorCode,
+        parsedBody.statusCode,
+      );
+    }
+
+    return withIdempotency(
       request,
       async () => {
         const startTime = Date.now();
 
         try {
-          const parsedBody = await safeParseJson<unknown>(request, {
-            route: "/api/contact",
-          });
-          if (!parsedBody.ok) {
-            return {
-              success: false as const,
-              errorCode: parsedBody.errorCode,
-              statusCode: parsedBody.statusCode,
-            };
-          }
-
           const validation = await validateFormData(parsedBody.data, clientIP);
           if (!validation.success || !validation.data) {
             return {
               success: false as const,
-              errorCode: API_ERROR_CODES.CONTACT_VALIDATION_FAILED,
+              errorCode:
+                validation.errorCode ??
+                API_ERROR_CODES.CONTACT_VALIDATION_FAILED,
               statusCode: HTTP_BAD_REQUEST,
             };
           }
@@ -104,8 +105,12 @@ const POST_RATE_LIMITED = withRateLimit(
           };
         }
       },
-      { required: true },
-    ),
+      {
+        required: true,
+        fingerprint: createRequestFingerprint(request, parsedBody.bodyHash),
+      },
+    );
+  },
 );
 
 export async function POST(request: NextRequest) {

@@ -14,6 +14,8 @@
  * - COMPLETED: Request finished successfully (set by complete())
  */
 
+import { logger } from "@/lib/logger";
+
 export type IdempotencyStatus = "PENDING" | "COMPLETED";
 
 export interface IdempotencyEntry {
@@ -134,6 +136,108 @@ export class MemoryIdempotencyStore implements IdempotencyStore {
   }
 }
 
+// ==================== Redis Implementation ====================
+
+export class RedisIdempotencyStore implements IdempotencyStore {
+  private baseUrl: string;
+  private token: string;
+
+  constructor(url: string, token: string) {
+    this.baseUrl = url.replace(/\/$/, "");
+    this.token = token;
+  }
+
+  private async redisCommand<T>(
+    command: (string | number)[],
+  ): Promise<T | null> {
+    const response = await fetch(this.baseUrl, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${this.token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(command),
+    });
+
+    if (!response.ok) {
+      throw new Error(
+        `[Idempotency] Redis command failed with status ${response.status}`,
+      );
+    }
+
+    const data = (await response.json()) as { result?: T; error?: string };
+    if (data.error) {
+      throw new Error(`[Idempotency] Redis command failed: ${data.error}`);
+    }
+
+    return data.result ?? null;
+  }
+
+  async setIfNotExists(
+    key: string,
+    entry: IdempotencyEntry,
+    ttlMs: number,
+  ): Promise<boolean> {
+    const result = await this.redisCommand<string | null>([
+      "SET",
+      key,
+      JSON.stringify(entry),
+      "PX",
+      ttlMs,
+      "NX",
+    ]);
+    return result === "OK";
+  }
+
+  async get(key: string): Promise<IdempotencyEntry | null> {
+    const result = await this.redisCommand<string | null>(["GET", key]);
+    if (!result) return null;
+
+    try {
+      return JSON.parse(result) as IdempotencyEntry;
+    } catch (error) {
+      logger.error(
+        "[Idempotency] Redis entry parse failure — treating as storage error",
+        {
+          keyPrefix: key.slice(0, 16),
+          valueLength: result.length,
+          error,
+        },
+      );
+      throw error;
+    }
+  }
+
+  async complete(
+    key: string,
+    result: unknown,
+    statusCode: number,
+  ): Promise<void> {
+    const existing = await this.get(key);
+    if (!existing) return;
+
+    const ttlMs = existing.expiresAt - Date.now();
+    if (ttlMs <= 0) return;
+
+    await this.redisCommand([
+      "SET",
+      key,
+      JSON.stringify({
+        ...existing,
+        status: "COMPLETED",
+        result,
+        statusCode,
+      }),
+      "PX",
+      ttlMs,
+    ]);
+  }
+
+  async delete(key: string): Promise<void> {
+    await this.redisCommand(["DEL", key]);
+  }
+}
+
 // ==================== Store Factory ====================
 
 /**
@@ -141,5 +245,26 @@ export class MemoryIdempotencyStore implements IdempotencyStore {
  * D1 adapter is planned (Task 025) but not yet implemented.
  */
 export function createIdempotencyStore(): IdempotencyStore {
+  const upstashUrl = process.env.UPSTASH_REDIS_REST_URL;
+  const upstashToken = process.env.UPSTASH_REDIS_REST_TOKEN;
+  const allowMemoryFallback = process.env.ALLOW_MEMORY_IDEMPOTENCY === "true";
+
+  if (upstashUrl && upstashToken) {
+    logger.info("[Idempotency] Using Upstash Redis store");
+    return new RedisIdempotencyStore(upstashUrl, upstashToken);
+  }
+
+  if (process.env.NODE_ENV === "production" && !allowMemoryFallback) {
+    throw new Error(
+      "[Idempotency] Production requires Upstash Redis. Set ALLOW_MEMORY_IDEMPOTENCY=true only for an explicit degraded override.",
+    );
+  }
+
+  if (process.env.NODE_ENV === "production" && allowMemoryFallback) {
+    logger.warn(
+      "[Idempotency] Falling back to in-memory idempotency in production due to ALLOW_MEMORY_IDEMPOTENCY=true.",
+    );
+  }
+
   return new MemoryIdempotencyStore();
 }

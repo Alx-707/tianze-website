@@ -3,28 +3,18 @@ import {
   applyCorsHeaders,
   createCorsPreflightResponse,
 } from "@/lib/api/cors-utils";
-import { safeParseJson as safeParseJsonHelper } from "@/lib/api/safe-parse-json";
+import { readAndHashJsonBody } from "@/lib/api/read-and-hash-body";
 import {
   withRateLimit,
   type RateLimitContext,
 } from "@/lib/api/with-rate-limit";
-import { withIdempotency } from "@/lib/idempotency";
+import { createRequestFingerprint, withIdempotency } from "@/lib/idempotency";
 import { processLead, type LeadResult } from "@/lib/lead-pipeline";
 import { LEAD_TYPES } from "@/lib/lead-pipeline/lead-schema";
 import { logger, sanitizeEmail, sanitizeIP } from "@/lib/logger";
 import { verifyTurnstile } from "@/lib/turnstile";
 import { HTTP_BAD_REQUEST, HTTP_INTERNAL_ERROR } from "@/constants";
 import { API_ERROR_CODES } from "@/constants/api-error-codes";
-
-type SafeParseSuccess<T> = { ok: true; data: T };
-type SafeParseFailure = { ok: false; errorCode: string; statusCode: number };
-
-function safeParseJson<T>(
-  req: NextRequest,
-): Promise<SafeParseSuccess<T> | SafeParseFailure> {
-  // 复用通用 safeParseJson helper，统一 JSON 解析行为和 errorCode 语义
-  return safeParseJsonHelper<T>(req, { route: "/api/subscribe" });
-}
 
 /**
  * Create success response for newsletter subscription
@@ -69,83 +59,90 @@ function createErrorResponse(result: LeadResult): NextResponse {
 function handlePost(
   request: NextRequest,
   { clientIP }: RateLimitContext,
-): ReturnType<typeof withIdempotency> {
-  // 使用幂等键中间件包装处理逻辑
-  return withIdempotency(
-    request,
-    async () => {
-      const parsedBody = await safeParseJson<{
-        email?: string;
-        pageType?: string;
-        turnstileToken?: string;
-      }>(request);
+): Promise<NextResponse> {
+  return (async () => {
+    const parsedBody = await readAndHashJsonBody<{
+      email?: string;
+      pageType?: string;
+      turnstileToken?: string;
+    }>(request, { route: "/api/subscribe" });
 
-      if (!parsedBody.ok) {
-        return NextResponse.json(
-          {
-            success: false,
-            errorCode: parsedBody.errorCode,
-          },
-          { status: parsedBody.statusCode },
+    if (!parsedBody.ok) {
+      return NextResponse.json(
+        {
+          success: false,
+          errorCode: parsedBody.errorCode,
+        },
+        { status: parsedBody.statusCode },
+      );
+    }
+
+    return withIdempotency(
+      request,
+      async () => {
+        const email = parsedBody.data?.email;
+        const turnstileToken = parsedBody.data?.turnstileToken;
+
+        if (email === undefined || email === "") {
+          return NextResponse.json(
+            {
+              success: false,
+              errorCode: API_ERROR_CODES.SUBSCRIBE_VALIDATION_EMAIL_REQUIRED,
+            },
+            { status: HTTP_BAD_REQUEST },
+          );
+        }
+
+        // Verify Turnstile token
+        if (!turnstileToken) {
+          logger.warn("Newsletter subscription missing Turnstile token", {
+            ip: sanitizeIP(clientIP),
+          });
+          return NextResponse.json(
+            {
+              success: false,
+              errorCode: API_ERROR_CODES.SUBSCRIBE_SECURITY_REQUIRED,
+            },
+            { status: HTTP_BAD_REQUEST },
+          );
+        }
+
+        const isValidTurnstile = await verifyTurnstile(
+          turnstileToken,
+          clientIP,
         );
-      }
+        if (!isValidTurnstile) {
+          logger.warn("Newsletter Turnstile verification failed", {
+            ip: sanitizeIP(clientIP),
+          });
+          return NextResponse.json(
+            {
+              success: false,
+              errorCode: API_ERROR_CODES.SUBSCRIBE_SECURITY_FAILED,
+            },
+            { status: HTTP_BAD_REQUEST },
+          );
+        }
 
-      const email = parsedBody.data?.email;
-      const turnstileToken = parsedBody.data?.turnstileToken;
+        // Prepare lead input for newsletter subscription
+        const leadInput = {
+          type: LEAD_TYPES.NEWSLETTER,
+          email,
+        };
 
-      if (email === undefined || email === "") {
-        return NextResponse.json(
-          {
-            success: false,
-            errorCode: API_ERROR_CODES.SUBSCRIBE_VALIDATION_EMAIL_REQUIRED,
-          },
-          { status: HTTP_BAD_REQUEST },
-        );
-      }
+        // Process via unified Lead Pipeline
+        const result = await processLead(leadInput);
 
-      // Verify Turnstile token
-      if (!turnstileToken) {
-        logger.warn("Newsletter subscription missing Turnstile token", {
-          ip: sanitizeIP(clientIP),
-        });
-        return NextResponse.json(
-          {
-            success: false,
-            errorCode: API_ERROR_CODES.SUBSCRIBE_SECURITY_REQUIRED,
-          },
-          { status: HTTP_BAD_REQUEST },
-        );
-      }
-
-      const isValidTurnstile = await verifyTurnstile(turnstileToken, clientIP);
-      if (!isValidTurnstile) {
-        logger.warn("Newsletter Turnstile verification failed", {
-          ip: sanitizeIP(clientIP),
-        });
-        return NextResponse.json(
-          {
-            success: false,
-            errorCode: API_ERROR_CODES.SUBSCRIBE_SECURITY_FAILED,
-          },
-          { status: HTTP_BAD_REQUEST },
-        );
-      }
-
-      // Prepare lead input for newsletter subscription
-      const leadInput = {
-        type: LEAD_TYPES.NEWSLETTER,
-        email,
-      };
-
-      // Process via unified Lead Pipeline
-      const result = await processLead(leadInput);
-
-      return result.success
-        ? createSuccessResponse(result, email)
-        : createErrorResponse(result);
-    },
-    { required: true },
-  );
+        return result.success
+          ? createSuccessResponse(result, email)
+          : createErrorResponse(result);
+      },
+      {
+        required: true,
+        fingerprint: createRequestFingerprint(request, parsedBody.bodyHash),
+      },
+    );
+  })();
 }
 
 const POST_RATE_LIMITED = withRateLimit("subscribe", handlePost);

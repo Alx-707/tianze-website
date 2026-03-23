@@ -123,16 +123,18 @@ describe("client-ip", () => {
         setEnv("CF_PAGES", "1");
       });
 
-      it("should extract IP from cf-connecting-ip header", () => {
+      it("should extract IP from cf-connecting-ip header when source is a trusted Cloudflare range", () => {
         const request = createMockRequest({
+          ip: "173.245.48.25",
           headers: { "cf-connecting-ip": "192.0.2.100" },
         });
         const ip = getClientIP(request);
         expect(ip).toBe("192.0.2.100");
       });
 
-      it("should prefer cf-connecting-ip over x-forwarded-for", () => {
+      it("should prefer cf-connecting-ip over x-forwarded-for when source is trusted", () => {
         const request = createMockRequest({
+          ip: "173.245.48.25",
           headers: {
             "cf-connecting-ip": "192.0.2.100",
             "x-forwarded-for": "203.0.113.50",
@@ -140,6 +142,15 @@ describe("client-ip", () => {
         });
         const ip = getClientIP(request);
         expect(ip).toBe("192.0.2.100");
+      });
+
+      it("should ignore Cloudflare headers when request source is not a trusted Cloudflare IP", () => {
+        const request = createMockRequest({
+          ip: "198.51.100.50",
+          headers: { "cf-connecting-ip": "192.0.2.100" },
+        });
+        const ip = getClientIP(request);
+        expect(ip).toBe("198.51.100.50");
       });
     });
 
@@ -169,6 +180,7 @@ describe("client-ip", () => {
         setEnv("VERCEL", "1"); // Would normally trigger Vercel
 
         const request = createMockRequest({
+          ip: "173.245.48.25",
           headers: {
             "cf-connecting-ip": "192.0.2.100",
             "x-real-ip": "198.51.100.10",
@@ -292,6 +304,14 @@ describe("client-ip", () => {
         new Headers({ "x-forwarded-for": "203.0.113.50, 10.0.0.1" }),
       );
       expect(ip).toBe("203.0.113.50");
+    });
+
+    it("should fail closed for Cloudflare headers without request source validation", () => {
+      setEnv("CF_PAGES", "1");
+      const ip = getClientIPFromHeaders(
+        new Headers({ "cf-connecting-ip": "192.0.2.100" }),
+      );
+      expect(ip).toBe("0.0.0.0");
     });
   });
 

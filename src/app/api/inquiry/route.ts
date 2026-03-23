@@ -10,12 +10,12 @@ import {
   applyCorsHeaders,
   createCorsPreflightResponse,
 } from "@/lib/api/cors-utils";
-import { safeParseJson } from "@/lib/api/safe-parse-json";
+import { readAndHashJsonBody } from "@/lib/api/read-and-hash-body";
 import {
   withRateLimit,
   type RateLimitContext,
 } from "@/lib/api/with-rate-limit";
-import { withIdempotency } from "@/lib/idempotency";
+import { createRequestFingerprint, withIdempotency } from "@/lib/idempotency";
 import { processLead, type LeadResult } from "@/lib/lead-pipeline";
 import {
   LEAD_TYPES,
@@ -143,25 +143,25 @@ async function validateTurnstile(
  */
 const POST_RATE_LIMITED = withRateLimit(
   "inquiry",
-  (request: NextRequest, { clientIP }: RateLimitContext) => {
+  async (request: NextRequest, { clientIP }: RateLimitContext) => {
+    const parsedBody = await readAndHashJsonBody<{
+      turnstileToken?: string;
+      [key: string]: unknown;
+    }>(request, { route: "/api/inquiry" });
+
+    if (!parsedBody.ok) {
+      return createApiErrorResponse(
+        parsedBody.errorCode,
+        parsedBody.statusCode,
+      );
+    }
+
     return withIdempotency(
       request,
       async () => {
         const startTime = Date.now();
 
         try {
-          const parsedBody = await safeParseJson<{
-            turnstileToken?: string;
-            [key: string]: unknown;
-          }>(request, { route: "/api/inquiry" });
-
-          if (!parsedBody.ok) {
-            return createApiErrorResponse(
-              parsedBody.errorCode,
-              parsedBody.statusCode,
-            );
-          }
-
           const data = parsedBody.data ?? {};
           const leadData = validateLeadData(data);
           if (!leadData) {
@@ -206,7 +206,10 @@ const POST_RATE_LIMITED = withRateLimit(
           );
         }
       },
-      { required: true },
+      {
+        required: true,
+        fingerprint: createRequestFingerprint(request, parsedBody.bodyHash),
+      },
     );
   },
 );

@@ -67,9 +67,28 @@ describe("AnimatedStatItem", () => {
     );
 
     await act(async () => {
-      vi.advanceTimersByTime(2000);
+      vi.advanceTimersByTime(2500);
     });
 
     expect(screen.getByText("99%")).toBeInTheDocument();
+  });
+
+  it("clears the animation interval on unmount", () => {
+    const clearIntervalSpy = vi.spyOn(window, "clearInterval");
+    const view = render(
+      <AnimatedStatItem
+        stat={{
+          id: "uptime",
+          label: "Uptime",
+          value: "99%",
+          numericValue: 99,
+          suffix: "%",
+        }}
+      />,
+    );
+
+    view.unmount();
+
+    expect(clearIntervalSpy).toHaveBeenCalled();
   });
 });

@@ -88,6 +88,7 @@ describe("processLead", () => {
       const result = await processLead(invalidInput);
 
       expect(result.success).toBe(false);
+      expect(result.partialSuccess).toBe(false);
       expect(result.error).toBe("VALIDATION_ERROR");
       expect(result.emailSent).toBe(false);
       expect(result.recordCreated).toBe(false);
@@ -101,6 +102,7 @@ describe("processLead", () => {
       const result = await processLead(missingFields);
 
       expect(result.success).toBe(false);
+      expect(result.partialSuccess).toBe(false);
       expect(result.error).toBe("VALIDATION_ERROR");
     });
 
@@ -116,6 +118,7 @@ describe("processLead", () => {
       const result = await processLead(invalidEmail);
 
       expect(result.success).toBe(false);
+      expect(result.partialSuccess).toBe(false);
       expect(result.error).toBe("VALIDATION_ERROR");
     });
   });
@@ -145,26 +148,30 @@ describe("processLead", () => {
       expect(result.referenceId?.startsWith("CON-")).toBe(true);
     });
 
-    it("should succeed when only email succeeds", async () => {
+    it("should mark contact lead as partial success when only email succeeds", async () => {
       mockSendContactFormEmail.mockResolvedValue("email-id-123");
       mockCreateLead.mockRejectedValue(new Error("CRM failed"));
 
       const result = await processLead(validContactLead);
 
-      expect(result.success).toBe(true);
+      expect(result.success).toBe(false);
+      expect(result.partialSuccess).toBe(true);
       expect(result.emailSent).toBe(true);
       expect(result.recordCreated).toBe(false);
+      expect(result.error).toBe("PROCESSING_FAILED");
     });
 
-    it("should succeed when only CRM succeeds", async () => {
+    it("should mark contact lead as partial success when only CRM succeeds", async () => {
       mockSendContactFormEmail.mockRejectedValue(new Error("Email failed"));
       mockCreateLead.mockResolvedValue({ id: "record-123" });
 
       const result = await processLead(validContactLead);
 
-      expect(result.success).toBe(true);
+      expect(result.success).toBe(false);
+      expect(result.partialSuccess).toBe(true);
       expect(result.emailSent).toBe(false);
       expect(result.recordCreated).toBe(true);
+      expect(result.error).toBe("PROCESSING_FAILED");
     });
 
     it("should fail when both services fail", async () => {
@@ -174,6 +181,7 @@ describe("processLead", () => {
       const result = await processLead(validContactLead);
 
       expect(result.success).toBe(false);
+      expect(result.partialSuccess).toBe(false);
       expect(result.emailSent).toBe(false);
       expect(result.recordCreated).toBe(false);
       expect(result.error).toBe("PROCESSING_FAILED");
@@ -202,6 +210,7 @@ describe("processLead", () => {
       const result = await processLead(validContactLead);
 
       expect(result.success).toBe(false);
+      expect(result.partialSuccess).toBe(false);
       expect(result.error).toBe("PROCESSING_FAILED");
       expect(result.emailSent).toBe(false);
       expect(result.recordCreated).toBe(false);
@@ -247,6 +256,7 @@ describe("processLead", () => {
       const result = await processLead(validProductLead);
 
       expect(result.success).toBe(true);
+      expect(result.partialSuccess).toBe(false);
       expect(result.emailSent).toBe(true);
       expect(result.recordCreated).toBe(true);
       expect(result.referenceId?.startsWith("PRO-")).toBe(true);
@@ -309,6 +319,7 @@ describe("processLead", () => {
       const result = await processLead(validNewsletterLead);
 
       expect(result.success).toBe(true);
+      expect(result.partialSuccess).toBe(false);
       expect(result.emailSent).toBe(false); // Newsletter has no email operation
       expect(result.recordCreated).toBe(true);
       expect(result.referenceId?.startsWith("NEW-")).toBe(true);
@@ -345,6 +356,7 @@ describe("processLead", () => {
 
       // Newsletter success depends solely on CRM - no email fallback
       expect(result.success).toBe(false);
+      expect(result.partialSuccess).toBe(false);
       expect(result.emailSent).toBe(false);
       expect(result.recordCreated).toBe(false);
       expect(result.error).toBe("PROCESSING_FAILED");
