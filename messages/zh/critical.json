@@ -946,5 +946,65 @@
     "generic": "出现了一些问题，请稍后重试",
     "translationMissing": "翻译不可用",
     "loadingFailed": "内容加载失败"
+  },
+  "catalog": {
+    "breadcrumb": {
+      "products": "产品中心"
+    },
+    "overview": {
+      "title": "产品中心",
+      "description": "按国际标准生产的PVC电工套管配件。选择您的市场查看符合当地合规标准的产品。",
+      "byStandard": "按市场标准",
+      "specialty": "特种产品与设备",
+      "equipmentTitle": "弯管设备",
+      "equipmentDescription": "自主研发的全自动和半自动PVC弯管机。我们的核心制造能力。",
+      "equipmentCta": "了解更多"
+    },
+    "market": {
+      "familyNav": {
+        "jumpTo": "跳转至"
+      },
+      "technical": {
+        "title": "技术参数"
+      },
+      "certifications": {
+        "title": "认证与合规"
+      },
+      "trade": {
+        "title": "贸易信息",
+        "moq": "最小起订量",
+        "leadTime": "交货周期",
+        "supplyCapacity": "供应能力",
+        "packaging": "包装方式",
+        "portOfLoading": "装运港"
+      },
+      "cta": {
+        "heading": "需要{marketLabel}电工套管配件？",
+        "description": "获取报价或咨询规格、起订量和交期。",
+        "button": "获取报价"
+      }
+    },
+    "specTable": {
+      "size": "尺寸",
+      "angle": "角度",
+      "wallThickness": "壁厚",
+      "endType": "端口类型",
+      "radius": "弯曲半径",
+      "type": "类型",
+      "length": "长度",
+      "schedule": "壁厚等级"
+    },
+    "familyCount": "{count} 个产品系列",
+    "highlights": {
+      "ul651Certified": "UL 651 认证",
+      "virginPvc": "100% 全新料 PVC",
+      "customAngles": "45°/90°/自定义角度",
+      "doubleBell": "双承口设计",
+      "secureJoints": "安全牢固连接",
+      "multiSize": "全尺寸覆盖",
+      "sch40Sch80": "Schedule 40 和 80",
+      "standardLengths": "标准长度",
+      "straightRuns": "直管段"
+    }
   }
 }
