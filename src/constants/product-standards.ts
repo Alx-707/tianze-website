@@ -14,6 +14,15 @@ export const PRODUCT_STANDARDS = {
   gb: {
     label: "GB",
   },
+  nom: {
+    label: "NOM",
+  },
+  iec: {
+    label: "IEC",
+  },
+  petg: {
+    label: "PETG",
+  },
 } as const satisfies Record<string, { label: string }>;
 
 export type ProductStandardId = keyof typeof PRODUCT_STANDARDS;

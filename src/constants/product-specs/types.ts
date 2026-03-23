@@ -12,7 +12,7 @@ export interface FamilySpecs {
   slug: string;
   /** Product image paths (placeholder or real) */
   images: string[];
-  /** Exactly 3 key selling point i18n keys */
+  /** Key selling points (raw English strings) */
   highlights: string[];
   /** Spec rows grouped by category (e.g. Schedule, Duty) */
   specGroups: SpecGroup[];

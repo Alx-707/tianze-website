@@ -83,7 +83,7 @@ export const PRODUCT_CATALOG: CatalogConfig = {
       description:
         "PVC conduit fittings compliant with NOM-001-SEDE standards for the Mexican electrical market.",
       sizeSystem: "mm",
-      standardIds: [],
+      standardIds: ["nom"],
       familySlugs: ["conduit-bends", "couplings", "conduit-pipes"],
     },
     {
@@ -93,7 +93,7 @@ export const PRODUCT_CATALOG: CatalogConfig = {
       description:
         "PVC conduit fittings manufactured to IEC 61386 standards for European electrical installations.",
       sizeSystem: "mm",
-      standardIds: [],
+      standardIds: ["iec"],
       familySlugs: ["conduit-bends", "couplings", "conduit-pipes"],
     },
     {
@@ -103,7 +103,7 @@ export const PRODUCT_CATALOG: CatalogConfig = {
       description:
         "PETG pneumatic tube systems for hospital logistics and automated material transport.",
       sizeSystem: "mm",
-      standardIds: [],
+      standardIds: ["petg"],
       familySlugs: ["petg-tubes", "fittings"],
     },
   ],
