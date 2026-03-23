@@ -10,6 +10,10 @@ import {
   applyCorsHeaders,
   createCorsPreflightResponse,
 } from "@/lib/api/cors-utils";
+import {
+  createLeadCachedSuccessResponse,
+  createLeadFailureResponse,
+} from "@/lib/api/lead-route-response";
 import { readAndHashJsonBody } from "@/lib/api/read-and-hash-body";
 import {
   withRateLimit,
@@ -27,17 +31,14 @@ import { verifyTurnstile } from "@/lib/turnstile";
 import { API_ERROR_CODES } from "@/constants/api-error-codes";
 import { HTTP_BAD_REQUEST, HTTP_INTERNAL_ERROR } from "@/constants";
 
-interface SuccessResponseOptions {
-  result: LeadResult;
-  clientIP: string;
-  processingTime: number;
-}
-
 /**
  * Create success payload for product inquiry
  */
-function createSuccessPayload(options: SuccessResponseOptions) {
-  const { result, clientIP, processingTime } = options;
+function createSuccessResponse(
+  result: LeadResult,
+  clientIP: string,
+  processingTime: number,
+) {
   if (process.env.NODE_ENV !== "production") {
     logger.info("Product inquiry submitted successfully", {
       referenceId: result.referenceId,
@@ -48,38 +49,28 @@ function createSuccessPayload(options: SuccessResponseOptions) {
     });
   }
 
-  return {
-    success: true as const,
-    data: {
-      referenceId: result.referenceId,
-    },
-  };
-}
-
-interface ErrorResponseOptions {
-  result: LeadResult;
-  clientIP: string;
-  processingTime: number;
+  return createLeadCachedSuccessResponse(result.referenceId!);
 }
 
 /**
  * Create error response for failed inquiry
  */
-function createErrorResponse(options: ErrorResponseOptions): NextResponse {
-  const { result, clientIP, processingTime } = options;
+function createErrorResponse(
+  result: LeadResult,
+  clientIP: string,
+  processingTime: number,
+): NextResponse {
   logger.warn("Product inquiry submission failed", {
     error: result.error,
     ip: sanitizeIP(clientIP),
     processingTime,
   });
 
-  const isValidationError = result.error === "VALIDATION_ERROR";
-  return createApiErrorResponse(
-    isValidationError
-      ? API_ERROR_CODES.INQUIRY_VALIDATION_FAILED
-      : API_ERROR_CODES.INQUIRY_PROCESSING_ERROR,
-    isValidationError ? HTTP_BAD_REQUEST : HTTP_INTERNAL_ERROR,
-  );
+  return createLeadFailureResponse({
+    result,
+    validationErrorCode: API_ERROR_CODES.INQUIRY_VALIDATION_FAILED,
+    processingErrorCode: API_ERROR_CODES.INQUIRY_PROCESSING_ERROR,
+  });
 }
 
 function validateLeadData(
@@ -186,12 +177,8 @@ const POST_RATE_LIMITED = withRateLimit(
           const processingTime = Date.now() - startTime;
 
           return result.success
-            ? createSuccessPayload({
-                result,
-                clientIP,
-                processingTime,
-              })
-            : createErrorResponse({ result, clientIP, processingTime });
+            ? createSuccessResponse(result, clientIP, processingTime)
+            : createErrorResponse(result, clientIP, processingTime);
         } catch (error) {
           logger.error("Product inquiry submission failed unexpectedly", {
             error: error instanceof Error ? error.message : "Unknown error",
