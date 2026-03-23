@@ -40,7 +40,6 @@ function safeJsonLd(data: ReturnType<typeof buildJsonLd>): string {
 
 export async function CatalogBreadcrumb({ market }: CatalogBreadcrumbProps) {
   const { baseUrl } = SITE_CONFIG;
-  const tCommon = await getTranslations("common");
   const tBreadcrumb = await getTranslations("catalog.breadcrumb");
 
   // JSON-LD URLs use default locale for canonical representation
@@ -65,7 +64,7 @@ export async function CatalogBreadcrumb({ market }: CatalogBreadcrumbProps) {
           {/* Home */}
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
-              <Link href="/">{tCommon("home")}</Link>
+              <Link href="/">{tBreadcrumb("home")}</Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />

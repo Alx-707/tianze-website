@@ -4,12 +4,9 @@ import { describe, expect, it, vi } from "vitest";
 
 vi.mock("next-intl/server", () => ({
   getTranslations: vi.fn(async (namespace?: string) => {
-    if (namespace === "common") {
-      return (key: string) => (key === "home" ? "Home" : key);
-    }
-
     if (namespace === "catalog.breadcrumb") {
-      return (key: string) => (key === "products" ? "Products" : key);
+      return (key: string) =>
+        key === "products" ? "Products" : key === "home" ? "Home" : key;
     }
 
     return (key: string) => key;
