@@ -489,5 +489,72 @@
       "description": "无论您需要OEM制造还是讨论定制规格，我们随时准备帮助。",
       "button": "联系我们"
     }
+  },
+  "oem": {
+    "meta": {
+      "title": "OEM定制制造 | 天泽",
+      "description": "定制PVC线管管件制造——您的规格，我们的产能。从原型到量产。"
+    },
+    "hero": {
+      "title": "OEM定制制造",
+      "subtitle": "您的规格，我们的产能。"
+    },
+    "scope": {
+      "title": "服务范围",
+      "customSizes": {
+        "title": "定制尺寸",
+        "desc": "按您的精确要求生产非标管径、角度和壁厚。"
+      },
+      "privateLabel": {
+        "title": "自有品牌",
+        "desc": "您的品牌，您的包装。完整的品牌产品解决方案。"
+      },
+      "moldDevelopment": {
+        "title": "模具开发",
+        "desc": "自主模具设计和制造，适用于任何管件几何形状。"
+      },
+      "qualityAssurance": {
+        "title": "质量保证",
+        "desc": "全检并可选第三方认证，满足您要求的标准。"
+      }
+    },
+    "process": {
+      "title": "合作流程",
+      "step1": {
+        "title": "询盘",
+        "desc": "分享您的规格和需求",
+        "timeline": "第1天"
+      },
+      "step2": {
+        "title": "打样",
+        "desc": "我们生产样品供您确认",
+        "timeline": "7-15天"
+      },
+      "step3": {
+        "title": "模具开发",
+        "desc": "根据需要进行定制模具开发",
+        "timeline": "15-30天"
+      },
+      "step4": {
+        "title": "试产",
+        "desc": "小批量生产用于最终验证",
+        "timeline": "7-10天"
+      },
+      "step5": {
+        "title": "量产",
+        "desc": "全面生产和质量控制交付",
+        "timeline": "15-20天"
+      }
+    },
+    "standards": {
+      "title": "支持标准",
+      "desc": "我们按所有主要国际线管标准制造——也支持定制规格。",
+      "custom": "也支持定制标准"
+    },
+    "cta": {
+      "heading": "开始您的OEM项目",
+      "description": "告诉我们您的规格。我们将提供包含时间表和价格的详细方案。",
+      "button": "立即开始"
+    }
   }
 }
