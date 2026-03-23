@@ -57,6 +57,8 @@ vi.mock("@/lib/sitemap-utils", () => ({
       "/faq": new Date("2024-09-01T00:00:00Z"),
       "/privacy": new Date("2024-06-01T00:00:00Z"),
       "/terms": new Date("2024-06-01T00:00:00Z"),
+      "/capabilities/bending-machines": new Date("2026-03-23T00:00:00Z"),
+      "/oem-custom-manufacturing": new Date("2026-03-23T00:00:00Z"),
     };
     return dates[page] || new Date("2024-01-01T00:00:00Z");
   }),
@@ -98,6 +100,10 @@ describe("sitemap.ts", () => {
       expect(urls).toContain("https://example.com/en/faq");
       expect(urls).toContain("https://example.com/en/privacy");
       expect(urls).toContain("https://example.com/en/terms");
+      expect(urls).toContain(
+        "https://example.com/en/capabilities/bending-machines",
+      );
+      expect(urls).toContain("https://example.com/en/oem-custom-manufacturing");
     });
 
     it("should include blog post pages", async () => {
@@ -224,6 +230,25 @@ describe("sitemap.ts", () => {
       const uniqueUrls = new Set(urls);
 
       expect(uniqueUrls.size).toBe(urls.length);
+    });
+
+    it("should include standalone pages with correct config", async () => {
+      const result = await sitemap();
+      const bendingMachines = result.find(
+        (entry) =>
+          entry.url === "https://example.com/en/capabilities/bending-machines",
+      );
+      expect(bendingMachines).toBeDefined();
+      expect(bendingMachines?.priority).toBe(0.8);
+      expect(bendingMachines?.changeFrequency).toBe("monthly");
+
+      const oem = result.find(
+        (entry) =>
+          entry.url === "https://example.com/en/oem-custom-manufacturing",
+      );
+      expect(oem).toBeDefined();
+      expect(oem?.priority).toBe(0.8);
+      expect(oem?.changeFrequency).toBe("monthly");
     });
   });
 });

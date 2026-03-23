@@ -86,8 +86,9 @@ describe("paths configuration", () => {
     it("should have consistent path format", () => {
       Object.entries(PATHS_CONFIG).forEach(([pageType, paths]) => {
         if (pageType !== "home") {
-          expect(paths.en).toMatch(/^\/[a-z-]*$/);
-          expect(paths.zh).toMatch(/^\/[a-z-]*$/);
+          // Paths should start with "/" and contain only lowercase letters, hyphens, and forward slashes
+          expect(paths.en).toMatch(/^\/[a-z/-]+$/);
+          expect(paths.zh).toMatch(/^\/[a-z/-]+$/);
         } else {
           expect(paths.en).toBe("/");
           expect(paths.zh).toBe("/");
@@ -578,6 +579,8 @@ describe("paths configuration", () => {
         "faq",
         "privacy",
         "terms",
+        "bendingMachines",
+        "oem",
       ];
 
       // All expected types should be present

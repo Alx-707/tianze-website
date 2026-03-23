@@ -23,6 +23,8 @@ const STATIC_PAGES = [
   "/faq",
   "/privacy",
   "/terms",
+  "/capabilities/bending-machines",
+  "/oem-custom-manufacturing",
 ] as const;
 
 // Change frequency mapping for different page types
@@ -49,6 +51,11 @@ const PAGE_CONFIG_MAP = new Map<string, PageConfig>([
   ["/blog", { changeFrequency: "weekly", priority: 0.7 }],
   ["/faq", { changeFrequency: "monthly", priority: 0.6 }],
   ["/privacy", { changeFrequency: "monthly", priority: 0.7 }],
+  [
+    "/capabilities/bending-machines",
+    { changeFrequency: "monthly", priority: 0.8 },
+  ],
+  ["/oem-custom-manufacturing", { changeFrequency: "monthly", priority: 0.8 }],
   ["blogPost", { changeFrequency: "monthly", priority: 0.6 }],
   ["productMarket", { changeFrequency: "weekly", priority: 0.8 }],
 ]);
@@ -76,6 +83,9 @@ const STATIC_PAGE_LASTMOD: StaticPageLastModConfig = new Map([
   // Legal pages - updated when terms change
   ["/privacy", new Date("2024-06-01T00:00:00Z")],
   ["/terms", new Date("2024-06-01T00:00:00Z")],
+  // Standalone pages
+  ["/capabilities/bending-machines", new Date("2026-03-23T00:00:00Z")],
+  ["/oem-custom-manufacturing", new Date("2026-03-23T00:00:00Z")],
 ]);
 
 // Helper to get page config
