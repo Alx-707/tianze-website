@@ -3,6 +3,7 @@ import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mockNotFound = vi.fn();
+const mockGetTranslations = vi.fn();
 
 vi.mock("next/navigation", () => ({
   notFound: () => {
@@ -12,6 +13,7 @@ vi.mock("next/navigation", () => ({
 }));
 
 vi.mock("next-intl/server", () => ({
+  getTranslations: mockGetTranslations,
   setRequestLocale: vi.fn(),
 }));
 
@@ -19,12 +21,13 @@ vi.mock("@/i18n/routing", () => ({
   Link: ({
     href,
     children,
-    ...props
+    className,
   }: {
     href: string;
     children: React.ReactNode;
+    className?: string;
   }) => (
-    <a href={href} {...props}>
+    <a href={href} className={className}>
       {children}
     </a>
   ),
@@ -48,9 +51,59 @@ vi.mock("@/components/products/catalog-breadcrumb", () => ({
   CatalogBreadcrumb: () => <nav aria-label="breadcrumb">Breadcrumb</nav>,
 }));
 
+vi.mock("@/components/products/family-section", () => ({
+  FamilySection: ({ family }: { family: { slug: string; label: string } }) => (
+    <div data-testid={`family-${family.slug}`}>{family.label}</div>
+  ),
+}));
+
+vi.mock("@/components/products/sticky-family-nav", () => ({
+  StickyFamilyNav: () => <nav data-testid="sticky-nav">nav</nav>,
+}));
+
+vi.mock("@/components/products/product-specs", () => ({
+  ProductSpecs: ({ title }: { title?: string }) => (
+    <div data-testid="product-specs">{title}</div>
+  ),
+  ProductCertifications: ({ title }: { title?: string }) => (
+    <div data-testid="product-certifications">{title}</div>
+  ),
+  ProductTradeInfo: ({ title }: { title?: string }) => (
+    <div data-testid="product-trade-info">{title}</div>
+  ),
+}));
+
+const MOCK_TRANSLATIONS: Record<string, string> = {
+  "market.technical.title": "Technical Properties",
+  "market.certifications.title": "Certifications & Compliance",
+  "market.trade.title": "Trade Information",
+  "market.trade.moq": "Minimum Order",
+  "market.trade.leadTime": "Lead Time",
+  "market.trade.supplyCapacity": "Supply Capacity",
+  "market.trade.packaging": "Packaging",
+  "market.trade.portOfLoading": "Port of Loading",
+  "market.cta.heading": "Need {marketLabel} conduit fittings?",
+  "market.cta.description":
+    "Request a quote or ask about specifications, MOQ, and lead times.",
+  "market.cta.button": "Request a Quote",
+};
+
 describe("Market Landing Page", () => {
   beforeEach(() => {
+    vi.resetModules();
     mockNotFound.mockClear();
+    mockGetTranslations.mockReset();
+    mockGetTranslations.mockResolvedValue(
+      (key: string, params?: Record<string, string>) => {
+        let value = MOCK_TRANSLATIONS[key] ?? key;
+        if (params) {
+          for (const [k, v] of Object.entries(params)) {
+            value = value.replace(`{${k}}`, v);
+          }
+        }
+        return value;
+      },
+    );
   });
 
   async function renderPage(market: string, locale = "en") {
@@ -61,32 +114,130 @@ describe("Market Landing Page", () => {
     return render(page);
   }
 
-  it("renders 3 family cards for north-america market", async () => {
-    await renderPage("north-america");
+  describe("Scenario 1.1: Page renders with title and standard label", () => {
+    it("renders the market title as h1 and standard label badge", async () => {
+      await renderPage("north-america");
 
-    expect(screen.getByText("Conduit Sweeps & Elbows")).toBeInTheDocument();
-    expect(screen.getByText("Couplings")).toBeInTheDocument();
-    expect(screen.getByText("Conduit Pipes")).toBeInTheDocument();
+      const heading = screen.getByRole("heading", { level: 1 });
+      expect(heading).toHaveTextContent("UL / ASTM Series");
+      expect(screen.getByText("UL 651 / ASTM D1785")).toBeInTheDocument();
+    });
+
+    it("renders the market description", async () => {
+      await renderPage("north-america");
+
+      expect(
+        screen.getByText(/PVC conduit fittings engineered to UL 651/),
+      ).toBeInTheDocument();
+    });
   });
 
-  it("renders 4 family cards for australia-new-zealand including Bellmouths", async () => {
-    await renderPage("australia-new-zealand");
+  describe("Scenario 1.2: Family sections rendered", () => {
+    it("renders 3 family sections for north-america", async () => {
+      await renderPage("north-america");
 
-    expect(screen.getByText("Conduit Bends")).toBeInTheDocument();
-    expect(screen.getByText("Bellmouths")).toBeInTheDocument();
-    expect(screen.getByText("Couplings")).toBeInTheDocument();
-    expect(screen.getByText("Conduit Pipes")).toBeInTheDocument();
+      expect(
+        screen.getByTestId("family-conduit-sweeps-elbows"),
+      ).toBeInTheDocument();
+      expect(screen.getByTestId("family-couplings")).toBeInTheDocument();
+      expect(screen.getByTestId("family-conduit-pipes")).toBeInTheDocument();
+    });
+
+    it("renders sticky family nav", async () => {
+      await renderPage("north-america");
+      expect(screen.getByTestId("sticky-nav")).toBeInTheDocument();
+    });
   });
 
-  it("calls notFound for invalid market slug", async () => {
-    await expect(renderPage("invalid-market")).rejects.toThrow(
-      "NEXT_NOT_FOUND",
-    );
-    expect(mockNotFound).toHaveBeenCalled();
+  describe("Scenario 1.6: Trust signals are present", () => {
+    it("renders technical specs section for market with spec data", async () => {
+      await renderPage("north-america");
+      expect(screen.getByTestId("product-specs")).toHaveTextContent(
+        "Technical Properties",
+      );
+    });
+
+    it("renders certifications section for market with spec data", async () => {
+      await renderPage("north-america");
+      expect(screen.getByTestId("product-certifications")).toHaveTextContent(
+        "Certifications & Compliance",
+      );
+    });
+
+    it("renders trade info section for market with spec data", async () => {
+      await renderPage("north-america");
+      expect(screen.getByTestId("product-trade-info")).toHaveTextContent(
+        "Trade Information",
+      );
+    });
+
+    it("does not render trust signals for market without spec data", async () => {
+      await renderPage("mexico");
+
+      expect(screen.queryByTestId("product-specs")).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId("product-certifications"),
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId("product-trade-info"),
+      ).not.toBeInTheDocument();
+    });
   });
 
-  it("renders breadcrumb", async () => {
-    await renderPage("north-america");
-    expect(screen.getByLabelText("breadcrumb")).toBeInTheDocument();
+  describe("Scenario 1.7: CTA links to /contact", () => {
+    it("renders CTA section with link to /contact", async () => {
+      await renderPage("north-america");
+
+      const ctaLink = screen.getByRole("link", { name: /request a quote/i });
+      expect(ctaLink).toHaveAttribute("href", "/contact");
+    });
+
+    it("renders CTA heading with market label", async () => {
+      await renderPage("north-america");
+
+      expect(
+        screen.getByText("Need UL / ASTM Series conduit fittings?"),
+      ).toBeInTheDocument();
+    });
+  });
+
+  describe("Scenario 1.10: Invalid market slug calls notFound", () => {
+    it("calls notFound for invalid market slug", async () => {
+      await expect(renderPage("invalid-market")).rejects.toThrow(
+        "NEXT_NOT_FOUND",
+      );
+      expect(mockNotFound).toHaveBeenCalled();
+    });
+  });
+
+  describe("Breadcrumb", () => {
+    it("renders breadcrumb navigation", async () => {
+      await renderPage("north-america");
+      expect(screen.getByLabelText("breadcrumb")).toBeInTheDocument();
+    });
+  });
+
+  describe("Market without spec data", () => {
+    it("renders header but not family sections or trust signals", async () => {
+      await renderPage("australia-new-zealand");
+
+      const heading = screen.getByRole("heading", { level: 1 });
+      expect(heading).toHaveTextContent("AS/NZS 2053 Series");
+
+      // Family sections are not rendered without spec data
+      expect(
+        screen.queryByTestId("family-conduit-bends"),
+      ).not.toBeInTheDocument();
+
+      // Trust signals are not rendered
+      expect(screen.queryByTestId("product-specs")).not.toBeInTheDocument();
+    });
+
+    it("still renders CTA for markets without spec data", async () => {
+      await renderPage("australia-new-zealand");
+
+      const ctaLink = screen.getByRole("link", { name: /request a quote/i });
+      expect(ctaLink).toHaveAttribute("href", "/contact");
+    });
   });
 });

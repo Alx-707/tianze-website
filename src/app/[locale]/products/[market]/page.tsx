@@ -1,15 +1,37 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import {
   getMarketBySlug,
   getFamiliesForMarket,
   getAllMarketSlugs,
   isValidMarketSlug,
 } from "@/constants/product-catalog";
+import { NORTH_AMERICA_SPECS } from "@/constants/product-specs/north-america";
+import type { MarketSpecs } from "@/constants/product-specs/types";
 import { SITE_CONFIG } from "@/config/paths";
 import { CatalogBreadcrumb } from "@/components/products/catalog-breadcrumb";
-import { routing } from "@/i18n/routing";
+import { FamilySection } from "@/components/products/family-section";
+import {
+  ProductCertifications,
+  ProductSpecs,
+  ProductTradeInfo,
+} from "@/components/products/product-specs";
+import { StickyFamilyNav } from "@/components/products/sticky-family-nav";
+import { Link, routing } from "@/i18n/routing";
+
+// --- Spec data lookup ---
+
+const SPECS_BY_MARKET: Record<string, MarketSpecs> = {
+  "north-america": NORTH_AMERICA_SPECS,
+  // Future markets will be added here
+};
+
+function getMarketSpecs(marketSlug: string): MarketSpecs | undefined {
+  return SPECS_BY_MARKET[marketSlug];
+}
+
+// --- Static params ---
 
 export function generateStaticParams() {
   const markets = getAllMarketSlugs();
@@ -17,6 +39,8 @@ export function generateStaticParams() {
     markets.map((market) => ({ locale, market })),
   );
 }
+
+// --- Metadata ---
 
 interface MarketPageProps {
   params: Promise<{ locale: string; market: string }>;
@@ -50,6 +74,72 @@ export async function generateMetadata({
   };
 }
 
+// --- Extracted sub-sections (keep MarketPage under 120 lines) ---
+
+interface TrustSignalsSectionProps {
+  marketSpecs: MarketSpecs;
+  technicalTitle: string;
+  certificationsTitle: string;
+  tradeTitle: string;
+  tradeLabels: {
+    moq: string;
+    leadTime: string;
+    supplyCapacity: string;
+    packaging: string;
+    portOfLoading: string;
+  };
+}
+
+function TrustSignalsSection({
+  marketSpecs,
+  technicalTitle,
+  certificationsTitle,
+  tradeTitle,
+  tradeLabels,
+}: TrustSignalsSectionProps) {
+  return (
+    <div className="mt-16 space-y-8">
+      <ProductSpecs specs={marketSpecs.technical} title={technicalTitle} />
+      <ProductCertifications
+        certifications={marketSpecs.certifications}
+        title={certificationsTitle}
+      />
+      <ProductTradeInfo
+        moq={marketSpecs.trade.moq}
+        leadTime={marketSpecs.trade.leadTime}
+        supplyCapacity={marketSpecs.trade.supplyCapacity}
+        packaging={marketSpecs.trade.packaging}
+        portOfLoading={marketSpecs.trade.portOfLoading}
+        title={tradeTitle}
+        labels={tradeLabels}
+      />
+    </div>
+  );
+}
+
+interface CtaSectionProps {
+  heading: string;
+  description: string;
+  buttonText: string;
+}
+
+function CtaSection({ heading, description, buttonText }: CtaSectionProps) {
+  return (
+    <section className="mt-16 rounded-lg border border-primary/20 bg-primary/5 p-8 text-center">
+      <h2 className="mb-2 text-xl font-semibold">{heading}</h2>
+      <p className="mb-6 text-muted-foreground">{description}</p>
+      <Link
+        href="/contact"
+        className="inline-flex items-center rounded-md bg-primary px-6 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+      >
+        {buttonText}
+      </Link>
+    </section>
+  );
+}
+
+// --- Page component ---
+
 export default async function MarketPage({ params }: MarketPageProps) {
   const { locale, market: marketSlug } = await params;
   setRequestLocale(locale);
@@ -60,6 +150,13 @@ export default async function MarketPage({ params }: MarketPageProps) {
 
   const market = getMarketBySlug(marketSlug)!;
   const families = getFamiliesForMarket(marketSlug);
+  const marketSpecs = getMarketSpecs(marketSlug);
+  const t = await getTranslations("catalog");
+
+  // Build family specs lookup for FamilySection rendering
+  const familySpecsMap = new Map(
+    marketSpecs?.families.map((fs) => [fs.slug, fs]),
+  );
 
   return (
     <main className="mx-auto max-w-[1080px] px-6 py-8 md:py-12">
@@ -75,21 +172,41 @@ export default async function MarketPage({ params }: MarketPageProps) {
         </p>
       </header>
 
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {families.map((family) => (
-          <div
-            key={family.slug}
-            className="rounded-lg border border-border bg-card p-6 shadow-sm"
-          >
-            <h2 className="mb-2 text-lg font-semibold text-foreground">
-              {family.label}
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              {family.description}
-            </p>
-          </div>
-        ))}
+      <StickyFamilyNav
+        families={families.map((f) => ({ slug: f.slug, label: f.label }))}
+      />
+
+      <div className="space-y-16">
+        {families.map((family) => {
+          const specs = familySpecsMap.get(family.slug);
+          if (!specs) return null;
+          return (
+            <FamilySection key={family.slug} family={family} specs={specs} />
+          );
+        })}
       </div>
+
+      {marketSpecs && (
+        <TrustSignalsSection
+          marketSpecs={marketSpecs}
+          technicalTitle={t("market.technical.title")}
+          certificationsTitle={t("market.certifications.title")}
+          tradeTitle={t("market.trade.title")}
+          tradeLabels={{
+            moq: t("market.trade.moq"),
+            leadTime: t("market.trade.leadTime"),
+            supplyCapacity: t("market.trade.supplyCapacity"),
+            packaging: t("market.trade.packaging"),
+            portOfLoading: t("market.trade.portOfLoading"),
+          }}
+        />
+      )}
+
+      <CtaSection
+        heading={t("market.cta.heading", { marketLabel: market.label })}
+        description={t("market.cta.description")}
+        buttonText={t("market.cta.button")}
+      />
     </main>
   );
 }
