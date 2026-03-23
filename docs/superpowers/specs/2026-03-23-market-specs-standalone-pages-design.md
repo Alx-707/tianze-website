@@ -68,7 +68,7 @@ Data is draft based on industry standards — owner will provide real data later
 |-----------|--------------|-------|--------|--------|-----------|
 | Size system | Imperial (1/2", 3/4") | Metric (16mm, 20mm) | Metric | Metric | Metric (OD) |
 | Grouping | Schedule 40/80 | Medium/Heavy Duty | Tipo Ligero/Pesado | Light/Medium/Heavy | By OD |
-| Unique products | — | Bellmouths | — | — | PETG tubes, diverters |
+| Unique products | — | Bellmouths | — | — | PETG tubes, fittings (incl. diverters) |
 | Certifications | UL 651, ASTM D1785 | AS/NZS 2053 | NOM-001-SEDE | IEC 61386 | — |
 | Trade terms | 500 pcs MOQ | 500 pcs MOQ | 500 pcs MOQ | 500 pcs MOQ | 100 meters MOQ |
 
@@ -90,7 +90,7 @@ Page logic already handles the presence/absence of specs — registration alone 
 
 ### 5.4 product-standards.ts additions
 
-New standard IDs:
+New standard IDs (short display-friendly labels; full standard names already exist in `product-catalog.ts` `standardLabel` fields):
 
 ```typescript
 nom: { label: "NOM" },
@@ -103,16 +103,22 @@ Update `product-catalog.ts` to fill currently-empty `standardIds`:
 - Europe: `["iec"]`
 - Pneumatic: `["petg"]`
 
-### 5.5 i18n key additions
+### 5.5 Highlights: raw strings (matching existing pattern)
 
-New highlight keys in `catalog.highlights`:
+The existing `north-america.ts` stores highlights as **raw English strings** directly in the spec data (e.g., `"UL 651 Certified"`). `FamilySection` renders them with `<span>{highlight}</span>` — no `t()` translation lookup.
 
-**AU/NZ**: `asNzsCertified`, `mediumHeavyDuty`, `bellEndFittings`, `flaredEntry`, `metricSizes`
-**Mexico**: `nomCompliant`, `metricSizes`, `lightHeavyDuty`
-**Europe**: `iecCertified`, `threeDutyRatings`, `metricSizes`
-**Pneumatic**: `crystalClear`, `silentOperation`, `leakProof`, `impactResistant`, `hospitalGrade`
+The orphaned `catalog.highlights` i18n keys in `critical.json` are unused by any component.
 
-Both `en` and `zh` locale files updated.
+**Decision**: New markets follow the same pattern — raw English strings in spec data files. This is consistent with North America and avoids a `FamilySection` refactor.
+
+**Future task (deferred)**: Migrate all highlights to i18n keys. This requires refactoring `FamilySection` to accept key names and call `t("catalog.highlights." + key)`. Not in scope for this phase.
+
+New highlight strings per market:
+
+**AU/NZ**: "AS/NZS 2053 Certified", "Medium & Heavy Duty", "Bell End Fittings", "Flared Entry Protection", "Metric Sizes"
+**Mexico**: "NOM Compliant", "Metric Sizes", "Light & Heavy Duty"
+**Europe**: "IEC 61386 Certified", "Three Duty Ratings", "Metric Sizes"
+**Pneumatic**: "Crystal Clear PETG", "Silent Operation", "Leak-Proof Joints", "Impact Resistant", "Hospital Grade"
 
 ### 5.6 Trade terms per market
 
@@ -168,7 +174,9 @@ interface EquipmentSpec {
 }
 ```
 
-**i18n namespace**: `capabilities` (new)
+**i18n namespace**: `capabilities` (new, in `deferred.json`)
+
+**Page conventions**: Must export `generateStaticParams()` and call `setRequestLocale(locale)` before any hooks/translations, following existing page patterns.
 
 ### 6.3 OEM Service page
 
@@ -198,20 +206,24 @@ interface EquipmentSpec {
 
 **Data**: Pure i18n keys. Process steps as inline const array in component.
 
-**i18n namespace**: `oem` (new)
+**i18n namespace**: `oem` (new, in `deferred.json`)
+
+**Page conventions**: Must export `generateStaticParams()` and call `setRequestLocale(locale)` before any hooks/translations.
 
 ### 6.4 Infrastructure changes
 
 | Location | Change |
 |----------|--------|
-| `src/config/paths/types.ts` | Add `"capabilities"` and `"oem"` to `PageType` union |
-| `src/config/paths/paths-config.ts` | Add paths for both routes |
+| `src/config/paths/types.ts` | Add `"bendingMachines"` and `"oem"` to `PageType` union |
+| `src/config/paths/paths-config.ts` | Add: `bendingMachines: { en: "/capabilities/bending-machines", zh: "/capabilities/bending-machines" }` and `oem: { en: "/oem-custom-manufacturing", zh: "/oem-custom-manufacturing" }` |
 | `src/app/sitemap.ts` `STATIC_PAGES` | Add `/capabilities/bending-machines` and `/oem-custom-manufacturing` |
 | `src/app/sitemap.ts` `PAGE_CONFIG_MAP` | Add entries: priority 0.8, changeFrequency monthly |
 | `src/app/sitemap.ts` `STATIC_PAGE_LASTMOD` | Add entries with current date |
 | `src/app/[locale]/products/page.tsx` | Update bending machines card: `/contact` → `/capabilities/bending-machines` |
-| `messages/en/critical.json` | Add `capabilities` and `oem` namespaces |
-| `messages/zh/critical.json` | Add `capabilities` and `oem` namespaces |
+| Homepage i18n links | Update `home.products.item3.link` → `/capabilities/bending-machines` and `home.products.item4.link` → `/oem-custom-manufacturing` (en + zh) |
+| `messages/en/deferred.json` | Add `capabilities` and `oem` namespaces (not critical — these are secondary landing pages) |
+| `messages/zh/deferred.json` | Add `capabilities` and `oem` namespaces |
+| `src/lib/i18n/route-parsing.ts` | No change needed (both routes are static, not dynamic) |
 
 ### 6.5 Components
 
@@ -243,17 +255,19 @@ Phase 1: Market spec data (4 files + registrations + i18n)
 
 Phase 2a: Bending Machines page
   2a-1. equipment-specs.ts + types
-  2a-2. i18n namespace: capabilities (en + zh)
-  2a-3. Page component + route
-  2a-4. Sitemap / paths-config / types updates
+  2a-2. i18n namespace: capabilities (en + zh, in deferred.json)
+  2a-3. Page component + route (with generateStaticParams + setRequestLocale)
+  2a-4. Sitemap / paths-config / types updates (PageType: "bendingMachines")
   2a-5. Update products overview bending machines card link
-  2a-6. Tests
+  2a-6. Update homepage i18n link: home.products.item3.link → /capabilities/bending-machines
+  2a-7. Tests
 
 Phase 2b: OEM Service page
-  2b-1. i18n namespace: oem (en + zh)
-  2b-2. Page component + route
-  2b-3. Sitemap / paths-config / types updates
-  2b-4. Tests
+  2b-1. i18n namespace: oem (en + zh, in deferred.json)
+  2b-2. Page component + route (with generateStaticParams + setRequestLocale)
+  2b-3. Sitemap / paths-config / types updates (PageType: "oem")
+  2b-4. Update homepage i18n link: home.products.item4.link → /oem-custom-manufacturing
+  2b-5. Tests
 ```
 
 ## 8. Risks & Mitigations
