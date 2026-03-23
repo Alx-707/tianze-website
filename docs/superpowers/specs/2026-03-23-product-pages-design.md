@@ -36,7 +36,7 @@ The original three-level hierarchy (products → market → family) is collapsed
 
 ### Removed
 
-- `/products/[market]/[family]` route — deleted. Family-level content is now sections within the L1 market page, navigable via anchor links (`#sweeps`, `#couplings`, `#conduit-pipes`).
+- `/products/[market]/[family]` route — deleted. Family-level content is now sections within the L1 market page, navigable via anchor links using catalog slugs (`#conduit-sweeps-elbows`, `#couplings`, `#conduit-pipes`).
 
 ### Out of scope (route reserved)
 
@@ -57,8 +57,9 @@ Page Header
   - Title: UL / ASTM Series
   - Description: 2-3 sentences about the standard and its market
   - Sticky family nav: [Sweeps & Elbows] [Couplings] [Pipes]
+    (anchor IDs use catalog slugs for consistency: #conduit-sweeps-elbows, #couplings, #conduit-pipes)
 
-Family Section #1: Conduit Sweeps & Elbows  (#sweeps)
+Family Section #1: Conduit Sweeps & Elbows  (#conduit-sweeps-elbows)
   - Image area (left) + Overview (right)
     - Product gallery with placeholder images
     - Family name + short description
@@ -72,6 +73,7 @@ Family Section #2: Couplings  (#couplings)
     Size | Type | Wall Thickness | End Type
 
 Family Section #3: Conduit Pipes  (#conduit-pipes)
+  - Same structure, different columns:
   - Same structure, different columns:
     Size | Length | Wall Thickness | Schedule
 
@@ -137,7 +139,9 @@ Section: "Specialty & Equipment"
 
 ## 6. Homepage Product Section Update
 
-The current homepage product section references old URLs (`/products/machines`, `/products/pvc-conduits`). Updated to match new catalog structure.
+The active homepage component (`ProductsSection`) links all cards to `/products`, which is correct. However, the card **content** (tags, spec highlights, descriptions) still reflects the old product-type classification (machines, PVC conduits, pneumatic tubes, custom). This needs updating to match the new market-standard structure.
+
+Note: A legacy `ProductMatrixBlock` component exists with old URLs (`/products/machines`, etc.) but is not consumed by the current homepage. Its cleanup is out of scope.
 
 ### 6.1 New card content (2x2 grid, same layout)
 
@@ -178,8 +182,9 @@ interface MarketSpecs {
   trade: {
     moq: string;
     leadTime: string;
-    port: string;
+    supplyCapacity: string;
     packaging: string;
+    portOfLoading: string;
   };
   families: FamilySpecs[];
 }
