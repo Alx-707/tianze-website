@@ -32,7 +32,7 @@ export function useRateLimit() {
   const rateLimitResetTimeoutRef = useRef<number | null>(null);
 
   // 使用自定义 hook 获取当前时间，每 5 秒更新一次（足够用于速率限制 UI）
-  const currentTime = useCurrentTime(5000);
+  const currentTime = useCurrentTime(5000, lastSubmissionTime !== null);
 
   const RATE_LIMIT_WINDOW = getConfiguredCooldownMs();
 

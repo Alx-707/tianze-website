@@ -27,6 +27,10 @@ function sanitizeFormData(formData: ContactFormData): ContactFormData {
   };
 }
 
+function escapeAirtableFormulaValue(value: string): string {
+  return value.replaceAll("\\", "\\\\").replaceAll('"', '\\"');
+}
+
 export async function createContactRecord(params: {
   base: AirtableNS.Base;
   tableName: string;
@@ -187,10 +191,13 @@ export async function isDuplicateEmailAddress(params: {
   const { base, tableName, email } = params;
 
   try {
+    const normalizedEmail = escapeAirtableFormulaValue(
+      email.trim().toLowerCase(),
+    );
     const records = await base
       .table(tableName)
       .select({
-        filterByFormula: `{Email} = "${email.toLowerCase()}"`,
+        filterByFormula: `{Email} = "${normalizedEmail}"`,
         maxRecords: ONE,
       })
       .all();

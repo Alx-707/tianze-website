@@ -371,5 +371,19 @@ describe("Airtable Service - Read Operations Tests", () => {
 
       expect(mockSelect).toHaveBeenCalledWith(expectedOptions);
     });
+
+    it("should escape duplicate email values before building Airtable formulas", async () => {
+      const service = new AirtableServiceClass();
+
+      setServiceReady(service);
+      mockSelectAll.mockResolvedValue([]);
+
+      await service.isDuplicateEmail('bad"actor@example.com');
+
+      expect(mockSelect).toHaveBeenCalledWith({
+        filterByFormula: '{Email} = "bad\\"actor@example.com"',
+        maxRecords: 1,
+      });
+    });
   });
 });

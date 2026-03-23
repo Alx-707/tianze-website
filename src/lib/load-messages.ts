@@ -17,6 +17,8 @@ type MessageType = "critical" | "deferred";
 
 const isCiEnv =
   process.env.CI === "true" || process.env.PLAYWRIGHT_TEST === "true";
+const isProductionBuild = () =>
+  process.env.NEXT_PHASE === "phase-production-build";
 const isDev = () => process.env.NODE_ENV === "development";
 const revalidate = () => (isDev() ? 1 : MONITORING_INTERVALS.CACHE_CLEANUP);
 
@@ -66,7 +68,7 @@ function createCached(locale: Locale, type: MessageType) {
 
 function load(locale: Locale, type: MessageType): Promise<Messages> {
   const safeLocale = sanitizeLocale(locale);
-  return isCiEnv
+  return isCiEnv || isProductionBuild()
     ? loadMessageSource(safeLocale, type)
     : createCached(safeLocale, type)();
 }

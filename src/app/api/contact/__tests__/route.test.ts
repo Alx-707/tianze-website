@@ -192,6 +192,7 @@ describe("Contact API Route", () => {
         await import("@/app/api/contact/contact-api-validation");
       vi.mocked(validateFormData).mockResolvedValue({
         success: false,
+        errorCode: API_ERROR_CODES.CONTACT_VALIDATION_FAILED,
         error: "Invalid form data",
         details: ["email: Invalid email"],
         data: null,
@@ -287,6 +288,7 @@ describe("Contact API Route", () => {
         await import("@/app/api/contact/contact-api-validation");
       vi.mocked(validateFormData).mockResolvedValue({
         success: false,
+        errorCode: API_ERROR_CODES.CONTACT_VALIDATION_FAILED,
         error: "Security verification failed. Please try again.",
         details: ["Turnstile verification failed"],
         data: null,

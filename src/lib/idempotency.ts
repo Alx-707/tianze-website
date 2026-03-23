@@ -110,9 +110,13 @@ export function getIdempotencyKey(request: NextRequest): string | null {
  * Build the semantic fingerprint for a request (method + pathname).
  * The same raw idempotency key used for a different endpoint is rejected.
  */
-function buildFingerprint(request: NextRequest): string {
+export function createRequestFingerprint(
+  request: NextRequest,
+  bodyHash?: string,
+): string {
   const { pathname } = new URL(request.url);
-  return `${request.method}:${pathname}`;
+  const baseFingerprint = `${request.method}:${pathname}`;
+  return bodyHash ? `${baseFingerprint}:${bodyHash}` : baseFingerprint;
 }
 
 /**
@@ -579,6 +583,7 @@ export async function withIdempotency<T>(
   options: {
     required?: boolean;
     ttl?: number;
+    fingerprint?: string;
   } = {},
 ): Promise<NextResponse> {
   const { required = false } = options;
@@ -601,7 +606,7 @@ export async function withIdempotency<T>(
 
   return idempotencyKey
     ? handleWithIdempotencyKey(idempotencyKey, handler, {
-        fingerprint: buildFingerprint(request),
+        fingerprint: options.fingerprint ?? createRequestFingerprint(request),
         ttlMs,
       })
     : handleWithoutIdempotencyKey(handler);

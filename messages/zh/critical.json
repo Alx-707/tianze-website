@@ -949,6 +949,7 @@
   },
   "catalog": {
     "breadcrumb": {
+      "home": "首页",
       "products": "产品中心"
     },
     "overview": {

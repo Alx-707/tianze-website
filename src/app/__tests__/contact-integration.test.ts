@@ -64,15 +64,21 @@ vi.mock("@/lib/turnstile", () => ({
 }));
 
 // Lead pipeline — external services (Resend + Airtable)
-vi.mock("@/lib/contact-form-processing", () => ({
-  processFormSubmission: vi.fn(() =>
-    Promise.resolve({
-      emailSent: true,
-      recordCreated: true,
-      referenceId: "ref-integration-001",
-    }),
-  ),
-}));
+vi.mock("@/lib/contact-form-processing", async (importOriginal) => {
+  const original =
+    await importOriginal<typeof import("@/lib/contact-form-processing")>();
+
+  return {
+    ...original,
+    processFormSubmission: vi.fn(() =>
+      Promise.resolve({
+        emailSent: true,
+        recordCreated: true,
+        referenceId: "ref-integration-001",
+      }),
+    ),
+  };
+});
 
 // ── Helpers ─────────────────────────────────────────────────────────
 
