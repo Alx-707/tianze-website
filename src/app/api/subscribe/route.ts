@@ -1,13 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createApiErrorResponse } from "@/lib/api/api-response";
 import {
   applyCorsHeaders,
   createCorsPreflightResponse,
 } from "@/lib/api/cors-utils";
-import {
-  createLeadCachedSuccessResponse,
-  createLeadFailureResponse,
-} from "@/lib/api/lead-route-response";
 import { readAndHashJsonBody } from "@/lib/api/read-and-hash-body";
 import {
   withRateLimit,
@@ -18,19 +13,24 @@ import { processLead, type LeadResult } from "@/lib/lead-pipeline";
 import { LEAD_TYPES } from "@/lib/lead-pipeline/lead-schema";
 import { logger, sanitizeEmail, sanitizeIP } from "@/lib/logger";
 import { verifyTurnstile } from "@/lib/turnstile";
-import { HTTP_BAD_REQUEST } from "@/constants";
+import { HTTP_BAD_REQUEST, HTTP_INTERNAL_ERROR } from "@/constants";
 import { API_ERROR_CODES } from "@/constants/api-error-codes";
 
 /**
  * Create success response for newsletter subscription
  */
-function createSuccessResponse(result: LeadResult, email: string) {
+function createSuccessResponse(result: LeadResult, email: string): object {
   logger.info("Newsletter subscription successful", {
     referenceId: result.referenceId,
     email: sanitizeEmail(email),
   });
 
-  return createLeadCachedSuccessResponse(result.referenceId!);
+  return {
+    success: true,
+    errorCode: API_ERROR_CODES.SUBSCRIBE_SUCCESS,
+    email,
+    referenceId: result.referenceId,
+  };
 }
 
 /**
@@ -39,11 +39,18 @@ function createSuccessResponse(result: LeadResult, email: string) {
 function createErrorResponse(result: LeadResult): NextResponse {
   logger.warn("Newsletter subscription failed", { error: result.error });
 
-  return createLeadFailureResponse({
-    result,
-    validationErrorCode: API_ERROR_CODES.SUBSCRIBE_VALIDATION_EMAIL_INVALID,
-    processingErrorCode: API_ERROR_CODES.SUBSCRIBE_PROCESSING_ERROR,
-  });
+  const isValidationError = result.error === "VALIDATION_ERROR";
+  return NextResponse.json(
+    {
+      success: false,
+      errorCode: isValidationError
+        ? API_ERROR_CODES.SUBSCRIBE_VALIDATION_EMAIL_INVALID
+        : API_ERROR_CODES.SUBSCRIBE_PROCESSING_ERROR,
+    },
+    {
+      status: isValidationError ? HTTP_BAD_REQUEST : HTTP_INTERNAL_ERROR,
+    },
+  );
 }
 
 /**
@@ -61,9 +68,12 @@ function handlePost(
     }>(request, { route: "/api/subscribe" });
 
     if (!parsedBody.ok) {
-      return createApiErrorResponse(
-        parsedBody.errorCode,
-        parsedBody.statusCode,
+      return NextResponse.json(
+        {
+          success: false,
+          errorCode: parsedBody.errorCode,
+        },
+        { status: parsedBody.statusCode },
       );
     }
 
@@ -74,9 +84,12 @@ function handlePost(
         const turnstileToken = parsedBody.data?.turnstileToken;
 
         if (email === undefined || email === "") {
-          return createApiErrorResponse(
-            API_ERROR_CODES.SUBSCRIBE_VALIDATION_EMAIL_REQUIRED,
-            HTTP_BAD_REQUEST,
+          return NextResponse.json(
+            {
+              success: false,
+              errorCode: API_ERROR_CODES.SUBSCRIBE_VALIDATION_EMAIL_REQUIRED,
+            },
+            { status: HTTP_BAD_REQUEST },
           );
         }
 
@@ -85,9 +98,12 @@ function handlePost(
           logger.warn("Newsletter subscription missing Turnstile token", {
             ip: sanitizeIP(clientIP),
           });
-          return createApiErrorResponse(
-            API_ERROR_CODES.SUBSCRIBE_SECURITY_REQUIRED,
-            HTTP_BAD_REQUEST,
+          return NextResponse.json(
+            {
+              success: false,
+              errorCode: API_ERROR_CODES.SUBSCRIBE_SECURITY_REQUIRED,
+            },
+            { status: HTTP_BAD_REQUEST },
           );
         }
 
@@ -99,9 +115,12 @@ function handlePost(
           logger.warn("Newsletter Turnstile verification failed", {
             ip: sanitizeIP(clientIP),
           });
-          return createApiErrorResponse(
-            API_ERROR_CODES.SUBSCRIBE_SECURITY_FAILED,
-            HTTP_BAD_REQUEST,
+          return NextResponse.json(
+            {
+              success: false,
+              errorCode: API_ERROR_CODES.SUBSCRIBE_SECURITY_FAILED,
+            },
+            { status: HTTP_BAD_REQUEST },
           );
         }
 
