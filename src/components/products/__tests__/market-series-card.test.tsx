@@ -2,6 +2,31 @@ import React from "react";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+// Mock next/image — renders as plain <img> in test environment
+vi.mock("next/image", () => ({
+  default: ({
+    src,
+    alt,
+    fill,
+    sizes,
+    className,
+  }: {
+    src: string;
+    alt: string;
+    fill?: boolean;
+    sizes?: string;
+    className?: string;
+  }) => (
+    <img
+      src={src}
+      alt={alt}
+      data-fill={fill ? "true" : undefined}
+      data-sizes={sizes}
+      className={className}
+    />
+  ),
+}));
+
 vi.mock("@/i18n/routing", () => ({
   Link: ({
     href,
@@ -86,5 +111,12 @@ describe("MarketSeriesCard", () => {
     render(<MarketSeriesCard market={market} familyCount={3} />);
 
     expect(screen.getByText(/3/)).toBeInTheDocument();
+  });
+
+  it("renders a placeholder image", async () => {
+    const MarketSeriesCard = await importComponent();
+    render(<MarketSeriesCard market={market} familyCount={3} />);
+    const img = screen.getByRole("img");
+    expect(img).toHaveAttribute("alt", expect.stringContaining(market.label));
   });
 });
