@@ -7,12 +7,125 @@
 import { processLead } from "@/lib/lead-pipeline/process-lead";
 import { CONTACT_SUBJECTS, LEAD_TYPES } from "@/lib/lead-pipeline/lead-schema";
 import { logger, sanitizeEmail } from "@/lib/logger";
-import type { ContactFormFieldValues } from "@/config/contact-form-config";
+import { contactFieldValidators } from "@/lib/form-schema/contact-field-validators";
+import { verifyTurnstile } from "@/lib/turnstile";
+import { mapZodIssueToErrorKey } from "@/lib/contact-form-error-utils";
+import {
+  CONTACT_FORM_CONFIG,
+  createContactFormSchemaFromConfig,
+  type ContactFormFieldValues,
+} from "@/config/contact-form-config";
+import { TEN_MINUTES_MS } from "@/constants/time";
+
+const contactFormSchema = createContactFormSchemaFromConfig(
+  CONTACT_FORM_CONFIG,
+  contactFieldValidators,
+);
 
 export type ContactFormWithToken = ContactFormFieldValues & {
   turnstileToken: string;
   submittedAt: string;
+  idempotencyKey?: string;
 };
+
+interface ContactValidationFailure {
+  success: false;
+  errorCode: string;
+  error: string;
+  details: string[] | null;
+  data: null;
+}
+
+interface ContactValidationSuccess {
+  success: true;
+  error: null;
+  details: null;
+  data: ContactFormWithToken;
+}
+
+export type ContactValidationResult =
+  | ContactValidationFailure
+  | ContactValidationSuccess;
+
+function createExpiredSubmissionFailure(): ContactValidationFailure {
+  return {
+    success: false,
+    errorCode: "CONTACT_SUBMISSION_EXPIRED",
+    error: "Form submission expired or invalid",
+    details: null,
+    data: null,
+  };
+}
+
+function validateSubmissionTime(
+  submittedAt: string,
+): ContactValidationFailure | null {
+  const submittedAtMs = new Date(submittedAt).getTime();
+  if (!submittedAt || isNaN(submittedAtMs)) {
+    return createExpiredSubmissionFailure();
+  }
+
+  const timeDiff = Date.now() - submittedAtMs;
+  if (timeDiff > TEN_MINUTES_MS || timeDiff < 0) {
+    return createExpiredSubmissionFailure();
+  }
+
+  return null;
+}
+
+export async function validateContactSubmission(
+  body: unknown,
+  clientIP: string,
+): Promise<ContactValidationResult> {
+  const validationResult = contactFormSchema.safeParse(body);
+
+  if (!validationResult.success) {
+    return {
+      success: false,
+      errorCode: "CONTACT_VALIDATION_FAILED",
+      error: "Validation failed",
+      details: validationResult.error.issues.map(mapZodIssueToErrorKey),
+      data: null,
+    };
+  }
+
+  const formData = validationResult.data as ContactFormWithToken;
+  if (!formData.turnstileToken) {
+    return {
+      success: false,
+      errorCode: "TURNSTILE_MISSING_TOKEN",
+      error: "Security verification required",
+      details: null,
+      data: null,
+    };
+  }
+
+  const timeValidationError = validateSubmissionTime(formData.submittedAt);
+  if (timeValidationError) {
+    return timeValidationError;
+  }
+
+  const turnstileValid = await verifyTurnstile(
+    formData.turnstileToken,
+    clientIP,
+  );
+  if (!turnstileValid) {
+    return {
+      success: false,
+      errorCode: "TURNSTILE_VERIFICATION_FAILED",
+      error: "Security verification failed",
+      details: null,
+      data: null,
+    };
+  }
+
+  return {
+    success: true,
+    error: null,
+    details: null,
+    data: formData,
+  };
+}
 
 function mapSubjectToEnum(
   subject: string | undefined,

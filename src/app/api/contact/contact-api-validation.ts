@@ -7,125 +7,43 @@
 
 import { z } from "zod";
 import { airtableService } from "@/lib/airtable";
-import { contactFieldValidators } from "@/lib/form-schema/contact-field-validators";
 import { logger, sanitizeIP } from "@/lib/logger";
 import { constantTimeCompare } from "@/lib/security-crypto";
-import { verifyTurnstile } from "@/lib/turnstile";
-import { mapZodIssueToErrorKey } from "@/lib/contact-form-error-utils";
-import {
-  CONTACT_FORM_CONFIG,
-  createContactFormSchemaFromConfig,
-} from "@/config/contact-form-config";
 import { ONE, ZERO } from "@/constants";
-import { TEN_MINUTES_MS } from "@/constants/time";
-// Canonical type definition lives in contact-form-processing.ts (lib layer).
-// Import here to avoid duplicating the shape definition.
-import { type ContactFormWithToken } from "@/lib/contact-form-processing";
-
-const contactFormSchema = createContactFormSchemaFromConfig(
-  CONTACT_FORM_CONFIG,
-  contactFieldValidators,
-);
+import {
+  type ContactFormWithToken,
+  validateContactSubmission,
+} from "@/lib/contact-form-processing";
 
 /**
  * 扩展的联系表单模式，包含Turnstile token
  * Extended contact form schema with Turnstile token
  */
-export const contactFormWithTokenSchema = contactFormSchema.extend({
+export const contactFormWithTokenSchema = z.object({
   turnstileToken: z.string().min(ONE, "Security verification required"),
   submittedAt: z.string(),
 });
 
 export type { ContactFormWithToken };
 
-const SUBMISSION_EXPIRED_RESPONSE = {
-  success: false,
-  error: "Form submission expired or invalid",
-  details: ["Please refresh the page and try again"],
-  data: null,
-} as const;
-
 let hasLoggedMissingAdminToken = false;
-
-/**
- * 验证提交时间（防止重放攻击）
- * Must validate NaN before arithmetic: NaN comparisons always return false,
- * allowing an attacker to bypass the time window check with "not-a-date".
- */
-function validateSubmissionTime(submittedAt: string, clientIP: string) {
-  const ms = new Date(submittedAt).getTime();
-  if (!submittedAt || isNaN(ms)) {
-    logger.warn("Form submission time validation failed — invalid date", {
-      submittedAt,
-      clientIP: sanitizeIP(clientIP),
-    });
-    return SUBMISSION_EXPIRED_RESPONSE;
-  }
-  const timeDiff = Date.now() - ms;
-  if (timeDiff > TEN_MINUTES_MS || timeDiff < ZERO) {
-    logger.warn("Form submission time validation failed", {
-      submittedAt,
-      timeDiff,
-      clientIP: sanitizeIP(clientIP),
-    });
-    return SUBMISSION_EXPIRED_RESPONSE;
-  }
-  return null;
-}
 
 /**
  * 验证表单数据
  * Validate form data
  */
 export async function validateFormData(body: unknown, clientIP: string) {
-  const validationResult = contactFormWithTokenSchema.safeParse(body);
+  const result = await validateContactSubmission(body, clientIP);
 
-  if (!validationResult.success) {
+  if (!result.success) {
     logger.warn("Form validation failed", {
-      errors: validationResult.error.issues,
+      errorCode: result.errorCode,
+      details: result.details,
       clientIP: sanitizeIP(clientIP),
     });
-
-    const errorMessages = validationResult.error.issues.map(
-      mapZodIssueToErrorKey,
-    );
-
-    return {
-      success: false,
-      error: "Validation failed",
-      details: errorMessages,
-      data: null,
-    };
   }
 
-  const formData = validationResult.data;
-
-  const timeError = validateSubmissionTime(formData.submittedAt, clientIP);
-  if (timeError) return timeError;
-
-  // 验证Turnstile token
-  const turnstileValid = await verifyTurnstile(
-    formData.turnstileToken,
-    clientIP,
-  );
-  if (!turnstileValid) {
-    logger.warn("Turnstile verification failed", {
-      clientIP: sanitizeIP(clientIP),
-    });
-    return {
-      success: false,
-      error: "Security verification failed",
-      details: ["Please complete the security check"],
-      data: null,
-    };
-  }
-
-  return {
-    success: true,
-    error: null,
-    details: null,
-    data: formData,
-  };
+  return result;
 }
 
 /**

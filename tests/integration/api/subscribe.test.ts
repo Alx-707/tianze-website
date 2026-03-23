@@ -121,6 +121,31 @@ describe("api/subscribe", () => {
     expect(json2.success).toBe(true);
   });
 
+  it("returns 409 when the same idempotency key is reused with a different body", async () => {
+    const leadPipeline = await import("@/lib/lead-pipeline");
+    const headers = { "Idempotency-Key": "key-body-conflict" };
+
+    const first = await route.POST(
+      makeReq(
+        { email: "ok@example.com", turnstileToken: "valid-token" },
+        headers,
+      ),
+    );
+    const second = await route.POST(
+      makeReq(
+        { email: "different@example.com", turnstileToken: "valid-token" },
+        headers,
+      ),
+    );
+
+    expect(first.status).toBe(200);
+    expect(second.status).toBe(409);
+    expect(vi.mocked(leadPipeline.processLead)).toHaveBeenCalledTimes(1);
+
+    const json = await second.json();
+    expect(json.errorCode).toBe(API_ERROR_CODES.IDEMPOTENCY_KEY_REUSED);
+  });
+
   it("returns 400 when turnstileToken is missing", async () => {
     const res = await route.POST(makeReq({ email: "test@example.com" }));
     expect(res.status).toBe(400);
