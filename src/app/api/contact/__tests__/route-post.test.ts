@@ -408,14 +408,10 @@ describe("Contact API Route - POST Tests", () => {
     });
 
     it("应该处理Airtable服务错误", async () => {
-      // Mock successful validation but Airtable error in processing
-      mockProcessFormSubmission.mockResolvedValue({
-        emailSent: true,
-        recordCreated: false, // Airtable failed
-        referenceId: "test-reference-id",
-      });
+      mockProcessFormSubmission.mockRejectedValue(
+        new Error("Failed to process form submission"),
+      );
 
-      // Expect error to be logged
       mockLogger.error.mockImplementation(() => {});
 
       const request = new NextRequest("http://localhost:3000/api/contact", {
@@ -430,21 +426,16 @@ describe("Contact API Route - POST Tests", () => {
       const response = await POST(request);
       const data = await response.json();
 
-      // Should still succeed despite Airtable error
-      expect(response.status).toBe(200);
-      expect(data.success).toBe(true);
-      // Note: Error logging happens inside processFormSubmission which is mocked
+      expect(response.status).toBe(500);
+      expect(data.success).toBe(false);
+      expect(data.errorCode).toBe(API_ERROR_CODES.CONTACT_PROCESSING_ERROR);
     });
 
     it("应该处理Resend服务错误", async () => {
-      // Mock successful validation but Resend error in processing
-      mockProcessFormSubmission.mockResolvedValue({
-        emailSent: false, // Resend failed
-        recordCreated: true,
-        referenceId: "test-reference-id",
-      });
+      mockProcessFormSubmission.mockRejectedValue(
+        new Error("Failed to process form submission"),
+      );
 
-      // Expect error to be logged
       mockLogger.error.mockImplementation(() => {});
 
       const request = new NextRequest("http://localhost:3000/api/contact", {
@@ -459,10 +450,9 @@ describe("Contact API Route - POST Tests", () => {
       const response = await POST(request);
       const data = await response.json();
 
-      // Should still succeed despite Resend error
-      expect(response.status).toBe(200);
-      expect(data.success).toBe(true);
-      // Note: Error logging happens inside processFormSubmission which is mocked
+      expect(response.status).toBe(500);
+      expect(data.success).toBe(false);
+      expect(data.errorCode).toBe(API_ERROR_CODES.CONTACT_PROCESSING_ERROR);
     });
 
     it("should replay cached success for duplicate idempotency key", async () => {

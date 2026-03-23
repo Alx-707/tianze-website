@@ -20,6 +20,7 @@ vi.mock("@/lib/turnstile", () => ({
 vi.mock("@/lib/lead-pipeline", () => ({
   processLead: vi.fn(async () => ({
     success: true,
+    partialSuccess: false,
     referenceId: "ref-123",
     recordCreated: true,
     emailSent: false,

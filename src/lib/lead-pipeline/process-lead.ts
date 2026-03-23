@@ -19,7 +19,10 @@ import {
 import { processContactLead } from "@/lib/lead-pipeline/processors/contact";
 import { processNewsletterLead } from "@/lib/lead-pipeline/processors/newsletter";
 import { processProductLead } from "@/lib/lead-pipeline/processors/product";
-import type { ServiceResult } from "@/lib/lead-pipeline/service-result";
+import {
+  isServiceFailure,
+  type ServiceResult,
+} from "@/lib/lead-pipeline/service-result";
 import { generateLeadReferenceId } from "@/lib/lead-pipeline/utils";
 import { logger, sanitizeEmail } from "@/lib/logger";
 
@@ -48,6 +51,110 @@ type LeadHandlerResult = {
   emailResult: ServiceResult;
   crmResult: ServiceResult;
 };
+
+interface LeadOutcome {
+  success: boolean;
+  partialSuccess: boolean;
+}
+
+interface LeadLogContext {
+  lead: LeadInput;
+  referenceId: string;
+  emailResult: ServiceResult;
+  crmResult: ServiceResult;
+}
+
+function createValidationFailureResult(): LeadResult {
+  return {
+    success: false,
+    partialSuccess: false,
+    emailSent: false,
+    recordCreated: false,
+    error: "VALIDATION_ERROR",
+  };
+}
+
+function createProcessingFailureResult(referenceId: string): LeadResult {
+  return {
+    success: false,
+    partialSuccess: false,
+    emailSent: false,
+    recordCreated: false,
+    referenceId,
+    error: "PROCESSING_FAILED",
+  };
+}
+
+function calculateLeadOutcome(
+  hasEmailOperation: boolean,
+  emailResult: ServiceResult,
+  crmResult: ServiceResult,
+): LeadOutcome {
+  const success = hasEmailOperation
+    ? emailResult.success && crmResult.success
+    : crmResult.success;
+
+  return {
+    success,
+    partialSuccess: !success && (emailResult.success || crmResult.success),
+  };
+}
+
+function logServiceFailures(
+  context: LeadLogContext & { hasEmailOperation: boolean },
+): void {
+  const { lead, referenceId, hasEmailOperation, emailResult, crmResult } =
+    context;
+  if (hasEmailOperation && !emailResult.success) {
+    logger.error("Lead email send failed", {
+      type: lead.type,
+      referenceId,
+      error: emailResult.error?.message,
+    });
+  }
+
+  if (!crmResult.success) {
+    logger.error("Lead CRM record failed", {
+      type: lead.type,
+      referenceId,
+      error: crmResult.error?.message,
+    });
+  }
+}
+
+function logLeadOutcome(
+  context: LeadLogContext & { outcome: LeadOutcome },
+): void {
+  const { lead, referenceId, emailResult, crmResult, outcome } = context;
+  if (outcome.success) {
+    logger.info("Lead processed successfully", {
+      type: lead.type,
+      referenceId,
+      emailSent: emailResult.success,
+      recordCreated: crmResult.success,
+    });
+    return;
+  }
+
+  if (outcome.partialSuccess) {
+    logger.warn("Lead processed partially", {
+      type: lead.type,
+      referenceId,
+      emailSent: emailResult.success,
+      recordCreated: crmResult.success,
+    });
+    return;
+  }
+
+  logger.error("Lead processing failed completely", {
+    type: lead.type,
+    referenceId,
+    emailError: isServiceFailure(emailResult)
+      ? emailResult.error.message
+      : undefined,
+    crmError: isServiceFailure(crmResult) ? crmResult.error.message : undefined,
+  });
+}
 
 /**
  * Dispatches lead to appropriate handler with exhaustive type checking
@@ -78,6 +185,7 @@ async function dispatchLeadHandler(
  */
 export interface LeadResult {
   success: boolean;
+  partialSuccess: boolean;
   emailSent: boolean;
   recordCreated: boolean;
   referenceId?: string | undefined;
@@ -102,12 +210,7 @@ export async function processLead(rawInput: unknown): Promise<LeadResult> {
     logger.warn("Lead validation failed", {
       errors: validationResult.error.issues,
     });
-    return {
-      success: false,
-      emailSent: false,
-      recordCreated: false,
-      error: "VALIDATION_ERROR",
-    };
+    return createValidationFailureResult();
   }
 
   const lead: LeadInput = validationResult.data;
@@ -129,26 +232,18 @@ export async function processLead(rawInput: unknown): Promise<LeadResult> {
 
     // Step 3: Emit metrics for service results
     emitServiceMetrics(emailResult, crmResult, hasEmailOperation);
-
-    // Log individual failures
-    if (hasEmailOperation && !emailResult.success) {
-      logger.error("Lead email send failed", {
-        type: lead.type,
-        referenceId,
-        error: emailResult.error?.message,
-      });
-    }
-
-    if (!crmResult.success) {
-      logger.error("Lead CRM record failed", {
-        type: lead.type,
-        referenceId,
-        error: crmResult.error?.message,
-      });
-    }
-
-    // Step 4: At least one success = overall success
-    const success = emailResult.success || crmResult.success;
+    logServiceFailures({
+      lead,
+      referenceId,
+      hasEmailOperation,
+      emailResult,
+      crmResult,
+    });
+    const outcome = calculateLeadOutcome(
+      hasEmailOperation,
+      emailResult,
+      crmResult,
+    );
 
     // Step 5: Log pipeline summary
     logPipelineSummary({
@@ -157,31 +252,23 @@ export async function processLead(rawInput: unknown): Promise<LeadResult> {
       emailResult,
       crmResult,
       totalLatencyMs,
-      overallSuccess: success,
+      overallSuccess: outcome.success,
+    });
+    logLeadOutcome({
+      lead,
+      referenceId,
+      emailResult,
+      crmResult,
+      outcome,
     });
 
-    if (success) {
-      logger.info("Lead processed successfully", {
-        type: lead.type,
-        referenceId,
-        emailSent: emailResult.success,
-        recordCreated: crmResult.success,
-      });
-    } else {
-      logger.error("Lead processing failed completely", {
-        type: lead.type,
-        referenceId,
-        emailError: emailResult.error?.message,
-        crmError: crmResult.error?.message,
-      });
-    }
-
     return {
-      success,
+      success: outcome.success,
+      partialSuccess: outcome.partialSuccess,
       emailSent: emailResult.success,
       recordCreated: crmResult.success,
-      referenceId: success ? referenceId : undefined,
-      error: success ? undefined : "PROCESSING_FAILED",
+      referenceId: outcome.success ? referenceId : undefined,
+      error: outcome.success ? undefined : "PROCESSING_FAILED",
     };
   } catch (error) {
     const totalLatencyMs = pipelineTimer.stop();
@@ -193,12 +280,6 @@ export async function processLead(rawInput: unknown): Promise<LeadResult> {
       totalLatencyMs,
     });
 
-    return {
-      success: false,
-      emailSent: false,
-      recordCreated: false,
-      referenceId,
-      error: "PROCESSING_FAILED",
-    };
+    return createProcessingFailureResult(referenceId);
   }
 }

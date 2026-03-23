@@ -16,6 +16,7 @@ import {
 } from "@/constants";
 
 const MAX_CSP_REPORT_BODY_BYTES = 16 * 1024; // 16 KB — CSP reports should be tiny; prevents body-based DoS
+const MAX_SCRIPT_SAMPLE_LENGTH = 200;
 
 /** Zod schema for CSP report validation (all fields optional per browser behavior) */
 const cspReportInnerSchema = z.object({
@@ -50,23 +51,42 @@ const isContentTypeValid = (ct: string | null) =>
     ct &&
     (ct.includes("application/csp-report") || ct.includes("application/json")),
   );
+
+function sanitizeLoggedUrl(value: string | undefined): string | undefined {
+  if (!value) return undefined;
+
+  try {
+    const url = new URL(value);
+    return url.protocol === "http:" || url.protocol === "https:"
+      ? `${url.origin}${url.pathname}`
+      : `${url.protocol}${url.pathname}`;
+  } catch {
+    return value.split(/[?#]/u, 1)[0];
+  }
+}
+
+function sanitizeScriptSample(value: string | undefined): string | undefined {
+  if (!value) return undefined;
+  return value.slice(0, MAX_SCRIPT_SAMPLE_LENGTH);
+}
+
 const buildViolationData = (
   request: NextRequest,
   cspReport: CSPReport["csp-report"],
   clientIP: string,
 ) => ({
   timestamp: new Date().toISOString(),
-  documentUri: cspReport["document-uri"],
-  referrer: cspReport.referrer,
+  documentUri: sanitizeLoggedUrl(cspReport["document-uri"]),
+  referrer: sanitizeLoggedUrl(cspReport.referrer),
   violatedDirective: cspReport["violated-directive"],
   effectiveDirective: cspReport["effective-directive"],
   originalPolicy: cspReport["original-policy"],
-  blockedUri: cspReport["blocked-uri"],
+  blockedUri: sanitizeLoggedUrl(cspReport["blocked-uri"]),
   lineNumber: cspReport["line-number"],
   columnNumber: cspReport["column-number"],
-  sourceFile: cspReport["source-file"],
+  sourceFile: sanitizeLoggedUrl(cspReport["source-file"]),
   statusCode: cspReport["status-code"],
-  scriptSample: cspReport["script-sample"],
+  scriptSample: sanitizeScriptSample(cspReport["script-sample"]),
   disposition: cspReport.disposition,
   userAgent: request.headers.get("user-agent"),
   ip: clientIP,

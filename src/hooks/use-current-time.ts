@@ -31,18 +31,23 @@ const DEFAULT_INTERVAL = 1000; // 1 second
  */
 export function useCurrentTime(
   updateInterval: number = DEFAULT_INTERVAL,
+  enabled: boolean = true,
 ): number {
   // Initialize with current time (lazy initialization to avoid SSR issues)
   const [time, setTime] = useState<number>(() => Date.now());
 
   useEffect(() => {
+    if (!enabled) {
+      return undefined;
+    }
+
     // ✅ Good: Date.now() called in effect, not during render
     const id = setInterval(() => {
       setTime(Date.now());
     }, updateInterval);
 
     return () => clearInterval(id);
-  }, [updateInterval]);
+  }, [enabled, updateInterval]);
 
   return time;
 }
