@@ -8,6 +8,10 @@ import {
   isValidMarketSlug,
 } from "@/constants/product-catalog";
 import { NORTH_AMERICA_SPECS } from "@/constants/product-specs/north-america";
+import { AUSTRALIA_NZ_SPECS } from "@/constants/product-specs/australia-new-zealand";
+import { MEXICO_SPECS } from "@/constants/product-specs/mexico";
+import { EUROPE_SPECS } from "@/constants/product-specs/europe";
+import { PNEUMATIC_SPECS } from "@/constants/product-specs/pneumatic-tube-systems";
 import type { MarketSpecs } from "@/constants/product-specs/types";
 import { SITE_CONFIG } from "@/config/paths";
 import { CatalogBreadcrumb } from "@/components/products/catalog-breadcrumb";
@@ -24,7 +28,10 @@ import { Link, routing } from "@/i18n/routing";
 
 const SPECS_BY_MARKET: Record<string, MarketSpecs> = {
   "north-america": NORTH_AMERICA_SPECS,
-  // Future markets will be added here
+  "australia-new-zealand": AUSTRALIA_NZ_SPECS,
+  mexico: MEXICO_SPECS,
+  europe: EUROPE_SPECS,
+  "pneumatic-tube-systems": PNEUMATIC_SPECS,
 };
 
 function getMarketSpecs(marketSlug: string): MarketSpecs | undefined {
