@@ -21,7 +21,7 @@ import { LazyWhatsAppButton } from "@/components/whatsapp/lazy-whatsapp-button";
 import { getAppConfig } from "@/config/app";
 import { FOOTER_COLUMNS, FOOTER_STYLE_TOKENS } from "@/config/footer-links";
 import { SITE_CONFIG } from "@/config/paths/site-config";
-import { routing } from "@/i18n/routing";
+import { coerceLocale, isLocale } from "@/i18n/locale-utils";
 
 // Client analytics are rendered as an island to avoid impacting LCP
 
@@ -184,12 +184,18 @@ export default async function LocaleLayout({
   const { locale } = await params;
 
   // Ensure that the incoming `locale` is valid
-  if (!routing.locales.includes(locale as "en" | "zh")) {
+  if (!isLocale(locale)) {
     notFound();
   }
 
-  const typedLocale = locale as "en" | "zh";
+  const typedLocale = coerceLocale(locale);
   setRequestLocale(typedLocale);
+  const disableDevTools =
+    process.env.PLAYWRIGHT_TEST === "true" ||
+    process.env.NEXT_PUBLIC_DISABLE_DEV_TOOLS === "true";
+  const disableReactScan =
+    disableDevTools || process.env.NEXT_PUBLIC_DISABLE_REACT_SCAN === "true";
+  const shouldLoadDevScripts = process.env.NODE_ENV === "development";
 
   return (
     <html
@@ -201,24 +207,30 @@ export default async function LocaleLayout({
         {/* Dev-only scripts: never loaded in production (NODE_ENV gate).
             SRI omitted intentionally — versioned CDN URLs would break on update if integrity drifts.
             Security note: these scripts have zero production attack surface. */}
-        {process.env.NODE_ENV === "development" && (
+        {shouldLoadDevScripts && (
           <>
-            <Script
-              src="https://unpkg.com/react-scan@0.5.3/dist/auto.global.js"
-              crossOrigin="anonymous"
-              strategy="afterInteractive"
-            />
-            <Script
-              src="https://unpkg.com/react-grab@0.1.28/dist/index.global.js"
-              crossOrigin="anonymous"
-              strategy="afterInteractive"
-            />
-            <Script
-              // Track the same release line as `react-grab` until this client is
-              // versioned from a locally-managed dependency instead of CDN.
-              src="https://unpkg.com/@react-grab/claude-code@0.1.28/dist/client.global.js"
-              strategy="lazyOnload"
-            />
+            {!disableReactScan && (
+              <Script
+                src="https://unpkg.com/react-scan@0.5.3/dist/auto.global.js"
+                crossOrigin="anonymous"
+                strategy="afterInteractive"
+              />
+            )}
+            {!disableDevTools && (
+              <>
+                <Script
+                  src="https://unpkg.com/react-grab@0.1.28/dist/index.global.js"
+                  crossOrigin="anonymous"
+                  strategy="afterInteractive"
+                />
+                <Script
+                  // Track the same release line as `react-grab` until this client is
+                  // versioned from a locally-managed dependency instead of CDN.
+                  src="https://unpkg.com/@react-grab/claude-code@0.1.28/dist/client.global.js"
+                  strategy="lazyOnload"
+                />
+              </>
+            )}
           </>
         )}
         <Suspense fallback={<LayoutFallback locale={typedLocale} />}>
