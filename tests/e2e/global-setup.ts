@@ -1,5 +1,6 @@
 import { chromium, type FullConfig } from "@playwright/test";
 import {
+  installInterferenceGuard,
   removeInterferingElements,
   setupTestEnvironment,
   waitForStablePage,
@@ -50,6 +51,7 @@ async function globalSetup(config: FullConfig) {
   const browser = await chromium.launch();
   const context = await browser.newContext();
   const page = await context.newPage();
+  await installInterferenceGuard(page);
 
   try {
     // 如果设置了 STAGING_URL，使用它；否则使用 baseURL
