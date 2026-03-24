@@ -8,6 +8,8 @@ Push beyond workflow wiring and reduce residual structural drift in:
 ## Completed Work
 
 ### Translation Quartet
+- Added shared quartet helper:
+  - [translation-flat-utils.js](/Users/Data/Warehouse/Pipe/tianze-website/scripts/translation-flat-utils.js)
 - Added flat regeneration script:
   - [regenerate-flat-translations.js](/Users/Data/Warehouse/Pipe/tianze-website/scripts/regenerate-flat-translations.js)
 - Added command:
@@ -33,5 +35,5 @@ Push beyond workflow wiring and reduce residual structural drift in:
   - 32 tests passed
 
 ## Result
-- Translation quartet is now closer to a true generated-flow model, not just a documented co-change cluster.
+- Translation quartet is now closer to a true generated-flow model, with split canonical input and flat/public derived views, not just a documented co-change cluster.
 - Homepage section cluster is now protected by both component-level tests and cluster-level contract coverage.

@@ -8,7 +8,7 @@ import {
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/routing";
 import type { LinkHref } from "@/lib/i18n/route-parsing";
-import { SectionHead } from "@/components/ui/section-head";
+import { HomepageSectionShell } from "@/components/sections/homepage-section-shell";
 
 const RESOURCE_COUNT = 4;
 
@@ -58,20 +58,18 @@ export async function ResourcesSection() {
   });
 
   return (
-    <section className="section-divider py-14 md:py-[72px]">
-      <div className="mx-auto max-w-[1080px] px-6">
-        <SectionHead
-          title={t("resources.title")}
-          subtitle={t("resources.subtitle")}
-        />
-        <div className="overflow-hidden rounded-lg border bg-border">
-          <div className="grid grid-cols-1 gap-[2px] sm:grid-cols-2 lg:grid-cols-4">
-            {resources.map((resource) => (
-              <ResourceCard key={resource.title} {...resource} />
-            ))}
-          </div>
+    <HomepageSectionShell
+      sectionClassName="section-divider py-14 md:py-[72px]"
+      title={t("resources.title")}
+      subtitle={t("resources.subtitle")}
+    >
+      <div className="overflow-hidden rounded-lg border bg-border">
+        <div className="grid grid-cols-1 gap-[2px] sm:grid-cols-2 lg:grid-cols-4">
+          {resources.map((resource) => (
+            <ResourceCard key={resource.title} {...resource} />
+          ))}
         </div>
       </div>
-    </section>
+    </HomepageSectionShell>
   );
 }

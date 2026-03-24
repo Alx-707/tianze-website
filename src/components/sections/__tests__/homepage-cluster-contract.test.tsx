@@ -1,8 +1,9 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { FinalCTA } from "@/components/sections/final-cta";
 import { HeroSection } from "@/components/sections/hero-section";
+import { HOMEPAGE_SECTION_LINKS } from "@/components/sections/homepage-section-links";
 import { ProductsSection } from "@/components/sections/products-section";
 import { ResourcesSection } from "@/components/sections/resources-section";
 import { SampleCTA } from "@/components/sections/sample-cta";
@@ -18,29 +19,37 @@ async function renderAsyncComponent(
 describe("Homepage section cluster contract", () => {
   it("preserves hero and final/sample CTA hierarchy", async () => {
     await renderAsyncComponent(HeroSection());
+    const heroProofList = screen.getByRole("list", {
+      name: "Homepage proof facts",
+    });
+    expect(within(heroProofList).getAllByRole("listitem")).toHaveLength(4);
     expect(screen.getByText("hero.cta.primary").closest("a")).toHaveAttribute(
       "href",
-      "/contact",
+      HOMEPAGE_SECTION_LINKS.contact,
     );
     expect(screen.getByText("hero.cta.secondary").closest("a")).toHaveAttribute(
       "href",
-      "/products",
+      HOMEPAGE_SECTION_LINKS.products,
     );
 
     await renderAsyncComponent(SampleCTA());
     expect(screen.getByRole("link", { name: "sample.cta" })).toHaveAttribute(
       "href",
-      "/contact",
+      HOMEPAGE_SECTION_LINKS.contact,
     );
 
     await renderAsyncComponent(FinalCTA());
+    const finalTrustList = screen.getByRole("list", {
+      name: "Homepage trust facts",
+    });
+    expect(within(finalTrustList).getAllByRole("listitem")).toHaveLength(1);
     expect(screen.getByText("primary").closest("a")).toHaveAttribute(
       "href",
-      "/contact",
+      HOMEPAGE_SECTION_LINKS.contact,
     );
     expect(screen.getByText("secondary").closest("a")).toHaveAttribute(
       "href",
-      "/products",
+      HOMEPAGE_SECTION_LINKS.products,
     );
   });
 

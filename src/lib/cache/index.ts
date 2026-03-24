@@ -16,6 +16,9 @@ export {
 } from "./cache-tags";
 
 export {
+  CACHE_INVALIDATION_DOMAINS,
+  CACHE_INVALIDATION_ENTITIES,
+  CACHE_INVALIDATION_LOCALES,
   invalidate,
   invalidateI18n,
   invalidateContent,
@@ -23,4 +26,8 @@ export {
   invalidateLocale,
   invalidateDomain,
   invalidateCachePath,
+  invalidateCacheRequest,
+  type CacheInvalidationRequest,
+  type CacheInvalidationResult,
+  type InvalidationResult,
 } from "./invalidate";

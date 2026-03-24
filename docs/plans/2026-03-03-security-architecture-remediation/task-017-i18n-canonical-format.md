@@ -15,10 +15,11 @@
 ## 审查证据（已验证的 drift 源）
 
 - `messages/en.json`（flat）与 `messages/en/critical.json` + `messages/en/deferred.json`（split）同时存在
-- `scripts/translation-sync.js:53`：读写 flat
+- `scripts/translation-sync.js`：读写 split，flat 仅作为派生产物
+- `scripts/translation-flat-utils.js`：统一 split/flat 路径与 nested-path traversal
 - `scripts/copy-translations.js:34`：构建时复制 split
 - `src/lib/load-messages.ts:46,58`：运行时读 split
-- `scripts/i18n-shape-check.js:217`：检查 flat == split union（drift 检测 = drift 证据）
+- `scripts/i18n-shape-check.js`：检查 flat == split union（drift 检测 = drift 证据）
 
 ## BDD Scenarios
 
@@ -38,7 +39,7 @@ Scenario: 所有 i18n 脚本以 split 为输入源
   When 脚本执行完成
   Then translation-sync 从 split 读取（而非 flat）
   And copy-translations 从 split 复制
-  And shape-check 以 split 为基准
+  And shape-check 以 split 为基准，flat 只做派生产物对账
 ```
 
 ### Scenario 3: CI 检查生成物一致性
@@ -52,6 +53,7 @@ Scenario: CI 验证无手动修改生成物
 ## Files to Modify
 
 - `scripts/translation-sync.js` — 改为从 split 读取
+- `scripts/translation-flat-utils.js` — 抽出 split/flat 公共路径与派生逻辑
 - `scripts/copy-translations.js` — 确认行为不变（已读 split）
 - `scripts/i18n-shape-check.js` — 以 split 为基准
 - `package.json` — 调整 `pnpm i18n:full` 流程
@@ -95,6 +97,7 @@ pnpm build
 - 工具链以 split 为输入源
 - CI 检查生成物一致性
 - 构建成功
+- nested-path traversal / set logic 不再在多个工具脚本中重复实现
 
 ## Commit
 

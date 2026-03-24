@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { ProductsSection } from "@/components/sections/products-section";
+import { HOMEPAGE_SECTION_LINKS } from "@/components/sections/homepage-section-links";
 
 async function renderAsyncComponent(
   asyncComponent: React.JSX.Element | Promise<React.JSX.Element>,
@@ -26,7 +27,7 @@ describe("ProductsSection", () => {
   it("renders CTA button as a link to products page", async () => {
     await renderAsyncComponent(ProductsSection());
     const ctaLink = screen.getByText("products.cta").closest("a");
-    expect(ctaLink).toHaveAttribute("href", "/products");
+    expect(ctaLink).toHaveAttribute("href", HOMEPAGE_SECTION_LINKS.products);
   });
 
   it("renders 4 product cards with tags, titles, and standards", async () => {

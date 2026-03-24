@@ -21,15 +21,21 @@ These sections are a known co-change cluster. This file defines the minimum stru
 - `sample/final CTA` own conversion reinforcement
 - `scenarios` owns application-context explanation
 
-### 2. CTA Hierarchy Must Remain Intentional
+### 2. Shared Structure Should Stay Centralized
+- Shared section chrome belongs in `src/components/sections/homepage-section-shell.tsx`, not repeated across individual sections.
+- Shared CTA destinations belong in `src/components/sections/homepage-section-links.ts` so hero, product, sample, and final CTA links stay aligned.
+
+### 3. CTA Hierarchy Must Remain Intentional
 - Primary CTA emphasis should not become ambiguous across hero/final/sample CTA sections.
 - Section changes should not accidentally produce duplicate competing primaries without deliberate decision.
 
-### 3. Proof / Trust Rhythm Must Stay Coherent
+### 4. Proof / Trust Rhythm Must Stay Coherent
 - Homepage proof elements should remain structurally consistent across the cluster.
 - Changes to proof density in one section should be reviewed in neighboring sections, not treated as isolated polish.
+- Inline proof / trust copy should use the shared list-based strip contract in `src/components/sections/homepage-trust-strip.tsx` rather than bespoke span stacks.
+- Hero owns the strongest proof strip; final CTA owns the closing trust strip. Their shared structure is intentional and should stay queryable in tests.
 
-### 4. Review as One Cluster
+### 5. Review as One Cluster
 If one cluster file changes materially:
 - inspect the other cluster files for hierarchy drift
 - run the cluster review command

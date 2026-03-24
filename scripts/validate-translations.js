@@ -3,7 +3,7 @@
 /**
  * Translation Validation Script
  *
- * Validates that critical.json and deferred.json:
+ * Validates the split canonical translation inputs:
  * 1. Contain all required keys
  * 2. Have no duplicate keys
  * 3. Have consistent structure across all locales
@@ -12,47 +12,22 @@
  */
 
 const fs = require("fs");
-const path = require("path");
-
-/**
- * Get all keys from a nested object (recursively)
- */
-function getAllKeys(obj, prefix = "") {
-  const keys = [];
-
-  for (const [key, value] of Object.entries(obj)) {
-    const fullKey = prefix ? `${prefix}.${key}` : key;
-
-    if (typeof value === "object" && value !== null && !Array.isArray(value)) {
-      keys.push(...getAllKeys(value, fullKey));
-    } else {
-      keys.push(fullKey);
-    }
-  }
-
-  return keys;
-}
+const {
+  LOCALES,
+  asSet,
+  collectLeafPaths,
+  getLocaleSplitPaths,
+  readJson,
+} = require("./translation-flat-utils");
 
 /**
  * Validate translations for a specific locale
  */
 function validateLocale(locale) {
-  console.log(`\n📦 Validating locale: ${locale}`);
+  console.log(`\n📦 Validating split canonical locale: ${locale}`);
 
-  const criticalPath = path.join(
-    __dirname,
-    "..",
-    "messages",
-    locale,
-    "critical.json",
-  );
-  const deferredPath = path.join(
-    __dirname,
-    "..",
-    "messages",
-    locale,
-    "deferred.json",
-  );
+  const { critical: criticalPath, deferred: deferredPath } =
+    getLocaleSplitPaths(locale);
 
   // Check if files exist
   if (!fs.existsSync(criticalPath)) {
@@ -66,28 +41,32 @@ function validateLocale(locale) {
   }
 
   // Read files
-  const critical = JSON.parse(fs.readFileSync(criticalPath, "utf-8"));
-  const deferred = JSON.parse(fs.readFileSync(deferredPath, "utf-8"));
+  const critical = readJson(criticalPath);
+  const deferred = readJson(deferredPath);
 
   // Get all keys
-  const criticalKeys = getAllKeys(critical);
-  const deferredKeys = getAllKeys(deferred);
+  const criticalKeys = collectLeafPaths(critical);
+  const deferredKeys = collectLeafPaths(deferred);
 
   console.log(`   Critical keys: ${criticalKeys.length}`);
   console.log(`   Deferred keys: ${deferredKeys.length}`);
   console.log(`   Total keys: ${criticalKeys.length + deferredKeys.length}`);
 
   // Check for duplicate keys
-  const criticalSet = new Set(criticalKeys);
-  const deferredSet = new Set(deferredKeys);
+  const criticalSet = asSet(criticalKeys);
+  const deferredSet = asSet(deferredKeys);
 
-  const duplicates = criticalKeys.filter((key) => deferredSet.has(key));
+  const deferredDuplicates = criticalKeys.filter((key) => deferredSet.has(key));
 
-  if (duplicates.length > 0) {
-    console.error(`   ❌ Error: Found ${duplicates.length} duplicate keys:`);
-    duplicates.slice(0, 10).forEach((key) => console.error(`      - ${key}`));
-    if (duplicates.length > 10) {
-      console.error(`      ... and ${duplicates.length - 10} more`);
+  if (deferredDuplicates.length > 0) {
+    console.error(
+      `   ❌ Error: Found ${deferredDuplicates.length} duplicate keys:`,
+    );
+    deferredDuplicates
+      .slice(0, 10)
+      .forEach((key) => console.error(`      - ${key}`));
+    if (deferredDuplicates.length > 10) {
+      console.error(`      ... and ${deferredDuplicates.length - 10} more`);
     }
     return false;
   }
@@ -182,15 +161,14 @@ function compareLocales(localeData) {
  * Main execution
  */
 function main() {
-  console.log("🚀 Translation Validation");
+  console.log("🚀 Translation Validation (split canonical)");
   console.log("==========================");
 
-  const locales = require("../i18n-locales.config").locales;
   const localeData = {};
   let allValid = true;
 
   // Validate each locale
-  for (const locale of locales) {
+  for (const locale of LOCALES) {
     const result = validateLocale(locale);
 
     if (!result) {
@@ -239,4 +217,4 @@ if (require.main === module) {
   }
 }
 
-module.exports = { validateLocale, compareLocales, getAllKeys };
+module.exports = { validateLocale, compareLocales, collectLeafPaths };

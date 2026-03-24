@@ -8,7 +8,13 @@ Reduce two remaining structural coupling points:
 ## Completed Work
 
 ### Translation Quartet
-- Added flat regeneration helper:
+- Added shared quartet helper:
+  - [translation-flat-utils.js](/Users/Data/Warehouse/Pipe/tianze-website/scripts/translation-flat-utils.js)
+- Shared nested-path traversal and nested read/write helpers now live in the same quartet utility:
+  - `collectLeafPaths`
+  - `getNestedValue`
+  - `setNestedValue`
+- Updated flat regeneration script:
   - [regenerate-flat-translations.js](/Users/Data/Warehouse/Pipe/tianze-website/scripts/regenerate-flat-translations.js)
 - Added command:
   - `pnpm i18n:regenerate-flat`
@@ -35,5 +41,5 @@ Reduce two remaining structural coupling points:
   - 23 tests passed
 
 ## Result
-- Translation quartet now has a more explicit generated artifact path for flat files.
+- Translation quartet now has explicit split/source, flat/generated, and public/runtime roles with shared helpers for both the derived path and nested traversal logic.
 - Locale runtime now has less duplicated locale validation/coercion logic across key runtime files.

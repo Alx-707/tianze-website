@@ -9,6 +9,7 @@
  */
 
 import { revalidatePath, revalidateTag } from "next/cache";
+import { API_ERROR_CODES } from "@/constants/api-error-codes";
 import type { Locale } from "@/types/content.types";
 import {
   CACHE_DOMAINS,
@@ -26,13 +27,48 @@ import { logger } from "@/lib/logger";
  */
 const DEFAULT_REVALIDATE_PROFILE = "max" as const;
 
+export const CACHE_INVALIDATION_LOCALES = ["en", "zh"] as const;
+export const CACHE_INVALIDATION_DOMAINS = [
+  "i18n",
+  "content",
+  "product",
+  "all",
+] as const;
+export const CACHE_INVALIDATION_ENTITIES = [
+  "critical",
+  "deferred",
+  "blog",
+  "page",
+  "detail",
+  "categories",
+  "featured",
+] as const;
+
 /**
  * Result of an invalidation operation.
  */
-interface InvalidationResult {
+export interface InvalidationResult {
   success: boolean;
   invalidatedTags: string[];
   errors: string[];
+}
+
+export interface CacheInvalidationRequest {
+  domain: (typeof CACHE_INVALIDATION_DOMAINS)[number];
+  locale?: Locale;
+  entity?: string;
+  identifier?: string;
+}
+
+export type CacheInvalidationResult =
+  | InvalidationResult
+  | { errorCode: string; status: number };
+
+function isValidLocale(locale: unknown): locale is Locale {
+  return (
+    typeof locale === "string" &&
+    CACHE_INVALIDATION_LOCALES.includes(locale as Locale)
+  );
 }
 
 /**
@@ -179,6 +215,98 @@ export function invalidateDomain(
   }
 
   return invalidateTags(tags);
+}
+
+function invalidateI18nRequest(
+  locale: Locale | undefined,
+  entity: string | undefined,
+): InvalidationResult {
+  if (locale && isValidLocale(locale)) {
+    if (entity === "critical") return invalidateI18n.critical(locale);
+    if (entity === "deferred") return invalidateI18n.deferred(locale);
+    return invalidateI18n.locale(locale);
+  }
+  return invalidateI18n.all();
+}
+
+function invalidateContentRequest(
+  locale: Locale,
+  entity: string | undefined,
+  identifier: string | undefined,
+): InvalidationResult {
+  if (entity === "blog" && identifier) {
+    return invalidateContent.blogPost(identifier, locale);
+  }
+  if (entity === "page" && identifier) {
+    return invalidateContent.page(identifier, locale);
+  }
+  return invalidateContent.locale(locale);
+}
+
+function invalidateProductRequest(
+  locale: Locale,
+  entity: string | undefined,
+  identifier: string | undefined,
+): InvalidationResult {
+  if (entity === "detail" && identifier) {
+    return invalidateProduct.detail(identifier, locale);
+  }
+  if (entity === "categories") return invalidateProduct.categories(locale);
+  if (entity === "featured") return invalidateProduct.featured(locale);
+  return invalidateProduct.locale(locale);
+}
+
+function invalidateAllRequest(locale: Locale | undefined): InvalidationResult {
+  if (locale && isValidLocale(locale)) {
+    return invalidateLocale(locale);
+  }
+
+  const results = [
+    invalidateDomain(CACHE_DOMAINS.I18N),
+    invalidateDomain(CACHE_DOMAINS.CONTENT),
+    invalidateDomain(CACHE_DOMAINS.PRODUCT),
+  ];
+
+  return {
+    success: results.every((r) => r.errors.length === 0),
+    invalidatedTags: results.flatMap((r) => r.invalidatedTags),
+    errors: results.flatMap((r) => r.errors),
+  };
+}
+
+export function invalidateCacheRequest(
+  options: CacheInvalidationRequest,
+): CacheInvalidationResult {
+  const { domain, locale, entity, identifier } = options;
+
+  switch (domain) {
+    case "i18n":
+      return invalidateI18nRequest(locale, entity);
+
+    case "content":
+      if (!locale || !isValidLocale(locale)) {
+        return {
+          errorCode: API_ERROR_CODES.CACHE_LOCALE_REQUIRED,
+          status: 400,
+        };
+      }
+      return invalidateContentRequest(locale, entity, identifier);
+
+    case "product":
+      if (!locale || !isValidLocale(locale)) {
+        return {
+          errorCode: API_ERROR_CODES.CACHE_LOCALE_REQUIRED,
+          status: 400,
+        };
+      }
+      return invalidateProductRequest(locale, entity, identifier);
+
+    case "all":
+      return invalidateAllRequest(locale);
+
+    default:
+      return { errorCode: API_ERROR_CODES.CACHE_INVALID_DOMAIN, status: 400 };
+  }
 }
 
 /**

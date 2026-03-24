@@ -4,9 +4,14 @@
 This contract covers the runtime locale path:
 - `src/middleware.ts`
 - `src/i18n/request.ts`
+- `src/i18n/locale-utils.ts`
+- `src/i18n/locale-presentation.ts`
 - `src/lib/load-messages.ts`
 - `src/app/[locale]/layout.tsx`
 - `src/app/[locale]/head.tsx`
+- `src/app/global-error.tsx`
+- `src/lib/seo-metadata.ts`
+- `src/lib/content-utils.ts`
 
 ## Purpose
 These files collectively define:

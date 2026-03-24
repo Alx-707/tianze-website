@@ -1,7 +1,8 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { FinalCTA } from "@/components/sections/final-cta";
+import { HOMEPAGE_SECTION_LINKS } from "@/components/sections/homepage-section-links";
 
 async function renderAsyncComponent(
   asyncComponent: React.JSX.Element | Promise<React.JSX.Element>,
@@ -26,17 +27,27 @@ describe("FinalCTA", () => {
   it("renders primary CTA as a link to /contact", async () => {
     await renderAsyncComponent(FinalCTA());
     const primaryLink = screen.getByText("primary").closest("a");
-    expect(primaryLink).toHaveAttribute("href", "/contact");
+    expect(primaryLink).toHaveAttribute("href", HOMEPAGE_SECTION_LINKS.contact);
   });
 
   it("renders secondary CTA as a link to /products", async () => {
     await renderAsyncComponent(FinalCTA());
     const secondaryLink = screen.getByText("secondary").closest("a");
-    expect(secondaryLink).toHaveAttribute("href", "/products");
+    expect(secondaryLink).toHaveAttribute(
+      "href",
+      HOMEPAGE_SECTION_LINKS.products,
+    );
   });
 
-  it("renders trust text", async () => {
+  it("renders trust facts as a semantic list", async () => {
     await renderAsyncComponent(FinalCTA());
-    expect(screen.getByText("trust")).toBeInTheDocument();
+
+    const trustList = screen.getByRole("list", {
+      name: "Homepage trust facts",
+    });
+    const trustItems = within(trustList).getAllByRole("listitem");
+
+    expect(trustItems).toHaveLength(1);
+    expect(within(trustList).getByText("trust")).toBeInTheDocument();
   });
 });

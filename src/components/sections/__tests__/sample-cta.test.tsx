@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { SampleCTA } from "@/components/sections/sample-cta";
+import { HOMEPAGE_SECTION_LINKS } from "@/components/sections/homepage-section-links";
 
 async function renderAsyncComponent(
   asyncComponent: React.JSX.Element | Promise<React.JSX.Element>,
@@ -26,6 +27,6 @@ describe("SampleCTA", () => {
   it("renders CTA button linking to contact page", async () => {
     await renderAsyncComponent(SampleCTA());
     const link = screen.getByRole("link", { name: "sample.cta" });
-    expect(link).toHaveAttribute("href", "/contact");
+    expect(link).toHaveAttribute("href", HOMEPAGE_SECTION_LINKS.contact);
   });
 });

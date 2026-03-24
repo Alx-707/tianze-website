@@ -1,7 +1,8 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { HeroSection } from "@/components/sections/hero-section";
+import { HOMEPAGE_SECTION_LINKS } from "@/components/sections/homepage-section-links";
 
 async function renderAsyncComponent(
   asyncComponent: React.JSX.Element | Promise<React.JSX.Element>,
@@ -35,23 +36,46 @@ describe("HeroSection", () => {
   it("renders primary CTA as a link to /contact", async () => {
     await renderAsyncComponent(HeroSection());
     const primaryLink = screen.getByText("hero.cta.primary").closest("a");
-    expect(primaryLink).toHaveAttribute("href", "/contact");
+    expect(primaryLink).toHaveAttribute("href", HOMEPAGE_SECTION_LINKS.contact);
   });
 
   it("renders secondary CTA as a link to /products", async () => {
     await renderAsyncComponent(HeroSection());
     const secondaryLink = screen.getByText("hero.cta.secondary").closest("a");
-    expect(secondaryLink).toHaveAttribute("href", "/products");
+    expect(secondaryLink).toHaveAttribute(
+      "href",
+      HOMEPAGE_SECTION_LINKS.products,
+    );
   });
 
-  it("user sees proof line showing establishment, countries, range, and production data", async () => {
+  it("user sees proof list showing establishment, countries, range, and production data", async () => {
     await renderAsyncComponent(HeroSection());
-    expect(screen.getByText("hero.proof.est")).toBeInTheDocument();
-    expect(screen.getByText("hero.proof.countries")).toBeInTheDocument();
-    expect(screen.getByText("hero.proof.countriesLabel")).toBeInTheDocument();
-    expect(screen.getByText("hero.proof.range")).toBeInTheDocument();
-    expect(screen.getByText("hero.proof.rangeLabel")).toBeInTheDocument();
-    expect(screen.getByText("hero.proof.production")).toBeInTheDocument();
-    expect(screen.getByText("hero.proof.productionLabel")).toBeInTheDocument();
+
+    const proofList = screen.getByRole("list", {
+      name: "Homepage proof facts",
+    });
+    const proofItems = within(proofList).getAllByRole("listitem");
+
+    expect(proofItems).toHaveLength(4);
+    expect(within(proofList).getByText("hero.proof.est")).toBeInTheDocument();
+    expect(
+      within(proofList).getByText("hero.proof.estLabel"),
+    ).toBeInTheDocument();
+    expect(
+      within(proofList).getByText("hero.proof.countries"),
+    ).toBeInTheDocument();
+    expect(
+      within(proofList).getByText("hero.proof.countriesLabel"),
+    ).toBeInTheDocument();
+    expect(within(proofList).getByText("hero.proof.range")).toBeInTheDocument();
+    expect(
+      within(proofList).getByText("hero.proof.rangeLabel"),
+    ).toBeInTheDocument();
+    expect(
+      within(proofList).getByText("hero.proof.production"),
+    ).toBeInTheDocument();
+    expect(
+      within(proofList).getByText("hero.proof.productionLabel"),
+    ).toBeInTheDocument();
   });
 });

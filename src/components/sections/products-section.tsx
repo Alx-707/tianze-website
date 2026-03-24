@@ -2,7 +2,8 @@ import { Link } from "@/i18n/routing";
 import { getTranslations } from "next-intl/server";
 import type { LinkHref } from "@/lib/i18n/route-parsing";
 import { Button } from "@/components/ui/button";
-import { SectionHead } from "@/components/ui/section-head";
+import { HomepageSectionShell } from "@/components/sections/homepage-section-shell";
+import { HOMEPAGE_SECTION_LINKS } from "@/components/sections/homepage-section-links";
 
 const PRODUCT_COUNT = 4;
 const SPECS_PER_PRODUCT = 3;
@@ -71,26 +72,24 @@ export async function ProductsSection() {
 
   const action = (
     <Button variant="secondary" asChild>
-      <Link href="/products" prefetch={false}>
+      <Link href={HOMEPAGE_SECTION_LINKS.products} prefetch={false}>
         {t("products.cta")}
       </Link>
     </Button>
   );
 
   return (
-    <section className="section-divider py-14 md:py-[72px]">
-      <div className="mx-auto max-w-[1080px] px-6">
-        <SectionHead
-          title={t("products.title")}
-          subtitle={t("products.subtitle")}
-          action={action}
-        />
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          {products.map((product) => (
-            <ProductCard key={product.tag} {...product} />
-          ))}
-        </div>
+    <HomepageSectionShell
+      sectionClassName="section-divider py-14 md:py-[72px]"
+      title={t("products.title")}
+      subtitle={t("products.subtitle")}
+      action={action}
+    >
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        {products.map((product) => (
+          <ProductCard key={product.tag} {...product} />
+        ))}
       </div>
-    </section>
+    </HomepageSectionShell>
   );
 }
