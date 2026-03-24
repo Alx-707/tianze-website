@@ -29,6 +29,7 @@ Files:
 - `src/app/api/contact/route.ts`
 - `src/app/api/inquiry/route.ts`
 - `src/app/api/subscribe/route.ts`
+- `src/lib/api/lead-route-response.ts`
 
 Why it matters:
 - These routes move together historically and form one operational family.
@@ -64,9 +65,14 @@ Review rule:
 Files:
 - `src/middleware.ts`
 - `src/i18n/request.ts`
+- `src/i18n/locale-utils.ts`
+- `src/i18n/locale-presentation.ts`
 - `src/lib/load-messages.ts`
 - `src/app/[locale]/layout.tsx`
 - `src/app/[locale]/head.tsx`
+- `src/app/global-error.tsx`
+- `src/lib/seo-metadata.ts`
+- `src/lib/content-utils.ts`
 - `src/app/global-error.tsx`
 
 Review rule:
@@ -80,13 +86,20 @@ Files:
 - `src/lib/cache/invalidate.ts`
 - `src/lib/cache/cache-tags.ts`
 - `src/app/api/health/route.ts`
+- `src/lib/api/cache-health-response.ts`
+- `src/lib/cache/invalidation-policy.ts`
+- `src/lib/cache/invalidation-guards.ts`
+- `tests/integration/api/cache-health-contract.test.ts`
 
 Review rule:
 - Use [`CACHE-HEALTH-CONTRACT.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/CACHE-HEALTH-CONTRACT.md) as the cluster contract.
 - Run `pnpm review:cache-health` to execute the cache/health regression suite.
 
 ## Usage
-- Run `pnpm review:clusters:staged` during review for staged changes.
+- Use `pnpm review:tier-a:staged` first if the staged diff touches Tier A paths.
+- Use `pnpm review:clusters:staged` for the default staged structural-cluster pass. It scans the staged diff and runs every matching cluster review automatically.
+- Use `pnpm review:cluster <name> --staged` when you already know a single cluster is in scope and want only that cluster's review.
+- In practice, `review:clusters:staged` is the broad staged entrypoint, and `review:cluster <name> --staged` is the targeted fallback when the scope is already known.
 - Use this file together with:
   - [`docs/guides/TIER-A-OWNER-MAP.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/TIER-A-OWNER-MAP.md)
   - [`docs/guides/QUALITY-PROOF-LEVELS.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/QUALITY-PROOF-LEVELS.md)

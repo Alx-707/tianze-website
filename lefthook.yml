@@ -76,19 +76,9 @@ pre-commit:
       fail_text: 'i18n flat regeneration 失败 - 请修复 split/flat 生成链路'
       stage_fixed: true
 
-    translation-quartet-review:
-      run: pnpm review:cluster translation-quartet --staged
-      fail_text: 'Translation quartet review 失败 - 请修复 quartet 契约或形状问题'
-      stage_fixed: false
-
-    lead-family-review:
-      run: pnpm review:cluster lead-family --staged
-      fail_text: 'Lead API family review 失败 - 请修复 family contract / protection drift'
-      stage_fixed: false
-
-    homepage-sections-review:
-      run: pnpm review:cluster homepage-sections --staged
-      fail_text: 'Homepage sections review 失败 - 请修复 homepage section cluster drift'
+    structural-clusters-review:
+      run: pnpm review:clusters:staged
+      fail_text: 'Structural cluster review 失败 - 请修复命中的 cluster contract / drift'
       stage_fixed: false
 
     # 相关测试检查 - 确保组件/库变更后测试同步更新

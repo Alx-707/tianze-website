@@ -1,42 +1,9 @@
 #!/usr/bin/env node
 
 const { execSync } = require("child_process");
-
-const CLUSTERS = [
-  {
-    name: "Translation critical quartet",
-    recommendedReview: "Inspect all four translation runtime bundles together",
-    files: [
-      "messages/en.json",
-      "messages/zh.json",
-      "messages/en/critical.json",
-      "messages/zh/critical.json",
-    ],
-  },
-  {
-    name: "Lead API family",
-    recommendedReview:
-      "Inspect sibling routes for contract/validation/rate-limit drift",
-    files: [
-      "src/app/api/contact/route.ts",
-      "src/app/api/inquiry/route.ts",
-      "src/app/api/subscribe/route.ts",
-    ],
-  },
-  {
-    name: "Homepage section cluster",
-    recommendedReview:
-      "Inspect adjacent homepage sections for rhythm/proof/CTA drift",
-    files: [
-      "src/components/sections/hero-section.tsx",
-      "src/components/sections/products-section.tsx",
-      "src/components/sections/final-cta.tsx",
-      "src/components/sections/sample-cta.tsx",
-      "src/components/sections/resources-section.tsx",
-      "src/components/sections/scenarios-section.tsx",
-    ],
-  },
-];
+const {
+  STRUCTURAL_CLUSTERS: CLUSTERS,
+} = require("./structural-cluster-registry");
 
 function normalize(file) {
   return file.trim().replace(/^\.\//, "");
@@ -45,8 +12,9 @@ function normalize(file) {
 function parseInputFiles() {
   const args = process.argv.slice(2);
   const staged = args.includes("--staged");
+  const run = args.includes("--run");
   const files = args.filter((arg) => !arg.startsWith("--")).map(normalize);
-  return { staged, files };
+  return { staged, run, files };
 }
 
 function collectChangedFiles(mode) {
@@ -77,7 +45,7 @@ function collectChangedFiles(mode) {
 }
 
 function main() {
-  const { staged, files } = parseInputFiles();
+  const { staged, run, files } = parseInputFiles();
   const targets =
     files.length > 0 ? files : collectChangedFiles(staged ? "staged" : "head");
 
@@ -109,9 +77,27 @@ function main() {
 
   if (hitCount === 0) {
     console.log("No known structural clusters matched.");
-  } else {
-    console.log("Reference doc: docs/guides/STRUCTURAL-CHANGE-CLUSTERS.md");
+    return;
   }
+
+  if (!run) {
+    console.log("");
+    console.log(
+      "Add --run to execute the matching cluster reviews automatically.",
+    );
+    console.log("Example: pnpm review:clusters:staged");
+    return;
+  }
+
+  console.log("");
+  for (const cluster of CLUSTERS) {
+    const matched = cluster.files.filter((file) => targets.includes(file));
+    if (matched.length === 0) continue;
+    console.log(`Running ${cluster.name} review...`);
+    execSync(cluster.command, { stdio: "inherit" });
+  }
+
+  console.log("Reference doc: docs/guides/STRUCTURAL-CHANGE-CLUSTERS.md");
 }
 
 main();

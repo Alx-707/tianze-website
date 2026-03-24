@@ -9,9 +9,12 @@ const AREAS = [
     primaryOwnerRole: "Runtime / i18n maintainer",
     backupOwnerRole: "Platform maintainer",
     crossReview: "Security review when headers/nonce/cookies change",
+    reviewCommand: "pnpm review:locale-runtime",
     patterns: [
       "src/middleware.ts",
       "src/i18n/",
+      "src/lib/seo-metadata.ts",
+      "src/lib/content-utils.ts",
       "src/app/[locale]/layout.tsx",
       "src/app/[locale]/head.tsx",
     ],
@@ -22,10 +25,12 @@ const AREAS = [
     primaryOwnerRole: "Lead pipeline maintainer",
     backupOwnerRole: "Runtime maintainer",
     crossReview: "Security review when validation/rate-limit/abuse changes",
+    reviewCommand: "pnpm review:lead-family",
     patterns: [
       "src/app/api/contact/",
       "src/app/api/inquiry/",
       "src/app/api/subscribe/",
+      "src/lib/api/lead-route-response.ts",
       "src/lib/lead-pipeline/",
       "src/components/forms/",
     ],
@@ -66,12 +71,17 @@ const AREAS = [
     primaryOwnerRole: "i18n maintainer",
     backupOwnerRole: "Runtime maintainer",
     crossReview: "Runtime review when SSR/critical-path keys change",
+    reviewCommand: "pnpm review:translation-quartet",
     patterns: [
       "messages/en.json",
       "messages/zh.json",
       "messages/en/critical.json",
       "messages/zh/critical.json",
+      "scripts/translation-flat-utils.js",
+      "scripts/regenerate-flat-translations.js",
+      "scripts/translation-sync.js",
       "scripts/validate-translations.js",
+      "scripts/i18n-shape-check.js",
     ],
   },
   {
@@ -80,10 +90,12 @@ const AREAS = [
     primaryOwnerRole: "Platform maintainer",
     backupOwnerRole: "Runtime maintainer",
     crossReview: "Security review for auth/invalidation policy changes",
+    reviewCommand: "pnpm review:cache-health",
     patterns: [
       "src/app/api/cache/invalidate/",
       "src/lib/cache/",
       "src/app/api/health/",
+      "src/lib/api/cache-health-response.ts",
     ],
   },
 ];
@@ -159,6 +171,9 @@ function main() {
     console.log(`Backup owner role: ${match.backupOwnerRole}`);
     console.log(`Cross-review: ${match.crossReview}`);
     console.log(`Minimum proof: ${match.minimumProof}`);
+    if (match.reviewCommand) {
+      console.log(`Suggested review: ${match.reviewCommand}`);
+    }
     console.log("Matched files:");
     for (const file of match.matchedFiles) {
       console.log(`- ${file}`);
