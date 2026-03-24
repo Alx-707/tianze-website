@@ -1,5 +1,21 @@
 # Quality Gates & CI/CD
 
+## Current Canonical Rule
+
+For proof semantics, use:
+- [`docs/guides/QUALITY-PROOF-LEVELS.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/QUALITY-PROOF-LEVELS.md)
+- [`docs/guides/RELEASE-PROOF-RUNBOOK.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/RELEASE-PROOF-RUNBOOK.md)
+- [`docs/guides/POLICY-SOURCE-OF-TRUTH.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/POLICY-SOURCE-OF-TRUTH.md)
+
+That file is the single current definition for:
+- `fast gate`
+- `local-full proof`
+- `ci-proof`
+- `release-proof`
+
+Do not infer those meanings from comments spread across scripts or workflows.
+This file is a reviewer-facing summary, not the final source of truth when canonical files disagree.
+
 ## Complexity Limits
 
 All limits are **function-level** (cyclomatic complexity measured per function).
@@ -36,6 +52,7 @@ Constants organization:
 Next.js 16 removed build-time size metrics in favor of runtime performance measurement via Lighthouse.
 
 **Configuration**: `lighthouserc.js`
+**Canonical threshold source**: `lighthouserc.js`
 
 | Metric | Current Target | Final Goal |
 |--------|----------------|------------|
@@ -77,11 +94,15 @@ When upgrading `next` / `react` / `typescript` or dependencies with security ale
 
 ## Test Coverage
 
-**Progressive Roadmap**:
+**Current enforcement source**: `scripts/quality-gate.js`
+
+The table below is roadmap context only. When this summary and `scripts/quality-gate.js` differ, `scripts/quality-gate.js` wins.
+
+**Roadmap Context**:
 
 | Phase | Target | Timeline |
 |-------|--------|----------|
-| Phase 1 (Current) | ≥65% | Baseline |
+| Phase 1 | ≥65% | Baseline |
 | Phase 2 | ≥75% | +3 months |
 | Phase 3 | ≥80% | +6 months |
 

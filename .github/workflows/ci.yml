@@ -134,6 +134,12 @@ jobs:
             reports/
           if-no-files-found: ignore
 
+      - name: Lead API Family Contract Review
+        run: pnpm review:lead-family
+
+      - name: Homepage Section Cluster Review
+        run: pnpm review:homepage-sections
+
   # E2E测试作业
   e2e-tests:
     name: E2E测试
@@ -380,6 +386,9 @@ jobs:
 
       - name: MDX slug 对齐校验
         run: pnpm content:slug-check
+
+      - name: Translation Quartet Review
+        run: pnpm review:translation-quartet
 
       - name: 上传 i18n 形状报告
         if: always()

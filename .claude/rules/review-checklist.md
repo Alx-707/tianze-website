@@ -44,6 +44,55 @@ pnpm lint:check
 pnpm test
 ```
 
+### Tier A Impact Review
+
+```bash
+pnpm review:tier-a:staged
+pnpm review:clusters:staged
+```
+
+If Tier A paths are matched:
+- use [`docs/guides/TIER-A-OWNER-MAP.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/TIER-A-OWNER-MAP.md)
+- use [`docs/guides/QUALITY-PROOF-LEVELS.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/QUALITY-PROOF-LEVELS.md)
+- use [`docs/guides/STRUCTURAL-CHANGE-CLUSTERS.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/STRUCTURAL-CHANGE-CLUSTERS.md)
+- do not treat fast local gates as sufficient proof
+
+If the impacted cluster is the lead API family:
+
+```bash
+pnpm review:lead-family
+```
+
+Also use:
+- [`docs/guides/LEAD-API-FAMILY-CONTRACT.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/LEAD-API-FAMILY-CONTRACT.md)
+
+If the impacted cluster is the translation quartet:
+
+```bash
+pnpm review:translation-quartet
+```
+
+Also use:
+- [`docs/guides/TRANSLATION-QUARTET-CONTRACT.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/TRANSLATION-QUARTET-CONTRACT.md)
+
+If the impacted cluster is the homepage section cluster:
+
+```bash
+pnpm review:homepage-sections
+```
+
+Also use:
+- [`docs/guides/HOMEPAGE-SECTION-CLUSTER-CONTRACT.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/HOMEPAGE-SECTION-CLUSTER-CONTRACT.md)
+
+If the impacted cluster is the locale runtime surface:
+
+```bash
+pnpm review:locale-runtime
+```
+
+Also use:
+- [`docs/guides/LOCALE-RUNTIME-CONTRACT.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/LOCALE-RUNTIME-CONTRACT.md)
+
 ## Severity Rules
 
 - Findings must be tagged: `PROD` / `DEV` / `CI` / `DOC`
