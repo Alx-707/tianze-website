@@ -4,8 +4,8 @@ import {
   loadCompleteMessages,
   loadCompleteMessagesFromSource,
 } from "@/lib/load-messages";
+import { coerceLocale } from "@/i18n/locale-utils";
 import { COUNT_FIVE, ONE } from "@/constants";
-import { routing } from "@/i18n/routing";
 
 // 辅助函数：获取格式配置
 function getFormats(locale: string) {
@@ -118,16 +118,10 @@ async function createFallbackResponse(locale: string, startTime: number) {
 
 export default getRequestConfig(async ({ requestLocale }) => {
   const startTime = performance.now();
-  let locale = await requestLocale;
-
-  // 如果没有明确的语言偏好，使用默认语言
-  // next-intl middleware会自动处理语言检测和cookie
-  if (!locale || !routing.locales.includes(locale as "en" | "zh")) {
-    locale = routing.defaultLocale;
-  }
+  const locale = coerceLocale(await requestLocale);
 
   try {
-    const messages = await loadCompleteMessages(locale as "en" | "zh");
+    const messages = await loadCompleteMessages(locale);
     const loadTime = performance.now() - startTime;
     recordRequestMetrics(loadTime);
 

@@ -10,7 +10,8 @@ import { unstable_cache } from "next/cache";
 import { i18nTags } from "@/lib/cache/cache-tags";
 import { mergeObjects } from "@/lib/merge-objects";
 import { MONITORING_INTERVALS } from "@/constants/performance-constants";
-import { routing, type Locale } from "@/i18n/routing";
+import { type Locale } from "@/i18n/routing";
+import { coerceLocale } from "@/i18n/locale-utils";
 
 type Messages = Record<string, unknown>;
 type MessageType = "critical" | "deferred";
@@ -36,18 +37,11 @@ const MESSAGE_LOADERS: Record<
   },
 };
 
-function sanitizeLocale(input: string): Locale {
-  const supportedLocales = routing.locales as readonly string[];
-  return supportedLocales.includes(input)
-    ? (input as Locale)
-    : (routing.defaultLocale as Locale);
-}
-
 async function loadMessageSource(
   locale: Locale,
   type: MessageType,
 ): Promise<Messages> {
-  const safeLocale = sanitizeLocale(locale);
+  const safeLocale = coerceLocale(locale);
   const loadedMessages = await MESSAGE_LOADERS[safeLocale][type]();
   return loadedMessages.default;
 }
@@ -67,7 +61,7 @@ function createCached(locale: Locale, type: MessageType) {
 }
 
 function load(locale: Locale, type: MessageType): Promise<Messages> {
-  const safeLocale = sanitizeLocale(locale);
+  const safeLocale = coerceLocale(locale);
   return isCiEnv || isProductionBuild()
     ? loadMessageSource(safeLocale, type)
     : createCached(safeLocale, type)();
@@ -84,7 +78,7 @@ export function loadDeferredMessages(locale: Locale): Promise<Messages> {
 export async function loadCompleteMessagesFromSource(
   locale: string,
 ): Promise<Messages> {
-  const safeLocale = sanitizeLocale(locale);
+  const safeLocale = coerceLocale(locale);
   const [critical, deferred] = await Promise.all([
     loadMessageSource(safeLocale, "critical"),
     loadMessageSource(safeLocale, "deferred"),
@@ -93,7 +87,7 @@ export async function loadCompleteMessagesFromSource(
 }
 
 export async function loadCompleteMessages(locale: Locale): Promise<Messages> {
-  const safeLocale = sanitizeLocale(locale);
+  const safeLocale = coerceLocale(locale);
   const [critical, deferred] = await Promise.all([
     loadCriticalMessages(safeLocale),
     loadDeferredMessages(safeLocale),
