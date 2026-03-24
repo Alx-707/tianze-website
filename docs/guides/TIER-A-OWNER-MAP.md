@@ -17,6 +17,16 @@ Tier A paths are repository areas where a change can materially affect:
 - Tier A changes require one primary owner review and one cross-domain review when the change crosses runtime/security/platform boundaries.
 - Tier A changes are not considered proven by fast local gates alone.
 - Tier A changes must use the proof levels defined in [QUALITY-PROOF-LEVELS.md](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/QUALITY-PROOF-LEVELS.md).
+- The repository default owner remains primary-only; the backup identity is reserved for Tier A paths and other explicitly critical surfaces.
+- When a second maintainer can be mapped into enforceable repository ownership, follow [MAINTAINER-ACTIVATION-CHECKLIST.md](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/MAINTAINER-ACTIVATION-CHECKLIST.md) instead of inventing a new ownership model.
+
+## Operational Checklist For Tier A Changes
+1. Identify whether the touched path is Tier A using the owner map below.
+2. Confirm the primary owner review path is available.
+3. If the change crosses runtime, security, or platform boundaries, require the cross-review listed for that row.
+4. Run the relevant staged review entrypoint before merge, not after merge.
+5. If the backup review path is unavailable, treat the change as blocked or re-scope it; do not describe the repo as diversified.
+6. If the change is release-critical, require the proof level listed for that row and pair it with release-proof policy.
 
 ## Owner Map
 
@@ -32,10 +42,20 @@ Tier A paths are repository areas where a change can materially affect:
 ## Current Repository State
 - Repository-level ownership is now enforced via [`.github/CODEOWNERS`](/Users/Data/Warehouse/Pipe/tianze-website/.github/CODEOWNERS).
 - This map remains the semantic owner-definition layer above raw CODEOWNERS patterns.
-- The current enforceable owner pair is:
+- The current enforceable default owner is:
   - primary: `@Alx-707`
-  - backup: `developer@flood-control.com`
+- The current enforceable Tier A backup review path is:
+  - `developer@flood-control.com`
+- The remaining constraint is explicit:
+  - active maintenance is broader than one person in practice
+  - there is still not a second enforceable repository owner identity that independently shares Tier A throughput
+  - the backup path improves review resilience, but it does not eliminate enforceable ownership concentration
 - Role separation remains documented above the identity mapping so future expansion does not collapse into raw file ownership alone.
+
+## Hard Ceiling
+- This file can define routing, review expectations, and proof requirements.
+- It cannot create a second enforceable repository owner identity.
+- Until another owner identity is actually mapped into repo-level enforcement, Tier A resilience remains a review fallback model, not a diversified operating model.
 
 ## Promotion / Demotion Rules
 - Promote to Tier A when a path affects runtime entry behavior, dual-platform compatibility, security posture, or lead capture correctness.
@@ -44,4 +64,4 @@ Tier A paths are repository areas where a change can materially affect:
   - ownership and proof requirements have been reduced intentionally, not by drift.
 
 ## Next Step
-Reduce owner concentration over time by mapping backup owner roles to additional maintainers as they become available.
+Reduce enforceable owner concentration over time by mapping the Tier A backup review path to at least one additional repository owner identity as soon as one is actually available.

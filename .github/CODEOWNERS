@@ -1,7 +1,10 @@
-# Repository default owners
-* @Alx-707 developer@flood-control.com
+# Repository default owner
+# The repository default is primary-only. This file encodes enforceable review routing, not diversified maintainer headcount.
+* @Alx-707
 
 # Tier A: runtime entry + locale routing
+# Tier A paths require the primary owner and the backup review path.
+# The backup path is a review fallback, not a second enforceable repository owner identity.
 /src/middleware.ts @Alx-707 developer@flood-control.com
 /src/i18n/ @Alx-707 developer@flood-control.com
 /src/app/[locale]/layout.tsx @Alx-707 developer@flood-control.com

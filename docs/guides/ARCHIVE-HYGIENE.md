@@ -29,6 +29,7 @@ When a rule changes:
 
 ### 4. Archive Does Not Mean Current
 Anything under `docs/archive/` or explicitly marked as supplemental/superseded should not be treated as a live rule source.
+If a file outside `docs/archive/` still claims to be current, verify that claim against [POLICY-SOURCE-OF-TRUTH.md](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/POLICY-SOURCE-OF-TRUTH.md) before treating it as canonical.
 
 ## Ongoing Maintenance
 - When a new policy file is introduced, decide whether it is canonical or supplemental.
@@ -40,4 +41,4 @@ Archive hygiene is considered healthy when:
 - supplemental files point to canonical files
 - superseded files are visibly marked
 
-This repository currently meets that standard for the structural governance surface.
+This repository currently meets that standard for the structural governance surface listed in the policy index.

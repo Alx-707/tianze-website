@@ -28,6 +28,10 @@ Status values:
 - none
 
 ## Long-Horizon Optimization Status
-- ownership resilience: optimized and documented
+- ownership resilience: documented, with multi-maintainer activity in practice but still constrained by a single enforceable repository owner identity and bounded by a hard ceiling until another owner identity is mapped
 - release-proof vs release-signoff separation: optimized and documented
 - archive hygiene: optimized and audit-backed
+
+## Ownership Activation Reference
+- When another maintainer can actually be mapped into enforceable repository ownership, follow:
+  - [`MAINTAINER-ACTIVATION-CHECKLIST.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/MAINTAINER-ACTIVATION-CHECKLIST.md)
