@@ -109,7 +109,15 @@ vi.mock("@/lib/security/distributed-rate-limit", () => ({
   createRateLimitHeaders: mockCreateRateLimitHeaders,
 }));
 
-vi.mock("@/lib/cache", () => ({
+vi.mock("@/lib/cache/cache-tags", () => ({
+  CACHE_DOMAINS: {
+    I18N: "i18n",
+    CONTENT: "content",
+    PRODUCT: "product",
+  },
+}));
+
+vi.mock("@/lib/cache/invalidate", () => ({
   CACHE_INVALIDATION_LOCALES: ["en", "zh"],
   CACHE_INVALIDATION_DOMAINS: ["i18n", "content", "product", "all"],
   CACHE_INVALIDATION_ENTITIES: [
@@ -126,64 +134,6 @@ vi.mock("@/lib/cache", () => ({
   invalidateProduct: mockInvalidateProduct,
   invalidateLocale: mockInvalidateLocale,
   invalidateDomain: mockInvalidateDomain,
-  invalidateCacheRequest: vi.fn(
-    (options: {
-      domain: string;
-      locale?: string;
-      entity?: string;
-      identifier?: string;
-    }) => {
-      if (options.domain === "i18n") {
-        if (options.locale === "en" || options.locale === "zh") {
-          if (options.entity === "critical")
-            return mockInvalidateI18n.critical();
-          if (options.entity === "deferred")
-            return mockInvalidateI18n.deferred();
-          return mockInvalidateI18n.locale();
-        }
-        return mockInvalidateI18n.all();
-      }
-
-      if (options.domain === "content") {
-        if (!options.locale) {
-          return {
-            errorCode: API_ERROR_CODES.CACHE_LOCALE_REQUIRED,
-            status: 400,
-          };
-        }
-        if (options.entity === "blog") return mockInvalidateContent.blogPost();
-        if (options.entity === "page") return mockInvalidateContent.page();
-        return mockInvalidateContent.locale();
-      }
-
-      if (options.domain === "product") {
-        if (!options.locale) {
-          return {
-            errorCode: API_ERROR_CODES.CACHE_LOCALE_REQUIRED,
-            status: 400,
-          };
-        }
-        if (options.entity === "detail") return mockInvalidateProduct.detail();
-        if (options.entity === "categories")
-          return mockInvalidateProduct.categories();
-        if (options.entity === "featured")
-          return mockInvalidateProduct.featured();
-        return mockInvalidateProduct.locale();
-      }
-
-      if (options.domain === "all") {
-        if (options.locale === "en" || options.locale === "zh") {
-          return mockInvalidateLocale();
-        }
-        return mockInvalidateDomain();
-      }
-
-      return {
-        errorCode: API_ERROR_CODES.CACHE_INVALID_DOMAIN,
-        status: 400,
-      };
-    },
-  ),
 }));
 
 describe("cache invalidate route", () => {

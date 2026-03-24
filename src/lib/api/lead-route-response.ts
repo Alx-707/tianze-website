@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createApiErrorResponse } from "@/lib/api/api-response";
-import type { LeadResult } from "@/lib/lead-pipeline";
+import type { LeadResult } from "@/lib/lead-pipeline/process-lead";
 import type { ApiErrorCode } from "@/constants/api-error-codes";
 import { HTTP_BAD_REQUEST, HTTP_INTERNAL_ERROR } from "@/constants";
 import { verifyTurnstile } from "@/lib/turnstile";

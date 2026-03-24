@@ -1,13 +1,13 @@
 import { z } from "zod";
 import type { Locale } from "@/types/content.types";
+import { CACHE_DOMAINS } from "@/lib/cache/cache-tags";
 import {
-  CACHE_DOMAINS,
   invalidateContent,
   invalidateDomain,
   invalidateI18n,
   invalidateLocale,
   invalidateProduct,
-} from "@/lib/cache";
+} from "@/lib/cache/invalidate";
 import { API_ERROR_CODES } from "@/constants/api-error-codes";
 
 export const VALID_CACHE_LOCALES = ["en", "zh"] as const;

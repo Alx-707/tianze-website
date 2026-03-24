@@ -48,7 +48,15 @@ vi.mock("@/lib/security/distributed-rate-limit", () => ({
   createRateLimitHeaders: mockCreateRateLimitHeaders,
 }));
 
-vi.mock("@/lib/cache", () => ({
+vi.mock("@/lib/cache/cache-tags", () => ({
+  CACHE_DOMAINS: {
+    I18N: "i18n",
+    CONTENT: "content",
+    PRODUCT: "product",
+  },
+}));
+
+vi.mock("@/lib/cache/invalidate", () => ({
   CACHE_INVALIDATION_LOCALES: ["en", "zh"],
   CACHE_INVALIDATION_DOMAINS: ["i18n", "content", "product", "all"],
   CACHE_INVALIDATION_ENTITIES: [
@@ -91,57 +99,6 @@ vi.mock("@/lib/cache", () => ({
   },
   invalidateLocale: vi.fn(),
   invalidateDomain: vi.fn(),
-  invalidateCacheRequest: vi.fn(
-    (options: {
-      domain: string;
-      locale?: string;
-      entity?: string;
-      identifier?: string;
-    }) => {
-      if (options.domain === "i18n") {
-        if (options.locale === "en" || options.locale === "zh") {
-          if (options.entity === "critical")
-            return mockInvalidateI18n.critical();
-          if (options.entity === "deferred")
-            return {
-              success: true,
-              invalidatedTags: ["i18n:deferred"],
-              errors: [],
-            };
-          return {
-            success: true,
-            invalidatedTags: ["i18n:locale"],
-            errors: [],
-          };
-        }
-        return {
-          success: true,
-          invalidatedTags: ["i18n"],
-          errors: [],
-        };
-      }
-
-      if (options.domain === "content" || options.domain === "product") {
-        return {
-          errorCode: API_ERROR_CODES.CACHE_LOCALE_REQUIRED,
-          status: 400,
-        };
-      }
-
-      if (options.domain === "all") {
-        return {
-          success: true,
-          invalidatedTags: ["all:locale"],
-          errors: [],
-        };
-      }
-
-      return {
-        errorCode: API_ERROR_CODES.CACHE_INVALID_DOMAIN,
-        status: 400,
-      };
-    },
-  ),
 }));
 
 describe("cache health contract", () => {
