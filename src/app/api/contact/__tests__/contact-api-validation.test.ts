@@ -231,6 +231,9 @@ describe("contact-api-validation", () => {
       email: "john@example.com",
       company: "Acme Inc",
       message: "Hello, this is a test message.",
+      phone: undefined,
+      subject: undefined,
+      website: undefined,
       acceptPrivacy: true,
       marketingConsent: false,
     };
