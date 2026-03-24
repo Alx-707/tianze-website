@@ -4,6 +4,7 @@
  * Shared form submission logic used by both Server Actions and API routes.
  */
 
+import { z } from "zod";
 import { processLead } from "@/lib/lead-pipeline/process-lead";
 import { CONTACT_SUBJECTS, LEAD_TYPES } from "@/lib/lead-pipeline/lead-schema";
 import { logger, sanitizeEmail } from "@/lib/logger";
@@ -13,20 +14,19 @@ import { mapZodIssueToErrorKey } from "@/lib/contact-form-error-utils";
 import {
   CONTACT_FORM_CONFIG,
   createContactFormSchemaFromConfig,
-  type ContactFormFieldValues,
 } from "@/config/contact-form-config";
 import { TEN_MINUTES_MS } from "@/constants/time";
 
 const contactFormSchema = createContactFormSchemaFromConfig(
   CONTACT_FORM_CONFIG,
   contactFieldValidators,
-);
+).extend({
+  turnstileToken: z.string().min(1),
+  submittedAt: z.string().min(1),
+  idempotencyKey: z.string().optional(),
+});
 
-export type ContactFormWithToken = ContactFormFieldValues & {
-  turnstileToken: string;
-  submittedAt: string;
-  idempotencyKey?: string;
-};
+export type ContactFormWithToken = z.infer<typeof contactFormSchema>;
 
 interface ContactValidationFailure {
   success: false;
@@ -89,7 +89,7 @@ export async function validateContactSubmission(
     };
   }
 
-  const formData = validationResult.data as ContactFormWithToken;
+  const formData = validationResult.data;
   if (!formData.turnstileToken) {
     return {
       success: false,

@@ -2,7 +2,7 @@
 
 const fs = require("fs");
 const path = require("path");
-const { execSync } = require("child_process");
+const { spawnSync } = require("child_process");
 
 const ROOT = process.cwd();
 const REPORT_DIR = path.join(ROOT, "reports", "architecture");
@@ -13,10 +13,22 @@ function ensureDir(dir) {
 
 function main() {
   ensureDir(REPORT_DIR);
-  const output = execSync(
-    "rg -n \"@deprecated|Currently used by|legacy helper|legacy server-side|legacy/test-side|//.*legacy|/\\*.*legacy|\\*.*legacy\" src --glob '!**/__tests__/**' || true",
+  const run = spawnSync(
+    "rg",
+    [
+      "-n",
+      "@deprecated|Currently used by|legacy helper|legacy server-side|legacy/test-side|//.*legacy|/\\*.*legacy|\\*.*legacy",
+      "src",
+      "--glob",
+      "!**/__tests__/**",
+    ],
     { cwd: ROOT, encoding: "utf8" },
   );
+  // status 0 = matches found, 1 = no matches, anything else = real error
+  if (run.status !== 0 && run.status !== 1) {
+    throw new Error(run.stderr || "legacy marker audit failed (rg error)");
+  }
+  const output = run.stdout;
 
   const findings = output
     .split("\n")

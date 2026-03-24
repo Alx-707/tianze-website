@@ -52,12 +52,28 @@ function parseInputFiles() {
 function collectChangedFiles(mode) {
   const command =
     mode === "staged"
-      ? "git diff --cached --name-only --diff-filter=ACM"
+      ? "git diff --cached --name-only --diff-filter=ACMRD"
       : "git diff --name-only HEAD";
-  return execSync(command, { encoding: "utf8" })
+  const files = execSync(command, { encoding: "utf8" })
     .split("\n")
     .map(normalize)
     .filter(Boolean);
+  // In clean CI checkouts git diff HEAD returns nothing;
+  // fall back to comparing against the merge-base with main.
+  if (files.length === 0 && mode !== "staged") {
+    try {
+      const base = execSync("git merge-base HEAD origin/main", {
+        encoding: "utf8",
+      }).trim();
+      return execSync(`git diff --name-only ${base}`, { encoding: "utf8" })
+        .split("\n")
+        .map(normalize)
+        .filter(Boolean);
+    } catch {
+      return files;
+    }
+  }
+  return files;
 }
 
 function main() {

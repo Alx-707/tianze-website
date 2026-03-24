@@ -23,13 +23,13 @@ const CLUSTERS = {
   "locale-runtime": {
     label: "locale runtime surface",
     pattern:
-      /^(src\/middleware\.ts|src\/i18n\/|src\/lib\/load-messages\.ts|src\/app\/\[locale\]\/layout\.tsx|src\/app\/\[locale\]\/head\.tsx|src\/app\/global-error\.tsx)$/,
+      /^(src\/middleware\.ts|src\/i18n\/.+|src\/lib\/load-messages\.ts|src\/app\/\[locale\]\/layout\.tsx|src\/app\/\[locale\]\/head\.tsx|src\/app\/global-error\.tsx)$/,
     command: "pnpm review:locale-runtime",
   },
   "cache-health": {
     label: "cache invalidation + health signals",
     pattern:
-      /^(src\/app\/api\/cache\/invalidate\/|src\/lib\/cache\/|src\/app\/api\/health\/route\.ts)$/,
+      /^(src\/app\/api\/cache\/invalidate\/.+|src\/lib\/cache\/.+|src\/app\/api\/health\/route\.ts)$/,
     command: "pnpm review:cache-health",
   },
 };
