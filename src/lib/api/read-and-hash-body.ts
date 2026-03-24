@@ -45,6 +45,126 @@ function resolveMaxBytes(options?: { maxBytes?: number }): number {
     : DEFAULT_MAX_JSON_BODY_BYTES;
 }
 
+interface DecodeContext {
+  route: string | undefined;
+  maxBytes: number;
+}
+
+function decodeChunk(
+  decoder: TextDecoder,
+  value: Uint8Array,
+  context: DecodeContext,
+): string | ReadBodyFailure {
+  const { route, maxBytes } = context;
+  try {
+    return decoder.decode(value, { stream: true });
+  } catch (error) {
+    logger.warn("Failed to decode JSON body as UTF-8", {
+      route,
+      maxBytes,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return createInvalidJsonFailure();
+  }
+}
+
+function finalizeDecodedBody(
+  decoder: TextDecoder,
+  context: DecodeContext,
+): string | ReadBodyFailure {
+  const { route, maxBytes } = context;
+  try {
+    return decoder.decode();
+  } catch (error) {
+    logger.warn("Failed to decode JSON body as UTF-8", {
+      route,
+      maxBytes,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return createInvalidJsonFailure();
+  }
+}
+
+function decodeBodyChunk(
+  value: Uint8Array,
+  state: {
+    totalBytes: number;
+    route: string | undefined;
+    maxBytes: number;
+    decoder: TextDecoder;
+    context: DecodeContext;
+  },
+):
+  | { ok: true; totalBytes: number; text: string }
+  | { ok: false; failure: ReadBodyFailure } {
+  const {
+    totalBytes: previousTotalBytes,
+    route,
+    maxBytes,
+    decoder,
+    context,
+  } = state;
+  const totalBytes = previousTotalBytes + value.byteLength;
+  if (totalBytes > maxBytes) {
+    logger.warn("JSON body exceeds byte-size limit", {
+      route,
+      maxBytes,
+    });
+    return { ok: false, failure: createPayloadTooLargeFailure() };
+  }
+
+  const decodedChunk = decodeChunk(decoder, value, context);
+  if (typeof decodedChunk !== "string") {
+    return { ok: false, failure: decodedChunk };
+  }
+
+  return {
+    ok: true,
+    totalBytes,
+    text: decodedChunk,
+  };
+}
+
+async function readDecodedText(context: {
+  reader: ReadableStreamDefaultReader<Uint8Array>;
+  decoder: TextDecoder;
+  route: string | undefined;
+  maxBytes: number;
+}): Promise<string | ReadBodyFailure> {
+  const { reader, decoder, route, maxBytes } = context;
+  const decodeContext: DecodeContext = { route, maxBytes };
+  let totalBytes = 0;
+  let text = "";
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    if (!value) continue;
+
+    const chunkResult = decodeBodyChunk(value, {
+      totalBytes,
+      route,
+      maxBytes,
+      decoder,
+      context: decodeContext,
+    });
+    if (!chunkResult.ok) {
+      await reader.cancel();
+      return chunkResult.failure;
+    }
+
+    ({ totalBytes } = chunkResult);
+    text += chunkResult.text;
+  }
+
+  const trailingText = finalizeDecodedBody(decoder, decodeContext);
+  if (typeof trailingText !== "string") {
+    return trailingText;
+  }
+
+  return `${text}${trailingText}`;
+}
+
 async function readBodyWithinLimit(
   req: NextRequest,
   route: string | undefined,
@@ -55,31 +175,15 @@ async function readBodyWithinLimit(
   }
 
   const reader = req.body.getReader();
-  const decoder = new TextDecoder();
-  let totalBytes = 0;
-  let text = "";
+  const decoder = new TextDecoder("utf-8", { fatal: true });
 
   try {
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      if (!value) continue;
-
-      totalBytes += value.byteLength;
-      if (totalBytes > maxBytes) {
-        logger.warn("JSON body exceeds byte-size limit", {
-          route,
-          maxBytes,
-        });
-        await reader.cancel();
-        return createPayloadTooLargeFailure();
-      }
-
-      text += decoder.decode(value, { stream: true });
-    }
-
-    text += decoder.decode();
-    return text;
+    return await readDecodedText({
+      reader,
+      decoder,
+      route,
+      maxBytes,
+    });
   } finally {
     reader.releaseLock();
   }

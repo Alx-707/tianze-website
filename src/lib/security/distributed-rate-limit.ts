@@ -31,7 +31,7 @@ export const RATE_LIMIT_PRESETS = {
   contact: {
     maxRequests: COUNT_FIVE,
     windowMs: MINUTE_MS,
-    failureMode: "open" as const,
+    failureMode: "closed" as const,
   },
   contactAdminStats: {
     maxRequests: 30,
@@ -41,12 +41,12 @@ export const RATE_LIMIT_PRESETS = {
   inquiry: {
     maxRequests: COUNT_TEN,
     windowMs: MINUTE_MS,
-    failureMode: "open" as const,
+    failureMode: "closed" as const,
   },
   subscribe: {
     maxRequests: COUNT_THREE,
     windowMs: MINUTE_MS,
-    failureMode: "open" as const,
+    failureMode: "closed" as const,
   },
   whatsapp: {
     maxRequests: COUNT_FIVE,

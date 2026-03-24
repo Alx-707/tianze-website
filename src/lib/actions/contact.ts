@@ -69,7 +69,6 @@ function createFormFingerprint(data: ContactFormWithToken): string {
   }
   return `SERVER_ACTION:contactForm:${(hash >>> 0).toString(HASH_RADIX)}`;
 }
-
 /**
  * Extract contact form data from FormData
  */
@@ -181,7 +180,6 @@ async function executeContactSubmissionAttempt(
     logger,
   );
 }
-
 /**
  * 联系表单 Server Action
  * 处理联系表单提交，集成Zod验证、Turnstile验证和现有的业务逻辑

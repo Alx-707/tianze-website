@@ -2,6 +2,17 @@ import React from "react";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+vi.mock("next-intl/server", () => ({
+  getTranslations: vi.fn(async (namespace?: string) => {
+    if (namespace === "catalog.breadcrumb") {
+      return (key: string) =>
+        key === "products" ? "Products" : key === "home" ? "Home" : key;
+    }
+
+    return (key: string) => key;
+  }),
+}));
+
 // Mock next-intl routing
 vi.mock("@/i18n/routing", () => ({
   routing: {
@@ -45,7 +56,7 @@ describe("CatalogBreadcrumb", () => {
 
   it("renders minimal breadcrumb for products overview (Home > Products)", async () => {
     const CatalogBreadcrumb = await importComponent();
-    render(<CatalogBreadcrumb />);
+    render(await CatalogBreadcrumb({}));
 
     expect(screen.getByText("Home")).toBeInTheDocument();
     expect(screen.getByText("Products")).toBeInTheDocument();
@@ -67,7 +78,7 @@ describe("CatalogBreadcrumb", () => {
       familySlugs: [],
     };
 
-    render(<CatalogBreadcrumb market={market} />);
+    render(await CatalogBreadcrumb({ market }));
 
     // Home is a link
     const homeLink = screen.getByText("Home").closest("a");
@@ -94,7 +105,7 @@ describe("CatalogBreadcrumb", () => {
       familySlugs: [],
     };
 
-    const { container } = render(<CatalogBreadcrumb market={market} />);
+    const { container } = render(await CatalogBreadcrumb({ market }));
 
     const scriptTag = container.querySelector(
       'script[type="application/ld+json"]',

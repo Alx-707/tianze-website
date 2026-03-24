@@ -76,6 +76,9 @@ const FALLBACK_IP = "0.0.0.0";
 
 /** Development localhost IP */
 const LOCALHOST_IP = "127.0.0.1";
+const IPV4_OCTET_COUNT = 4;
+const IPV4_BITS_PER_OCTET = 8;
+const IPV4_FULL_MASK = 2 ** (IPV4_OCTET_COUNT * IPV4_BITS_PER_OCTET) - 1;
 
 /**
  * Get deployment platform from environment
@@ -190,6 +193,63 @@ function getPlatformConfig(platform: string): TrustedProxyConfig | undefined {
   return undefined;
 }
 
+function ipv4ToInteger(ip: string): number | null {
+  if (isIP(ip) !== 4) return null;
+
+  return (
+    ip.split(".").reduce<number>((accumulator, segment) => {
+      const octet = Number.parseInt(segment, 10);
+      return (accumulator << 8) + octet;
+    }, 0) >>> 0
+  );
+}
+
+function isIPv4InCIDRRange(ip: string, cidr: string): boolean {
+  const [network, prefixLengthValue] = cidr.split("/");
+  if (!network || !prefixLengthValue) return false;
+
+  const ipValue = ipv4ToInteger(ip);
+  const networkValue = ipv4ToInteger(network);
+  const prefixLength = Number.parseInt(prefixLengthValue, 10);
+
+  if (
+    ipValue === null ||
+    networkValue === null ||
+    !Number.isFinite(prefixLength) ||
+    prefixLength < 0 ||
+    prefixLength > 32
+  ) {
+    return false;
+  }
+
+  const hostBits = 32 - prefixLength;
+  const mask =
+    hostBits === IPV4_OCTET_COUNT * IPV4_BITS_PER_OCTET
+      ? 0
+      : (IPV4_FULL_MASK << hostBits) >>> 0;
+  return (ipValue & mask) === (networkValue & mask);
+}
+
+function isIPInCIDRRange(ip: string, cidr: string): boolean {
+  return isIPv4InCIDRRange(ip, cidr);
+}
+
+function isTrustedCdnSource(
+  request: NextRequest,
+  config: TrustedProxyConfig,
+): boolean {
+  if (!config.cdnIpRanges || config.cdnIpRanges.length === 0) {
+    return true;
+  }
+
+  const sourceIP = getNextJsIP(request);
+  if (!sourceIP) {
+    return false;
+  }
+
+  return config.cdnIpRanges.some((cidr) => isIPInCIDRRange(sourceIP, cidr));
+}
+
 /**
  * Try to extract IP from trusted headers
  */
@@ -236,6 +296,10 @@ export function getClientIP(request: NextRequest): string {
 
   const config = getPlatformConfig(platform);
   if (!config) {
+    return getNextJsIP(request) ?? FALLBACK_IP;
+  }
+
+  if (platform === "cloudflare" && !isTrustedCdnSource(request, config)) {
     return getNextJsIP(request) ?? FALLBACK_IP;
   }
 
@@ -327,6 +391,10 @@ export function getClientIPFromHeaders(headers: HeadersLike): string {
 
   const config = getPlatformConfig(platform);
   if (!config) {
+    return FALLBACK_IP;
+  }
+
+  if (platform === "cloudflare") {
     return FALLBACK_IP;
   }
 

@@ -56,9 +56,19 @@ describe("CSP Report API Route", () => {
     };
 
     it("应该成功处理有效的CSP报告", async () => {
+      const reportWithSensitiveFields = {
+        "csp-report": {
+          ...validCSPReport["csp-report"],
+          "document-uri": "https://example.com/page?token=secret#frag",
+          referrer: "https://ref.example.com/path?session=123",
+          "blocked-uri": "https://malicious.com/script.js?payload=1#hash",
+          "source-file": "https://example.com/app.js?build=123",
+          "script-sample": "x".repeat(250),
+        },
+      };
       const request = new NextRequest("http://localhost:3000/api/csp-report", {
         method: "POST",
-        body: JSON.stringify(validCSPReport),
+        body: JSON.stringify(reportWithSensitiveFields),
         headers: {
           "content-type": "application/csp-report",
           "x-forwarded-for": "127.0.0.1",
@@ -73,7 +83,13 @@ describe("CSP Report API Route", () => {
       expect(data.timestamp).toBeDefined();
       expect(console.warn).toHaveBeenCalledWith(
         "CSP Violation Report",
-        expect.any(Object),
+        expect.objectContaining({
+          documentUri: "https://example.com/page",
+          referrer: "https://ref.example.com/path",
+          blockedUri: "https://malicious.com/script.js",
+          sourceFile: "https://example.com/app.js",
+          scriptSample: "x".repeat(200),
+        }),
       );
     });
 

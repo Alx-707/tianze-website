@@ -13,7 +13,7 @@
  */
 
 import { logger } from "@/lib/logger";
-import { ONE } from "@/constants";
+import { ONE, ZERO } from "@/constants";
 
 // ==================== Interface ====================
 
@@ -109,6 +109,14 @@ export class MemoryRateLimitStore implements RateLimitStore {
 export class RedisRateLimitStore implements RateLimitStore {
   private baseUrl: string;
   private token: string;
+  private static readonly INCREMENT_SCRIPT = `
+local current = redis.call("INCR", KEYS[1])
+if current == 1 then
+  redis.call("PEXPIRE", KEYS[1], ARGV[1])
+end
+local ttl = redis.call("PTTL", KEYS[1])
+return {current, ttl}
+`.trim();
 
   constructor(url: string, token: string) {
     this.baseUrl = url.replace(/\/$/, "");
@@ -141,8 +149,21 @@ export class RedisRateLimitStore implements RateLimitStore {
     const result = await this.redisCommand<string | null>(["GET", key]);
     if (!result) return null;
 
+    const ttlMs = await this.redisCommand<number>(["PTTL", key]);
+    if (!ttlMs || ttlMs <= 0) {
+      return null;
+    }
+
     try {
-      return JSON.parse(result) as RateLimitEntry;
+      const count = Number.parseInt(result, 10);
+      if (!Number.isFinite(count)) {
+        throw new Error("Rate limit counter is not a number");
+      }
+
+      return {
+        count,
+        resetTime: Date.now() + ttlMs,
+      };
     } catch (error) {
       // Treat corrupted data as a storage error so the caller's failureMode
       // logic handles it (fail-closed presets deny; fail-open presets degrade).
@@ -159,14 +180,12 @@ export class RedisRateLimitStore implements RateLimitStore {
   }
 
   async set(key: string, entry: RateLimitEntry, ttlMs: number): Promise<void> {
-    // Use EX (seconds) to match KV store precision; no rounding to minute boundaries.
-    const ttlSeconds = Math.ceil(ttlMs / 1000);
     await this.redisCommand([
       "SET",
       key,
-      JSON.stringify(entry),
-      "EX",
-      ttlSeconds,
+      entry.count,
+      "PX",
+      Math.max(ttlMs, ONE),
     ]);
   }
 
@@ -174,22 +193,29 @@ export class RedisRateLimitStore implements RateLimitStore {
     key: string,
     windowMs: number,
   ): Promise<{ count: number; resetTime: number }> {
-    const now = Date.now();
-    const existing = await this.get(key);
+    const result = await this.redisCommand<[number, number]>([
+      "EVAL",
+      RedisRateLimitStore.INCREMENT_SCRIPT,
+      ONE,
+      key,
+      Math.max(windowMs, ONE),
+    ]);
 
-    if (!existing || now > existing.resetTime) {
-      const newEntry: RateLimitEntry = {
-        count: ONE,
-        resetTime: now + windowMs,
-      };
-      await this.set(key, newEntry, windowMs);
-      return newEntry;
+    if (!result || result.length < 2) {
+      throw new Error("[Rate Limit] Redis increment returned invalid response");
     }
 
-    existing.count += ONE;
-    const remainingTtl = existing.resetTime - now;
-    await this.set(key, existing, remainingTtl);
-    return existing;
+    const [count, ttlMs] = result;
+    if (!Number.isFinite(count) || !Number.isFinite(ttlMs)) {
+      throw new Error(
+        "[Rate Limit] Redis increment returned non-numeric values",
+      );
+    }
+
+    return {
+      count,
+      resetTime: Date.now() + Math.max(ttlMs, ZERO),
+    };
   }
 }
 
@@ -298,6 +324,27 @@ export function createRateLimitStore(): RateLimitStore {
 
   const kvUrl = process.env.KV_REST_API_URL;
   const kvToken = process.env.KV_REST_API_TOKEN;
+  const allowMemoryFallback = process.env.ALLOW_MEMORY_RATE_LIMIT === "true";
+  const isProduction = process.env.NODE_ENV === "production";
+
+  if (isProduction) {
+    if (kvUrl && kvToken) {
+      throw new Error(
+        "[Rate Limit] KV-only rate limiting is not allowed in production. Configure Upstash Redis or explicitly opt into ALLOW_MEMORY_RATE_LIMIT=true.",
+      );
+    }
+
+    if (!allowMemoryFallback) {
+      throw new Error(
+        "[Rate Limit] Production requires Upstash Redis. Set ALLOW_MEMORY_RATE_LIMIT=true only for an explicit degraded override.",
+      );
+    }
+
+    logger.warn(
+      "[Rate Limit] Falling back to in-memory rate limiting in production due to ALLOW_MEMORY_RATE_LIMIT=true.",
+    );
+    return new MemoryRateLimitStore();
+  }
 
   if (kvUrl && kvToken) {
     logger.info("[Rate Limit] Using Vercel KV store");

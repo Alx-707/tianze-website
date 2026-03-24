@@ -14,19 +14,25 @@ import { mapZodIssueToErrorKey } from "@/lib/contact-form-error-utils";
 import {
   CONTACT_FORM_CONFIG,
   createContactFormSchemaFromConfig,
+  type ContactFormFieldValues,
 } from "@/config/contact-form-config";
 import { TEN_MINUTES_MS } from "@/constants/time";
 
 const contactFormSchema = createContactFormSchemaFromConfig(
   CONTACT_FORM_CONFIG,
   contactFieldValidators,
-).extend({
-  turnstileToken: z.string().min(1),
-  submittedAt: z.string().min(1),
-  idempotencyKey: z.string().optional(),
+);
+
+const contactSubmissionSchema = contactFormSchema.extend({
+  turnstileToken: z.string().min(1, "Security verification required"),
+  submittedAt: z.string(),
 });
 
-export type ContactFormWithToken = z.infer<typeof contactFormSchema>;
+export type ContactFormWithToken = ContactFormFieldValues & {
+  turnstileToken: string;
+  submittedAt: string;
+  idempotencyKey?: string;
+};
 
 interface ContactValidationFailure {
   success: false;
@@ -81,7 +87,22 @@ export async function validateContactSubmission(
   body: unknown,
   clientIP: string,
 ): Promise<ContactValidationResult> {
-  const validationResult = contactFormSchema.safeParse(body);
+  if (
+    !body ||
+    typeof body !== "object" ||
+    typeof (body as { turnstileToken?: unknown }).turnstileToken !== "string" ||
+    (body as { turnstileToken: string }).turnstileToken.length === 0
+  ) {
+    return {
+      success: false,
+      errorCode: "TURNSTILE_MISSING_TOKEN",
+      error: "Security verification required",
+      details: null,
+      data: null,
+    };
+  }
+
+  const validationResult = contactSubmissionSchema.safeParse(body);
 
   if (!validationResult.success) {
     return {
@@ -93,17 +114,7 @@ export async function validateContactSubmission(
     };
   }
 
-  const formData = validationResult.data;
-  if (!formData.turnstileToken) {
-    return {
-      success: false,
-      errorCode: "TURNSTILE_MISSING_TOKEN",
-      error: "Security verification required",
-      details: null,
-      data: null,
-    };
-  }
-
+  const formData: ContactFormWithToken = validationResult.data;
   const timeValidationError = validateSubmissionTime(formData.submittedAt);
   if (timeValidationError) {
     return timeValidationError;

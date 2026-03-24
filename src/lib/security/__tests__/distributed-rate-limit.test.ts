@@ -218,18 +218,7 @@ describe("distributed-rate-limit", () => {
       expect(afterWindow.allowed).toBe(true);
     });
 
-    it("should use fail-open on store error", async () => {
-      // First, initialize the store normally
-      await checkDistributedRateLimit("init-user", "contact");
-
-      // Reset and mock an error scenario by using a different approach
-      // Since we can't easily inject errors into the memory store,
-      // we test the fail-open behavior indirectly by verifying
-      // the result structure includes degraded flag when errors occur
-
-      // For memory store, errors are unlikely, but the logic path
-      // for fail-open returns degraded: true. We verify the normal case
-      // does NOT have degraded flag
+    it("should keep non-degraded responses clean during normal operation", async () => {
       const normalResult = await checkDistributedRateLimit(
         "normal-user",
         "contact",
@@ -448,16 +437,19 @@ describe("distributed-rate-limit", () => {
     it("should have expected values for contact preset", () => {
       expect(RATE_LIMIT_PRESETS.contact.maxRequests).toBe(COUNT_FIVE);
       expect(RATE_LIMIT_PRESETS.contact.windowMs).toBe(MINUTE_MS);
+      expect(RATE_LIMIT_PRESETS.contact.failureMode).toBe("closed");
     });
 
     it("should have expected values for inquiry preset", () => {
       expect(RATE_LIMIT_PRESETS.inquiry.maxRequests).toBe(COUNT_TEN);
       expect(RATE_LIMIT_PRESETS.inquiry.windowMs).toBe(MINUTE_MS);
+      expect(RATE_LIMIT_PRESETS.inquiry.failureMode).toBe("closed");
     });
 
     it("should have expected values for subscribe preset", () => {
       expect(RATE_LIMIT_PRESETS.subscribe.maxRequests).toBe(COUNT_THREE);
       expect(RATE_LIMIT_PRESETS.subscribe.windowMs).toBe(MINUTE_MS);
+      expect(RATE_LIMIT_PRESETS.subscribe.failureMode).toBe("closed");
     });
 
     it("should have expected values for whatsapp preset", () => {

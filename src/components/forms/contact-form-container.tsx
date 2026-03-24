@@ -21,7 +21,6 @@ import { type ServerActionResult } from "@/lib/server-action-utils";
 import { generateIdempotencyKey } from "@/lib/idempotency-key";
 import { appendAttributionToFormData } from "@/lib/utm";
 import { LazyTurnstile } from "@/components/forms/lazy-turnstile";
-import { useOptimisticFormState } from "@/components/forms/use-optimistic-form-state";
 import { useRateLimit } from "@/components/forms/use-rate-limit";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -44,7 +43,6 @@ import {
 function getStatusConfig(
   status: FormSubmissionStatus,
   t: (key: string) => string,
-  optimisticMessage?: string,
 ): { className: string; message: string } | undefined {
   // 使用 switch 代替对象索引访问，避免 security/detect-object-injection
   switch (status) {
@@ -61,7 +59,7 @@ function getStatusConfig(
     case "submitting":
       return {
         className: "bg-blue-50 border-blue-200 text-blue-800",
-        message: optimisticMessage || t("submitting"),
+        message: t("submitting"),
       };
     case "idle":
     default:
@@ -75,23 +73,20 @@ function getStatusConfig(
 interface StatusMessageProps {
   status: FormSubmissionStatus;
   t: (_key: string) => string;
-  optimisticMessage?: string | undefined;
 }
 
-const StatusMessage = memo(
-  ({ status, t, optimisticMessage }: StatusMessageProps) => {
-    if (status === "idle") return null;
+const StatusMessage = memo(({ status, t }: StatusMessageProps) => {
+  if (status === "idle") return null;
 
-    const config = getStatusConfig(status, t, optimisticMessage);
-    if (!config) return null;
+  const config = getStatusConfig(status, t);
+  if (!config) return null;
 
-    return (
-      <div className={`rounded-md border p-4 ${config.className}`} role="alert">
-        {config.message}
-      </div>
-    );
-  },
-);
+  return (
+    <div className={`rounded-md border p-4 ${config.className}`} role="alert">
+      {config.message}
+    </div>
+  );
+});
 
 StatusMessage.displayName = "StatusMessage";
 
@@ -99,7 +94,6 @@ StatusMessage.displayName = "StatusMessage";
  * 计算提交状态的输入参数
  */
 interface SubmitStatusInput {
-  optimisticStatus: FormSubmissionStatus;
   isPending: boolean;
   stateSuccess: boolean | undefined;
   stateError: string | undefined;
@@ -109,7 +103,6 @@ interface SubmitStatusInput {
  * 计算提交状态，优先使用乐观更新状态
  */
 function computeSubmitStatus(input: SubmitStatusInput): FormSubmissionStatus {
-  if (input.optimisticStatus !== "idle") return input.optimisticStatus;
   if (input.isPending) return "submitting";
   if (input.stateSuccess) return "success";
   if (input.stateError) return "error";
@@ -117,7 +110,7 @@ function computeSubmitStatus(input: SubmitStatusInput): FormSubmissionStatus {
 }
 
 /**
- * 自定义Hook：管理联系表单状态和逻辑（React 19 useActionState + useOptimistic版本）
+ * 自定义 Hook：管理联系表单状态和逻辑。
  */
 function useContactForm() {
   // React 19 useActionState Hook替代手动状态管理
@@ -129,16 +122,15 @@ function useContactForm() {
   const idempotencyKeyRef = useRef<string | null>(null);
   const lastRecordedSuccessRef = useRef(false);
   const [isPendingTransition, startTransition] = useTransition();
+  const isSubmitting = isPending || isPendingTransition;
 
   // 使用提取的 hooks
   const { isRateLimited, setLastSubmissionTime } = useRateLimit();
-  const { optimisticState, setOptimisticState, optimisticMessage } =
-    useOptimisticFormState();
 
-  // 从Server Action状态中提取提交状态
+  // 直接从 Server Action 状态和 pending 标志推导提交状态，避免额外的
+  // 客户端 optimistic 状态机在失败路径上卡住。
   const submitStatus = computeSubmitStatus({
-    optimisticStatus: optimisticState.status,
-    isPending,
+    isPending: isSubmitting,
     stateSuccess: state?.success,
     stateError: state?.error,
   });
@@ -164,19 +156,12 @@ function useContactForm() {
     lastRecordedSuccessRef.current = Boolean(state?.success);
   }, [state?.success, state?.error, state?.errorCode, setLastSubmissionTime]);
 
-  // 创建增强的formAction，使用React 19原生乐观更新
+  // 创建增强的 formAction
   const enhancedFormAction = (formData: FormData) => {
     if (!turnstileToken) {
       logger.warn("Form submission attempted without Turnstile token");
       return;
     }
-
-    // 使用React 19原生useOptimistic进行乐观更新
-    // Note: message is omitted - StatusMessage uses t('submitting') as fallback
-    setOptimisticState({
-      status: "submitting",
-      timestamp: Date.now(),
-    });
 
     // 添加Turnstile token和提交时间戳到FormData
     formData.append("turnstileToken", turnstileToken);
@@ -198,13 +183,11 @@ function useContactForm() {
   return {
     state,
     formAction: enhancedFormAction,
-    isPending: isPending || isPendingTransition,
+    isPending: isSubmitting,
     submitStatus,
     turnstileToken,
     setTurnstileToken,
     isRateLimited,
-    optimisticState,
-    optimisticMessage,
   };
 }
 
@@ -414,7 +397,6 @@ export function ContactFormContainer() {
     turnstileToken,
     setTurnstileToken,
     isRateLimited,
-    optimisticMessage,
   } = useContactForm();
 
   const submitDisabledReason = Boolean(
@@ -428,11 +410,7 @@ export function ContactFormContainer() {
         onSubmit={handleSubmit}
         className="space-y-6 p-6"
       >
-        <StatusMessage
-          status={submitStatus}
-          t={t}
-          optimisticMessage={optimisticMessage}
-        />
+        <StatusMessage status={submitStatus} t={t} />
 
         <ErrorDisplay state={state} translateForm={t} translateApi={tApi} />
 
