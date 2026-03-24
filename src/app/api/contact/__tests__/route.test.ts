@@ -334,7 +334,9 @@ describe("Contact API Route", () => {
         data: validFormData,
       });
 
-      // Mock processFormSubmission to handle service unavailability gracefully
+      // Mock processFormSubmission returning success but missing referenceId
+      // This is an invariant violation — the pipeline should never report
+      // success without a referenceId, so the route treats it as a 500 error.
       const { processFormSubmission } =
         await import("@/lib/contact-form-processing");
       vi.mocked(processFormSubmission).mockResolvedValue({
@@ -361,11 +363,8 @@ describe("Contact API Route", () => {
       const response = await POST(request);
       const data = await response.json();
 
-      expect(response.status).toBe(200);
-      expect(data.success).toBe(true);
-      // 应该仍然成功，但没有调用外部服务
-      expect(mockAirtableService.createContact).not.toHaveBeenCalled();
-      expect(mockResendService.sendContactFormEmail).not.toHaveBeenCalled();
+      expect(response.status).toBe(500);
+      expect(data.success).toBe(false);
     });
 
     it("应该处理JSON解析错误", async () => {

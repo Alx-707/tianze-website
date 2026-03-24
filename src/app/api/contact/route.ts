@@ -8,6 +8,7 @@ import {
   createApiErrorResponse,
   createApiSuccessResponse,
 } from "@/lib/api/api-response";
+import { createLeadSuccessPayload } from "@/lib/api/lead-route-response";
 import {
   applyCorsHeaders,
   createCorsPreflightResponse,
@@ -84,12 +85,12 @@ const POST_RATE_LIMITED = withRateLimit(
             );
           }
 
-          return {
-            success: true as const,
-            data: {
-              referenceId: submissionResult.referenceId,
-            },
-          };
+          if (!submissionResult.referenceId) {
+            throw new Error(
+              "referenceId missing on successful contact submission",
+            );
+          }
+          return createLeadSuccessPayload(submissionResult.referenceId);
         } catch (error) {
           logger.error("Contact form submission failed", {
             error: error instanceof Error ? error.message : "Unknown error",
