@@ -248,6 +248,10 @@ describe("Contact API Route - GET Tests", () => {
 
       expect(mockLogger.warn).toHaveBeenCalledWith(
         expect.stringContaining("Unauthorized access attempt"),
+        expect.objectContaining({
+          surface: "lead-family",
+          requestId: expect.any(String),
+        }),
       );
     });
 

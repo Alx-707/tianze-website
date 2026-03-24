@@ -47,6 +47,10 @@ export type ContactValidationResult =
   | ContactValidationFailure
   | ContactValidationSuccess;
 
+interface ProcessFormSubmissionOptions {
+  requestId?: string;
+}
+
 function createExpiredSubmissionFailure(): ContactValidationFailure {
   return {
     success: false,
@@ -144,7 +148,10 @@ function mapSubjectToEnum(
 /**
  * Process a contact form submission via the unified Lead Pipeline.
  */
-export async function processFormSubmission(formData: ContactFormWithToken) {
+export async function processFormSubmission(
+  formData: ContactFormWithToken,
+  options: ProcessFormSubmissionOptions = {},
+) {
   const fullName = [formData.firstName, formData.lastName]
     .filter(Boolean)
     .join(" ")
@@ -162,7 +169,9 @@ export async function processFormSubmission(formData: ContactFormWithToken) {
     marketingConsent: formData.marketingConsent ?? false,
   };
 
-  const result = await processLead(leadInput);
+  const result = await processLead(leadInput, {
+    ...(options.requestId ? { requestId: options.requestId } : {}),
+  });
 
   if (result.success) {
     return {
@@ -176,6 +185,7 @@ export async function processFormSubmission(formData: ContactFormWithToken) {
   logger.error("Contact form submission failed via processLead", {
     error: result.error,
     email: sanitizeEmail(formData.email),
+    ...(options.requestId ? { requestId: options.requestId } : {}),
   });
 
   throw new Error("Failed to process form submission");

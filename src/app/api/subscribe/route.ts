@@ -9,6 +9,12 @@ import {
   createLeadSuccessPayload,
   validateLeadTurnstileToken,
 } from "@/lib/api/lead-route-response";
+import {
+  applyRequestObservability,
+  getRequestObservability,
+  withObservabilityContext,
+} from "@/lib/api/request-observability";
+import { recordApiResponseSignal } from "@/lib/observability/api-signals";
 import { readAndHashJsonBody } from "@/lib/api/read-and-hash-body";
 import {
   withRateLimit,
@@ -24,11 +30,16 @@ import { API_ERROR_CODES } from "@/constants/api-error-codes";
 /**
  * Create success response for newsletter subscription
  */
-function createSuccessResponse(result: LeadResult, email: string) {
+function createSuccessResponse(
+  result: LeadResult,
+  email: string,
+  observability: ReturnType<typeof getRequestObservability>,
+) {
   if (process.env.NODE_ENV !== "production") {
     logger.info("Newsletter subscription successful", {
       referenceId: result.referenceId,
       email: sanitizeEmail(email),
+      ...withObservabilityContext(observability),
     });
   }
 
@@ -41,8 +52,14 @@ function createSuccessResponse(result: LeadResult, email: string) {
 /**
  * Create error response for failed subscription
  */
-function createErrorResponse(result: LeadResult): NextResponse {
-  logger.warn("Newsletter subscription failed", { error: result.error });
+function createErrorResponse(
+  result: LeadResult,
+  observability: ReturnType<typeof getRequestObservability>,
+): NextResponse {
+  logger.warn("Newsletter subscription failed", {
+    error: result.error,
+    ...withObservabilityContext(observability),
+  });
 
   return createLeadFailureResponse({
     result,
@@ -59,6 +76,7 @@ function handlePost(
   { clientIP }: RateLimitContext,
 ): Promise<NextResponse> {
   return (async () => {
+    const observability = getRequestObservability(request, "lead-family");
     const parsedBody = await readAndHashJsonBody<{
       email?: string;
       pageType?: string;
@@ -103,11 +121,13 @@ function handlePost(
         };
 
         // Process via unified Lead Pipeline
-        const result = await processLead(leadInput);
+        const result = await processLead(leadInput, {
+          requestId: observability.requestId,
+        });
 
         return result.success
-          ? createSuccessResponse(result, email)
-          : createErrorResponse(result);
+          ? createSuccessResponse(result, email, observability)
+          : createErrorResponse(result, observability);
       },
       {
         required: true,
@@ -120,8 +140,21 @@ function handlePost(
 const POST_RATE_LIMITED = withRateLimit("subscribe", handlePost);
 
 export async function POST(request: NextRequest) {
+  const startTime = Date.now();
+  const observability = getRequestObservability(request, "lead-family");
   const response = await POST_RATE_LIMITED(request);
-  return applyCorsHeaders({ request, response });
+  const enrichedResponse = applyRequestObservability(
+    applyCorsHeaders({ request, response }),
+    observability,
+  );
+  await recordApiResponseSignal({
+    context: observability,
+    response: enrichedResponse,
+    name: "subscribe.post",
+    route: "/api/subscribe",
+    latencyMs: Date.now() - startTime,
+  });
+  return enrichedResponse;
 }
 
 // 处理 OPTIONS 请求 (CORS)

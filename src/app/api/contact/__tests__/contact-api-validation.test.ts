@@ -253,6 +253,7 @@ describe("contact-api-validation", () => {
           email: "john@example.com",
           fullName: "John Doe",
         }),
+        expect.any(Object),
       );
     });
 
@@ -268,6 +269,7 @@ describe("contact-api-validation", () => {
         expect.objectContaining({
           fullName: "John",
         }),
+        expect.any(Object),
       );
     });
 
@@ -296,6 +298,7 @@ describe("contact-api-validation", () => {
         expect.objectContaining({
           subject: "product_inquiry",
         }),
+        expect.any(Object),
       );
     });
 
@@ -311,6 +314,7 @@ describe("contact-api-validation", () => {
         expect.objectContaining({
           subject: "distributor",
         }),
+        expect.any(Object),
       );
     });
 
@@ -326,6 +330,7 @@ describe("contact-api-validation", () => {
         expect.objectContaining({
           subject: "oem_odm",
         }),
+        expect.any(Object),
       );
     });
 
@@ -341,6 +346,7 @@ describe("contact-api-validation", () => {
         expect.objectContaining({
           subject: "oem_odm",
         }),
+        expect.any(Object),
       );
     });
 
@@ -356,6 +362,7 @@ describe("contact-api-validation", () => {
         expect.objectContaining({
           subject: "other",
         }),
+        expect.any(Object),
       );
     });
 
@@ -371,6 +378,7 @@ describe("contact-api-validation", () => {
         expect.objectContaining({
           subject: "other",
         }),
+        expect.any(Object),
       );
     });
   });

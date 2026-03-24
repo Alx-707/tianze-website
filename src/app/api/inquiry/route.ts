@@ -15,6 +15,12 @@ import {
   createLeadSuccessPayload,
   validateLeadTurnstileToken,
 } from "@/lib/api/lead-route-response";
+import {
+  applyRequestObservability,
+  getRequestObservability,
+  withObservabilityContext,
+} from "@/lib/api/request-observability";
+import { recordApiResponseSignal } from "@/lib/observability/api-signals";
 import { readAndHashJsonBody } from "@/lib/api/read-and-hash-body";
 import {
   withRateLimit,
@@ -31,11 +37,17 @@ import { logger, sanitizeIP } from "@/lib/logger";
 import { API_ERROR_CODES } from "@/constants/api-error-codes";
 import { HTTP_BAD_REQUEST, HTTP_INTERNAL_ERROR } from "@/constants";
 
+interface InquiryResponseContext {
+  clientIP: string;
+  processingTime: number;
+  observability: ReturnType<typeof getRequestObservability>;
+}
+
 function createSuccessPayload(
   result: LeadResult,
-  clientIP: string,
-  processingTime: number,
+  context: InquiryResponseContext,
 ) {
+  const { clientIP, processingTime, observability } = context;
   if (process.env.NODE_ENV !== "production") {
     logger.info("Product inquiry submitted successfully", {
       referenceId: result.referenceId,
@@ -43,6 +55,7 @@ function createSuccessPayload(
       processingTime,
       emailSent: result.emailSent,
       recordCreated: result.recordCreated,
+      ...withObservabilityContext(observability),
     });
   }
 
@@ -57,13 +70,14 @@ function createSuccessPayload(
  */
 function createErrorResponse(
   result: LeadResult,
-  clientIP: string,
-  processingTime: number,
+  context: InquiryResponseContext,
 ): NextResponse {
+  const { clientIP, processingTime, observability } = context;
   logger.warn("Product inquiry submission failed", {
     error: result.error,
     ip: sanitizeIP(clientIP),
     processingTime,
+    ...withObservabilityContext(observability),
   });
 
   return createLeadFailureResponse({
@@ -98,6 +112,7 @@ function validateLeadData(
 const POST_RATE_LIMITED = withRateLimit(
   "inquiry",
   async (request: NextRequest, { clientIP }: RateLimitContext) => {
+    const observability = getRequestObservability(request, "lead-family");
     const parsedBody = await readAndHashJsonBody<{
       turnstileToken?: string;
       [key: string]: unknown;
@@ -139,20 +154,29 @@ const POST_RATE_LIMITED = withRateLimit(
           });
           if (turnstileError) return turnstileError;
 
-          const result = await processLead({
-            ...leadData,
-          });
+          const result = await processLead(
+            {
+              ...leadData,
+            },
+            { requestId: observability.requestId },
+          );
           const processingTime = Date.now() - startTime;
+          const responseContext = {
+            clientIP,
+            processingTime,
+            observability,
+          };
 
           return result.success
-            ? createSuccessPayload(result, clientIP, processingTime)
-            : createErrorResponse(result, clientIP, processingTime);
+            ? createSuccessPayload(result, responseContext)
+            : createErrorResponse(result, responseContext);
         } catch (error) {
           logger.error("Product inquiry submission failed unexpectedly", {
             error: error instanceof Error ? error.message : "Unknown error",
             stack: error instanceof Error ? error.stack : undefined,
             ip: sanitizeIP(clientIP),
             processingTime: Date.now() - startTime,
+            ...withObservabilityContext(observability),
           });
 
           return createApiErrorResponse(
@@ -170,8 +194,21 @@ const POST_RATE_LIMITED = withRateLimit(
 );
 
 export async function POST(request: NextRequest) {
+  const startTime = Date.now();
+  const observability = getRequestObservability(request, "lead-family");
   const response = await POST_RATE_LIMITED(request);
-  return applyCorsHeaders({ request, response });
+  const enrichedResponse = applyRequestObservability(
+    applyCorsHeaders({ request, response }),
+    observability,
+  );
+  await recordApiResponseSignal({
+    context: observability,
+    response: enrichedResponse,
+    name: "inquiry.post",
+    route: "/api/inquiry",
+    latencyMs: Date.now() - startTime,
+  });
+  return enrichedResponse;
 }
 
 /**

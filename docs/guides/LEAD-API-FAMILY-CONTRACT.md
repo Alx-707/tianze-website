@@ -5,6 +5,7 @@ This contract covers the write-path family:
 - `POST /api/contact`
 - `POST /api/inquiry`
 - `POST /api/subscribe`
+- `src/lib/api/lead-route-response.ts`
 
 It does not cover:
 - `GET /api/contact` admin stats
@@ -39,6 +40,12 @@ All failed write-path family responses should communicate failure through:
 
 HTTP status communicates transport/error class.
 `errorCode` communicates the machine-readable product meaning.
+
+### Observability Headers
+- Write-path family responses should expose:
+  - `x-request-id`
+  - `x-observability-surface: lead-family`
+- If the caller provides `x-request-id`, the response should preserve it.
 
 ### Idempotency
 - Public write-path family routes should require `Idempotency-Key`.

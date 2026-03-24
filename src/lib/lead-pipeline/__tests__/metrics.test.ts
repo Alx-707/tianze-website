@@ -12,6 +12,10 @@ import {
   METRIC_SERVICES,
   METRIC_TYPES,
 } from "../metrics";
+import {
+  getSystemObservabilitySnapshot,
+  resetSystemObservability,
+} from "@/lib/observability/system-observability";
 
 vi.mock("@/lib/logger", () => ({
   logger: {
@@ -101,6 +105,7 @@ describe("LeadPipelineMetrics", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    resetSystemObservability();
     metrics = new LeadPipelineMetrics();
   });
 
@@ -108,7 +113,7 @@ describe("LeadPipelineMetrics", () => {
     it("should emit success metric with latency", async () => {
       const { logger } = await import("@/lib/logger");
 
-      metrics.recordSuccess(METRIC_SERVICES.RESEND, 150);
+      metrics.recordSuccess(METRIC_SERVICES.RESEND, 150, "metric-request-1");
 
       expect(logger.info).toHaveBeenCalledWith(
         "Lead pipeline metric",
@@ -119,6 +124,16 @@ describe("LeadPipelineMetrics", () => {
           latencyMs: 150,
         }),
       );
+
+      expect(getSystemObservabilitySnapshot().aggregates).toEqual([
+        expect.objectContaining({
+          surface: "lead-pipeline",
+          kind: "pipeline_metric",
+          name: METRIC_SERVICES.RESEND,
+          success: 1,
+          lastRequestId: "metric-request-1",
+        }),
+      ]);
     });
 
     it("should reset failure count on success", async () => {
@@ -315,6 +330,7 @@ describe("LeadPipelineMetrics", () => {
         resend: { success: true, latencyMs: 200 },
         airtable: { success: true, latencyMs: 300 },
         overallSuccess: true,
+        requestId: "summary-request-1",
         timestamp: "2025-01-01T00:00:00.000Z",
       });
 
@@ -326,6 +342,16 @@ describe("LeadPipelineMetrics", () => {
           overallSuccess: true,
         }),
       );
+
+      expect(getSystemObservabilitySnapshot().aggregates).toEqual([
+        expect.objectContaining({
+          surface: "lead-pipeline",
+          kind: "pipeline_summary",
+          name: "contact",
+          success: 1,
+          lastRequestId: "summary-request-1",
+        }),
+      ]);
     });
 
     it("should log failure summary with error level", async () => {

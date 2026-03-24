@@ -11,363 +11,175 @@
  *
  * Body:
  * {
- *   "domain": "i18n" | "content" | "product",
+ *   "domain": "i18n" | "content" | "product" | "all",
  *   "locale"?: "en" | "zh",
  *   "entity"?: string,
  *   "identifier"?: string
  * }
- *
- * @see src/lib/cache/invalidate.ts - Core invalidation utilities
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
-import type { Locale } from "@/types/content.types";
-import { createValidationErrorResponse } from "@/lib/api/validation-error-response";
 import {
-  CACHE_DOMAINS,
-  invalidateContent,
-  invalidateDomain,
-  invalidateI18n,
-  invalidateLocale,
-  invalidateProduct,
-} from "@/lib/cache";
+  applyRequestObservability,
+  createSyntheticObservability,
+  getRequestObservability,
+  withObservabilityContext,
+} from "@/lib/api/request-observability";
+import { recordApiResponseSignal } from "@/lib/observability/api-signals";
+import {
+  createCacheHealthErrorResponse,
+  createCacheInvalidationResponse,
+} from "@/lib/api/cache-health-response";
+import {
+  VALID_CACHE_DOMAINS,
+  VALID_CACHE_ENTITIES,
+  VALID_CACHE_LOCALES,
+  processCacheInvalidation,
+  type InvalidationRequest,
+  type InvalidationResult,
+} from "@/lib/cache/invalidation-policy";
+import {
+  checkCacheInvalidationRateLimit,
+  getPostAuthInvalidationKey,
+  getPreAuthInvalidationKey,
+  parseCacheInvalidationRequestBody,
+  validateCacheInvalidationApiKey,
+} from "@/lib/cache/invalidation-guards";
 import { logger } from "@/lib/logger";
-import { constantTimeCompare } from "@/lib/security-crypto";
-import {
-  checkDistributedRateLimit,
-  createRateLimitHeaders,
-} from "@/lib/security/distributed-rate-limit";
-import {
-  getApiKeyPriorityKey,
-  getIPKey,
-} from "@/lib/security/rate-limit-key-strategies";
 import { API_ERROR_CODES } from "@/constants/api-error-codes";
-import {
-  HTTP_INTERNAL_ERROR,
-  HTTP_OK,
-  HTTP_SERVICE_UNAVAILABLE,
-  HTTP_TOO_MANY_REQUESTS,
-} from "@/constants";
+import { HTTP_INTERNAL_ERROR } from "@/constants";
 
-const VALID_LOCALES = ["en", "zh"] as const;
-const VALID_DOMAINS = ["i18n", "content", "product", "all"] as const;
-const VALID_ENTITIES = [
-  "critical",
-  "deferred",
-  "blog",
-  "page",
-  "detail",
-  "categories",
-  "featured",
-] as const;
+// Keep these exported-like constants in route scope for GET usage metadata.
+const VALID_LOCALES = VALID_CACHE_LOCALES;
+const VALID_DOMAINS = VALID_CACHE_DOMAINS;
+const VALID_ENTITIES = VALID_CACHE_ENTITIES;
 
-const cacheInvalidationSchema = z
-  .object({
-    domain: z.enum(VALID_DOMAINS, {
-      message: `domain must be one of: ${VALID_DOMAINS.join(", ")}`,
-    }),
-    locale: z.enum(VALID_LOCALES).optional(),
-    entity: z.enum(VALID_ENTITIES).optional(),
-    identifier: z.string().min(1).max(256).optional(),
-  })
-  .strict();
+type ProcessResult = InvalidationResult | { errorCode: string; status: number };
 
-type InvalidationRequest = z.infer<typeof cacheInvalidationSchema>;
-
-function isValidLocale(locale: unknown): locale is Locale {
-  return typeof locale === "string" && VALID_LOCALES.includes(locale as Locale);
-}
-
-type ApiKeyValidationResult =
-  | { ok: true }
-  | { ok: false; status: number; errorCode: string };
-
-function validateApiKey(request: NextRequest): ApiKeyValidationResult {
-  const secret = process.env.CACHE_INVALIDATION_SECRET;
-
-  // In development, allow without secret if not set
-  if (!secret && process.env.NODE_ENV === "development") {
-    return { ok: true };
-  }
-
-  if (!secret) {
-    logger.error("CACHE_INVALIDATION_SECRET not configured");
-    return {
-      ok: false,
-      status: HTTP_SERVICE_UNAVAILABLE,
-      errorCode: API_ERROR_CODES.SERVICE_UNAVAILABLE,
-    };
-  }
-
-  const authHeader = request.headers.get("authorization");
-  if (!authHeader?.startsWith("Bearer ")) {
-    return { ok: false, status: 401, errorCode: API_ERROR_CODES.UNAUTHORIZED };
-  }
-
-  const token = authHeader.slice(7);
-  return constantTimeCompare(token, secret)
-    ? { ok: true }
-    : { ok: false, status: 401, errorCode: API_ERROR_CODES.UNAUTHORIZED };
-}
-
-interface InvalidationResult {
-  success: boolean;
-  invalidatedTags: string[];
-  errors: string[];
-}
-
-function handleI18nInvalidation(
-  locale: Locale | undefined,
-  entity: string | undefined,
-): InvalidationResult {
-  if (locale && isValidLocale(locale)) {
-    if (entity === "critical") return invalidateI18n.critical(locale);
-    if (entity === "deferred") return invalidateI18n.deferred(locale);
-    return invalidateI18n.locale(locale);
-  }
-  return invalidateI18n.all();
-}
-
-function handleContentInvalidation(
-  locale: Locale,
-  entity: string | undefined,
-  identifier: string | undefined,
-): InvalidationResult {
-  if (entity === "blog" && identifier) {
-    return invalidateContent.blogPost(identifier, locale);
-  }
-  if (entity === "page" && identifier) {
-    return invalidateContent.page(identifier, locale);
-  }
-  return invalidateContent.locale(locale);
-}
-
-function handleProductInvalidation(
-  locale: Locale,
-  entity: string | undefined,
-  identifier: string | undefined,
-): InvalidationResult {
-  if (entity === "detail" && identifier) {
-    return invalidateProduct.detail(identifier, locale);
-  }
-  if (entity === "categories") return invalidateProduct.categories(locale);
-  if (entity === "featured") return invalidateProduct.featured(locale);
-  return invalidateProduct.locale(locale);
-}
-
-function handleAllInvalidation(locale: Locale | undefined): InvalidationResult {
-  if (locale && isValidLocale(locale)) {
-    return invalidateLocale(locale);
-  }
-  const results = [
-    invalidateDomain(CACHE_DOMAINS.I18N),
-    invalidateDomain(CACHE_DOMAINS.CONTENT),
-    invalidateDomain(CACHE_DOMAINS.PRODUCT),
-  ];
-  return {
-    success: results.every((r) => r.errors.length === 0),
-    invalidatedTags: results.flatMap((r) => r.invalidatedTags),
-    errors: results.flatMap((r) => r.errors),
-  };
-}
-
-type RateLimitPresetType = "cacheInvalidatePreAuth" | "cacheInvalidate";
-
-async function checkRateLimitAndRespond(
-  identifier: string,
-  preset: RateLimitPresetType,
-  logContext: string,
-): Promise<NextResponse | null> {
-  const rateLimitResult = await checkDistributedRateLimit(identifier, preset);
-  if (!rateLimitResult.allowed) {
-    const isStorageFailure = rateLimitResult.deniedReason === "storage_failure";
-    logger.warn(`Cache invalidation ${logContext} rate limit exceeded`, {
-      keyPrefix: identifier.slice(0, 8),
-      retryAfter: rateLimitResult.retryAfter,
-      deniedReason: rateLimitResult.deniedReason,
-    });
-    return NextResponse.json(
-      {
-        success: false,
-        errorCode: isStorageFailure
-          ? API_ERROR_CODES.SERVICE_UNAVAILABLE
-          : API_ERROR_CODES.RATE_LIMIT_EXCEEDED,
-      },
-      {
-        status: isStorageFailure
-          ? HTTP_SERVICE_UNAVAILABLE
-          : HTTP_TOO_MANY_REQUESTS,
-        headers: createRateLimitHeaders(rateLimitResult),
-      },
-    );
-  }
-  return null;
-}
-
-async function parseRequestBody(
-  request: NextRequest,
-): Promise<InvalidationRequest | NextResponse> {
-  let rawBody: unknown;
-  try {
-    rawBody = await request.json();
-  } catch {
-    return NextResponse.json(
-      { success: false, errorCode: API_ERROR_CODES.INVALID_JSON_BODY },
-      { status: 400 },
-    );
-  }
-
-  const parseResult = cacheInvalidationSchema.safeParse(rawBody);
-  if (!parseResult.success) {
-    return createValidationErrorResponse(
-      parseResult.error,
-      API_ERROR_CODES.INVALID_JSON_BODY,
-    );
-  }
-
-  return parseResult.data;
-}
-
-function buildSuccessResponse(result: InvalidationResult): NextResponse {
-  return NextResponse.json(
-    {
-      success: result.success,
-      errorCode: result.success
-        ? API_ERROR_CODES.CACHE_INVALIDATED
-        : API_ERROR_CODES.CACHE_INVALIDATION_FAILED,
-      invalidatedTags: result.invalidatedTags,
-      ...(result.errors.length > 0 && { errors: result.errors }),
-    },
-    { status: result.success ? HTTP_OK : HTTP_INTERNAL_ERROR },
-  );
+function processDomainInvalidation(
+  options: InvalidationRequest,
+): ProcessResult {
+  return processCacheInvalidation(options);
 }
 
 async function handleCacheInvalidation(
   request: NextRequest,
+  observability: ReturnType<typeof getRequestObservability>,
 ): Promise<NextResponse> {
-  const body = await parseRequestBody(request);
+  const body = await parseCacheInvalidationRequestBody(request);
   if (body instanceof NextResponse) return body;
 
-  const { domain, locale, entity, identifier } = body;
-  const result = processDomainInvalidation({
-    domain,
-    locale,
-    entity,
-    identifier,
-  });
+  const result = processDomainInvalidation(body);
 
   if ("errorCode" in result) {
-    return NextResponse.json(
-      { success: false, errorCode: result.errorCode },
-      { status: result.status },
-    );
+    return createCacheHealthErrorResponse(result.errorCode, result.status);
   }
 
   logger.info("Cache invalidation triggered", {
-    domain,
-    locale,
-    entity,
-    identifier,
+    domain: body.domain,
+    locale: body.locale,
+    entity: body.entity,
+    identifier: body.identifier,
     result,
+    ...withObservabilityContext(observability),
   });
 
-  return buildSuccessResponse(result);
+  return createCacheInvalidationResponse(result);
 }
 
 export async function POST(request: NextRequest) {
-  // 1. Pre-auth rate limit (brute force protection)
-  const preAuthRateLimitKey = getIPKey(request);
-  const preAuthBlock = await checkRateLimitAndRespond(
-    preAuthRateLimitKey,
+  const startTime = Date.now();
+  const observability = getRequestObservability(request, "cache-health");
+  const preAuthBlock = await checkCacheInvalidationRateLimit(
+    getPreAuthInvalidationKey(request),
     "cacheInvalidatePreAuth",
     "pre-auth",
   );
-  if (preAuthBlock) return preAuthBlock;
+  if (preAuthBlock) {
+    return applyRequestObservability(preAuthBlock, observability);
+  }
 
-  // 2. Auth check
-  const authResult = validateApiKey(request);
+  const authResult = validateCacheInvalidationApiKey(request);
   if (!authResult.ok) {
-    return NextResponse.json(
-      { success: false, errorCode: authResult.errorCode },
-      { status: authResult.status },
+    return applyRequestObservability(
+      createCacheHealthErrorResponse(authResult.errorCode, authResult.status),
+      observability,
     );
   }
 
-  // 3. Post-auth rate limit (defense in depth)
-  const postAuthRateLimitKey = getApiKeyPriorityKey(request);
-  const postAuthBlock = await checkRateLimitAndRespond(
-    postAuthRateLimitKey,
+  const postAuthBlock = await checkCacheInvalidationRateLimit(
+    getPostAuthInvalidationKey(request),
     "cacheInvalidate",
     "post-auth",
   );
-  if (postAuthBlock) return postAuthBlock;
+  if (postAuthBlock) {
+    return applyRequestObservability(postAuthBlock, observability);
+  }
 
   try {
-    return await handleCacheInvalidation(request);
-  } catch (error) {
-    logger.error("Cache invalidation failed", error);
-    return NextResponse.json(
-      { success: false, errorCode: API_ERROR_CODES.CACHE_INVALIDATION_FAILED },
-      { status: 500 },
+    const response = applyRequestObservability(
+      await handleCacheInvalidation(request, observability),
+      observability,
     );
-  }
-}
-
-type ProcessResult = InvalidationResult | { errorCode: string; status: number };
-
-interface ProcessOptions {
-  domain: string;
-  locale: Locale | undefined;
-  entity: string | undefined;
-  identifier: string | undefined;
-}
-
-function processDomainInvalidation(options: ProcessOptions): ProcessResult {
-  const { domain, locale, entity, identifier } = options;
-  switch (domain) {
-    case "i18n":
-      return handleI18nInvalidation(locale, entity);
-
-    case "content":
-      if (!locale || !isValidLocale(locale)) {
-        return {
-          errorCode: API_ERROR_CODES.CACHE_LOCALE_REQUIRED,
-          status: 400,
-        };
-      }
-      return handleContentInvalidation(locale, entity, identifier);
-
-    case "product":
-      if (!locale || !isValidLocale(locale)) {
-        return {
-          errorCode: API_ERROR_CODES.CACHE_LOCALE_REQUIRED,
-          status: 400,
-        };
-      }
-      return handleProductInvalidation(locale, entity, identifier);
-
-    case "all":
-      return handleAllInvalidation(locale);
-
-    default:
-      return { errorCode: API_ERROR_CODES.CACHE_INVALID_DOMAIN, status: 400 };
-  }
-}
-
-export function GET() {
-  return NextResponse.json({
-    message: "Cache Invalidation API",
-    usage: {
-      method: "POST",
-      authentication: "Bearer <CACHE_INVALIDATION_SECRET>",
-      body: {
-        domain: "i18n | content | product | all",
-        locale: "en | zh (optional for i18n, required for others)",
-        entity:
-          "critical | deferred | blog | page | detail | categories | featured",
-        identifier: "slug or specific identifier",
+    await recordApiResponseSignal({
+      context: observability,
+      response,
+      name: "cache.invalidate.post",
+      route: "/api/cache/invalidate",
+      latencyMs: Date.now() - startTime,
+    });
+    return response;
+  } catch (error) {
+    logger.error(
+      "Cache invalidation failed",
+      withObservabilityContext(observability, { error }),
+    );
+    const response = applyRequestObservability(
+      createCacheHealthErrorResponse(
+        API_ERROR_CODES.CACHE_INVALIDATION_FAILED,
+        HTTP_INTERNAL_ERROR,
+      ),
+      observability,
+    );
+    await recordApiResponseSignal({
+      context: observability,
+      response,
+      name: "cache.invalidate.post",
+      route: "/api/cache/invalidate",
+      latencyMs: Date.now() - startTime,
+      meta: {
+        path: "unexpected-error",
       },
-    },
-  });
+    });
+    return response;
+  }
+}
+
+export function GET(request?: NextRequest) {
+  const observability = request
+    ? getRequestObservability(request, "cache-health")
+    : createSyntheticObservability("cache-health");
+  const response = applyRequestObservability(
+    NextResponse.json({
+      message: "Cache Invalidation API",
+      usage: {
+        method: "POST",
+        authentication: "Bearer <CACHE_INVALIDATION_SECRET>",
+        body: {
+          domain: VALID_DOMAINS.join(" | "),
+          locale: `${VALID_LOCALES.join(" | ")} (optional for i18n/all, required for content/product)`,
+          entity: VALID_ENTITIES.join(" | "),
+          identifier: "slug or specific identifier",
+        },
+      },
+    }),
+    observability,
+  );
+  recordApiResponseSignal({
+    context: observability,
+    response,
+    name: "cache.invalidate.get",
+    route: "/api/cache/invalidate",
+  }).catch(() => undefined);
+  return response;
 }

@@ -156,6 +156,9 @@ describe("/api/inquiry — integration (protection chain)", () => {
           type: "PRODUCT",
           email: "bob@example.com",
         }),
+        expect.objectContaining({
+          requestId: expect.any(String),
+        }),
       );
     });
 

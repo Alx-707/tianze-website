@@ -4,6 +4,10 @@
  */
 
 import { logger } from "@/lib/logger";
+import {
+  createSystemSignal,
+  recordSystemSignal,
+} from "@/lib/observability/system-observability";
 import { COUNT_FIVE, TEN_SECONDS_MS } from "@/constants";
 
 /**
@@ -49,6 +53,7 @@ export interface ServiceMetric {
   type: MetricType;
   latencyMs: number;
   timestamp: string;
+  requestId?: string;
   errorType?: ErrorType;
   errorMessage?: string;
 }
@@ -60,6 +65,7 @@ export interface PipelineSummary {
   leadId: string;
   leadType: string;
   totalLatencyMs: number;
+  requestId?: string;
   resend: { success: boolean; latencyMs: number; errorType?: ErrorType };
   airtable: { success: boolean; latencyMs: number; errorType?: ErrorType };
   overallSuccess: boolean;
@@ -166,6 +172,26 @@ export class LeadPipelineMetrics {
       ...metric,
     };
 
+    recordSystemSignal(
+      createSystemSignal({
+        kind: "pipeline_metric",
+        surface: "lead-pipeline",
+        name: metric.service,
+        outcome: metric.type === METRIC_TYPES.SUCCESS ? "success" : "failure",
+        ...(metric.requestId !== undefined
+          ? { requestId: metric.requestId }
+          : {}),
+        latencyMs: metric.latencyMs,
+        ...(metric.errorType !== undefined
+          ? { errorType: metric.errorType }
+          : {}),
+        meta: {
+          metricType: metric.type,
+          errorMessage: metric.errorMessage,
+        },
+      }),
+    );
+
     if (metric.type === METRIC_TYPES.SUCCESS) {
       logger.info("Lead pipeline metric", metricLog);
       this.resetFailureCount(metric.service);
@@ -178,22 +204,29 @@ export class LeadPipelineMetrics {
   /**
    * Record a success metric with latency
    */
-  recordSuccess(service: MetricService, latencyMs: number): void {
+  recordSuccess(
+    service: MetricService,
+    latencyMs: number,
+    requestId?: string,
+  ): void {
     this.emitMetric({
       service,
       type: METRIC_TYPES.SUCCESS,
       latencyMs,
       timestamp: new Date().toISOString(),
+      ...(requestId !== undefined ? { requestId } : {}),
     });
   }
 
   /**
    * Record a failure metric with error details
    */
+  // eslint-disable-next-line max-params -- requestId is part of the correlation envelope for failure metrics
   recordFailure(
     service: MetricService,
     latencyMs: number,
     error: Error | unknown,
+    requestId?: string,
   ): void {
     const errorType = categorizeError(error);
     const errorMessage = error instanceof Error ? error.message : String(error);
@@ -203,6 +236,7 @@ export class LeadPipelineMetrics {
       type: METRIC_TYPES.FAILURE,
       latencyMs,
       timestamp: new Date().toISOString(),
+      ...(requestId !== undefined ? { requestId } : {}),
       errorType,
       errorMessage,
     });
@@ -217,6 +251,24 @@ export class LeadPipelineMetrics {
       event: "lead_pipeline_summary",
       ...summary,
     };
+
+    recordSystemSignal(
+      createSystemSignal({
+        kind: "pipeline_summary",
+        surface: "lead-pipeline",
+        name: summary.leadType,
+        outcome: summary.overallSuccess ? "success" : "failure",
+        ...(summary.requestId !== undefined
+          ? { requestId: summary.requestId }
+          : {}),
+        latencyMs: summary.totalLatencyMs,
+        meta: {
+          leadId: summary.leadId,
+          resend: summary.resend,
+          airtable: summary.airtable,
+        },
+      }),
+    );
 
     if (level === "info") {
       logger.info("Lead pipeline completed", logData);

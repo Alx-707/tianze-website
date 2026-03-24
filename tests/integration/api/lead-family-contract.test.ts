@@ -2,6 +2,14 @@ import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { resetIdempotencyState } from "@/lib/idempotency";
 import { API_ERROR_CODES } from "@/constants/api-error-codes";
+import {
+  OBSERVABILITY_SURFACE_HEADER,
+  REQUEST_ID_HEADER,
+} from "@/lib/api/request-observability";
+import {
+  getSystemObservabilitySnapshot,
+  resetSystemObservability,
+} from "@/lib/observability/system-observability";
 import * as contactRoute from "@/app/api/contact/route";
 import * as inquiryRoute from "@/app/api/inquiry/route";
 import * as subscribeRoute from "@/app/api/subscribe/route";
@@ -89,22 +97,44 @@ function makeRequest(
   );
 }
 
+function expectLeadObservabilityHeaders(
+  response: Response,
+  expectedRequestId?: string,
+) {
+  expect(response.headers.get(OBSERVABILITY_SURFACE_HEADER)).toBe(
+    "lead-family",
+  );
+  if (expectedRequestId) {
+    expect(response.headers.get(REQUEST_ID_HEADER)).toBe(expectedRequestId);
+    return;
+  }
+  expect(response.headers.get(REQUEST_ID_HEADER)).toBeTruthy();
+}
+
 describe("lead API family contract", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     resetIdempotencyState();
+    resetSystemObservability();
   });
 
   it("contact success uses the family success contract", async () => {
     const response = await contactRoute.POST(
-      makeRequest("/api/contact", {
-        email: "contact@example.com",
-        company: "Acme",
-        firstName: "Ada",
-      }),
+      makeRequest(
+        "/api/contact",
+        {
+          email: "contact@example.com",
+          company: "Acme",
+          firstName: "Ada",
+        },
+        {
+          [REQUEST_ID_HEADER]: "lead-contact-request",
+        },
+      ),
     );
 
     expect(response.status).toBe(200);
+    expectLeadObservabilityHeaders(response, "lead-contact-request");
     const body = await response.json();
     expect(body).toEqual({
       success: true,
@@ -112,6 +142,17 @@ describe("lead API family contract", () => {
         referenceId: "contact-ref-001",
       },
     });
+    expect(getSystemObservabilitySnapshot().aggregates).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          surface: "lead-family",
+          kind: "api_request",
+          name: "contact.post",
+          success: 1,
+          lastRequestId: "lead-contact-request",
+        }),
+      ]),
+    );
   });
 
   it("inquiry success uses the family success contract", async () => {
@@ -127,6 +168,7 @@ describe("lead API family contract", () => {
     );
 
     expect(response.status).toBe(200);
+    expectLeadObservabilityHeaders(response);
     const body = await response.json();
     expect(body).toEqual({
       success: true,
@@ -145,6 +187,7 @@ describe("lead API family contract", () => {
     );
 
     expect(response.status).toBe(200);
+    expectLeadObservabilityHeaders(response);
     const body = await response.json();
     expect(body).toEqual({
       success: true,
@@ -169,6 +212,7 @@ describe("lead API family contract", () => {
     );
 
     expect(response.status).toBe(400);
+    expectLeadObservabilityHeaders(response);
     const body = await response.json();
     expect(body).toEqual({
       success: false,
@@ -188,6 +232,7 @@ describe("lead API family contract", () => {
     );
 
     expect(response.status).toBe(400);
+    expectLeadObservabilityHeaders(response);
     const body = await response.json();
     expect(body).toEqual({
       success: false,
@@ -203,6 +248,7 @@ describe("lead API family contract", () => {
     );
 
     expect(response.status).toBe(400);
+    expectLeadObservabilityHeaders(response);
     const body = await response.json();
     expect(body).toEqual({
       success: false,
