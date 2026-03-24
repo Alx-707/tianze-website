@@ -1,6 +1,8 @@
 import { getTranslations } from "next-intl/server";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/routing";
+import { HOMEPAGE_SECTION_LINKS } from "@/components/sections/homepage-section-links";
+import { HomepageTrustStrip } from "@/components/sections/homepage-trust-strip";
 
 export async function FinalCTA() {
   const t = await getTranslations("home.finalCta");
@@ -18,18 +20,24 @@ export async function FinalCTA() {
 
         <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <Button variant="on-dark" size="lg" asChild>
-            <Link href="/contact" prefetch={false}>
+            <Link href={HOMEPAGE_SECTION_LINKS.contact} prefetch={false}>
               {t("primary")}
             </Link>
           </Button>
           <Button variant="ghost-dark" size="lg" asChild>
-            <Link href="/products" prefetch={false}>
+            <Link href={HOMEPAGE_SECTION_LINKS.products} prefetch={false}>
               {t("secondary")}
             </Link>
           </Button>
         </div>
 
-        <p className="mt-6 text-[13px] text-white/75">{t("trust")}</p>
+        <HomepageTrustStrip
+          ariaLabel="Homepage trust facts"
+          className="mt-6 text-[13px]"
+          tone="inverse"
+          emphasizeValues={false}
+          items={[{ value: t("trust") }]}
+        />
       </div>
     </section>
   );

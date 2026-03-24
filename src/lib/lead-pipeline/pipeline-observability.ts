@@ -9,10 +9,12 @@ import {
   type ServiceResult,
 } from "@/lib/lead-pipeline/service-result";
 
+// eslint-disable-next-line max-params -- requestId is required to correlate route and pipeline signals
 export function emitServiceMetrics(
   emailResult: ServiceResult,
   crmResult: ServiceResult,
   hasEmailOperation: boolean,
+  requestId?: string,
 ): void {
   // Emit Resend metrics (only for leads with email operations)
   if (hasEmailOperation) {
@@ -20,12 +22,14 @@ export function emitServiceMetrics(
       leadPipelineMetrics.recordSuccess(
         METRIC_SERVICES.RESEND,
         emailResult.latencyMs,
+        requestId,
       );
     } else {
       leadPipelineMetrics.recordFailure(
         METRIC_SERVICES.RESEND,
         emailResult.latencyMs,
         emailResult.error,
+        requestId,
       );
     }
   }
@@ -35,12 +39,14 @@ export function emitServiceMetrics(
     leadPipelineMetrics.recordSuccess(
       METRIC_SERVICES.AIRTABLE,
       crmResult.latencyMs,
+      requestId,
     );
   } else {
     leadPipelineMetrics.recordFailure(
       METRIC_SERVICES.AIRTABLE,
       crmResult.latencyMs,
       crmResult.error,
+      requestId,
     );
   }
 }
@@ -48,6 +54,7 @@ export function emitServiceMetrics(
 interface LogPipelineSummaryParams {
   referenceId: string;
   leadType: string;
+  requestId?: string;
   emailResult: ServiceResult;
   crmResult: ServiceResult;
   totalLatencyMs: number;
@@ -58,6 +65,7 @@ export function logPipelineSummary(params: LogPipelineSummaryParams): void {
   const {
     referenceId,
     leadType,
+    requestId,
     emailResult,
     crmResult,
     totalLatencyMs,
@@ -68,6 +76,7 @@ export function logPipelineSummary(params: LogPipelineSummaryParams): void {
     leadId: referenceId,
     leadType,
     totalLatencyMs,
+    ...(requestId !== undefined ? { requestId } : {}),
     resend: {
       success: emailResult.success,
       latencyMs: emailResult.latencyMs,

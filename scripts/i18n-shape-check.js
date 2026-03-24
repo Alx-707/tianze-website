@@ -18,45 +18,18 @@
 const fs = require("fs");
 const fsp = require("fs").promises;
 const path = require("path");
+const {
+  LOCALES,
+  asSet,
+  collectLeafPaths,
+  diffSets,
+  getLocaleSplitPaths,
+  readJson,
+} = require("./translation-flat-utils");
 
 const ROOT = path.join(__dirname, "..");
 const REPORT_DIR = path.join(ROOT, "reports");
 const REPORT_PATH = path.join(REPORT_DIR, "i18n-shape-report.json");
-
-function isObject(v) {
-  return v !== null && typeof v === "object" && !Array.isArray(v);
-}
-
-function collectLeafPaths(obj, prefix = "") {
-  const out = [];
-  if (!isObject(obj)) return out; // non-object root => no keys
-  for (const [k, v] of Object.entries(obj)) {
-    const p = prefix ? `${prefix}.${k}` : k;
-    if (isObject(v)) {
-      out.push(...collectLeafPaths(v, p));
-    } else {
-      // treat any non-object as a leaf (strings for next-intl; tolerate number/boolean/null)
-      out.push(p);
-    }
-  }
-  return out;
-}
-
-async function readJson(p) {
-  const s = await fsp.readFile(p, "utf-8");
-  return JSON.parse(s);
-}
-
-function asSet(arr) {
-  return new Set(arr);
-}
-
-function diffSets(a, b) {
-  // return a - b
-  const out = [];
-  for (const x of a) if (!b.has(x)) out.push(x);
-  return out;
-}
 
 async function ensureDir(p) {
   if (!fs.existsSync(p)) {
@@ -75,7 +48,8 @@ async function compareSplitFiles(result, locales) {
     const splitData = {};
 
     for (const locale of locales) {
-      const filePath = path.join(ROOT, "messages", locale, `${splitType}.json`);
+      const { critical, deferred } = getLocaleSplitPaths(locale);
+      const filePath = splitType === "critical" ? critical : deferred;
       try {
         splitData[locale] = await readJson(filePath);
       } catch (err) {
@@ -126,30 +100,21 @@ async function main() {
   };
 
   try {
-    const locales = require("../i18n-locales.config").locales;
-
     // Check 1: Compare split files (critical/deferred) between locales
     result.summary.totalChecks += 2; // critical + deferred
     const issueCountBefore = result.issues.length;
-    await compareSplitFiles(result, locales);
+    await compareSplitFiles(result, LOCALES);
     const newIssues = result.issues.length - issueCountBefore;
     result.summary.passedChecks += 2 - newIssues;
     result.summary.failedChecks += newIssues;
 
     // Check 2+: For each locale, validate split canonical source
-    for (const locale of locales) {
-      const srcCriticalPath = path.join(
-        ROOT,
-        "messages",
-        locale,
-        "critical.json",
-      );
-      const srcDeferredPath = path.join(
-        ROOT,
-        "messages",
-        locale,
-        "deferred.json",
-      );
+    for (const locale of LOCALES) {
+      const {
+        critical: srcCriticalPath,
+        deferred: srcDeferredPath,
+        flat,
+      } = getLocaleSplitPaths(locale);
       const pubCriticalPath = path.join(
         ROOT,
         "public",
@@ -209,11 +174,10 @@ async function main() {
       }
 
       // Check 3: flat file parity (optional generated compatibility artifact)
-      const flatPath = path.join(ROOT, "messages", `${locale}.json`);
-      if (fs.existsSync(flatPath)) {
+      if (fs.existsSync(flat)) {
         result.summary.totalChecks++;
-        const flat = await readJson(flatPath);
-        const flatSet = asSet(collectLeafPaths(flat));
+        const flatData = await readJson(flat);
+        const flatSet = asSet(collectLeafPaths(flatData));
         const srcMinusFlat = diffSets(srcSet, flatSet);
         const flatMinusSrc = diffSets(flatSet, srcSet);
 

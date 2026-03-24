@@ -63,6 +63,7 @@ describe("pipeline-observability", () => {
       expect(leadPipelineMetrics.recordSuccess).toHaveBeenCalledWith(
         METRIC_SERVICES.AIRTABLE,
         200,
+        undefined,
       );
     });
 
@@ -85,6 +86,7 @@ describe("pipeline-observability", () => {
       expect(leadPipelineMetrics.recordSuccess).toHaveBeenCalledWith(
         METRIC_SERVICES.RESEND,
         150,
+        undefined,
       );
       expect(leadPipelineMetrics.recordFailure).not.toHaveBeenCalledWith(
         METRIC_SERVICES.RESEND,
@@ -115,6 +117,7 @@ describe("pipeline-observability", () => {
         METRIC_SERVICES.RESEND,
         150,
         emailError,
+        undefined,
       );
       expect(leadPipelineMetrics.recordSuccess).not.toHaveBeenCalledWith(
         METRIC_SERVICES.RESEND,
@@ -144,6 +147,7 @@ describe("pipeline-observability", () => {
       expect(leadPipelineMetrics.recordSuccess).toHaveBeenCalledWith(
         METRIC_SERVICES.AIRTABLE,
         200,
+        undefined,
       );
 
       vi.clearAllMocks();
@@ -165,6 +169,7 @@ describe("pipeline-observability", () => {
         METRIC_SERVICES.AIRTABLE,
         300,
         airtableError,
+        undefined,
       );
     });
   });

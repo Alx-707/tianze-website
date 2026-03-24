@@ -10,7 +10,7 @@
  * 2. Bundle 大小监控 (total-byte-weight, bootup-time)
  * 3. 未使用 JavaScript 检测 (unused-javascript)
  *
- * 阶段性阈值规划（详见 docs/p2-1-lighthouse-thresholds-and-perf-plan.md）：
+ * 阶段性阈值规划：
  * - Phase 0: Performance 0.68, LCP 5200ms, TBT 800ms (已完成)
  * - Phase 1: Performance 0.85, LCP 4500ms, TBT 200ms (已完成)
  * - Phase 2: total-byte-weight 512KB→515KB 字体减重 (已完成)

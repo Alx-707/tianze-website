@@ -53,6 +53,16 @@ export const PATHS_CONFIG = Object.freeze({
     en: "/terms",
     zh: "/terms",
   }),
+
+  bendingMachines: Object.freeze({
+    en: "/capabilities/bending-machines",
+    zh: "/capabilities/bending-machines",
+  }),
+
+  oem: Object.freeze({
+    en: "/oem-custom-manufacturing",
+    zh: "/oem-custom-manufacturing",
+  }),
 } as const satisfies Record<PageType, LocalizedPath>);
 
 // 动态路由配置 - 用于 next-intl 路由和语言切换

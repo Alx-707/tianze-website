@@ -1,6 +1,7 @@
 import { Link } from "@/i18n/routing";
 import { getTranslations } from "next-intl/server";
 import { Button } from "@/components/ui/button";
+import { HOMEPAGE_SECTION_LINKS } from "@/components/sections/homepage-section-links";
 
 export async function SampleCTA() {
   const t = await getTranslations("home");
@@ -29,7 +30,7 @@ export async function SampleCTA() {
             </p>
           </div>
           <Button asChild size="lg" className="shrink-0">
-            <Link href="/contact" prefetch={false}>
+            <Link href={HOMEPAGE_SECTION_LINKS.contact} prefetch={false}>
               {t("sample.cta")}
             </Link>
           </Button>

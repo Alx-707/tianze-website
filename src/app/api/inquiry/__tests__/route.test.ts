@@ -328,6 +328,9 @@ describe("/api/inquiry route", () => {
         expect.objectContaining({
           type: "PRODUCT",
         }),
+        expect.objectContaining({
+          requestId: expect.any(String),
+        }),
       );
     });
 
@@ -344,6 +347,9 @@ describe("/api/inquiry route", () => {
       expect(processLead).toHaveBeenCalledWith(
         expect.objectContaining({
           type: "PRODUCT",
+        }),
+        expect.objectContaining({
+          requestId: expect.any(String),
         }),
       );
     });

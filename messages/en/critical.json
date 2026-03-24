@@ -206,7 +206,7 @@
         "spec2": "DN25 to DN160mm pipe range",
         "spec3": "150-200 pcs/hour production speed",
         "standard": "Self-developed",
-        "link": "/contact"
+        "link": "/capabilities/bending-machines"
       },
       "item4": {
         "tag": "Service",
@@ -215,7 +215,7 @@
         "spec2": "Private labeling and packaging",
         "spec3": "Prototype to mass production support",
         "standard": "Per your spec",
-        "link": "/contact"
+        "link": "/oem-custom-manufacturing"
       }
     },
     "resources": {

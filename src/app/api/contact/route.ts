@@ -8,6 +8,13 @@ import {
   createApiErrorResponse,
   createApiSuccessResponse,
 } from "@/lib/api/api-response";
+import { createLeadSuccessPayload } from "@/lib/api/lead-route-response";
+import {
+  applyRequestObservability,
+  getRequestObservability,
+  withObservabilityContext,
+} from "@/lib/api/request-observability";
+import { recordApiResponseSignal } from "@/lib/observability/api-signals";
 import {
   applyCorsHeaders,
   createCorsPreflightResponse,
@@ -40,6 +47,7 @@ import {
 const POST_RATE_LIMITED = withRateLimit(
   "contact",
   async (request: NextRequest, { clientIP }: RateLimitContext) => {
+    const observability = getRequestObservability(request, "lead-family");
     const parsedBody = await readAndHashJsonBody<unknown>(request, {
       route: "/api/contact",
     });
@@ -67,7 +75,12 @@ const POST_RATE_LIMITED = withRateLimit(
             };
           }
 
-          const submissionResult = await processFormSubmission(validation.data);
+          const submissionResult = await processFormSubmission(
+            validation.data,
+            {
+              requestId: observability.requestId,
+            },
+          );
           const processingTime = Date.now() - startTime;
 
           if (process.env.NODE_ENV !== "production") {
@@ -80,22 +93,24 @@ const POST_RATE_LIMITED = withRateLimit(
                 processingTime,
                 emailSent: submissionResult.emailSent,
                 recordCreated: submissionResult.recordCreated,
+                ...withObservabilityContext(observability),
               }),
             );
           }
 
-          return {
-            success: true as const,
-            data: {
-              referenceId: submissionResult.referenceId,
-            },
-          };
+          if (!submissionResult.referenceId) {
+            throw new Error(
+              "referenceId missing on successful contact submission",
+            );
+          }
+          return createLeadSuccessPayload(submissionResult.referenceId);
         } catch (error) {
           logger.error("Contact form submission failed", {
             error: error instanceof Error ? error.message : "Unknown error",
             stack: error instanceof Error ? error.stack : undefined,
             ip: sanitizeIP(clientIP),
             processingTime: Date.now() - startTime,
+            ...withObservabilityContext(observability),
           });
 
           return {
@@ -114,8 +129,21 @@ const POST_RATE_LIMITED = withRateLimit(
 );
 
 export async function POST(request: NextRequest) {
+  const startTime = Date.now();
+  const observability = getRequestObservability(request, "lead-family");
   const response = await POST_RATE_LIMITED(request);
-  return applyCorsHeaders({ request, response });
+  const enrichedResponse = applyRequestObservability(
+    applyCorsHeaders({ request, response }),
+    observability,
+  );
+  await recordApiResponseSignal({
+    context: observability,
+    response: enrichedResponse,
+    name: "contact.post",
+    route: "/api/contact",
+    latencyMs: Date.now() - startTime,
+  });
+  return enrichedResponse;
 }
 
 /**
@@ -129,12 +157,16 @@ const GET_RATE_LIMITED = withRateLimit(
     request: NextRequest,
     _ctx: RateLimitContext,
   ): Promise<NextResponse> => {
+    const observability = getRequestObservability(request, "lead-family");
     try {
       // 验证管理员权限
       const authHeader = request.headers.get("authorization");
 
       if (!validateAdminAccess(authHeader)) {
-        logger.warn("Unauthorized access attempt to contact statistics");
+        logger.warn(
+          "Unauthorized access attempt to contact statistics",
+          withObservabilityContext(observability),
+        );
         return createApiErrorResponse(
           API_ERROR_CODES.UNAUTHORIZED,
           HTTP_UNAUTHORIZED,
@@ -148,6 +180,7 @@ const GET_RATE_LIMITED = withRateLimit(
     } catch (error) {
       logger.error("Failed to get contact statistics", {
         error: error instanceof Error ? error.message : "Unknown error",
+        ...withObservabilityContext(observability),
       });
 
       return createApiErrorResponse(
@@ -159,13 +192,26 @@ const GET_RATE_LIMITED = withRateLimit(
 );
 
 export async function GET(request: NextRequest) {
+  const startTime = Date.now();
+  const observability = getRequestObservability(request, "lead-family");
   const response = await GET_RATE_LIMITED(request);
-  return applyCorsHeaders({
-    request,
-    response,
-    additionalMethods: ["GET"],
-    additionalHeaders: ["Authorization"],
+  const enrichedResponse = applyRequestObservability(
+    applyCorsHeaders({
+      request,
+      response,
+      additionalMethods: ["GET"],
+      additionalHeaders: ["Authorization"],
+    }),
+    observability,
+  );
+  await recordApiResponseSignal({
+    context: observability,
+    response: enrichedResponse,
+    name: "contact.get-stats",
+    route: "/api/contact",
+    latencyMs: Date.now() - startTime,
   });
+  return enrichedResponse;
 }
 
 /**

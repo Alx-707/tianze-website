@@ -441,5 +441,120 @@
       "disputes": "Dispute Resolution",
       "contact": "Contact Information"
     }
+  },
+  "capabilities": {
+    "meta": {
+      "title": "PVC Conduit Bending Machines | Tianze",
+      "description": "Self-developed full-auto and semi-auto PVC conduit bending machines. The core manufacturing technology behind our fittings."
+    },
+    "hero": {
+      "title": "PVC Conduit Bending Machines",
+      "subtitle": "Self-developed. In-house manufactured. The technology behind our fittings."
+    },
+    "why": {
+      "title": "Why It Matters",
+      "card1": {
+        "title": "We Make the Machines",
+        "desc": "As an upstream bending machine manufacturer, we control the core technology that shapes every fitting."
+      },
+      "card2": {
+        "title": "Precision Control",
+        "desc": "CNC-controlled bending ensures consistent angles, wall thickness, and finish across every production run."
+      },
+      "card3": {
+        "title": "Custom Capability",
+        "desc": "In-house mold development means we can produce non-standard sizes, angles, and specifications to your requirements."
+      }
+    },
+    "machines": {
+      "title": "Machine Lineup"
+    },
+    "capability": {
+      "title": "Production Capability",
+      "monthlyCapacity": {
+        "value": "50,000+",
+        "label": "Fittings per Month"
+      },
+      "countries": {
+        "value": "20+",
+        "label": "Countries Served"
+      },
+      "experience": {
+        "value": "10+",
+        "label": "Years of Experience"
+      }
+    },
+    "cta": {
+      "heading": "Interested in our bending technology?",
+      "description": "Whether you need OEM manufacturing or want to discuss custom specifications, we're ready to help.",
+      "button": "Contact Us"
+    }
+  },
+  "oem": {
+    "meta": {
+      "title": "OEM & Custom Manufacturing | Tianze",
+      "description": "Custom PVC conduit fittings manufacturing — your specifications, our production capability. From prototype to mass production."
+    },
+    "hero": {
+      "title": "OEM & Custom Manufacturing",
+      "subtitle": "Your specifications. Our production capability."
+    },
+    "scope": {
+      "title": "Service Scope",
+      "customSizes": {
+        "title": "Custom Sizes",
+        "desc": "Non-standard diameters, angles, and wall thicknesses to your exact specifications."
+      },
+      "privateLabel": {
+        "title": "Private Label",
+        "desc": "Your brand, your packaging. Complete branded product solutions."
+      },
+      "moldDevelopment": {
+        "title": "Mold Development",
+        "desc": "In-house mold design and manufacturing for any fitting geometry."
+      },
+      "qualityAssurance": {
+        "title": "Quality Assurance",
+        "desc": "Full inspection with optional third-party certification to your required standards."
+      }
+    },
+    "process": {
+      "title": "How We Work Together",
+      "step1": {
+        "title": "Inquiry",
+        "desc": "Share your specifications and requirements",
+        "timeline": "Day 1"
+      },
+      "step2": {
+        "title": "Sample",
+        "desc": "We produce samples for your approval",
+        "timeline": "7-15 days"
+      },
+      "step3": {
+        "title": "Mold & Tooling",
+        "desc": "Custom mold development if needed",
+        "timeline": "15-30 days"
+      },
+      "step4": {
+        "title": "Trial Run",
+        "desc": "Small batch production for final validation",
+        "timeline": "7-10 days"
+      },
+      "step5": {
+        "title": "Mass Production",
+        "desc": "Full-scale production and quality-controlled delivery",
+        "timeline": "15-20 days"
+      }
+    },
+    "standards": {
+      "title": "Supported Standards",
+      "desc": "We manufacture to all major international conduit standards — and custom specifications.",
+      "custom": "Custom standards also supported"
+    },
+    "cta": {
+      "heading": "Start Your OEM Project",
+      "description": "Tell us your specifications. We'll provide a detailed proposal with timeline and pricing.",
+      "button": "Get Started"
+    }
   }
 }

@@ -37,6 +37,7 @@ public/messages/
 .claude/settings.local.json
 .claude/skills-backup-*/
 .claude/skills-reference-*/
+.claude/worktrees/
 .claude-plugin/
 .agents/
 skills/
@@ -48,6 +49,8 @@ labels/
 statuses/
 squirrel.toml
 scripts/ralph/
+CLAUDE.local.md
+.firecrawl/
 
 # OS
 .DS_Store

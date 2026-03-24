@@ -171,16 +171,12 @@ describe("Market Landing Page", () => {
       );
     });
 
-    it("does not render trust signals for market without spec data", async () => {
+    it("renders trust signals for mexico market", async () => {
       await renderPage("mexico");
 
-      expect(screen.queryByTestId("product-specs")).not.toBeInTheDocument();
-      expect(
-        screen.queryByTestId("product-certifications"),
-      ).not.toBeInTheDocument();
-      expect(
-        screen.queryByTestId("product-trade-info"),
-      ).not.toBeInTheDocument();
+      expect(screen.getByTestId("product-specs")).toBeInTheDocument();
+      expect(screen.getByTestId("product-certifications")).toBeInTheDocument();
+      expect(screen.getByTestId("product-trade-info")).toBeInTheDocument();
     });
   });
 
@@ -217,27 +213,26 @@ describe("Market Landing Page", () => {
     });
   });
 
-  describe("Market without spec data", () => {
-    it("renders header but not family sections or trust signals", async () => {
+  describe("Scenario: AU/NZ market renders with spec data", () => {
+    it("renders family sections for AU/NZ", async () => {
       await renderPage("australia-new-zealand");
 
-      const heading = screen.getByRole("heading", { level: 1 });
-      expect(heading).toHaveTextContent("AS/NZS 2053 Series");
-
-      // Family sections are not rendered without spec data
-      expect(
-        screen.queryByTestId("family-conduit-bends"),
-      ).not.toBeInTheDocument();
-
-      // Trust signals are not rendered
-      expect(screen.queryByTestId("product-specs")).not.toBeInTheDocument();
+      expect(screen.getByTestId("family-conduit-bends")).toBeInTheDocument();
+      expect(screen.getByTestId("family-bellmouths")).toBeInTheDocument();
     });
 
-    it("still renders CTA for markets without spec data", async () => {
+    it("renders trust signals for AU/NZ", async () => {
       await renderPage("australia-new-zealand");
 
-      const ctaLink = screen.getByRole("link", { name: /request a quote/i });
-      expect(ctaLink).toHaveAttribute("href", "/contact");
+      expect(screen.getByTestId("product-specs")).toBeInTheDocument();
+      expect(screen.getByTestId("product-certifications")).toBeInTheDocument();
+      expect(screen.getByTestId("product-trade-info")).toBeInTheDocument();
+    });
+
+    it("renders sticky family navigation when spec data exists", async () => {
+      await renderPage("australia-new-zealand");
+
+      expect(screen.getByTestId("sticky-nav")).toBeInTheDocument();
     });
   });
 });

@@ -10,6 +10,17 @@ import {
   applyCorsHeaders,
   createCorsPreflightResponse,
 } from "@/lib/api/cors-utils";
+import {
+  createLeadFailureResponse,
+  createLeadSuccessPayload,
+  validateLeadTurnstileToken,
+} from "@/lib/api/lead-route-response";
+import {
+  applyRequestObservability,
+  getRequestObservability,
+  withObservabilityContext,
+} from "@/lib/api/request-observability";
+import { recordApiResponseSignal } from "@/lib/observability/api-signals";
 import { readAndHashJsonBody } from "@/lib/api/read-and-hash-body";
 import {
   withRateLimit,
@@ -23,21 +34,20 @@ import {
   type ProductLeadInput,
 } from "@/lib/lead-pipeline/lead-schema";
 import { logger, sanitizeIP } from "@/lib/logger";
-import { verifyTurnstile } from "@/lib/turnstile";
 import { API_ERROR_CODES } from "@/constants/api-error-codes";
 import { HTTP_BAD_REQUEST, HTTP_INTERNAL_ERROR } from "@/constants";
 
-interface SuccessResponseOptions {
-  result: LeadResult;
+interface InquiryResponseContext {
   clientIP: string;
   processingTime: number;
+  observability: ReturnType<typeof getRequestObservability>;
 }
 
-/**
- * Create success payload for product inquiry
- */
-function createSuccessPayload(options: SuccessResponseOptions) {
-  const { result, clientIP, processingTime } = options;
+function createSuccessPayload(
+  result: LeadResult,
+  context: InquiryResponseContext,
+) {
+  const { clientIP, processingTime, observability } = context;
   if (process.env.NODE_ENV !== "production") {
     logger.info("Product inquiry submitted successfully", {
       referenceId: result.referenceId,
@@ -45,41 +55,36 @@ function createSuccessPayload(options: SuccessResponseOptions) {
       processingTime,
       emailSent: result.emailSent,
       recordCreated: result.recordCreated,
+      ...withObservabilityContext(observability),
     });
   }
 
-  return {
-    success: true as const,
-    data: {
-      referenceId: result.referenceId,
-    },
-  };
-}
-
-interface ErrorResponseOptions {
-  result: LeadResult;
-  clientIP: string;
-  processingTime: number;
+  if (!result.referenceId) {
+    throw new Error("referenceId missing on successful lead result");
+  }
+  return createLeadSuccessPayload(result.referenceId);
 }
 
 /**
  * Create error response for failed inquiry
  */
-function createErrorResponse(options: ErrorResponseOptions): NextResponse {
-  const { result, clientIP, processingTime } = options;
+function createErrorResponse(
+  result: LeadResult,
+  context: InquiryResponseContext,
+): NextResponse {
+  const { clientIP, processingTime, observability } = context;
   logger.warn("Product inquiry submission failed", {
     error: result.error,
     ip: sanitizeIP(clientIP),
     processingTime,
+    ...withObservabilityContext(observability),
   });
 
-  const isValidationError = result.error === "VALIDATION_ERROR";
-  return createApiErrorResponse(
-    isValidationError
-      ? API_ERROR_CODES.INQUIRY_VALIDATION_FAILED
-      : API_ERROR_CODES.INQUIRY_PROCESSING_ERROR,
-    isValidationError ? HTTP_BAD_REQUEST : HTTP_INTERNAL_ERROR,
-  );
+  return createLeadFailureResponse({
+    result,
+    validationErrorCode: API_ERROR_CODES.INQUIRY_VALIDATION_FAILED,
+    processingErrorCode: API_ERROR_CODES.INQUIRY_PROCESSING_ERROR,
+  });
 }
 
 function validateLeadData(
@@ -100,43 +105,6 @@ function validateLeadData(
   return parsed.success ? parsed.data : null;
 }
 
-interface TurnstileValidationOptions {
-  token: string | undefined;
-  clientIP: string;
-}
-
-/**
- * Validate Turnstile token and return error response if invalid
- */
-async function validateTurnstile(
-  options: TurnstileValidationOptions,
-): Promise<NextResponse | null> {
-  const { token, clientIP } = options;
-
-  if (!token) {
-    logger.warn("Product inquiry missing Turnstile token", {
-      ip: sanitizeIP(clientIP),
-    });
-    return createApiErrorResponse(
-      API_ERROR_CODES.INQUIRY_SECURITY_REQUIRED,
-      HTTP_BAD_REQUEST,
-    );
-  }
-
-  const isValid = await verifyTurnstile(token, clientIP);
-  if (!isValid) {
-    logger.warn("Product inquiry Turnstile verification failed", {
-      ip: sanitizeIP(clientIP),
-    });
-    return createApiErrorResponse(
-      API_ERROR_CODES.INQUIRY_SECURITY_FAILED,
-      HTTP_BAD_REQUEST,
-    );
-  }
-
-  return null;
-}
-
 /**
  * POST /api/inquiry
  * Handle product inquiry form submission
@@ -144,6 +112,7 @@ async function validateTurnstile(
 const POST_RATE_LIMITED = withRateLimit(
   "inquiry",
   async (request: NextRequest, { clientIP }: RateLimitContext) => {
+    const observability = getRequestObservability(request, "lead-family");
     const parsedBody = await readAndHashJsonBody<{
       turnstileToken?: string;
       [key: string]: unknown;
@@ -155,7 +124,6 @@ const POST_RATE_LIMITED = withRateLimit(
         parsedBody.statusCode,
       );
     }
-
     return withIdempotency(
       request,
       async () => {
@@ -171,33 +139,43 @@ const POST_RATE_LIMITED = withRateLimit(
             );
           }
 
-          const turnstileError = await validateTurnstile({
+          const turnstileError = await validateLeadTurnstileToken({
             token:
               typeof data.turnstileToken === "string"
                 ? data.turnstileToken
                 : undefined,
             clientIP,
+            missingTokenErrorCode: API_ERROR_CODES.INQUIRY_SECURITY_REQUIRED,
+            invalidTokenErrorCode: API_ERROR_CODES.INQUIRY_SECURITY_FAILED,
+            missingTokenLogMessage: "Product inquiry missing Turnstile token",
+            invalidTokenLogMessage:
+              "Product inquiry Turnstile verification failed",
           });
           if (turnstileError) return turnstileError;
 
-          const result = await processLead({
-            ...leadData,
-          });
+          const result = await processLead(
+            {
+              ...leadData,
+            },
+            { requestId: observability.requestId },
+          );
           const processingTime = Date.now() - startTime;
+          const responseContext = {
+            clientIP,
+            processingTime,
+            observability,
+          };
 
           return result.success
-            ? createSuccessPayload({
-                result,
-                clientIP,
-                processingTime,
-              })
-            : createErrorResponse({ result, clientIP, processingTime });
+            ? createSuccessPayload(result, responseContext)
+            : createErrorResponse(result, responseContext);
         } catch (error) {
           logger.error("Product inquiry submission failed unexpectedly", {
             error: error instanceof Error ? error.message : "Unknown error",
             stack: error instanceof Error ? error.stack : undefined,
             ip: sanitizeIP(clientIP),
             processingTime: Date.now() - startTime,
+            ...withObservabilityContext(observability),
           });
 
           return createApiErrorResponse(
@@ -215,8 +193,21 @@ const POST_RATE_LIMITED = withRateLimit(
 );
 
 export async function POST(request: NextRequest) {
+  const startTime = Date.now();
+  const observability = getRequestObservability(request, "lead-family");
   const response = await POST_RATE_LIMITED(request);
-  return applyCorsHeaders({ request, response });
+  const enrichedResponse = applyRequestObservability(
+    applyCorsHeaders({ request, response }),
+    observability,
+  );
+  await recordApiResponseSignal({
+    context: observability,
+    response: enrichedResponse,
+    name: "inquiry.post",
+    route: "/api/inquiry",
+    latencyMs: Date.now() - startTime,
+  });
+  return enrichedResponse;
 }
 
 /**

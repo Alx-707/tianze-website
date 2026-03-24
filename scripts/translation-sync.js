@@ -7,13 +7,24 @@
 
 const fs = require("fs");
 const path = require("path");
+const {
+  LOCALES,
+  MESSAGES_DIR,
+  deepMerge,
+  collectLeafPaths,
+  getLocaleSplitPaths,
+  getNestedValue,
+  loadLocaleSplit,
+  setNestedValue,
+  writeFlatTranslation,
+} = require("./translation-flat-utils");
 
 console.log("🔄 开始翻译同步和更新...\n");
 
 // 配置
 const CONFIG = {
-  LOCALES: require("../i18n-locales.config").locales,
-  MESSAGES_DIR: path.join(process.cwd(), "messages"),
+  LOCALES,
+  MESSAGES_DIR,
   BACKUP_DIR: path.join(process.cwd(), "backups", "translations"),
   OUTPUT_DIR: path.join(process.cwd(), "reports"),
 
@@ -71,52 +82,18 @@ function createBackup() {
 }
 
 /**
- * Deep merge two objects (source wins on leaf conflicts)
- */
-function deepMerge(target, source) {
-  const result = { ...target };
-  for (const [key, value] of Object.entries(source)) {
-    if (
-      typeof value === "object" &&
-      value !== null &&
-      !Array.isArray(value) &&
-      typeof result[key] === "object" &&
-      result[key] !== null &&
-      !Array.isArray(result[key])
-    ) {
-      result[key] = deepMerge(result[key], value);
-    } else {
-      result[key] = value;
-    }
-  }
-  return result;
-}
-
-/**
- * 加载翻译文件 — 从 split 格式 (canonical) 读取
+ * 加载翻译文件 - 从 split canonical source 读取
  * 合并 critical.json + deferred.json 为完整翻译对象
  */
 function loadTranslations() {
   const translations = {};
 
   for (const locale of CONFIG.LOCALES) {
-    const criticalPath = path.join(
-      CONFIG.MESSAGES_DIR,
-      locale,
-      "critical.json",
-    );
-    const deferredPath = path.join(
-      CONFIG.MESSAGES_DIR,
-      locale,
-      "deferred.json",
-    );
-
     try {
-      const critical = JSON.parse(fs.readFileSync(criticalPath, "utf8"));
-      const deferred = JSON.parse(fs.readFileSync(deferredPath, "utf8"));
-      translations[locale] = deepMerge(critical, deferred);
+      const { merged } = loadLocaleSplit(locale);
+      translations[locale] = merged;
       console.log(
-        `📖 加载翻译文件: ${locale}/critical.json + ${locale}/deferred.json`,
+        `📖 加载 split 翻译文件: ${locale}/critical.json + ${locale}/deferred.json`,
       );
     } catch (error) {
       syncResults.errors.push({
@@ -124,9 +101,7 @@ function loadTranslations() {
         locale,
         error: error.message,
       });
-      console.error(
-        `❌ 无法加载翻译文件: ${locale}/split files - ${error.message}`,
-      );
+      console.error(`❌ 无法加载 split 翻译文件: ${locale} - ${error.message}`);
       translations[locale] = {};
     }
   }
@@ -135,64 +110,16 @@ function loadTranslations() {
 }
 
 /**
- * 获取所有翻译键的并集
- */
-function getAllTranslationKeys(translations) {
-  const allKeys = new Set();
-
-  function extractKeys(obj, prefix = "") {
-    for (const [key, value] of Object.entries(obj)) {
-      const fullKey = prefix ? `${prefix}.${key}` : key;
-
-      if (typeof value === "object" && value !== null) {
-        extractKeys(value, fullKey);
-      } else {
-        allKeys.add(fullKey);
-      }
-    }
-  }
-
-  for (const locale of CONFIG.LOCALES) {
-    if (translations[locale]) {
-      extractKeys(translations[locale]);
-    }
-  }
-
-  return Array.from(allKeys).sort();
-}
-
-/**
- * 获取嵌套对象的值
- */
-function getNestedValue(obj, path) {
-  return path.split(".").reduce((current, key) => {
-    return current && current[key] !== undefined ? current[key] : undefined;
-  }, obj);
-}
-
-/**
- * 设置嵌套对象的值
- */
-function setNestedValue(obj, path, value) {
-  const keys = path.split(".");
-  const lastKey = keys.pop();
-
-  let current = obj;
-  for (const key of keys) {
-    if (!current[key] || typeof current[key] !== "object") {
-      current[key] = {};
-    }
-    current = current[key];
-  }
-
-  current[lastKey] = value;
-}
-
-/**
  * 同步翻译键
  */
 function syncTranslationKeys(translations) {
-  const allKeys = getAllTranslationKeys(translations);
+  const allKeys = Array.from(
+    new Set(
+      CONFIG.LOCALES.flatMap((locale) =>
+        translations[locale] ? collectLeafPaths(translations[locale]) : [],
+      ),
+    ),
+  ).sort();
   const syncedTranslations = JSON.parse(JSON.stringify(translations));
 
   console.log(`🔍 发现 ${allKeys.length} 个唯一翻译键\n`);
@@ -249,7 +176,13 @@ function syncTranslationKeys(translations) {
  */
 function validateTranslations(translations) {
   const issues = [];
-  const allKeys = getAllTranslationKeys(translations);
+  const allKeys = Array.from(
+    new Set(
+      CONFIG.LOCALES.flatMap((locale) =>
+        translations[locale] ? collectLeafPaths(translations[locale]) : [],
+      ),
+    ),
+  ).sort();
 
   for (const key of allKeys) {
     const values = {};
@@ -308,17 +241,8 @@ function validateTranslations(translations) {
  */
 function saveTranslations(translations) {
   for (const locale of CONFIG.LOCALES) {
-    const criticalPath = path.join(
-      CONFIG.MESSAGES_DIR,
-      locale,
-      "critical.json",
-    );
-    const deferredPath = path.join(
-      CONFIG.MESSAGES_DIR,
-      locale,
-      "deferred.json",
-    );
-    const flatPath = path.join(CONFIG.MESSAGES_DIR, `${locale}.json`);
+    const { critical: criticalPath, deferred: deferredPath } =
+      getLocaleSplitPaths(locale);
 
     try {
       // Read original split files to determine key classification
@@ -380,17 +304,12 @@ function saveTranslations(translations) {
         "utf8",
       );
       console.log(
-        `💾 保存翻译文件: ${locale}/critical.json + ${locale}/deferred.json`,
+        `💾 保存 split 翻译文件: ${locale}/critical.json + ${locale}/deferred.json`,
       );
 
-      // Regenerate flat file from split (compatibility artifact only)
-      const flatContent = deepMerge(newCritical, newDeferred);
-      fs.writeFileSync(
-        flatPath,
-        `${JSON.stringify(flatContent, null, 2)}\n`,
-        "utf8",
-      );
-      console.log(`💾 重新生成 flat 文件（兼容产物）: ${locale}.json`);
+      // Regenerate flat file from split source as a compatibility artifact.
+      writeFlatTranslation(locale, deepMerge(newCritical, newDeferred));
+      console.log(`💾 重新生成 flat 兼容产物: messages/${locale}.json`);
 
       syncResults.updated++;
     } catch (error) {

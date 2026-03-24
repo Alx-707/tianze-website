@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { logger } from "@/lib/logger";
 import { Button } from "@/components/ui/button";
-import { routing } from "@/i18n/routing-config";
+import { coerceLocale } from "@/i18n/locale-utils";
 
 interface GlobalErrorProps {
   error: Error & { digest?: string };
@@ -34,12 +34,10 @@ const translations = {
 } as const;
 
 function getLocaleFromBrowser(): "en" | "zh" {
-  if (typeof window === "undefined")
-    return routing.defaultLocale as "en" | "zh";
+  if (typeof window === "undefined") return coerceLocale(undefined);
 
   const browserLang = navigator.language?.toLowerCase() || "";
-  if (browserLang.startsWith("zh")) return "zh";
-  return "en";
+  return coerceLocale(browserLang.startsWith("zh") ? "zh" : "en");
 }
 
 export default function GlobalError({ error, reset }: GlobalErrorProps) {

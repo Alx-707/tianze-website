@@ -65,6 +65,22 @@ pre-commit:
       fail_text: '多语言同步检查失败 - 请同步 messages 与内容文件的中英版本'
       stage_fixed: false
 
+    i18n-regenerate-flat:
+      run: |
+        if git diff --cached --name-only | grep -E '^(messages/(en|zh)/(critical|deferred)\.json)$' >/dev/null; then
+          pnpm i18n:regenerate-flat
+          git add messages/en.json messages/zh.json
+        else
+          echo "跳过 i18n flat regeneration（无 split quartet 变更）"; exit 0;
+        fi
+      fail_text: 'i18n flat regeneration 失败 - 请修复 split/flat 生成链路'
+      stage_fixed: true
+
+    structural-clusters-review:
+      run: pnpm review:clusters:staged
+      fail_text: 'Structural cluster review 失败 - 请修复命中的 cluster contract / drift'
+      stage_fixed: false
+
     # 相关测试检查 - 确保组件/库变更后测试同步更新
     # 使用 Vitest 4 的 `vitest related` 子命令
     test-related:

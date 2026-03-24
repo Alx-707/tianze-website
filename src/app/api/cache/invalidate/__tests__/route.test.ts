@@ -109,12 +109,26 @@ vi.mock("@/lib/security/distributed-rate-limit", () => ({
   createRateLimitHeaders: mockCreateRateLimitHeaders,
 }));
 
-vi.mock("@/lib/cache", () => ({
+vi.mock("@/lib/cache/cache-tags", () => ({
   CACHE_DOMAINS: {
     I18N: "i18n",
     CONTENT: "content",
     PRODUCT: "product",
   },
+}));
+
+vi.mock("@/lib/cache/invalidate", () => ({
+  CACHE_INVALIDATION_LOCALES: ["en", "zh"],
+  CACHE_INVALIDATION_DOMAINS: ["i18n", "content", "product", "all"],
+  CACHE_INVALIDATION_ENTITIES: [
+    "critical",
+    "deferred",
+    "blog",
+    "page",
+    "detail",
+    "categories",
+    "featured",
+  ],
   invalidateI18n: mockInvalidateI18n,
   invalidateContent: mockInvalidateContent,
   invalidateProduct: mockInvalidateProduct,

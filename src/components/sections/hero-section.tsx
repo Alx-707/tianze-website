@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { DesktopDecorationGate } from "@/components/grid/desktop-decoration-gate";
 import { HeroGuideOverlay } from "@/components/grid";
 import { Link } from "@/i18n/routing";
+import { HOMEPAGE_SECTION_LINKS } from "@/components/sections/homepage-section-links";
+import { HomepageTrustStrip } from "@/components/sections/homepage-trust-strip";
 
 function HeroEyebrow({ text }: { text: string }) {
   return (
@@ -11,45 +13,6 @@ function HeroEyebrow({ text }: { text: string }) {
       <span className="h-2 w-2 rounded-full bg-primary" aria-hidden="true" />
       <span className="text-[13px] font-semibold uppercase tracking-[0.04em] text-primary">
         {text}
-      </span>
-    </div>
-  );
-}
-
-function ProofLine({ t }: { t: Awaited<ReturnType<typeof getTranslations>> }) {
-  return (
-    <div className="hero-stagger-5 mt-7 flex flex-wrap items-center gap-x-5 gap-y-1 border-t border-border-light pt-5 font-mono text-[13px] text-muted-foreground">
-      <span>
-        <span className="font-semibold text-foreground">
-          {t("hero.proof.est")}
-        </span>
-      </span>
-      <span aria-hidden="true" className="text-border">
-        ·
-      </span>
-      <span>
-        <span className="font-semibold text-foreground">
-          {t("hero.proof.countries")}
-        </span>{" "}
-        {t("hero.proof.countriesLabel")}
-      </span>
-      <span aria-hidden="true" className="text-border">
-        ·
-      </span>
-      <span>
-        <span className="font-semibold text-foreground">
-          {t("hero.proof.range")}
-        </span>{" "}
-        {t("hero.proof.rangeLabel")}
-      </span>
-      <span aria-hidden="true" className="text-border">
-        ·
-      </span>
-      <span>
-        <span className="font-semibold text-foreground">
-          {t("hero.proof.production")}
-        </span>{" "}
-        {t("hero.proof.productionLabel")}
       </span>
     </div>
   );
@@ -91,18 +54,39 @@ export async function HeroSection() {
 
           <div className="hero-stagger-4 mt-7 flex flex-wrap gap-3">
             <Button asChild>
-              <Link href="/contact" prefetch={false}>
+              <Link href={HOMEPAGE_SECTION_LINKS.contact} prefetch={false}>
                 {t("hero.cta.primary")}
               </Link>
             </Button>
             <Button variant="secondary" asChild>
-              <Link href="/products" prefetch={false}>
+              <Link href={HOMEPAGE_SECTION_LINKS.products} prefetch={false}>
                 {t("hero.cta.secondary")}
               </Link>
             </Button>
           </div>
 
-          <ProofLine t={t} />
+          <HomepageTrustStrip
+            ariaLabel="Homepage proof facts"
+            className="hero-stagger-5 mt-7 border-t border-border-light pt-5 font-mono text-[13px] text-muted-foreground"
+            items={[
+              {
+                value: t("hero.proof.est"),
+                label: t("hero.proof.estLabel"),
+              },
+              {
+                value: t("hero.proof.countries"),
+                label: t("hero.proof.countriesLabel"),
+              },
+              {
+                value: t("hero.proof.range"),
+                label: t("hero.proof.rangeLabel"),
+              },
+              {
+                value: t("hero.proof.production"),
+                label: t("hero.proof.productionLabel"),
+              },
+            ]}
+          />
         </div>
 
         {/* Right column — Visual grid */}

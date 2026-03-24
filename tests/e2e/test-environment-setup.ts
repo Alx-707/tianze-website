@@ -29,6 +29,14 @@ export const TEST_ENV_VARS = {
   NEXT_PUBLIC_TEST_MODE: "true",
 } as const;
 
+const INTERFERING_SELECTORS = [
+  "#react-scan-toolbar-root",
+  '[data-testid="react-scan-indicator"]',
+  '[data-testid="react-scan-control-panel"]',
+  ".react-scan-overlay",
+  ".react-scan-toolbar",
+] as const;
+
 /**
  * 为测试环境配置环境变量
  */
@@ -59,19 +67,54 @@ export function cleanupTestEnvironment() {
 }
 
 /**
+ * 在页面上安装持续的干扰元素清理器，避免工具栏/覆盖层在测试过程中反复回流。
+ */
+export async function installInterferenceGuard(page: Page) {
+  await page.addInitScript((selectors: readonly string[]) => {
+    const removeMatches = () => {
+      for (const selector of selectors) {
+        document.querySelectorAll(selector).forEach((node) => node.remove());
+      }
+    };
+
+    removeMatches();
+
+    const observer = new MutationObserver(() => {
+      observer.disconnect();
+      removeMatches();
+      observer.observe(document.documentElement, {
+        childList: true,
+        subtree: true,
+      });
+    });
+
+    const start = () => {
+      removeMatches();
+      observer.observe(document.documentElement, {
+        childList: true,
+        subtree: true,
+      });
+    };
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", start, { once: true });
+    } else {
+      start();
+    }
+
+    window.addEventListener("beforeunload", () => observer.disconnect(), {
+      once: true,
+    });
+  }, INTERFERING_SELECTORS);
+}
+
+/**
  * 检查页面是否存在干扰元素
  */
 export async function checkForInterferingElements(page: Page) {
-  const interferingElements = [
-    "#react-scan-toolbar-root",
-    '[data-testid="react-scan-indicator"]',
-    '[data-testid="react-scan-control-panel"]',
-    ".react-scan-overlay",
-  ];
-
   const foundElements: string[] = [];
 
-  for (const selector of interferingElements) {
+  for (const selector of INTERFERING_SELECTORS) {
     try {
       const element = await page.locator(selector);
       const count = await element.count();
@@ -97,15 +140,7 @@ export async function checkForInterferingElements(page: Page) {
 export async function removeInterferingElements(page: Page) {
   console.log("🧹 Removing interfering elements...");
 
-  const interferingSelectors = [
-    "#react-scan-toolbar-root",
-    '[data-testid="react-scan-indicator"]',
-    '[data-testid="react-scan-control-panel"]',
-    ".react-scan-overlay",
-    ".react-scan-toolbar",
-  ];
-
-  for (const selector of interferingSelectors) {
+  for (const selector of INTERFERING_SELECTORS) {
     try {
       await page.evaluate((sel: string) => {
         const elements = document.querySelectorAll(sel);
@@ -231,6 +266,7 @@ export async function safeClick(
 const testEnvironmentUtils = {
   setupTestEnvironment,
   cleanupTestEnvironment,
+  installInterferenceGuard,
   checkForInterferingElements,
   removeInterferingElements,
   waitForStablePage,

@@ -44,6 +44,73 @@ pnpm lint:check
 pnpm test
 ```
 
+### Tier A Impact Review
+
+```bash
+pnpm review:tier-a:staged
+pnpm review:clusters:staged
+```
+
+Use `pnpm review:tier-a:staged` when the staged diff touches Tier A paths and you want the owner/proof guidance first.
+Use `pnpm review:clusters:staged` when you want the staged diff to scan all matching structural clusters and run the matching cluster reviews automatically.
+Use `pnpm review:cluster <name> --staged` when you already know a single cluster is in scope and want to run only that cluster's review.
+
+Default flow for staged diffs:
+1. Run `pnpm review:tier-a:staged` if any Tier A path is touched.
+2. Run `pnpm review:clusters:staged` for structural cluster coverage.
+3. Drop to `pnpm review:cluster <name> --staged` only when the scope is already known and you want a single-cluster check.
+
+If Tier A paths are matched:
+- use [`docs/guides/TIER-A-OWNER-MAP.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/TIER-A-OWNER-MAP.md)
+- use [`docs/guides/QUALITY-PROOF-LEVELS.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/QUALITY-PROOF-LEVELS.md)
+- use [`docs/guides/STRUCTURAL-CHANGE-CLUSTERS.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/STRUCTURAL-CHANGE-CLUSTERS.md)
+- do not treat fast local gates as sufficient proof
+
+If the impacted cluster is the lead API family:
+
+```bash
+pnpm review:lead-family
+```
+
+Also use:
+- [`docs/guides/LEAD-API-FAMILY-CONTRACT.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/LEAD-API-FAMILY-CONTRACT.md)
+
+If the impacted cluster is the translation quartet:
+
+```bash
+pnpm review:translation-quartet
+```
+
+Also use:
+- [`docs/guides/TRANSLATION-QUARTET-CONTRACT.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/TRANSLATION-QUARTET-CONTRACT.md)
+
+If the impacted cluster is the homepage section cluster:
+
+```bash
+pnpm review:homepage-sections
+```
+
+Also use:
+- [`docs/guides/HOMEPAGE-SECTION-CLUSTER-CONTRACT.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/HOMEPAGE-SECTION-CLUSTER-CONTRACT.md)
+
+If the impacted cluster is the locale runtime surface:
+
+```bash
+pnpm review:locale-runtime
+```
+
+Also use:
+- [`docs/guides/LOCALE-RUNTIME-CONTRACT.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/LOCALE-RUNTIME-CONTRACT.md)
+
+If the impacted cluster is cache invalidation + health:
+
+```bash
+pnpm review:cache-health
+```
+
+Also use:
+- [`docs/guides/CACHE-HEALTH-CONTRACT.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/CACHE-HEALTH-CONTRACT.md)
+
 ## Severity Rules
 
 - Findings must be tagged: `PROD` / `DEV` / `CI` / `DOC`

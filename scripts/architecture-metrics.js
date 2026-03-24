@@ -46,12 +46,20 @@ const METRICS_CONFIG = {
     "theme-analytics",
   ],
 
-  // 质量阈值
+  // 当前目标阈值（现行规则）
   thresholds: {
-    exportStar: { current: 97, phase1: 30, final: 0 },
-    tsErrors: { current: 2759, phase1: 1500, phase2: 500, final: 0 },
-    eslintIssues: { current: 2075, target: 200 },
-    totalFiles: { current: 644, target: 300 },
+    exportStar: { target: 30, aspirational: 0 },
+    tsErrors: { target: 0 },
+    eslintIssues: { target: 0 },
+    totalFiles: { reviewTarget: 700, aspirational: 500 },
+  },
+
+  // 历史迁移基线（仅用于趋势参照，不再当作现行目标）
+  historicalBaselines: {
+    exportStar: 97,
+    tsErrors: 2759,
+    eslintIssues: 2075,
+    totalFiles: 644,
   },
 };
 
@@ -285,10 +293,15 @@ class ArchitectureMetrics {
       },
       metrics: this.metrics,
       thresholds: METRICS_CONFIG.thresholds,
+      historicalBaselines: METRICS_CONFIG.historicalBaselines,
       analysis: {
-        phase1Ready:
+        meetsCurrentTargets:
           this.metrics.exportStarCount <=
-          METRICS_CONFIG.thresholds.exportStar.phase1,
+            METRICS_CONFIG.thresholds.exportStar.target &&
+          this.metrics.typeScriptErrors <=
+            METRICS_CONFIG.thresholds.tsErrors.target &&
+          this.metrics.eslintIssues <=
+            METRICS_CONFIG.thresholds.eslintIssues.target,
         qualityTrend: this.calculateQualityTrend(),
         recommendations: this.generateRecommendations(),
       },
@@ -311,28 +324,30 @@ class ArchitectureMetrics {
 
   calculateQualityTrend() {
     // 简化的质量趋势计算
-    const { exportStarCount, typeScriptErrors, eslintIssues } = this.metrics;
-    const { thresholds } = METRICS_CONFIG;
+    const { exportStarCount, typeScriptErrors, eslintIssues, totalFiles } =
+      this.metrics;
+    const { historicalBaselines } = METRICS_CONFIG;
 
     return {
       exportStarProgress: Math.max(
         0,
-        ((thresholds.exportStar.current - exportStarCount) /
-          thresholds.exportStar.current) *
+        ((historicalBaselines.exportStar - exportStarCount) /
+          historicalBaselines.exportStar) *
           100,
       ),
       tsErrorProgress: Math.max(
         0,
-        ((thresholds.tsErrors.current - typeScriptErrors) /
-          thresholds.tsErrors.current) *
+        ((historicalBaselines.tsErrors - typeScriptErrors) /
+          historicalBaselines.tsErrors) *
           100,
       ),
       eslintProgress: Math.max(
         0,
-        ((thresholds.eslintIssues.current - eslintIssues) /
-          thresholds.eslintIssues.current) *
+        ((historicalBaselines.eslintIssues - eslintIssues) /
+          historicalBaselines.eslintIssues) *
           100,
       ),
+      fileCountDeltaFromHistorical: totalFiles - historicalBaselines.totalFiles,
     };
   }
 
@@ -340,17 +355,21 @@ class ArchitectureMetrics {
     const recommendations = [];
 
     if (
-      this.metrics.exportStarCount > METRICS_CONFIG.thresholds.exportStar.phase1
+      this.metrics.exportStarCount > METRICS_CONFIG.thresholds.exportStar.target
     ) {
-      recommendations.push(
-        "优先处理export *重新导出，当前数量超出第一阶段目标",
-      );
+      recommendations.push("优先处理export *重新导出，当前数量超出当前目标");
     }
 
     if (
-      this.metrics.typeScriptErrors > METRICS_CONFIG.thresholds.tsErrors.phase1
+      this.metrics.typeScriptErrors > METRICS_CONFIG.thresholds.tsErrors.target
     ) {
       recommendations.push("TypeScript错误数量较高，建议分阶段修复");
+    }
+
+    if (
+      this.metrics.eslintIssues > METRICS_CONFIG.thresholds.eslintIssues.target
+    ) {
+      recommendations.push("ESLint问题仍未清零，建议继续收敛为零问题口径");
     }
 
     return recommendations;
@@ -365,10 +384,17 @@ class ArchitectureMetrics {
 
 | 指标 | 当前值 | 目标值 | 状态 |
 |------|--------|--------|------|
-| Export * 数量 | ${report.metrics.exportStarCount} | ${METRICS_CONFIG.thresholds.exportStar.phase1} | ${report.metrics.exportStarCount <= METRICS_CONFIG.thresholds.exportStar.phase1 ? "✅" : "❌"} |
-| TypeScript 错误 | ${report.metrics.typeScriptErrors} | ${METRICS_CONFIG.thresholds.tsErrors.phase1} | ${report.metrics.typeScriptErrors <= METRICS_CONFIG.thresholds.tsErrors.phase1 ? "✅" : "❌"} |
+| Export * 数量 | ${report.metrics.exportStarCount} | ${METRICS_CONFIG.thresholds.exportStar.target} | ${report.metrics.exportStarCount <= METRICS_CONFIG.thresholds.exportStar.target ? "✅" : "❌"} |
+| TypeScript 错误 | ${report.metrics.typeScriptErrors} | ${METRICS_CONFIG.thresholds.tsErrors.target} | ${report.metrics.typeScriptErrors <= METRICS_CONFIG.thresholds.tsErrors.target ? "✅" : "❌"} |
 | ESLint 问题 | ${report.metrics.eslintIssues} | ${METRICS_CONFIG.thresholds.eslintIssues.target} | ${report.metrics.eslintIssues <= METRICS_CONFIG.thresholds.eslintIssues.target ? "✅" : "❌"} |
-| 总文件数 | ${report.metrics.totalFiles} | ${METRICS_CONFIG.thresholds.totalFiles.target} | ${report.metrics.totalFiles <= METRICS_CONFIG.thresholds.totalFiles.target ? "✅" : "❌"} |
+| 总文件数 | ${report.metrics.totalFiles} | ${METRICS_CONFIG.thresholds.totalFiles.reviewTarget} | ${report.metrics.totalFiles <= METRICS_CONFIG.thresholds.totalFiles.reviewTarget ? "✅" : "❌"} |
+
+## 历史迁移基线（仅趋势参考）
+
+- Export * 历史基线: ${METRICS_CONFIG.historicalBaselines.exportStar}
+- TypeScript 错误历史基线: ${METRICS_CONFIG.historicalBaselines.tsErrors}
+- ESLint 问题历史基线: ${METRICS_CONFIG.historicalBaselines.eslintIssues}
+- 总文件数历史基线: ${METRICS_CONFIG.historicalBaselines.totalFiles}
 
 ## Export * 按域分布
 

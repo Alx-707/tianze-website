@@ -1,6 +1,6 @@
 import { Check } from "lucide-react";
 import { getTranslations } from "next-intl/server";
-import { SectionHead } from "@/components/ui/section-head";
+import { HomepageSectionShell } from "@/components/sections/homepage-section-shell";
 
 const STEP_COUNT = 5;
 const STAT_COUNT = 3;
@@ -77,28 +77,24 @@ export async function ChainSection() {
   );
 
   return (
-    <section className="section-divider py-10 md:py-14">
-      <div className="mx-auto max-w-[1080px] px-6">
-        <SectionHead title={t("chain.title")} subtitle={t("chain.subtitle")} />
-
-        {/* Process flow */}
-        <div className="flex flex-col md:flex-row">
-          {steps.map((step, i) => (
-            <ProcessStep
-              key={step.num}
-              {...step}
-              isLast={i === STEP_COUNT - 1}
-            />
-          ))}
-        </div>
-
-        {/* Stats */}
-        <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
-          {stats.map((text) => (
-            <StatBadge key={text} text={text} />
-          ))}
-        </div>
+    <HomepageSectionShell
+      sectionClassName="section-divider py-10 md:py-14"
+      title={t("chain.title")}
+      subtitle={t("chain.subtitle")}
+    >
+      {/* Process flow */}
+      <div className="flex flex-col md:flex-row">
+        {steps.map((step, i) => (
+          <ProcessStep key={step.num} {...step} isLast={i === STEP_COUNT - 1} />
+        ))}
       </div>
-    </section>
+
+      {/* Stats */}
+      <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
+        {stats.map((text) => (
+          <StatBadge key={text} text={text} />
+        ))}
+      </div>
+    </HomepageSectionShell>
   );
 }

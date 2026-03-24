@@ -53,8 +53,22 @@ export interface ContactFormWithToken extends ContactFormData {
   idempotencyKey?: string;
 }
 
-const CONTACT_FORM_IDEMPOTENCY_FINGERPRINT = "SERVER_ACTION:contactFormAction";
+/** MurmurHash2 mixing constant */
+const MURMUR2_MULTIPLIER = 0x5bd1e995;
+/** MurmurHash2 right-shift amount */
+const MURMUR2_SHIFT = 13;
+/** Radix for compact hash string encoding */
+const HASH_RADIX = 36;
 
+function createFormFingerprint(data: ContactFormWithToken): string {
+  const payload = `${data.email}:${data.message}:${data.submittedAt}`;
+  let hash = 0;
+  for (let i = 0; i < payload.length; i++) {
+    hash = Math.imul(hash ^ payload.charCodeAt(i), MURMUR2_MULTIPLIER);
+    hash ^= hash >>> MURMUR2_SHIFT;
+  }
+  return `SERVER_ACTION:contactForm:${(hash >>> 0).toString(HASH_RADIX)}`;
+}
 /**
  * Extract contact form data from FormData
  */
@@ -120,6 +134,17 @@ async function executeContactSubmissionAttempt(
   clientIP: string,
   startTime: number,
 ): Promise<ServerActionResult<ContactFormResult>> {
+  if (!contactData.turnstileToken) {
+    return createErrorResultWithLogging(
+      {
+        code: API_ERROR_CODES.TURNSTILE_MISSING_TOKEN,
+        message: "Security verification required",
+      },
+      undefined,
+      logger,
+    );
+  }
+
   const validation = await validateContactSubmission(contactData, clientIP);
   if (!validation.success || !validation.data) {
     return createErrorResultWithLogging(
@@ -155,7 +180,6 @@ async function executeContactSubmissionAttempt(
     logger,
   );
 }
-
 /**
  * 联系表单 Server Action
  * 处理联系表单提交，集成Zod验证、Turnstile验证和现有的业务逻辑
@@ -197,7 +221,7 @@ export const contactFormAction: ServerAction<FormData, ContactFormResult> =
         () => executeContactSubmissionAttempt(contactData, clientIP, startTime),
         {
           required: true,
-          fingerprint: CONTACT_FORM_IDEMPOTENCY_FINGERPRINT,
+          fingerprint: createFormFingerprint(contactData),
         },
       );
 

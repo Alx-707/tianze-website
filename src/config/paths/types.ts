@@ -20,7 +20,9 @@ export type PageType =
   | "products"
   | "faq"
   | "privacy"
-  | "terms";
+  | "terms"
+  | "bendingMachines"
+  | "oem";
 
 // 动态路由类型定义
 export type DynamicPageType = "blogDetail" | "productMarket";

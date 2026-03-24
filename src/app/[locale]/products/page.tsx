@@ -93,9 +93,9 @@ export default async function ProductsPage({ params }: ProductsPageProps) {
               })}
             />
           )}
-          {/* Bending Machines card — links to /contact as placeholder */}
+          {/* Bending Machines card — links to /capabilities/bending-machines */}
           <Link
-            href="/contact"
+            href="/capabilities/bending-machines"
             className="group block rounded-lg border border-border bg-card p-6 shadow-sm transition-shadow hover:shadow-md"
           >
             <div className="relative mb-4 aspect-[16/9] w-full overflow-hidden rounded-md bg-muted">

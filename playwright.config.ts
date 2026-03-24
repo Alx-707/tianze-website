@@ -44,7 +44,9 @@ const ensureLocaleInUrl = (input: string): string => {
 };
 
 const resolvedBaseUrl = ensureLocaleInUrl(
-  process.env.PLAYWRIGHT_BASE_URL || "http://localhost:3000",
+  process.env.STAGING_URL ||
+    process.env.PLAYWRIGHT_BASE_URL ||
+    "http://localhost:3000",
 );
 
 // HTML reporter may start a local server and wait for Ctrl+C when open is enabled.
