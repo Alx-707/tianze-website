@@ -65,7 +65,14 @@ describe("Feature: Market Family Page — Product Family Section", () => {
   describe("Scenario 1.2 / 1.5: Buyer sees product family with image area and spec table", () => {
     it("renders the family name as a heading", async () => {
       const FamilySection = await importComponent();
-      render(<FamilySection family={mockFamily} specs={mockSpecs} />);
+      render(
+        <FamilySection
+          family={mockFamily}
+          specs={mockSpecs}
+          familyLabel="Conduit Sweeps & Elbows"
+          familyDescription="PVC conduit sweeps and elbows in standard angles."
+        />,
+      );
 
       expect(
         screen.getByRole("heading", { name: "Conduit Sweeps & Elbows" }),
@@ -74,7 +81,14 @@ describe("Feature: Market Family Page — Product Family Section", () => {
 
     it("renders the family description", async () => {
       const FamilySection = await importComponent();
-      render(<FamilySection family={mockFamily} specs={mockSpecs} />);
+      render(
+        <FamilySection
+          family={mockFamily}
+          specs={mockSpecs}
+          familyLabel="Conduit Sweeps & Elbows"
+          familyDescription="PVC conduit sweeps and elbows in standard angles."
+        />,
+      );
 
       expect(
         screen.getByText("PVC conduit sweeps and elbows in standard angles."),
@@ -83,7 +97,14 @@ describe("Feature: Market Family Page — Product Family Section", () => {
 
     it("renders an image area with the first product image", async () => {
       const FamilySection = await importComponent();
-      render(<FamilySection family={mockFamily} specs={mockSpecs} />);
+      render(
+        <FamilySection
+          family={mockFamily}
+          specs={mockSpecs}
+          familyLabel="Conduit Sweeps & Elbows"
+          familyDescription="PVC conduit sweeps and elbows in standard angles."
+        />,
+      );
 
       const img = screen.getByRole("img");
       expect(img).toHaveAttribute(
@@ -94,7 +115,14 @@ describe("Feature: Market Family Page — Product Family Section", () => {
 
     it("renders 3 key highlights", async () => {
       const FamilySection = await importComponent();
-      render(<FamilySection family={mockFamily} specs={mockSpecs} />);
+      render(
+        <FamilySection
+          family={mockFamily}
+          specs={mockSpecs}
+          familyLabel="Conduit Sweeps & Elbows"
+          familyDescription="PVC conduit sweeps and elbows in standard angles."
+        />,
+      );
 
       expect(screen.getByText("UL 651 Certified")).toBeInTheDocument();
       expect(screen.getByText("100% Virgin PVC")).toBeInTheDocument();
@@ -103,7 +131,14 @@ describe("Feature: Market Family Page — Product Family Section", () => {
 
     it("renders the SpecTable component", async () => {
       const FamilySection = await importComponent();
-      render(<FamilySection family={mockFamily} specs={mockSpecs} />);
+      render(
+        <FamilySection
+          family={mockFamily}
+          specs={mockSpecs}
+          familyLabel="Conduit Sweeps & Elbows"
+          familyDescription="PVC conduit sweeps and elbows in standard angles."
+        />,
+      );
 
       expect(screen.getByTestId("spec-table")).toBeInTheDocument();
       expect(screen.getByTestId("spec-table")).toHaveTextContent("1 groups");
@@ -112,7 +147,12 @@ describe("Feature: Market Family Page — Product Family Section", () => {
     it("has an anchor id matching the family slug for sticky nav linking", async () => {
       const FamilySection = await importComponent();
       const { container } = render(
-        <FamilySection family={mockFamily} specs={mockSpecs} />,
+        <FamilySection
+          family={mockFamily}
+          specs={mockSpecs}
+          familyLabel="Conduit Sweeps & Elbows"
+          familyDescription="PVC conduit sweeps and elbows in standard angles."
+        />,
       );
 
       const section = container.querySelector("section#conduit-sweeps-elbows");

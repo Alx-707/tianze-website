@@ -12,7 +12,12 @@ import { AUSTRALIA_NZ_SPECS } from "@/constants/product-specs/australia-new-zeal
 import { MEXICO_SPECS } from "@/constants/product-specs/mexico";
 import { EUROPE_SPECS } from "@/constants/product-specs/europe";
 import { PNEUMATIC_SPECS } from "@/constants/product-specs/pneumatic-tube-systems";
-import type { MarketSpecs } from "@/constants/product-specs/types";
+import type { MarketSpecs, SpecGroup } from "@/constants/product-specs/types";
+import {
+  getColumnTranslationKey,
+  getGroupLabelTranslationKey,
+  getRowValueTranslationKey,
+} from "@/lib/spec-table-translator";
 import { SITE_CONFIG } from "@/config/paths";
 import { CatalogBreadcrumb } from "@/components/products/catalog-breadcrumb";
 import { FamilySection } from "@/components/products/family-section";
@@ -148,6 +153,30 @@ function CtaSection({ heading, description, buttonText }: CtaSectionProps) {
   );
 }
 
+// --- Helper functions for spec translation ---
+
+function translateSpecColumns(
+  columns: string[],
+  t: (key: string) => string,
+): string[] {
+  return columns.map((col) => {
+    const colKey = getColumnTranslationKey(col);
+    return t(colKey);
+  });
+}
+
+function translateSpecRows(
+  rows: string[][],
+  t: (key: string) => string,
+): string[][] {
+  return rows.map((row) =>
+    row.map((cell) => {
+      const cellKey = getRowValueTranslationKey(cell);
+      return cellKey ? t(cellKey) : cell;
+    }),
+  );
+}
+
 // --- Page component ---
 
 export default async function MarketPage({ params }: MarketPageProps) {
@@ -196,8 +225,49 @@ export default async function MarketPage({ params }: MarketPageProps) {
         {families.map((family) => {
           const specs = familySpecsMap.get(family.slug);
           if (!specs) return null;
+          const familyLabel = t(`families.${marketSlug}.${family.slug}.label`);
+          const familyDescription = t(
+            `families.${marketSlug}.${family.slug}.description`,
+          );
+          // Translate highlights from catalog keys
+          const translatedHighlights = specs.highlights.map((_, index) =>
+            t(
+              `specs.${marketSlug}.families.${family.slug}.highlights.${index}`,
+            ),
+          );
+          // Translate spec groups (column headers, group labels, row values)
+          const translatedSpecGroups: SpecGroup[] = specs.specGroups.map(
+            (group, groupIndex) => {
+              const groupLabelKey = getGroupLabelTranslationKey(
+                marketSlug,
+                family.slug,
+                groupIndex,
+              );
+              const translatedLabel = t(groupLabelKey);
+              const translatedColumns = translateSpecColumns(group.columns, t);
+              const translatedRows = translateSpecRows(group.rows, t);
+
+              return {
+                ...group,
+                groupLabel: translatedLabel,
+                columns: translatedColumns,
+                rows: translatedRows,
+              };
+            },
+          );
+          const specsWithTranslations = {
+            ...specs,
+            highlights: translatedHighlights,
+            specGroups: translatedSpecGroups,
+          };
           return (
-            <FamilySection key={family.slug} family={family} specs={specs} />
+            <FamilySection
+              key={family.slug}
+              family={family}
+              specs={specsWithTranslations}
+              familyLabel={familyLabel}
+              familyDescription={familyDescription}
+            />
           );
         })}
       </div>

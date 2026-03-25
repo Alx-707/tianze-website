@@ -52,9 +52,13 @@ vi.mock("@/components/products/catalog-breadcrumb", () => ({
 }));
 
 vi.mock("@/components/products/family-section", () => ({
-  FamilySection: ({ family }: { family: { slug: string; label: string } }) => (
-    <div data-testid={`family-${family.slug}`}>{family.label}</div>
-  ),
+  FamilySection: ({
+    family,
+    familyLabel,
+  }: {
+    family: { slug: string; label: string };
+    familyLabel: string;
+  }) => <div data-testid={`family-${family.slug}`}>{familyLabel}</div>,
 }));
 
 vi.mock("@/components/products/sticky-family-nav", () => ({
