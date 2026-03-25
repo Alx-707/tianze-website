@@ -169,13 +169,6 @@ export function getUnconfiguredPlaceholders(
       value: config.contact.email,
     });
   }
-  if (!isWhatsAppConfigured(config.contact.whatsappNumber)) {
-    placeholders.push({
-      path: "SITE_CONFIG.contact.whatsappNumber",
-      value: config.contact.whatsappNumber,
-    });
-  }
-
   return placeholders;
 }
 
