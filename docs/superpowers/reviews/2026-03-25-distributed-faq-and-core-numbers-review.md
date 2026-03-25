@@ -240,3 +240,48 @@ This revision fixes most of the Round 2 blockers in the right way: the `locale` 
 Most of the prior blockers are resolved, and the plan is now close. The remaining work is mainly tightening the plan so it is consistently executable under strict TypeScript and consistently testable across all pages (not just contact).
 
 **Consensus Status**: NEEDS_REVISION
+
+---
+
+## Round 4 — 2026-03-25
+
+### Overall Assessment
+The plan is now implementation-ready. The Round 3 execution blockers are addressed directly in the plan (locale typing in the test helper, concrete test paths/patterns for all page integrations, concrete core-numbers test targets, and a stronger route deletion checklist). The remaining “differences from the design handoff” are now clearly in the “intentional and acceptable” category for this batch, rather than hidden gaps.
+
+**Rating**: 9/10
+
+### Previous Round Tracking
+| # | Issue | Status | Notes |
+|---|-------|--------|-------|
+| 1 | Sequencing will break `/faq` before it is deleted | Resolved | Task 1 remains backward-compatible and Task 7 removes old keys when deleting the route. |
+| 2 | Missing chevron + rotation behavior | Resolved | Trigger includes `group` and chevron rotation selector is in place. |
+| 3 | Wrong breakpoint for 44px touch targets | Resolved | Trigger uses `min-h-[44px]`. |
+| 4 | “20 Q&As distributed” not met due to duplicates | Resolved | Coverage map remains and the plan assigns all 20 items to at least one page. |
+| 5 | Shared `faq` namespace contradicts handoff / maintenance risk | Acceptable | Plan explicitly chooses a shared namespace and documents why; acceptable for this batch. |
+| 6 | Incorrect / non-existent `Locale` import | Resolved | Locale typing is now consistent and no longer relies on a cast. |
+| 7 | Schema placement not configurable / inconsistent with handoff | Acceptable | Schema emission inside `FaqSection` is consistent and workable given one FAQ section per page in this batch. |
+| 8 | Answer renderer can’t support tables (BDD mobile requirement) | Resolved | BDD now explicitly defers table support for prose-only content. |
+| 9 | File list incomplete (missing `faq-accordion.tsx`, test targets) | Resolved | File list includes `faq-accordion.tsx`, and integration test targets are now concrete across pages. |
+| 10 | Route deletion checklist was optional/incomplete | Resolved | Checklist now explicitly includes `src/constants/` as a mandatory check. |
+| 11 | Core numbers plan lacked reliable tests | Resolved | Plan now specifies concrete test files/targets (homepage via `hero-section.test.tsx`, about via about page test). |
+| 12 | “Years in business” caching staleness not defined | Resolved | BDD + plan now align on stable “Established {year}”. |
+| 13 | Parallelization causes critical.json merge conflicts | Resolved | Execution order still sequences Task 7 before Task 8 to avoid conflicts. |
+| A | Task 2’s test code and component props don’t match | Resolved | Test helper now passes locale and types it as `"en" | "zh"`. |
+| B | Chevron rotation likely won’t work as written | Resolved | `group` class is added on the trigger, enabling the selector. |
+| C | Locale typing/import remains a compile-risk | Resolved | Locale prop is typed as a locale union and the cast is removed. |
+| D | Table support spec mismatch | Resolved | BDD updated to explicitly defer table support. |
+| E | “Established {year}” vs “years in business” mismatch | Resolved | BDD updated to “Established {year}”. |
+| F | Integration test steps too vague to execute | Resolved | Test file paths and render patterns are now concrete for all target pages. |
+
+### Issues (new or unresolved)
+No new blocking issues found in this revision.
+
+### Positive Aspects
+- The plan is now “followable” end-to-end without needing unstated fixes to make tests/type-checks work.
+- Page integration testing guidance is consistent across all target routes.
+- Route deletion cleanup is aligned with the project’s own checklist, reducing the risk of dead links and orphaned config.
+
+### Summary
+All previously raised blocking issues are resolved, and the remaining design deviations are explicitly chosen and acceptable for this batch.
+
+**Consensus Status**: APPROVED
