@@ -995,11 +995,11 @@
       "type": "类型",
       "length": "长度",
       "schedule": "壁厚等级",
-      "bendRadius": "Bend Radius",
-      "connection": "Connection",
-      "duty": "Duty",
-      "material": "Material",
-      "outerDiameter": "Outer Diameter"
+      "bendRadius": "弯曲半径",
+      "connection": "连接方式",
+      "duty": "强度等级",
+      "material": "材料",
+      "outerDiameter": "外径"
     },
     "familyCount": "{count} 个产品系列",
     "highlights": {

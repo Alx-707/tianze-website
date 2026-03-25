@@ -279,6 +279,7 @@ export default async function MarketPage({ params }: MarketPageProps) {
               slug: f.slug,
               label: t(`families.${marketSlug}.${f.slug}.label`),
             }))}
+          ariaLabel={t("market.familyNav.jumpTo")}
         />
       )}
 

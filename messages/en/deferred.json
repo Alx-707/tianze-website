@@ -473,13 +473,13 @@
       "full-auto-bending-machine": {
         "name": "Full-Automatic PVC Pipe Bending Machine",
         "params": {
-          "pipeDiameter": "DN25-DN160mm",
-          "bendingAngles": "15°-180° (Programmable)",
-          "heatingZones": "4-8 zones",
-          "powerSupply": "380V/50Hz 3-Phase",
-          "productionSpeed": "150-200 pcs/hour",
-          "machineWeight": "~1200kg",
-          "controlSystem": "PLC + HMI Touch Screen"
+          "pipeDiameter": "Pipe Diameter",
+          "bendingAngles": "Bending Angles",
+          "heatingZones": "Heating Zones",
+          "powerSupply": "Power Supply",
+          "productionSpeed": "Production Speed",
+          "machineWeight": "Machine Weight",
+          "controlSystem": "Control System"
         },
         "highlights": {
           "0": "CNC Control System",
@@ -491,12 +491,12 @@
       "semi-auto-bending-machine": {
         "name": "Semi-Automatic PVC Pipe Bending Machine",
         "params": {
-          "pipeDiameter": "DN20-DN110mm",
-          "bendingAngles": "45°, 90°, Custom",
-          "heatingMethod": "Infrared / Electric",
-          "powerSupply": "380V/50Hz 3-Phase",
-          "productionSpeed": "60-80 pcs/hour",
-          "machineWeight": "~500kg"
+          "pipeDiameter": "Pipe Diameter",
+          "bendingAngles": "Bending Angles",
+          "heatingMethod": "Heating Method",
+          "powerSupply": "Power Supply",
+          "productionSpeed": "Production Speed",
+          "machineWeight": "Machine Weight"
         },
         "highlights": {
           "0": "Precision Temperature Control",

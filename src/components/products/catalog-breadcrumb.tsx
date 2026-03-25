@@ -49,8 +49,8 @@ export async function CatalogBreadcrumb({
   const canonicalBase = `${baseUrl}/${routing.defaultLocale}`;
 
   const entries: BreadcrumbEntry[] = [
-    { name: "Home", url: canonicalBase },
-    { name: "Products", url: `${canonicalBase}/products` },
+    { name: tBreadcrumb("home"), url: canonicalBase },
+    { name: tBreadcrumb("products"), url: `${canonicalBase}/products` },
   ];
 
   if (market) {

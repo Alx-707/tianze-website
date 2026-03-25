@@ -995,11 +995,11 @@
       "type": "类型",
       "length": "长度",
       "schedule": "壁厚等级",
-      "bendRadius": "Bend Radius",
-      "connection": "Connection",
-      "duty": "Duty",
-      "material": "Material",
-      "outerDiameter": "Outer Diameter"
+      "bendRadius": "弯曲半径",
+      "connection": "连接方式",
+      "duty": "强度等级",
+      "material": "材料",
+      "outerDiameter": "外径"
     },
     "familyCount": "{count} 个产品系列",
     "highlights": {
@@ -1963,38 +1963,38 @@
     },
     "equipment": {
       "full-auto-bending-machine": {
-        "highlights": {
-          "0": "CNC Control System",
-          "1": "Automatic Feeding",
-          "2": "Multi-Station Design",
-          "3": "Remote Diagnostics"
-        },
-        "name": "Full-Automatic PVC Pipe Bending Machine",
+        "name": "全自动PVC弯管机",
         "params": {
-          "bendingAngles": "15°-180° (Programmable)",
-          "controlSystem": "PLC + HMI Touch Screen",
-          "heatingZones": "4-8 zones",
-          "machineWeight": "~1200kg",
-          "pipeDiameter": "DN25-DN160mm",
-          "powerSupply": "380V/50Hz 3-Phase",
-          "productionSpeed": "150-200 pcs/hour"
+          "pipeDiameter": "管径",
+          "bendingAngles": "弯曲角度",
+          "heatingZones": "加热区",
+          "powerSupply": "电源",
+          "productionSpeed": "生产速度",
+          "machineWeight": "机器重量",
+          "controlSystem": "控制系统"
+        },
+        "highlights": {
+          "0": "CNC数控系统",
+          "1": "自动送料",
+          "2": "多工位设计",
+          "3": "远程诊断"
         }
       },
       "semi-auto-bending-machine": {
-        "highlights": {
-          "0": "Precision Temperature Control",
-          "1": "Adjustable Bending Angles",
-          "2": "Quick-Swap Mold System",
-          "3": "Safety Features"
-        },
-        "name": "Semi-Automatic PVC Pipe Bending Machine",
+        "name": "半自动PVC弯管机",
         "params": {
-          "bendingAngles": "45°, 90°, Custom",
-          "heatingMethod": "Infrared / Electric",
-          "machineWeight": "~500kg",
-          "pipeDiameter": "DN20-DN110mm",
-          "powerSupply": "380V/50Hz 3-Phase",
-          "productionSpeed": "60-80 pcs/hour"
+          "pipeDiameter": "管径",
+          "bendingAngles": "弯曲角度",
+          "heatingMethod": "加热方式",
+          "powerSupply": "电源",
+          "productionSpeed": "生产速度",
+          "machineWeight": "机器重量"
+        },
+        "highlights": {
+          "0": "精密温控",
+          "1": "可调弯曲角度",
+          "2": "快换模具系统",
+          "3": "安全防护"
         }
       }
     }
