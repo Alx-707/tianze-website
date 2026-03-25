@@ -92,7 +92,15 @@ export async function generateMetadata({
 // --- Extracted sub-sections (keep MarketPage under 120 lines) ---
 
 interface TrustSignalsSectionProps {
-  marketSpecs: MarketSpecs;
+  translatedTechnical: Record<string, string>;
+  certifications: string[];
+  translatedTrade: {
+    moq: string;
+    leadTime: string;
+    supplyCapacity: string;
+    packaging: string;
+    portOfLoading: string;
+  };
   technicalTitle: string;
   certificationsTitle: string;
   tradeTitle: string;
@@ -106,7 +114,9 @@ interface TrustSignalsSectionProps {
 }
 
 function TrustSignalsSection({
-  marketSpecs,
+  translatedTechnical,
+  certifications,
+  translatedTrade,
   technicalTitle,
   certificationsTitle,
   tradeTitle,
@@ -114,17 +124,17 @@ function TrustSignalsSection({
 }: TrustSignalsSectionProps) {
   return (
     <div className="mt-16 space-y-8">
-      <ProductSpecs specs={marketSpecs.technical} title={technicalTitle} />
+      <ProductSpecs specs={translatedTechnical} title={technicalTitle} />
       <ProductCertifications
-        certifications={marketSpecs.certifications}
+        certifications={certifications}
         title={certificationsTitle}
       />
       <ProductTradeInfo
-        moq={marketSpecs.trade.moq}
-        leadTime={marketSpecs.trade.leadTime}
-        supplyCapacity={marketSpecs.trade.supplyCapacity}
-        packaging={marketSpecs.trade.packaging}
-        portOfLoading={marketSpecs.trade.portOfLoading}
+        moq={translatedTrade.moq}
+        leadTime={translatedTrade.leadTime}
+        supplyCapacity={translatedTrade.supplyCapacity}
+        packaging={translatedTrade.packaging}
+        portOfLoading={translatedTrade.portOfLoading}
         title={tradeTitle}
         labels={tradeLabels}
       />
@@ -175,6 +185,54 @@ function translateSpecRows(
       return cellKey ? t(cellKey) : cell;
     }),
   );
+}
+
+function translateTechnicalSpecs(
+  technical: Record<string, string>,
+  marketSlug: string,
+  t: (key: string) => string,
+): Record<string, string> {
+  const translated: Record<string, string> = {};
+  for (const key of Object.keys(technical)) {
+    const labelKey = `technicalLabels.${key}`;
+    const valueKey = `specs.${marketSlug}.technical.${key}`;
+    const translatedLabel = t(labelKey);
+    const translatedValue = t(valueKey);
+    translated[translatedLabel] = translatedValue;
+  }
+  return translated;
+}
+
+function buildTrustSignalsSectionProps(
+  marketSpecs: MarketSpecs,
+  marketSlug: string,
+  t: (key: string) => string,
+): TrustSignalsSectionProps {
+  return {
+    translatedTechnical: translateTechnicalSpecs(
+      marketSpecs.technical,
+      marketSlug,
+      t,
+    ),
+    certifications: marketSpecs.certifications,
+    translatedTrade: {
+      moq: t(`specs.${marketSlug}.trade.moq`),
+      leadTime: t(`specs.${marketSlug}.trade.leadTime`),
+      supplyCapacity: t(`specs.${marketSlug}.trade.supplyCapacity`),
+      packaging: t(`specs.${marketSlug}.trade.packaging`),
+      portOfLoading: t(`specs.${marketSlug}.trade.portOfLoading`),
+    },
+    technicalTitle: t("market.technical.title"),
+    certificationsTitle: t("market.certifications.title"),
+    tradeTitle: t("market.trade.title"),
+    tradeLabels: {
+      moq: t("market.trade.moq"),
+      leadTime: t("market.trade.leadTime"),
+      supplyCapacity: t("market.trade.supplyCapacity"),
+      packaging: t("market.trade.packaging"),
+      portOfLoading: t("market.trade.portOfLoading"),
+    },
+  };
 }
 
 // --- Page component ---
@@ -280,17 +338,7 @@ export default async function MarketPage({ params }: MarketPageProps) {
 
       {marketSpecs && (
         <TrustSignalsSection
-          marketSpecs={marketSpecs}
-          technicalTitle={t("market.technical.title")}
-          certificationsTitle={t("market.certifications.title")}
-          tradeTitle={t("market.trade.title")}
-          tradeLabels={{
-            moq: t("market.trade.moq"),
-            leadTime: t("market.trade.leadTime"),
-            supplyCapacity: t("market.trade.supplyCapacity"),
-            packaging: t("market.trade.packaging"),
-            portOfLoading: t("market.trade.portOfLoading"),
-          }}
+          {...buildTrustSignalsSectionProps(marketSpecs, marketSlug, t)}
         />
       )}
 
