@@ -10,7 +10,9 @@
 
 **User Requirements:** Buyers need FAQ answers in context (on the page where the question arises), not on a separate FAQ page. 20 PVC conduit-specific Q&As distributed across contact, about, products, OEM, and bending machines pages.
 
-**Design Decisions:** Distributed FAQ over standalone page (user feedback during brainstorming). Shadow-card accordion per PAGE-PATTERNS.md. Shared `faq` i18n namespace for cross-page reuse (diverges from HANDOFF's per-page `namespace` prop — simplified to single namespace since all items live in one pool and pages just select which keys to display).
+**Design Decisions:** Distributed FAQ over standalone page (user feedback during brainstorming). Shadow-card accordion per PAGE-PATTERNS.md. Shared `faq` i18n namespace for cross-page reuse (diverges from HANDOFF's per-page `namespace` prop — simplified to single namespace since all items live in one pool and pages just select which keys to display; payload impact is negligible because the entire `deferred.json` bundle loads regardless of which page the user visits). "Years in business" uses stable "Established {year}" display, not dynamic year computation, to avoid cache staleness.
+
+**Codex Review:** Round 1 scored 5/10, NEEDS_REVISION. 8 of 13 issues accepted and fixed in this revision. See `docs/superpowers/reviews/2026-03-25-distributed-faq-and-core-numbers-review.md`.
 
 **BDD Specs Reference:** `docs/specs/batch3-faq-numbers/bdd-specs.md`
 
@@ -27,6 +29,7 @@
 | `messages/en/deferred.json` | Modify | Add `faq` namespace with 20 Q&A items (en) |
 | `messages/zh/deferred.json` | Modify | Add `faq` namespace with 20 Q&A items (zh) |
 | `src/components/sections/faq-section.tsx` | **Create** | Reusable FaqSection Server Component |
+| `src/components/sections/faq-accordion.tsx` | **Create** | Client accordion wrapper with chevron |
 | `src/components/sections/__tests__/faq-section.test.tsx` | **Create** | FaqSection unit tests |
 | `src/app/[locale]/contact/page.tsx` | Modify | Add FaqSection + FAQ Schema |
 | `src/app/[locale]/about/page.tsx` | Modify | Add FaqSection + FAQ Schema |
@@ -54,9 +57,9 @@
 
 **BDD:** Supports scenarios 2.1, 2.2, 3.1, 3.2, 4.1, 4.2, 5.1, 5.2
 
-- [ ] **Step 1: Replace old `faq` namespace in `messages/en/deferred.json`**
+- [ ] **Step 1: Extend `faq` namespace in `messages/en/deferred.json` (backward-compatible)**
 
-Remove the existing `faq` block (pageTitle, categories, noResults, searchPlaceholder, contactCta) and replace with the new shared structure. Extract all 20 Q&A items from `docs/content/faq/v1-final.md`.
+**IMPORTANT:** Do NOT remove the existing keys (pageTitle, categories, noResults, searchPlaceholder, contactCta) yet — the old `/faq` route still reads them. Add the new `sectionTitle` and `items` keys alongside the old ones. The old keys will be removed in Task 7 when the route is deleted. Extract all 20 Q&A items from `docs/content/faq/v1-final.md`.
 
 Key structure:
 ```json
@@ -319,6 +322,7 @@ Create the Client accordion wrapper:
 // src/components/sections/faq-accordion.tsx
 "use client";
 
+import { ChevronDownIcon } from "lucide-react";
 import {
   Accordion,
   AccordionItem,
@@ -342,8 +346,9 @@ export function FaqAccordion({ items }: FaqAccordionProps) {
     >
       {items.map((item) => (
         <AccordionItem key={item.key} value={item.key} className="border-b-0 border-t border-border first:border-t-0">
-          <AccordionTrigger className="px-6 text-[15px] font-medium sm:min-h-[44px]">
+          <AccordionTrigger className="min-h-[44px] px-6 text-[15px] font-medium">
             {item.question}
+            <ChevronDownIcon className="size-4 shrink-0 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
           </AccordionTrigger>
           <AccordionContent className="px-6">
             <p className="text-sm leading-relaxed text-muted-foreground whitespace-pre-line">
@@ -356,6 +361,12 @@ export function FaqAccordion({ items }: FaqAccordionProps) {
   );
 }
 ```
+
+**Notes (Codex review fixes):**
+- `min-h-[44px]` is mobile-first (not `sm:min-h-[44px]`) — 44px touch target on all screens
+- `ChevronDownIcon` with `group-data-[state=open]:rotate-180` satisfies BDD 1.3 chevron rotation
+- The existing `AccordionTrigger` in `src/components/ui/accordion.tsx` does NOT include a built-in chevron — it must be added here
+- Current FAQ content is prose-only; table rendering support is deferred to a future batch
 
 - [ ] **Step 4: Run tests to verify they pass**
 
@@ -485,11 +496,13 @@ import { FaqSection } from "@/components/sections/faq-section";
 // After TrustSignalsSection or product specs, before FinalCTA:
 <FaqSection
   locale={locale}
-  items={["sch40vs80", "conduitSize", "bendingRadius", "strengthGrades", "lszh", "standardsDifference"]}
+  items={["sch40vs80", "conduitSize", "bendingRadius", "strengthGrades", "lszh", "standardsDifference", "directBurial", "indoorOutdoor", "solarDataCenter", "corrosion"]}
 />
 ```
 
-All 5 market pages share the same technical FAQ. Market-specific FAQ deferred.
+All 5 market pages share the same technical + installation FAQ. Market-specific FAQ deferred.
+
+**Coverage note (Codex review fix):** Added 4 installation-related items (directBurial, indoorOutdoor, solarDataCenter, corrosion) that were previously unassigned to any page. All 20 FAQ items now appear on at least one page.
 
 - [ ] **Step 4: Run test to verify it passes**
 
@@ -553,7 +566,24 @@ git commit -m "feat(oem,bending): add contextual faq sections"
 
 **BDD:** Scenarios 6.1, 6.2, 6.3
 
-Follow the Route Deletion Checklist from `.claude/rules/architecture.md`.
+Follow the Route Deletion Checklist from `.claude/rules/architecture.md`. **ALL items are mandatory:**
+
+| Location | What to check |
+|----------|--------------|
+| `src/app/sitemap.ts` | Remove `/faq` URL generation |
+| `src/config/paths/paths-config.ts` | Remove `faq` from `DYNAMIC_PATHS_CONFIG` |
+| `src/config/paths/types.ts` | Remove from `DynamicPageType` union if present |
+| `src/config/paths/utils.ts` | Remove `"/faq"` from `PATHNAMES` |
+| `src/lib/i18n/route-parsing.ts` | Remove from `DYNAMIC_ROUTE_PATTERNS` if present |
+| `messages/*/critical.json` | Remove FAQ nav links from header/footer |
+| Navigation components | Remove any hardcoded FAQ links |
+| Test files | Remove/update tests referencing the route |
+
+**301 redirect**: Deferred. Old `/faq` will return 404. Can add redirect in a future batch if analytics show traffic.
+
+- [ ] **Step 0: Remove old faq keys from deferred.json**
+
+Now that the route is being deleted, remove the backward-compatible old keys (pageTitle, categories, noResults, searchPlaceholder, contactCta) from `messages/en/deferred.json` and `messages/zh/deferred.json`. The new `sectionTitle` and `items` keys stay.
 
 - [ ] **Step 1: Write failing tests for cleanup**
 
@@ -659,15 +689,32 @@ grep -rn '"20 "' messages/ --include="*.json"
 
 Record every location found.
 
-- [ ] **Step 2: Write failing test for ICU interpolation**
+- [ ] **Step 2: Write failing tests for ICU interpolation and component rendering**
 
 ```typescript
+// Test 1: Translation strings have ICU placeholders
 it("translation strings use ICU placeholders for company numbers", () => {
   // Read critical.json
   // Assert: strings mentioning country count use {countries} not literal "20"
-  // Assert: strings mentioning year use {year} not literal "2018"
+  // Assert: strings mentioning year use {established} not literal "2018"
+});
+
+// Test 2: Homepage renders siteFacts values (BDD 7.1)
+it("homepage trust elements display country count from siteFacts", async () => {
+  // Render homepage or relevant section
+  // Assert: rendered text contains siteFacts.stats.exportCountries value
+  // Assert: "+" suffix comes from template (e.g., "20+" not just "20")
+});
+
+// Test 3: About page renders siteFacts values (BDD 7.2)
+it("about page stats show established year from siteFacts", async () => {
+  // Render about page stats section
+  // Assert: "Established {year}" matches siteFacts.company.established
+  // NOTE: Use stable "Established {year}" display, NOT dynamic year computation
 });
 ```
+
+**Note (Codex review fix):** Tests must render actual components and assert displayed values match `siteFacts`, not just inspect raw JSON files. "Years in business" uses stable "Established {year}" display to avoid cache staleness.
 
 - [ ] **Step 3: Replace hardcoded numbers in translation files with ICU placeholders**
 
@@ -762,15 +809,43 @@ git commit -m "docs: register FaqSection and FaqAccordion components"
 ## Execution Order Summary
 
 ```
-Task 1: Translation keys (data layer)     — no dependencies
+Task 1: Translation keys (data layer)     — no dependencies, keeps old keys for backward compat
 Task 2: FaqSection component (Red→Green)   — depends on Task 1
 Task 3: Contact page integration           — depends on Task 2
 Task 4: About page integration             — depends on Task 2
 Task 5: Product pages integration          — depends on Task 2
 Task 6: OEM + Bending pages integration    — depends on Task 2
-Task 7: Remove old /faq route              — after Tasks 3-6 (all integrations done)
-Task 8: Core numbers unification           — independent, can run parallel with Tasks 3-6
+Task 7: Remove old /faq route + cleanup    — after Tasks 3-6 (deletes old keys + route)
+Task 8: Core numbers unification           — after Task 7 (both touch critical.json)
 Task 9: Final verification                 — after all tasks
 ```
 
-Tasks 3, 4, 5, 6, and 8 are independent of each other and can be parallelized.
+Tasks 3, 4, 5, 6 are independent and can be parallelized.
+Task 7 must complete before Task 8 to avoid merge conflicts in `messages/*/critical.json`.
+
+## 20-Item Coverage Map
+
+All 20 FAQ items assigned to at least one page:
+
+| Key | Contact | About | Products | OEM | Bending |
+|-----|---------|-------|----------|-----|---------|
+| moq | x | | | | |
+| leadTime | x | | | | |
+| payment | x | | | | |
+| samples | x | | | x | |
+| oem | x | | | x | |
+| certifications | | x | | | |
+| standardsDifference | | | x | | |
+| verifyCerts | | x | | | |
+| sch40vs80 | | | x | | |
+| conduitSize | | | x | | |
+| bendingRadius | | | x | | x |
+| strengthGrades | | | x | | |
+| lszh | | | x | | |
+| directBurial | | | x | | |
+| indoorOutdoor | | | x | | |
+| solarDataCenter | | | x | | |
+| corrosion | | | x | | |
+| manufacturer | | x | | | x |
+| factoryVisit | | x | | | |
+| exportExperience | | x | | | |
