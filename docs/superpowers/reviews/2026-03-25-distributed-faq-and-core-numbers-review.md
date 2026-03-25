@@ -108,3 +108,135 @@ The plan has a solid direction (a reusable FAQ section, distributed placement, a
 ## Consensus Status
 **NEEDS_REVISION**
 
+---
+
+## Round 2 — 2026-03-25
+
+### Overall Assessment
+The revised plan is meaningfully stronger: it fixes the biggest “will break mid-way” sequencing problem, adds an explicit 20-item coverage map, tightens the route deletion checklist, and addresses the touch-target requirement. However, it still has a couple of hard blockers that would prevent a clean implementation pass (most importantly: a broken/inconsistent `locale` prop story in Task 2 and an unresolved mismatch with the BDD requirement around table rendering). With a few targeted fixes, it can become implementation-ready.
+
+**Rating**: 6/10
+
+### Previous Round Tracking
+| # | Issue | Status | Notes |
+|---|-------|--------|-------|
+| 1 | Sequencing will break `/faq` before it is deleted | Resolved | Task 1 now keeps old keys and explicitly says “backward-compatible”; Task 7 adds Step 0 to remove old keys only when deleting the route (plan lines 60–63, 584–587). |
+| 2 | Missing chevron + rotation behavior | Partially Resolved | Chevron icon is added in `FaqAccordion`, but the rotation class likely won’t work unless the trigger is also marked as a `group`, and there is still no test asserting rotation (plan lines 349–352). |
+| 3 | Wrong breakpoint for 44px touch targets | Resolved | Trigger now uses `min-h-[44px]` (mobile-first) and the plan calls this out explicitly (plan lines 349, 365–367). |
+| 4 | “20 Q&As distributed” not met due to duplicates | Resolved | Plan adds a 20-item coverage map and assigns previously unassigned keys to product pages (plan lines 505–506, 826–851). |
+| 5 | Shared `faq` namespace contradicts handoff / maintenance risk | Partially Resolved | The plan explicitly keeps a shared namespace and provides a rationale; it still diverges from the handoff approach and doesn’t add page-specific title/subtitle guidance (plan line 13). |
+| 6 | Incorrect / non-existent `Locale` import | Unresolved | `FaqSection` still imports `Locale` from `@/types/content.types` and casts `locale as Locale` while `locale` is typed as `string` (plan lines 272–303). |
+| 7 | Schema placement not configurable / inconsistent with handoff | Unresolved | Schema is still always emitted inside `FaqSection` and the plan does not add an `includeSchema` option (plan lines 300–315). |
+| 8 | Answer renderer can’t support tables (BDD mobile requirement) | Unresolved | The plan explicitly defers table support (“prose-only; table rendering support is deferred”), which conflicts with the BDD requirement as written (plan lines 369–370). |
+| 9 | File list incomplete (missing `faq-accordion.tsx`, test targets) | Partially Resolved | File structure now includes `faq-accordion.tsx`, but the plan still doesn’t specify which integration test files to edit/create for Tasks 3–6 (plan lines 31–38, 392–408, 526–529). |
+| 10 | Route deletion checklist was optional/incomplete | Partially Resolved | Checklist is now marked “ALL items are mandatory” and covers types + route parsing, but it still omits the “`src/constants/` helpers” check from the project checklist (plan lines 569–581). |
+| 11 | Core numbers plan lacked reliable tests | Partially Resolved | Plan adds a note that tests must render real components and adds placeholder tests for homepage/about rendering, but still leaves the tests underspecified (no concrete test file paths, no concrete component names) and keeps a raw-JSON placeholder test (plan lines 692–717). |
+| 12 | “Years in business” caching staleness not defined | Partially Resolved | The plan chooses a stable “Established {year}” display to avoid cache staleness, but this may not satisfy the BDD wording that asks for “years in business” (plan lines 13, 710–714). |
+| 13 | Parallelization causes critical.json merge conflicts | Resolved | Execution order now forces Task 7 before Task 8 explicitly to avoid `messages/*/critical.json` conflicts (plan lines 819–825). |
+
+### Issues (new or unresolved)
+
+#### A) Critical — Task 2’s test code and component props don’t match (plan is not internally consistent)
+- **Plan location**: Task 2 tests (plan lines 169–176) vs `FaqSectionProps` (plan lines 275–284).
+- **What’s wrong**: The tests call `FaqSection({ items, title })` but the proposed `FaqSectionProps` requires `locale`. This makes the plan’s own Red→Green loop impossible without “secret edits” that aren’t written down.
+- **What to change**: Either (1) make `locale` optional (or remove it if it isn’t needed by `generateFAQSchema`), or (2) update every test + every page integration snippet to pass the correct locale value consistently.
+
+#### B) High — Chevron rotation likely won’t work as written
+- **Plan location**: `FaqAccordion` chevron class (plan line 351) and trigger class (plan line 349).
+- **What’s wrong**: The icon uses `group-data-[state=open]:rotate-180`, but the plan does not add a `group` class to the trigger (or any parent). Without that, the rotation may never apply.
+- **What to change**: Add `group` to the trigger class (e.g., `className="group …"`), or switch to a selector strategy that definitely matches how `data-state` is applied by Radix. Also add a test that proves the rotation behavior.
+
+#### C) High — Locale typing/import remains a concrete compile-risk
+- **Plan location**: Task 2 → `FaqSection` code (plan lines 272–303).
+- **What’s wrong**: `@/types/content.types` is not established as the project’s locale type source in the referenced files, and `locale: string` + `as Locale` is a type escape hatch rather than a real contract.
+- **What to change**: Use the project’s real locale type (for example, from the i18n routing types) and type `locale` as `"en" | "zh"` (or whatever the project uses) so invalid locales are impossible at compile time.
+
+#### D) High — Table support is still a spec mismatch (must be resolved one way or the other)
+- **Plan location**: Task 2 notes (plan lines 369–370) vs BDD mobile requirement for tables.
+- **What’s wrong**: The plan defers table rendering support, but the BDD spec explicitly requires that tables inside answers scroll horizontally on narrow screens.
+- **What to change**: Either (1) implement minimal rich-content support now (enough to render a table wrapper with horizontal scroll), or (2) explicitly revise the BDD spec/acceptance criteria to remove the table requirement for this batch.
+
+#### E) Medium — “Established {year}” may not satisfy “years in business” (BDD wording mismatch)
+- **Plan location**: Design decision statement (plan line 13) + core numbers tests (plan lines 710–714).
+- **What’s wrong**: The plan intentionally avoids dynamic year computation, but the BDD scenario describes “years in business,” which implies a computed value rather than the founding year.
+- **What to change**: Either update the BDD spec to match “Established {year}”, or define a safe strategy to compute years without cache staleness (for example, a defined revalidation window or a small client-side computation).
+
+#### F) Medium — Integration test steps are still too vague to execute reliably
+- **Plan location**: Tasks 3–6 test steps (plan lines 392–408, 449–452, 485–488, 526–529).
+- **What’s wrong**: The plan says “add to the contact page test file (or create a focused test)” but does not name the test file(s), nor does it describe how to render App Router pages that take locale params in this codebase.
+- **What to change**: Specify the exact test file paths to create/edit and the exact rendering strategy used in this repo (so someone can follow the plan without guesswork).
+
+### Positive Aspects
+- The plan now explicitly prevents the mid-way breakage of `/faq` by keeping backward-compatible i18n keys until deletion.
+- The 20-item coverage map makes the scope concrete and checkable.
+- Route deletion guidance is stricter and closer to the project’s real checklist.
+- The plan now sequences Task 7 → Task 8 to avoid translation merge conflicts.
+
+### Summary
+The plan is close, but not yet implementation-ready because it still has internal inconsistencies and unresolved spec mismatches. Fixing the `locale` prop contract (and its tests), validating chevron rotation, and deciding the “tables in answers” requirement are the key remaining steps.
+
+**Consensus Status**: NEEDS_REVISION
+
+---
+
+## Round 3 — 2026-03-25
+
+### Overall Assessment
+This revision fixes most of the Round 2 blockers in the right way: the `locale` prop is now consistently passed, the chevron rotation is wired correctly via a `group` trigger, the locale typing is tightened, and the BDD spec now explicitly matches the “prose-only” FAQ content and the stable “Established {year}” display. The plan is now close to implementation-ready, but it still contains a couple of concrete “follow the plan and you’ll hit TypeScript/test gaps” problems (mainly: the test helper still types `locale` as `string`, and integration test paths/patterns are only fully specified for the contact page).
+
+**Rating**: 7/10
+
+### Previous Round Tracking
+| # | Issue | Status | Notes |
+|---|-------|--------|-------|
+| 1 | Sequencing will break `/faq` before it is deleted | Resolved | Backward-compatible i18n guidance remains, and Task 7 still removes old keys at deletion time (plan lines 60–63, 595–598). |
+| 2 | Missing chevron + rotation behavior | Resolved | `FaqAccordion` now adds `group` on the trigger and uses `group-data-[state=open]:rotate-180` (plan lines 350–353). |
+| 3 | Wrong breakpoint for 44px touch targets | Resolved | Trigger uses `min-h-[44px]` (plan line 350). |
+| 4 | “20 Q&As distributed” not met due to duplicates | Resolved | Coverage map remains and product page includes the formerly-unassigned items (plan lines 510–517, 837–862). |
+| 5 | Shared `faq` namespace contradicts handoff / maintenance risk | Partially Resolved | Plan keeps the shared namespace and documents the rationale; handoff divergence remains (plan line 13). |
+| 6 | Incorrect / non-existent `Locale` import | Resolved | The `Locale` type is now used directly (no `as Locale` cast) and the import path corresponds to an existing file in this repo (`src/types/content.types.ts`) (plan lines 273–304). |
+| 7 | Schema placement not configurable / inconsistent with handoff | Partially Resolved | Schema is still emitted inside `FaqSection`. That’s workable for this batch (one FAQ section per page), but the plan still doesn’t explicitly reconcile this with the handoff’s “page generates schema” guidance or provide an opt-out prop (plan lines 301–315). |
+| 8 | Answer renderer can’t support tables (BDD mobile requirement) | Resolved | BDD now explicitly marks table support as deferred for prose-only content, matching the plan (bdd-specs line 286; plan line 370). |
+| 9 | File list incomplete (missing `faq-accordion.tsx`, test targets) | Partially Resolved | `faq-accordion.tsx` is listed, and contact integration test path/pattern is now concrete; other pages still lack concrete test file paths (plan lines 31–33, 395–419). |
+| 10 | Route deletion checklist was optional/incomplete | Partially Resolved | Checklist is mandatory and expanded, but it still doesn’t explicitly include the architecture guide’s “check `src/constants/` helpers” item (plan lines 580–592). |
+| 11 | Core numbers plan lacked reliable tests | Partially Resolved | BDD is now aligned on “Established {year}”, but the plan’s tests are still placeholders without concrete test file paths or specific component targets (plan lines 703–725). |
+| 12 | “Years in business” caching staleness not defined | Resolved | Plan uses stable “Established {year}”, and BDD Scenario 7.2 now matches that (bdd-specs lines 231–238; plan line 13). |
+| 13 | Parallelization causes critical.json merge conflicts | Resolved | Execution order still sequences Task 7 before Task 8 and calls out the conflict risk (plan lines 820–836). |
+| A | Task 2’s test code and component props don’t match | Partially Resolved | Locale is now passed in the test helper (plan lines 169–176), but the helper still types `locale` as `string`, which can cause strict TypeScript friction when passing into `FaqSection`’s `locale: Locale` prop. |
+| B | Chevron rotation likely won’t work as written | Resolved | Trigger now includes `group`, enabling the rotation selector to work (plan line 350). |
+| C | Locale typing/import remains a compile-risk | Resolved | `locale` is now typed as `Locale` in `FaqSectionProps` and the cast is removed (plan lines 283–304). |
+| D | Table support spec mismatch | Resolved | BDD explicitly defers table support for prose-only content (bdd-specs line 286). |
+| E | “Established {year}” vs “years in business” mismatch | Resolved | BDD Scenario 7.2 now uses “Established {year}” language (bdd-specs lines 231–238). |
+| F | Integration test steps too vague to execute | Partially Resolved | Contact page test path + render pattern is now concrete; other integration tests still need the same treatment (plan lines 395–419, 460–463, 496–499, 537–540). |
+
+### Issues (new or unresolved)
+
+#### 1) High — Task 2 test helper still types `locale` as `string` instead of `Locale`
+- **Plan location**: Task 2 test helper signature (plan line 169) and `FaqSectionProps` locale type (plan lines 283–285).
+- **Description**: The plan says TypeScript strict and now types `FaqSectionProps.locale` as `Locale`, but the test helper still declares `locale: string`. If someone follows the plan literally, they may hit a TypeScript mismatch when passing `props?.locale` through.
+- **Improvement suggestion**: Change the helper type to `locale: Locale` (and set the default to `"en"`), so the test code matches the component contract cleanly.
+
+#### 2) Medium — Integration test file paths/patterns are still missing for About/Product/OEM/Bending pages
+- **Plan location**: Task 4 Step 1 (plan lines 460–463), Task 5 Step 1 (plan lines 496–499), Task 6 Step 1 (plan lines 537–540).
+- **Description**: Only the contact page has a concrete integration test file path and a concrete render pattern. The other integration scenarios are still described at a high level.
+- **Improvement suggestion**: Add the same “Test file: …” + “render pattern: import page + pass `{ params: Promise.resolve({ locale: 'en' }) }`” blocks for each of these pages, so the plan is uniformly executable.
+
+#### 3) Medium — Core numbers tests still lack concrete test file paths and concrete component targets
+- **Plan location**: Task 8 Step 2 (plan lines 703–725).
+- **Description**: The plan correctly says tests must render real components, but it still doesn’t say which test files to edit/create, nor which components should be rendered for homepage/about stats.
+- **Improvement suggestion**: Name the exact test files and the exact component entrypoints to render (mirroring the contact page approach), so the “core numbers” work can be implemented without guesswork.
+
+#### 4) Low — Route deletion checklist still omits the `src/constants/` scan called out by the project architecture guide
+- **Plan location**: Task 7 mandatory checklist (plan lines 580–592) vs `.claude/rules/architecture.md` route deletion checklist.
+- **Description**: The plan’s checklist is stronger than before, but it still doesn’t explicitly mention scanning `src/constants/` for route helpers.
+- **Improvement suggestion**: Add a line item for checking/removing any `src/constants/` helpers that reference the deleted route, even if it’s “usually none for /faq”.
+
+### Positive Aspects
+- The plan and BDD spec are now aligned on the key scope decisions (prose-only FAQ, stable “Established {year}”).
+- The most error-prone UI details (chevron rotation + 44px touch targets) are now explicitly handled.
+- Contact page integration testing is now concrete and uses a clear, repeatable rendering pattern.
+
+### Summary
+Most of the prior blockers are resolved, and the plan is now close. The remaining work is mainly tightening the plan so it is consistently executable under strict TypeScript and consistently testable across all pages (not just contact).
+
+**Consensus Status**: NEEDS_REVISION

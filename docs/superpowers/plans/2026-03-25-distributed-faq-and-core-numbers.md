@@ -166,7 +166,7 @@ vi.mock("@/components/seo", () => ({
 
 describe("Feature: FaqSection Reusable Component", () => {
   // Helper to render async Server Component
-  async function renderFaqSection(props?: Partial<{ items: string[]; title: string; locale: string }>) {
+  async function renderFaqSection(props?: Partial<{ items: string[]; title: string; locale: "en" | "zh" }>) {
     const { FaqSection } = await import("@/components/sections/faq-section");
     const element = await FaqSection({
       items: props?.items ?? ["moq", "leadTime"],
@@ -459,7 +459,28 @@ git commit -m "feat(contact): add ordering faq section (5 questions)"
 
 - [ ] **Step 1: Write failing test**
 
-Test that about page renders FAQ with factory qualification questions. Assert "manufacturer" and "bending machine" appear in answers.
+**Test file:** `src/app/[locale]/about/__tests__/page.test.tsx` (existing or create)
+
+```typescript
+describe("About page FAQ integration", () => {
+  async function renderAboutPage() {
+    const { default: AboutPage } = await import("@/app/[locale]/about/page");
+    const element = await AboutPage({ params: Promise.resolve({ locale: "en" }) });
+    return render(await Promise.resolve(element));
+  }
+
+  it("renders FAQ with factory qualification questions (BDD 3.1)", async () => {
+    await renderAboutPage();
+    expect(screen.getByText(/manufacturer.*trading company/i)).toBeInTheDocument();
+  });
+
+  it("manufacturer answer mentions bending machine (BDD 3.2)", async () => {
+    await renderAboutPage();
+    await userEvent.click(screen.getByText(/manufacturer.*trading company/i));
+    expect(screen.getByText(/bending machine/i)).toBeVisible();
+  });
+});
+```
 
 - [ ] **Step 2: Run test to verify it fails**
 
@@ -495,7 +516,28 @@ git commit -m "feat(about): add factory qualification faq section (5 questions)"
 
 - [ ] **Step 1: Write failing test**
 
-Test that product market page renders FAQ with technical questions. Assert Schedule 40 vs 80 content is present.
+**Test file:** `src/app/[locale]/products/[market]/__tests__/page.test.tsx` (existing or create)
+
+```typescript
+describe("Product page FAQ integration", () => {
+  async function renderProductPage() {
+    const { default: ProductPage } = await import("@/app/[locale]/products/[market]/page");
+    const element = await ProductPage({ params: Promise.resolve({ locale: "en", market: "north-america" }) });
+    return render(await Promise.resolve(element));
+  }
+
+  it("renders FAQ with technical questions (BDD 4.1)", async () => {
+    await renderProductPage();
+    expect(screen.getByText(/schedule 40.*schedule 80/i)).toBeInTheDocument();
+  });
+
+  it("Sch 40/80 answer explains wall thickness (BDD 4.2)", async () => {
+    await renderProductPage();
+    await userEvent.click(screen.getByText(/schedule 40.*schedule 80/i));
+    expect(screen.getByText(/wall thickness/i)).toBeVisible();
+  });
+});
+```
 
 - [ ] **Step 2: Run test to verify it fails**
 
@@ -535,6 +577,12 @@ git commit -m "feat(products): add technical faq section to market pages (6 ques
 **BDD:** Integration coverage — verify each page renders its FAQ section.
 
 - [ ] **Step 1: Write failing integration tests**
+
+**Test files:**
+- `src/app/[locale]/oem-custom-manufacturing/__tests__/page.test.tsx` (existing or create)
+- `src/app/[locale]/capabilities/bending-machines/__tests__/page.test.tsx` (existing or create)
+
+Same rendering pattern as contact/about pages: import page → pass `{ params: Promise.resolve({ locale: "en" }) }` → assert FAQ content.
 
 Assert OEM page renders FAQ with "Can you do OEM or custom labeling?" and bending machines page renders FAQ with "What is the minimum bending radius?"
 
@@ -587,6 +635,7 @@ Follow the Route Deletion Checklist from `.claude/rules/architecture.md`. **ALL 
 | `src/config/paths/utils.ts` | Remove `"/faq"` from `PATHNAMES` |
 | `src/lib/i18n/route-parsing.ts` | Remove from `DYNAMIC_ROUTE_PATTERNS` if present |
 | `messages/*/critical.json` | Remove FAQ nav links from header/footer |
+| `src/constants/` | Remove any route helpers referencing `/faq` |
 | Navigation components | Remove any hardcoded FAQ links |
 | Test files | Remove/update tests referencing the route |
 
@@ -725,7 +774,11 @@ it("about page stats show established year from siteFacts", async () => {
 });
 ```
 
-**Note (Codex review fix):** Tests must render actual components and assert displayed values match `siteFacts`, not just inspect raw JSON files. "Years in business" uses stable "Established {year}" display to avoid cache staleness.
+**Test files:**
+- Homepage numbers: `src/components/sections/__tests__/hero-section.test.tsx` (existing — add assertions for siteFacts)
+- About page stats: `src/app/[locale]/about/__tests__/page.test.tsx` (existing or create)
+
+Render the actual components (HeroSection for homepage, AboutPage for about) and assert displayed values match `siteFacts`. "Years in business" uses stable "Established {year}" display to avoid cache staleness.
 
 - [ ] **Step 3: Replace hardcoded numbers in translation files with ICU placeholders**
 
