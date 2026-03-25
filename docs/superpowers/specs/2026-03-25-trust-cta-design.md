@@ -111,7 +111,7 @@ home.quality.certifications.certified    → "Certified"
 home.quality.certifications.compliant    → "Compliant"
 home.quality.certifications.applying     → "Applying"
 home.quality.certifications.iso9001      → "ISO 9001:2015"
-home.quality.certifications.iso9001Num   → "#240021Q09730R0S"
+home.quality.certifications.iso9001Num   → "240021Q09730R0S"
 home.quality.standards.astm             → "ASTM D1785 / UL 651"
 home.quality.standards.asnzs            → "AS/NZS 61386"
 home.quality.standards.iec              → "IEC 61386"
@@ -147,7 +147,7 @@ Add a WhatsApp contact card to the contact page, at the same visual level as ema
 ```
 
 **Behavior:**
-- Number comes from `SITE_CONFIG.contact.whatsappNumber`
+- Number comes from `siteFacts.contact.whatsapp` (which sources from `SITE_CONFIG.contact.whatsappNumber`)
 - If number is the placeholder (`+86-518-0000-0000`), show the row but with "Coming soon" instead of the number, and disable the CTA button
 - When real number is configured via `NEXT_PUBLIC_WHATSAPP_NUMBER` env var, it works automatically
 
@@ -158,9 +158,12 @@ underConstruction.pages.contact.chatNow        → "Chat Now"
 underConstruction.pages.contact.comingSoon      → "Coming Soon"
 ```
 
+**Important:** `src/lib/contact/getContactCopy.ts` must be updated to expose the new WhatsApp keys in its returned `copy` object, since the contact page consumes translations through this helper, not directly from `t()`.
+
 ### Files Changed
 
 - `src/app/[locale]/contact/page.tsx` — Add WhatsApp row in contact info Card
+- `src/lib/contact/getContactCopy.ts` — Add WhatsApp fields to copy object
 - `messages/en/critical.json` — Add contact WhatsApp keys
 - `messages/zh/critical.json` — Same
 - `messages/en.json`, `messages/zh.json` — Same (legacy)

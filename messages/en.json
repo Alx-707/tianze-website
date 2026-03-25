@@ -146,7 +146,7 @@
         "rangeLabel": "mm Range",
         "production": "24/7",
         "productionLabel": "Production",
-        "est": "2006",
+        "est": "2018",
         "estLabel": "Est."
       }
     },
@@ -305,7 +305,7 @@
     "footer": {
       "about": {
         "title": "Tianze Pipe Industry",
-        "desc": "PVC conduit bends and fittings manufacturer based in Lianyungang, Jiangsu, China. Designing and manufacturing bending equipment since 2006."
+        "desc": "PVC conduit bends and fittings manufacturer based in Lianyungang, Jiangsu, China. Designing and manufacturing bending equipment since 2018."
       },
       "products": {
         "title": "Products",
@@ -492,7 +492,7 @@
         },
         "i18n": {
           "title": "Global Export",
-          "description": "Serving customers in over 100 countries with reliable international shipping.",
+          "description": "Serving customers in over 20 countries with reliable international shipping.",
           "languageUnit": "Countries"
         },
         "themes": {
@@ -700,7 +700,7 @@
       },
       "contact": {
         "title": "Contact Us - Tianze Pipe | Get a Quote",
-        "description": "Contact our team for pipe bending machinery, PVC conduits, or PETG pneumatic tube inquiries. Export to 100+ countries."
+        "description": "Contact our team for pipe bending machinery, PVC conduits, or PETG pneumatic tube inquiries. Export to 20+ countries."
       },
       "products": {
         "title": "Products - Tianze Pipe | Machines & Pipe Fittings",
