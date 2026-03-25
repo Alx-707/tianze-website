@@ -166,11 +166,12 @@ vi.mock("@/components/seo", () => ({
 
 describe("Feature: FaqSection Reusable Component", () => {
   // Helper to render async Server Component
-  async function renderFaqSection(props?: Partial<{ items: string[]; title: string }>) {
+  async function renderFaqSection(props?: Partial<{ items: string[]; title: string; locale: string }>) {
     const { FaqSection } = await import("@/components/sections/faq-section");
     const element = await FaqSection({
       items: props?.items ?? ["moq", "leadTime"],
       title: props?.title ?? "Frequently Asked Questions",
+      locale: props?.locale ?? "en",
     });
     return render(element);
   }
@@ -279,8 +280,8 @@ interface FaqSectionProps {
   title?: string;
   /** Optional subtitle */
   subtitle?: string;
-  /** Locale for schema generation */
-  locale: string;
+  /** Locale for schema generation — typed as Locale ("en" | "zh") */
+  locale: Locale;
 }
 
 export async function FaqSection({
@@ -299,7 +300,7 @@ export async function FaqSection({
 
   const faqSchema = generateFAQSchema(
     faqData.map(({ question, answer }) => ({ question, answer })),
-    locale as Locale,
+    locale,
   );
 
   return (
@@ -346,7 +347,7 @@ export function FaqAccordion({ items }: FaqAccordionProps) {
     >
       {items.map((item) => (
         <AccordionItem key={item.key} value={item.key} className="border-b-0 border-t border-border first:border-t-0">
-          <AccordionTrigger className="min-h-[44px] px-6 text-[15px] font-medium">
+          <AccordionTrigger className="group min-h-[44px] px-6 text-[15px] font-medium">
             {item.question}
             <ChevronDownIcon className="size-4 shrink-0 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
           </AccordionTrigger>
@@ -391,19 +392,29 @@ git commit -m "feat: add reusable FaqSection component with schema generation"
 
 - [ ] **Step 1: Write failing test**
 
-Add to the contact page test file (or create a focused test):
+**Test file:** `src/app/[locale]/contact/__tests__/page.test.tsx` (existing test file — add new describe block)
+
+Use the project's async Server Component rendering pattern (same as `hero-section.test.tsx`):
 
 ```typescript
-// Test that contact page renders FAQ section with ordering questions
-it("renders FAQ section with ordering questions", async () => {
-  // Render contact page
-  // Assert: "What is the minimum order quantity" is present
-  // Assert: FAQ section heading is present
-});
+// Add to existing contact page test file
+describe("Contact page FAQ integration", () => {
+  async function renderContactPage() {
+    const { default: ContactPage } = await import("@/app/[locale]/contact/page");
+    const element = await ContactPage({ params: Promise.resolve({ locale: "en" }) });
+    return render(await Promise.resolve(element));
+  }
 
-it("MOQ answer contains real business data", async () => {
-  // Expand MOQ question
-  // Assert: answer contains "500" and "1,000"
+  it("renders FAQ section with ordering questions (BDD 2.1)", async () => {
+    await renderContactPage();
+    expect(screen.getByText(/minimum order quantity/i)).toBeInTheDocument();
+  });
+
+  it("MOQ answer contains real business data (BDD 2.2)", async () => {
+    await renderContactPage();
+    await userEvent.click(screen.getByText(/minimum order quantity/i));
+    expect(screen.getByText(/500/)).toBeVisible();
+  });
 });
 ```
 

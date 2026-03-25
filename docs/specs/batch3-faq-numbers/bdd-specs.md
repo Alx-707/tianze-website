@@ -233,7 +233,7 @@ And the "+" suffix comes from the translation template, not the data
 ```gherkin
 Given siteFacts contains established = 2018 and employees = 60
 When I view the about page
-Then the stats section shows the correct years in business
+Then the stats section shows "Established {year}" using siteFacts.company.established
 And the stats section shows "60+" for employees
 ```
 
@@ -283,7 +283,7 @@ And no translation file contains literal company numbers outside of ICU context
 
 - [ ] Accordion displays in single-column on mobile
 - [ ] Touch targets for accordion headers meet 44px minimum
-- [ ] Tables inside answers scroll horizontally on narrow screens
+- [ ] Tables inside answers scroll horizontally on narrow screens (deferred — current FAQ content is prose-only; implement when table content is added)
 
 ---
 
