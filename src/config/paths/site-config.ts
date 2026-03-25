@@ -71,6 +71,21 @@ export const SITE_CONFIG = {
 } as const satisfies SiteConfig;
 
 /**
+ * Default placeholder phone number used when no real number is configured.
+ * Shared across layout (floating button gate) and contact page (coming-soon state).
+ */
+const WHATSAPP_PLACEHOLDER = "+86-518-0000-0000";
+
+/**
+ * Check if the WhatsApp number is properly configured (not the default placeholder).
+ */
+export function isWhatsAppConfigured(
+  number: string | undefined = SITE_CONFIG.contact.whatsappNumber,
+): boolean {
+  return number !== undefined && number !== WHATSAPP_PLACEHOLDER;
+}
+
+/**
  * Production placeholder pattern - matches [PLACEHOLDER_NAME] format
  * Used to detect unconfigured values that should be replaced before production
  */
@@ -152,6 +167,12 @@ export function getUnconfiguredPlaceholders(
     placeholders.push({
       path: "SITE_CONFIG.contact.email",
       value: config.contact.email,
+    });
+  }
+  if (!isWhatsAppConfigured(config.contact.whatsappNumber)) {
+    placeholders.push({
+      path: "SITE_CONFIG.contact.whatsappNumber",
+      value: config.contact.whatsappNumber,
     });
   }
 

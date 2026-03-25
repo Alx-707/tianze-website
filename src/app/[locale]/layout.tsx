@@ -20,7 +20,7 @@ import { LazyThemeSwitcher } from "@/components/ui/lazy-theme-switcher";
 import { LazyWhatsAppButton } from "@/components/whatsapp/lazy-whatsapp-button";
 import { getAppConfig } from "@/config/app";
 import { FOOTER_COLUMNS, FOOTER_STYLE_TOKENS } from "@/config/footer-links";
-import { SITE_CONFIG } from "@/config/paths/site-config";
+import { SITE_CONFIG, isWhatsAppConfigured } from "@/config/paths/site-config";
 import { coerceLocale, isLocale } from "@/i18n/locale-utils";
 
 // Client analytics are rendered as an island to avoid impacting LCP
@@ -87,7 +87,7 @@ async function AsyncLocaleLayoutContent({
   const appConfig = getAppConfig();
   const showWhatsAppButton =
     appConfig.features.ENABLE_WHATSAPP_CHAT &&
-    Boolean(SITE_CONFIG.contact.whatsappNumber);
+    isWhatsAppConfigured(SITE_CONFIG.contact.whatsappNumber);
 
   // Note: Removed headers() call for CSP nonce to enable Cache Components static generation.
   // JSON-LD scripts are data-only and don't require nonce for CSP compliance.

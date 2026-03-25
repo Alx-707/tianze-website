@@ -13,6 +13,7 @@ import { ContactForm } from "@/components/contact/contact-form";
 import { Card } from "@/components/ui/card";
 import { generateLocaleStaticParams } from "@/app/[locale]/generate-static-params";
 import { siteFacts } from "@/config/site-facts";
+import { isWhatsAppConfigured as checkWhatsApp } from "@/config/paths/site-config";
 import { COUNT_TWO } from "@/constants";
 
 function ContactLoadingSkeleton() {
@@ -189,13 +190,12 @@ async function ContactContent({ locale }: { locale: string }) {
 
   const copy = await getContactCopy(locale as Locale);
 
-  const WHATSAPP_PLACEHOLDER = "+86-518-0000-0000";
   const whatsappNumber = siteFacts.contact.whatsapp;
-  const isWhatsAppConfigured =
-    whatsappNumber !== undefined && whatsappNumber !== WHATSAPP_PLACEHOLDER;
-  const whatsAppUrl = isWhatsAppConfigured
-    ? `https://wa.me/${whatsappNumber.replace(/[^0-9]/g, "")}`
-    : undefined;
+  const whatsappConfigured = checkWhatsApp(whatsappNumber);
+  const whatsAppUrl =
+    whatsappConfigured && whatsappNumber !== undefined
+      ? `https://wa.me/${whatsappNumber.replace(/[^0-9]/g, "")}`
+      : undefined;
 
   return (
     <main className="min-h-[80vh] px-4 py-16">
@@ -213,7 +213,7 @@ async function ContactContent({ locale }: { locale: string }) {
             <ContactMethodsCard
               copy={copy.panel.contact}
               whatsappCopy={copy.panel.whatsapp}
-              isWhatsAppConfigured={isWhatsAppConfigured}
+              isWhatsAppConfigured={whatsappConfigured}
               whatsappNumber={whatsappNumber}
               whatsAppUrl={whatsAppUrl}
             />

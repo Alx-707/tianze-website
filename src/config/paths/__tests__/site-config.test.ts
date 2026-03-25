@@ -249,6 +249,10 @@ describe("site-config", () => {
       const configuredConfig = {
         ...SITE_CONFIG,
         baseUrl: "https://b2b-web-template.vercel.app",
+        contact: {
+          ...SITE_CONFIG.contact,
+          whatsappNumber: "+8613800138000",
+        },
       } satisfies SiteConfig;
       const result = validateSiteConfig(configuredConfig);
       expect(result.valid).toBe(true);
