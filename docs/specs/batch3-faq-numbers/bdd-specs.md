@@ -1,192 +1,225 @@
-# Behavioral Specifications: Batch 3 — FAQ Redesign + Core Numbers
+# Behavioral Specifications: Batch 3 — Distributed FAQ + Core Numbers
 
-> Design spec: `docs/superpowers/specs/2026-03-25-batch3-faq-numbers-design.md`
+> Design spec: `docs/superpowers/specs/2026-03-25-batch3-faq-numbers-design.md` (v2 — distributed)
 > Each scenario maps to 1 Red task (failing test) + 1 Green task (implementation).
 
 ---
 
-## Feature 1: FAQ Page Content
+## Feature 1: FaqSection Reusable Component
 
 ```
-As a B2B buyer evaluating PVC conduit suppliers
-I want answers to common purchasing, technical, and qualification questions
-So that I can make an informed decision without waiting for a sales reply
+As a developer
+I want a reusable FaqSection component
+So that I can add contextual FAQ to any page without duplicating code
 ```
 
-### Scenario 1.1: Buyer sees five PVC-specific categories
+### Scenario 1.1: FaqSection renders title via SectionHead
 
 ```gherkin
-Given I am on the FAQ page
-When the page loads
-Then I see exactly 5 category sections:
-  | Category                         |
-  | Ordering & Purchasing            |
-  | Certifications & Standards       |
-  | Technical Selection              |
-  | Installation & Application       |
-  | Factory & Supplier Qualifications|
+Given a FaqSection component with a title prop
+When the section renders
+Then the title is displayed using the SectionHead pattern
+And the section has a divider border at the top
 ```
 
-### Scenario 1.2: Buyer reads ordering FAQ with real business data
+### Scenario 1.2: FaqSection renders accordion items from translation keys
 
 ```gherkin
-Given I am on the FAQ page
-When I expand the question "What is the minimum order quantity (MOQ)?"
-Then the answer mentions "500" and "1000"
-And the answer mentions the quantity depends on pipe type
+Given a FaqSection with 5 FAQ item keys
+When the section renders
+Then 5 accordion items are displayed
+And each item shows the question text
+And all items are initially collapsed
 ```
 
-### Scenario 1.3: Buyer reads certification FAQ
+### Scenario 1.3: Buyer expands a question
 
 ```gherkin
-Given I am on the FAQ page
-When I expand the question about certifications held
-Then the answer mentions "ISO 9001:2015"
-And the answer mentions the certificate number "240021Q09730R0S"
-```
-
-### Scenario 1.4: Buyer reads technical FAQ about conduit selection
-
-```gherkin
-Given I am on the FAQ page
-When I expand the question about Schedule 40 vs Schedule 80
-Then the answer explains the difference in wall thickness
-And the answer explains when each type is appropriate
-```
-
-### Scenario 1.5: Buyer reads factory qualification FAQ
-
-```gherkin
-Given I am on the FAQ page
-When I expand the question "Are you a manufacturer or trading company?"
-Then the answer confirms direct manufacturer status
-And the answer mentions bending machine manufacturing capability
-```
-
----
-
-## Feature 2: FAQ Page Navigation & Interaction
-
-```
-As a B2B buyer
-I want to quickly find relevant questions
-So that I don't waste time scrolling through unrelated content
-```
-
-### Scenario 2.1: Buyer jumps to category via index
-
-```gherkin
-Given I am on the FAQ page
-When I click a category label in the category index
-Then the page scrolls to the corresponding category section
-```
-
-### Scenario 2.2: Buyer expands a question
-
-```gherkin
-Given I am on the FAQ page
-And all questions are initially collapsed
+Given a FaqSection is displayed on a page
+And all questions are collapsed
 When I click on a question
 Then the answer expands and becomes visible
-And a visual indicator shows the question is open
+And a chevron icon rotates to indicate open state
 ```
 
-### Scenario 2.3: Buyer collapses an expanded question
+### Scenario 1.4: Multiple questions can be open simultaneously
 
 ```gherkin
-Given I am on the FAQ page
-And a question is expanded
-When I click on the same question again
-Then the answer collapses and is no longer visible
-```
-
-### Scenario 2.4: Multiple questions can be open simultaneously
-
-```gherkin
-Given I am on the FAQ page
-And I have expanded one question
+Given one question is already expanded
 When I click on a different question
 Then both questions remain expanded
 ```
 
-### Scenario 2.5: Buyer navigates accordion via keyboard
+### Scenario 1.5: Buyer navigates accordion via keyboard
 
 ```gherkin
-Given I am on the FAQ page
+Given a FaqSection is displayed
 When I use Tab to focus on a question
 And I press Enter or Space
 Then the question expands or collapses
 ```
 
-### Scenario 2.6: Buyer clicks FAQ CTA to contact
+### Scenario 1.6: FaqSection generates FAQ Schema for its items
 
 ```gherkin
-Given I am on the FAQ page
-When I scroll to the bottom
-Then I see a call-to-action section with a contact button
-And the contact button links to the contact page
+Given a FaqSection with FAQ items
+When the page renders
+Then the page contains JSON-LD structured data of type "FAQPage"
+And the structured data contains all questions and answers from the section
 ```
 
 ---
 
-## Feature 3: FAQ Page i18n
+## Feature 2: Contact Page FAQ
 
 ```
-As a buyer who reads Chinese
-I want to view FAQ content in my language
+As a buyer ready to inquire
+I want ordering FAQ on the contact page
+So that I can understand MOQ, payment, and lead time before submitting
+```
+
+### Scenario 2.1: Contact page shows ordering FAQ
+
+```gherkin
+Given I am on the contact page
+When I scroll to the FAQ section
+Then I see questions about MOQ, lead time, payment, samples, and OEM
+And the FAQ section title is visible
+```
+
+### Scenario 2.2: Contact FAQ contains real business data
+
+```gherkin
+Given I am on the contact page
+When I expand the MOQ question
+Then the answer mentions "500" and "1,000"
+```
+
+---
+
+## Feature 3: About Page FAQ
+
+```
+As a buyer evaluating supplier credibility
+I want qualification FAQ on the about page
+So that I can verify this is a real manufacturer
+```
+
+### Scenario 3.1: About page shows factory qualification FAQ
+
+```gherkin
+Given I am on the about page
+When I scroll to the FAQ section
+Then I see questions about manufacturer identity, factory location, export experience, and certifications
+```
+
+### Scenario 3.2: About FAQ confirms manufacturer identity
+
+```gherkin
+Given I am on the about page
+When I expand the question about manufacturer vs trading company
+Then the answer confirms direct manufacturer status
+And the answer mentions bending machine manufacturing
+```
+
+---
+
+## Feature 4: Product Page FAQ
+
+```
+As a buyer researching conduit specifications
+I want technical FAQ on the product page
+So that I can make informed product selection decisions
+```
+
+### Scenario 4.1: Product page shows technical FAQ
+
+```gherkin
+Given I am on a product market page
+When I scroll to the FAQ section
+Then I see questions about Schedule 40 vs 80, conduit sizing, bending radius, strength grades, LSZH, and standards
+```
+
+### Scenario 4.2: Product FAQ explains Schedule 40 vs 80
+
+```gherkin
+Given I am on a product market page
+When I expand the Schedule 40 vs 80 question
+Then the answer explains the difference in wall thickness and use cases
+```
+
+---
+
+## Feature 5: FAQ i18n
+
+```
+As a Chinese-speaking buyer
+I want FAQ content in my language
 So that I can understand the information without translation
 ```
 
-### Scenario 3.1: Chinese buyer views FAQ in Chinese
+### Scenario 5.1: Chinese locale shows Chinese FAQ
 
 ```gherkin
 Given my locale is set to Chinese
-When I visit the FAQ page
-Then the page title is displayed in Chinese
-And the category names are displayed in Chinese
+When I view a page with a FAQ section
+Then the FAQ title is in Chinese
 And the questions and answers are in Chinese
 ```
 
-### Scenario 3.2: English buyer views FAQ in English
+### Scenario 5.2: English locale shows English FAQ
 
 ```gherkin
 Given my locale is set to English
-When I visit the FAQ page
-Then the page title is "Frequently Asked Questions"
-And all content is in English
+When I view a page with a FAQ section
+Then all FAQ content is in English
 ```
 
 ---
 
-## Feature 4: FAQ Schema Structured Data
+## Feature 6: FAQ Route Cleanup
 
 ```
-As a search engine crawler
-I want FAQ structured data on the page
-So that FAQ rich results appear in search listings
+As the site maintainer
+I want the old standalone FAQ route removed
+So that there are no orphaned pages or dead links
 ```
 
-### Scenario 4.1: FAQ page generates FAQPage schema
+### Scenario 6.1: Old FAQ route no longer exists
 
 ```gherkin
-Given I am on the FAQ page
-When the page renders
-Then the page contains JSON-LD structured data of type "FAQPage"
-And the structured data contains all questions and answers from the page
+Given the standalone /faq page has been removed
+When I navigate to /faq
+Then I receive a 404 or am redirected to /contact
+```
+
+### Scenario 6.2: No dead FAQ links in navigation
+
+```gherkin
+Given the FAQ route has been removed
+When I check the site header and footer navigation
+Then there are no links pointing to /faq
+```
+
+### Scenario 6.3: Sitemap does not contain /faq
+
+```gherkin
+Given the FAQ route has been removed
+When the sitemap is generated
+Then it does not contain any /faq URL
 ```
 
 ---
 
-## Feature 5: Core Numbers Unification
+## Feature 7: Core Numbers Unification
 
 ```
 As the site owner
-I want all company numbers (founding year, export countries, employees)
-  to come from a single data source
+I want all company numbers to come from a single data source
 So that updating one value keeps the entire site consistent
 ```
 
-### Scenario 5.1: Homepage displays numbers from siteFacts
+### Scenario 7.1: Homepage displays numbers from siteFacts
 
 ```gherkin
 Given siteFacts contains exportCountries = 20
@@ -195,34 +228,24 @@ Then the proof/trust elements display "20+" for countries
 And the "+" suffix comes from the translation template, not the data
 ```
 
-### Scenario 5.2: About page displays numbers from siteFacts
+### Scenario 7.2: About page displays numbers from siteFacts
 
 ```gherkin
 Given siteFacts contains established = 2018 and employees = 60
 When I view the about page
-Then the stats section shows the correct years in business (calculated from 2018)
+Then the stats section shows the correct years in business
 And the stats section shows "60+" for employees
 ```
 
-### Scenario 5.3: Translation strings use ICU interpolation
+### Scenario 7.3: Translation strings use ICU interpolation
 
 ```gherkin
 Given a translation string contains "{countries}" placeholder
 When the component renders with siteFacts.stats.exportCountries = 20
 Then the rendered text shows "20" in place of the placeholder
-And no literal company numbers are hardcoded in the translation string
 ```
 
-### Scenario 5.4: Chinese pages use same data source
-
-```gherkin
-Given my locale is set to Chinese
-When I view pages that display company numbers
-Then the numbers match the English version exactly
-And the numbers come from the same siteFacts source
-```
-
-### Scenario 5.5: No hardcoded company numbers remain in source code
+### Scenario 7.4: No hardcoded company numbers remain in source code
 
 ```gherkin
 Given the codebase under src/ and messages/
@@ -235,34 +258,32 @@ And no translation file contains literal company numbers outside of ICU context
 
 ## Acceptance Criteria (Non-functional)
 
-### Layout & Design Token Alignment
+### FaqSection Design Token Alignment
 
-- [ ] FAQ page container uses `max-w-[1080px] px-6` (not `container px-4`)
-- [ ] Section spacing is `py-14 md:py-[72px]`
-- [ ] H1 uses precise typography params (36/48px extrabold with tracking)
-- [ ] Section titles use `SectionHead` component
-- [ ] Q&A groups use `shadow-card` system (not `border`)
-- [ ] Bottom CTA uses full-width dark pattern (`bg-primary`, `on-dark` buttons)
-- [ ] No GridFrame decoration (content page)
-- [ ] Loading skeleton matches new layout structure
+- [ ] Section uses page container (inherits `max-w-[1080px] px-6`)
+- [ ] Section spacing is `py-14 md:py-[72px]` with `section-divider` border-top
+- [ ] Title uses `SectionHead` component
+- [ ] Accordion container uses `shadow-card` system (not `border`)
+- [ ] Individual items have no shadow hover — only open/close interaction
+- [ ] Answer text uses `text-sm leading-relaxed text-muted-foreground`
 
 ### Accessibility
 
 - [ ] Accordion items are focusable via Tab
 - [ ] Enter/Space toggles accordion open/close
-- [ ] Accordion uses appropriate ARIA attributes (expanded/collapsed state)
-- [ ] Category index links are keyboard-navigable
+- [ ] Radix Accordion provides aria-expanded, aria-controls, role="region"
+- [ ] Multi-expand mode (type="multiple")
 
 ### Performance
 
-- [ ] FAQ page loads without layout shift (CLS < 0.1)
-- [ ] Accordion interactions respond within 100ms
+- [ ] FaqSection is a Server Component (accordion is the only Client boundary)
+- [ ] No layout shift when accordion expands
 
 ### Mobile
 
-- [ ] All 5 categories display in single-column layout on mobile
-- [ ] Category index wraps gracefully on narrow screens
+- [ ] Accordion displays in single-column on mobile
 - [ ] Touch targets for accordion headers meet 44px minimum
+- [ ] Tables inside answers scroll horizontally on narrow screens
 
 ---
 
@@ -270,22 +291,24 @@ And no translation file contains literal company numbers outside of ICU context
 
 | Scenario | Test Type | Key Assertion |
 |----------|-----------|---------------|
-| 1.1 | Unit (render) | 5 category sections present |
-| 1.2 | Unit (render) | MOQ answer contains "500" and "1000" |
-| 1.3 | Unit (render) | Cert answer contains ISO number |
-| 1.4 | Unit (render) | Sch 40/80 answer has comparison content |
-| 1.5 | Unit (render) | Manufacturer answer mentions bending machines |
-| 2.1 | Unit (link) | Category index href matches section id |
-| 2.2 | Unit (interaction) | Click expands accordion item |
-| 2.3 | Unit (interaction) | Click collapses expanded item |
-| 2.4 | Unit (interaction) | Multiple items open simultaneously |
-| 2.5 | Unit (a11y) | Keyboard triggers accordion |
-| 2.6 | Unit (link) | CTA button href = /contact |
-| 3.1 | Unit (i18n) | Chinese locale renders Chinese content |
-| 3.2 | Unit (i18n) | English locale renders English content |
-| 4.1 | Unit (SEO) | JSON-LD contains FAQPage type + all Q&As |
-| 5.1 | Unit (render) | Homepage numbers match siteFacts values |
-| 5.2 | Unit (render) | About page numbers match siteFacts values |
-| 5.3 | Unit (render) | Translation interpolation works correctly |
-| 5.4 | Unit (i18n) | Chinese numbers match English numbers |
-| 5.5 | Static analysis | Grep finds no hardcoded company numbers |
+| 1.1 | Unit (render) | SectionHead + divider present |
+| 1.2 | Unit (render) | N accordion items from translation keys |
+| 1.3 | Unit (interaction) | Click expands item |
+| 1.4 | Unit (interaction) | Multiple items open |
+| 1.5 | Unit (a11y) | Keyboard triggers accordion |
+| 1.6 | Unit (SEO) | JSON-LD FAQPage schema generated |
+| 2.1 | Integration (render) | Contact page has FAQ section with ordering questions |
+| 2.2 | Integration (render) | MOQ answer contains "500" and "1,000" |
+| 3.1 | Integration (render) | About page has FAQ section with qualification questions |
+| 3.2 | Integration (render) | Manufacturer answer mentions bending machines |
+| 4.1 | Integration (render) | Product page has FAQ section with technical questions |
+| 4.2 | Integration (render) | Sch 40/80 answer explains wall thickness |
+| 5.1 | Unit (i18n) | Chinese locale renders Chinese |
+| 5.2 | Unit (i18n) | English locale renders English |
+| 6.1 | Integration (routing) | /faq returns 404 or redirects |
+| 6.2 | Static (grep) | No /faq links in navigation components |
+| 6.3 | Unit (sitemap) | Sitemap excludes /faq |
+| 7.1 | Unit (render) | Homepage numbers match siteFacts |
+| 7.2 | Unit (render) | About page numbers match siteFacts |
+| 7.3 | Unit (render) | ICU interpolation works |
+| 7.4 | Static (grep) | No hardcoded company numbers |
