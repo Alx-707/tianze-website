@@ -10,11 +10,20 @@ import {
   type Locale as SeoLocale,
 } from "@/lib/seo-metadata";
 import { ContactForm } from "@/components/contact/contact-form";
+import { FaqSection } from "@/components/sections/faq-section";
 import { Card } from "@/components/ui/card";
 import { generateLocaleStaticParams } from "@/app/[locale]/generate-static-params";
 import { siteFacts } from "@/config/site-facts";
 import { isWhatsAppConfigured as checkWhatsApp } from "@/config/paths/site-config";
 import { COUNT_TWO } from "@/constants";
+
+const CONTACT_FAQ_ITEMS = [
+  "moq",
+  "leadTime",
+  "payment",
+  "samples",
+  "oem",
+] as const;
 
 function ContactLoadingSkeleton() {
   return (
@@ -246,6 +255,8 @@ async function ContactContent({ locale }: { locale: string }) {
           </div>
         </div>
       </div>
+
+      <FaqSection items={[...CONTACT_FAQ_ITEMS]} locale={locale as Locale} />
     </main>
   );
 }
