@@ -68,24 +68,28 @@ function WhyItMattersSection({
   );
 }
 
-function formatParamKey(key: string): string {
-  return key.replace(/([A-Z])/g, " $1").replace(/^./, (s) => s.toUpperCase());
-}
-
-function MachineCard({ machine }: { machine: EquipmentSpec }) {
+function MachineCard({
+  machine,
+  t,
+}: {
+  machine: EquipmentSpec;
+  t: (key: string) => string;
+}) {
   return (
     <section className="rounded-lg border border-border p-6 md:p-8">
       <div className="grid gap-8 md:grid-cols-2">
         <div className="relative aspect-[4/3] overflow-hidden rounded-md bg-muted">
           <Image
             src={machine.image}
-            alt={machine.name}
+            alt={t(`equipment.${machine.slug}.name`)}
             fill
             className="object-contain"
           />
         </div>
         <div>
-          <h3 className="mb-4 text-xl font-semibold">{machine.name}</h3>
+          <h3 className="mb-4 text-xl font-semibold">
+            {t(`equipment.${machine.slug}.name`)}
+          </h3>
           <dl className="space-y-2">
             {Object.entries(machine.params).map(([key, value]) => (
               <div
@@ -93,7 +97,7 @@ function MachineCard({ machine }: { machine: EquipmentSpec }) {
                 className="flex justify-between border-b border-border/50 pb-1"
               >
                 <dt className="text-sm text-muted-foreground">
-                  {formatParamKey(key)}
+                  {t(`equipment.${machine.slug}.params.${key}`)}
                 </dt>
                 <dd className="font-mono text-sm">{value}</dd>
               </div>
@@ -101,12 +105,12 @@ function MachineCard({ machine }: { machine: EquipmentSpec }) {
           </dl>
           <div className="mt-4">
             <ul className="flex flex-wrap gap-2">
-              {machine.highlights.map((highlight) => (
+              {machine.highlights.map((_, index) => (
                 <li
-                  key={highlight}
+                  key={index}
                   className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary"
                 >
-                  {highlight}
+                  {t(`equipment.${machine.slug}.highlights.${index}`)}
                 </li>
               ))}
             </ul>
@@ -213,7 +217,7 @@ export default async function BendingMachinesPage({ params }: PageProps) {
         <h2 className="mb-8 text-2xl font-bold">{t("machines.title")}</h2>
         <div className="space-y-8">
           {EQUIPMENT_SPECS.map((machine) => (
-            <MachineCard key={machine.slug} machine={machine} />
+            <MachineCard key={machine.slug} machine={machine} t={t} />
           ))}
         </div>
       </section>
