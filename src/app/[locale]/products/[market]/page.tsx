@@ -13,12 +13,14 @@ import { MEXICO_SPECS } from "@/constants/product-specs/mexico";
 import { EUROPE_SPECS } from "@/constants/product-specs/europe";
 import { PNEUMATIC_SPECS } from "@/constants/product-specs/pneumatic-tube-systems";
 import type { MarketSpecs, SpecGroup } from "@/constants/product-specs/types";
+import type { Locale } from "@/types/content.types";
 import {
   getColumnTranslationKey,
   getGroupLabelTranslationKey,
   getRowValueTranslationKey,
 } from "@/lib/spec-table-translator";
 import { SITE_CONFIG } from "@/config/paths";
+import { FaqSection } from "@/components/sections/faq-section";
 import { CatalogBreadcrumb } from "@/components/products/catalog-breadcrumb";
 import { FamilySection } from "@/components/products/family-section";
 import {
@@ -28,6 +30,19 @@ import {
 } from "@/components/products/product-specs";
 import { StickyFamilyNav } from "@/components/products/sticky-family-nav";
 import { Link, routing } from "@/i18n/routing";
+
+const PRODUCT_FAQ_ITEMS = [
+  "sch40vs80",
+  "conduitSize",
+  "bendingRadius",
+  "strengthGrades",
+  "lszh",
+  "standardsDifference",
+  "directBurial",
+  "indoorOutdoor",
+  "solarDataCenter",
+  "corrosion",
+] as const;
 
 // --- Spec data lookup ---
 
@@ -345,6 +360,8 @@ export default async function MarketPage({ params }: MarketPageProps) {
           {...buildTrustSignalsSectionProps(marketSpecs, marketSlug, t)}
         />
       )}
+
+      <FaqSection items={[...PRODUCT_FAQ_ITEMS]} locale={locale as Locale} />
 
       <CtaSection
         heading={t("market.cta.heading", { marketLabel })}
