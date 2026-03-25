@@ -289,10 +289,20 @@
         "title": "灵活起订量",
         "desc": "首单低起订量，随项目规模灵活扩量。"
       },
-      "cert1": "ISO 9001:2015",
-      "cert2": "UL651 / SCH40-80",
-      "cert3": "AS/NZS 2053",
-      "cert4": "ASTM标准",
+      "certifications": {
+        "title": "认证与标准",
+        "certified": "已认证",
+        "compliant": "符合标准",
+        "applying": "申请中",
+        "iso9001": "ISO 9001:2015",
+        "iso9001Num": "240021Q09730R0S"
+      },
+      "standards": {
+        "astm": "ASTM D1785 / UL 651",
+        "asnzs": "AS/NZS 61386",
+        "iec": "IEC 61386",
+        "nom": "NOM-001-SEDE"
+      },
       "logoWall": "客户与合作伙伴 Logo 展位"
     },
     "finalCta": {

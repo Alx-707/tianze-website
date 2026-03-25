@@ -289,10 +289,20 @@
         "title": "Flexible MOQ",
         "desc": "Low minimums for first orders. Scale volumes as your projects grow."
       },
-      "cert1": "ISO 9001:2015",
-      "cert2": "UL651 / SCH40-80",
-      "cert3": "AS/NZS 2053",
-      "cert4": "ASTM Standards",
+      "certifications": {
+        "title": "Certifications & Standards",
+        "certified": "Certified",
+        "compliant": "Compliant",
+        "applying": "Applying",
+        "iso9001": "ISO 9001:2015",
+        "iso9001Num": "240021Q09730R0S"
+      },
+      "standards": {
+        "astm": "ASTM D1785 / UL 651",
+        "asnzs": "AS/NZS 61386",
+        "iec": "IEC 61386",
+        "nom": "NOM-001-SEDE"
+      },
       "logoWall": "Customer and partner logo placeholders"
     },
     "finalCta": {

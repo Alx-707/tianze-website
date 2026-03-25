@@ -39,13 +39,27 @@ describe("QualitySection", () => {
     }
   });
 
-  it("renders 4 certification badges", async () => {
+  it("renders ISO 9001 certification with certificate number", async () => {
     await renderAsyncComponent(QualitySection());
 
-    expect(screen.getByText("cert1")).toBeInTheDocument();
-    expect(screen.getByText("cert2")).toBeInTheDocument();
-    expect(screen.getByText("cert3")).toBeInTheDocument();
-    expect(screen.getByText("cert4")).toBeInTheDocument();
+    expect(screen.getByText("certifications.iso9001")).toBeInTheDocument();
+    expect(screen.getByText("certifications.iso9001Num")).toBeInTheDocument();
+    expect(screen.getByText("certifications.certified")).toBeInTheDocument();
+  });
+
+  it("renders 4 standards compliance labels", async () => {
+    await renderAsyncComponent(QualitySection());
+
+    expect(screen.getByText("standards.astm")).toBeInTheDocument();
+    expect(screen.getByText("standards.asnzs")).toBeInTheDocument();
+    expect(screen.getByText("standards.iec")).toBeInTheDocument();
+    expect(screen.getByText("standards.nom")).toBeInTheDocument();
+  });
+
+  it("renders applying badge for AS/NZS standard", async () => {
+    await renderAsyncComponent(QualitySection());
+
+    expect(screen.getByText("certifications.applying")).toBeInTheDocument();
   });
 
   it("renders logo wall placeholder", async () => {
