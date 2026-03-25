@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { generateMetadataForPath, type Locale } from "@/lib/seo-metadata";
+import { siteFacts } from "@/config/site-facts";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -210,10 +211,24 @@ interface StatsSectionProps {
 }
 
 function StatsSection({ stats }: StatsSectionProps) {
+  const yearsInBusiness =
+    new Date().getFullYear() - siteFacts.company.established;
   const statItems = [
-    { key: "years", value: "15+", label: stats.yearsExperience },
-    { key: "countries", value: "100+", label: stats.countriesServed },
-    { key: "team", value: "60+", label: stats.happyClients },
+    {
+      key: "years",
+      value: `${yearsInBusiness}+`,
+      label: stats.yearsExperience,
+    },
+    {
+      key: "countries",
+      value: `${siteFacts.stats.exportCountries ?? 20}+`,
+      label: stats.countriesServed,
+    },
+    {
+      key: "team",
+      value: `${siteFacts.company.employees ?? 60}+`,
+      label: stats.happyClients,
+    },
     { key: "factory", value: "100", label: stats.productsDelivered },
   ];
 
