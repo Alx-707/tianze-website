@@ -121,8 +121,7 @@ export const siteFacts: SiteFacts = {
     },
   ],
   stats: {
-    exportCountries: 100,
-    clientsServed: 500,
+    exportCountries: 20,
     onTimeDeliveryRate: 98,
   },
   social: {
