@@ -12,8 +12,8 @@ import {
 } from "@/components/ui/breadcrumb";
 
 type CatalogBreadcrumbProps =
-  | { market?: undefined }
-  | { market: MarketDefinition };
+  | { market?: undefined; marketLabel?: undefined }
+  | { market: MarketDefinition; marketLabel?: string };
 
 interface BreadcrumbEntry {
   name: string;
@@ -38,7 +38,10 @@ function safeJsonLd(data: ReturnType<typeof buildJsonLd>): string {
   return JSON.stringify(data).replace(/</g, "\\u003c");
 }
 
-export async function CatalogBreadcrumb({ market }: CatalogBreadcrumbProps) {
+export async function CatalogBreadcrumb({
+  market,
+  marketLabel,
+}: CatalogBreadcrumbProps) {
   const { baseUrl } = SITE_CONFIG;
   const tBreadcrumb = await getTranslations("catalog.breadcrumb");
 
@@ -52,7 +55,7 @@ export async function CatalogBreadcrumb({ market }: CatalogBreadcrumbProps) {
 
   if (market) {
     entries.push({
-      name: market.label,
+      name: marketLabel || market.label,
       url: `${canonicalBase}/products/${market.slug}`,
     });
   }
@@ -85,7 +88,7 @@ export async function CatalogBreadcrumb({ market }: CatalogBreadcrumbProps) {
             <>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbPage>{market.label}</BreadcrumbPage>
+                <BreadcrumbPage>{marketLabel || market.label}</BreadcrumbPage>
               </BreadcrumbItem>
             </>
           )}

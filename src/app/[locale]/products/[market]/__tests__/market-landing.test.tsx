@@ -74,6 +74,21 @@ vi.mock("@/components/products/product-specs", () => ({
 }));
 
 const MOCK_TRANSLATIONS: Record<string, string> = {
+  "markets.north-america.label": "UL / ASTM Series",
+  "markets.north-america.description":
+    "PVC conduit fittings engineered to UL 651 and ASTM D1785 standards for North American applications.",
+  "markets.australia-new-zealand.label": "AS/NZS 2053 Series",
+  "markets.australia-new-zealand.description":
+    "PVC conduit fittings complying with AS/NZS 2053 standards for Australian and New Zealand markets.",
+  "markets.mexico.label": "NOM Series",
+  "markets.mexico.description":
+    "PVC conduit fittings meeting Mexico NOM standards for electrical conduit systems.",
+  "markets.europe.label": "IEC Series",
+  "markets.europe.description":
+    "PVC conduit fittings complying with IEC 61084 standards for European markets.",
+  "markets.pneumatic-tube-systems.label": "PETG Pneumatic Tubes",
+  "markets.pneumatic-tube-systems.description":
+    "High-performance PETG tubes designed for pneumatic conveying systems.",
   "market.technical.title": "Technical Properties",
   "market.certifications.title": "Certifications & Compliance",
   "market.trade.title": "Trade Information",

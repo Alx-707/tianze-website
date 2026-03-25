@@ -61,12 +61,15 @@ export async function generateMetadata({
 
   if (!market) return {};
 
+  const t = await getTranslations({ locale, namespace: "catalog" });
+  const marketLabel = t(`markets.${marketSlug}.label`);
+  const marketDescription = t(`markets.${marketSlug}.description`);
   const path = `/products/${market.slug}`;
   const canonical = `${SITE_CONFIG.baseUrl}/${locale}${path}`;
 
   return {
-    title: `${market.label} | Tianze`,
-    description: market.description,
+    title: `${marketLabel} | Tianze`,
+    description: marketDescription,
     alternates: {
       canonical,
       languages: Object.fromEntries(
@@ -74,8 +77,8 @@ export async function generateMetadata({
       ),
     },
     openGraph: {
-      title: `${market.label} | Tianze`,
-      description: market.description,
+      title: `${marketLabel} | Tianze`,
+      description: marketDescription,
       type: "website",
     },
   };
@@ -159,6 +162,8 @@ export default async function MarketPage({ params }: MarketPageProps) {
   const families = getFamiliesForMarket(marketSlug);
   const marketSpecs = getMarketSpecs(marketSlug);
   const t = await getTranslations({ locale, namespace: "catalog" });
+  const marketLabel = t(`markets.${marketSlug}.label`);
+  const marketDescription = t(`markets.${marketSlug}.description`);
 
   // Build family specs lookup for FamilySection rendering
   const familySpecsMap = new Map(
@@ -167,15 +172,15 @@ export default async function MarketPage({ params }: MarketPageProps) {
 
   return (
     <main className="mx-auto max-w-[1080px] px-6 py-8 md:py-12">
-      <CatalogBreadcrumb market={market} />
+      <CatalogBreadcrumb market={market} marketLabel={marketLabel} />
 
       <header className="mb-8 md:mb-12">
         <span className="mb-2 inline-block rounded bg-muted px-2 py-0.5 font-mono text-xs text-muted-foreground">
           {market.standardLabel}
         </span>
-        <h1 className="text-heading mb-4">{market.label}</h1>
+        <h1 className="text-heading mb-4">{marketLabel}</h1>
         <p className="text-body max-w-2xl text-muted-foreground">
-          {market.description}
+          {marketDescription}
         </p>
       </header>
 
@@ -220,7 +225,7 @@ export default async function MarketPage({ params }: MarketPageProps) {
       )}
 
       <CtaSection
-        heading={t("market.cta.heading", { marketLabel: market.label })}
+        heading={t("market.cta.heading", { marketLabel })}
         description={t("market.cta.description")}
         buttonText={t("market.cta.button")}
       />
