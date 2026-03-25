@@ -994,19 +994,481 @@
       "radius": "Radius",
       "type": "Type",
       "length": "Length",
-      "schedule": "Schedule"
+      "schedule": "Schedule",
+      "bendRadius": "Bend Radius",
+      "connection": "Connection",
+      "duty": "Duty",
+      "material": "Material",
+      "outerDiameter": "Outer Diameter"
     },
     "familyCount": "{count} product families",
+    "markets": {
+      "north-america": {
+        "label": "UL / ASTM Series",
+        "description": "PVC conduit fittings engineered to UL 651 and ASTM D1785 standards for the North American electrical market. Available in Schedule 40 and Schedule 80."
+      },
+      "australia-new-zealand": {
+        "label": "AS/NZS 2053 Series",
+        "description": "PVC conduit fittings manufactured to AS/NZS 2053 standards for Australian and New Zealand electrical installations. Medium and heavy duty ratings."
+      },
+      "mexico": {
+        "label": "NOM Series",
+        "description": "PVC conduit fittings compliant with NOM-001-SEDE standards for the Mexican electrical market."
+      },
+      "europe": {
+        "label": "IEC Series",
+        "description": "PVC conduit fittings manufactured to IEC 61386 standards for European electrical installations."
+      },
+      "pneumatic-tube-systems": {
+        "label": "PETG Pneumatic Tubes",
+        "description": "PETG pneumatic tube systems for hospital logistics and automated material transport."
+      }
+    },
+    "families": {
+      "north-america": {
+        "conduit-sweeps-elbows": {
+          "label": "Conduit Sweeps & Elbows",
+          "description": "PVC conduit sweeps and elbows in standard angles. Bell end and plain end options available."
+        },
+        "couplings": {
+          "label": "Couplings",
+          "description": "PVC conduit couplings for joining straight conduit sections. Double-bell design for secure connections."
+        },
+        "conduit-pipes": {
+          "label": "Conduit Pipes",
+          "description": "Rigid PVC conduit pipes in Schedule 40 and Schedule 80 wall thicknesses."
+        }
+      },
+      "australia-new-zealand": {
+        "conduit-bends": {
+          "label": "Conduit Bends",
+          "description": "PVC conduit bends in standard angles. Plain and bell end options for AS/NZS 2053 installations."
+        },
+        "bellmouths": {
+          "label": "Bellmouths",
+          "description": "PVC bellmouth fittings for conduit termination. Flared entry protects cable insulation during pulling."
+        },
+        "couplings": {
+          "label": "Couplings",
+          "description": "PVC conduit couplings for AS/NZS 2053 conduit systems. Double-bell and flared connector options."
+        },
+        "conduit-pipes": {
+          "label": "Conduit Pipes",
+          "description": "Rigid PVC conduit pipes in medium and heavy duty ratings for Australian and NZ installations."
+        }
+      },
+      "mexico": {
+        "conduit-bends": {
+          "label": "Conduit Bends",
+          "description": "PVC conduit bends compliant with NOM-001-SEDE for Mexican electrical installations."
+        },
+        "couplings": {
+          "label": "Couplings",
+          "description": "PVC conduit couplings for NOM-compliant conduit systems."
+        },
+        "conduit-pipes": {
+          "label": "Conduit Pipes",
+          "description": "Rigid PVC conduit pipes manufactured to NOM standards."
+        }
+      },
+      "europe": {
+        "conduit-bends": {
+          "label": "Conduit Bends",
+          "description": "PVC conduit bends manufactured to IEC 61386 standards for European electrical installations."
+        },
+        "couplings": {
+          "label": "Couplings",
+          "description": "PVC conduit couplings for IEC 61386 conduit systems."
+        },
+        "conduit-pipes": {
+          "label": "Conduit Pipes",
+          "description": "Rigid PVC conduit pipes manufactured to IEC 61386 standards."
+        }
+      },
+      "pneumatic-tube-systems": {
+        "petg-tubes": {
+          "label": "PETG Tubes",
+          "description": "PETG pneumatic transport tubes for hospital logistics systems. Clear and durable."
+        },
+        "fittings": {
+          "label": "Fittings",
+          "description": "Fittings and connectors for PETG pneumatic tube systems."
+        }
+      }
+    },
+    "technicalLabels": {
+      "material": "Material",
+      "surface": "Surface",
+      "uvResistance": "UV Resistance",
+      "temperatureRange": "Temperature Range",
+      "lifespan": "Service Life",
+      "fireRating": "Fire Rating",
+      "standard": "Standard",
+      "transparency": "Transparency",
+      "maxWorkingPressure": "Max Working Pressure",
+      "impactResistance": "Impact Resistance"
+    },
+    "specs": {
+      "north-america": {
+        "technical": {
+          "material": "100% Virgin PVC (UPVC)",
+          "surface": "Smooth interior, reduces wire pulling friction",
+          "uvResistance": "UV stabilized for outdoor installations",
+          "temperatureRange": "-20°C to +60°C",
+          "lifespan": "30+ years service life",
+          "fireRating": "Self-extinguishing, flame retardant"
+        },
+        "trade": {
+          "moq": "500 pcs",
+          "leadTime": "15-20 days",
+          "supplyCapacity": "50,000+ pcs/month",
+          "packaging": "Carton + Pallet (export standard)",
+          "portOfLoading": "Lianyungang, China"
+        },
+        "families": {
+          "conduit-sweeps-elbows": {
+            "highlights": {
+              "0": "UL 651 Certified",
+              "1": "100% Virgin PVC",
+              "2": "45°/90°/Custom Angles"
+            },
+            "groups": {
+              "0": {
+                "label": "Schedule 40"
+              },
+              "1": {
+                "label": "Schedule 80"
+              }
+            }
+          },
+          "couplings": {
+            "highlights": {
+              "0": "Double-Bell Design",
+              "1": "Secure Conduit Joints",
+              "2": "Multi-Size Range"
+            },
+            "groups": {
+              "0": {
+                "label": "Schedule 40"
+              },
+              "1": {
+                "label": "Schedule 80"
+              }
+            }
+          },
+          "conduit-pipes": {
+            "highlights": {
+              "0": "Schedule 40 & 80",
+              "1": "Standard Lengths",
+              "2": "Straight Conduit Runs"
+            },
+            "groups": {
+              "0": {
+                "label": "Schedule 40"
+              },
+              "1": {
+                "label": "Schedule 80"
+              }
+            }
+          }
+        }
+      },
+      "australia-new-zealand": {
+        "technical": {
+          "material": "100% Virgin PVC (UPVC)",
+          "surface": "Smooth interior, reduces wire pulling friction",
+          "uvResistance": "UV stabilized for outdoor installations",
+          "temperatureRange": "-15°C to +60°C",
+          "lifespan": "30+ years service life",
+          "fireRating": "Self-extinguishing, flame retardant",
+          "standard": "AS/NZS 2053"
+        },
+        "trade": {
+          "moq": "500 pcs",
+          "leadTime": "15-20 days",
+          "supplyCapacity": "50,000+ pcs/month",
+          "packaging": "Carton + Pallet (export standard)",
+          "portOfLoading": "Lianyungang, China"
+        },
+        "families": {
+          "conduit-bends": {
+            "highlights": {
+              "0": "AS/NZS 2053 Certified",
+              "1": "Medium & Heavy Duty",
+              "2": "45°/90°/Custom Angles"
+            },
+            "groups": {
+              "0": {
+                "label": "Medium Duty"
+              },
+              "1": {
+                "label": "Heavy Duty"
+              }
+            }
+          },
+          "bellmouths": {
+            "highlights": {
+              "0": "Flared Entry Protection",
+              "1": "AS/NZS 2053 Compliant",
+              "2": "Cable Insulation Safety"
+            },
+            "groups": {
+              "0": {
+                "label": "Medium Duty"
+              },
+              "1": {
+                "label": "Heavy Duty"
+              }
+            }
+          },
+          "couplings": {
+            "highlights": {
+              "0": "Double-Bell Design",
+              "1": "AS/NZS 2053 Compliant",
+              "2": "Medium & Heavy Duty"
+            },
+            "groups": {
+              "0": {
+                "label": "Medium Duty"
+              },
+              "1": {
+                "label": "Heavy Duty"
+              }
+            }
+          },
+          "conduit-pipes": {
+            "highlights": {
+              "0": "Medium & Heavy Duty",
+              "1": "Standard Metric Lengths",
+              "2": "Straight Conduit Runs"
+            },
+            "groups": {
+              "0": {
+                "label": "Medium Duty"
+              },
+              "1": {
+                "label": "Heavy Duty"
+              }
+            }
+          }
+        }
+      },
+      "mexico": {
+        "technical": {
+          "material": "100% Virgin PVC (UPVC)",
+          "surface": "Smooth interior, reduces wire pulling friction",
+          "uvResistance": "UV stabilized for outdoor installations",
+          "temperatureRange": "-20°C to +60°C",
+          "lifespan": "30+ years service life",
+          "fireRating": "Self-extinguishing, flame retardant"
+        },
+        "trade": {
+          "moq": "500 pcs",
+          "leadTime": "15-20 days",
+          "supplyCapacity": "50,000+ pcs/month",
+          "packaging": "Carton + Pallet (export standard)",
+          "portOfLoading": "Lianyungang, China"
+        },
+        "families": {
+          "conduit-bends": {
+            "highlights": {
+              "0": "NOM Compliant",
+              "1": "Metric Sizes",
+              "2": "Light & Heavy Duty"
+            },
+            "groups": {
+              "0": {
+                "label": "Tipo Ligero"
+              },
+              "1": {
+                "label": "Tipo Pesado"
+              }
+            }
+          },
+          "couplings": {
+            "highlights": {
+              "0": "NOM Compliant",
+              "1": "Double-Bell Design",
+              "2": "Metric Sizes"
+            },
+            "groups": {
+              "0": {
+                "label": "Tipo Ligero"
+              },
+              "1": {
+                "label": "Tipo Pesado"
+              }
+            }
+          },
+          "conduit-pipes": {
+            "highlights": {
+              "0": "NOM Compliant",
+              "1": "Standard Lengths",
+              "2": "Metric Sizes"
+            },
+            "groups": {
+              "0": {
+                "label": "Tipo Ligero"
+              },
+              "1": {
+                "label": "Tipo Pesado"
+              }
+            }
+          }
+        }
+      },
+      "europe": {
+        "technical": {
+          "material": "100% Virgin PVC (UPVC)",
+          "surface": "Smooth interior, reduces wire pulling friction",
+          "uvResistance": "UV stabilized for outdoor installations",
+          "temperatureRange": "-20°C to +60°C",
+          "lifespan": "30+ years service life",
+          "fireRating": "Self-extinguishing, flame retardant"
+        },
+        "trade": {
+          "moq": "500 pcs",
+          "leadTime": "15-20 days",
+          "supplyCapacity": "50,000+ pcs/month",
+          "packaging": "Carton + Pallet (export standard)",
+          "portOfLoading": "Lianyungang, China"
+        },
+        "families": {
+          "conduit-bends": {
+            "highlights": {
+              "0": "IEC 61386 Certified",
+              "1": "Three Duty Ratings",
+              "2": "Metric Sizes"
+            },
+            "groups": {
+              "0": {
+                "label": "Light"
+              },
+              "1": {
+                "label": "Medium"
+              },
+              "2": {
+                "label": "Heavy"
+              }
+            }
+          },
+          "couplings": {
+            "highlights": {
+              "0": "IEC 61386 Certified",
+              "1": "Double-Bell Design",
+              "2": "Metric Sizes"
+            },
+            "groups": {
+              "0": {
+                "label": "Light"
+              },
+              "1": {
+                "label": "Medium"
+              },
+              "2": {
+                "label": "Heavy"
+              }
+            }
+          },
+          "conduit-pipes": {
+            "highlights": {
+              "0": "IEC 61386 Certified",
+              "1": "Standard Lengths",
+              "2": "Metric Sizes"
+            },
+            "groups": {
+              "0": {
+                "label": "Light"
+              },
+              "1": {
+                "label": "Medium"
+              },
+              "2": {
+                "label": "Heavy"
+              }
+            }
+          }
+        }
+      },
+      "pneumatic-tube-systems": {
+        "technical": {
+          "material": "PETG (Food-grade available)",
+          "transparency": "Crystal clear for visual monitoring",
+          "maxWorkingPressure": "0.5 MPa",
+          "temperatureRange": "-20°C to +60°C",
+          "surface": "Smooth interior for silent carrier transport",
+          "impactResistance": "High impact resistance for carrier collisions"
+        },
+        "trade": {
+          "moq": "100 meters",
+          "leadTime": "20-30 days",
+          "supplyCapacity": "10,000+ meters/month",
+          "packaging": "Individual wrapping + Wooden crate",
+          "portOfLoading": "Lianyungang, China"
+        },
+        "families": {
+          "petg-tubes": {
+            "highlights": {
+              "0": "Crystal Clear PETG",
+              "1": "Silent Operation",
+              "2": "Leak-Proof Joints"
+            },
+            "groups": {
+              "0": {
+                "label": "110mm OD"
+              },
+              "1": {
+                "label": "160mm OD"
+              }
+            }
+          },
+          "fittings": {
+            "highlights": {
+              "0": "Impact Resistant",
+              "1": "Hospital Grade",
+              "2": "Multiple Connection Types"
+            },
+            "groups": {
+              "0": {
+                "label": "110mm Fittings"
+              },
+              "1": {
+                "label": "160mm Fittings"
+              }
+            }
+          }
+        }
+      }
+    },
+    "rowValues": {
+      "bellEnd": "Bell End",
+      "plainEnd": "Plain End",
+      "standardCoupling": "Standard Coupling",
+      "expansionCoupling": "Expansion Coupling",
+      "standardBellmouth": "Standard Bellmouth",
+      "heavyDutyBellmouth": "Heavy Duty Bellmouth",
+      "mediumDuty": "Medium Duty",
+      "heavyDuty": "Heavy Duty",
+      "pushFit": "Push-fit",
+      "flange": "Flange",
+      "connector": "Connector",
+      "bend90": "90° Bend",
+      "bend45": "45° Bend",
+      "yDiverter": "Y-Diverter",
+      "accessPanel": "Access Panel",
+      "petg": "PETG",
+      "custom": "Custom"
+    },
     "highlights": {
-      "ul651Certified": "UL 651 Certified",
-      "virginPvc": "100% Virgin PVC",
-      "customAngles": "45°/90°/Custom Angles",
-      "doubleBell": "Double-Bell Design",
-      "secureJoints": "Secure Conduit Joints",
-      "multiSize": "Multi-Size Range",
-      "sch40Sch80": "Schedule 40 & 80",
-      "standardLengths": "Standard Lengths",
-      "straightRuns": "Straight Conduit Runs"
+      "customAngles": "45°/90°/自定义角度",
+      "doubleBell": "双承口设计",
+      "multiSize": "全尺寸覆盖",
+      "sch40Sch80": "Schedule 40 和 80",
+      "secureJoints": "安全牢固连接",
+      "standardLengths": "标准长度",
+      "straightRuns": "直管段",
+      "ul651Certified": "UL 651 认证",
+      "virginPvc": "100% 全新料 PVC"
     }
   }
 }

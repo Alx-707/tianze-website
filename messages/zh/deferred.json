@@ -488,6 +488,43 @@
       "heading": "对我们的弯管技术感兴趣？",
       "description": "无论您需要OEM制造还是讨论定制规格，我们随时准备帮助。",
       "button": "联系我们"
+    },
+    "equipment": {
+      "full-auto-bending-machine": {
+        "highlights": {
+          "0": "CNC Control System",
+          "1": "Automatic Feeding",
+          "2": "Multi-Station Design",
+          "3": "Remote Diagnostics"
+        },
+        "name": "Full-Automatic PVC Pipe Bending Machine",
+        "params": {
+          "bendingAngles": "15°-180° (Programmable)",
+          "controlSystem": "PLC + HMI Touch Screen",
+          "heatingZones": "4-8 zones",
+          "machineWeight": "~1200kg",
+          "pipeDiameter": "DN25-DN160mm",
+          "powerSupply": "380V/50Hz 3-Phase",
+          "productionSpeed": "150-200 pcs/hour"
+        }
+      },
+      "semi-auto-bending-machine": {
+        "highlights": {
+          "0": "Precision Temperature Control",
+          "1": "Adjustable Bending Angles",
+          "2": "Quick-Swap Mold System",
+          "3": "Safety Features"
+        },
+        "name": "Semi-Automatic PVC Pipe Bending Machine",
+        "params": {
+          "bendingAngles": "45°, 90°, Custom",
+          "heatingMethod": "Infrared / Electric",
+          "machineWeight": "~500kg",
+          "pipeDiameter": "DN20-DN110mm",
+          "powerSupply": "380V/50Hz 3-Phase",
+          "productionSpeed": "60-80 pcs/hour"
+        }
+      }
     }
   },
   "oem": {
