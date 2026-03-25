@@ -18,7 +18,7 @@ const COMMITMENT_KEYS = [
   "commitment5",
 ] as const;
 
-const CERT_KEYS = ["cert1", "cert2", "cert3", "cert4"] as const;
+const STANDARD_KEYS = ["astm", "asnzs", "iec", "nom"] as const;
 
 const COMMITMENT_ICONS: Record<string, LucideIcon> = {
   commitment1: Clock,
@@ -62,15 +62,45 @@ export async function QualitySection() {
         })}
       </div>
 
-      {/* Cert badges */}
-      <div className="mt-8 flex flex-wrap items-center gap-4">
-        {CERT_KEYS.map((key) => (
+      {/* Certification — verified */}
+      <div className="mt-8">
+        <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+          {t("certifications.title")}
+        </h3>
+        <div className="flex items-center gap-3 rounded-lg border bg-card px-4 py-3">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10">
+            <Check size={16} className="text-primary" aria-hidden />
+          </div>
+          <div>
+            <span className="font-semibold">{t("certifications.iso9001")}</span>
+            <span className="ml-2 text-xs text-muted-foreground">
+              <span aria-hidden>#</span>
+              {t("certifications.iso9001Num")}
+            </span>
+          </div>
+          <span className="ml-auto rounded-md bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+            {t("certifications.certified")}
+          </span>
+        </div>
+      </div>
+
+      {/* Standards compliance */}
+      <div className="mt-4 flex flex-wrap items-center gap-3">
+        {STANDARD_KEYS.map((key) => (
           <div
             key={key}
             className="flex items-center gap-1.5 rounded-md bg-muted/50 px-3 py-1.5 text-[13px] font-medium"
           >
-            <Check size={16} className="shrink-0 text-primary" aria-hidden />
-            <span>{t(key)}</span>
+            <span>{t(`standards.${key}`)}</span>
+            {key === "asnzs" ? (
+              <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[11px] font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                {t("certifications.applying")}
+              </span>
+            ) : (
+              <span className="rounded bg-muted px-1.5 py-0.5 text-[11px] text-muted-foreground">
+                {t("certifications.compliant")}
+              </span>
+            )}
           </div>
         ))}
       </div>

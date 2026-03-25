@@ -68,8 +68,10 @@ export default async function ProductsPage({ params }: ProductsPageProps) {
             return (
               <MarketSeriesCard
                 key={market.slug}
-                market={market}
-                familyCount={count}
+                slug={market.slug}
+                label={t(`markets.${market.slug}.label`)}
+                description={t(`markets.${market.slug}.description`)}
+                standardLabel={market.standardLabel}
                 familyCountLabel={t("familyCount", { count })}
               />
             );
@@ -86,8 +88,10 @@ export default async function ProductsPage({ params }: ProductsPageProps) {
           {/* PETG Pneumatic Tubes card */}
           {pneumaticMarket && (
             <MarketSeriesCard
-              market={pneumaticMarket}
-              familyCount={getFamiliesForMarket(pneumaticMarket.slug).length}
+              slug={pneumaticMarket.slug}
+              label={t(`markets.${pneumaticMarket.slug}.label`)}
+              description={t(`markets.${pneumaticMarket.slug}.description`)}
+              standardLabel={pneumaticMarket.standardLabel}
               familyCountLabel={t("familyCount", {
                 count: getFamiliesForMarket(pneumaticMarket.slug).length,
               })}

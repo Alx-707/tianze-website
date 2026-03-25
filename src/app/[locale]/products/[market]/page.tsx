@@ -12,7 +12,12 @@ import { AUSTRALIA_NZ_SPECS } from "@/constants/product-specs/australia-new-zeal
 import { MEXICO_SPECS } from "@/constants/product-specs/mexico";
 import { EUROPE_SPECS } from "@/constants/product-specs/europe";
 import { PNEUMATIC_SPECS } from "@/constants/product-specs/pneumatic-tube-systems";
-import type { MarketSpecs } from "@/constants/product-specs/types";
+import type { MarketSpecs, SpecGroup } from "@/constants/product-specs/types";
+import {
+  getColumnTranslationKey,
+  getGroupLabelTranslationKey,
+  getRowValueTranslationKey,
+} from "@/lib/spec-table-translator";
 import { SITE_CONFIG } from "@/config/paths";
 import { CatalogBreadcrumb } from "@/components/products/catalog-breadcrumb";
 import { FamilySection } from "@/components/products/family-section";
@@ -61,12 +66,15 @@ export async function generateMetadata({
 
   if (!market) return {};
 
+  const t = await getTranslations({ locale, namespace: "catalog" });
+  const marketLabel = t(`markets.${marketSlug}.label`);
+  const marketDescription = t(`markets.${marketSlug}.description`);
   const path = `/products/${market.slug}`;
   const canonical = `${SITE_CONFIG.baseUrl}/${locale}${path}`;
 
   return {
-    title: `${market.label} | Tianze`,
-    description: market.description,
+    title: `${marketLabel} | Tianze`,
+    description: marketDescription,
     alternates: {
       canonical,
       languages: Object.fromEntries(
@@ -74,8 +82,8 @@ export async function generateMetadata({
       ),
     },
     openGraph: {
-      title: `${market.label} | Tianze`,
-      description: market.description,
+      title: `${marketLabel} | Tianze`,
+      description: marketDescription,
       type: "website",
     },
   };
@@ -84,7 +92,15 @@ export async function generateMetadata({
 // --- Extracted sub-sections (keep MarketPage under 120 lines) ---
 
 interface TrustSignalsSectionProps {
-  marketSpecs: MarketSpecs;
+  translatedTechnical: Record<string, string>;
+  certifications: string[];
+  translatedTrade: {
+    moq: string;
+    leadTime: string;
+    supplyCapacity: string;
+    packaging: string;
+    portOfLoading: string;
+  };
   technicalTitle: string;
   certificationsTitle: string;
   tradeTitle: string;
@@ -98,7 +114,9 @@ interface TrustSignalsSectionProps {
 }
 
 function TrustSignalsSection({
-  marketSpecs,
+  translatedTechnical,
+  certifications,
+  translatedTrade,
   technicalTitle,
   certificationsTitle,
   tradeTitle,
@@ -106,17 +124,17 @@ function TrustSignalsSection({
 }: TrustSignalsSectionProps) {
   return (
     <div className="mt-16 space-y-8">
-      <ProductSpecs specs={marketSpecs.technical} title={technicalTitle} />
+      <ProductSpecs specs={translatedTechnical} title={technicalTitle} />
       <ProductCertifications
-        certifications={marketSpecs.certifications}
+        certifications={certifications}
         title={certificationsTitle}
       />
       <ProductTradeInfo
-        moq={marketSpecs.trade.moq}
-        leadTime={marketSpecs.trade.leadTime}
-        supplyCapacity={marketSpecs.trade.supplyCapacity}
-        packaging={marketSpecs.trade.packaging}
-        portOfLoading={marketSpecs.trade.portOfLoading}
+        moq={translatedTrade.moq}
+        leadTime={translatedTrade.leadTime}
+        supplyCapacity={translatedTrade.supplyCapacity}
+        packaging={translatedTrade.packaging}
+        portOfLoading={translatedTrade.portOfLoading}
         title={tradeTitle}
         labels={tradeLabels}
       />
@@ -145,6 +163,78 @@ function CtaSection({ heading, description, buttonText }: CtaSectionProps) {
   );
 }
 
+// --- Helper functions for spec translation ---
+
+function translateSpecColumns(
+  columns: string[],
+  t: (key: string) => string,
+): string[] {
+  return columns.map((col) => {
+    const colKey = getColumnTranslationKey(col);
+    return t(colKey);
+  });
+}
+
+function translateSpecRows(
+  rows: string[][],
+  t: (key: string) => string,
+): string[][] {
+  return rows.map((row) =>
+    row.map((cell) => {
+      const cellKey = getRowValueTranslationKey(cell);
+      return cellKey ? t(cellKey) : cell;
+    }),
+  );
+}
+
+function translateTechnicalSpecs(
+  technical: Record<string, string>,
+  marketSlug: string,
+  t: (key: string) => string,
+): Record<string, string> {
+  const translated: Record<string, string> = {};
+  for (const key of Object.keys(technical)) {
+    const labelKey = `technicalLabels.${key}`;
+    const valueKey = `specs.${marketSlug}.technical.${key}`;
+    const translatedLabel = t(labelKey);
+    const translatedValue = t(valueKey);
+    translated[translatedLabel] = translatedValue;
+  }
+  return translated;
+}
+
+function buildTrustSignalsSectionProps(
+  marketSpecs: MarketSpecs,
+  marketSlug: string,
+  t: (key: string) => string,
+): TrustSignalsSectionProps {
+  return {
+    translatedTechnical: translateTechnicalSpecs(
+      marketSpecs.technical,
+      marketSlug,
+      t,
+    ),
+    certifications: marketSpecs.certifications,
+    translatedTrade: {
+      moq: t(`specs.${marketSlug}.trade.moq`),
+      leadTime: t(`specs.${marketSlug}.trade.leadTime`),
+      supplyCapacity: t(`specs.${marketSlug}.trade.supplyCapacity`),
+      packaging: t(`specs.${marketSlug}.trade.packaging`),
+      portOfLoading: t(`specs.${marketSlug}.trade.portOfLoading`),
+    },
+    technicalTitle: t("market.technical.title"),
+    certificationsTitle: t("market.certifications.title"),
+    tradeTitle: t("market.trade.title"),
+    tradeLabels: {
+      moq: t("market.trade.moq"),
+      leadTime: t("market.trade.leadTime"),
+      supplyCapacity: t("market.trade.supplyCapacity"),
+      packaging: t("market.trade.packaging"),
+      portOfLoading: t("market.trade.portOfLoading"),
+    },
+  };
+}
+
 // --- Page component ---
 
 export default async function MarketPage({ params }: MarketPageProps) {
@@ -159,6 +249,8 @@ export default async function MarketPage({ params }: MarketPageProps) {
   const families = getFamiliesForMarket(marketSlug);
   const marketSpecs = getMarketSpecs(marketSlug);
   const t = await getTranslations({ locale, namespace: "catalog" });
+  const marketLabel = t(`markets.${marketSlug}.label`);
+  const marketDescription = t(`markets.${marketSlug}.description`);
 
   // Build family specs lookup for FamilySection rendering
   const familySpecsMap = new Map(
@@ -167,15 +259,15 @@ export default async function MarketPage({ params }: MarketPageProps) {
 
   return (
     <main className="mx-auto max-w-[1080px] px-6 py-8 md:py-12">
-      <CatalogBreadcrumb market={market} />
+      <CatalogBreadcrumb market={market} marketLabel={marketLabel} />
 
       <header className="mb-8 md:mb-12">
         <span className="mb-2 inline-block rounded bg-muted px-2 py-0.5 font-mono text-xs text-muted-foreground">
           {market.standardLabel}
         </span>
-        <h1 className="text-heading mb-4">{market.label}</h1>
+        <h1 className="text-heading mb-4">{marketLabel}</h1>
         <p className="text-body max-w-2xl text-muted-foreground">
-          {market.description}
+          {marketDescription}
         </p>
       </header>
 
@@ -183,7 +275,11 @@ export default async function MarketPage({ params }: MarketPageProps) {
         <StickyFamilyNav
           families={families
             .filter((f) => familySpecsMap.has(f.slug))
-            .map((f) => ({ slug: f.slug, label: f.label }))}
+            .map((f) => ({
+              slug: f.slug,
+              label: t(`families.${marketSlug}.${f.slug}.label`),
+            }))}
+          ariaLabel={t("market.familyNav.jumpTo")}
         />
       )}
 
@@ -191,8 +287,49 @@ export default async function MarketPage({ params }: MarketPageProps) {
         {families.map((family) => {
           const specs = familySpecsMap.get(family.slug);
           if (!specs) return null;
+          const familyLabel = t(`families.${marketSlug}.${family.slug}.label`);
+          const familyDescription = t(
+            `families.${marketSlug}.${family.slug}.description`,
+          );
+          // Translate highlights from catalog keys
+          const translatedHighlights = specs.highlights.map((_, index) =>
+            t(
+              `specs.${marketSlug}.families.${family.slug}.highlights.${index}`,
+            ),
+          );
+          // Translate spec groups (column headers, group labels, row values)
+          const translatedSpecGroups: SpecGroup[] = specs.specGroups.map(
+            (group, groupIndex) => {
+              const groupLabelKey = getGroupLabelTranslationKey(
+                marketSlug,
+                family.slug,
+                groupIndex,
+              );
+              const translatedLabel = t(groupLabelKey);
+              const translatedColumns = translateSpecColumns(group.columns, t);
+              const translatedRows = translateSpecRows(group.rows, t);
+
+              return {
+                ...group,
+                groupLabel: translatedLabel,
+                columns: translatedColumns,
+                rows: translatedRows,
+              };
+            },
+          );
+          const specsWithTranslations = {
+            ...specs,
+            highlights: translatedHighlights,
+            specGroups: translatedSpecGroups,
+          };
           return (
-            <FamilySection key={family.slug} family={family} specs={specs} />
+            <FamilySection
+              key={family.slug}
+              family={family}
+              specs={specsWithTranslations}
+              familyLabel={familyLabel}
+              familyDescription={familyDescription}
+            />
           );
         })}
       </div>
@@ -205,22 +342,12 @@ export default async function MarketPage({ params }: MarketPageProps) {
 
       {marketSpecs && (
         <TrustSignalsSection
-          marketSpecs={marketSpecs}
-          technicalTitle={t("market.technical.title")}
-          certificationsTitle={t("market.certifications.title")}
-          tradeTitle={t("market.trade.title")}
-          tradeLabels={{
-            moq: t("market.trade.moq"),
-            leadTime: t("market.trade.leadTime"),
-            supplyCapacity: t("market.trade.supplyCapacity"),
-            packaging: t("market.trade.packaging"),
-            portOfLoading: t("market.trade.portOfLoading"),
-          }}
+          {...buildTrustSignalsSectionProps(marketSpecs, marketSlug, t)}
         />
       )}
 
       <CtaSection
-        heading={t("market.cta.heading", { marketLabel: market.label })}
+        heading={t("market.cta.heading", { marketLabel })}
         description={t("market.cta.description")}
         buttonText={t("market.cta.button")}
       />

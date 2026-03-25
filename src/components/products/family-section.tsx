@@ -7,12 +7,16 @@ import { SpecTable } from "@/components/products/spec-table";
 export interface FamilySectionProps {
   family: ProductFamilyDefinition;
   specs: FamilySpecs;
+  familyLabel: string;
+  familyDescription: string;
   className?: string;
 }
 
 export function FamilySection({
   family,
   specs,
+  familyLabel,
+  familyDescription,
   className,
 }: FamilySectionProps) {
   const firstImage = specs.images[0] ?? "/images/products/placeholder.svg";
@@ -25,7 +29,7 @@ export function FamilySection({
         <div className="relative aspect-[4/3] w-full shrink-0 overflow-hidden rounded-lg border border-border bg-muted md:w-1/2">
           <Image
             src={firstImage}
-            alt={family.label}
+            alt={familyLabel}
             fill
             sizes="(max-width: 768px) 100vw, 50vw"
             className="object-contain p-4"
@@ -35,9 +39,9 @@ export function FamilySection({
         {/* Overview — right column on desktop */}
         <div className="flex flex-col gap-4 md:w-1/2">
           <h2 className="text-2xl font-semibold text-foreground">
-            {family.label}
+            {familyLabel}
           </h2>
-          <p className="text-muted-foreground">{family.description}</p>
+          <p className="text-muted-foreground">{familyDescription}</p>
 
           {/* Key highlights */}
           <ul className="space-y-2">

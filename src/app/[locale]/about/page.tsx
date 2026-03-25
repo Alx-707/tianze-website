@@ -8,8 +8,10 @@ import {
   HeadphonesIcon,
   Wrench,
 } from "lucide-react";
+import { cacheLife } from "next/cache";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { generateMetadataForPath, type Locale } from "@/lib/seo-metadata";
+import { siteFacts } from "@/config/site-facts";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -199,6 +201,14 @@ function ValuesSection({ title, values }: ValuesSectionProps) {
   );
 }
 
+// eslint-disable-next-line require-await -- "use cache" directive requires async
+async function getYearsInBusiness() {
+  "use cache";
+  cacheLife("days");
+
+  return new Date().getFullYear() - siteFacts.company.established;
+}
+
 // Stats section component
 interface StatsSectionProps {
   stats: {
@@ -209,11 +219,24 @@ interface StatsSectionProps {
   };
 }
 
-function StatsSection({ stats }: StatsSectionProps) {
+async function StatsSection({ stats }: StatsSectionProps) {
+  const yearsInBusiness = await getYearsInBusiness();
   const statItems = [
-    { key: "years", value: "15+", label: stats.yearsExperience },
-    { key: "countries", value: "100+", label: stats.countriesServed },
-    { key: "team", value: "60+", label: stats.happyClients },
+    {
+      key: "years",
+      value: `${yearsInBusiness}+`,
+      label: stats.yearsExperience,
+    },
+    {
+      key: "countries",
+      value: `${siteFacts.stats.exportCountries ?? 20}+`,
+      label: stats.countriesServed,
+    },
+    {
+      key: "team",
+      value: `${siteFacts.company.employees ?? 60}+`,
+      label: stats.happyClients,
+    },
     { key: "factory", value: "100", label: stats.productsDelivered },
   ];
 

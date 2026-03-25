@@ -2,17 +2,22 @@ import { cn } from "@/lib/utils";
 
 export interface StickyFamilyNavProps {
   families: { slug: string; label: string }[];
+  ariaLabel?: string;
   className?: string;
 }
 
-export function StickyFamilyNav({ families, className }: StickyFamilyNavProps) {
+export function StickyFamilyNav({
+  families,
+  ariaLabel = "Product families",
+  className,
+}: StickyFamilyNavProps) {
   return (
     <nav
       className={cn(
         "sticky top-14 z-10 -mx-6 mb-8 border-b border-border bg-background/95 px-6 backdrop-blur supports-[backdrop-filter]:bg-background/60",
         className,
       )}
-      aria-label="Product families"
+      aria-label={ariaLabel}
     >
       <div className="flex gap-1 overflow-x-auto py-2">
         {families.map((family) => (

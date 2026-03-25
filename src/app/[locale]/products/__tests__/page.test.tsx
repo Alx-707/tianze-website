@@ -3,8 +3,26 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 // Mock next-intl
+const mockTranslations = {
+  "markets.north-america.label": "UL / ASTM Series",
+  "markets.australia-new-zealand.label": "AS/NZS 2053 Series",
+  "markets.mexico.label": "NOM Series",
+  "markets.europe.label": "IEC Series",
+  "markets.pneumatic-tube-systems.label": "PETG Pneumatic Tubes",
+  "overview.byStandard": "By Market Standard",
+  "overview.specialty": "Specialty & Equipment",
+  "overview.title": "Products",
+  "overview.description": "Our product catalog",
+  "overview.equipmentTitle": "Bending Machines",
+  "overview.equipmentDescription": "Our manufacturing equipment",
+  familyCount: "3 product families",
+} as const;
+
 vi.mock("next-intl/server", () => ({
-  getTranslations: vi.fn(async () => (key: string) => key),
+  getTranslations: vi.fn(
+    async () => (key: string) =>
+      mockTranslations[key as keyof typeof mockTranslations] || key,
+  ),
   setRequestLocale: vi.fn(),
 }));
 
@@ -50,12 +68,17 @@ vi.mock("@/components/products/catalog-breadcrumb", () => ({
 // Mock MarketSeriesCard
 vi.mock("@/components/products/market-series-card", () => ({
   MarketSeriesCard: ({
-    market,
+    slug,
+    label,
   }: {
-    market: { label: string; slug: string };
+    slug: string;
+    label: string;
+    description: string;
+    standardLabel: string;
+    familyCountLabel: string;
   }) => (
-    <a href={`/products/${market.slug}`}>
-      <h2>{market.label}</h2>
+    <a href={`/products/${slug}`}>
+      <h2>{label}</h2>
     </a>
   ),
 }));

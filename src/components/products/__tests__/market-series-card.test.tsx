@@ -57,23 +57,17 @@ describe("MarketSeriesCard", () => {
     return mod.MarketSeriesCard;
   }
 
-  const market = {
+  const defaultProps = {
     slug: "north-america",
     label: "UL / ASTM Series",
-    standardLabel: "UL 651 / ASTM D1785",
     description: "PVC conduit fittings for North American market.",
-    sizeSystem: "inch" as const,
-    standardIds: [] as const,
-    familySlugs: [
-      "conduit-sweeps-elbows",
-      "couplings",
-      "conduit-pipes",
-    ] as const,
+    standardLabel: "UL 651 / ASTM D1785",
+    familyCountLabel: "3 product families",
   };
 
   it("renders market label as heading", async () => {
     const MarketSeriesCard = await importComponent();
-    render(<MarketSeriesCard market={market} familyCount={3} />);
+    render(<MarketSeriesCard {...defaultProps} />);
 
     expect(
       screen.getByRole("heading", { name: "UL / ASTM Series" }),
@@ -82,14 +76,14 @@ describe("MarketSeriesCard", () => {
 
   it("renders standard label badge", async () => {
     const MarketSeriesCard = await importComponent();
-    render(<MarketSeriesCard market={market} familyCount={3} />);
+    render(<MarketSeriesCard {...defaultProps} />);
 
     expect(screen.getByText("UL 651 / ASTM D1785")).toBeInTheDocument();
   });
 
   it("renders market description", async () => {
     const MarketSeriesCard = await importComponent();
-    render(<MarketSeriesCard market={market} familyCount={3} />);
+    render(<MarketSeriesCard {...defaultProps} />);
 
     expect(
       screen.getByText("PVC conduit fittings for North American market."),
@@ -98,7 +92,7 @@ describe("MarketSeriesCard", () => {
 
   it("links to the market landing page", async () => {
     const MarketSeriesCard = await importComponent();
-    render(<MarketSeriesCard market={market} familyCount={3} />);
+    render(<MarketSeriesCard {...defaultProps} />);
 
     const link = screen
       .getByRole("heading", { name: "UL / ASTM Series" })
@@ -106,30 +100,26 @@ describe("MarketSeriesCard", () => {
     expect(link).toHaveAttribute("href", "/products/north-america");
   });
 
-  it("displays family count with default label", async () => {
+  it("displays family count label", async () => {
     const MarketSeriesCard = await importComponent();
-    render(<MarketSeriesCard market={market} familyCount={3} />);
+    render(<MarketSeriesCard {...defaultProps} />);
 
     expect(screen.getByText("3 product families")).toBeInTheDocument();
   });
 
-  it("displays translated family count label when provided", async () => {
+  it("displays translated family count label", async () => {
     const MarketSeriesCard = await importComponent();
     render(
-      <MarketSeriesCard
-        market={market}
-        familyCount={3}
-        familyCountLabel="3 个产品系列"
-      />,
+      <MarketSeriesCard {...defaultProps} familyCountLabel="3 个产品系列" />,
     );
 
     expect(screen.getByText("3 个产品系列")).toBeInTheDocument();
   });
 
-  it("renders a placeholder image", async () => {
+  it("renders a placeholder image with label as alt text", async () => {
     const MarketSeriesCard = await importComponent();
-    render(<MarketSeriesCard market={market} familyCount={3} />);
+    render(<MarketSeriesCard {...defaultProps} />);
     const img = screen.getByRole("img");
-    expect(img).toHaveAttribute("alt", expect.stringContaining(market.label));
+    expect(img).toHaveAttribute("alt", "UL / ASTM Series");
   });
 });

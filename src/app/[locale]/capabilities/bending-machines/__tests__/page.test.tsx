@@ -66,8 +66,12 @@ describe("Feature: Bending Machines Capability Page", () => {
 
   it("renders specs for both machines", async () => {
     await renderPage();
-    expect(screen.getByText(/Full-Automatic/)).toBeInTheDocument();
-    expect(screen.getByText(/Semi-Automatic/)).toBeInTheDocument();
+    expect(
+      screen.getByText("equipment.full-auto-bending-machine.name"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("equipment.semi-auto-bending-machine.name"),
+    ).toBeInTheDocument();
   });
 
   it("renders production capability numbers", async () => {

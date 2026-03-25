@@ -21,11 +21,18 @@ export interface ContactPanelHoursCopy {
   closedLabel: string;
 }
 
+export interface ContactPanelWhatsAppCopy {
+  label: string;
+  chatNow: string;
+  comingSoon: string;
+}
+
 export interface ContactCopyModel {
   header: ContactHeaderCopy;
   panel: {
     contact: ContactPanelContactCopy;
     hours: ContactPanelHoursCopy;
+    whatsapp: ContactPanelWhatsAppCopy;
   };
 }
 
@@ -73,6 +80,11 @@ export async function getContactCopy(
         saturdayLabel: t("panel.saturday"),
         sundayLabel: t("panel.sunday"),
         closedLabel: t("panel.closed"),
+      },
+      whatsapp: {
+        label: t("panel.whatsapp"),
+        chatNow: t("panel.chatNow"),
+        comingSoon: t("panel.comingSoon"),
       },
     },
   };

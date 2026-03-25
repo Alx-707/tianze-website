@@ -132,9 +132,9 @@
   },
   "home": {
     "hero": {
-      "eyebrow": "ISO 9001 认证制造商",
-      "title": "PVC电工弯管与管件，工厂直供。",
-      "subtitle": "来自自主设计制造弯管设备的制造商。从设备研发到成品交付，全链路垂直整合。",
+      "eyebrow": "ISO 9001 认证 · 始于 2018",
+      "title": "造设备的人，做管件。",
+      "subtitle": "PVC电工套管弯头及配件，从弯管设备研发到成品管件的垂直整合制造商。",
       "cta": {
         "primary": "获取报价",
         "secondary": "查看产品目录"
@@ -146,7 +146,7 @@
         "rangeLabel": "mm 口径",
         "production": "24/7",
         "productionLabel": "不间断生产",
-        "est": "2006",
+        "est": "2018",
         "estLabel": "年创立"
       }
     },
@@ -289,10 +289,20 @@
         "title": "灵活起订量",
         "desc": "首单低起订量，随项目规模灵活扩量。"
       },
-      "cert1": "ISO 9001:2015",
-      "cert2": "UL651 / SCH40-80",
-      "cert3": "AS/NZS 2053",
-      "cert4": "ASTM标准",
+      "certifications": {
+        "title": "认证与标准",
+        "certified": "已认证",
+        "compliant": "符合标准",
+        "applying": "申请中",
+        "iso9001": "ISO 9001:2015",
+        "iso9001Num": "240021Q09730R0S"
+      },
+      "standards": {
+        "astm": "ASTM D1785 / UL 651",
+        "asnzs": "AS/NZS 61386",
+        "iec": "IEC 61386",
+        "nom": "NOM-001-SEDE"
+      },
       "logoWall": "客户与合作伙伴 Logo 展位"
     },
     "finalCta": {
@@ -305,7 +315,7 @@
     "footer": {
       "about": {
         "title": "天泽管业",
-        "desc": "PVC电工弯管与管件制造商，位于江苏省连云港市。自2006年起设计制造弯管设备。"
+        "desc": "PVC电工弯管与管件制造商，位于江苏省连云港市。自2018年起设计制造弯管设备。"
       },
       "products": {
         "title": "产品",
@@ -492,7 +502,7 @@
         },
         "i18n": {
           "title": "全球出口",
-          "description": "服务100+国家客户，可靠的国际物流配送。",
+          "description": "服务20+国家客户，可靠的国际物流配送。",
           "languageUnit": "个国家"
         },
         "themes": {
@@ -700,7 +710,7 @@
       },
       "contact": {
         "title": "联系我们 - 天泽管业 | 获取报价",
-        "description": "咨询弯管设备、PVC管材或PETG气动管产品。产品出口100+国家和地区。"
+        "description": "咨询弯管设备、PVC管材或PETG气动管产品。产品出口20+国家和地区。"
       },
       "products": {
         "title": "产品中心 - 天泽管业 | 设备与管件",
@@ -753,6 +763,9 @@
           "contactTitle": "联系方式",
           "email": "邮箱",
           "phone": "电话",
+          "whatsapp": "WhatsApp",
+          "chatNow": "立即聊天",
+          "comingSoon": "即将开通",
           "hoursTitle": "营业时间",
           "weekdays": "周一 - 周五",
           "saturday": "周六",
@@ -994,7 +1007,12 @@
       "radius": "弯曲半径",
       "type": "类型",
       "length": "长度",
-      "schedule": "壁厚等级"
+      "schedule": "壁厚等级",
+      "bendRadius": "弯曲半径",
+      "connection": "连接方式",
+      "duty": "强度等级",
+      "material": "材料",
+      "outerDiameter": "外径"
     },
     "familyCount": "{count} 个产品系列",
     "highlights": {
@@ -1007,6 +1025,463 @@
       "sch40Sch80": "Schedule 40 和 80",
       "standardLengths": "标准长度",
       "straightRuns": "直管段"
+    },
+    "families": {
+      "australia-new-zealand": {
+        "bellmouths": {
+          "description": "PVC喇叭口接头，用于电工套管终端。喇叭形入口在拉线过程中保护电缆绝缘。",
+          "label": "喇叭口接头"
+        },
+        "conduit-bends": {
+          "description": "标准角度的PVC电工弯管。提供直口和喇叭口选项，适用于AS/NZS 2053标准安装。",
+          "label": "电工弯管"
+        },
+        "conduit-pipes": {
+          "description": "中型和重型PVC电工直管，适用于澳大利亚和新西兰安装。",
+          "label": "电工直管"
+        },
+        "couplings": {
+          "description": "AS/NZS 2053电工套管用PVC接头。提供双承口和喇叭形连接器选项。",
+          "label": "接头"
+        }
+      },
+      "europe": {
+        "conduit-bends": {
+          "description": "按IEC 61386标准制造的PVC电工弯管，用于欧洲电气安装。",
+          "label": "电工弯管"
+        },
+        "conduit-pipes": {
+          "description": "按IEC 61386标准制造的PVC电工直管。",
+          "label": "电工直管"
+        },
+        "couplings": {
+          "description": "IEC 61386电工套管用PVC接头。",
+          "label": "接头"
+        }
+      },
+      "mexico": {
+        "conduit-bends": {
+          "description": "符合NOM-001-SEDE标准的PVC电工弯管，用于墨西哥电气安装。",
+          "label": "电工弯管"
+        },
+        "conduit-pipes": {
+          "description": "按NOM标准制造的PVC电工直管。",
+          "label": "电工直管"
+        },
+        "couplings": {
+          "description": "符合NOM标准的电工套管用PVC接头。",
+          "label": "接头"
+        }
+      },
+      "north-america": {
+        "conduit-pipes": {
+          "description": "Schedule 40和Schedule 80壁厚的PVC电工直管。",
+          "label": "电工直管"
+        },
+        "conduit-sweeps-elbows": {
+          "description": "标准角度的PVC电工弯管和弯头。提供喇叭口和直口选项。",
+          "label": "电工弯管与弯头"
+        },
+        "couplings": {
+          "description": "用于连接直电工套管的PVC接头。双承口设计可确保安全连接。",
+          "label": "接头"
+        }
+      },
+      "pneumatic-tube-systems": {
+        "fittings": {
+          "description": "PETG气动物流管用接头和连接器。",
+          "label": "接头"
+        },
+        "petg-tubes": {
+          "description": "用于医院物流系统的PETG气动运输管。透明耐用。",
+          "label": "PETG管"
+        }
+      }
+    },
+    "markets": {
+      "australia-new-zealand": {
+        "description": "按AS/NZS 2053标准制造的PVC电工套管配件，用于澳大利亚和新西兰电气安装。提供中型和重型规格。",
+        "label": "AS/NZS 2053系列"
+      },
+      "europe": {
+        "description": "按IEC 61386标准制造的PVC电工套管配件，用于欧洲电气安装。",
+        "label": "IEC系列"
+      },
+      "mexico": {
+        "description": "符合NOM-001-SEDE标准的PVC电工套管配件，用于墨西哥电气市场。",
+        "label": "NOM系列"
+      },
+      "north-america": {
+        "description": "按UL 651和ASTM D1785标准设计的PVC电工套管配件，用于北美电气市场。提供Schedule 40和Schedule 80规格。",
+        "label": "UL / ASTM系列"
+      },
+      "pneumatic-tube-systems": {
+        "description": "用于医院物流和自动物料运输的PETG气动物流管系统。",
+        "label": "PETG气动物流管"
+      }
+    },
+    "rowValues": {
+      "accessPanel": "接线盒",
+      "bellEnd": "喇叭口",
+      "bend45": "45°弯管",
+      "bend90": "90°弯管",
+      "connector": "连接器",
+      "custom": "定制",
+      "expansionCoupling": "伸缩接头",
+      "flange": "法兰",
+      "heavyDuty": "重型",
+      "heavyDutyBellmouth": "重型喇叭口",
+      "mediumDuty": "中型",
+      "petg": "PETG",
+      "plainEnd": "直口",
+      "pushFit": "快速接头",
+      "standardBellmouth": "标准喇叭口",
+      "standardCoupling": "标准接头",
+      "yDiverter": "Y型分支"
+    },
+    "specs": {
+      "australia-new-zealand": {
+        "families": {
+          "bellmouths": {
+            "groups": {
+              "0": {
+                "label": "中型"
+              },
+              "1": {
+                "label": "重型"
+              }
+            },
+            "highlights": {
+              "0": "喇叭形入口保护",
+              "1": "AS/NZS 2053认证",
+              "2": "电缆绝缘安全"
+            }
+          },
+          "conduit-bends": {
+            "groups": {
+              "0": {
+                "label": "中型"
+              },
+              "1": {
+                "label": "重型"
+              }
+            },
+            "highlights": {
+              "0": "AS/NZS 2053认证",
+              "1": "中型和重型规格",
+              "2": "45°/90°/自定义角度"
+            }
+          },
+          "conduit-pipes": {
+            "groups": {
+              "0": {
+                "label": "中型"
+              },
+              "1": {
+                "label": "重型"
+              }
+            },
+            "highlights": {
+              "0": "中型和重型规格",
+              "1": "标准公制长度",
+              "2": "直管段"
+            }
+          },
+          "couplings": {
+            "groups": {
+              "0": {
+                "label": "中型"
+              },
+              "1": {
+                "label": "重型"
+              }
+            },
+            "highlights": {
+              "0": "双承口设计",
+              "1": "AS/NZS 2053认证",
+              "2": "中型和重型规格"
+            }
+          }
+        },
+        "technical": {
+          "fireRating": "自熄，阻燃",
+          "lifespan": "30年以上使用寿命",
+          "material": "100% 全新PVC（UPVC）",
+          "standard": "AS/NZS 2053",
+          "surface": "光滑内壁，减少拉线摩擦",
+          "temperatureRange": "-15°C 至 +60°C",
+          "uvResistance": "紫外线稳定，适合户外安装"
+        },
+        "trade": {
+          "leadTime": "15-20天",
+          "moq": "500个",
+          "packaging": "纸箱+托盘（出口标准）",
+          "portOfLoading": "连云港，中国",
+          "supplyCapacity": "50,000+个/月"
+        }
+      },
+      "europe": {
+        "families": {
+          "conduit-bends": {
+            "groups": {
+              "0": {
+                "label": "轻型"
+              },
+              "1": {
+                "label": "中型"
+              },
+              "2": {
+                "label": "重型"
+              }
+            },
+            "highlights": {
+              "0": "IEC 61386认证",
+              "1": "三种规格等级",
+              "2": "公制尺寸"
+            }
+          },
+          "conduit-pipes": {
+            "groups": {
+              "0": {
+                "label": "轻型"
+              },
+              "1": {
+                "label": "中型"
+              },
+              "2": {
+                "label": "重型"
+              }
+            },
+            "highlights": {
+              "0": "IEC 61386认证",
+              "1": "标准长度",
+              "2": "公制尺寸"
+            }
+          },
+          "couplings": {
+            "groups": {
+              "0": {
+                "label": "轻型"
+              },
+              "1": {
+                "label": "中型"
+              },
+              "2": {
+                "label": "重型"
+              }
+            },
+            "highlights": {
+              "0": "IEC 61386认证",
+              "1": "双承口设计",
+              "2": "公制尺寸"
+            }
+          }
+        },
+        "technical": {
+          "fireRating": "自熄，阻燃",
+          "lifespan": "30年以上使用寿命",
+          "material": "100% 全新PVC（UPVC）",
+          "surface": "光滑内壁，减少拉线摩擦",
+          "temperatureRange": "-20°C 至 +60°C",
+          "uvResistance": "紫外线稳定，适合户外安装"
+        },
+        "trade": {
+          "leadTime": "15-20天",
+          "moq": "500个",
+          "packaging": "纸箱+托盘（出口标准）",
+          "portOfLoading": "连云港，中国",
+          "supplyCapacity": "50,000+个/月"
+        }
+      },
+      "mexico": {
+        "families": {
+          "conduit-bends": {
+            "groups": {
+              "0": {
+                "label": "Tipo Ligero"
+              },
+              "1": {
+                "label": "Tipo Pesado"
+              }
+            },
+            "highlights": {
+              "0": "NOM标准符合",
+              "1": "公制尺寸",
+              "2": "轻型和重型规格"
+            }
+          },
+          "conduit-pipes": {
+            "groups": {
+              "0": {
+                "label": "Tipo Ligero"
+              },
+              "1": {
+                "label": "Tipo Pesado"
+              }
+            },
+            "highlights": {
+              "0": "NOM标准符合",
+              "1": "标准长度",
+              "2": "公制尺寸"
+            }
+          },
+          "couplings": {
+            "groups": {
+              "0": {
+                "label": "Tipo Ligero"
+              },
+              "1": {
+                "label": "Tipo Pesado"
+              }
+            },
+            "highlights": {
+              "0": "NOM标准符合",
+              "1": "双承口设计",
+              "2": "公制尺寸"
+            }
+          }
+        },
+        "technical": {
+          "fireRating": "自熄，阻燃",
+          "lifespan": "30年以上使用寿命",
+          "material": "100% 全新PVC（UPVC）",
+          "surface": "光滑内壁，减少拉线摩擦",
+          "temperatureRange": "-20°C 至 +60°C",
+          "uvResistance": "紫外线稳定，适合户外安装"
+        },
+        "trade": {
+          "leadTime": "15-20天",
+          "moq": "500个",
+          "packaging": "纸箱+托盘（出口标准）",
+          "portOfLoading": "连云港，中国",
+          "supplyCapacity": "50,000+个/月"
+        }
+      },
+      "north-america": {
+        "families": {
+          "conduit-pipes": {
+            "groups": {
+              "0": {
+                "label": "Schedule 40"
+              },
+              "1": {
+                "label": "Schedule 80"
+              }
+            },
+            "highlights": {
+              "0": "Schedule 40和80",
+              "1": "标准长度",
+              "2": "直管段"
+            }
+          },
+          "conduit-sweeps-elbows": {
+            "groups": {
+              "0": {
+                "label": "Schedule 40"
+              },
+              "1": {
+                "label": "Schedule 80"
+              }
+            },
+            "highlights": {
+              "0": "UL 651认证",
+              "1": "100%全新PVC",
+              "2": "45°/90°/自定义角度"
+            }
+          },
+          "couplings": {
+            "groups": {
+              "0": {
+                "label": "Schedule 40"
+              },
+              "1": {
+                "label": "Schedule 80"
+              }
+            },
+            "highlights": {
+              "0": "双承口设计",
+              "1": "安全牢固连接",
+              "2": "多尺寸范围"
+            }
+          }
+        },
+        "technical": {
+          "fireRating": "自熄，阻燃",
+          "lifespan": "30年以上使用寿命",
+          "material": "100% 全新PVC（UPVC）",
+          "surface": "光滑内壁，减少拉线摩擦",
+          "temperatureRange": "-20°C 至 +60°C",
+          "uvResistance": "紫外线稳定，适合户外安装"
+        },
+        "trade": {
+          "leadTime": "15-20天",
+          "moq": "500个",
+          "packaging": "纸箱+托盘（出口标准）",
+          "portOfLoading": "连云港，中国",
+          "supplyCapacity": "50,000+个/月"
+        }
+      },
+      "pneumatic-tube-systems": {
+        "families": {
+          "fittings": {
+            "groups": {
+              "0": {
+                "label": "110mm接头"
+              },
+              "1": {
+                "label": "160mm接头"
+              }
+            },
+            "highlights": {
+              "0": "抗冲击",
+              "1": "医疗级别",
+              "2": "多种连接方式"
+            }
+          },
+          "petg-tubes": {
+            "groups": {
+              "0": {
+                "label": "110mm外径"
+              },
+              "1": {
+                "label": "160mm外径"
+              }
+            },
+            "highlights": {
+              "0": "透明PETG",
+              "1": "静音操作",
+              "2": "防漏密封"
+            }
+          }
+        },
+        "technical": {
+          "impactResistance": "抗运输车碰撞能力强",
+          "material": "PETG（可提供食品级）",
+          "maxWorkingPressure": "0.5 MPa",
+          "surface": "光滑内壁，静音运输",
+          "temperatureRange": "-20°C 至 +60°C",
+          "transparency": "透明，可视监控"
+        },
+        "trade": {
+          "leadTime": "20-30天",
+          "moq": "100米",
+          "packaging": "单独包装+木质箱板",
+          "portOfLoading": "连云港，中国",
+          "supplyCapacity": "10,000+米/月"
+        }
+      }
+    },
+    "technicalLabels": {
+      "fireRating": "阻燃等级",
+      "impactResistance": "抗冲击性",
+      "lifespan": "使用寿命",
+      "material": "材料",
+      "maxWorkingPressure": "最大工作压力",
+      "standard": "标准",
+      "surface": "表面",
+      "temperatureRange": "温度范围",
+      "transparency": "透明度",
+      "uvResistance": "紫外线抗性"
     }
   }
 }
