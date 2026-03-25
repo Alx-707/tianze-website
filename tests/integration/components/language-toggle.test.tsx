@@ -347,7 +347,7 @@ describe("LanguageToggle Integration Tests", () => {
     });
 
     it("should preserve current pathname during language switch", async () => {
-      const testPaths = ["/about", "/contact", "/faq"];
+      const testPaths = ["/about", "/contact", "/privacy"];
 
       for (const path of testPaths) {
         mockUsePathname.mockReturnValue(path);

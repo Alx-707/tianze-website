@@ -107,8 +107,6 @@ function getPageDataByType(
       return pages.blog;
     case "products":
       return pages.products;
-    case "faq":
-      return pages.faq;
     case "privacy":
       return pages.privacy;
     case "terms":
@@ -367,10 +365,6 @@ export function createPageSEOConfig(
       type: "website" as const,
       keywords: ["Products", "Solutions", "Enterprise", "B2B"],
     },
-    faq: {
-      type: "website" as const,
-      keywords: ["FAQ", "Help", "Questions", "Support"],
-    },
     privacy: {
       type: "website" as const,
       keywords: ["Privacy", "Policy", "Data Protection"],
@@ -410,9 +404,6 @@ export function createPageSEOConfig(
       break;
     case "products":
       baseConfig = baseConfigs.products;
-      break;
-    case "faq":
-      baseConfig = baseConfigs.faq;
       break;
     case "privacy":
       baseConfig = baseConfigs.privacy;

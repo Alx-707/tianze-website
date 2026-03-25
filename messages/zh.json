@@ -64,7 +64,6 @@
     "docs": "文档",
     "pricing": "定价",
     "blog": "博客",
-    "faq": "常见问题",
     "privacy": "隐私政策",
     "login": "登录",
     "logout": "退出",
@@ -622,7 +621,6 @@
       },
       "support": {
         "title": "支持",
-        "faq": "常见问题",
         "privacy": "隐私政策",
         "terms": "服务条款"
       }
@@ -1869,21 +1867,6 @@
     }
   },
   "faq": {
-    "pageTitle": "常见问题",
-    "pageDescription": "查找关于订购、付款、运输和售后服务的常见问题解答。",
-    "categories": {
-      "ordering": "订购与采购",
-      "payment": "付款与结算",
-      "logistics": "物流与运输",
-      "quality": "质量与售后"
-    },
-    "noResults": "未找到匹配的问题。",
-    "searchPlaceholder": "搜索问题...",
-    "contactCta": {
-      "title": "还有其他问题？",
-      "description": "我们的支持团队随时为您提供帮助。",
-      "button": "联系我们"
-    },
     "sectionTitle": "常见问题解答",
     "items": {
       "moq": {

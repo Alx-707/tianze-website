@@ -64,7 +64,6 @@
     "docs": "Docs",
     "pricing": "Pricing",
     "blog": "Blog",
-    "faq": "FAQ",
     "privacy": "Privacy Policy",
     "login": "Login",
     "logout": "Logout",
@@ -622,7 +621,6 @@
       },
       "support": {
         "title": "Support",
-        "faq": "FAQs",
         "privacy": "Privacy Policy",
         "terms": "Terms of Service"
       }
@@ -1869,21 +1867,6 @@
     }
   },
   "faq": {
-    "pageTitle": "Frequently Asked Questions",
-    "pageDescription": "Find answers to common questions about ordering, payment, shipping, and after-sales service.",
-    "categories": {
-      "ordering": "Ordering & Purchasing",
-      "payment": "Payment & Settlement",
-      "logistics": "Logistics & Shipping",
-      "quality": "Quality & After-Sales"
-    },
-    "noResults": "No questions found matching your search.",
-    "searchPlaceholder": "Search questions...",
-    "contactCta": {
-      "title": "Still have questions?",
-      "description": "Our support team is here to help you.",
-      "button": "Contact Us"
-    },
     "sectionTitle": "Frequently Asked Questions",
     "items": {
       "moq": {

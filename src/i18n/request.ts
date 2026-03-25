@@ -73,7 +73,6 @@ function createSuccessResponse({
       loadTime,
       topLevelKeys,
       hasProducts: Object.prototype.hasOwnProperty.call(messages, "products"),
-      hasFaq: Object.prototype.hasOwnProperty.call(messages, "faq"),
       hasPrivacy: Object.prototype.hasOwnProperty.call(messages, "privacy"),
     });
   }

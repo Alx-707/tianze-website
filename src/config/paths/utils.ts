@@ -47,7 +47,6 @@ export const PATHNAMES = {
   "/products": "/products",
   "/products/[market]": "/products/[market]",
   "/products/[market]/[family]": "/products/[market]/[family]",
-  "/faq": "/faq",
   "/privacy": "/privacy",
   "/terms": "/terms",
   "/capabilities/bending-machines": "/capabilities/bending-machines",

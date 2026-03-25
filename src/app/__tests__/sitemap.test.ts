@@ -54,7 +54,6 @@ vi.mock("@/lib/sitemap-utils", () => ({
       "/contact": new Date("2024-06-01T00:00:00Z"),
       "/products": new Date("2024-11-01T00:00:00Z"),
       "/blog": new Date("2024-11-01T00:00:00Z"),
-      "/faq": new Date("2024-09-01T00:00:00Z"),
       "/privacy": new Date("2024-06-01T00:00:00Z"),
       "/terms": new Date("2024-06-01T00:00:00Z"),
       "/capabilities/bending-machines": new Date("2026-03-23T00:00:00Z"),
@@ -97,7 +96,6 @@ describe("sitemap.ts", () => {
       expect(urls).toContain("https://example.com/en/contact");
       expect(urls).toContain("https://example.com/en/products");
       expect(urls).toContain("https://example.com/en/blog");
-      expect(urls).toContain("https://example.com/en/faq");
       expect(urls).toContain("https://example.com/en/privacy");
       expect(urls).toContain("https://example.com/en/terms");
       expect(urls).toContain(

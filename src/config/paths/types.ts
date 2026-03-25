@@ -18,7 +18,6 @@ export type PageType =
   | "contact"
   | "blog"
   | "products"
-  | "faq"
   | "privacy"
   | "terms"
   | "bendingMachines"

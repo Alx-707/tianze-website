@@ -155,13 +155,6 @@ export const FOOTER_COLUMNS: FooterColumnConfig[] = [
     translationKey: "footer.sections.support.title",
     links: [
       {
-        key: "faq",
-        label: "FAQs",
-        href: "/faq",
-        external: false,
-        translationKey: "footer.sections.support.faq",
-      },
-      {
         key: "privacy",
         label: "Privacy Policy",
         href: "/privacy",

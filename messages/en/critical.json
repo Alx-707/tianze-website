@@ -64,7 +64,6 @@
     "docs": "Docs",
     "pricing": "Pricing",
     "blog": "Blog",
-    "faq": "FAQ",
     "privacy": "Privacy Policy",
     "login": "Login",
     "logout": "Logout",
@@ -622,7 +621,6 @@
       },
       "support": {
         "title": "Support",
-        "faq": "FAQs",
         "privacy": "Privacy Policy",
         "terms": "Terms of Service"
       }
