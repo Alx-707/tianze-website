@@ -11,14 +11,18 @@ vi.mock("next-intl/server", () => ({
 // Mock sub-components
 vi.mock("@/components/products/market-series-card", () => ({
   MarketSeriesCard: ({
-    market,
-    familyCount,
+    slug,
+    label,
+    familyCountLabel,
   }: {
-    market: { slug: string; label: string };
-    familyCount: number;
+    slug: string;
+    label: string;
+    description: string;
+    standardLabel: string;
+    familyCountLabel: string;
   }) => (
-    <div data-testid={`market-card-${market.slug}`}>
-      {market.label} ({familyCount})
+    <div data-testid={`market-card-${slug}`}>
+      {label} ({familyCountLabel})
     </div>
   ),
 }));
