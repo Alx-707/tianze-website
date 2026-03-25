@@ -12,6 +12,7 @@ import { cacheLife } from "next/cache";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { generateMetadataForPath, type Locale } from "@/lib/seo-metadata";
 import { siteFacts } from "@/config/site-facts";
+import { FaqSection } from "@/components/sections/faq-section";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -25,6 +26,14 @@ import { generateLocaleStaticParams } from "@/app/[locale]/generate-static-param
 export function generateStaticParams() {
   return generateLocaleStaticParams();
 }
+
+const ABOUT_FAQ_ITEMS = [
+  "manufacturer",
+  "factoryVisit",
+  "exportExperience",
+  "certifications",
+  "verifyCerts",
+] as const;
 
 function AboutLoadingSkeleton() {
   return (
@@ -348,6 +357,7 @@ async function AboutContent({ locale }: { locale: string }) {
       <MissionSection {...missionProps} />
       <ValuesSection {...valuesProps} />
       <StatsSection {...statsProps} />
+      <FaqSection items={[...ABOUT_FAQ_ITEMS]} locale={locale as Locale} />
       <CTASection {...ctaProps} />
     </main>
   );
