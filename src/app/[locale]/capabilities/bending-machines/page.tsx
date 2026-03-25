@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { generateMetadataForPath, type Locale } from "@/lib/seo-metadata";
+import { FaqSection } from "@/components/sections/faq-section";
 import { Link } from "@/i18n/routing";
 import { generateLocaleStaticParams } from "@/app/[locale]/generate-static-params";
 import {
@@ -33,6 +34,8 @@ export async function generateMetadata({
     },
   });
 }
+
+const BENDING_FAQ_ITEMS = ["bendingRadius", "manufacturer"] as const;
 
 // --- Extracted sub-sections (keep main function under 120 lines) ---
 
@@ -226,6 +229,8 @@ export default async function BendingMachinesPage({ params }: PageProps) {
         title={t("capability.title")}
         stats={stats}
       />
+
+      <FaqSection items={[...BENDING_FAQ_ITEMS]} locale={locale as Locale} />
 
       <CtaSection
         heading={t("cta.heading")}

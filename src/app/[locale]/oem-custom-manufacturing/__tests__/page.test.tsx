@@ -30,6 +30,10 @@ vi.mock("@/app/[locale]/generate-static-params", () => ({
   generateLocaleStaticParams: () => [{ locale: "en" }, { locale: "zh" }],
 }));
 
+vi.mock("@/components/sections/faq-section", () => ({
+  FaqSection: () => <section data-testid="faq-section">FAQ</section>,
+}));
+
 describe("Feature: OEM Custom Manufacturing Page", () => {
   beforeEach(() => {
     vi.resetModules();

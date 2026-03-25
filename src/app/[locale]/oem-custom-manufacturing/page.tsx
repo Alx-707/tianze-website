@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { generateMetadataForPath, type Locale } from "@/lib/seo-metadata";
+import { FaqSection } from "@/components/sections/faq-section";
 import { Link } from "@/i18n/routing";
 import { generateLocaleStaticParams } from "@/app/[locale]/generate-static-params";
 
@@ -30,6 +31,8 @@ export async function generateMetadata({
 }
 
 // --- Constants ---
+
+const OEM_FAQ_ITEMS = ["oem", "samples"] as const;
 
 const SUPPORTED_STANDARDS = [
   "UL 651 / ASTM D1785",
@@ -240,6 +243,8 @@ export default async function OemCustomManufacturingPage({
         desc={t("standards.desc")}
         customLabel={t("standards.custom")}
       />
+
+      <FaqSection items={[...OEM_FAQ_ITEMS]} locale={locale as Locale} />
 
       <CtaSection
         heading={t("cta.heading")}

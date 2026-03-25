@@ -36,6 +36,10 @@ vi.mock("next/image", () => ({
   ),
 }));
 
+vi.mock("@/components/sections/faq-section", () => ({
+  FaqSection: () => <section data-testid="faq-section">FAQ</section>,
+}));
+
 describe("Feature: Bending Machines Capability Page", () => {
   beforeEach(() => {
     vi.resetModules();
