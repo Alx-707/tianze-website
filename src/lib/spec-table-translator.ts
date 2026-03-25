@@ -60,7 +60,7 @@ export function mapRowValueToKey(value: string): string | null {
  */
 export function getColumnTranslationKey(columnName: string): string {
   const key = mapColumnNameToKey(columnName);
-  return `catalog.specTable.${key}`;
+  return `specTable.${key}`;
 }
 
 /**
@@ -68,7 +68,7 @@ export function getColumnTranslationKey(columnName: string): string {
  */
 export function getRowValueTranslationKey(value: string): string | null {
   const key = mapRowValueToKey(value);
-  return key ? `catalog.rowValues.${key}` : null;
+  return key ? `rowValues.${key}` : null;
 }
 
 /**
@@ -79,5 +79,5 @@ export function getGroupLabelTranslationKey(
   familySlug: string,
   groupIndex: number,
 ): string {
-  return `catalog.specs.${marketSlug}.families.${familySlug}.groups.${groupIndex}.label`;
+  return `specs.${marketSlug}.families.${familySlug}.groups.${groupIndex}.label`;
 }
