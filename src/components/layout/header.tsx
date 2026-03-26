@@ -4,11 +4,11 @@
  * 服务端渲染的头部，交互部件以客户端小岛方式注入，减少首屏 JS 体积。
  */
 import { Link } from "@/i18n/routing";
+import { NAVIGATION_ARIA } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
 import {
-  LanguageToggleIsland,
   MobileNavigationIsland,
-  NavSwitcherIsland,
+  LanguageToggleIsland,
 } from "@/components/layout/header-client";
 import { HeaderScrollChrome } from "@/components/layout/header-scroll-chrome";
 import { Logo } from "@/components/layout/logo";
@@ -30,6 +30,30 @@ interface HeaderProps {
   sticky?: boolean;
   locale?: "en" | "zh";
   contactSalesLabel?: string;
+  openMenuLabel?: string;
+  closeMenuLabel?: string;
+  mobileLanguageLabel?: string;
+  mainNavItems?: Array<{
+    key: string;
+    href: string;
+    label: string;
+  }>;
+}
+
+function getHeaderState(
+  variant: HeaderProps["variant"],
+  sticky: boolean,
+  locale: HeaderProps["locale"],
+) {
+  return {
+    isSticky: variant === "transparent" ? false : sticky,
+    isMinimal: variant === "minimal",
+    isTransparent: variant === "transparent",
+    isVercelNav: process.env.NEXT_PUBLIC_NAV_VARIANT !== "legacy",
+    visibleMargin:
+      process.env.NEXT_PUBLIC_IDLE_ROOTMARGIN ?? "400px 0px 400px 0px",
+    showTestIds: !locale,
+  };
 }
 
 export function Header({
@@ -38,13 +62,19 @@ export function Header({
   sticky = true,
   locale,
   contactSalesLabel = "Contact Sales",
+  openMenuLabel = "Open navigation menu",
+  closeMenuLabel = "Close navigation menu",
+  mobileLanguageLabel = "Language",
+  mainNavItems = [],
 }: HeaderProps) {
-  const isSticky = variant === "transparent" ? false : sticky;
-  const isMinimal = variant === "minimal";
-  const isTransparent = variant === "transparent";
-  const isVercelNav = process.env.NEXT_PUBLIC_NAV_VARIANT !== "legacy";
-  const VISIBLE_MARGIN =
-    process.env.NEXT_PUBLIC_IDLE_ROOTMARGIN ?? "400px 0px 400px 0px";
+  const {
+    isSticky,
+    isMinimal,
+    isTransparent,
+    isVercelNav,
+    visibleMargin,
+    showTestIds,
+  } = getHeaderState(variant, sticky, locale);
 
   return (
     <header
@@ -54,7 +84,7 @@ export function Header({
         isTransparent && "border-transparent bg-transparent backdrop-blur-none",
         // Scroll shadow effect via data-scrolled attribute (8-12% border opacity)
         isVercelNav
-          ? "border-b border-border/10 transition-all duration-200 data-[scrolled=true]:border-border/20 data-[scrolled=true]:bg-background/95 data-[scrolled=true]:shadow-sm"
+          ? "border-b border-border/10 transition-[background-color,border-color,box-shadow] duration-200 data-[scrolled=true]:border-border/20 data-[scrolled=true]:bg-background/95 data-[scrolled=true]:shadow-sm"
           : !isTransparent && "border-b border-border/10",
         className,
       )}
@@ -66,7 +96,7 @@ export function Header({
           {/* Left section: Logo */}
           <div
             className="header-nav-left"
-            {...(!locale ? { "data-testid": "mobile-navigation" } : {})}
+            {...(showTestIds ? { "data-testid": "mobile-navigation" } : {})}
           >
             <Logo locale={locale} />
           </div>
@@ -75,13 +105,16 @@ export function Header({
           <CenterNav
             isMinimal={isMinimal}
             locale={locale}
-            VISIBLE_MARGIN={VISIBLE_MARGIN}
+            mainNavItems={mainNavItems}
           />
 
           <HeaderUtilityControls
             contactSalesLabel={contactSalesLabel}
             locale={locale}
-            rootMargin={VISIBLE_MARGIN}
+            openMenuLabel={openMenuLabel}
+            closeMenuLabel={closeMenuLabel}
+            mobileLanguageLabel={mobileLanguageLabel}
+            rootMargin={visibleMargin}
           />
         </div>
       </div>
@@ -92,35 +125,59 @@ export function Header({
 function CenterNav({
   isMinimal,
   locale,
-  VISIBLE_MARGIN,
+  mainNavItems,
 }: {
   isMinimal: boolean;
   locale?: "en" | "zh" | undefined;
-  VISIBLE_MARGIN: string;
+  mainNavItems: Array<{
+    key: string;
+    href: string;
+    label: string;
+  }>;
 }) {
-  if (isMinimal) return null;
+  if (isMinimal || !locale || mainNavItems.length === 0) return null;
+
   return (
-    <div
+    <nav
       className="header-nav-center"
-      {...(!locale ? { "data-testid": "nav-switcher" } : {})}
+      aria-label={NAVIGATION_ARIA.mainNav}
+      data-testid="nav-switcher"
     >
-      {/* 客户端：导航切换器（更晚加载，避免首屏竞争） */}
-      <ViewportClientGate mode="desktop">
-        <Idle strategy="visible" rootMargin={VISIBLE_MARGIN}>
-          {locale ? <NavSwitcherIsland /> : null}
-        </Idle>
-      </ViewportClientGate>
-    </div>
+      <ul className="header-desktop-only items-center gap-1">
+        {mainNavItems.map((item) => (
+          <li key={item.key}>
+            <Link
+              href={item.href as "/"}
+              prefetch={false}
+              className={cn(
+                "relative inline-flex items-center rounded-full bg-transparent px-3 py-2 text-sm font-medium tracking-[0.01em]",
+                "text-muted-foreground hover:text-foreground",
+                "hover:bg-muted/40 dark:hover:bg-foreground/10",
+                "transition-colors duration-100 ease-out",
+              )}
+            >
+              {item.label}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </nav>
   );
 }
 
 function HeaderUtilityControls({
   contactSalesLabel,
   locale,
+  openMenuLabel,
+  closeMenuLabel,
+  mobileLanguageLabel,
   rootMargin,
 }: {
   contactSalesLabel: string;
   locale: "en" | "zh" | undefined;
+  openMenuLabel: string;
+  closeMenuLabel: string;
+  mobileLanguageLabel: string;
   rootMargin: string;
 }) {
   return (
@@ -150,7 +207,11 @@ function HeaderUtilityControls({
           <div className="header-mobile-only h-10 w-10">
             <ViewportClientGate mode="mobile">
               <Idle strategy="visible" rootMargin={rootMargin}>
-                <MobileNavigationIsland />
+                <MobileNavigationIsland
+                  openMenuLabel={openMenuLabel}
+                  closeMenuLabel={closeMenuLabel}
+                  languageLabel={mobileLanguageLabel}
+                />
               </Idle>
             </ViewportClientGate>
           </div>

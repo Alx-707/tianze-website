@@ -82,6 +82,11 @@ async function renderAsyncComponent(
   return render(resolvedElement);
 }
 
+const MAIN_NAV_ITEMS = [
+  { key: "home", href: "/", label: "Home" },
+  { key: "products", href: "/products", label: "Products" },
+];
+
 describe("Header Component", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -89,7 +94,9 @@ describe("Header Component", () => {
 
   describe("Default Header", () => {
     it("renders all navigation components", async () => {
-      await renderAsyncComponent(Header({ locale: "en" }));
+      await renderAsyncComponent(
+        Header({ locale: "en", mainNavItems: MAIN_NAV_ITEMS }),
+      );
 
       expect(screen.getByTestId("logo")).toBeInTheDocument();
       expect(screen.getByTestId("nav-switcher")).toBeInTheDocument();
@@ -210,7 +217,9 @@ describe("Header Component", () => {
 
   describe("Responsive Behavior", () => {
     it("contains both desktop and mobile navigation", async () => {
-      await renderAsyncComponent(Header({ locale: "en" }));
+      await renderAsyncComponent(
+        Header({ locale: "en", mainNavItems: MAIN_NAV_ITEMS }),
+      );
 
       // Both should be present, visibility controlled by CSS
       expect(screen.getByTestId("nav-switcher")).toBeInTheDocument();

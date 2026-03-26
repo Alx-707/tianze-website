@@ -58,7 +58,27 @@ describe("MobileNavigationIsland", () => {
 
     const trigger = screen.getByTestId("header-mobile-menu-button");
     expect(trigger).toBeInTheDocument();
+    expect(trigger).toHaveAttribute("aria-haspopup", "dialog");
+    expect(trigger).toHaveAttribute("aria-controls", "mobile-navigation");
+    expect(trigger).toHaveAttribute("aria-expanded", "false");
     expect(screen.queryByTestId("dynamic-component")).not.toBeInTheDocument();
+  });
+
+  it("passes localized labels to the hydrated mobile navigation", () => {
+    render(
+      <MobileNavigationIsland
+        openMenuLabel="打开导航菜单"
+        closeMenuLabel="关闭导航菜单"
+        languageLabel="选择语言"
+      />,
+    );
+
+    fireEvent.click(screen.getByTestId("header-mobile-menu-button"));
+
+    const dynamicComponent = screen.getByTestId("dynamic-component");
+    expect(dynamicComponent).toHaveAttribute("openMenuLabel", "打开导航菜单");
+    expect(dynamicComponent).toHaveAttribute("closeMenuLabel", "关闭导航菜单");
+    expect(dynamicComponent).toHaveAttribute("languageLabel", "选择语言");
   });
 
   it("loads dynamic component after trigger click", () => {

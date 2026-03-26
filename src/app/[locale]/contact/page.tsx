@@ -1,10 +1,16 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
+import { NextIntlClientProvider } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
 import { MessageCircle } from "lucide-react";
 import type { Locale } from "@/types/i18n";
 import { getContactCopy } from "@/lib/contact/getContactCopy";
+import { pickMessages } from "@/lib/i18n/client-messages";
 import { getTranslationsCached } from "@/lib/i18n/server/getTranslationsCached";
+import {
+  loadCriticalMessages,
+  loadDeferredMessages,
+} from "@/lib/load-messages";
 import {
   generateMetadataForPath,
   type Locale as SeoLocale,
@@ -25,23 +31,183 @@ const CONTACT_FAQ_ITEMS = [
   "oem",
 ] as const;
 
-function ContactLoadingSkeleton() {
+function buildWhatsAppUrl(whatsappNumber: string | undefined) {
+  return whatsappNumber
+    ? `https://wa.me/${whatsappNumber.replace(/[^0-9]/g, "")}`
+    : undefined;
+}
+
+function buildFaqItems(
+  faqT: Awaited<ReturnType<typeof getTranslationsCached>>,
+) {
+  return CONTACT_FAQ_ITEMS.map((key) => ({
+    key,
+    question: faqT(`items.${key}.question`, {
+      established: siteFacts.company.established,
+      countries: siteFacts.stats.exportCountries,
+      employees: siteFacts.company.employees,
+    }),
+    answer: faqT(`items.${key}.answer`, {
+      established: siteFacts.company.established,
+      countries: siteFacts.stats.exportCountries,
+      employees: siteFacts.company.employees,
+    }),
+  }));
+}
+
+function ContactFormFallback({
+  title,
+  description,
+  labels,
+}: {
+  title: string;
+  description: string;
+  labels: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    company: string;
+    subject: string;
+    message: string;
+    acceptPrivacy: string;
+    submit: string;
+  };
+}) {
   return (
-    <div className="min-h-[80vh] px-4 py-16">
-      <div className="mx-auto max-w-4xl">
-        <div className="mb-12 text-center">
-          <div className="mx-auto mb-4 h-12 w-64 animate-pulse rounded bg-muted" />
-          <div className="mx-auto h-6 w-96 max-w-full animate-pulse rounded bg-muted" />
+    <Card className="mx-auto w-full max-w-2xl">
+      <div className="space-y-6 p-6">
+        <div className="space-y-2">
+          <h2 className="text-2xl font-semibold tracking-tight">{title}</h2>
+          <p className="text-sm text-muted-foreground">{description}</p>
         </div>
-        <div className="grid gap-8 md:grid-cols-2">
-          <div className="h-96 animate-pulse rounded-lg bg-muted" />
-          <div className="space-y-6">
-            <div className="h-48 animate-pulse rounded-lg bg-muted" />
-            <div className="h-32 animate-pulse rounded-lg bg-muted" />
+
+        <form className="space-y-6">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <label className="space-y-2 text-sm">
+              <span>{labels.firstName}</span>
+              <input
+                className="flex h-10 w-full rounded-xl border border-input bg-transparent px-4 py-1 text-base md:text-sm"
+                autoComplete="given-name"
+                disabled
+                name="firstName"
+                required
+                type="text"
+              />
+            </label>
+            <label className="space-y-2 text-sm">
+              <span>{labels.lastName}</span>
+              <input
+                className="flex h-10 w-full rounded-xl border border-input bg-transparent px-4 py-1 text-base md:text-sm"
+                autoComplete="family-name"
+                disabled
+                name="lastName"
+                required
+                type="text"
+              />
+            </label>
+            <label className="space-y-2 text-sm">
+              <span>{labels.email}</span>
+              <input
+                className="flex h-10 w-full rounded-xl border border-input bg-transparent px-4 py-1 text-base md:text-sm"
+                autoComplete="email"
+                disabled
+                name="email"
+                required
+                type="email"
+              />
+            </label>
+            <label className="space-y-2 text-sm">
+              <span>{labels.company}</span>
+              <input
+                className="flex h-10 w-full rounded-xl border border-input bg-transparent px-4 py-1 text-base md:text-sm"
+                autoComplete="organization"
+                disabled
+                name="company"
+                required
+                type="text"
+              />
+            </label>
           </div>
+
+          <label className="space-y-2 text-sm">
+            <span>{labels.subject}</span>
+            <input
+              className="flex h-10 w-full rounded-xl border border-input bg-transparent px-4 py-1 text-base md:text-sm"
+              autoComplete="off"
+              disabled
+              name="subject"
+              type="text"
+            />
+          </label>
+
+          <label className="space-y-2 text-sm">
+            <span>{labels.message}</span>
+            <textarea
+              className="flex min-h-[80px] w-full rounded-xl border border-input bg-background px-3 py-2 text-sm"
+              autoComplete="off"
+              disabled
+              name="message"
+              required
+              rows={4}
+            />
+          </label>
+
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              className="h-4 w-4 rounded border border-input"
+              disabled
+              name="acceptPrivacy"
+              required
+              type="checkbox"
+            />
+            <span>{labels.acceptPrivacy}</span>
+          </label>
+
+          <button
+            className="inline-flex h-[38px] w-full items-center justify-center rounded-[6px] bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground opacity-80"
+            disabled
+            type="submit"
+          >
+            {labels.submit}
+          </button>
+        </form>
+      </div>
+    </Card>
+  );
+}
+
+function ContactFaqFallback({
+  title,
+  items,
+}: {
+  title: string;
+  items: Array<{ key: string; question: string; answer: string }>;
+}) {
+  return (
+    <section className="section-divider py-14 md:py-[72px]">
+      <div className="mx-auto max-w-[1080px] px-6">
+        <div className="mb-9">
+          <h2 className="text-[32px] font-bold leading-[1.2] tracking-[-0.02em]">
+            {title}
+          </h2>
+        </div>
+        <div className="rounded-xl border bg-card">
+          {items.map((item, index) => (
+            <details
+              key={item.key}
+              className={index === 0 ? "" : "border-t border-border"}
+            >
+              <summary className="cursor-pointer px-6 py-4 text-left text-sm font-medium">
+                {item.question}
+              </summary>
+              <div className="px-6 pb-4 text-sm leading-relaxed text-muted-foreground">
+                {item.answer}
+              </div>
+            </details>
+          ))}
         </div>
       </div>
-    </div>
+    </section>
   );
 }
 
@@ -197,17 +363,38 @@ function ContactMethodsCard({
 async function ContactContent({ locale }: { locale: string }) {
   setRequestLocale(locale);
 
-  const copy = await getContactCopy(locale as Locale);
+  const [copy, formT, faqT, criticalMessages, deferredMessages] =
+    await Promise.all([
+      getContactCopy(locale as Locale),
+      getTranslationsCached({
+        locale,
+        namespace: "contact.form",
+      }),
+      getTranslationsCached({
+        locale,
+        namespace: "faq",
+      }),
+      loadCriticalMessages(locale as Locale),
+      loadDeferredMessages(locale as Locale),
+    ]);
+  const mergedMessages = {
+    ...criticalMessages,
+    ...deferredMessages,
+  };
 
   const whatsappNumber = siteFacts.contact.whatsapp;
   const whatsappConfigured = checkWhatsApp(whatsappNumber);
-  const whatsAppUrl =
-    whatsappConfigured && whatsappNumber !== undefined
-      ? `https://wa.me/${whatsappNumber.replace(/[^0-9]/g, "")}`
-      : undefined;
+  const whatsAppUrl = whatsappConfigured
+    ? buildWhatsAppUrl(whatsappNumber)
+    : undefined;
+  const faqItems = buildFaqItems(faqT);
+  const contactClientMessages = pickMessages(mergedMessages, [
+    "contact",
+    "apiErrors",
+  ]);
 
   return (
-    <main className="min-h-[80vh] px-4 py-16">
+    <div className="min-h-[80vh] px-4 py-16">
       <div className="mx-auto max-w-4xl">
         <ContactPageHeader
           title={copy.header.title}
@@ -215,7 +402,31 @@ async function ContactContent({ locale }: { locale: string }) {
         />
 
         <div className="grid gap-8 md:grid-cols-2">
-          <ContactForm />
+          <Suspense
+            fallback={
+              <ContactFormFallback
+                title={formT("title")}
+                description={formT("description")}
+                labels={{
+                  firstName: formT("firstName"),
+                  lastName: formT("lastName"),
+                  email: formT("email"),
+                  company: formT("company"),
+                  subject: formT("subject"),
+                  message: formT("message"),
+                  acceptPrivacy: formT("acceptPrivacy"),
+                  submit: formT("submit"),
+                }}
+              />
+            }
+          >
+            <NextIntlClientProvider
+              locale={locale}
+              messages={contactClientMessages}
+            >
+              <ContactForm />
+            </NextIntlClientProvider>
+          </Suspense>
 
           {/* 联系信息 */}
           <div className="space-y-6">
@@ -256,17 +467,19 @@ async function ContactContent({ locale }: { locale: string }) {
         </div>
       </div>
 
-      <FaqSection items={[...CONTACT_FAQ_ITEMS]} locale={locale as Locale} />
-    </main>
+      <Suspense
+        fallback={
+          <ContactFaqFallback title={faqT("sectionTitle")} items={faqItems} />
+        }
+      >
+        <FaqSection items={[...CONTACT_FAQ_ITEMS]} locale={locale as Locale} />
+      </Suspense>
+    </div>
   );
 }
 
 export default async function ContactPage({ params }: ContactPageProps) {
   const { locale } = await params;
 
-  return (
-    <Suspense fallback={<ContactLoadingSkeleton />}>
-      <ContactContent locale={locale} />
-    </Suspense>
-  );
+  return <ContactContent locale={locale} />;
 }

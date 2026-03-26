@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { INTERNAL_TRUSTED_CLIENT_IP_HEADER } from "../client-ip-headers";
 import { getClientIP, getClientIPFromHeaders, getIPChain } from "../client-ip";
 
 /**
@@ -306,7 +307,18 @@ describe("client-ip", () => {
       expect(ip).toBe("203.0.113.50");
     });
 
-    it("should fail closed for Cloudflare headers without request source validation", () => {
+    it("should use middleware-derived internal header on Cloudflare", () => {
+      setEnv("CF_PAGES", "1");
+      const ip = getClientIPFromHeaders(
+        new Headers({
+          [INTERNAL_TRUSTED_CLIENT_IP_HEADER]: "192.0.2.100",
+          "cf-connecting-ip": "198.51.100.10",
+        }),
+      );
+      expect(ip).toBe("192.0.2.100");
+    });
+
+    it("should fail closed for raw Cloudflare headers without middleware-derived header", () => {
       setEnv("CF_PAGES", "1");
       const ip = getClientIPFromHeaders(
         new Headers({ "cf-connecting-ip": "192.0.2.100" }),

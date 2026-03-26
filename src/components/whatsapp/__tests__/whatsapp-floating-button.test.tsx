@@ -1,40 +1,56 @@
 /**
  * @vitest-environment jsdom
  */
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { WhatsAppFloatingButton } from "@/components/whatsapp/whatsapp-floating-button";
 
 // Mock WhatsAppFabButton
 vi.mock("@/components/whatsapp/whatsapp-fab-button", () => ({
-  WhatsAppFabButton: ({
-    buttonLabel,
-    isChatOpen,
-    className,
-    onClick,
-  }: {
-    buttonLabel: string;
-    isChatOpen: boolean;
-    className?: string;
-    onClick: () => void;
-  }) => (
-    <button
-      type="button"
-      aria-label={buttonLabel}
-      aria-expanded={isChatOpen}
-      className={`text-emerald-600 ${className}`}
-      onClick={onClick}
-      style={{
-        width: "52px",
-        height: "52px",
-        borderRadius: "16px",
-        borderWidth: "1px",
-      }}
-      data-testid="mock-fab-button"
-    >
-      {isChatOpen ? "Close" : "Open"}
-    </button>
-  ),
+  WhatsAppFabButton: React.forwardRef<
+    HTMLButtonElement,
+    {
+      buttonLabel: string;
+      isChatOpen: boolean;
+      className?: string;
+      onClick: () => void;
+      "aria-controls"?: string;
+      "aria-haspopup"?: string;
+    }
+  >(function MockWhatsAppFabButton(
+    {
+      buttonLabel,
+      isChatOpen,
+      className,
+      onClick,
+      "aria-controls": ariaControls,
+      "aria-haspopup": ariaHaspopup,
+    },
+    ref,
+  ) {
+    return (
+      <button
+        ref={ref}
+        type="button"
+        aria-label={buttonLabel}
+        aria-expanded={isChatOpen}
+        aria-controls={ariaControls}
+        aria-haspopup={ariaHaspopup}
+        className={`text-emerald-600 ${className}`}
+        onClick={onClick}
+        style={{
+          width: "52px",
+          height: "52px",
+          borderRadius: "16px",
+          borderWidth: "1px",
+        }}
+        data-testid="mock-fab-button"
+      >
+        {isChatOpen ? "Close" : "Open"}
+      </button>
+    );
+  }),
 }));
 
 // Mock react-draggable
@@ -95,6 +111,8 @@ describe("WhatsAppFloatingButton", () => {
       name: /chat with us on whatsapp/i,
     });
     expect(button).toHaveAttribute("aria-expanded", "false");
+    expect(button).toHaveAttribute("aria-haspopup", "dialog");
+    expect(button).toHaveAttribute("aria-controls", "whatsapp-chat-dialog");
   });
 
   it("skips rendering when number is invalid", () => {
@@ -140,5 +158,34 @@ describe("WhatsAppFloatingButton", () => {
       name: /support chat/i,
     });
     expect(container).toBeInTheDocument();
+  });
+
+  it("renders an accessible chat dialog and returns focus when closed", async () => {
+    render(<WhatsAppFloatingButton number="+1 (555) 123-4567" />);
+
+    const trigger = screen.getByRole("button", {
+      name: /chat with us on whatsapp/i,
+    });
+
+    trigger.focus();
+    fireEvent.click(trigger);
+
+    const dialog = await screen.findByRole("dialog", { name: /need help/i });
+    expect(dialog).toHaveAttribute("id", "whatsapp-chat-dialog");
+    expect(
+      screen.getByRole("textbox", { name: /type your message/i }),
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /close/i }));
+
+    await waitFor(() => {
+      expect(
+        screen.queryByRole("dialog", { name: /need help/i }),
+      ).not.toBeInTheDocument();
+    });
+
+    await waitFor(() => {
+      expect(trigger).toHaveFocus();
+    });
   });
 });

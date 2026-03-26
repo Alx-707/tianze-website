@@ -17,6 +17,7 @@ export interface WhatsAppFloatingButtonProps {
 }
 
 const DRAG_RESET_DELAY_MS = 100;
+const WHATSAPP_DIALOG_ID = "whatsapp-chat-dialog";
 
 const normalizePhoneNumber = (value: string) => {
   const digits = value.replace(/[^0-9]/g, "");
@@ -32,24 +33,26 @@ export function WhatsAppFloatingButton({
   const tCommon = useTranslations("common");
   const tokens = WHATSAPP_STYLE_TOKENS;
   const normalizedNumber = normalizePhoneNumber(number);
-  const nodeRef = useRef<HTMLDivElement>(null);
+  const nodeRef = useRef<HTMLDivElement>(null),
+    triggerRef = useRef<HTMLButtonElement>(null);
   const { position, persistPosition } = useWhatsAppPosition();
-  const [isDragging, setIsDragging] = useState(false);
-  const [isChatOpen, setIsChatOpen] = useState(false);
-
-  const defaultMessage = t("defaultMessage");
-  const contextualMessage = useContextualMessage(defaultMessage);
-
+  const [isDragging, setIsDragging] = useState(false),
+    [isChatOpen, setIsChatOpen] = useState(false);
+  const contextualMessage = useContextualMessage(t("defaultMessage"));
   const translations = {
     greeting: t("greeting"),
     responseTime: t("responseTime"),
     placeholder: t("placeholder"),
+    messageLabel: t("placeholder"),
     startChat: t("startChat"),
     close: tCommon("close"),
   };
-
-  const buttonLabel = t("buttonLabel");
-  const supportChatLabel = t("supportChat");
+  const buttonLabel = t("buttonLabel"),
+    supportChatLabel = t("supportChat");
+  const closeChat = () => {
+    setIsChatOpen(false);
+    requestAnimationFrame(() => triggerRef.current?.focus());
+  };
 
   // Handle click outside to close chat window
   useEffect(() => {
@@ -59,7 +62,7 @@ export function WhatsAppFloatingButton({
       if (nodeRef.current && nodeRef.current.contains(event.target as Node)) {
         return;
       }
-      setIsChatOpen(false);
+      closeChat();
     };
 
     document.addEventListener("mousedown", handleClickOutside);
@@ -76,7 +79,14 @@ export function WhatsAppFloatingButton({
     setTimeout(() => setIsDragging(false), DRAG_RESET_DELAY_MS);
   };
 
-  const handleButtonClick = () => setIsChatOpen((prev) => !prev);
+  const handleButtonClick = () => {
+    if (isChatOpen) {
+      closeChat();
+      return;
+    }
+
+    setIsChatOpen(true);
+  };
 
   return (
     <Draggable
@@ -103,17 +113,21 @@ export function WhatsAppFloatingButton({
           <WhatsAppChatWindow
             number={normalizedNumber}
             defaultMessage={contextualMessage}
-            onClose={() => setIsChatOpen(false)}
+            dialogId={WHATSAPP_DIALOG_ID}
+            onClose={closeChat}
             translations={translations}
           />
         )}
 
         <WhatsAppFabButton
+          ref={triggerRef}
           isChatOpen={isChatOpen}
           isDragging={isDragging}
           buttonLabel={buttonLabel}
           tokens={tokens}
           className={className}
+          aria-controls={WHATSAPP_DIALOG_ID}
+          aria-haspopup="dialog"
           onClick={handleButtonClick}
         />
       </div>

@@ -80,9 +80,14 @@ const StatusMessage = memo(({ status, t }: StatusMessageProps) => {
 
   const config = getStatusConfig(status, t);
   if (!config) return null;
+  const isError = status === "error";
 
   return (
-    <div className={`rounded-md border p-4 ${config.className}`} role="alert">
+    <div
+      className={`rounded-md border p-4 ${config.className}`}
+      role={isError ? "alert" : "status"}
+      aria-live={isError ? "assertive" : "polite"}
+    >
       {config.message}
     </div>
   );
@@ -198,10 +203,12 @@ function ErrorDisplay({
   state,
   translateForm,
   translateApi,
+  containerRef,
 }: {
   state: ServerActionResult<ContactFormResult> | null;
   translateForm: (key: string) => string;
   translateApi: (key: string) => string;
+  containerRef?: (_node: HTMLDivElement | null) => void;
 }) {
   if (!state?.error && !state?.errorCode) return null;
 
@@ -221,7 +228,13 @@ function ErrorDisplay({
     state.error && !state.errorCode && !isValidationError;
 
   return (
-    <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-800">
+    <div
+      ref={containerRef}
+      className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-800"
+      role="alert"
+      aria-live="assertive"
+      tabIndex={-1}
+    >
       <p className="font-medium">{translateForm("error")}</p>
       {shouldShowTranslatedMessage && (
         <p className="text-sm">{translatedError}</p>
@@ -241,6 +254,53 @@ function ErrorDisplay({
 interface FormFieldsProps {
   t: (key: string) => string;
   isPending: boolean;
+}
+
+function getFieldInputProps(
+  field: ContactFormFieldDescriptor,
+): Partial<React.ComponentProps<"input"> & React.ComponentProps<"textarea">> {
+  switch (field.key) {
+    case "firstName":
+      return {
+        autoComplete: "given-name",
+        autoCapitalize: "words",
+      };
+    case "lastName":
+      return {
+        autoComplete: "family-name",
+        autoCapitalize: "words",
+      };
+    case "email":
+      return {
+        autoComplete: "email",
+        inputMode: "email",
+        spellCheck: false,
+        autoCapitalize: "none",
+      };
+    case "company":
+      return {
+        autoComplete: "organization",
+        autoCapitalize: "words",
+      };
+    case "phone":
+      return {
+        autoComplete: "tel",
+        inputMode: "tel",
+        spellCheck: false,
+      };
+    case "subject":
+      return {
+        autoComplete: "off",
+        autoCapitalize: "sentences",
+      };
+    case "message":
+      return {
+        autoComplete: "off",
+        spellCheck: true,
+      };
+    default:
+      return {};
+  }
 }
 
 /**
@@ -287,7 +347,7 @@ const FormFields = memo(({ t, isPending }: FormFieldsProps) => {
                 placeholder={renderPlaceholder(field)}
                 disabled={isPending}
                 required={field.required}
-                aria-describedby={`${field.key}-error`}
+                {...getFieldInputProps(field)}
               />
             </div>
           ))}
@@ -306,7 +366,7 @@ const FormFields = memo(({ t, isPending }: FormFieldsProps) => {
             disabled={isPending}
             required={field.required}
             rows={4}
-            aria-describedby={`${field.key}-error`}
+            {...getFieldInputProps(field)}
           />
         </div>
       ))}
@@ -323,7 +383,6 @@ const FormFields = memo(({ t, isPending }: FormFieldsProps) => {
                   disabled={isPending}
                   required={field.required}
                   className="h-4 w-4 rounded border border-input"
-                  aria-describedby={`${field.key}-error`}
                 />
                 <Label htmlFor={field.key} className={renderLabelClass(field)}>
                   {t(field.labelKey)}
@@ -384,6 +443,14 @@ function SubmitButton({
 export function ContactFormContainer() {
   const t = useTranslations("contact.form");
   const tApi = useTranslations(API_ERROR_NAMESPACE);
+  const errorSummaryRef = useRef<HTMLDivElement | null>(null);
+  const handleErrorDisplayRef = (node: HTMLDivElement | null) => {
+    errorSummaryRef.current = node;
+
+    if (node) {
+      node.focus();
+    }
+  };
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     if (process.env.NODE_ENV === "test") {
       e.preventDefault();
@@ -409,10 +476,16 @@ export function ContactFormContainer() {
         action={formAction}
         onSubmit={handleSubmit}
         className="space-y-6 p-6"
+        noValidate
       >
         <StatusMessage status={submitStatus} t={t} />
 
-        <ErrorDisplay state={state} translateForm={t} translateApi={tApi} />
+        <ErrorDisplay
+          state={state}
+          translateForm={t}
+          translateApi={tApi}
+          containerRef={handleErrorDisplayRef}
+        />
 
         <FormFields t={t} isPending={isPending} />
 
@@ -432,7 +505,7 @@ export function ContactFormContainer() {
         />
 
         {isRateLimited && (
-          <p className="text-center text-sm text-amber-600">
+          <p className="text-center text-sm text-amber-600" aria-live="polite">
             {t("rateLimitMessage")}
           </p>
         )}

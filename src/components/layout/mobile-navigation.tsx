@@ -30,11 +30,17 @@ import { Link, usePathname } from "@/i18n/routing";
 interface MobileNavigationProps {
   className?: string;
   initialOpen?: boolean;
+  openMenuLabel?: string;
+  closeMenuLabel?: string;
+  languageLabel?: string;
 }
 
 export function MobileNavigation({
   className,
   initialOpen = false,
+  openMenuLabel,
+  closeMenuLabel,
+  languageLabel = "Language",
 }: MobileNavigationProps) {
   const t = useTranslations();
   const pathname = usePathname();
@@ -56,9 +62,14 @@ export function MobileNavigation({
             variant="ghost"
             size="icon"
             className="relative"
-            aria-label={NAVIGATION_ARIA.mobileMenuButton}
+            aria-label={
+              isOpen
+                ? (closeMenuLabel ?? t("accessibility.closeMenu"))
+                : (openMenuLabel ?? t("accessibility.openMenu"))
+            }
             aria-expanded={isOpen}
             aria-controls="mobile-navigation"
+            aria-haspopup="dialog"
             data-state={isOpen ? "open" : "closed"}
             data-testid="header-mobile-menu-button"
           >
@@ -135,6 +146,7 @@ export function MobileNavigation({
             </div>
             <Separator className="my-4" />
             <MobileLanguageSwitcher
+              languageLabel={languageLabel}
               pathname={pathname}
               onSelect={() => setIsOpen(false)}
             />
@@ -150,9 +162,11 @@ export function MobileNavigation({
  * Simple two-link list to avoid nested portal/focus issues with DropdownMenu inside Sheet.
  */
 function MobileLanguageSwitcher({
+  languageLabel,
   pathname,
   onSelect,
 }: {
+  languageLabel: string;
   pathname: string;
   onSelect: () => void;
 }) {
@@ -167,7 +181,7 @@ function MobileLanguageSwitcher({
     <div className="space-y-1">
       <div className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-muted-foreground">
         <Globe className="h-4 w-4" />
-        <span>Language</span>
+        <span>{languageLabel}</span>
       </div>
       {languages.map(({ locale, label }) => {
         const isActive = currentLocale === locale;
@@ -214,6 +228,8 @@ export function MobileMenuButton({
       onClick={onClick}
       aria-label={NAVIGATION_ARIA.mobileMenuButton}
       aria-expanded={isOpen}
+      aria-haspopup="dialog"
+      aria-controls="mobile-navigation"
       data-state={isOpen ? "open" : "closed"}
       data-testid="header-mobile-menu-button"
     >

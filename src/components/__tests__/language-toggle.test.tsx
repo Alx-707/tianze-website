@@ -360,6 +360,8 @@ describe("LanguageToggle Component", () => {
       // Check that the elements exist and have the role attribute
       expect(englishItem).toBeInTheDocument();
       expect(chineseItem).toBeInTheDocument();
+      expect(button).toHaveAttribute("aria-haspopup", "menu");
+      expect(button).toHaveAttribute("aria-expanded");
 
       if (englishItem) {
         expect(englishItem).toHaveAttribute("role", "menuitem");

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import createMiddleware from "next-intl/middleware";
 import { generateNonce, getSecurityHeaders } from "@/config/security";
 import { routing, type Locale } from "@/i18n/routing-config";
+import { INTERNAL_TRUSTED_CLIENT_IP_HEADER } from "@/lib/security/client-ip-headers";
 
 const intlMiddleware = createMiddleware(routing);
 const SUPPORTED_LOCALES = new Set<string>(routing.locales);
@@ -30,6 +31,42 @@ function applyRequestHeaderOverride(
   response.headers.set(
     "x-middleware-override-headers",
     Array.from(keys).join(","),
+  );
+}
+
+function stripPort(ip: string): string {
+  if (ip.startsWith("[")) {
+    const bracketEnd = ip.indexOf("]");
+    if (bracketEnd !== -1) {
+      return ip.slice(1, bracketEnd);
+    }
+  }
+
+  const colonCount = (ip.match(/:/g) ?? []).length;
+  if (colonCount === 1) {
+    return ip.split(":")[0] ?? ip;
+  }
+
+  return ip;
+}
+
+function normalizeForwardedIP(headerValue: string | null): string | null {
+  if (!headerValue) return null;
+
+  const firstValue = headerValue.split(",")[0]?.trim();
+  if (!firstValue || firstValue.toLowerCase() === "unknown") {
+    return null;
+  }
+
+  const normalized = stripPort(firstValue);
+  return normalized.length > 0 ? normalized : null;
+}
+
+function getTrustedClientIPForRequest(request: NextRequest): string | null {
+  return (
+    normalizeForwardedIP(request.headers.get("cf-connecting-ip")) ??
+    normalizeForwardedIP(request.headers.get("x-real-ip")) ??
+    normalizeForwardedIP(request.headers.get("x-forwarded-for"))
   );
 }
 
@@ -67,6 +104,24 @@ function setLocaleCookie(resp: NextResponse, locale: Locale): void {
   }
 }
 
+function removeLeakedMiddlewareCookieHeader(response: NextResponse): void {
+  response.headers.delete("x-middleware-set-cookie");
+}
+
+function extractLocaleFromLocationHeader(
+  request: NextRequest,
+  locationHeader: string | null,
+): Locale | undefined {
+  if (!locationHeader) return undefined;
+
+  try {
+    const redirectUrl = new URL(locationHeader, request.url);
+    return extractLocaleCandidate(redirectUrl.pathname);
+  } catch {
+    return undefined;
+  }
+}
+
 function tryHandleInvalidLocalePrefix(
   request: NextRequest,
   nonce: string,
@@ -99,6 +154,7 @@ function tryHandleInvalidLocalePrefix(
 
   const resp = NextResponse.redirect(targetUrl);
   setLocaleCookie(resp, routing.defaultLocale);
+  removeLeakedMiddlewareCookieHeader(resp);
   addSecurityHeaders(resp, nonce);
 
   return resp;
@@ -106,6 +162,7 @@ function tryHandleInvalidLocalePrefix(
 
 export default function middleware(request: NextRequest) {
   const nonce = generateNonce();
+  const trustedClientIP = getTrustedClientIPForRequest(request);
 
   const invalidLocaleHandled = tryHandleInvalidLocalePrefix(request, nonce);
   if (invalidLocaleHandled) {
@@ -114,17 +171,34 @@ export default function middleware(request: NextRequest) {
       NONCE_REQUEST_HEADER_KEY,
       nonce,
     );
+    if (trustedClientIP) {
+      applyRequestHeaderOverride(
+        invalidLocaleHandled,
+        INTERNAL_TRUSTED_CLIENT_IP_HEADER,
+        trustedClientIP,
+      );
+    }
     return invalidLocaleHandled;
   }
 
   const response = intlMiddleware(request);
-  const locale = extractLocaleCandidate(request.nextUrl.pathname);
+  const locale =
+    extractLocaleCandidate(request.nextUrl.pathname) ??
+    extractLocaleFromLocationHeader(request, response.headers.get("location"));
   const existingLocale = request.cookies.get("NEXT_LOCALE")?.value;
   if (response && locale && existingLocale !== locale) {
     setLocaleCookie(response, locale);
   }
   if (response) {
+    removeLeakedMiddlewareCookieHeader(response);
     applyRequestHeaderOverride(response, NONCE_REQUEST_HEADER_KEY, nonce);
+    if (trustedClientIP) {
+      applyRequestHeaderOverride(
+        response,
+        INTERNAL_TRUSTED_CLIENT_IP_HEADER,
+        trustedClientIP,
+      );
+    }
     addSecurityHeaders(response, nonce);
   }
   return response;

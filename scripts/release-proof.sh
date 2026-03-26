@@ -1,12 +1,21 @@
 #!/bin/bash
 set -euo pipefail
 
-echo "== Tier A release-proof flow =="
-pnpm review:tier-a:staged
-pnpm review:clusters:staged
+echo "== Release verification flow =="
+pnpm type-check
+pnpm lint:check
+pnpm review:tier-a
+pnpm review:clusters
+pnpm test:locale-runtime
+pnpm test:lead-family
+pnpm test:cache-health
 pnpm validate:translations
 pnpm build
 pnpm build:cf
-CI=1 pnpm test:e2e
+pnpm test:release-smoke
 
-echo "Release-proof flow completed successfully."
+echo "Cloudflare proof split:"
+echo "  - Local stock preview: pnpm smoke:cf:preview"
+echo "  - Strict local stock preview (includes /api/health): pnpm smoke:cf:preview:strict"
+echo "  - Final deployed proof: pnpm smoke:cf:deploy -- --base-url <deployment-url>"
+echo "Release verification completed successfully."

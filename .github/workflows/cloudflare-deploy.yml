@@ -70,6 +70,15 @@ jobs:
       - name: 安装依赖
         run: pnpm install --frozen-lockfile
 
+      - name: 安装 Playwright Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: 运行统一发布校验
+        run: pnpm release:verify
+        env:
+          CI: true
+          NODE_ENV: production
+
       - name: 构建（Cloudflare Workers）
         id: build
         run: |
@@ -82,6 +91,7 @@ jobs:
           echo "log-path=$(pwd)/cf_build.log" >> "$GITHUB_OUTPUT"
         env:
           CI: true
+          NODE_ENV: production
 
       - name: 阻断：检测 next-intl MISSING_MESSAGE
         run: |
@@ -138,6 +148,7 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          NODE_ENV: production
 
       - name: 部署总结
         run: |
@@ -190,32 +201,5 @@ jobs:
 
       - name: 健康检查
         run: |
-          set -euo pipefail
-          BASE="${{ needs.build-and-deploy.outputs.deployment_url }}"
-
-          check_url() {
-            local url="$1"
-            local desc="$2"
-            local max_retries=3
-            local attempt=1
-
-            echo "检查 $desc..."
-            while [ $attempt -le $max_retries ]; do
-              HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$url") || HTTP_CODE="000"
-              if [ "$HTTP_CODE" = "200" ]; then
-                echo "  ✓ $desc (HTTP $HTTP_CODE)"
-                return 0
-              fi
-              echo "  尝试 $attempt/$max_retries: HTTP $HTTP_CODE"
-              sleep $((attempt * 3))
-              attempt=$((attempt + 1))
-            done
-            echo "  ❌ $desc 失败"
-            return 1
-          }
-
-          check_url "$BASE" "根路径"
-          check_url "$BASE/en" "英文首页"
-          check_url "$BASE/zh" "中文首页"
-          check_url "$BASE/api/health" "Health API"
-          echo "✅ 健康检查通过"
+          echo "Cloudflare deployed proof: running final post-deploy smoke against the deployed URL"
+          node scripts/deploy/post-deploy-smoke.mjs --base-url "${{ needs.build-and-deploy.outputs.deployment_url }}"

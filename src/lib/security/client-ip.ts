@@ -11,6 +11,7 @@
 
 import { isIP } from "net";
 import { NextRequest } from "next/server";
+import { INTERNAL_TRUSTED_CLIENT_IP_HEADER } from "@/lib/security/client-ip-headers";
 
 /**
  * Trusted proxy configuration per platform
@@ -374,6 +375,8 @@ function getIPFromTrustedHeadersLike(
  * we don't have access to request.ip, the fallback behavior differs:
  * - No platform configured: returns FALLBACK_IP (does NOT trust proxy headers)
  * - Platform configured: trusts only the platform's trusted headers
+ * - Cloudflare Server Actions: trusts the middleware-derived internal header
+ *   because middleware still has access to the trusted request context
  *
  * @example
  * ```ts
@@ -395,6 +398,13 @@ export function getClientIPFromHeaders(headers: HeadersLike): string {
   }
 
   if (platform === "cloudflare") {
+    const middlewareDerivedIP = getIPFromTrustedHeadersLike(headers, {
+      trustedHeaders: [INTERNAL_TRUSTED_CLIENT_IP_HEADER],
+    });
+    if (middlewareDerivedIP) {
+      return middlewareDerivedIP;
+    }
+
     return FALLBACK_IP;
   }
 

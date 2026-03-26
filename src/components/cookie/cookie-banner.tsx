@@ -19,6 +19,15 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
 const CSS_VAR_BANNER_HEIGHT = "--cookie-banner-height";
+const COOKIE_PREFERENCES_PANEL_ID = "cookie-preferences-panel";
+const FOCUSABLE_SELECTOR = [
+  "button:not([disabled])",
+  "a[href]",
+  "input:not([disabled])",
+  "select:not([disabled])",
+  "textarea:not([disabled])",
+  '[tabindex]:not([tabindex="-1"])',
+].join(", ");
 
 interface CookieBannerProps {
   className?: string;
@@ -41,16 +50,10 @@ function resetCookieBannerHeight(): void {
   document.documentElement.style.setProperty(CSS_VAR_BANNER_HEIGHT, "0px");
 }
 
-export function CookieBanner({ className }: CookieBannerProps) {
-  const t = useTranslations("cookie");
-  const { hasConsented, ready, acceptAll, rejectAll, savePreferences } =
-    useCookieConsent();
-  const [showPreferences, setShowPreferences] = useState(false);
-  const [analytics, setAnalytics] = useState(false);
-  const [marketing, setMarketing] = useState(false);
-  const bannerRef = useRef<HTMLDivElement>(null);
-
-  // Update CSS variable when banner size changes
+function useCookieBannerHeightSync(
+  bannerRef: React.RefObject<HTMLDivElement | null>,
+  hasConsented: boolean,
+) {
   useEffect(() => {
     const banner = bannerRef.current;
     if (!banner || hasConsented) {
@@ -63,10 +66,8 @@ export function CookieBanner({ className }: CookieBannerProps) {
       setCookieBannerHeight(height);
     };
 
-    // Initial measurement
     updateHeight();
 
-    // Observe size changes (e.g., preferences panel toggle)
     const observer = new ResizeObserver(updateHeight);
     observer.observe(banner);
 
@@ -74,12 +75,76 @@ export function CookieBanner({ className }: CookieBannerProps) {
       observer.disconnect();
       resetCookieBannerHeight();
     };
-  }, [hasConsented]);
+  }, [bannerRef, hasConsented]);
+}
+
+function getFocusableElements(panel: HTMLDivElement) {
+  return Array.from(
+    panel.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR),
+  ).filter(
+    (element) => !element.hasAttribute("disabled") && element.tabIndex !== -1,
+  );
+}
+
+function trapPanelFocus(
+  event: KeyboardEvent,
+  panel: HTMLDivElement,
+  closeButtonRef: React.RefObject<HTMLButtonElement | null>,
+) {
+  const focusable = getFocusableElements(panel);
+
+  if (focusable.length === 0) {
+    event.preventDefault();
+    closeButtonRef.current?.focus();
+    return;
+  }
+
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+  const activeElement = document.activeElement as HTMLElement | null;
+  const focusInsidePanel =
+    Boolean(activeElement) && panel.contains(activeElement);
+
+  if (event.shiftKey) {
+    if (!focusInsidePanel || activeElement === first) {
+      event.preventDefault();
+      last?.focus();
+    }
+    return;
+  }
+
+  if (!focusInsidePanel || activeElement === last) {
+    event.preventDefault();
+    first?.focus();
+  }
+}
+
+export function CookieBanner({ className }: CookieBannerProps) {
+  const t = useTranslations("cookie");
+  const { hasConsented, ready, acceptAll, rejectAll, savePreferences } =
+    useCookieConsent();
+  const [showPreferences, setShowPreferences] = useState(false);
+  const [analytics, setAnalytics] = useState(false);
+  const [marketing, setMarketing] = useState(false);
+  const bannerRef = useRef<HTMLDivElement>(null);
+  const manageButtonRef = useRef<HTMLButtonElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const preferencesPanelRef = useRef<HTMLDivElement>(null);
+  const closePreferencesPanel = useCallback(() => {
+    setShowPreferences(false);
+    requestAnimationFrame(() => manageButtonRef.current?.focus());
+  }, []);
+  const openPreferencesPanel = useCallback(() => {
+    setShowPreferences(true);
+    requestAnimationFrame(() => closeButtonRef.current?.focus());
+  }, []);
+
+  useCookieBannerHeightSync(bannerRef, hasConsented);
 
   const handleSavePreferences = useCallback(() => {
     savePreferences({ analytics, marketing });
-    setShowPreferences(false);
-  }, [analytics, marketing, savePreferences]);
+    closePreferencesPanel();
+  }, [analytics, marketing, closePreferencesPanel, savePreferences]);
 
   const handleAcceptAll = useCallback(() => {
     acceptAll();
@@ -88,6 +153,32 @@ export function CookieBanner({ className }: CookieBannerProps) {
   const handleRejectAll = useCallback(() => {
     rejectAll();
   }, [rejectAll]);
+
+  useEffect(() => {
+    if (!showPreferences) {
+      return undefined;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closePreferencesPanel();
+        return;
+      }
+
+      if (event.key !== "Tab") {
+        return;
+      }
+
+      const panel = preferencesPanelRef.current;
+      if (panel) {
+        trapPanelFocus(event, panel, closeButtonRef);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [closePreferencesPanel, showPreferences]);
 
   // Don't render until hydrated or if already consented
   if (!ready || hasConsented) {
@@ -116,14 +207,18 @@ export function CookieBanner({ className }: CookieBannerProps) {
             onAnalyticsChange={setAnalytics}
             onMarketingChange={setMarketing}
             onSave={handleSavePreferences}
-            onClose={() => setShowPreferences(false)}
+            onClose={closePreferencesPanel}
+            closeButtonRef={closeButtonRef}
+            panelRef={preferencesPanelRef}
           />
         ) : (
           <MainBanner
             t={t}
             onAcceptAll={handleAcceptAll}
             onRejectAll={handleRejectAll}
-            onManage={() => setShowPreferences(true)}
+            onManage={openPreferencesPanel}
+            manageButtonRef={manageButtonRef}
+            showPreferences={showPreferences}
           />
         )}
       </div>
@@ -136,6 +231,8 @@ interface MainBannerProps {
   onAcceptAll: () => void;
   onRejectAll: () => void;
   onManage: () => void;
+  manageButtonRef: React.RefObject<HTMLButtonElement | null>;
+  showPreferences: boolean;
 }
 
 function MainBanner({
@@ -143,6 +240,8 @@ function MainBanner({
   onAcceptAll,
   onRejectAll,
   onManage,
+  manageButtonRef,
+  showPreferences,
 }: MainBannerProps) {
   return (
     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -161,10 +260,14 @@ function MainBanner({
       </div>
       <div className="flex flex-wrap items-center gap-2 sm:flex-nowrap">
         <Button
+          ref={manageButtonRef}
           variant="ghost"
           size="sm"
           onClick={onManage}
           className="text-xs"
+          aria-controls={COOKIE_PREFERENCES_PANEL_ID}
+          aria-expanded={showPreferences}
+          aria-haspopup="dialog"
         >
           {t("manage")}
         </Button>
@@ -197,6 +300,8 @@ interface PreferencesPanelProps {
   onMarketingChange: (value: boolean) => void;
   onSave: () => void;
   onClose: () => void;
+  closeButtonRef: React.RefObject<HTMLButtonElement | null>;
+  panelRef: React.RefObject<HTMLDivElement | null>;
 }
 
 function PreferencesPanel({
@@ -207,9 +312,23 @@ function PreferencesPanel({
   onMarketingChange,
   onSave,
   onClose,
+  closeButtonRef,
+  panelRef,
 }: PreferencesPanelProps) {
   return (
-    <div className="space-y-4">
+    <div
+      ref={panelRef}
+      className="space-y-4"
+      id={COOKIE_PREFERENCES_PANEL_ID}
+      role="group"
+      aria-label={t("preferences.title")}
+      onKeyDown={(event) => {
+        if (event.key === "Escape") {
+          event.preventDefault();
+          onClose();
+        }
+      }}
+    >
       <div className="flex items-start justify-between">
         <div>
           <p className="text-sm font-medium text-foreground">
@@ -220,6 +339,7 @@ function PreferencesPanel({
           </p>
         </div>
         <Button
+          ref={closeButtonRef}
           variant="ghost"
           size="icon"
           onClick={onClose}

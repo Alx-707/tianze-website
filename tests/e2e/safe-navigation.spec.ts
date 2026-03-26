@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { getHeaderMobileMenuButton } from "./helpers/navigation";
 import {
   removeInterferingElements,
   safeClick,
@@ -109,34 +110,15 @@ test.describe("Safe Navigation Tests", () => {
     await removeInterferingElements(page);
 
     // 查找移动菜单按钮
-    const mobileMenuSelectors = [
-      '[data-testid="mobile-menu-button"]',
-      'button[aria-label*="menu"]',
-      'button[aria-label*="Toggle mobile menu"]',
-      ".hamburger",
-    ];
-
-    let menuButtonFound = false;
-    let usedSelector = "";
-
-    for (const selector of mobileMenuSelectors) {
-      const count = await page.locator(selector).count();
-      if (count > 0) {
-        const isVisible = await page.locator(selector).first().isVisible();
-        if (isVisible) {
-          menuButtonFound = true;
-          usedSelector = selector;
-          break;
-        }
-      }
-    }
+    const mobileMenuButton = getHeaderMobileMenuButton(page);
+    const menuButtonFound = await mobileMenuButton
+      .isVisible()
+      .catch(() => false);
 
     if (menuButtonFound) {
-      console.log(`🎯 Found mobile menu button: ${usedSelector}`);
+      console.log("🎯 Found mobile menu button via stable test id");
 
-      // 安全点击移动菜单按钮
-      const success = await safeClick(page, usedSelector);
-      expect(success).toBe(true);
+      await mobileMenuButton.click();
 
       // 等待菜单动画完成
       await page.waitForTimeout(300);

@@ -2,7 +2,13 @@
  * @vitest-environment jsdom
  * Tests for CookieBanner component
  */
-import { fireEvent, render, screen } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { CookieBanner } from "../cookie-banner";
 
@@ -170,6 +176,7 @@ describe("CookieBanner", () => {
       fireEvent.click(screen.getByRole("button", { name: "Manage" }));
 
       expect(screen.getByText("Cookie Preferences")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Close" })).toHaveFocus();
     });
 
     it("shows all cookie categories", () => {
@@ -240,7 +247,7 @@ describe("CookieBanner", () => {
       expect(checkboxes[2]).toBeChecked();
     });
 
-    it("closes preferences panel when close button is clicked", () => {
+    it("closes preferences panel when close button is clicked", async () => {
       render(<CookieBanner />);
 
       fireEvent.click(screen.getByRole("button", { name: "Manage" }));
@@ -248,6 +255,9 @@ describe("CookieBanner", () => {
 
       fireEvent.click(screen.getByRole("button", { name: "Close" }));
       expect(screen.queryByText("Cookie Preferences")).not.toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByRole("button", { name: "Manage" })).toHaveFocus();
+      });
     });
 
     it("closes preferences panel when cancel button is clicked", () => {
@@ -302,6 +312,54 @@ describe("CookieBanner", () => {
 
       const dialog = screen.getByRole("dialog");
       expect(dialog).toHaveAttribute("aria-label", "Cookie Consent");
+    });
+
+    it("manage button exposes dialog relationship", () => {
+      render(<CookieBanner />);
+
+      const manageButton = screen.getByRole("button", { name: "Manage" });
+      expect(manageButton).toHaveAttribute(
+        "aria-controls",
+        "cookie-preferences-panel",
+      );
+      expect(manageButton).toHaveAttribute("aria-haspopup", "dialog");
+      expect(manageButton).toHaveAttribute("aria-expanded", "false");
+
+      fireEvent.click(manageButton);
+      expect(screen.getByText("Cookie Preferences")).toBeInTheDocument();
+    });
+
+    it("closes preferences panel with Escape", () => {
+      render(<CookieBanner />);
+
+      fireEvent.click(screen.getByRole("button", { name: "Manage" }));
+      expect(screen.getByText("Cookie Preferences")).toBeInTheDocument();
+
+      fireEvent.keyDown(document, { key: "Escape" });
+      expect(screen.queryByText("Cookie Preferences")).not.toBeInTheDocument();
+    });
+
+    it("keeps tab focus inside the preferences panel while open", () => {
+      render(<CookieBanner />);
+
+      fireEvent.click(screen.getByRole("button", { name: "Manage" }));
+
+      const panel = screen.getByRole("group", {
+        name: "Cookie Preferences",
+      });
+      const controls = within(panel);
+      const closeButton = screen.getByRole("button", { name: "Close" });
+      const saveButton = controls.getByRole("button", {
+        name: "Save Preferences",
+      });
+
+      saveButton.focus();
+      fireEvent.keyDown(document, { key: "Tab" });
+      expect(closeButton).toHaveFocus();
+
+      closeButton.focus();
+      fireEvent.keyDown(document, { key: "Tab", shiftKey: true });
+      expect(saveButton).toHaveFocus();
     });
   });
 

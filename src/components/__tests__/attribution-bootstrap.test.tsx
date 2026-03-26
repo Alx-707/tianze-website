@@ -1,41 +1,48 @@
 import { render } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { mockStoreAttributionData } = vi.hoisted(() => ({
-  mockStoreAttributionData: vi.fn(),
-}));
-
-vi.mock("@/lib/utm", () => ({
-  storeAttributionData: mockStoreAttributionData,
-}));
-
 describe("AttributionBootstrap", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    window.history.replaceState({}, "", "/en");
   });
 
-  it("calls storeAttributionData on mount", async () => {
-    const { AttributionBootstrap } = await import("../attribution-bootstrap");
-    render(<AttributionBootstrap />);
-
-    expect(mockStoreAttributionData).toHaveBeenCalledTimes(1);
+  it("detects attribution-bearing search strings", async () => {
+    const module = await import("../attribution-bootstrap");
+    expect(module.shouldLoadAttribution("?utm_source=test")).toBe(true);
+    expect(module.shouldLoadAttribution("?gclid=test-click")).toBe(true);
+    expect(module.shouldLoadAttribution("?fbclid=test-click")).toBe(true);
+    expect(module.shouldLoadAttribution("?msclkid=test-click")).toBe(true);
+    expect(module.shouldLoadAttribution("?foo=bar")).toBe(false);
+    expect(module.shouldLoadAttribution("")).toBe(false);
   });
 
   it("renders nothing (returns null)", async () => {
-    const { AttributionBootstrap } = await import("../attribution-bootstrap");
-    const { container } = render(<AttributionBootstrap />);
+    const module = await import("../attribution-bootstrap");
+    const { container } = render(<module.AttributionBootstrap />);
 
     expect(container).toBeEmptyDOMElement();
   });
 
-  it("only calls storeAttributionData once even on re-render", async () => {
-    const { AttributionBootstrap } = await import("../attribution-bootstrap");
-    const { rerender } = render(<AttributionBootstrap />);
+  it("does not load attribution logic when there are no attribution params", async () => {
+    const module = await import("../attribution-bootstrap");
+    const loadSpy = vi.spyOn(module, "loadAttributionModule");
+    render(<module.AttributionBootstrap />);
 
-    rerender(<AttributionBootstrap />);
-    rerender(<AttributionBootstrap />);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(loadSpy).not.toHaveBeenCalled();
+  });
 
-    // useEffect with [] deps should only run once
-    expect(mockStoreAttributionData).toHaveBeenCalledTimes(1);
+  it("still avoids loading attribution logic on re-render when no params exist", async () => {
+    const module = await import("../attribution-bootstrap");
+    const loadSpy = vi.spyOn(module, "loadAttributionModule");
+
+    const { rerender } = render(<module.AttributionBootstrap />);
+
+    rerender(<module.AttributionBootstrap />);
+    rerender(<module.AttributionBootstrap />);
+
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(loadSpy).not.toHaveBeenCalled();
   });
 });

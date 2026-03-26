@@ -1,7 +1,16 @@
 "use client";
 
 import { useEffect } from "react";
-import { storeAttributionData } from "@/lib/utm";
+
+const ATTRIBUTION_PARAM_PATTERN = /(?:^|[?&])(utm_|gclid=|fbclid=|msclkid=)/i;
+
+export function loadAttributionModule() {
+  return import("@/lib/utm");
+}
+
+export function shouldLoadAttribution(search: string) {
+  return ATTRIBUTION_PARAM_PATTERN.test(search);
+}
 
 /**
  * Attribution Bootstrap
@@ -15,7 +24,23 @@ import { storeAttributionData } from "@/lib/utm";
  */
 export function AttributionBootstrap() {
   useEffect(() => {
-    storeAttributionData();
+    if (!shouldLoadAttribution(window.location.search)) {
+      return undefined;
+    }
+
+    let cancelled = false;
+
+    loadAttributionModule()
+      .then(({ storeAttributionData }) => {
+        if (!cancelled) {
+          storeAttributionData();
+        }
+      })
+      .catch(() => undefined);
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   return null;

@@ -8,6 +8,7 @@ export interface WhatsAppChatWindowTranslations {
   greeting: string;
   responseTime: string;
   placeholder: string;
+  messageLabel: string;
   startChat: string;
   close: string;
 }
@@ -15,6 +16,7 @@ export interface WhatsAppChatWindowTranslations {
 export interface WhatsAppChatWindowProps {
   number: string;
   defaultMessage?: string;
+  dialogId?: string;
   onClose: () => void;
   translations: WhatsAppChatWindowTranslations;
   className?: string;
@@ -39,6 +41,7 @@ function getWhatsAppUrl(phone: string, message: string): string {
 export function WhatsAppChatWindow({
   number,
   defaultMessage = "",
+  dialogId,
   onClose,
   translations,
   className,
@@ -95,6 +98,7 @@ export function WhatsAppChatWindow({
       role="dialog"
       aria-modal="true"
       aria-label={translations.greeting}
+      {...(dialogId ? { id: dialogId } : {})}
       onMouseDown={(e) => e.stopPropagation()}
     >
       {/* Header */}
@@ -130,6 +134,7 @@ export function WhatsAppChatWindow({
           onChange={(e) => setMessage(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={translations.placeholder}
+          aria-label={translations.messageLabel}
           rows={3}
           className={cn(
             "w-full resize-none rounded-xl p-3 text-sm transition-all outline-none",

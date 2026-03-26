@@ -69,7 +69,7 @@ export function Logo({
         width={COUNT_120}
         height={HOURS_PER_DAY}
         className={cn(
-          "transition-all duration-200 dark:invert",
+          "transition-[filter,opacity] duration-200 dark:invert",
           getSizeClass(size),
         )}
         decoding="async"

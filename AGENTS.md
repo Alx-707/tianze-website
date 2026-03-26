@@ -60,3 +60,57 @@
 - 正确做法：
   - 让真正的 root layout 在服务端直接输出 `<html lang={locale}>`
   - 客户端组件用 `next-intl` 的 locale context（如 `useLocale()`），不要偷读 `document.documentElement.lang`
+
+### 8. 不要把 stock `opennextjs-cloudflare preview` 当成 phase6 / split-worker 的完整真相
+- 截至 2026-03-26，本仓库已验证：
+  - stock `opennextjs-cloudflare preview` 仍然主要走默认 worker 路径；
+  - 它可以帮助发现明显的 Cloudflare 本地兼容性问题；
+  - 但它不能自动证明 phase6 / split-worker 的最终运行形态是对的。
+- 同期还验证到：即使直接对 `.open-next/wrangler/phase6/*.jsonc` 跑 `wrangler dev --no-bundle`，本地也可能在 Wrangler / Miniflare 启动层就失败，并不一定是业务路由或 repo 配置错了。
+- 默认动作：
+  - 把 stock preview 当作“局部信号”，不要当作 split-worker release proof；
+  - 如果 phase6 本地验证失败，先区分：
+    - 默认 worker 路径问题，
+    - 还是本地 Wrangler / Miniflare 启动问题；
+  - 不要在没有新证据前持续堆本地 harness 胶水代码。
+
+### 9. 本地并行跑多个 `wrangler dev` 时，必须显式分配不同 `--inspector-port`
+- 截至 2026-03-26，本仓库在尝试 phase6 本地多 worker 验证时，已经确认：
+  - 不同 worker 的 `wrangler dev` 会因为 inspector 端口冲突互相干扰；
+  - 即使业务端口不同，如果 `--inspector-port` 重复，也会出现误导性的 “Address already in use”。
+- 默认动作：
+  - 每个本地 worker 明确给独立的 `--port` 和 `--inspector-port`；
+  - 如果仍然报端口占用，不要立刻判断为业务代码问题，先检查本地 `workerd` 残留和 Wrangler 自身启动状态。
+
+### 10. Contact Server Action 在 Cloudflare 下不要直接信原始代理头，优先走 middleware 派生的内部 client IP
+- 截至 2026-03-26，本仓库已验证：
+  - API route 可以基于 `NextRequest` 做 Cloudflare source-aware 的 client IP 推导；
+  - 但 Contact Server Action 只有 `headers()`，直接信 `cf-connecting-ip` / `x-forwarded-for` 会丢失“请求是否来自可信 Cloudflare 入口”的上下文；
+  - 之前 `getClientIPFromHeaders()` 因此在 Cloudflare 分支故意 fail closed，导致 Contact 主转化路径退化到 `0.0.0.0`。
+- 当前稳定做法：
+  - 在 `src/middleware.ts` 里先派生并覆盖内部请求头 `x-internal-client-ip`；
+  - Cloudflare 下的 `getClientIPFromHeaders()` 只信这个内部头，不直接信原始 Cloudflare 头。
+- 默认动作：
+  - 如果再改 Contact Server Action 的 client identity 链路，先确认 middleware 内部头有没有一起被维护；
+  - 至少执行：
+    - `pnpm exec vitest run src/lib/security/__tests__/client-ip.test.ts src/app/__tests__/actions.test.ts src/app/__tests__/contact-integration.test.ts src/__tests__/middleware-locale-cookie.test.ts tests/unit/middleware.test.ts`
+    - `pnpm build`
+    - `pnpm build:cf`
+
+### 11. Cloudflare 证明边界要写死在脚本里，不要靠人脑记住
+- 截至 2026-03-26，本仓库当前更可信的做法是：
+  - stock `opennextjs-cloudflare preview` 只作为本地 page/header/cookie/redirect 真相检查；
+  - `/api/health` 等最终 API 证明，应放到真实部署后的 smoke 里做。
+- 当前脚本分工：
+  - `pnpm smoke:cf:preview`
+    - 默认只验证 `/`、locale 页面、Contact 页面、invalid locale redirect、cookie flags、内部 header 泄漏、manifest crash
+  - `pnpm smoke:cf:preview:strict`
+    - 额外把 `/api/health` 算进去；当前如果 stock preview 还不能正确代表 split-worker API 路径，这个命令可能失败
+  - `pnpm smoke:cf:deploy -- --base-url <url>`
+    - 对真实部署地址做最终 smoke，包括 `/api/health`
+- 默认动作：
+  - 不要因为 `smoke:cf:preview` 通过就宣布 Cloudflare 完全闭环；
+  - 也不要因为 `smoke:cf:preview:strict` 失败，就直接判定 deployed phase6 一定有问题；
+  - 先看失败属于：
+    - stock preview 边界内的问题，
+    - 还是必须由 deployed smoke 证明的问题。

@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { API_ERROR_CODES } from "@/constants/api-error-codes";
 import { resetIdempotencyState } from "@/lib/idempotency";
 import { checkDistributedRateLimit } from "@/lib/security/distributed-rate-limit";
+import { INTERNAL_TRUSTED_CLIENT_IP_HEADER } from "@/lib/security/client-ip-headers";
 import { verifyTurnstile } from "@/lib/turnstile";
 import { contactFormAction } from "../actions";
 
@@ -356,6 +357,26 @@ describe("actions.ts", () => {
         expect(verifyTurnstile).toHaveBeenCalledWith(
           "valid-token",
           "172.16.0.100",
+        );
+      });
+
+      it("should use middleware-derived client IP on Cloudflare", async () => {
+        vi.stubEnv("VERCEL", undefined);
+        vi.stubEnv("CF_PAGES", "1");
+        mockHeadersGet.mockImplementation((key: string) => {
+          if (key === INTERNAL_TRUSTED_CLIENT_IP_HEADER) {
+            return "198.51.100.77";
+          }
+          if (key === "cf-connecting-ip") return "192.0.2.100";
+          return null;
+        });
+
+        const formData = createFormData(getValidFormData());
+        await contactFormAction(null, formData);
+
+        expect(verifyTurnstile).toHaveBeenCalledWith(
+          "valid-token",
+          "198.51.100.77",
         );
       });
     });

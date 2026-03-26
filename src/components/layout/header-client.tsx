@@ -21,18 +21,36 @@ const LanguageToggle = dynamic(
   { ssr: false },
 );
 
-export function MobileNavigationIsland() {
+export function MobileNavigationIsland({
+  openMenuLabel = "Open navigation menu",
+  closeMenuLabel = "Close navigation menu",
+  languageLabel = "Language",
+}: {
+  openMenuLabel?: string;
+  closeMenuLabel?: string;
+  languageLabel?: string;
+}) {
   const [isActivated, setIsActivated] = useState(false);
 
   if (isActivated) {
-    return <MobileNavigation initialOpen />;
+    return (
+      <MobileNavigation
+        initialOpen
+        openMenuLabel={openMenuLabel}
+        closeMenuLabel={closeMenuLabel}
+        languageLabel={languageLabel}
+      />
+    );
   }
 
   return (
     <button
       type="button"
       className="relative inline-flex h-9 w-9 items-center justify-center rounded-[6px] text-foreground transition-colors duration-150 hover:bg-accent"
-      aria-label="Toggle mobile menu"
+      aria-label={openMenuLabel}
+      aria-controls="mobile-navigation"
+      aria-expanded="false"
+      aria-haspopup="dialog"
       data-testid="header-mobile-menu-button"
       onClick={() => setIsActivated(true)}
     >
@@ -50,7 +68,7 @@ export function MobileNavigationIsland() {
           strokeWidth="2"
         />
       </svg>
-      <span className="sr-only">Open menu</span>
+      <span className="sr-only">{openMenuLabel}</span>
     </button>
   );
 }

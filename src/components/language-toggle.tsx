@@ -120,6 +120,8 @@ export const LanguageToggle = memo(({ locale }: { locale?: "en" | "zh" }) => {
             disabled={isPending}
             data-testid="language-toggle-button"
             aria-label={currentLanguageName}
+            aria-haspopup="menu"
+            aria-expanded={isOpen}
             className={cn(
               "h-8 gap-1.5 rounded-full px-3",
               "border border-border",
@@ -185,8 +187,7 @@ export const LanguageToggle = memo(({ locale }: { locale?: "en" | "zh" }) => {
                 "font-medium text-muted-foreground",
                 "hover:bg-muted hover:text-foreground dark:hover:bg-foreground/10",
                 "rounded-md",
-                // 过渡：120ms
-                "transition-all duration-150 ease-in-out",
+                "transition-colors duration-150 ease-in-out",
                 "cursor-pointer",
               )}
               onClick={() => {
@@ -224,8 +225,7 @@ export const LanguageToggle = memo(({ locale }: { locale?: "en" | "zh" }) => {
                 "font-medium text-muted-foreground",
                 "hover:bg-muted hover:text-foreground dark:hover:bg-foreground/10",
                 "rounded-md",
-                // 过渡：120ms
-                "transition-all duration-150 ease-in-out",
+                "transition-colors duration-150 ease-in-out",
                 "cursor-pointer",
               )}
               onClick={() => {

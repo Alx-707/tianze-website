@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { INTERNAL_TRUSTED_CLIENT_IP_HEADER } from "@/lib/security/client-ip-headers";
 
 // Mock next-intl/middleware
 vi.mock("next-intl/middleware", () => ({
@@ -210,6 +211,77 @@ describe("Middleware Cookie Security", () => {
           expect(setCookieHeader).toMatch(/SameSite=Lax/i);
         }
       }
+    });
+
+    it("should normalize root redirect locale cookie flags and remove leaked middleware cookie header", async () => {
+      vi.stubEnv("APP_ENV", "preview");
+      vi.resetModules();
+
+      const intlMock = vi.fn(() => {
+        const response = NextResponse.redirect("http://localhost:3000/en");
+        response.headers.set(
+          "set-cookie",
+          "NEXT_LOCALE=en; Path=/; Max-Age=31536000; SameSite=Lax",
+        );
+        response.headers.set(
+          "x-middleware-set-cookie",
+          "NEXT_LOCALE=en; Path=/; Max-Age=31536000; SameSite=Lax",
+        );
+        return response;
+      });
+
+      vi.doMock("next-intl/middleware", () => ({
+        default: vi.fn(() => intlMock),
+      }));
+      vi.doMock("@/config/security", () => ({
+        generateNonce: vi.fn(() => "test-nonce-123"),
+        getSecurityHeaders: vi.fn(() => []),
+      }));
+      vi.doMock("@/i18n/routing-config", () => ({
+        routing: {
+          defaultLocale: "en",
+          locales: ["en", "zh"],
+          pathnames: { "/": "/", "/about": "/about" },
+          localeCookie: { maxAge: 60 * 60 * 24 * 365 },
+        },
+      }));
+
+      const { default: middleware } = await import("@/middleware");
+
+      const request = new NextRequest("http://localhost:3000/");
+      const response = middleware(request);
+
+      if (response) {
+        const setCookieHeader = (
+          response.headers.get("set-cookie") ?? ""
+        ).toLowerCase();
+        expect(response.headers.get("x-middleware-set-cookie")).toBeNull();
+        expect(setCookieHeader).toContain("next_locale=en");
+        expect(setCookieHeader).toContain("httponly");
+        expect(setCookieHeader).toContain("secure");
+      }
+
+      expect(intlMock).toHaveBeenCalledTimes(1);
+    });
+
+    it("should expose a middleware-derived trusted client IP override", async () => {
+      const { default: middleware } = await import("@/middleware");
+
+      const request = new NextRequest("http://localhost:3000/en/contact", {
+        headers: {
+          "cf-connecting-ip": "198.51.100.77",
+        },
+      });
+      const response = middleware(request);
+
+      expect(
+        response.headers.get(
+          `x-middleware-request-${INTERNAL_TRUSTED_CLIENT_IP_HEADER}`,
+        ),
+      ).toBe("198.51.100.77");
+      expect(response.headers.get("x-middleware-override-headers")).toContain(
+        INTERNAL_TRUSTED_CLIENT_IP_HEADER,
+      );
     });
   });
 });

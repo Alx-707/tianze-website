@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { getNav } from "./helpers/navigation";
+import { getHeaderMobileMenuButton, getNav } from "./helpers/navigation";
 import {
   removeInterferingElements,
   waitForLoadWithFallback,
@@ -80,17 +80,14 @@ test.describe("Basic Navigation", () => {
     await waitForStablePage(page);
 
     // Check if mobile navigation works - match actual component: "Toggle mobile menu"
-    const mobileMenuButton = page
-      .locator('[data-testid="mobile-menu-button"]')
-      .or(page.getByRole("button", { name: /toggle.*menu|mobile.*menu|menu/i }))
-      .or(page.locator('button[aria-label*="menu"]'))
-      .or(page.locator(".hamburger"));
+    const mobileMenuButton = getHeaderMobileMenuButton(page);
 
     // 在移动视口下，菜单按钮应该可见（给予更多等待时间）
-    await expect(mobileMenuButton.first()).toBeVisible({ timeout: 5000 });
+    await expect(mobileMenuButton).toBeVisible({ timeout: 5000 });
+    await expect(mobileMenuButton).toHaveAttribute("aria-haspopup", "dialog");
 
     // 点击菜单按钮
-    await mobileMenuButton.first().click();
+    await mobileMenuButton.click();
 
     // Check if mobile menu opens - wait for menu animation
     // 移动菜单可能是 sheet, dialog, 或带有特定 data-state 的元素

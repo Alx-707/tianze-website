@@ -111,6 +111,17 @@ jobs:
         if: steps.vercel_secrets.outputs.configured == 'true'
         run: pnpm install --frozen-lockfile
 
+      - name: 安装 Playwright Chromium
+        if: steps.vercel_secrets.outputs.configured == 'true'
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: 运行统一发布校验
+        if: steps.vercel_secrets.outputs.configured == 'true'
+        run: pnpm release:verify
+        env:
+          CI: true
+          NODE_ENV: production
+
       - name: 使用 Vercel CLI 构建（保存日志）
         id: vercel_build
         if: steps.vercel_secrets.outputs.configured == 'true'
@@ -123,6 +134,7 @@ jobs:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
           CI: true
+          NODE_ENV: production
 
       - name: 阻断：检测 next-intl MISSING_MESSAGE
         if: steps.vercel_secrets.outputs.configured == 'true'
@@ -252,6 +264,15 @@ jobs:
       - name: 安装项目依赖（显式）
         run: pnpm install --frozen-lockfile
 
+      - name: 安装 Playwright Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: 运行统一发布校验
+        run: pnpm release:verify
+        env:
+          CI: true
+          NODE_ENV: production
+
       - name: 使用 Vercel CLI 构建（保存日志，prod）
         id: vercel_build_prod
         run: |
@@ -262,6 +283,7 @@ jobs:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
           CI: true
+          NODE_ENV: production
 
       - name: 阻断：检测 next-intl MISSING_MESSAGE（prod）
         run: |
@@ -380,21 +402,10 @@ jobs:
 
       - name: 验证部署健康状态
         run: |
-          DEPLOYMENT_URL="${{ needs.deploy-to-vercel.outputs.preview_url }}"
-
-          # 检查根路径
-          echo "检查根路径..."
-          curl -f -s -o /dev/null -w "%{http_code}" -H "x-vercel-protection-bypass: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}" "$DEPLOYMENT_URL" || exit 1
-
-          # 检查英文路由
-          echo "检查英文路由..."
-          curl -f -s -o /dev/null -w "%{http_code}" -H "x-vercel-protection-bypass: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}" "$DEPLOYMENT_URL/en" || exit 1
-
-          # 检查中文路由
-          echo "检查中文路由..."
-          curl -f -s -o /dev/null -w "%{http_code}" -H "x-vercel-protection-bypass: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}" "$DEPLOYMENT_URL/zh" || exit 1
-
-          echo "✅ 所有路由验证通过"
+          node scripts/deploy/post-deploy-smoke.mjs \
+            --base-url "${{ needs.deploy-to-vercel.outputs.preview_url }}" \
+            --header-name "x-vercel-protection-bypass" \
+            --header-value "${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}"
 
       - name: 验证 API 端点
         run: |

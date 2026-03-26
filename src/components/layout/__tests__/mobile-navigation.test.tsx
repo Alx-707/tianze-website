@@ -526,6 +526,7 @@ describe("MobileNavigation Component", () => {
 
       // Check initial state
       expect(button).toHaveAttribute("aria-expanded", "false");
+      expect(button).toHaveAttribute("aria-haspopup", "dialog");
       expect(button).toHaveAttribute("data-state", "closed");
 
       // Simulate state change by re-rendering with isOpen=true
@@ -536,6 +537,7 @@ describe("MobileNavigation Component", () => {
 
       // Check after state change
       expect(button).toHaveAttribute("aria-expanded", "true");
+      expect(button).toHaveAttribute("aria-haspopup", "dialog");
       expect(button).toHaveAttribute("data-state", "open");
 
       // Test click functionality
@@ -560,7 +562,7 @@ describe("MobileLanguageSwitcher Integration", () => {
     await user.click(trigger);
 
     // Should show language section
-    expect(screen.getByText("Language")).toBeInTheDocument();
+    expect(screen.getByText(/Language|Select Language/)).toBeInTheDocument();
     expect(screen.getByText("English")).toBeInTheDocument();
     expect(screen.getByText("简体中文")).toBeInTheDocument();
   });

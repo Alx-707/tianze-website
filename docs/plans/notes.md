@@ -1,256 +1,526 @@
-# Notes: Five-Priority Execution And Current Decoupling State
+# Notes: Performance and Accessibility Repair Program
 
-## Priority Execution Summary
+## Source Set
 
-### Existing Sub-Agent Status
-- The previously listed reusable sub-agents (`Epicurus`, `James`, `Helmholtz`, `Descartes`) are no longer live.
-- Status check result: all four returned `not_found`.
-- Current work therefore used fresh sub-agents instead of attempting to reuse stale threads.
+### Source 1: User-provided combined audit summary
+- Key points:
+  - The repository already has decision-grade audit coverage, but not full closure.
+  - Cloudflare parity, Contact lead path, no-JS truth, release gating, and fake production truths are major themes.
+  - Performance and accessibility were explicitly called out as not yet audited deeply enough.
 
-### Final Repo-Local Completion State
-- Review-surface drift is now materially reduced:
-  - wide scan and single-cluster entrypoints share a registry
-  - helper/shared files are recognized as part of their structural surfaces
-- Ownership activation now has a concrete future checklist:
-  - `docs/guides/MAINTAINER-ACTIVATION-CHECKLIST.md`
-- The main remaining blocker is no longer repo-local implementation work.
-- The main remaining blocker is organizational:
-  - there is not yet a second enforceable repository owner identity mapped into the repo-level owner surface
+### Source 2: Verified local implementation and validation work
+- Key points:
+  - Main navigation now renders in initial HTML instead of being client-only.
+  - Skip link and `#main-content` anchor now exist in the layout.
+  - Contact page now renders real fallback content in initial HTML instead of collapsing to an empty shell.
+  - Contact form client-side messages are scoped locally instead of forcing large page-only bundles into the global client message payload.
+  - Root-level client translation scope has been reduced again to only the truly global interactive namespaces.
+  - Cookie preferences panel now supports better button/panel relationship semantics, focus movement, and Escape closing.
+  - WhatsApp floating chat now exposes clearer dialog semantics, a named message input, and returns focus to its trigger after close.
+  - Language toggle trigger now exposes clearer menu semantics.
 
-### Priority 1: Ownership Resilience
-- Tightened owner semantics so the repository default is primary-only and the backup path stays concentrated on Tier A surfaces.
-- Rewrote governance docs to state the real remaining constraint plainly:
-  - active maintenance is broader than one person in practice
-  - the backup path improves review resilience but does not eliminate enforceable ownership concentration
-- Added an operational checklist and hard ceiling language so Tier A ownership is treated as a review-routing model, not as diversified maintainer headcount.
-- Added `docs/guides/MAINTAINER-ACTIVATION-CHECKLIST.md` so a future enforceable owner expansion has a concrete activation path instead of an implied handoff.
-- Updated:
-  - `.github/CODEOWNERS`
-  - `docs/guides/TIER-A-OWNER-MAP.md`
-  - `docs/guides/OWNERSHIP-RESILIENCE.md`
-  - `docs/guides/POLICY-SOURCE-OF-TRUTH.md`
-  - `docs/guides/STRUCTURAL-GOVERNANCE-LEDGER.md`
-  - `docs/guides/ARCHIVE-HYGIENE.md`
+### Source 3: Current measured performance state
+- Key points:
+  - Latest raw HTML sizes measured locally:
+    - `/en`: about 152 KB
+    - `/zh`: about 150 KB
+    - `/en/contact`: about 95 KB
+  - Latest Lighthouse homepage medians:
+    - Performance: 0.95 for both `/en` and `/zh`
+    - LCP: about 2.94s to 2.96s
+    - Total byte weight: about 292 KB to 293 KB
+  - Largest remaining homepage downloads are now mostly shared runtime chunks, stylesheet, and font assets rather than obvious page-specific payload mistakes.
 
-### Priority 2: Implementation-Level Decoupling
+### Source 4: Active execution evidence
+- Key points:
+  - Main-thread accessibility closure since the last planning snapshot:
+    - mobile menu trigger now explicitly exposes dialog behavior,
+    - mobile language section label now comes from translations instead of a hard-coded English string,
+    - cookie preferences Escape/focus behavior is covered by focused unit tests and the stable navigation Playwright suite.
+  - Targeted verification completed locally:
+    - `pnpm exec vitest run src/components/layout/__tests__/header.test.tsx src/components/cookie/__tests__/cookie-banner.test.tsx src/components/__tests__/language-toggle.test.tsx src/components/whatsapp/__tests__/whatsapp-floating-button.test.tsx src/components/forms/__tests__/contact-form-accessibility.test.tsx src/lib/i18n/__tests__/client-messages.test.ts`
+    - result: `64/64` tests passed
+    - `pnpm exec vitest run src/components/layout/__tests__/mobile-navigation.test.tsx`
+    - result: `39/39` tests passed
+    - `pnpm exec vitest run src/components/layout/__tests__/header-client.test.tsx src/components/lazy/__tests__/lazy-top-loader.test.tsx`
+    - result: `21/21` tests passed
+    - `pnpm build`
+    - result: passed
+    - `STAGING_URL=http://localhost:3000 CI=1 pnpm exec playwright test tests/e2e/navigation.spec.ts --project=chromium`
+    - result: `20 passed, 1 skipped`
+  - Performance attribution sub-agent confirmed:
+    - the largest remaining homepage bytes are mostly framework/runtime floor,
+    - the clearest app-owned reduction set is a mixed layout-island bundle covering attribution bootstrap, cookie consent, header client island, top loader, toaster, theme provider, and WhatsApp lazy button,
+    - `nextjs-toploader` remains one of the cleanest low-risk reduction targets.
+  - Additional performance closure completed after attribution:
+    - homepage top-loader loading is now delayed long enough that ordinary homepage visits do not pay that package up front,
+    - attribution bootstrap now only loads the UTM module when the URL actually contains attribution-bearing params.
+    - `LazyToaster` has been removed from the global layout because the current codebase has no real toast producers; keeping it in the layout only added dormant global client setup cost.
+  - Latest post-change Lighthouse medians from the current local run:
+    - `/en`: performance `0.95`, FCP about `1062ms`, LCP about `2950-2953ms`, TBT about `35-37ms`, total byte weight about `287.9KB`
+    - `/zh`: performance `0.95`, FCP about `1059ms`, LCP about `2947-2949ms`, TBT about `36-37ms`, total byte weight about `289.1KB`
+    - Compared with the previous local baseline, total byte weight dropped by roughly `4-5KB` on each localized homepage while keeping the same overall performance score.
+  - Latest follow-on Lighthouse medians after removing `LazyToaster` from the layout:
+    - `/en`: performance `0.95`, FCP about `1062-1064ms`, LCP about `2922-2957ms`, TBT about `39-40ms` on the median runs, total byte weight about `285.9KB`
+    - `/zh`: performance `0.95`, FCP about `1059-1061ms`, LCP about `2948-2950ms`, TBT about `36-37ms`, total byte weight about `287.0KB`
+    - Compared with the immediately previous run, homepage byte weight dropped by another roughly `2KB` per locale while keeping the same Lighthouse performance score.
+  - Dead-code cleanup completed after removing the unused toaster from the layout:
+    - deleted the dormant `LazyToaster` implementation and its tests,
+    - deleted the unused `src/components/ui/toaster.tsx` wrapper,
+    - removed the now-unused `sonner` dependency from `package.json` and lockfile,
+    - verified that no remaining `LazyToaster` / `sonner` references exist in `src` or `tests`.
+  - Risk assessment for the next layout-island candidates:
+    - `cookie-consent` is not just a banner surface; it also owns analytics-consent state and gates analytics loading,
+    - `theme` is still a real user-facing feature path because the footer theme switcher and theme initialization depend on it,
+    - practical implication: these two are not in the same low-risk class as the toaster/top-loader/attribution cuts.
 
-#### Translation Quartet
-- Shared quartet helper now owns:
-  - split/flat path lookup
-  - nested traversal
-  - nested read/write helpers
-- Updated:
-  - `scripts/translation-flat-utils.js`
-  - `scripts/translation-sync.js`
-  - `scripts/validate-translations.js`
-  - `scripts/i18n-shape-check.js`
-  - `docs/guides/TRANSLATION-QUARTET-CONTRACT.md`
-- Structural effect:
-  - quartet sync and quartet validation now share the same traversal primitives instead of reimplementing leaf/diff logic
+### Source 5: Production env contract deep-dive and closure work
+- Key points:
+  - `scripts/validate-production-config.ts` previously only validated site config placeholders, not the real production runtime contract.
+  - Runtime guards already existed, but they were fragmented across:
+    - `src/lib/security/rate-limit-key-strategies.ts`
+    - `src/lib/security/stores/rate-limit-store.ts`
+    - `src/lib/security/stores/idempotency-store.ts`
+    - `src/lib/turnstile.ts`
+    - `src/lib/resend-core.tsx`
+    - `src/lib/airtable/service.ts`
+    - `scripts/cloudflare/sync-server-actions-key.mjs`
+  - The new production contract now validates, in explicit production mode:
+    - Upstash Redis or explicit degraded overrides for rate limiting/idempotency
+    - `RATE_LIMIT_PEPPER`
+    - `NEXT_SERVER_ACTIONS_ENCRYPTION_KEY`
+    - `TURNSTILE_SECRET_KEY`
+    - `NEXT_PUBLIC_TURNSTILE_SITE_KEY`
+    - `RESEND_API_KEY`
+    - `AIRTABLE_API_KEY`
+    - `AIRTABLE_BASE_ID`
+  - The validator also rejects partial Redis/KV pairs and warns when degraded in-memory overrides are intentionally enabled.
+  - Because `validate:config` runs inside `prebuild`, the strict runtime contract is gated on `NODE_ENV=production`; otherwise normal local builds would be forced to carry release secrets.
+  - Deploy workflows were updated so their build steps run with `NODE_ENV=production`, which means this stricter contract now applies on the actual release path instead of only existing as local logic.
+  - Focused verification completed locally:
+    - `pnpm exec vitest run tests/unit/scripts/validate-production-config.test.ts`
+    - result: `6/6` tests passed
+    - `env -i PATH=\"$PATH\" HOME=\"$HOME\" NODE_ENV=production pnpm exec tsx scripts/validate-production-config.ts`
+    - result: failed with the expected missing-production-env errors
+    - `NODE_ENV=production ... pnpm validate:config`
+    - result: passed with a complete placeholder production contract
+    - `NODE_ENV=production ... pnpm build`
+    - result: passed
 
-#### Locale Runtime Surface
-- Locale coercion and presentation semantics are now more centralized through:
-  - `src/i18n/locale-utils.ts`
-  - `src/i18n/locale-presentation.ts`
-- Runtime-adjacent consumers now rely less on one-off locale branches.
+### Source 6: Cloudflare parity rerun with production-style env contract
+- Key points:
+  - `NODE_ENV=production ... pnpm build:cf` passed after the stronger runtime env contract was put in place.
+  - `NODE_ENV=production ... pnpm exec opennextjs-cloudflare preview --env preview` still failed on key routes:
+    - `/en`
+    - `/zh`
+    - `/api/health`
+    - `/en/contact`
+    - `/zh/contact`
+  - The failure body is the same across those routes:
+    - `Unexpected loadManifest(/.next/server/prefetch-hints.json) call!`
+  - The file itself is not missing:
+    - `.next/server/prefetch-hints.json` exists
+    - `.open-next/server-functions/default/.next/server/prefetch-hints.json` exists
+    - both currently contain `{}`.
+  - Practical implication:
+    - the current failure looks like an OpenNext-generated handler incompatibility with Next.js 16 prefetch-hints loading, not like a missing repository asset.
+  - Additional Cloudflare-specific drift confirmed during the same run:
+    - `/` still leaks `x-middleware-set-cookie`
+    - `/invalid/contact` still leaks `x-middleware-set-cookie`
+    - `NEXT_LOCALE` cookie flags differ between `/` and `/invalid/contact`
+  - New automation landed:
+    - `scripts/cloudflare/preview-smoke.mjs`
+    - package script: `pnpm smoke:cf:preview`
+  - The smoke script currently fails with the exact known parity problems:
+    - 500s on the key localized and health routes
+    - `Unexpected loadManifest` surfaced in bodies
+    - `x-middleware-set-cookie` leakage
+    - `NEXT_LOCALE` cookie-flag drift
+  - Additional focused verification:
+    - `pnpm exec vitest run tests/unit/middleware.test.ts src/__tests__/middleware-locale-cookie.test.ts`
+    - result: `10/10` tests passed
 
-#### Cache Invalidation + Health
-- Shared layers now exist for:
-  - response shaping: `src/lib/api/cache-health-response.ts`
-  - invalidation policy: `src/lib/cache/invalidation-policy.ts`
-  - route guards: `src/lib/cache/invalidation-guards.ts`
-- Request observability now also exists for this surface:
-  - `x-request-id`
-  - `x-observability-surface: cache-health`
-- Route orchestration is thinner in:
-  - `src/app/api/cache/invalidate/route.ts`
-  - `src/app/api/health/route.ts`
+### Source 7: Cloudflare parity deep-dive after middleware fixes
+- Key points:
+  - Repository-controlled Cloudflare drift that was visible in headers/cookies is now closed on the stock local preview path:
+    - `x-middleware-set-cookie` no longer leaks
+    - `NEXT_LOCALE` cookie flags are aligned between `/` and invalid-locale redirects
+    - `pnpm exec vitest run tests/unit/middleware.test.ts src/__tests__/middleware-locale-cookie.test.ts`
+    - result: `12/12` tests passed
+  - The stock `opennextjs-cloudflare preview` path is still broken, but the failures are no longer one single issue:
+    - page routes such as `/en`, `/zh`, `/en/contact`, `/zh/contact` now fail through repeated generated-handler manifest incompatibilities in `server-functions/default/handler.mjs`
+    - manifest names observed across reruns:
+      - `prefetch-hints.json`
+      - `subresource-integrity-manifest.json`
+      - `dynamic-css-manifest`
+    - practical implication:
+      - this now looks like a broader Next 16 manifest-loading incompatibility in the generated default worker, not one missing repository asset
+  - `/api/health` still fails separately with:
+    - `Dynamic require of ".../.open-next/server-functions/default/.next/server/app/api/health/route.js" is not supported`
+    - the generated default handler contains raw API-route `require(...)` branches even though these API routes were split into `apiLead`
+    - practical implication:
+      - the stock local preview path is still running API requests through the default worker rather than proving the split-function routing graph
+  - Structural evidence from generated output:
+    - `.open-next/worker.js` always routes requests into `./server-functions/default/handler.mjs` after middleware
+    - `scripts/cloudflare/build-phase6-workers.mjs` generates a gateway worker plus separate `web`, `apiLead`, `apiOps`, and `apiWhatsapp` workers with service-binding route rules
+    - the generated phase6 gateway config expects companion local worker processes; running only the gateway leaves `WORKER_WEB` / `WORKER_API_*` in `local [not connected]` state
+  - Practical planning implication:
+    - `pnpm smoke:cf:preview` is still useful for catching obvious stock-preview breakage
+    - but the stock preview alone is not a trustworthy release-grade parity proof for the repo's split-worker Cloudflare design
+    - release-gate planning now needs to choose between:
+      - building a local multi-worker/phase6 parity harness, or
+      - explicitly downgrading Cloudflare support until upstream/generated-worker compatibility is resolved
 
-#### Lead API Family Observability
-- The write-path family now exposes:
-  - `x-request-id`
-  - `x-observability-surface: lead-family`
-- If a caller provides `x-request-id`, the family preserves it in the response.
-- Lead-family route signals now also feed the shared system observability collector.
+### Source 8: Stock preview narrowed to API-only failure after generated manifest patch
+- Key points:
+  - `scripts/cloudflare/patch-prefetch-hints-manifest.mjs` was broadened to match the upstream OpenNext direction more closely:
+    - instead of only special-casing `prefetch-hints.json`, it now returns `{}` for unexpected manifest-like lookups in the generated default handler
+  - Verified local result after `NODE_ENV=production ... pnpm build:cf` and a fresh preview run:
+    - `/en`: `200`
+    - `/zh`: `200`
+    - `/en/contact`: `200`
+    - `/zh/contact`: `200`
+    - `/`: `307 -> /en`
+    - `/invalid/contact`: `307 -> /en/contact`
+    - `NEXT_LOCALE` cookie flags remained aligned
+    - `x-middleware-set-cookie` remained absent
+  - `pnpm smoke:cf:preview --base-url http://127.0.0.1:8792`
+    - now fails only with:
+      - `Expected /api/health to return 200, got 500`
+  - Practical implication:
+    - the stock-preview page-route failure class has been materially reduced by the repo-side manifest patch
+    - the remaining stock-preview blocker is now concentrated in API-route loading, not page rendering
+  - Follow-up experiment that was explicitly rejected:
+    - adding `export const runtime = "edge"` to `src/app/api/health/route.ts`
+    - `pnpm build` failed because route-level `runtime` is not allowed with `nextConfig.cacheComponents`
+    - the change was reverted immediately
+  - Current best reading of A2:
+    - stock preview is now good enough to prove page-route recovery and middleware drift closure
+    - stock preview is still not a full split-worker parity proof because `/api/health` is being loaded through an unsupported default-worker path
 
-#### Homepage Section Cluster
-- Shared structural primitives now exist for:
-  - CTA targets: `src/components/sections/homepage-section-links.ts`
-  - section shell: `src/components/sections/homepage-section-shell.tsx`
-  - proof/trust strip: `src/components/sections/homepage-trust-strip.tsx`
-- Shared structure is now used across:
-  - `hero-section.tsx`
-  - `products-section.tsx`
-  - `final-cta.tsx`
-  - `sample-cta.tsx`
-  - `resources-section.tsx`
-  - `scenarios-section.tsx`
-  - `quality-section.tsx`
-  - `chain-section.tsx`
+### Source 9: Phase6 local `wrangler dev --no-bundle` viability check
+- Key points:
+  - Generated phase6 configs were exercised directly with local Wrangler commands against:
+    - `.open-next/wrangler/phase6/web.jsonc`
+    - `.open-next/wrangler/phase6/api-lead.jsonc`
+    - `.open-next/wrangler/phase6/gateway.jsonc`
+  - Commands used the same pattern:
+    - `pnpm exec wrangler dev --config ... --env preview --port ... --inspector-port ... --show-interactive-dev-session=false --no-bundle`
+  - Result:
+    - `web`, `api-lead`, and `gateway` all still failed locally
+    - errors were tooling/runtime-class failures, not repo-route mismatches:
+      - `MiniflareCoreError [ERR_RUNTIME_FAILURE]`
+      - `service core:user:tianze-website-*-preview: Uncaught Error: internal error`
+  - Additional surprising behavior:
+    - Wrangler sometimes reported `Address already in use` on explicitly chosen inspector ports while short-lived `workerd` processes appeared on those ports
+    - direct `curl` attempts to the supposedly-started worker ports still failed to connect
+  - Practical implication:
+    - `--no-bundle` does not meaningfully unlock a trustworthy local phase6 parity harness in the current toolchain
+    - the remaining blocker is now better understood as local Wrangler/Miniflare startup instability for the generated phase6 workers, not as a missing route split or an ordinary application bug
 
-### Priority 3: Real Review-Cycle Validation
-- Representative staged review cycle was exercised by temporarily staging:
-  - `src/components/sections/hero-section.tsx`
-  - `src/app/api/cache/invalidate/route.ts`
-  - `src/app/api/health/route.ts`
-  - `src/lib/cache/invalidation-policy.ts`
-  - `src/lib/cache/invalidation-guards.ts`
-  - `src/lib/api/cache-health-response.ts`
-- The second staged cycle proved the review surface is executable and reusable.
-- `pnpm review:tier-a:staged` correctly identified:
-  - `Cache invalidation + health signals`
-  - suggested review: `pnpm review:cache-health`
-- `pnpm review:clusters:staged` correctly matched:
-  - `Homepage section cluster`
-  - and ran `pnpm review:homepage-sections`
+### Source 10: Current release-gate gap after workflow review
+- Key points:
+  - `scripts/release-proof.sh` already exists, but it is not the single source of release truth:
+    - it was not exposed as a canonical `pnpm release:verify` command at the time of review
+    - it was not called by the deploy workflows at the time of review
+  - The current Cloudflare deploy workflow performs:
+    - install
+    - `build:cf` or `build:cf:phase6`
+    - deploy
+    - post-deploy health checks for `/`, `/en`, `/zh`, `/api/health`
+  - The current Cloudflare deploy workflow does **not** run the broader release-proof checks before deploy, including:
+    - locale runtime tests
+    - lead-family tests
+    - cache-health tests
+    - explicit stock-preview smoke
+  - The current Vercel workflow similarly focuses on build + deploy rather than a unified release verification chain
+  - Practical implication:
+    - A5 is still open for repo-controlled reasons even before considering upstream Cloudflare tooling gaps
+    - the missing piece is now easy to describe:
+      - one canonical release command
+      - wired into both deploy paths
+      - with Cloudflare proof split into “what stock preview can prove locally” and “what must be verified on deployed phase6 infrastructure”
 
-### Priority 4: Re-Score After Usage, Not Immediately
-- Evidence review indicates:
-  - `S3`, `R2`, and `G1` are trending upward
-  - `R3` should remain conservative
-  - `G2` remains capped by owner concentration
-- Decision:
-  - keep the numeric score unchanged in this pass
-  - update the report narrative instead of forcing another score increase
-  - treat the second staged cycle as evidence for executability, not diversification
+### Source 11: Canonical repo-side release entrypoint added
+- Key points:
+  - `package.json` now exposes:
+    - `pnpm release:verify`
+    - `pnpm test:release-smoke`
+  - `scripts/release-proof.sh` now runs a more realistic repo-owned verification chain:
+    - type check
+    - lint
+    - tier-A review
+    - cluster review
+    - locale runtime tests
+    - lead-family tests
+    - cache-health tests
+    - translation validation
+    - `build`
+    - `build:cf`
+    - targeted browser release smoke
+  - Focused verification completed locally:
+    - `bash -n scripts/release-proof.sh`
+    - package-script presence check via Node
+    - `pnpm test:release-smoke`
+    - result: `43 passed, 1 skipped`
+  - Practical implication:
+    - the repo now has a real canonical release entrypoint for repo-controlled checks
+    - A5 was still not fully closed at this stage because Cloudflare proof still needed the local-vs-deployed split made explicit
 
-### Priority 5: Low-Drift Governance
-- Canonical vs supplemental policy language was tightened.
-- Archive hygiene now explicitly points back to the canonical policy index when older files appear current.
-- Structural governance ledger now describes ownership resilience more honestly instead of over-claiming diversification.
+### Source 12: Full `release:verify` now passes locally
+- Key points:
+  - After wiring the release gate and fixing the new lint blockers it exposed, the full repo-side release command now passes locally:
+    - `pnpm release:verify`
+  - Verified path included:
+    - type check
+    - lint
+    - tier-A review
+    - cluster review
+    - locale runtime tests
+    - lead-family tests
+    - cache-health tests
+    - translation validation
+    - `build`
+    - `build:cf`
+    - targeted browser release smoke
+  - Final browser result in that run:
+    - `43 passed, 1 skipped`
+  - Important boundary:
+    - the local command still does not magically solve the Cloudflare split-worker proof gap
+    - it proves the repo-side gate is executable and valuable, not that A2 is fully closed
 
-## Validation Results
+### Source 13: Reusable post-deploy smoke script added and verified
+- Key points:
+  - Added a shared deploy-check script:
+    - `scripts/deploy/post-deploy-smoke.mjs`
+  - The script probes the same key routes across deployments:
+    - `/`
+    - `/en`
+    - `/zh`
+    - `/api/health`
+    - `/en/contact`
+    - `/zh/contact`
+    - `/invalid/contact` redirect behavior
+  - Both deploy workflows now call the shared script instead of carrying separate ad-hoc curl logic:
+    - Cloudflare workflow calls it directly against the deployment URL
+    - Vercel workflow calls it with the automation bypass header
+  - Local verification completed:
+    - initial run failed with `ECONNREFUSED` while no server was running
+    - after `pnpm start`, `node scripts/deploy/post-deploy-smoke.mjs --base-url http://127.0.0.1:3000` passed
+  - Practical implication:
+    - post-deploy route proof is now more consistent between platforms
+    - the remaining Cloudflare uncertainty is about split-worker proof depth, not whether deployed smoke checks remember to include Contact and redirect behavior
 
-### Cluster / Surface Reviews
-- `pnpm review:translation-quartet`
-  - passed
-- `pnpm review:homepage-sections`
-  - `7` files passed
-  - `32` tests passed
-- `pnpm review:cache-health`
-  - `3` files passed
-  - `9` tests passed
-- `pnpm review:locale-runtime`
-  - `4` files passed
-  - `23` tests passed
+### Source 14: Contact client identity closure for Cloudflare Server Actions
+- Key points:
+  - The real Contact lead path (`src/lib/actions/contact.ts`) was confirmed to derive both rate-limit identity and Turnstile `remoteip` from `getClientIPFromHeaders(await headers())`.
+  - The Cloudflare branch of `getClientIPFromHeaders()` intentionally failed closed because `headers()` alone does not expose `request.ip` source validation.
+  - Practical consequence before the fix:
+    - Contact Server Action submissions on Cloudflare collapsed into `0.0.0.0`,
+    - so the main shipped lead path lost real client identity for both rate limiting and Turnstile verification.
+  - Repository-side closure landed:
+    - `src/middleware.ts` now derives a normalized internal client-IP header while still in trusted request context,
+    - `src/lib/security/client-ip.ts` now trusts that middleware-derived internal header for the Cloudflare Server Action path instead of trusting raw Cloudflare headers directly,
+    - the shared header name now lives in `src/lib/security/client-ip-headers.ts`.
+  - Focused verification completed locally:
+    - `pnpm exec vitest run src/lib/security/__tests__/client-ip.test.ts src/app/__tests__/actions.test.ts src/app/__tests__/contact-integration.test.ts src/__tests__/middleware-locale-cookie.test.ts tests/unit/middleware.test.ts`
+    - result: `79/79` tests passed
+    - `pnpm exec tsc --noEmit`
+    - result: passed
+    - `pnpm build`
+    - result: passed
+    - `pnpm build:cf`
+    - result: passed
+  - Practical implication:
+    - A3 is now materially closed at the repository level,
+    - the remaining Cloudflare uncertainty has shifted back to A1/A2/A5 policy and proof-boundary work rather than Contact identity correctness.
 
-### Staged Review Flow
-- `pnpm review:tier-a:staged`
-  - passed
-- `pnpm review:clusters:staged`
-  - passed
+### Source 15: Cloudflare proof boundary encoded and rerun
+- Key points:
+  - The proof split is now explicit in repo scripts instead of staying implicit in notes:
+    - `pnpm smoke:cf:preview`
+      - stock-preview page/header/cookie/redirect proof
+      - intentionally skips `/api/health`
+    - `pnpm smoke:cf:preview:strict`
+      - same stock-preview checks plus `/api/health`
+    - `pnpm smoke:cf:deploy -- --base-url <url>`
+      - final deployed smoke including `/api/health`
+  - `scripts/release-proof.sh` now prints that Cloudflare proof split when the repo-side gate completes.
+  - Focused verification completed locally:
+    - `bash -n scripts/release-proof.sh`
+    - result: passed
+    - `pnpm smoke:cf:preview -- --base-url http://127.0.0.1:8792`
+    - result: passed
+    - `pnpm smoke:cf:preview:strict -- --base-url http://127.0.0.1:8792`
+    - result: failed only on `/api/health` returning `500`
+    - `pnpm smoke:cf:deploy -- --base-url http://127.0.0.1:3000`
+    - result: passed
+  - One false-positive gap was also closed during this rerun:
+    - the stock preview script originally compared `Expires=` timestamps in `Set-Cookie`,
+    - which caused a meaningless mismatch when only the timestamp second differed,
+    - the comparison now ignores `Expires=` and only compares behavior-relevant flags.
+  - Practical implication:
+    - the remaining Cloudflare issue is now even cleaner:
+      - stock preview is good enough to prove page/header/cookie/redirect behavior,
+      - stock preview strict mode still isolates the `/api/health` API gap,
+      - deployed smoke remains the final API/runtime proof surface.
 
-### Second Staged Review Cycle
-- A second staged review cycle was executed against a different object set:
-  - translation quartet tooling surface
-  - cache invalidation + health signals
-- Staged files included:
-  - `scripts/translation-flat-utils.js`
-  - `scripts/regenerate-flat-translations.js`
-  - `scripts/translation-sync.js`
-  - `scripts/validate-translations.js`
-  - `scripts/i18n-shape-check.js`
-  - `src/app/api/cache/invalidate/route.ts`
-  - `src/app/api/health/route.ts`
-  - `src/lib/cache/invalidation-policy.ts`
-  - `src/lib/cache/invalidation-guards.ts`
-  - `src/lib/api/cache-health-response.ts`
-  - `tests/integration/api/cache-health-contract.test.ts`
-- `pnpm review:tier-a:staged`
-  - passed
-  - correctly identified:
-    - `Translation critical path`
-    - `Cache invalidation + health signals`
-- `pnpm review:clusters:staged`
-  - passed
-  - correctly ran:
-    - `pnpm review:translation-quartet`
-    - `pnpm review:cache-health`
-- `pnpm review:cluster cache-health --staged`
-  - passed
-- `pnpm review:cluster translation-quartet --staged`
-  - initially skipped due stale pattern matching in `scripts/run-cluster-review.js`
-  - fixed by extending the dispatcher to recognize quartet tooling files
-  - rerun passed
+### Source 16: Upstream OpenNext 1.17.3 upgrade check
+- Key points:
+  - The repository was upgraded from `@opennextjs/cloudflare 1.17.1` to `1.17.3`.
+  - Upstream evidence checked:
+    - issue `#1157` describes the same `Unexpected loadManifest(/.next/server/prefetch-hints.json)` crash family that originally affected the repo,
+    - PR `#1160` was merged on 2026-03-23 and closes that issue,
+    - npm latest for `@opennextjs/cloudflare` is now `1.17.3`,
+    - unpacking the published `1.17.3` tarball shows built-in handling for:
+      - `prefetch-hints`
+      - `dynamic-css-manifest`
+      - `subresource-integrity-manifest`
+  - Local verification after the upgrade:
+    - raw upstream Cloudflare build succeeded without relying on the repo patch script
+    - stock preview page/header smoke still passed
+    - stock preview strict mode still failed only on `/api/health`
+  - Repository-side follow-up:
+    - the historical manifest patch script initially failed because the old hook point was gone,
+    - the script now exits cleanly when upstream support is already present,
+    - standard `pnpm build:cf` now passes again and reports that no local manifest patch is needed.
+  - Practical implication:
+    - the old `#1157`-style manifest crash is no longer the active blocker for this repo,
+    - upgrading to `1.17.3` did not close the remaining strict-preview `/api/health` gap,
+    - so the live decision is still about the local API-proof boundary, not about `prefetch-hints.json`.
 
-### Review-Surface Friction Found
-- Before the fix, `review:clusters:staged` and `review:cluster translation-quartet --staged` were inconsistent:
-  - wide scan matched quartet tooling files
-  - single-cluster dispatcher did not
-- Fix applied:
-  - `scripts/run-cluster-review.js` now recognizes quartet tooling files, expanded homepage shared-layer files, and cache-health helper/test files
-- Human-facing friction was also reduced in:
-  - `.claude/rules/review-checklist.md`
-  - `docs/guides/STRUCTURAL-CHANGE-CLUSTERS.md`
+## Synthesized Findings
 
-### Final Review-Surface Alignment
-- Shared registry now covers:
-  - `translation quartet`
-  - `lead API family`
-  - `homepage section cluster`
-  - `locale runtime surface`
-  - `cache invalidation + health`
-- Additional helper/shared-file coverage now includes:
-  - `src/lib/api/lead-route-response.ts`
-  - `src/lib/seo-metadata.ts`
-  - `src/lib/content-utils.ts`
-  - `src/lib/api/cache-health-response.ts`
-  - translation quartet tooling scripts
-- Targeted proof:
-  - `node scripts/review-clusters.js src/lib/api/lead-route-response.ts`
-  - `node scripts/review-clusters.js src/lib/seo-metadata.ts`
-  - `node scripts/tier-a-impact.js src/lib/api/lead-route-response.ts scripts/translation-flat-utils.js src/lib/api/cache-health-response.ts src/lib/seo-metadata.ts`
-  all matched the expected structural surfaces
+### Already Closed or Substantially Improved
+- Homepage and Contact now have meaningful no-JS HTML.
+- Desktop main navigation is now initial-HTML visible.
+- Contact fallback no longer hides the page’s core content.
+- Global client translation payload has been reduced and then reduced again.
+- Floating chat and cookie preferences now have better accessibility semantics.
 
-### Final Validation Additions
-- `pnpm review:lead-family`
-  - `2` files passed
-  - `10` tests passed
-- `pnpm review:locale-runtime`
-  - `4` files passed
-  - `23` tests passed
-- `pnpm review:cache-health`
-  - `3` files passed
-  - `9` tests passed
-- `pnpm exec vitest run tests/integration/api/health.test.ts`
-  - `1` file passed
-  - `1` test passed
-- `pnpm exec vitest run src/lib/observability/__tests__/system-observability.test.ts src/lib/lead-pipeline/__tests__/metrics.test.ts tests/integration/api/lead-family-contract.test.ts tests/integration/api/cache-health-contract.test.ts tests/integration/api/health.test.ts`
-  - `5` files passed
-  - `32` tests passed
+### Still Open as Program Work
+- Release-blocking Cloudflare parity remains open even though Contact client-IP correctness is now materially closed at the repository level and the proof split is now encoded in runnable commands.
+- Release gate and deploy gate are still governance work, not fully institutionalized.
+- Shared runtime chunk cost is still present; remaining performance work is now mostly structural and framework/runtime-oriented rather than easy application-layer waste.
+- Some edge interaction islands may still need focused accessibility review if they gain more behavior later.
+- Browser-level WhatsApp verification remains environment-dependent until a non-placeholder number is supplied in the verification target.
+- The production env contract is now substantially stronger, but the single unified release gate still remains open work because these checks are not yet gathered under one deploy-blocking command.
+- Cloudflare parity is now a cleaner problem statement:
+  - build passes,
+  - preview still fails in the default worker on `prefetch-hints.json`,
+  - separate middleware/header drift still exists even before the 500 path is fixed.
+- Cloudflare parity is cleaner again after the latest rerun:
+  - repository-controlled header/cookie drift is fixed,
+  - stock preview still fails,
+  - but the remaining failures are now split into:
+    - default-worker manifest incompatibilities on page routes,
+    - default-worker dynamic API loading that does not match the repo's split-worker intent.
+- Cloudflare parity is narrower again after the generated manifest patch:
+  - stock-preview page routes are now healthy,
+  - stock-preview API parity is still broken on `/api/health`,
+  - so the remaining blocker is now concentrated enough to guide the next decision instead of being a wide routing failure.
+- Cloudflare parity is clearer again after the phase6 no-bundle check:
+  - stock preview remains useful for proving page-route recovery and middleware drift closure,
+  - local phase6 multi-worker startup is currently blocked by Wrangler/Miniflare runtime instability,
+  - so “build a custom local harness” should not be treated as the default near-term closure path.
+- Release gating is also clearer after the workflow review:
+  - the repo already has many useful checks,
+  - but they still do not flow through one canonical deploy-blocking command,
+  - and Cloudflare proof needs to be explicitly split between local stock-preview checks and post-deploy phase6 checks.
+- Release gating is now partially improved:
+  - the canonical command exists,
+  - its targeted browser smoke has been verified,
+  - but final Cloudflare proof policy is still open.
+- Release gating is stronger again:
+  - the canonical command exists,
+  - the targeted browser smoke passes,
+  - the full command also passes locally,
+  - deploy workflows now share a reusable post-deploy route smoke,
+  - the Cloudflare proof split is now explicit in scripts,
+  - the OpenNext upgrade confirms the old manifest crash was upstream and is now effectively addressed,
+  - so the remaining work is now mainly Cloudflare support policy and the final stock-preview `/api/health` gap rather than gate viability, Contact identity correctness, or `prefetch-hints.json`.
 
-## Heavy Observability Pass
-- Added a shared system signal collector:
-  - `src/lib/observability/system-observability.ts`
-- Added a route signal helper:
-  - `src/lib/observability/api-signals.ts`
-- High-value route surfaces now record structured `api_request` signals.
-- Lead-pipeline metrics and summaries now record:
-  - `pipeline_metric`
-  - `pipeline_summary`
-- Shared signal model now supports:
-  - recent signal retention
-  - aggregate counts by `surface + kind + name`
-  - request correlation when `requestId` is available
-- Added guide:
-  - `docs/guides/SYSTEM-OBSERVABILITY.md`
+### Subagent Finding: Product and Blog Interactive Islands
+- A dedicated performance worker verified that:
+  - `BlogNewsletter` is not imported by the shipped blog routes.
+  - `ProductActions`, `InquiryDrawer`, and `ProductInquiryForm` are not imported by the shipped product routes.
+- Practical implication:
+  - No further product/blog local message-provider refactor is needed right now.
+  - The correct action is guardrail coverage so these islands do not silently re-enter shipped routes without a conscious decision.
 
-## Non-Blocking Observations
-- The previous Vitest warning about a non-top-level `vi.mock("lucide-react")` in `src/test/setup.icons.ts` has been removed by moving the mock to a true top-level form with a browser-mode fallback.
+### Planning Implication
+- The next plan must distinguish:
+  - release blockers,
+  - critical-path structural tasks,
+  - parallelizable implementation tasks,
+  - verification-only tasks for already-fixed areas,
+  - governance tasks that should not block all other work but must land before the program is truly “closed.”
+- The next highest-value release work after A4 is now A1/A2/A5, because A3 is materially closed at the repository level and no longer the weakest link on the release-critical path.
+- The A2 path now has a durable local reproducer (`pnpm smoke:cf:preview` against a running preview), which means the next slice can focus on either:
+  - a repository-level workaround/patch for the OpenNext manifest loader gap, or
+  - formalizing Cloudflare as non-release-grade until upstream compatibility is resolved.
+- The A2 path now also has a sharper architecture split:
+  - stock preview proves there is still a serious Cloudflare local-compatibility problem,
+  - but it does not yet prove end-to-end behavior for the repo's split-worker deployment shape,
+  - so a trustworthy release gate cannot stop at `opennextjs-cloudflare preview` if phase6 remains the intended deployment model.
+- The next highest-value planning move is no longer another local phase6 startup experiment.
+  - The evidence now supports:
+    - deciding the supported Cloudflare release posture,
+    - defining the exact local-vs-deployed Cloudflare proof split,
+    - and keeping the repo-controlled checks tied to one release gate.
 
-## Current Mainline Judgment
-- The repository has materially advanced all five report priorities.
-- The strongest new evidence is not only more rules, but also:
-  - shared implementation layers
-  - staged review entrypoints that now execute real cluster checks
-  - stable request observability headers on high-value write and health surfaces
-  - clearer canonical-source boundaries
-- The main unresolved structural risk is still:
-  - ownership concentration
+## Active Execution Log
 
-## Review-Surface Friction
-- The main documentation friction was entrypoint selection, not command availability.
-- Clarified usage now distinguishes:
-  - `pnpm review:tier-a:staged` for staged diffs that hit Tier A paths
-  - `pnpm review:clusters:staged` for the broad staged structural-cluster pass
-  - `pnpm review:cluster <name> --staged` for a known single-cluster scope
+### Current Main-Thread Focus
+- Recently completed:
+  - mobile menu trigger dialog semantics on the pre-hydration island,
+  - translated mobile language heading passed from the server-rendered layout into the mobile island,
+  - cookie preferences Escape handling hardened in the production browser path,
+  - browser-level regression coverage for cookie preferences and mobile-navigation localization,
+  - delayed homepage top-loader loading,
+  - attribution bootstrap gating so non-attribution visits avoid loading the UTM module.
+  - removed the unused global toaster from the layout path after confirming there are no real toast producers in the current shipped code.
+  - deleted the now-dead toaster implementation files and removed the unused `sonner` dependency.
+  - replaced the old site-config-only production validation with a real runtime fail-fast contract for the release-critical Contact/security path.
+  - wired Cloudflare and Vercel build workflows to run in explicit production mode so the stricter runtime contract applies on real deploy builds.
+  - reran the Cloudflare build/preview path with a production-style env contract and confirmed that runtime parity is still broken on `prefetch-hints.json` loading in the default worker.
+  - added `scripts/cloudflare/preview-smoke.mjs` plus `pnpm smoke:cf:preview` so Cloudflare preview failures are now reproducible as a single command.
+  - fixed the middleware-controlled Cloudflare parity drift for locale cookies and leaked internal middleware headers, and verified the updated tests.
+  - reran the Cloudflare preview path after those fixes and confirmed that the remaining 500s now break into:
+    - repeated generated-handler manifest incompatibilities on page routes,
+    - dynamic API-route loading inside the default worker for `/api/health`.
+  - generated the phase6 multi-worker configs and confirmed that they represent a different, closer-to-deployed routing shape than the stock single-worker preview path.
+  - broadened the generated-handler patch so unexpected manifest-like lookups in the default worker return `{}` instead of crashing page routes during stock preview.
+  - verified a fresh stock preview where `/en`, `/zh`, `/en/contact`, and `/zh/contact` all returned `200`, and the smoke script failed only on `/api/health`.
+  - ran direct phase6 `wrangler dev --no-bundle` experiments against generated `web`, `api-lead`, and `gateway` configs; all still failed locally with runtime-level errors rather than route-level mismatches.
+  - reviewed current deploy workflows and confirmed that the single release gate is still a repo gap, not just an upstream Cloudflare limitation.
+  - added `pnpm release:verify` and `pnpm test:release-smoke` so release verification now has a single repo entrypoint instead of remaining fully fragmented.
+  - verified the new release-smoke bundle locally: `43 passed, 1 skipped`.
+  - fixed the lint blockers exposed by the first full gate run and reran `pnpm release:verify` successfully to prove the new entrypoint works end-to-end.
+  - added a reusable post-deploy smoke script and verified it locally against a running production server.
+  - tried and then reverted an `edge` runtime workaround on `/api/health` after `pnpm build` proved it is incompatible with the repo's current `cacheComponents` setup.
+  - closed the repository-level Contact-on-Cloudflare identity gap by deriving an internal trusted client-IP header in middleware and consuming that internal header in the Contact Server Action path.
+  - encoded the Cloudflare proof split into package scripts and smoke behavior, then verified:
+    - stock-preview default proof passes,
+    - stock-preview strict proof still fails only on `/api/health`,
+    - deployed smoke alias passes.
+  - upgraded `@opennextjs/cloudflare` to `1.17.3`, confirmed that the old manifest crash family is now handled upstream, and adjusted the repo patch script so standard `build:cf` works cleanly again.
+- Next likely performance target:
+  - stop treating `theme` and `cookie-consent` as “easy next cuts”;
+  - either shift to a more deliberate high-risk review of those two global feature chains, or move the next execution slice back to release-truth and governance blockers.
+  - after the 1.17.3 upgrade check, the strongest next move is still the remaining release-truth path: Cloudflare support decision, final documentation/governance of which proof layers are release-blocking, and closure or explicit downgrade of the remaining stock-preview `/api/health` gap.
+
+### Active Sub-Agent Streams
+- Browser regression worker output, now integrated:
+  - stable Playwright coverage now lives inside `tests/e2e/navigation.spec.ts` for cookie preferences keyboard flow and mobile-navigation localization,
+  - WhatsApp browser verification was turned into a conditional check because the runtime feature gate suppresses the launcher when placeholder configuration is active.
+- Interaction-spec prototype:
+  - a standalone `tests/e2e/interaction-accessibility.spec.ts` was attempted,
+  - it was removed because it overlapped the stable navigation suite and stayed too timing-sensitive against deferred UI surfaces.
+- Read-only accessibility review, now folded into implementation:
+  - mobile navigation still needed explicit dialog semantics on the pre-hydration trigger,
+  - the mobile language heading needed real localization instead of hard-coded English,
+  - cookie preferences were acceptable as a non-modal banner surface, with stable verification centered on focus return rather than modal-style trapping.
+- Performance attribution stream:
+  - attribution is complete for the current homepage payload,
+  - next useful work is trimming or replacing optional app-owned layout islands instead of chasing framework-floor chunks.

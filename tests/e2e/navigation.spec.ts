@@ -228,10 +228,9 @@ test.describe("Navigation System", () => {
       await expect(desktopNav).not.toBeVisible();
 
       // Mobile menu button should be visible
-      const mobileMenuButton = page.getByRole("button", {
-        name: "Toggle mobile menu",
-      });
+      const mobileMenuButton = getHeaderMobileMenuButton(page);
       await expect(mobileMenuButton).toBeVisible();
+      await expect(mobileMenuButton).toHaveAttribute("aria-haspopup", "dialog");
 
       // Verify the menu trigger still renders an icon even after moving away
       // from lucide-react for the lightweight pre-hydration button.
@@ -240,9 +239,7 @@ test.describe("Navigation System", () => {
     });
 
     test("should open and close mobile navigation sheet", async ({ page }) => {
-      const mobileMenuButton = page.getByRole("button", {
-        name: "Toggle mobile menu",
-      });
+      const mobileMenuButton = getHeaderMobileMenuButton(page);
 
       // Open mobile menu
       await mobileMenuButton.click();
@@ -262,6 +259,7 @@ test.describe("Navigation System", () => {
         const link = mobileNavSheet.getByRole("link", { name: linkText });
         await expect(link).toBeVisible();
       }
+      await expect(mobileNavSheet.getByText("Select Language")).toBeVisible();
 
       // Close menu by clicking close button
       const closeButton = mobileNavSheet.getByRole("button", {
@@ -278,12 +276,30 @@ test.describe("Navigation System", () => {
       await expect(mobileNavSheet).not.toBeVisible();
     });
 
+    test("should return focus to the trigger after closing the mobile sheet with Escape", async ({
+      page,
+    }) => {
+      const mobileMenuButton = getHeaderMobileMenuButton(page);
+
+      await mobileMenuButton.focus();
+      await expect(mobileMenuButton).toBeFocused();
+
+      await page.keyboard.press("Enter");
+
+      const mobileNavSheet = page.getByRole("dialog", {
+        name: /mobile navigation/i,
+      });
+      await expect(mobileNavSheet).toBeVisible();
+
+      await page.keyboard.press("Escape");
+      await expect(mobileNavSheet).not.toBeVisible();
+      await expect(mobileMenuButton).toBeFocused();
+    });
+
     test("should navigate from mobile menu and auto-close", async ({
       page,
     }) => {
-      const mobileMenuButton = page.getByRole("button", {
-        name: "Toggle mobile menu",
-      });
+      const mobileMenuButton = getHeaderMobileMenuButton(page);
       await mobileMenuButton.click();
 
       const mobileNavSheet = page.getByRole("dialog", {
@@ -307,9 +323,7 @@ test.describe("Navigation System", () => {
     });
 
     test("should support touch interactions", async ({ page }) => {
-      const mobileMenuButton = page.getByRole("button", {
-        name: "Toggle mobile menu",
-      });
+      const mobileMenuButton = getHeaderMobileMenuButton(page);
 
       // Simulate touch tap with graceful fallback when touch is not available
       try {
@@ -478,8 +492,8 @@ test.describe("Navigation System", () => {
         const mobileMenuButton = getHeaderMobileMenuButton(page);
         await expect(mobileMenuButton).toBeVisible();
         await expect(mobileMenuButton).toHaveAttribute(
-          "aria-label",
-          "Toggle mobile menu",
+          "aria-haspopup",
+          "dialog",
         );
         await mobileMenuButton.click();
         const mobileNavSheet = page.getByRole("dialog", {
@@ -514,13 +528,60 @@ test.describe("Navigation System", () => {
           name: /skip to main content/i,
         });
         if (await skipLink.isVisible()) {
-          await expect(skipLink).toHaveAttribute("href", "#main");
+          await expect(skipLink).toHaveAttribute("href", "#main-content");
         }
 
         // Verify heading structure
         const mainHeading = page.getByRole("heading", { level: 1 });
         await expect(mainHeading).toBeVisible();
       }
+    });
+
+    test("should restore focus after closing cookie preferences with Escape", async ({
+      page,
+    }) => {
+      const cookieBanner = page.getByRole("dialog", { name: /cookie/i });
+      await expect(cookieBanner).toBeVisible();
+
+      const manageButton = cookieBanner.getByRole("button", {
+        name: /manage/i,
+      });
+      await expect(manageButton).toHaveAttribute("aria-haspopup", "dialog");
+
+      await manageButton.focus();
+      await page.keyboard.press("Enter");
+
+      const closeButton = cookieBanner.getByRole("button", { name: /close/i });
+      await expect(closeButton).toBeFocused();
+
+      await page.keyboard.press("Escape");
+      await expect(closeButton).not.toBeVisible();
+      await expect(manageButton).toBeFocused();
+    });
+
+    test("should restore focus to the WhatsApp trigger after closing chat with Escape", async ({
+      page,
+    }) => {
+      const chatTrigger = page.locator(
+        'button[aria-controls="whatsapp-chat-dialog"]',
+      );
+
+      const isVisible = await chatTrigger.isVisible().catch(() => false);
+      test.skip(
+        !isVisible,
+        "WhatsApp trigger is not enabled in this environment",
+      );
+
+      await expect(chatTrigger).toHaveAttribute("aria-haspopup", "dialog");
+      await chatTrigger.focus();
+      await page.keyboard.press("Enter");
+
+      const chatDialog = page.locator("#whatsapp-chat-dialog");
+      await expect(chatDialog).toBeVisible();
+
+      await page.keyboard.press("Escape");
+      await expect(chatDialog).not.toBeVisible();
+      await expect(chatTrigger).toBeFocused();
     });
 
     test("should work with high contrast mode", async ({ page }) => {

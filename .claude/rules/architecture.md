@@ -85,6 +85,23 @@ Notes:
 
 **Compatibility record**: See `docs/known-issues/middleware-to-proxy-migration.md`
 
+## Cloudflare Verification Policy
+
+> [2026-03-26] Decision — local stock preview cannot faithfully reproduce `/api/health` under the split-worker topology. The failure is an upstream OpenNext/Wrangler local-preview limitation, not an application defect.
+
+**Cloudflare is the primary deployment platform.** Verification is split into two layers:
+
+| Layer | Scope | Command | Release-blocking? |
+|-------|-------|---------|-------------------|
+| **Local preview** | Pages, redirects, cookies, headers, middleware behavior | `pnpm smoke:cf:preview` | Yes |
+| **Deployed smoke** | API routes (`/api/health`, Server Actions) | `node scripts/deploy/post-deploy-smoke.mjs --base-url <url>` | Yes (post-deploy) |
+
+- `pnpm smoke:cf:preview:strict` (includes `/api/health` in local preview) is a **diagnostic tool**, not a release gate. Its failure does not block releases.
+- Final API proof happens **only after real Cloudflare deployment**, via the post-deploy smoke in the deploy workflow.
+- If post-deploy smoke fails, rollback to the previous deployment.
+
+**Upstream reference**: [opennextjs/opennextjs-cloudflare#1157](https://github.com/opennextjs/opennextjs-cloudflare/issues/1157), [#1082](https://github.com/opennextjs/opennextjs-cloudflare/issues/1082)
+
 ## Route Deletion Checklist
 
 When removing any route (page), grep and clean ALL of these:

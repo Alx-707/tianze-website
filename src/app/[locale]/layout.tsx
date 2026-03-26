@@ -1,19 +1,19 @@
 import { generateLocaleMetadata } from "@/app/[locale]/layout-metadata";
 import { generatePageStructuredData } from "@/app/[locale]/layout-structured-data";
 import "@/app/globals.css";
-import { Suspense, type ReactNode } from "react";
+import { type ReactNode } from "react";
 import Script from "next/script";
 import { notFound } from "next/navigation";
 import { NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { getFontClassNames } from "@/app/[locale]/layout-fonts";
 import { loadCompleteMessages } from "@/lib/load-messages";
+import { pickClientMessages } from "@/lib/i18n/client-messages";
 import { generateJSONLD } from "@/lib/structured-data";
 import { AttributionBootstrap } from "@/components/attribution-bootstrap";
 import { LazyCookieConsentIsland } from "@/components/cookie/lazy-cookie-consent-island";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/layout/header";
-import { LazyToaster } from "@/components/lazy/lazy-toaster";
 import { LazyTopLoader } from "@/components/lazy/lazy-top-loader";
 import { ThemeProvider } from "@/components/theme-provider";
 import { LazyThemeSwitcher } from "@/components/ui/lazy-theme-switcher";
@@ -22,6 +22,7 @@ import { getAppConfig } from "@/config/app";
 import { FOOTER_COLUMNS, FOOTER_STYLE_TOKENS } from "@/config/footer-links";
 import { SITE_CONFIG, isWhatsAppConfigured } from "@/config/paths/site-config";
 import { coerceLocale, isLocale } from "@/i18n/locale-utils";
+import { mainNavigation } from "@/lib/navigation";
 
 // Client analytics are rendered as an island to avoid impacting LCP
 
@@ -37,49 +38,6 @@ interface AsyncLocaleLayoutContentProps {
   children: ReactNode;
 }
 
-function LayoutFallback({ locale }: { locale: "en" | "zh" }) {
-  const loadingLabel = locale === "zh" ? "页面加载中" : "Loading page";
-  const supportLabel =
-    locale === "zh" ? "工业弯管与管件解决方案" : "Industrial pipe systems";
-
-  return (
-    <div
-      aria-label={loadingLabel}
-      className="min-h-screen bg-background text-foreground"
-      data-testid="layout-fallback"
-      role="status"
-    >
-      <div className="mx-auto flex min-h-screen max-w-7xl flex-col px-6 py-10 md:px-8 md:py-12">
-        <div className="flex items-center justify-between border-b border-border/15 pb-5">
-          <div>
-            <p className="text-xs font-medium uppercase tracking-[0.24em] text-muted-foreground">
-              Tianze Pipe
-            </p>
-            <p className="mt-2 text-sm text-muted-foreground">{supportLabel}</p>
-          </div>
-          <div className="h-9 w-24 rounded-full border border-border/30 bg-muted/40" />
-        </div>
-
-        <div className="flex flex-1 items-center">
-          <div className="max-w-2xl space-y-4">
-            <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
-              {loadingLabel}
-            </p>
-            <div className="space-y-3">
-              <div className="h-10 w-full max-w-xl rounded bg-muted/60" />
-              <div className="h-10 w-[82%] max-w-lg rounded bg-muted/45" />
-            </div>
-            <div className="space-y-2 pt-2">
-              <div className="h-4 w-full max-w-2xl rounded bg-muted/40" />
-              <div className="h-4 w-[88%] max-w-xl rounded bg-muted/30" />
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 async function AsyncLocaleLayoutContent({
   locale,
   children,
@@ -93,7 +51,14 @@ async function AsyncLocaleLayoutContent({
   // JSON-LD scripts are data-only and don't require nonce for CSP compliance.
   // For client-side scripts that need nonce, consider using a dynamic island component.
 
-  const [tFooter, tNavigation, messages, structuredData] = await Promise.all([
+  const [
+    tFooter,
+    tNavigation,
+    tAccessibility,
+    tLanguage,
+    messages,
+    structuredData,
+  ] = await Promise.all([
     getTranslations({
       locale,
       namespace: "footer",
@@ -102,6 +67,14 @@ async function AsyncLocaleLayoutContent({
       locale,
       namespace: "navigation",
     }),
+    getTranslations({
+      locale,
+      namespace: "accessibility",
+    }),
+    getTranslations({
+      locale,
+      namespace: "language",
+    }),
     // Load complete messages for root provider (eliminates need for nested providers)
     loadCompleteMessages(locale),
     generatePageStructuredData(locale),
@@ -109,6 +82,15 @@ async function AsyncLocaleLayoutContent({
 
   const footerSystemStatus = tFooter("systemStatus");
   const contactSalesLabel = tNavigation("contactSales");
+  const openMenuLabel = tAccessibility("openMenu");
+  const closeMenuLabel = tAccessibility("closeMenu");
+  const mobileLanguageLabel = tLanguage("selectLanguage");
+  const mainNavItems = mainNavigation.map((item) => ({
+    key: item.key,
+    href: item.href,
+    label: tNavigation(item.translationKey.replace(/^navigation\./, "")),
+  }));
+  const clientMessages = pickClientMessages(messages);
   const { organizationData, websiteData } = structuredData;
 
   return (
@@ -133,7 +115,7 @@ async function AsyncLocaleLayoutContent({
           __html: generateJSONLD(websiteData),
         }}
       />
-      <NextIntlClientProvider locale={locale} messages={messages}>
+      <NextIntlClientProvider locale={locale} messages={clientMessages}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           {/* P1-1 Fix: Single attribution initialization for UTM tracking */}
           <AttributionBootstrap />
@@ -142,10 +124,19 @@ async function AsyncLocaleLayoutContent({
           <LazyTopLoader />
 
           {/* 导航栏 */}
-          <Header locale={locale} contactSalesLabel={contactSalesLabel} />
+          <Header
+            locale={locale}
+            contactSalesLabel={contactSalesLabel}
+            openMenuLabel={openMenuLabel}
+            closeMenuLabel={closeMenuLabel}
+            mobileLanguageLabel={mobileLanguageLabel}
+            mainNavItems={mainNavItems}
+          />
 
           {/* 主要内容 */}
-          <main className="flex-1">{children}</main>
+          <main id="main-content" className="flex-1">
+            {children}
+          </main>
 
           {/* 页脚：使用新 Footer 组件与配置数据，附加主题切换与状态插槽 */}
           <Footer
@@ -160,9 +151,6 @@ async function AsyncLocaleLayoutContent({
               <LazyThemeSwitcher data-testid="footer-theme-toggle" />
             }
           />
-
-          {/* Toast 消息容器 - P1 优化：懒加载，减少 vendors chunk */}
-          <LazyToaster />
 
           {showWhatsAppButton && (
             <LazyWhatsAppButton number={SITE_CONFIG.contact.whatsappNumber} />
@@ -196,6 +184,8 @@ export default async function LocaleLayout({
   const disableReactScan =
     disableDevTools || process.env.NEXT_PUBLIC_DISABLE_REACT_SCAN === "true";
   const shouldLoadDevScripts = process.env.NODE_ENV === "development";
+  const skipToContentLabel =
+    typedLocale === "zh" ? "跳转到主要内容" : "Skip to main content";
 
   return (
     <html
@@ -204,6 +194,9 @@ export default async function LocaleLayout({
       suppressHydrationWarning
     >
       <body className="flex min-h-screen flex-col antialiased">
+        <a href="#main-content" className="skip-link">
+          {skipToContentLabel}
+        </a>
         {/* Dev-only scripts: never loaded in production (NODE_ENV gate).
             SRI omitted intentionally — versioned CDN URLs would break on update if integrity drifts.
             Security note: these scripts have zero production attack surface. */}
@@ -233,11 +226,9 @@ export default async function LocaleLayout({
             )}
           </>
         )}
-        <Suspense fallback={<LayoutFallback locale={typedLocale} />}>
-          <AsyncLocaleLayoutContent locale={typedLocale}>
-            {children}
-          </AsyncLocaleLayoutContent>
-        </Suspense>
+        <AsyncLocaleLayoutContent locale={typedLocale}>
+          {children}
+        </AsyncLocaleLayoutContent>
       </body>
     </html>
   );

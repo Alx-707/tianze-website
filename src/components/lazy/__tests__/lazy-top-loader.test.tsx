@@ -7,8 +7,17 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   IDLE_CALLBACK_FALLBACK_DELAY,
   IDLE_CALLBACK_TIMEOUT_LONG,
+  THIRTY_SECONDS_MS,
 } from "@/constants/time";
 import { LazyTopLoader } from "../lazy-top-loader";
+
+const { mockPathname } = vi.hoisted(() => ({
+  mockPathname: vi.fn(),
+}));
+
+vi.mock("next/navigation", () => ({
+  usePathname: mockPathname,
+}));
 
 // Mock next/dynamic
 vi.mock("next/dynamic", () => ({
@@ -49,6 +58,7 @@ describe("LazyTopLoader", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.useFakeTimers();
+    mockPathname.mockReturnValue("/en/about");
 
     // Mock requestIdleCallback
     mockRequestIdleCallback = vi.fn(
@@ -114,6 +124,28 @@ describe("LazyTopLoader", () => {
       expect(loader).toHaveAttribute("data-color", "var(--primary)");
       expect(loader).toHaveAttribute("data-height", "2");
       expect(loader).toHaveAttribute("data-show-spinner", "false");
+    });
+
+    it("does not render on the homepage after the idle timeout alone", async () => {
+      mockPathname.mockReturnValue("/en");
+      render(<LazyTopLoader />);
+
+      await act(async () => {
+        vi.advanceTimersByTime(IDLE_CALLBACK_TIMEOUT_LONG);
+      });
+
+      expect(screen.queryByTestId("top-loader")).not.toBeInTheDocument();
+    });
+
+    it("renders on the homepage only after the long homepage delay elapses", async () => {
+      mockPathname.mockReturnValue("/en");
+      render(<LazyTopLoader />);
+
+      await act(async () => {
+        vi.advanceTimersByTime(THIRTY_SECONDS_MS);
+      });
+
+      expect(screen.getByTestId("top-loader")).toBeInTheDocument();
     });
   });
 
