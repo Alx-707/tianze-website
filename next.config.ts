@@ -33,6 +33,9 @@ const nextConfig: NextConfig = {
       "./tests/e2e/.playwright/**",
       "./playwright-report/**",
       "./.playwright/**",
+      // Exclude @vercel/og (resvg.wasm + yoga.wasm + edge runtime) from server bundle.
+      // Not used in this project — saves ~2.2MB from Cloudflare Worker bundle.
+      "./node_modules/next/dist/compiled/@vercel/og/**",
     ],
   },
 

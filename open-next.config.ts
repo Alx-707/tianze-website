@@ -52,6 +52,8 @@ const splitFunctions: Record<string, SplittedFunctionOptions> = {
 };
 
 cloudflareConfig.functions = splitFunctions;
+// OpenNext minifier crashes with pnpm symlink structure (ENOENT on .pnpm/node_modules/).
+// Keep disabled until upstream fix lands. Bundle size relies on paid Workers plan (10MB compressed).
 cloudflareConfig.default.minify = false;
 
 export default cloudflareConfig;
