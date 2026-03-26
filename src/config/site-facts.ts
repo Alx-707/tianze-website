@@ -29,7 +29,7 @@ import { SITE_CONFIG } from "@/config/paths/site-config";
 export interface CompanyInfo {
   name: string;
   established: number;
-  employees?: number;
+  employees: number;
   location: {
     country: string;
     city: string;
@@ -60,7 +60,7 @@ export interface Certification {
 }
 
 export interface BusinessStats {
-  exportCountries?: number;
+  exportCountries: number;
   annualCapacity?: string;
   clientsServed?: number;
   onTimeDeliveryRate?: number;
