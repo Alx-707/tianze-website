@@ -79,7 +79,7 @@ const DEFAULT_FEATURES: FeatureItem[] = [
     icon: Globe,
     titleKey: "features.i18n.title",
     descriptionKey: "features.i18n.description",
-    badge: "100+",
+    badge: `${siteFacts.stats.exportCountries}+`,
   },
   {
     icon: Palette,

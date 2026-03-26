@@ -17,6 +17,7 @@ Catches correctness bugs, security issues, and convention violations that tests 
 ```bash
 git diff main...HEAD > /tmp/pr-review-diff.patch
 git diff >> /tmp/pr-review-diff.patch
+git diff --cached >> /tmp/pr-review-diff.patch
 git diff main...HEAD --stat > /tmp/pr-review-files.txt
 ```
 

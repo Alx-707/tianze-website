@@ -79,6 +79,11 @@ describe("Feature: OEM Custom Manufacturing Page", () => {
     expect(screen.getByText("standards.title")).toBeInTheDocument();
   });
 
+  it("renders FAQ section", async () => {
+    await renderPage();
+    expect(screen.getByTestId("faq-section")).toBeInTheDocument();
+  });
+
   it("CTA links to /contact", async () => {
     await renderPage();
     const ctaLink = screen.getByRole("link", { name: /cta\.button/i });
