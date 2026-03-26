@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { generateMetadataForPath, type Locale } from "@/lib/seo-metadata";
+import { siteFacts } from "@/config/site-facts";
 import { FaqSection } from "@/components/sections/faq-section";
 import { Link } from "@/i18n/routing";
 import { generateLocaleStaticParams } from "@/app/[locale]/generate-static-params";
@@ -196,7 +197,9 @@ export default async function BendingMachinesPage({ params }: PageProps) {
       label: t("capability.monthlyCapacity.label"),
     },
     {
-      value: t("capability.countries.value"),
+      value: t("capability.countries.value", {
+        countries: siteFacts.stats.exportCountries,
+      }),
       label: t("capability.countries.label"),
     },
     {

@@ -13,6 +13,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { siteFacts } from "@/config/site-facts";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -145,7 +146,7 @@ const COLOR_CLASSES: Record<ArchitectureColor, string> = {
 };
 
 interface TranslationFn {
-  (key: string): string;
+  (key: string, values?: Record<string, string | number>): string;
 }
 
 function FeatureGrid({
@@ -170,7 +171,11 @@ function FeatureGrid({
                 <Badge variant="secondary">{feature.badge}</Badge>
               </div>
               <CardTitle className="text-xl">{t(feature.titleKey)}</CardTitle>
-              <CardDescription>{t(feature.descriptionKey)}</CardDescription>
+              <CardDescription>
+                {t(feature.descriptionKey, {
+                  countries: siteFacts.stats.exportCountries,
+                })}
+              </CardDescription>
             </CardHeader>
           </Card>
         );

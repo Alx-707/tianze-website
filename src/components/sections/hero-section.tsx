@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { DesktopDecorationGate } from "@/components/grid/desktop-decoration-gate";
 import { HeroGuideOverlay } from "@/components/grid";
 import { Link } from "@/i18n/routing";
+import { siteFacts } from "@/config/site-facts";
 import { HOMEPAGE_SECTION_LINKS } from "@/components/sections/homepage-section-links";
 import { HomepageTrustStrip } from "@/components/sections/homepage-trust-strip";
 
@@ -42,7 +43,11 @@ export async function HeroSection() {
       <div className="relative z-[1] mx-auto grid max-w-[1080px] grid-cols-1 items-center gap-12 md:grid-cols-2">
         {/* Left column — Copy */}
         <div className="flex flex-col">
-          <HeroEyebrow text={t("hero.eyebrow")} />
+          <HeroEyebrow
+            text={t("hero.eyebrow", {
+              established: siteFacts.company.established,
+            })}
+          />
 
           <h1 className="hero-stagger-2 mt-4 text-[36px] font-extrabold leading-[1.1] tracking-[-0.03em] md:text-[48px] md:leading-[1.0] md:tracking-[-0.05em]">
             {t("hero.title")}
@@ -70,11 +75,15 @@ export async function HeroSection() {
             className="hero-stagger-5 mt-7 border-t border-border-light pt-5 font-mono text-[13px] text-muted-foreground"
             items={[
               {
-                value: t("hero.proof.est"),
+                value: t("hero.proof.est", {
+                  established: siteFacts.company.established,
+                }),
                 label: t("hero.proof.estLabel"),
               },
               {
-                value: t("hero.proof.countries"),
+                value: t("hero.proof.countries", {
+                  countries: siteFacts.stats.exportCountries,
+                }),
                 label: t("hero.proof.countriesLabel"),
               },
               {
