@@ -36,7 +36,7 @@ git diff main...HEAD --stat > /tmp/pr-review-files.txt
 The `<review_prompt>`:
 
 ```
-You are performing an independent code review of recent changes in this repository.
+You are a senior engineer performing an independent code review. Your job is NOT just to find bugs — it is to evaluate whether these changes make the project better or worse.
 
 Step 1: Understand context
 - Read CLAUDE.md and .claude/rules/*.md for project conventions
@@ -47,11 +47,26 @@ Step 2: Understand changes
 - The changed files list is in /tmp/pr-review-files.txt
 - Read all modified/added files in the workspace for full context
 
-Step 3: Review for these dimensions (skip irrelevant ones):
+Step 3: Approach review (most important first)
+
+## Is the approach right?
+Before looking for bugs, ask: is this the right way to solve the problem?
+- Does the change address root cause or just patch symptoms?
+- Will this make the codebase more or less maintainable in 6 months?
+- Are there simpler alternatives that achieve the same goal?
+- Does the change create inconsistencies with how similar things work elsewhere in the codebase?
+Only flag this if you have a concrete better alternative — not vague "could be improved."
+
+## Cross-file consistency
+Look beyond the diff. Read the FULL files that were changed, plus related files.
+- Do values, labels, or data that appear in multiple places stay consistent?
+- If a constant was changed in one place, was it updated everywhere?
+- Do new components follow the same patterns as existing siblings?
 
 ## Correctness
 - Logic errors, off-by-one, null/undefined handling
 - API contracts and type safety
+- ICU/i18n: do all translation strings with placeholders receive values?
 
 ## Security
 - Input validation, auth issues, injection vulnerabilities
@@ -60,10 +75,6 @@ Step 3: Review for these dimensions (skip irrelevant ones):
 ## Test Coverage
 - Untested critical paths or edge cases
 - Tests must verify behavior (href, navigation), not just presence
-
-## Code Quality
-- Maintainability, readability, modularity
-- Consistency with project patterns
 
 ## Project Conventions
 - Check against .claude/rules/ (Server Components first, i18n required, no any, etc.)
@@ -80,6 +91,8 @@ If issues need fixing, end with: VERDICT: REVISE
 
 | Category | Default Action |
 |----------|---------------|
+| Wrong approach / architectural concern | **Flag to user** — this is a direction decision |
+| Cross-file inconsistency | **Must fix** — these ship visible contradictions |
 | Bug / correctness error | **Must fix** |
 | Security vulnerability (critical/high) | **Must fix** |
 | Security vulnerability (medium/low) | **Evaluate** |
@@ -113,8 +126,11 @@ Report a summary:
 
 ## Relationship to Other Reviews
 
-| Review | What it checks | When |
-|--------|---------------|------|
-| `/plan-review` | Is the plan sound? (direction) | Before TDD |
-| `/review` (this) | Is the code correct? (result) | After TDD, before `/pr` |
-| Cloud reviews (CodeRabbit, Gemini) | External perspective | After PR created |
+| Review | What it checks | Strength | Blind spot |
+|--------|---------------|----------|------------|
+| `/plan-review` | Is the plan sound? (direction) | Catches architectural errors before code is written | Can't verify runtime behavior |
+| `/review` (this) | Is the approach right + is the code correct? | Deep data-flow tracing, approach evaluation | Focused on diff; may miss consistency in untouched files |
+| Cloud reviews (CodeRabbit) | Full-file semantic consistency | Catches cross-file contradictions (e.g. badge vs description) | Shallow — flags patterns, doesn't trace logic |
+| Cloud reviews (Gemini) | Type safety patterns | Good at spotting repeated type issues | Repetitive; low signal-to-noise on project conventions |
+
+Three layers complement each other. None is sufficient alone.
