@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import enCritical from "@messages/en/critical.json";
 import zhCritical from "@messages/zh/critical.json";
 import { SITE_CONFIG, type Locale, type PageType } from "@/config/paths";
+import { siteFacts } from "@/config/site-facts";
 import { ONE } from "@/constants";
 import { routing } from "@/i18n/routing-config";
 import {
@@ -47,6 +48,20 @@ const SEO_TRANSLATIONS: Record<Locale, SEOMessages> = {
 
 function resolveLocale(locale: Locale): Locale {
   return locale === "zh" ? "zh" : FALLBACK_LOCALE;
+}
+
+/** Replace ICU-style {placeholders} with siteFacts values in SEO strings. */
+const SEO_INTERPOLATION_MAP: Record<string, string | number> = {
+  established: siteFacts.company.established,
+  countries: siteFacts.stats.exportCountries,
+  employees: siteFacts.company.employees,
+};
+
+function interpolateSeoString(text: string): string {
+  return text.replace(/\{(\w+)\}/g, (match, key: string) => {
+    const value = SEO_INTERPOLATION_MAP[key];
+    return value !== undefined ? String(value) : match;
+  });
 }
 
 function normalizePath(path: string): string {
@@ -136,9 +151,12 @@ function pickTranslatedField(options: TranslationFieldOptions): string {
 
   const candidate = override ?? pageValue ?? rootValue ?? defaultValue;
 
-  return typeof candidate === "string" && candidate.trim().length > 0
-    ? candidate
-    : defaultValue;
+  const resolved =
+    typeof candidate === "string" && candidate.trim().length > 0
+      ? candidate
+      : defaultValue;
+
+  return interpolateSeoString(resolved);
 }
 
 /**
