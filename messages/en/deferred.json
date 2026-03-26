@@ -464,7 +464,7 @@
       },
       "exportExperience": {
         "question": "How long have you been exporting?",
-        "answer": "Tianze has been manufacturing PVC conduit products since 2018 and currently exports to over 20 countries across:\n\n- North America: Schedule 40/80 conduit per ASTM D1785\n- Oceania: AS/NZS 61386 compliant conduit for Australia and New Zealand\n- Middle East & Asia: IEC 61386 conduit systems\n- Latin America: NOM-compliant products for Mexico and regional markets\n\nOur team includes dedicated export staff who handle documentation, customs requirements, and logistics coordination. We ship via major Chinese ports (Lianyungang, Shanghai, Ningbo) with experience in both FCL and LCL arrangements."
+        "answer": "Tianze has been manufacturing PVC conduit products since {established} and currently exports to over {countries} countries across:\n\n- North America: Schedule 40/80 conduit per ASTM D1785\n- Oceania: AS/NZS 61386 compliant conduit for Australia and New Zealand\n- Middle East & Asia: IEC 61386 conduit systems\n- Latin America: NOM-compliant products for Mexico and regional markets\n\nOur team includes dedicated export staff who handle documentation, customs requirements, and logistics coordination. We ship via major Chinese ports (Lianyungang, Shanghai, Ningbo) with experience in both FCL and LCL arrangements."
       }
     }
   },
@@ -581,7 +581,7 @@
         "label": "Fittings per Month"
       },
       "countries": {
-        "value": "20+",
+        "value": "{countries}+",
         "label": "Countries Served"
       },
       "experience": {
