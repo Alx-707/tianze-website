@@ -5,6 +5,10 @@
   "compatibility_date": "2025-09-01",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
 
+  // Wrangler-level minification via esbuild (bypasses OpenNext minifier pnpm bug).
+  // Reduces gzip bundle from ~3.2MB to ~2.8MB, fitting within free-tier 3MB limit.
+  "minify": true,
+
   // Static assets (OpenNext output)
   "assets": {
     "directory": ".open-next/assets",
