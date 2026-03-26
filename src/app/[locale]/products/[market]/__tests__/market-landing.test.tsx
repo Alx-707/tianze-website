@@ -65,6 +65,10 @@ vi.mock("@/components/products/sticky-family-nav", () => ({
   StickyFamilyNav: () => <nav data-testid="sticky-nav">nav</nav>,
 }));
 
+vi.mock("@/components/sections/faq-section", () => ({
+  FaqSection: () => <section data-testid="faq-section">FAQ</section>,
+}));
+
 vi.mock("@/components/products/product-specs", () => ({
   ProductSpecs: ({ title }: { title?: string }) => (
     <div data-testid="product-specs">{title}</div>

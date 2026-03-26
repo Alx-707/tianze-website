@@ -64,7 +64,6 @@
     "docs": "文档",
     "pricing": "定价",
     "blog": "博客",
-    "faq": "常见问题",
     "privacy": "隐私政策",
     "login": "登录",
     "logout": "退出",
@@ -132,7 +131,7 @@
   },
   "home": {
     "hero": {
-      "eyebrow": "ISO 9001 认证 · 始于 2018",
+      "eyebrow": "ISO 9001 认证 · 始于 {established}",
       "title": "造设备的人，做管件。",
       "subtitle": "PVC电工套管弯头及配件，从弯管设备研发到成品管件的垂直整合制造商。",
       "cta": {
@@ -140,13 +139,13 @@
         "secondary": "查看产品目录"
       },
       "proof": {
-        "countries": "20+",
+        "countries": "{countries}+",
         "countriesLabel": "出口国家",
         "range": "16-168",
         "rangeLabel": "mm 口径",
         "production": "24/7",
         "productionLabel": "不间断生产",
-        "est": "2018",
+        "est": "{established}",
         "estLabel": "年创立"
       }
     },
@@ -249,7 +248,7 @@
     },
     "scenarios": {
       "title": "我们的管件在哪里使用",
-      "subtitle": "在20+国家的建筑、基础设施和工业安装中经过实地验证。",
+      "subtitle": "在{countries}+国家的建筑、基础设施和工业安装中经过实地验证。",
       "item1": {
         "title": "地下预埋",
         "desc": "直埋式预弯管件。一致的弯曲半径消除了土壤压力下的现场开裂问题。",
@@ -310,12 +309,12 @@
       "description": "获取报价、申请样品或预约技术咨询。我们24小时内响应。",
       "primary": "获取工厂直供报价",
       "secondary": "预约技术咨询",
-      "trust": "24小时响应 · 工厂直供 · 出口20+国家"
+      "trust": "24小时响应 · 工厂直供 · 出口{countries}+国家"
     },
     "footer": {
       "about": {
         "title": "天泽管业",
-        "desc": "PVC电工弯管与管件制造商，位于江苏省连云港市。自2018年起设计制造弯管设备。"
+        "desc": "PVC电工弯管与管件制造商，位于江苏省连云港市。自{established}年起设计制造弯管设备。"
       },
       "products": {
         "title": "产品",
@@ -502,7 +501,7 @@
         },
         "i18n": {
           "title": "全球出口",
-          "description": "服务20+国家客户，可靠的国际物流配送。",
+          "description": "服务{countries}+国家客户，可靠的国际物流配送。",
           "languageUnit": "个国家"
         },
         "themes": {
@@ -622,7 +621,6 @@
       },
       "support": {
         "title": "支持",
-        "faq": "常见问题",
         "privacy": "隐私政策",
         "terms": "服务条款"
       }
@@ -706,11 +704,11 @@
       },
       "about": {
         "title": "关于我们 - 天泽管业 | 制造能力",
-        "description": "了解天泽管业的一体化制造能力：弯管设备、精密模具、优质管件。创立于2018年。"
+        "description": "了解天泽管业的一体化制造能力：弯管设备、精密模具、优质管件。创立于{established}年。"
       },
       "contact": {
         "title": "联系我们 - 天泽管业 | 获取报价",
-        "description": "咨询弯管设备、PVC管材或PETG气动管产品。产品出口20+国家和地区。"
+        "description": "咨询弯管设备、PVC管材或PETG气动管产品。产品出口{countries}+国家和地区。"
       },
       "products": {
         "title": "产品中心 - 天泽管业 | 设备与管件",

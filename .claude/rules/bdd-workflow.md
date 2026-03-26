@@ -30,9 +30,9 @@ Each Given/When/Then scenario must map to at least one Red task (failing test)
 and one Green task (minimal implementation).
 ```
 
-## Optional: Dual-AI Plan Review
+## Optional: Codex Plan Review
 
-After `writing-plans` produces the implementation plan, **consider** invoking `/codex-feedback-loop plan` for Claude-Codex iterative review.
+After `writing-plans` produces the implementation plan, **consider** invoking `/plan-review` for adversarial Codex review.
 
 **When to use:**
 - Multi-step features with architectural impact (e.g., new page system, API redesign)
@@ -45,8 +45,19 @@ After `writing-plans` produces the implementation plan, **consider** invoking `/
 
 Flow when used:
 ```
-writing-plans → /codex-feedback-loop plan → [3-5 rounds convergence] → TDD
+writing-plans → /plan-review <plan-file> → [iterative refinement until APPROVED] → TDD
 ```
+
+### Context Injection (Critical)
+
+Codex runs in an isolated process — it can read project files (`CLAUDE.md`, `.claude/rules/*`, source code) but **cannot** see Claude's conversation context. Before invoking `/plan-review`, Claude **must** ensure the plan file's header contains:
+
+1. **User Requirements** — the original business intent that prompted this feature
+2. **Design Decisions** — key choices from brainstorming (with rationale)
+3. **BDD Specs Reference** — path to `docs/specs/{feature}/bdd-specs.md`
+4. **Constraints** — any project-specific constraints Codex should respect
+
+This is handled by the `writing-plans` skill's plan header format. If the header is missing context, Claude must prepend it before calling `/plan-review`.
 
 Claude should suggest this step when the plan complexity warrants it. The user decides whether to invoke.
 

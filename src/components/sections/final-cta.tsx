@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/routing";
+import { siteFacts } from "@/config/site-facts";
 import { HOMEPAGE_SECTION_LINKS } from "@/components/sections/homepage-section-links";
 import { HomepageTrustStrip } from "@/components/sections/homepage-trust-strip";
 
@@ -36,7 +37,11 @@ export async function FinalCTA() {
           className="mt-6 text-[13px]"
           tone="inverse"
           emphasizeValues={false}
-          items={[{ value: t("trust") }]}
+          items={[
+            {
+              value: t("trust", { countries: siteFacts.stats.exportCountries }),
+            },
+          ]}
         />
       </div>
     </section>

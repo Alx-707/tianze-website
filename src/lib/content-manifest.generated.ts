@@ -52,14 +52,6 @@ export const CONTENT_MANIFEST: ContentManifest = {
   {
     "type": "pages",
     "locale": "en",
-    "slug": "faq",
-    "extension": ".mdx",
-    "filePath": "/content/pages/en/faq.mdx",
-    "relativePath": "content/pages/en/faq.mdx"
-  },
-  {
-    "type": "pages",
-    "locale": "en",
     "slug": "privacy",
     "extension": ".mdx",
     "filePath": "/content/pages/en/privacy.mdx",
@@ -80,14 +72,6 @@ export const CONTENT_MANIFEST: ContentManifest = {
     "extension": ".mdx",
     "filePath": "/content/pages/zh/about.mdx",
     "relativePath": "content/pages/zh/about.mdx"
-  },
-  {
-    "type": "pages",
-    "locale": "zh",
-    "slug": "faq",
-    "extension": ".mdx",
-    "filePath": "/content/pages/zh/faq.mdx",
-    "relativePath": "content/pages/zh/faq.mdx"
   },
   {
     "type": "pages",
@@ -131,14 +115,6 @@ export const CONTENT_MANIFEST: ContentManifest = {
     "filePath": "/content/pages/en/about.mdx",
     "relativePath": "content/pages/en/about.mdx"
   },
-  "pages/en/faq": {
-    "type": "pages",
-    "locale": "en",
-    "slug": "faq",
-    "extension": ".mdx",
-    "filePath": "/content/pages/en/faq.mdx",
-    "relativePath": "content/pages/en/faq.mdx"
-  },
   "pages/en/privacy": {
     "type": "pages",
     "locale": "en",
@@ -162,14 +138,6 @@ export const CONTENT_MANIFEST: ContentManifest = {
     "extension": ".mdx",
     "filePath": "/content/pages/zh/about.mdx",
     "relativePath": "content/pages/zh/about.mdx"
-  },
-  "pages/zh/faq": {
-    "type": "pages",
-    "locale": "zh",
-    "slug": "faq",
-    "extension": ".mdx",
-    "filePath": "/content/pages/zh/faq.mdx",
-    "relativePath": "content/pages/zh/faq.mdx"
   },
   "pages/zh/privacy": {
     "type": "pages",

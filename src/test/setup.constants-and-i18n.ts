@@ -82,7 +82,6 @@ vi.mock("@/i18n/routing", () => ({
       "/contact": "/contact",
       "/products": "/products",
       "/blog": "/blog",
-      "/faq": "/faq",
       "/privacy": "/privacy",
     },
   },

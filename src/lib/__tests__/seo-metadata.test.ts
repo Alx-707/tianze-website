@@ -227,7 +227,6 @@ describe("SEO Metadata", () => {
         "contact",
         "blog",
         "products",
-        "faq",
         "privacy",
         "terms",
       ] as const;
@@ -326,7 +325,6 @@ describe("SEO Metadata", () => {
         "contact",
         "blog",
         "products",
-        "faq",
         "privacy",
         "terms",
       ];
@@ -347,11 +345,11 @@ describe("SEO Metadata", () => {
         // Only title provided, other fields should come from base config
       };
 
-      const config = createPageSEOConfig("faq", customConfig);
+      const config = createPageSEOConfig("privacy", customConfig);
 
       expect(config.title).toBe("Custom Title");
       expect(config.type).toBe("website"); // From base config
-      expect(config.keywords).toEqual(["FAQ", "Help", "Questions", "Support"]); // From base config
+      expect(config.keywords).toEqual(["Privacy", "Policy", "Data Protection"]); // From base config
     });
 
     it("should handle empty custom config", () => {
@@ -376,7 +374,7 @@ describe("SEO Metadata", () => {
         section: "Tech",
       };
 
-      const config = createPageSEOConfig("faq", customConfig);
+      const config = createPageSEOConfig("privacy", customConfig);
 
       expect(config).toEqual(customConfig);
     });

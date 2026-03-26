@@ -30,7 +30,6 @@ describe("i18n Routing Configuration", () => {
       "/products": "/products",
       "/blog": "/blog",
       "/blog/[slug]": "/blog/[slug]",
-      "/faq": "/faq",
       "/privacy": "/privacy",
       "/terms": "/terms",
     },
@@ -83,7 +82,6 @@ describe("i18n Routing Configuration", () => {
         "/products",
         "/blog",
         "/blog/[slug]",
-        "/faq",
         "/privacy",
         "/terms",
       ];
@@ -171,16 +169,6 @@ describe("i18n Routing Configuration", () => {
 
       const mainPages = ["/", "/about", "/contact", "/products", "/blog"];
       mainPages.forEach((page) => {
-        expect(pathnames).toHaveProperty(page);
-      });
-    });
-
-    it("应该包含功能页面路径", () => {
-      const config = mockDefineRouting.mock.calls[0]?.[0];
-      const pathnames = config.pathnames;
-
-      const featurePages = ["/faq"];
-      featurePages.forEach((page) => {
         expect(pathnames).toHaveProperty(page);
       });
     });

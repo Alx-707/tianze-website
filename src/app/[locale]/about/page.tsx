@@ -8,10 +8,10 @@ import {
   HeadphonesIcon,
   Wrench,
 } from "lucide-react";
-import { cacheLife } from "next/cache";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { generateMetadataForPath, type Locale } from "@/lib/seo-metadata";
 import { siteFacts } from "@/config/site-facts";
+import { FaqSection } from "@/components/sections/faq-section";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -25,6 +25,14 @@ import { generateLocaleStaticParams } from "@/app/[locale]/generate-static-param
 export function generateStaticParams() {
   return generateLocaleStaticParams();
 }
+
+const ABOUT_FAQ_ITEMS = [
+  "manufacturer",
+  "factoryVisit",
+  "exportExperience",
+  "certifications",
+  "verifyCerts",
+] as const;
 
 function AboutLoadingSkeleton() {
   return (
@@ -201,14 +209,6 @@ function ValuesSection({ title, values }: ValuesSectionProps) {
   );
 }
 
-// eslint-disable-next-line require-await -- "use cache" directive requires async
-async function getYearsInBusiness() {
-  "use cache";
-  cacheLife("days");
-
-  return new Date().getFullYear() - siteFacts.company.established;
-}
-
 // Stats section component
 interface StatsSectionProps {
   stats: {
@@ -219,22 +219,21 @@ interface StatsSectionProps {
   };
 }
 
-async function StatsSection({ stats }: StatsSectionProps) {
-  const yearsInBusiness = await getYearsInBusiness();
+function StatsSection({ stats }: StatsSectionProps) {
   const statItems = [
     {
       key: "years",
-      value: `${yearsInBusiness}+`,
+      value: String(siteFacts.company.established),
       label: stats.yearsExperience,
     },
     {
       key: "countries",
-      value: `${siteFacts.stats.exportCountries ?? 20}+`,
+      value: `${siteFacts.stats.exportCountries}+`,
       label: stats.countriesServed,
     },
     {
       key: "team",
-      value: `${siteFacts.company.employees ?? 60}+`,
+      value: `${siteFacts.company.employees}+`,
       label: stats.happyClients,
     },
     { key: "factory", value: "100", label: stats.productsDelivered },
@@ -348,6 +347,7 @@ async function AboutContent({ locale }: { locale: string }) {
       <MissionSection {...missionProps} />
       <ValuesSection {...valuesProps} />
       <StatsSection {...statsProps} />
+      <FaqSection items={[...ABOUT_FAQ_ITEMS]} locale={locale as Locale} />
       <CTASection {...ctaProps} />
     </main>
   );

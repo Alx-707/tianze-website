@@ -28,13 +28,11 @@ export const postImporters: Record<string, Record<string, ContentImporter>> = {
 export const pageImporters: Record<string, Record<string, ContentImporter>> = {
   en: {
     'about': () => import('@content/pages/en/about.mdx'),
-    'faq': () => import('@content/pages/en/faq.mdx'),
     'privacy': () => import('@content/pages/en/privacy.mdx'),
     'terms': () => import('@content/pages/en/terms.mdx'),
   },
   zh: {
     'about': () => import('@content/pages/zh/about.mdx'),
-    'faq': () => import('@content/pages/zh/faq.mdx'),
     'privacy': () => import('@content/pages/zh/privacy.mdx'),
     'terms': () => import('@content/pages/zh/terms.mdx'),
   },

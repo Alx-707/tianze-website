@@ -83,7 +83,7 @@ function FooterSection({
               ) : (
                 <Link
                   className={linkClassName}
-                  href={link.href as "/faq" | "/privacy" | "/terms"}
+                  href={link.href as "/privacy" | "/terms"}
                   prefetch={false}
                   style={linkStyle}
                 >

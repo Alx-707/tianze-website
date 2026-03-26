@@ -1,4 +1,5 @@
 import { getTranslations } from "next-intl/server";
+import { siteFacts } from "@/config/site-facts";
 import { HomepageSectionShell } from "@/components/sections/homepage-section-shell";
 
 const SCENARIO_KEYS = ["item1", "item2", "item3"] as const;
@@ -10,7 +11,7 @@ export async function ScenariosSection() {
     <HomepageSectionShell
       sectionClassName="py-14 md:py-[72px]"
       title={t("title")}
-      subtitle={t("subtitle")}
+      subtitle={t("subtitle", { countries: siteFacts.stats.exportCountries })}
     >
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         {SCENARIO_KEYS.map((key) => (

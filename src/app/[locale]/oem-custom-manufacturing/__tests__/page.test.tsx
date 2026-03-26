@@ -30,6 +30,10 @@ vi.mock("@/app/[locale]/generate-static-params", () => ({
   generateLocaleStaticParams: () => [{ locale: "en" }, { locale: "zh" }],
 }));
 
+vi.mock("@/components/sections/faq-section", () => ({
+  FaqSection: () => <section data-testid="faq-section">FAQ</section>,
+}));
+
 describe("Feature: OEM Custom Manufacturing Page", () => {
   beforeEach(() => {
     vi.resetModules();
@@ -73,6 +77,11 @@ describe("Feature: OEM Custom Manufacturing Page", () => {
   it("renders supported standards section", async () => {
     await renderPage();
     expect(screen.getByText("standards.title")).toBeInTheDocument();
+  });
+
+  it("renders FAQ section", async () => {
+    await renderPage();
+    expect(screen.getByTestId("faq-section")).toBeInTheDocument();
   });
 
   it("CTA links to /contact", async () => {

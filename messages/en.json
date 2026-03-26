@@ -64,7 +64,6 @@
     "docs": "Docs",
     "pricing": "Pricing",
     "blog": "Blog",
-    "faq": "FAQ",
     "privacy": "Privacy Policy",
     "login": "Login",
     "logout": "Logout",
@@ -132,7 +131,7 @@
   },
   "home": {
     "hero": {
-      "eyebrow": "ISO 9001 Certified · Est. 2018",
+      "eyebrow": "ISO 9001 Certified · Est. {established}",
       "title": "We Build the Machines That Make the Pipes.",
       "subtitle": "PVC conduit bends & fittings, factory direct from a bending equipment manufacturer. Full vertical integration from R&D to finished product.",
       "cta": {
@@ -140,13 +139,13 @@
         "secondary": "View Product Catalog"
       },
       "proof": {
-        "countries": "20+",
+        "countries": "{countries}+",
         "countriesLabel": "Countries",
         "range": "16-168",
         "rangeLabel": "mm Range",
         "production": "24/7",
         "productionLabel": "Production",
-        "est": "2018",
+        "est": "{established}",
         "estLabel": "Est."
       }
     },
@@ -249,7 +248,7 @@
     },
     "scenarios": {
       "title": "Where Our Conduits Work",
-      "subtitle": "Field-proven in construction, infrastructure, and industrial installations across 20+ countries.",
+      "subtitle": "Field-proven in construction, infrastructure, and industrial installations across {countries}+ countries.",
       "item1": {
         "title": "Underground Pre-Burial",
         "desc": "Pre-bent conduits for direct burial. Consistent bend radius eliminates field cracking under soil pressure.",
@@ -310,12 +309,12 @@
       "description": "Get a quote, request samples, or book a technical consultation. We respond within 24 hours.",
       "primary": "Get Factory-Direct Quote",
       "secondary": "Book Technical Consultation",
-      "trust": "24-hour response · Factory direct · 20+ countries served"
+      "trust": "24-hour response · Factory direct · {countries}+ countries served"
     },
     "footer": {
       "about": {
         "title": "Tianze Pipe Industry",
-        "desc": "PVC conduit bends and fittings manufacturer based in Lianyungang, Jiangsu, China. Designing and manufacturing bending equipment since 2018."
+        "desc": "PVC conduit bends and fittings manufacturer based in Lianyungang, Jiangsu, China. Designing and manufacturing bending equipment since {established}."
       },
       "products": {
         "title": "Products",
@@ -502,7 +501,7 @@
         },
         "i18n": {
           "title": "Global Export",
-          "description": "Serving customers in over 20 countries with reliable international shipping.",
+          "description": "Serving customers in over {countries} countries with reliable international shipping.",
           "languageUnit": "Countries"
         },
         "themes": {
@@ -622,7 +621,6 @@
       },
       "support": {
         "title": "Support",
-        "faq": "FAQs",
         "privacy": "Privacy Policy",
         "terms": "Terms of Service"
       }
@@ -706,11 +704,11 @@
       },
       "about": {
         "title": "About Us - Tianze Pipe | Manufacturing Excellence",
-        "description": "Discover Tianze Pipe's integrated manufacturing capability: pipe bending equipment, precision molds, and quality pipe fittings since 2018."
+        "description": "Discover Tianze Pipe's integrated manufacturing capability: pipe bending equipment, precision molds, and quality pipe fittings since {established}."
       },
       "contact": {
         "title": "Contact Us - Tianze Pipe | Get a Quote",
-        "description": "Contact our team for pipe bending machinery, PVC conduits, or PETG pneumatic tube inquiries. Export to 20+ countries."
+        "description": "Contact our team for pipe bending machinery, PVC conduits, or PETG pneumatic tube inquiries. Export to {countries}+ countries."
       },
       "products": {
         "title": "Products - Tianze Pipe | Machines & Pipe Fittings",
@@ -1869,20 +1867,88 @@
     }
   },
   "faq": {
-    "pageTitle": "Frequently Asked Questions",
-    "pageDescription": "Find answers to common questions about ordering, payment, shipping, and after-sales service.",
-    "categories": {
-      "ordering": "Ordering & Purchasing",
-      "payment": "Payment & Settlement",
-      "logistics": "Logistics & Shipping",
-      "quality": "Quality & After-Sales"
-    },
-    "noResults": "No questions found matching your search.",
-    "searchPlaceholder": "Search questions...",
-    "contactCta": {
-      "title": "Still have questions?",
-      "description": "Our support team is here to help you.",
-      "button": "Contact Us"
+    "sectionTitle": "Frequently Asked Questions",
+    "items": {
+      "moq": {
+        "question": "What is the minimum order quantity (MOQ)?",
+        "answer": "Our MOQ is typically 500 to 1,000 pieces, depending on the specific pipe type and size. Standard conduit bends in common sizes (20mm, 25mm, 32mm) have lower MOQs, while larger or custom-specification items may require higher minimums.\n\nFor first-time buyers, we offer flexible trial order arrangements. Contact our sales team to discuss quantities that work for your project requirements."
+      },
+      "leadTime": {
+        "question": "What is the lead time for standard orders?",
+        "answer": "Standard orders ship within 15 to 30 days from order confirmation. The timeline depends on:\n\n- Order quantity: Smaller orders (under 5,000 pieces) ship faster\n- Product type: Standard sizes ship within 15 days; custom specifications may take up to 30 days\n- Season: Peak season (March-June) may add 5-7 days\n\nWe maintain stock of common Schedule 40 and Schedule 80 fittings for faster dispatch. For urgent requirements, contact us — expedited production may be available depending on current line capacity."
+      },
+      "payment": {
+        "question": "What payment terms do you accept?",
+        "answer": "Our standard payment terms:\n\n- T/T (Bank Transfer): 30% deposit upon order confirmation, 70% balance before shipment\n- L/C (Letter of Credit): Available for orders above USD 10,000, at sight or 30/60/90 days\n\nAll payments are processed through our verified corporate bank account. We provide proforma invoices and commercial invoices for every transaction."
+      },
+      "samples": {
+        "question": "Do you offer free samples?",
+        "answer": "Yes. We provide free samples for standard PVC conduit bends and fittings. Buyers pay only the shipping cost (typically via express courier).\n\n- Standard products: 3-5 sample pieces at no charge\n- Custom specifications: Sample charges may apply, credited toward your first bulk order\n- Sample lead time: 5-7 business days\n\nRequest samples through our contact form or email, specifying the product type, size, and applicable standard (ASTM, IEC, or AS/NZS)."
+      },
+      "oem": {
+        "question": "Can you do OEM or custom labeling?",
+        "answer": "Yes. We offer full OEM and customization services:\n\n- Custom printing: Your brand name, logo, and product codes printed on conduit surfaces\n- Custom color: PVC conduits available in colors beyond standard white/gray (minimum order applies)\n- Custom packaging: Branded boxes, labels, and bundling to your specifications\n- Custom specifications: Non-standard sizes, wall thicknesses, or bend angles\n\nOEM orders typically require a minimum of 2,000 pieces per SKU. Lead time for first OEM production is 25-30 days, including printing plate setup."
+      },
+      "certifications": {
+        "question": "What certifications do your products hold?",
+        "answer": "Certified:\n- ISO 9001:2015 Quality Management System (Certificate #240021Q09730R0S, valid through March 2027)\n\nStandards compliance:\nOur products are manufactured and tested to meet the following international standards:\n\n- ASTM D1785 / UL 651: Schedule 40 and Schedule 80 PVC conduit for the North American market\n- AS/NZS 61386: PVC conduit systems for Australia and New Zealand (certification in progress)\n- IEC 61386: Conduit systems for cable management, applicable in Europe, Asia, and the Middle East\n- NOM-001-SEDE: Electrical installation requirements for the Mexican market\n\nWe invest in third-party testing to verify material properties, dimensional accuracy, and mechanical performance against each standard's requirements."
+      },
+      "standardsDifference": {
+        "question": "What is the difference between UL 651, IEC 61386, and AS/NZS 61386?",
+        "answer": "These are regional standards governing PVC electrical conduit, each with different testing requirements:\n\n- UL 651 / ASTM D1785 (North America): Wall thickness (Schedule 40/80), flame resistance, impact resistance at specific temperatures\n- IEC 61386 (Europe, Asia, Middle East): Mechanical strength classification (light/medium/heavy duty at 750N/320N), IP ratings\n- AS/NZS 61386 (Australia, New Zealand): Based on IEC 61386 with additional local requirements for UV resistance and fire performance\n\nThe main practical difference: North American standards classify by wall thickness (Schedule 40 for general use, Schedule 80 for exposed or high-impact), while IEC-based standards classify by mechanical crush resistance measured in Newtons.\n\nWe manufacture to all three standard families, so we can supply the correct product regardless of your market's requirements."
+      },
+      "verifyCerts": {
+        "question": "How can I verify your certifications?",
+        "answer": "Our ISO 9001:2015 certificate (#240021Q09730R0S) was issued by an accredited certification body. You can verify it by:\n\n1. Requesting a copy of the certificate directly from us (PDF available upon request)\n2. Contacting the issuing certification body with the certificate number\n3. Checking during a factory audit or third-party inspection visit\n\nFor product standard compliance, we provide test reports from accredited laboratories upon request. These reports document material composition, dimensional measurements, impact resistance, flame spread, and other properties tested per the applicable standard."
+      },
+      "sch40vs80": {
+        "question": "What is the difference between Schedule 40 and Schedule 80?",
+        "answer": "Schedule 40 and Schedule 80 refer to wall thickness classifications under ASTM D1785:\n\n- Wall thickness: Schedule 40 is standard; Schedule 80 is approximately 40% thicker\n- Pressure rating: Schedule 80 is higher\n- Impact resistance: Schedule 80 is enhanced\n- Weight: Schedule 80 is heavier\n- Cost: Schedule 80 is higher\n- Typical use: Schedule 40 for concealed in walls, ceilings, underground; Schedule 80 for exposed locations, high-traffic areas, industrial\n\nWhen to use Schedule 40: Standard electrical wiring in residential and commercial buildings where conduit is concealed within walls, above ceilings, or embedded in concrete.\n\nWhen to use Schedule 80: Exposed conduit runs in warehouses, parking structures, industrial facilities, or any location where the conduit may be subject to physical damage. Many building codes require Schedule 80 for exposed installations."
+      },
+      "conduitSize": {
+        "question": "How do I choose the right conduit size?",
+        "answer": "Conduit size selection depends on the number, type, and size of conductors you need to route. The key principle is wire fill capacity — the maximum percentage of the conduit's internal area that can be occupied by wires.\n\nPer NEC (National Electrical Code) guidelines:\n- 1 conductor: Maximum 53% fill\n- 2 conductors: Maximum 31% fill\n- 3+ conductors: Maximum 40% fill\n\nCommon sizing reference:\n- 20mm (3/4\"): Residential branch circuits, 2-3 wires\n- 25mm (1\"): Residential feeders, small commercial\n- 32mm (1-1/4\"): Commercial branch circuits\n- 40mm (1-1/2\"): Commercial feeders\n- 50mm (2\"): Large commercial, light industrial\n\nAlways consult your local electrical code for specific wire fill calculations. We provide dimensional data sheets for all our conduit sizes to assist with your calculations."
+      },
+      "bendingRadius": {
+        "question": "What is the minimum bending radius for PVC conduit?",
+        "answer": "The minimum bending radius depends on conduit size and is specified in NEC Table 344.24 (for rigid PVC conduit) and similar tables in IEC 61386:\n\n- 20mm (3/4\"): 200mm (8\")\n- 25mm (1\"): 250mm (10\")\n- 32mm (1-1/4\"): 300mm (12\")\n- 40mm (1-1/2\"): 350mm (14\")\n- 50mm (2\"): 450mm (18\")\n\nFactory-made bends (like ours) are precision-formed using dedicated bending machines, ensuring consistent radius and wall thickness throughout the bend. This is more reliable than field-bending with a heat gun, which risks wall thinning, kinking, or uneven radius.\n\nAs a bending machine manufacturer ourselves, we control the bending process from equipment design through finished product — ensuring every bend meets dimensional tolerances."
+      },
+      "strengthGrades": {
+        "question": "What are the mechanical strength grades (heavy, medium, light)?",
+        "answer": "IEC 61386 classifies conduit by mechanical resistance — the force needed to crush the conduit:\n\n- Heavy duty: 750 N (per 50mm length) — Industrial environments, direct burial, concrete encasement\n- Medium duty: 320 N (per 50mm length) — Commercial buildings, concealed in walls\n- Light duty: 125 N (per 50mm length) — Residential, low-risk concealed installations\n\nThe test involves applying a compressive load across a 50mm section of conduit. Heavy-duty conduits maintain their shape under more than twice the load of medium-duty.\n\nFor most commercial electrical projects, medium duty is sufficient. Heavy duty is recommended for industrial settings, outdoor installations, or where conduit may bear additional loads (such as concrete encasement or vehicle traffic areas)."
+      },
+      "lszh": {
+        "question": "What is LSZH and when is it needed?",
+        "answer": "LSZH stands for Low Smoke Zero Halogen. It refers to conduit materials that produce minimal smoke and no toxic halogen gases (such as hydrogen chloride) when exposed to fire.\n\nStandard PVC conduit contains chlorine (a halogen) and produces dense smoke when burning. LSZH conduit uses alternative compounds that significantly reduce these hazards.\n\nLSZH is typically required in:\n- Enclosed public spaces (shopping centers, airports, stadiums)\n- Mass transit systems (subways, railway tunnels)\n- Data centers and server rooms\n- Hospitals and healthcare facilities\n- High-rise buildings with limited evacuation routes\n\nRegulatory context: Many European and Asian building codes mandate LSZH materials in public and high-occupancy buildings. Check your local fire safety regulations for specific requirements.\n\nContact us if your project requires LSZH-rated conduit — we can advise on available options and lead times."
+      },
+      "directBurial": {
+        "question": "Can PVC conduit be direct-buried or encased in concrete?",
+        "answer": "Yes, PVC conduit is well-suited for both applications:\n\nDirect burial:\n- Schedule 80 PVC conduit is rated for direct burial per NEC 300.5\n- Minimum burial depth depends on voltage and location (typically 450mm / 18\" for residential, 600mm / 24\" for commercial)\n- No additional corrosion protection needed — PVC is inherently resistant to soil chemicals and moisture\n\nConcrete encasement:\n- Both Schedule 40 and Schedule 80 can be encased in concrete\n- PVC's smooth interior surface allows easy wire pulling even after concrete curing\n- Expansion joints should be placed where conduit transitions from concrete to open air, to accommodate thermal movement\n\nFor direct burial applications, we recommend heavy-duty (IEC 61386) or Schedule 80 (ASTM) conduit to withstand soil pressure and potential surface loads."
+      },
+      "indoorOutdoor": {
+        "question": "What is the difference between indoor and outdoor installation?",
+        "answer": "The main concerns for outdoor PVC conduit are UV exposure and temperature variation:\n\n- UV exposure: Not a concern indoors; outdoors requires UV-stabilized PVC or protective coating\n- Temperature range: Indoor is stable (15-30 °C); outdoor can swing widely (-20 °C to +60 °C)\n- Moisture: Minimal indoors; rain, condensation, standing water outdoors\n- Physical damage: Low risk indoors; higher risk outdoors (wind, debris, vandalism)\n- Conduit type: Schedule 40 sufficient indoors; Schedule 80 recommended for exposed outdoor runs\n\nFor outdoor installations:\n- Use Schedule 80 for exposed conduit runs\n- Ensure conduit bodies and fittings are rated for wet locations\n- Include expansion fittings on long runs to handle thermal expansion (PVC expands approximately 50mm per 30m for a 30 °C temperature swing)\n- Apply UV-resistant paint or use sunlight-resistant PVC formulations for long-term outdoor exposure"
+      },
+      "solarDataCenter": {
+        "question": "Is your conduit suitable for solar farm or data center projects?",
+        "answer": "Yes. Both solar installations and data centers have specific conduit requirements we can meet:\n\nSolar farm projects:\n- Schedule 80 PVC conduit for underground cable runs between panel arrays and inverters\n- UV-resistant formulations for any above-ground sections\n- Long production runs at consistent quality — solar farms typically require large volumes of uniform conduit\n\nData center projects:\n- LSZH options available for raised-floor and ceiling-void cable management\n- Medium or heavy-duty IEC 61386 conduit for structured cabling pathways\n- Clean, smooth interior surface for high-density fiber optic cable pulls\n- Fire-rated conduit options for compartmentalization compliance\n\nContact us with your project specifications and we will recommend the appropriate conduit type, size, and standard."
+      },
+      "corrosion": {
+        "question": "How does PVC conduit perform in corrosive environments?",
+        "answer": "PVC has inherent chemical resistance that makes it ideal for harsh environments:\n\n- Acids and bases: Resistant to most common acids, alkalis, and salt solutions\n- Soil chemicals: Unaffected by soil moisture, fertilizers, and common groundwater contaminants\n- Coastal/marine: No galvanic corrosion (unlike metal conduit) — will not rust or corrode in salt air\n- Industrial: Resistant to most oils, detergents, and common industrial chemicals\n\nPVC conduit is often specified in:\n- Coastal and marine environments where metal conduit corrodes rapidly\n- Chemical processing plants and laboratories\n- Agricultural facilities with fertilizer and chemical exposure\n- Water treatment plants and wastewater facilities\n\nUnlike metal conduit, PVC requires no protective coatings, galvanizing, or cathodic protection — reducing both installation cost and long-term maintenance."
+      },
+      "manufacturer": {
+        "question": "Are you a manufacturer or trading company?",
+        "answer": "We are a direct manufacturer. Our factory in Lianyungang, Jiangsu operates complete production lines for PVC conduit extrusion, bending, expansion, and cutting.\n\nWhat sets us apart: we build the bending machines that make our products. Before producing PVC conduit fittings, we designed and manufactured the bending equipment itself. This means:\n\n- Deep understanding of PVC forming technology and material behavior\n- Rapid tooling development for custom bend angles and radii\n- Full quality control from raw material to finished product\n- No dependence on third-party equipment suppliers for production capability\n\nThis vertical integration — from bending machine R&D to finished conduit fittings — means the same team that designs the equipment controls the finished product quality."
+      },
+      "factoryVisit": {
+        "question": "Where is your factory? Can I visit?",
+        "answer": "Our factory is located at:\n\nNo. 6 Yulong Road, Dongwangji Industrial Zone, Guanyun County, Lianyungang, Jiangsu, China\n\nWe welcome factory visits and can arrange:\n- Guided tour of production lines (extrusion, bending, expansion, cutting, QC)\n- Live demonstration of our bending machines in operation\n- Meeting with our technical team to discuss your specific requirements\n- Video tour for buyers who cannot travel in person\n\nTo schedule a visit, contact us at least 2 weeks in advance so we can prepare relevant product samples and production demonstrations for your review."
+      },
+      "exportExperience": {
+        "question": "How long have you been exporting?",
+        "answer": "Tianze has been manufacturing PVC conduit products since {established} and currently exports to {countries}+ countries across:\n\n- North America: Schedule 40/80 conduit per ASTM D1785\n- Oceania: AS/NZS 61386 compliant conduit for Australia and New Zealand\n- Middle East & Asia: IEC 61386 conduit systems\n- Latin America: NOM-compliant products for Mexico and regional markets\n\nOur team includes dedicated export staff who handle documentation, customs requirements, and logistics coordination. We ship via major Chinese ports (Lianyungang, Shanghai, Ningbo) with experience in both FCL and LCL arrangements."
+      }
     }
   },
   "privacy": {
@@ -1998,7 +2064,7 @@
         "label": "Fittings per Month"
       },
       "countries": {
-        "value": "20+",
+        "value": "{countries}+",
         "label": "Countries Served"
       },
       "experience": {

@@ -64,7 +64,6 @@
     "docs": "Docs",
     "pricing": "Pricing",
     "blog": "Blog",
-    "faq": "FAQ",
     "privacy": "Privacy Policy",
     "login": "Login",
     "logout": "Logout",
@@ -132,7 +131,7 @@
   },
   "home": {
     "hero": {
-      "eyebrow": "ISO 9001 Certified · Est. 2018",
+      "eyebrow": "ISO 9001 Certified · Est. {established}",
       "title": "We Build the Machines That Make the Pipes.",
       "subtitle": "PVC conduit bends & fittings, factory direct from a bending equipment manufacturer. Full vertical integration from R&D to finished product.",
       "cta": {
@@ -140,13 +139,13 @@
         "secondary": "View Product Catalog"
       },
       "proof": {
-        "countries": "20+",
+        "countries": "{countries}+",
         "countriesLabel": "Countries",
         "range": "16-168",
         "rangeLabel": "mm Range",
         "production": "24/7",
         "productionLabel": "Production",
-        "est": "2018",
+        "est": "{established}",
         "estLabel": "Est."
       }
     },
@@ -249,7 +248,7 @@
     },
     "scenarios": {
       "title": "Where Our Conduits Work",
-      "subtitle": "Field-proven in construction, infrastructure, and industrial installations across 20+ countries.",
+      "subtitle": "Field-proven in construction, infrastructure, and industrial installations across {countries}+ countries.",
       "item1": {
         "title": "Underground Pre-Burial",
         "desc": "Pre-bent conduits for direct burial. Consistent bend radius eliminates field cracking under soil pressure.",
@@ -310,12 +309,12 @@
       "description": "Get a quote, request samples, or book a technical consultation. We respond within 24 hours.",
       "primary": "Get Factory-Direct Quote",
       "secondary": "Book Technical Consultation",
-      "trust": "24-hour response · Factory direct · 20+ countries served"
+      "trust": "24-hour response · Factory direct · {countries}+ countries served"
     },
     "footer": {
       "about": {
         "title": "Tianze Pipe Industry",
-        "desc": "PVC conduit bends and fittings manufacturer based in Lianyungang, Jiangsu, China. Designing and manufacturing bending equipment since 2018."
+        "desc": "PVC conduit bends and fittings manufacturer based in Lianyungang, Jiangsu, China. Designing and manufacturing bending equipment since {established}."
       },
       "products": {
         "title": "Products",
@@ -502,7 +501,7 @@
         },
         "i18n": {
           "title": "Global Export",
-          "description": "Serving customers in over 20 countries with reliable international shipping.",
+          "description": "Serving customers in over {countries} countries with reliable international shipping.",
           "languageUnit": "Countries"
         },
         "themes": {
@@ -622,7 +621,6 @@
       },
       "support": {
         "title": "Support",
-        "faq": "FAQs",
         "privacy": "Privacy Policy",
         "terms": "Terms of Service"
       }
@@ -706,11 +704,11 @@
       },
       "about": {
         "title": "About Us - Tianze Pipe | Manufacturing Excellence",
-        "description": "Discover Tianze Pipe's integrated manufacturing capability: pipe bending equipment, precision molds, and quality pipe fittings since 2018."
+        "description": "Discover Tianze Pipe's integrated manufacturing capability: pipe bending equipment, precision molds, and quality pipe fittings since {established}."
       },
       "contact": {
         "title": "Contact Us - Tianze Pipe | Get a Quote",
-        "description": "Contact our team for pipe bending machinery, PVC conduits, or PETG pneumatic tube inquiries. Export to 20+ countries."
+        "description": "Contact our team for pipe bending machinery, PVC conduits, or PETG pneumatic tube inquiries. Export to {countries}+ countries."
       },
       "products": {
         "title": "Products - Tianze Pipe | Machines & Pipe Fittings",

@@ -20,7 +20,6 @@ const STATIC_PAGES = [
   "/contact",
   "/products",
   "/blog",
-  "/faq",
   "/privacy",
   "/terms",
   "/capabilities/bending-machines",
@@ -49,7 +48,6 @@ const PAGE_CONFIG_MAP = new Map<string, PageConfig>([
   ["/contact", { changeFrequency: "monthly", priority: 0.8 }],
   ["/products", { changeFrequency: "weekly", priority: 0.9 }],
   ["/blog", { changeFrequency: "weekly", priority: 0.7 }],
-  ["/faq", { changeFrequency: "monthly", priority: 0.6 }],
   ["/privacy", { changeFrequency: "monthly", priority: 0.7 }],
   [
     "/capabilities/bending-machines",
@@ -78,8 +76,6 @@ const STATIC_PAGE_LASTMOD: StaticPageLastModConfig = new Map([
   ["/products", new Date("2024-11-01T00:00:00Z")],
   // Blog listing - updated when posts change
   ["/blog", new Date("2024-11-01T00:00:00Z")],
-  // FAQ - occasionally updated
-  ["/faq", new Date("2024-09-01T00:00:00Z")],
   // Legal pages - updated when terms change
   ["/privacy", new Date("2024-06-01T00:00:00Z")],
   ["/terms", new Date("2024-06-01T00:00:00Z")],

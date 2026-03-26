@@ -41,7 +41,6 @@ vi.mock("@/i18n/routing", () => ({
       "/": "/",
       "/products": "/products",
       "/blog": "/blog",
-      "/faq": "/faq",
       "/about": "/about",
       "/privacy": "/privacy",
     },
@@ -173,7 +172,6 @@ function createTranslationMock() {
     "navigation.solutions": "Solutions",
     "navigation.enterprise": "Enterprise",
     "navigation.blog": "Blog",
-    "navigation.faq": "FAQ",
     "navigation.about": "About",
     "navigation.privacy": "Privacy",
   };
