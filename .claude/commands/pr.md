@@ -1,6 +1,8 @@
 # Create Pull Request
 
-Automate the full PR lifecycle: preflight → self-heal → Codex review → commit → push → PR → CI + cloud review monitoring → merge → cleanup.
+Submission pipeline: preflight → self-heal → commit → push → PR → CI monitoring → merge → cleanup.
+
+**Prerequisite**: `/review` (Codex Semantic Review) should be run before `/pr`. If not done, warn the user once and proceed.
 
 ## Execution Steps
 
@@ -11,240 +13,104 @@ Automate the full PR lifecycle: preflight → self-heal → Codex review → com
 2. **Check Changes**: Run `git status` to identify staged/unstaged changes.
    - If changes exist: proceed to step 3.
    - If no changes and no unpushed commits: abort with "Nothing to submit".
-   - If no changes but unpushed commits exist: skip to Phase 5 (Push).
+   - If no changes but unpushed commits exist: skip to Phase 4 (Push).
 
 3. **AI Slop Check**: Review the diff (`git diff` + `git diff --cached`) and remove AI-generated slop:
-   - Extra comments that a human wouldn't add or are inconsistent with the rest of the file
-   - Unnecessary defensive checks or try/catch blocks (especially if called by trusted codepaths)
+   - Extra comments inconsistent with file patterns
+   - Unnecessary defensive checks or try/catch blocks
    - Casts to `any` to get around type issues
-   - Any style inconsistent with the file's existing patterns
-   - If slop found: fix it before proceeding. If clean: proceed.
+   - Style inconsistent with existing file patterns
+   - If slop found: fix it. If clean: proceed.
 
 ### Phase 2: Preflight
 
-4. **Run `pnpm ci:local:quick`**: Full local validation (type-check, lint, format, tests, build, translations, quality-gate:fast, architecture, security audit).
-   - If passes: proceed to Phase 4 (Codex Review).
+4. **Run `pnpm ci:local:quick`**: Full local validation.
+   - If passes: proceed to Phase 4 (Commit & Push).
    - If fails: proceed to Phase 3 (Self-Heal).
 
 ### Phase 3: Self-Heal (max 3 attempts)
 
-5. **Classify failure**: Read the error output and classify each failure:
+5. **Classify failure**:
 
    | Check | Auto-fixable? | Fix Strategy |
    |-------|---------------|--------------|
    | Prettier | Yes | `pnpm format:write` |
-   | ESLint | Partially | `pnpm lint:fix` + manual fix remaining |
-   | TypeScript | Yes (usually) | Analyze and fix type errors |
-   | Tests | Yes (usually) | Read output, fix failing tests |
+   | ESLint | Partially | `pnpm lint:fix` + manual |
+   | TypeScript | Yes (usually) | Fix type errors |
+   | Tests | Yes (usually) | Read output, fix tests |
    | Build (imports) | Yes | Fix import paths |
-   | Build (runtime) | Depends | Case-by-case analysis |
-   | i18n/translation/shape/slug | Partially | Missing keys: yes. Content issues: no |
-   | PII log leak | Yes | Apply sanitize functions |
-   | Architecture (barrel/circular) | **No** | **Abort** — report to user |
-   | Security audit | **No** | **Abort** — NEVER auto-upgrade deps |
-   | Node/pnpm version | **No** | **Abort** — environment issue |
-   | Quality gate | Depends | Fix the underlying check |
+   | Build (runtime) | Depends | Case-by-case |
+   | i18n/translation | Partially | Missing keys: yes |
+   | Architecture | **No** | **Abort** |
+   | Security audit | **No** | **Abort** |
+   | Node/pnpm version | **No** | **Abort** |
 
-6. **Fix and retry**: Apply fixes for auto-fixable failures, then re-run `pnpm ci:local:quick`.
+6. **Fix and retry**: Apply fixes, re-run `pnpm ci:local:quick`.
    - If passes: proceed to Phase 4.
-   - If same failure after 3 attempts: **abort** with diagnosis report.
-   - If non-auto-fixable failure: **abort immediately** with diagnosis report.
+   - If same failure after 3 attempts: **abort**.
+   - If non-auto-fixable: **abort immediately**.
 
-### Phase 4: Codex Semantic Review
+### Phase 4: Commit & Push
 
-7. **Generate review prompt and call Codex**: Write the diff to a temp file, then invoke `ask_codex.sh`:
-
-   ```bash
-   # Capture diff for Codex
-   git diff main...HEAD > /tmp/pr-review-diff.patch
-   git diff >> /tmp/pr-review-diff.patch
-   git diff main...HEAD --stat > /tmp/pr-review-files.txt
-
-   # Call Codex via ask_codex.sh
-   ~/.claude/skills/codex/scripts/ask_codex.sh \
-     "<review_prompt>" \
-     --file /tmp/pr-review-diff.patch \
-     --file /tmp/pr-review-files.txt \
-     --file CLAUDE.md \
-     --sandbox read-only \
-     --reasoning high
-   ```
-
-   The `<review_prompt>` must include:
-
-   ```
-   You are performing an independent code review of recent changes in this repository.
-
-   Step 1: Understand context
-   - Read CLAUDE.md and .claude/rules/*.md for project conventions
-   - Understand this is a production Next.js 16 project (solo dev)
-
-   Step 2: Understand changes
-   - The diff is in /tmp/pr-review-diff.patch
-   - The changed files list is in /tmp/pr-review-files.txt
-   - Read all modified/added files in the workspace for full context
-
-   Step 3: Review for these dimensions (skip irrelevant ones):
-
-   ## Correctness
-   - Logic errors, off-by-one, null/undefined handling
-   - API contracts and type safety
-
-   ## Security
-   - Input validation, auth issues, injection vulnerabilities
-   - Credential exposure, OWASP Top 10
-
-   ## Test Coverage
-   - Untested critical paths or edge cases
-   - Tests must verify behavior (href, navigation), not just presence
-
-   ## Code Quality
-   - Maintainability, readability, modularity
-   - Consistency with project patterns
-
-   ## Project Conventions
-   - Check against .claude/rules/ (Server Components first, i18n required, no any, etc.)
-   - Do NOT impose conventions the project doesn't use
-
-   For each issue: file path, line number, severity (critical/high/medium/low), category, description, suggested fix.
-   Organize by severity. End with summary.
-   Only flag issues you are confident about.
-   If all changes are solid, end with: VERDICT: APPROVED
-   If issues need fixing, end with: VERDICT: REVISE
-   ```
-
-8. **Triage Codex findings**: Parse the response and categorize each finding:
-
-   | Category | Default Action |
-   |----------|---------------|
-   | Bug / correctness error | **Must fix** |
-   | Security vulnerability (critical/high) | **Must fix** |
-   | Security vulnerability (medium/low) | **Evaluate** |
-   | Missing test coverage | **Evaluate** — real gap or over-testing? |
-   | Code quality / refactor | **Evaluate** — proportional benefit? |
-   | Style / preference | **Accept only if** aligned with `.claude/rules/` |
-   | Irrelevant to project | **Reject** |
-
-   **Autonomous triage with evidence-based decisions**: For each finding, **actually verify** before deciding:
-
-   - Read the relevant source code to confirm the issue exists
-   - Run commands if needed (e.g., check if a function is actually called, trace data flow)
-   - Cross-reference with `.claude/rules/` to confirm convention violations
-
-   Decision criteria:
-   - **Fix**: Issue is objectively verified in code (bug exists, vulnerability confirmed, convention violated)
-   - **Reject**: Issue is not reproducible, based on incorrect assumptions, or doesn't apply to this codebase
-   - **Defer**: Issue is real but fix cost exceeds benefit for current scope (add `<!-- TODO -->` comment)
-   - **Flag to user**: Issue involves **business decisions** (product behavior, user-facing copy, pricing logic) — only this category pauses for user input
-
-   Present a brief summary of decisions with evidence (e.g., "Confirmed: `fetchData()` at line 42 doesn't handle null — fixed"). Fix accepted items.
-
-   After fixing, if changes were made, re-run `pnpm ci:local:quick` (with self-heal if needed) to ensure fixes don't break anything.
-
-### Phase 5: Commit & Push
-
-9. **Stage & Commit**: Run `git add -A`, then generate a conventional commit message:
+7. **Stage & Commit**: `git add` relevant files, generate conventional commit message:
    - Format: `<type>(<scope>): <description>`
-   - Types: `feat`, `fix`, `docs`, `chore`, `refactor`, `test`, `perf`
-   - Subject: ≤50 chars, lowercase, imperative mood
-   - Body: required, bullet points with `- ` prefix
+   - Subject: <=50 chars, lowercase, imperative mood
+   - Body: required, bullet points
    - Execute `git commit` with HEREDOC message.
 
-10. **Push**: Since preflight already passed, use dedup:
+8. **Push**: Since preflight passed, use dedup:
     ```bash
     RUN_FAST_PUSH=1 git push -u origin <current-branch>
     ```
-    This skips redundant lefthook pre-push checks (build, quality-gate, arch, security) that preflight already validated. `translation-check` still runs (~2s).
 
-### Phase 6: Create PR
+### Phase 5: Create PR
 
-11. **Create PR**: Execute `gh pr create --base main --fill`.
+9. **Create PR**: Execute `gh pr create --base main --fill`.
 
-12. **Report**: Output the PR URL.
+10. **Report**: Output the PR URL.
 
-### Phase 7: CI & Cloud Review Monitoring (skip if `--no-auto`)
+### Phase 6: CI & Cloud Review Monitoring (skip if `--no-auto`)
 
-13. **Wait for CI**: Poll with `gh pr checks <pr-number> --watch`.
-    - If all checks pass → continue to step 14.
-    - If any check fails → report which check failed, **stop here**.
+11. **Wait for CI**: Poll with `gh pr checks <pr-number> --watch`.
+    - All pass: continue. Any fail: report and stop.
 
-14. **Wait for cloud reviews**: Check ALL review sources:
-    ```bash
-    # Check for CodeRabbit and Gemini review comments
-    gh api graphql -f query='
-      query($owner:String!, $repo:String!, $pr:Int!) {
-        repository(owner:$owner, name:$repo) {
-          pullRequest(number:$pr) {
-            reviews(first:10) { nodes { author { login } state } }
-            reviewThreads(first:100) {
-              nodes { isResolved comments(first:1) { nodes { author { login } body } } }
-              pageInfo { hasNextPage endCursor }
-            }
-          }
-        }
-      }
-    ' -f owner="$(gh repo view --json owner -q .owner.login)" -f repo="$(gh repo view --json name -q .name)" -F pr=<number>
-    ```
-    - If reviews present with no unresolved blocking threads → report summary, proceed to step 15.
-    - If no reviews after 10 minutes → report to user with 3 options:
-      1. Continue waiting
-      2. Merge without cloud review
-      3. Abort
-    - If unresolved threads exist → report and suggest `/review-fix`.
+12. **Wait for cloud reviews**: Check CodeRabbit / Gemini via GraphQL API.
+    - Reviews present, no blockers: proceed.
+    - No reviews after 10 minutes: ask user (wait / merge / abort).
+    - Unresolved threads: suggest `/review-fix`.
 
-15. **Merge decision**: Present review summary to user. Wait for explicit "merge" confirmation.
+13. **Merge decision**: Present summary, wait for explicit "merge" confirmation.
 
-### Phase 8: Merge & Cleanup (only after user confirms merge)
+### Phase 7: Merge & Cleanup (only after user confirms)
 
-16. **Merge**: Execute `gh pr merge <pr-number> --squash`.
-
-17. **Switch to main**: `git checkout main`
-
-18. **Pull latest**: `git pull origin main`
-
-19. **Delete local branch**: `git branch -d <branch-name>`
-
-20. **Prune remote refs**: `git remote prune origin`
-
-21. **Final Report**:
-    - PR URL and merge status
-    - Branch cleanup confirmation
-    - Current state: on `main`, up to date
+14. **Merge**: `gh pr merge <pr-number> --squash`
+15. **Switch**: `git checkout main && git pull origin main`
+16. **Cleanup**: `git branch -d <branch-name> && git remote prune origin`
+17. **Report**: PR URL, merge status, current state.
 
 ## Options
 
-- `--no-auto`: Stop after PR creation (Phase 6). Skip CI/review monitoring and merge.
-
-## Example Usage
-
-```
-/pr                    # Full lifecycle: preflight → review → PR → CI → merge → cleanup
-/pr --no-auto          # Stop after PR creation (manual merge later)
-```
+- `--no-auto`: Stop after PR creation (Phase 5). Skip CI/review monitoring and merge.
 
 ## Failure Behavior
 
-- **Preflight fails 3x**: Abort with diagnosis. User decides next step.
-- **Non-auto-fixable failure**: Abort immediately (architecture, security audit, env issues).
-- **Codex review finds critical/high**: Must fix before proceeding.
-- **CI fails**: Report failure, stop. User fixes and re-runs `/pr`.
-- **Cloud review timeout**: User chooses (wait / merge without review / abort).
-- **Unresolved review threads**: Suggest `/review-fix`.
+- **Preflight fails 3x**: Abort with diagnosis.
+- **Non-auto-fixable failure**: Abort immediately.
+- **CI fails**: Report, stop.
+- **Cloud review timeout**: User chooses.
+- **Unresolved threads**: Suggest `/review-fix`.
 
 ## Observability
 
-After the PR lifecycle completes (or aborts), append a JSON line to `reports/automation-loop.jsonl`:
+Append JSON line to `reports/automation-loop.jsonl`:
 
 ```bash
 mkdir -p reports
-echo '{"ts":"<ISO-8601>","command":"pr","branch":"<branch>","preflight_pass":<true|false>,"self_heal_rounds":<0-3>,"codex_findings":<count>,"codex_accepted":<count>,"pr_number":<number|null>,"ci_pass":<true|false|null>,"cloud_reviews":{"coderabbit":<true|false|null>,"gemini":<true|false|null>},"unresolved_threads":<count|null>,"outcome":"<merged|created|aborted|failed>"}' >> reports/automation-loop.jsonl
+echo '{"ts":"<ISO-8601>","command":"pr","branch":"<branch>","preflight_pass":<bool>,"self_heal_rounds":<0-3>,"pr_number":<number|null>,"ci_pass":<bool|null>,"cloud_reviews":{"coderabbit":<bool|null>,"gemini":<bool|null>},"outcome":"<merged|created|aborted|failed>"}' >> reports/automation-loop.jsonl
 ```
-
-This file is gitignored (`reports/` in `.gitignore`). Used for tracking automation effectiveness over time.
 
 ## Notes
 
 - GitHub Flow: all branches merge to `main` via PR
 - No auto-merge: all PRs require explicit merge after review
-- Codex review uses `ask_codex.sh` (longranger2/claude-gpt-workflow) in read-only sandbox
-- If re-running `/pr` on existing PR branch, it pushes new commits to update the PR
+- Codex code review is done separately via `/review` BEFORE running `/pr`

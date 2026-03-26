@@ -47,36 +47,33 @@
                                       │
                                       ▼
 ┌─────────────────────────────────────────────────────────────────────────────────┐
-│                    阶段 3: Review — 代码审查                                     │
+│                    阶段 3: Review — 代码审查（审查与提交分离）                    │
 ├─────────────────────────────────────────────────────────────────────────────────┤
-│  /review:hierarchical ──▶ 多代理层级审查                                        │
+│  /review ──▶ Codex 语义审查（TDD 完成后，/pr 之前）                             │
+│         │    独立的 Codex 代码审查，检查正确性/安全/覆盖率/规范                  │
+│         │    自动化流程中 TDD 最后一步完成后自动触发                              │
+│         │    也可手动调用 `/review` 随时审查                                      │
+│         │                                                                        │
+│  /review:hierarchical ──▶ 多代理层级审查（可选，大型变更时使用）                 │
 │         │                                                                        │
 │         ├── @tech-lead-reviewer (协调者，风险范围界定)                            │
 │         ├── @code-reviewer (代码质量)                                            │
 │         ├── @security-reviewer (安全，参考 review-checklist.md)                  │
 │         └── @ux-reviewer (用户体验)                                              │
 │                                                                                  │
-│  /review:quick ──▶ 精简审查（tech-lead 按需选择专项代理）                        │
-│                                                                                  │
 │  辅助: ui-visual-validator ──▶ 截图分析验证 UI                                  │
 └─────────────────────────────────────────────────────────────────────────────────┘
                                       │
                                       ▼
 ┌─────────────────────────────────────────────────────────────────────────────────┐
-│                    阶段 4: Commit & Finish — 提交与完成                           │
+│                    阶段 4: Submit — 提交流水线（纯机械操作）                      │
 ├─────────────────────────────────────────────────────────────────────────────────┤
-│  git commit ──▶ Pre-commit Hooks 自动执行                                       │
-│         │       format-check → type-check → quality-check                       │
-│         │       → architecture-guard → i18n-sync → test-related                 │
+│  /pr ──▶ preflight → self-heal → commit → push → create PR → CI → merge        │
+│         │  不含代码审查（审查在阶段 3 已完成）                                    │
 │         │                                                                        │
-│         │  提交格式: type(scope): desc (≤50 chars)                              │
-│         │            body: 必须，bullet points                                   │
-│         │            footer: Co-Authored-By 必须                                 │
-│         ▼                                                                        │
-│  /pr ──▶ 推送远程 + 创建 PR (base=main) + 自动合并                             │
-│         │                                                                        │
-│         ▼                                                                        │
-│  Pre-push Hooks: build → translation → quality-gate → arch → security           │
+│         ├── Pre-commit Hooks: format → type-check → quality → arch → i18n       │
+│         ├── Pre-push Hooks: build → translation → quality-gate → security       │
+│         └── CI + Cloud Review (CodeRabbit/Gemini) → merge                       │
 └─────────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -127,7 +124,7 @@ task 文件引用 scenario
        ↓
   executing-plans → BDD (Red-Green-Refactor) → commit
        ↓
-  review:hierarchical → /pr (base=main)
+  /review (Codex 语义审查) → /pr (提交流水线, base=main)
 ```
 
 ---
@@ -141,8 +138,8 @@ task 文件引用 scenario
 | **规划** | `writing-plans` | — |
 | **执行** | `behavior-driven-development` (自动) | `agent-team-driven-development` |
 | **调试** | — | `systematic-debugging` |
-| **审查** | `review:hierarchical` | `review:quick`, `ui-visual-validator` |
-| **完成** | `/pr` | — |
+| **审查** | `/review` (Codex 语义审查) | `review:hierarchical`, `review:quick`, `ui-visual-validator` |
+| **提交** | `/pr` (提交流水线) | — |
 
 ---
 
@@ -168,7 +165,8 @@ task 文件引用 scenario
 | 名称 | 类型 | 作用 | 阶段 |
 |------|------|------|------|
 | `afk` | Command | 无人值守模式 | 入口 |
-| `pr` | Command | 创建 PR (base=main) | 提交 |
+| `review` | Command | Codex 语义审查（TDD 后，/pr 前） | 审查 |
+| `pr` | Command | 提交流水线 (preflight → push → PR → CI → merge) | 提交 |
 | `cwf` | Command | 文案工作流 | 入口 |
 | `dwf` | Command | 设计工作流 | 入口 |
 
@@ -239,8 +237,8 @@ task 文件引用 scenario
 | 改 Next.js | `next-best-practices` → BDD 执行 |
 | 升级 Next.js | `next-upgrade` |
 | 样式问题 | `tailwind-v4-shadcn` |
-| 代码审查 | `review:hierarchical` 或 `review:quick` |
-| 提 PR | `/pr` (base=main) |
+| 代码审查 | `/review` (Codex 语义审查) → 可选 `review:hierarchical` |
+| 提 PR | `/review` → `/pr` (审查完再提交) |
 | 紧急修复 | 创建 hotfix 分支 → 修复 → `/pr` |
 | 复杂多人 | `agent-team-driven-development` |
 | 离开执行 | `/afk` |
@@ -271,15 +269,15 @@ BDD 链 (brainstorming → specs → tests → implementation)
     ↓  确保每个功能都有对应测试
 Pre-commit Hooks (format + type-check + quality + arch + i18n)
     ↓  确保代码质量门禁
-review:hierarchical (tech-lead + code + security + ux)
-    ↓  确保多维度审查 (参考 review-checklist.md)
-Pre-push Hooks (build + translation + quality-gate + security)
-    ↓  确保可部署
-pnpm ci:local (手动全量验证)
-    ↓  PR 前最终确认
+/review (Codex 语义审查 — 正确性 + 安全 + 规范)
+    ↓  独立于提交流程，TDD 后自动或手动触发
+/pr (preflight + push + PR + CI monitoring)
+    ↓  纯机械流水线，不含代码审查
+Cloud Reviews (CodeRabbit / Gemini)
+    ↓  外部视角补充
 ```
 
-BDD 链 + Git Hooks + Review 插件构成三层质量保障，不需要额外的 CI 循环命令。
+BDD 链 + Codex 审查 + Git Hooks + Cloud Reviews 构成四层质量保障。审查与提交分离，各司其职。
 
 ---
 
