@@ -228,7 +228,8 @@
       "@radix-ui/react-slot": "1.2.4",
       "ajv@>=8.0.0 <8.18.0": ">=8.18.0",
       "serialize-javascript@<=7.0.2": ">=7.0.3",
-      "webpack@>=5.49.0 <5.104.1": ">=5.104.1"
+      "webpack@>=5.49.0 <5.104.1": ">=5.104.1",
+      "picomatch@>=4.0.0 <4.0.4": ">=4.0.4"
     },
     "onlyBuiltDependencies": [
       "@tailwindcss/oxide",

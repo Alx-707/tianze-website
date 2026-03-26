@@ -172,6 +172,13 @@ task 文件引用 scenario
 | `cwf` | Command | 文案工作流 | 入口 |
 | `dwf` | Command | 设计工作流 | 入口 |
 
+### Codex 协作 (longranger2/claude-gpt-workflow)
+| Skill | 作用 | 阶段 |
+|-------|------|------|
+| `codex` | 委派编码任务给 Codex CLI | 执行 |
+| `plan-review` | Codex 对抗式审查计划，迭代到 APPROVED | 规划 |
+| `plan-execute` | Claude 指挥 + Codex 写码 + Claude 审查循环 | 执行 |
+
 ### 领域 Skills
 | 类别 | Skills |
 |------|--------|

@@ -52,13 +52,22 @@ Automate the full PR lifecycle: preflight → self-heal → Codex review → com
 
 ### Phase 4: Codex Semantic Review
 
-7. **Generate review prompt and call Codex**: Run the following via Bash:
+7. **Generate review prompt and call Codex**: Write the diff to a temp file, then invoke `ask_codex.sh`:
 
    ```bash
-   python3 ~/.claude/skills/collaborating-with-codex/scripts/codex_bridge.py \
-     --cd "$(pwd)" \
+   # Capture diff for Codex
+   git diff main...HEAD > /tmp/pr-review-diff.patch
+   git diff >> /tmp/pr-review-diff.patch
+   git diff main...HEAD --stat > /tmp/pr-review-files.txt
+
+   # Call Codex via ask_codex.sh
+   ~/.claude/skills/codex/scripts/ask_codex.sh \
+     "<review_prompt>" \
+     --file /tmp/pr-review-diff.patch \
+     --file /tmp/pr-review-files.txt \
+     --file CLAUDE.md \
      --sandbox read-only \
-     --PROMPT "<review_prompt>"
+     --reasoning high
    ```
 
    The `<review_prompt>` must include:
@@ -71,8 +80,9 @@ Automate the full PR lifecycle: preflight → self-heal → Codex review → com
    - Understand this is a production Next.js 16 project (solo dev)
 
    Step 2: Understand changes
-   - Run: git diff main...HEAD
-   - Read all modified/added files
+   - The diff is in /tmp/pr-review-diff.patch
+   - The changed files list is in /tmp/pr-review-files.txt
+   - Read all modified/added files in the workspace for full context
 
    Step 3: Review for these dimensions (skip irrelevant ones):
 
@@ -99,6 +109,8 @@ Automate the full PR lifecycle: preflight → self-heal → Codex review → com
    For each issue: file path, line number, severity (critical/high/medium/low), category, description, suggested fix.
    Organize by severity. End with summary.
    Only flag issues you are confident about.
+   If all changes are solid, end with: VERDICT: APPROVED
+   If issues need fixing, end with: VERDICT: REVISE
    ```
 
 8. **Triage Codex findings**: Parse the response and categorize each finding:
@@ -234,5 +246,5 @@ This file is gitignored (`reports/` in `.gitignore`). Used for tracking automati
 
 - GitHub Flow: all branches merge to `main` via PR
 - No auto-merge: all PRs require explicit merge after review
-- Codex review uses `collaborating-with-codex` bridge in read-only sandbox
+- Codex review uses `ask_codex.sh` (longranger2/claude-gpt-workflow) in read-only sandbox
 - If re-running `/pr` on existing PR branch, it pushes new commits to update the PR
