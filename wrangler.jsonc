@@ -8,6 +8,8 @@
   // Wrangler-level minification via esbuild (bypasses OpenNext minifier pnpm bug).
   // Reduces gzip bundle from ~3.2MB to ~2.8MB, fitting within free-tier 3MB limit.
   "minify": true,
+  // Drop __name() annotations from minified output for additional ~76KB gzip savings.
+  "keep_names": false,
 
   // Static assets (OpenNext output)
   "assets": {
