@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   shouldValidateProductionRuntimeContract,
+  validateProductionConfig,
   validateProductionRuntimeContract,
 } from "../../../scripts/validate-production-config";
 
@@ -138,5 +139,40 @@ describe("validate-production-config runtime contract", () => {
         expect.stringContaining("AIRTABLE_BASE_ID is required"),
       ]),
     );
+  });
+});
+
+describe("validateProductionConfig CI vs deploy gate", () => {
+  it("downgrades runtime errors to warnings when VALIDATE_CONFIG_SKIP_RUNTIME is true", () => {
+    const env: NodeJS.ProcessEnv = {
+      NODE_ENV: "production",
+      VALIDATE_CONFIG_SKIP_RUNTIME: "true",
+    };
+
+    const result = validateProductionConfig(env);
+
+    expect(result.errors).toEqual([]);
+    expect(result.warnings.length).toBeGreaterThan(0);
+  });
+
+  it("keeps runtime errors as hard failures when VALIDATE_CONFIG_SKIP_RUNTIME is absent", () => {
+    const env: NodeJS.ProcessEnv = {
+      NODE_ENV: "production",
+    };
+
+    const result = validateProductionConfig(env);
+
+    expect(result.errors.length).toBeGreaterThan(0);
+  });
+
+  it("keeps runtime errors as hard failures even when CI=true without the skip flag", () => {
+    const env: NodeJS.ProcessEnv = {
+      NODE_ENV: "production",
+      CI: "true",
+    };
+
+    const result = validateProductionConfig(env);
+
+    expect(result.errors.length).toBeGreaterThan(0);
   });
 });

@@ -29,6 +29,7 @@ import { SITE_CONFIG } from "@/config/paths/site-config";
 export interface CompanyInfo {
   name: string;
   established: number;
+  yearsInBusiness: number;
   employees: number;
   location: {
     country: string;
@@ -91,10 +92,13 @@ export interface SiteFacts {
  * 2. Update all values with client's actual data
  * 3. Add/remove fields as needed
  */
+const ESTABLISHED_YEAR = 2018;
+
 export const siteFacts: SiteFacts = {
   company: {
     name: SITE_CONFIG.name,
-    established: 2018,
+    established: ESTABLISHED_YEAR,
+    yearsInBusiness: new Date().getFullYear() - ESTABLISHED_YEAR,
     employees: 60,
     location: {
       country: "China",

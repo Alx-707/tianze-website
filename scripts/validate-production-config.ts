@@ -216,11 +216,13 @@ export function validateProductionConfig(
     ? validateProductionRuntimeContract(env)
     : { warnings: [], errors: [] };
 
-  // CI tests code quality, not deployment readiness.
-  // Runtime contract errors are downgraded to warnings so builds can proceed.
-  const isCi = isTrue(env, "CI");
-  const runtimeErrors = isCi ? [] : runtimeContract.errors;
-  const runtimeWarnings = isCi
+  // CI quality builds test code, not deployment readiness.
+  // VALIDATE_CONFIG_SKIP_RUNTIME downgrades runtime contract errors to warnings
+  // so CI builds can proceed without production secrets.
+  // Deploy workflows must NOT set this flag — they need hard enforcement.
+  const skipRuntime = isTrue(env, "VALIDATE_CONFIG_SKIP_RUNTIME");
+  const runtimeErrors = skipRuntime ? [] : runtimeContract.errors;
+  const runtimeWarnings = skipRuntime
     ? [...runtimeContract.warnings, ...runtimeContract.errors]
     : runtimeContract.warnings;
 

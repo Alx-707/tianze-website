@@ -223,7 +223,7 @@ function StatsSection({ stats }: StatsSectionProps) {
   const statItems = [
     {
       key: "years",
-      value: String(siteFacts.company.established),
+      value: `${siteFacts.company.yearsInBusiness}+`,
       label: stats.yearsExperience,
     },
     {

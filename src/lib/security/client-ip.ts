@@ -249,8 +249,18 @@ function normalizeIPv6Segments(segments: string[]): string[] | null {
   return segments;
 }
 
+const MALFORMED_IPV6_TRIPLE_COLON = /:::/u;
+
+function hasValidIPv6Structure(ip: string): boolean {
+  if (MALFORMED_IPV6_TRIPLE_COLON.test(ip)) return false;
+  if (ip.startsWith(":") && !ip.startsWith("::")) return false;
+  if (ip.endsWith(":") && !ip.endsWith("::")) return false;
+  return true;
+}
+
 function ipv6ToBigInt(ip: string): bigint | null {
   if (!ip.includes(":")) return null;
+  if (!hasValidIPv6Structure(ip)) return null;
 
   const compressedParts = ip.split("::");
   if (compressedParts.length > 2) return null;
@@ -266,13 +276,14 @@ function ipv6ToBigInt(ip: string): bigint | null {
 
   if (!leftSegments || !rightSegments) return null;
 
-  const hasCompression = ip.includes("::");
-  const missingSegments =
-    IPV6_SEGMENT_COUNT - (leftSegments.length + rightSegments.length);
+  const hasCompression = compressedParts.length === 2;
+  const totalProvided = leftSegments.length + rightSegments.length;
+  const missingSegments = IPV6_SEGMENT_COUNT - totalProvided;
 
-  if ((!hasCompression && missingSegments !== 0) || missingSegments < 0) {
-    return null;
-  }
+  const validCount = hasCompression
+    ? missingSegments > 0
+    : missingSegments === 0;
+  if (!validCount) return null;
 
   const segments = hasCompression
     ? [

@@ -4,15 +4,29 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import AboutPage, { generateMetadata, generateStaticParams } from "../page";
 
 // Mock dependencies using vi.hoisted
-const { mockGetTranslations, mockSetRequestLocale, mockSuspenseState } =
-  vi.hoisted(() => ({
-    mockGetTranslations: vi.fn(),
-    mockSetRequestLocale: vi.fn(),
-    mockSuspenseState: {
-      locale: "en",
-      translations: {} as Record<string, string>,
+const {
+  mockGetTranslations,
+  mockSetRequestLocale,
+  mockSuspenseState,
+  mockSiteFacts,
+} = vi.hoisted(() => ({
+  mockGetTranslations: vi.fn(),
+  mockSetRequestLocale: vi.fn(),
+  mockSuspenseState: {
+    locale: "en",
+    translations: {} as Record<string, string>,
+  },
+  mockSiteFacts: {
+    company: {
+      name: "Tianze",
+      established: 2018,
+      yearsInBusiness: new Date().getFullYear() - 2018,
+      employees: 60,
+      location: { country: "China", city: "Lianyungang, Jiangsu" },
     },
-  }));
+    stats: { exportCountries: 20 },
+  },
+}));
 
 // Mock Suspense to render mock content (async Server Components can't be rendered in Vitest)
 vi.mock("react", async () => {
@@ -92,7 +106,7 @@ vi.mock("react", async () => {
               <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
                 <div className="text-center">
                   <div className="mb-2 text-4xl font-bold text-primary">
-                    15+
+                    {`${mockSiteFacts.company.yearsInBusiness}+`}
                   </div>
                   <div className="text-sm text-muted-foreground">
                     {t("stats.yearsExperience")}
@@ -100,7 +114,7 @@ vi.mock("react", async () => {
                 </div>
                 <div className="text-center">
                   <div className="mb-2 text-4xl font-bold text-primary">
-                    50+
+                    {`${mockSiteFacts.stats.exportCountries}+`}
                   </div>
                   <div className="text-sm text-muted-foreground">
                     {t("stats.countriesServed")}
@@ -108,7 +122,7 @@ vi.mock("react", async () => {
                 </div>
                 <div className="text-center">
                   <div className="mb-2 text-4xl font-bold text-primary">
-                    1000+
+                    {`${mockSiteFacts.company.employees}+`}
                   </div>
                   <div className="text-sm text-muted-foreground">
                     {t("stats.happyClients")}
@@ -116,13 +130,29 @@ vi.mock("react", async () => {
                 </div>
                 <div className="text-center">
                   <div className="mb-2 text-4xl font-bold text-primary">
-                    10M+
+                    100
                   </div>
                   <div className="text-sm text-muted-foreground">
                     {t("stats.productsDelivered")}
                   </div>
                 </div>
               </div>
+            </div>
+          </section>
+          <section data-testid="faq-section" className="section-divider py-14">
+            <div className="mx-auto max-w-[1080px] px-6">
+              <h2>FAQ</h2>
+              {[
+                "manufacturer",
+                "factoryVisit",
+                "exportExperience",
+                "certifications",
+                "verifyCerts",
+              ].map((key) => (
+                <div key={key} data-testid={`faq-item-${key}`}>
+                  {t(`faq.${key}`) || key}
+                </div>
+              ))}
             </div>
           </section>
           <section className="bg-primary py-12 md:py-16">
@@ -359,10 +389,32 @@ describe("AboutPage", () => {
       expect(screen.getByText("Countries Served")).toBeInTheDocument();
       expect(screen.getByText("Happy Clients")).toBeInTheDocument();
       expect(screen.getByText("Products Delivered")).toBeInTheDocument();
-      expect(screen.getByText("15+")).toBeInTheDocument();
-      expect(screen.getByText("50+")).toBeInTheDocument();
-      expect(screen.getByText("1000+")).toBeInTheDocument();
-      expect(screen.getByText("10M+")).toBeInTheDocument();
+      // Values match siteFacts (not hardcoded placeholders)
+      expect(
+        screen.getByText(`${mockSiteFacts.company.yearsInBusiness}+`),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(`${mockSiteFacts.stats.exportCountries}+`),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(`${mockSiteFacts.company.employees}+`),
+      ).toBeInTheDocument();
+      expect(screen.getByText("100")).toBeInTheDocument();
+    });
+
+    it("should render FAQ section with expected items", async () => {
+      const AboutPageComponent = await AboutPage({
+        params: Promise.resolve(mockParams),
+      });
+
+      render(AboutPageComponent);
+
+      expect(screen.getByTestId("faq-section")).toBeInTheDocument();
+      expect(screen.getByTestId("faq-item-manufacturer")).toBeInTheDocument();
+      expect(
+        screen.getByTestId("faq-item-exportExperience"),
+      ).toBeInTheDocument();
+      expect(screen.getByTestId("faq-item-certifications")).toBeInTheDocument();
     });
 
     it("should render CTA section with contact button", async () => {
