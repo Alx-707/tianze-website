@@ -37,7 +37,7 @@ It is organized as a dependency-aware execution program, not a flat todo list.
 - ~~Contact Server Action client IP correctness under Cloudflare~~ → materially closed at repo level
 - ~~single release gate tied to deployment~~ → effectively closed (`pnpm release:verify` + deployed smoke)
 - full production env fail-fast contract (partially closed, remaining work minor)
-- long-term governance docs and truth registry
+- ~~long-term governance docs and truth registry~~ → materially closed via active-doc alignment + canonical truth registry
 - residual shared runtime script cost
 - trustworthy local parity proof for the split-worker Cloudflare architecture
 
@@ -202,11 +202,13 @@ It is organized as a dependency-aware execution program, not a flat todo list.
 #### D1. Deployment and identity docs alignment
 - Goal: Make project identity, deployment story, and supported platforms match reality.
 - Depends on: A1
+- Status: materially closed
 - Release impact: medium
 
 #### D2. Canonical truth registry
 - Goal: Record the true runtime entrypoints, message sources, lead paths, and test-only surfaces.
 - Depends on: A1 and latest implementation state
+- Status: closed
 - Release impact: medium
 
 #### D3. Dead code / fake abstraction cleanup

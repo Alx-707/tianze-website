@@ -1,9 +1,16 @@
 import { NextResponse } from "next/server";
 import { createApiErrorResponse } from "@/lib/api/api-response";
 import type { LeadResult } from "@/lib/lead-pipeline/process-lead";
-import type { ApiErrorCode } from "@/constants/api-error-codes";
-import { HTTP_BAD_REQUEST, HTTP_INTERNAL_ERROR } from "@/constants";
-import { verifyTurnstile } from "@/lib/turnstile";
+import {
+  API_ERROR_CODES,
+  type ApiErrorCode,
+} from "@/constants/api-error-codes";
+import {
+  HTTP_BAD_REQUEST,
+  HTTP_INTERNAL_ERROR,
+  HTTP_SERVICE_UNAVAILABLE,
+} from "@/constants";
+import { verifyTurnstileDetailed } from "@/lib/turnstile";
 import { logger, sanitizeIP } from "@/lib/logger";
 
 interface LeadFailureResponseOptions {
@@ -60,10 +67,28 @@ export async function validateLeadTurnstileToken(
     return createApiErrorResponse(missingTokenErrorCode, HTTP_BAD_REQUEST);
   }
 
-  const isValid = await verifyTurnstile(token, clientIP);
-  if (!isValid) {
+  const verificationResult = await verifyTurnstileDetailed(token, clientIP);
+
+  if (!verificationResult.success) {
+    const errorCodes = verificationResult.errorCodes ?? [];
+    const isServiceFailure = errorCodes.some((code) =>
+      ["not-configured", "network-error", "timeout"].includes(code),
+    );
+
+    if (isServiceFailure) {
+      logger.error("Lead Turnstile verification unavailable", {
+        ip: sanitizeIP(clientIP),
+        errorCodes,
+      });
+      return createApiErrorResponse(
+        API_ERROR_CODES.SERVICE_UNAVAILABLE,
+        HTTP_SERVICE_UNAVAILABLE,
+      );
+    }
+
     logger.warn(invalidTokenLogMessage, {
       ip: sanitizeIP(clientIP),
+      errorCodes,
     });
     return createApiErrorResponse(invalidTokenErrorCode, HTTP_BAD_REQUEST);
   }

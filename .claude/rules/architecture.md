@@ -103,6 +103,7 @@ Notes:
 
 - `pnpm smoke:cf:preview:strict` (includes `/api/health` in local preview) is a **diagnostic tool**, not a release gate. Its failure does not block releases.
 - Local preview is still a bounded proof surface even though `build:cf` now uses Webpack by default; do not treat local Wrangler behavior as a complete substitute for deployed Cloudflare evidence.
+- As of 2026-03-27, the local preview server can still render middleware-only redirects correctly while returning 500 for page requests like `/en` and `/en/contact` because Wrangler local runtime hits a `middleware-manifest.json` dynamic-require failure. Treat that as a local preview limitation unless the same failure reproduces after deployment.
 - Final API proof happens **only after real Cloudflare deployment**, via the post-deploy smoke in the deploy workflow.
 - If post-deploy smoke fails, rollback to the previous deployment.
 

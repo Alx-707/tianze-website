@@ -2,6 +2,10 @@ import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { GET, POST } from "@/app/api/cache/invalidate/route";
 import { API_ERROR_CODES } from "@/constants/api-error-codes";
+import {
+  getSystemObservabilitySnapshot,
+  resetSystemObservability,
+} from "@/lib/observability/system-observability";
 
 const {
   mockLogger,
@@ -20,10 +24,11 @@ const {
       error: vi.fn(),
     },
     mockCheckDistributedRateLimit: vi.fn(async () => ({
-      allowed: true,
+      allowed: true as boolean,
       remaining: 10,
       resetTime: Date.now() + 60000,
-      retryAfter: null,
+      retryAfter: null as number | null,
+      deniedReason: undefined as string | undefined,
     })),
     mockCreateRateLimitHeaders: vi.fn(() => new Headers()),
     mockInvalidateI18n: {
@@ -140,6 +145,7 @@ describe("cache invalidate route", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.stubEnv("CACHE_INVALIDATION_SECRET", "secret");
+    resetSystemObservability();
   });
 
   it("GET returns usage metadata", async () => {
@@ -167,6 +173,7 @@ describe("cache invalidate route", () => {
     expect(response.status).toBe(401);
     const body = await response.json();
     expect(body.errorCode).toBe(API_ERROR_CODES.UNAUTHORIZED);
+    expect(getSystemObservabilitySnapshot().aggregates).toHaveLength(1);
   });
 
   it("POST returns 503 when CACHE_INVALIDATION_SECRET is not configured", async () => {
@@ -189,6 +196,31 @@ describe("cache invalidate route", () => {
     const body = await response.json();
     expect(body.errorCode).toBe(API_ERROR_CODES.SERVICE_UNAVAILABLE);
     expect(mockInvalidateI18n.all).not.toHaveBeenCalled();
+  });
+
+  it("POST records observability when pre-auth rate limit rejects the request", async () => {
+    mockCheckDistributedRateLimit.mockResolvedValueOnce({
+      allowed: false,
+      remaining: 0,
+      resetTime: Date.now() + 60000,
+      retryAfter: 60,
+      deniedReason: "limit",
+    });
+
+    const request = new NextRequest(
+      "http://localhost:3000/api/cache/invalidate",
+      {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({ domain: "i18n" }),
+      },
+    );
+
+    const response = await POST(request);
+    expect(response.status).toBe(429);
+    expect(getSystemObservabilitySnapshot().aggregates).toHaveLength(1);
   });
 
   it("POST invalidates i18n tags when authorized", async () => {

@@ -32,7 +32,16 @@ describe("Middleware Cookie Security", () => {
 
   afterEach(() => {
     vi.unstubAllGlobals();
+    vi.unstubAllEnvs();
   });
+
+  function attachRequestIP(request: NextRequest, ip: string): NextRequest {
+    Object.defineProperty(request, "ip", {
+      value: ip,
+      configurable: true,
+    });
+    return request;
+  }
 
   describe("setLocaleCookie security attributes", () => {
     it("should set httpOnly: true to prevent XSS access", async () => {
@@ -210,6 +219,50 @@ describe("Middleware Cookie Security", () => {
           expect(setCookieHeader).toContain("HttpOnly");
           expect(setCookieHeader).toMatch(/SameSite=Lax/i);
         }
+        expect(response.headers.get("location")).toBe(
+          "http://localhost:3000/en/about",
+        );
+      }
+    });
+
+    it("should redirect invalid locale prefix for dynamic routes", async () => {
+      vi.resetModules();
+
+      vi.doMock("next-intl/middleware", () => ({
+        default: vi.fn(() => vi.fn(() => NextResponse.next())),
+      }));
+      vi.doMock("@/config/security", () => ({
+        generateNonce: vi.fn(() => "test-nonce-123"),
+        getSecurityHeaders: vi.fn(() => []),
+      }));
+      vi.doMock("@/i18n/routing-config", () => ({
+        routing: {
+          defaultLocale: "en",
+          locales: ["en", "zh"],
+          pathnames: {
+            "/": "/",
+            "/about": "/about",
+            "/products/[market]/[family]": "/products/[market]/[family]",
+          },
+        },
+      }));
+
+      const { default: middleware } = await import("@/middleware");
+
+      const request = new NextRequest(
+        "http://localhost:3000/fr/products/eu/fittings",
+      );
+      const response = middleware(request);
+
+      if (response) {
+        const setCookieHeader = response.headers.get("set-cookie");
+        if (setCookieHeader) {
+          expect(setCookieHeader).toContain("HttpOnly");
+          expect(setCookieHeader).toMatch(/SameSite=Lax/i);
+        }
+        expect(response.headers.get("location")).toBe(
+          "http://localhost:3000/en/products/eu/fittings",
+        );
       }
     });
 
@@ -265,13 +318,17 @@ describe("Middleware Cookie Security", () => {
     });
 
     it("should expose a middleware-derived trusted client IP override", async () => {
+      vi.stubEnv("CF_PAGES", "1");
       const { default: middleware } = await import("@/middleware");
 
-      const request = new NextRequest("http://localhost:3000/en/contact", {
-        headers: {
-          "cf-connecting-ip": "198.51.100.77",
-        },
-      });
+      const request = attachRequestIP(
+        new NextRequest("http://localhost:3000/en/contact", {
+          headers: {
+            "cf-connecting-ip": "198.51.100.77",
+          },
+        }),
+        "173.245.48.25",
+      );
       const response = middleware(request);
 
       expect(
@@ -282,6 +339,27 @@ describe("Middleware Cookie Security", () => {
       expect(response.headers.get("x-middleware-override-headers")).toContain(
         INTERNAL_TRUSTED_CLIENT_IP_HEADER,
       );
+    });
+
+    it("should not expose a middleware-derived trusted client IP override for untrusted Cloudflare sources", async () => {
+      vi.stubEnv("CF_PAGES", "1");
+      const { default: middleware } = await import("@/middleware");
+
+      const request = attachRequestIP(
+        new NextRequest("http://localhost:3000/en/contact", {
+          headers: {
+            "cf-connecting-ip": "198.51.100.77",
+          },
+        }),
+        "198.51.100.25",
+      );
+      const response = middleware(request);
+
+      expect(
+        response.headers.get(
+          `x-middleware-request-${INTERNAL_TRUSTED_CLIENT_IP_HEADER}`,
+        ),
+      ).toBeNull();
     });
   });
 });

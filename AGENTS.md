@@ -41,12 +41,12 @@
   - 每次涉及该入口文件的改动，至少执行一次 `pnpm build` 和 `pnpm build:cf`
   - 如果未来再次迁移 `middleware -> proxy`，`config.matcher` 仍必须只写静态字面量；不能引用常量、拼装数组或动态值，否则 Turbopack 会报 `matcher[...] need to be static strings or static objects`
 
-### 5. 当前 `@opennextjs/cloudflare@1.17.1` 下，先不要重新打开 OpenNext `minify`
-- 本仓库已验证：升级到 `next@16.2.0` + `@opennextjs/cloudflare@1.17.1` 后，Cloudflare 打包链路在 OpenNext 的 minify 阶段会因为 pnpm 风格 `node_modules` 触发 `ENOENT`。
+### 5. 当前 `@opennextjs/cloudflare@1.17.3` 下，先不要重新打开 OpenNext `minify`
+- 本仓库已验证：升级到 `next@16.2.0` + `@opennextjs/cloudflare@1.17.3` 后，Cloudflare 打包链路的默认稳定做法仍然是关闭 OpenNext `minify`；在当前 pnpm 结构下，重新打开仍有较高概率重新触发打包层问题。
 - 当前稳定做法是：在 `open-next.config.ts` 中把 split functions 和 default worker 的 `minify` 关闭。
 - 默认动作：
   - 如果有人想重新打开 `minify`，必须先重新执行 `pnpm build:cf`
-  - 只有在确认上游修复后，才允许恢复
+  - 只有在确认上游修复且本仓库重新验证通过后，才允许恢复
   - 不要把这个开关当作“纯性能优化”随手改动
 
 ### 6. 不要并行执行 `pnpm build` 和 `pnpm build:cf`
@@ -120,9 +120,11 @@
   - `pnpm build:cf` 的正式实现现在是 `node scripts/cloudflare/build-webpack.mjs`；
   - `pnpm build:cf:turbo` 仅保留为对照/排查链路，不再是默认 Cloudflare 构建入口；
   - 直接基于当前 Webpack 产物跑 `wrangler dev --env preview`，仍会在本地 bundling/runtime 层触发 `middleware-manifest.json` 动态 require 错误；
+  - 这个错误当前会让 `/en`、`/zh`、`/en/contact`、`/zh/contact` 之类页面在 stock local preview 下返回 500，但不会阻止 `/`、invalid locale redirect、动态产品 redirect 这类纯 middleware / redirect 路径返回正确结果；
   - 改成 `wrangler dev --env preview --no-bundle` 后，本地又会卡在 `cloudflare/images.js` 模块缺失。
 - 当前默认动作：
   - 把 Webpack 视为当前正式 Cloudflare 构建链路；
   - 不要把本地 Wrangler preview 当成这条主链路的完整 release proof；
+  - 如果这类 local preview 500 只出现在页面渲染阶段，而 redirect / cookie / internal header 检查仍然正常，先归类为 stock preview 边界，不要直接回滚业务改动；
   - 本地 Cloudflare 页面验证仍优先走既有的 `smoke:cf:preview` 分层策略；
   - 如果未来要把 Wrangler 本地 preview 提升为更强的正式证明面，必须先补一轮本地可运行证据。

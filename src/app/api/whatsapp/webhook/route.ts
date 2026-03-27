@@ -38,6 +38,26 @@ import {
 const MAX_BODY_BYTES = 1_000_000; // 1 MB
 const HTTP_FORBIDDEN = 403;
 
+function createWebhookRateLimitResponse(
+  rateLimitResult: Awaited<ReturnType<typeof checkDistributedRateLimit>>,
+) {
+  const headers = createRateLimitHeaders(rateLimitResult);
+  const isStorageFailure = rateLimitResult.deniedReason === "storage_failure";
+  const status = isStorageFailure
+    ? HTTP_SERVICE_UNAVAILABLE
+    : HTTP_TOO_MANY_REQUESTS;
+
+  return NextResponse.json(
+    {
+      success: false,
+      errorCode: isStorageFailure
+        ? API_ERROR_CODES.SERVICE_UNAVAILABLE
+        : API_ERROR_CODES.RATE_LIMIT_EXCEEDED,
+    },
+    { status, headers },
+  );
+}
+
 function getUtf8ByteLength(text: string): number {
   // Buffer.byteLength avoids allocating a full byte array; keep a fallback for edge-like runtimes.
   if (typeof Buffer !== "undefined") return Buffer.byteLength(text, "utf8");
@@ -45,8 +65,26 @@ function getUtf8ByteLength(text: string): number {
 }
 
 // GET: Webhook verification
-export function GET(request: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
+    const rateLimitKey = getIPKey(request);
+    const rateLimitResult = await checkDistributedRateLimit(
+      rateLimitKey,
+      "whatsapp",
+    );
+    if (!rateLimitResult.allowed) {
+      return createWebhookRateLimitResponse(rateLimitResult);
+    }
+
+    if (rateLimitResult.degraded) {
+      logger.warn(
+        "[WhatsAppWebhook] Verification rate limit storage degraded (fail-open) — proceeding without enforcement",
+        {
+          rateLimitKey,
+        },
+      );
+    }
+
     const { searchParams } = request.nextUrl;
     const mode = searchParams.get("hub.mode");
     const token = searchParams.get("hub.verify_token");

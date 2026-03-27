@@ -72,7 +72,7 @@ describe("WhatsApp Webhook Route", () => {
   });
 
   describe("GET - Webhook Verification", () => {
-    it("should verify webhook with valid parameters", () => {
+    it("should verify webhook with valid parameters", async () => {
       mockVerifyWebhook.mockReturnValue("challenge-token-123");
 
       const request = createMockGetRequest({
@@ -81,7 +81,7 @@ describe("WhatsApp Webhook Route", () => {
         "hub.challenge": "challenge-token-123",
       });
 
-      const response = GET(request);
+      const response = await GET(request);
 
       expect(response.status).toBe(200);
       expect(mockVerifyWebhook).toHaveBeenCalledWith(
@@ -100,7 +100,7 @@ describe("WhatsApp Webhook Route", () => {
         "hub.challenge": "challenge-token-123",
       });
 
-      const response = GET(request);
+      const response = await GET(request);
       const text = await response.text();
 
       expect(text).toBe("challenge-token-123");
@@ -116,7 +116,7 @@ describe("WhatsApp Webhook Route", () => {
         "hub.challenge": "challenge-123",
       });
 
-      const response = GET(request);
+      const response = await GET(request);
       const data = await response.json();
 
       expect(response.status).toBe(403);
@@ -129,7 +129,7 @@ describe("WhatsApp Webhook Route", () => {
         "hub.challenge": "challenge-123",
       });
 
-      const response = GET(request);
+      const response = await GET(request);
       const data = await response.json();
 
       expect(response.status).toBe(400);
@@ -142,7 +142,7 @@ describe("WhatsApp Webhook Route", () => {
         "hub.challenge": "challenge-123",
       });
 
-      const response = GET(request);
+      const response = await GET(request);
       const data = await response.json();
 
       expect(response.status).toBe(400);
@@ -155,7 +155,7 @@ describe("WhatsApp Webhook Route", () => {
         "hub.verify_token": "my-token",
       });
 
-      const response = GET(request);
+      const response = await GET(request);
       const data = await response.json();
 
       expect(response.status).toBe(400);
@@ -165,7 +165,7 @@ describe("WhatsApp Webhook Route", () => {
     it("should return 400 when all parameters are missing", async () => {
       const request = createMockGetRequest({});
 
-      const response = GET(request);
+      const response = await GET(request);
       const data = await response.json();
 
       expect(response.status).toBe(400);
@@ -183,11 +183,34 @@ describe("WhatsApp Webhook Route", () => {
         "hub.challenge": "challenge-123",
       });
 
-      const response = GET(request);
+      const response = await GET(request);
       const data = await response.json();
 
       expect(response.status).toBe(500);
       expect(data.errorCode).toBe("INTERNAL_SERVER_ERROR");
+    });
+
+    it("should return 429 when verification GET is rate limited", async () => {
+      mockCheckDistributedRateLimit.mockResolvedValueOnce({
+        allowed: false,
+        remaining: 0,
+        resetTime: Date.now() + 60000,
+        retryAfter: 60,
+        deniedReason: "limit",
+      });
+
+      const request = createMockGetRequest({
+        "hub.mode": "subscribe",
+        "hub.verify_token": "invalid-token",
+        "hub.challenge": "challenge-123",
+      });
+
+      const response = await GET(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(429);
+      expect(data.errorCode).toBe("RATE_LIMIT_EXCEEDED");
+      expect(mockVerifyWebhook).not.toHaveBeenCalled();
     });
   });
 

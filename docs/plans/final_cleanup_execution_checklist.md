@@ -7,6 +7,16 @@ Close the remaining non-blocking work after release-truth and Cloudflare deploym
 - Real Cloudflare deployment validation has already passed.
 - Remaining work is cleanup, hardening, documentation, and third-party service completion rather than release blocking.
 
+## Current Close-Out Status
+- Documentation alignment: substantially complete
+- Canonical truth registry: complete
+- Release blocking items: closed
+- Remaining work is now concentrated in:
+  - third-party service completion
+  - performance guardrails
+  - accessibility guardrails
+  - dead code / fake-entry cleanup
+
 ## Parallel Workstreams
 
 ### Workstream 1: Secrets and Third-Party Service Completion
@@ -107,6 +117,11 @@ Tasks:
 
 Done when:
 - A new maintainer can understand what is actually live without reverse-engineering the repository.
+
+Current state:
+- README / active guides / active rules are aligned with the current Cloudflare and release-proof model.
+- Canonical truth registry is present.
+- Remaining governance work is mainly dead-code and fake-entry cleanup rather than truth-definition work.
 
 ## API Key / Secret List For User Completion
 

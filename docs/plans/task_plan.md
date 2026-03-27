@@ -136,7 +136,7 @@ Remaining program work is in Tracks B (performance), C (accessibility), and D (g
   - fill production secrets / third-party service config
   - finish performance guardrails
   - finish accessibility guardrails
-  - align documentation and canonical truth registry
+  - continue dead-code / fake-entry cleanup
 - Parallel sub-agent attempts for inventory and dependency mapping failed due upstream `503 Service Unavailable`; main-thread review completed the checklist directly.
 - Pre-commit cleanup verified:
   - targeted Contact/navigation/cookie/header tests passed
@@ -145,3 +145,4 @@ Remaining program work is in Tracks B (performance), C (accessibility), and D (g
   - `pnpm build:cf:webpack` passed
   - `pnpm deploy:cf:webpack:dry-run` passed
   - local Wrangler preview is still a bounded proof surface under the current Webpack-based Cloudflare mainline and must not be treated as full deployed proof.
+  - active rules, active guides, README, and canonical truth registry are now aligned to the current Cloudflare build/proof model

@@ -118,6 +118,23 @@ describe("idempotency security properties", () => {
     });
   });
 
+  describe("non-idempotent fallback semantics", () => {
+    it("should preserve statusCode even when no idempotency key is provided", async () => {
+      const request = createRequest("POST", "/api/contact");
+      const response = await withIdempotency(request, async () => ({
+        success: false,
+        errorCode: "BOOM",
+        statusCode: 409,
+      }));
+
+      expect(response.status).toBe(409);
+      expect(await response.json()).toEqual({
+        success: false,
+        errorCode: "BOOM",
+      });
+    });
+  });
+
   // =========================================================================
   // 3. Hot-cache Resilience Test
   // =========================================================================

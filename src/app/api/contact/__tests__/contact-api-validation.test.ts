@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { airtableService } from "@/lib/airtable";
 import { processLead } from "@/lib/lead-pipeline/process-lead";
-import { verifyTurnstile } from "@/lib/turnstile";
+import { verifyTurnstileDetailed } from "@/lib/turnstile";
 import {
   processFormSubmission,
   type ContactFormWithToken,
@@ -54,6 +54,7 @@ vi.mock("@/lib/lead-pipeline/process-lead", () => ({
 
 vi.mock("@/lib/turnstile", () => ({
   verifyTurnstile: vi.fn(() => Promise.resolve(true)),
+  verifyTurnstileDetailed: vi.fn(() => Promise.resolve({ success: true })),
 }));
 
 describe("contact-api-validation", () => {
@@ -202,13 +203,33 @@ describe("contact-api-validation", () => {
     });
 
     it("should return error when turnstile verification fails", async () => {
-      vi.mocked(verifyTurnstile).mockResolvedValueOnce(false);
+      vi.mocked(verifyTurnstileDetailed).mockResolvedValueOnce({
+        success: false,
+        errorCodes: ["invalid-input-response"],
+      });
       vi.setSystemTime(new Date());
 
       const result = await validateFormData(validFormData, "192.168.1.1");
 
       expect(result.success).toBe(false);
       expect(result.error).toBe("Security verification failed");
+    });
+
+    it("should surface service-side turnstile failures separately", async () => {
+      vi.mocked(verifyTurnstileDetailed).mockResolvedValueOnce({
+        success: false,
+        errorCodes: ["not-configured"],
+      });
+      vi.setSystemTime(new Date());
+
+      const result = await validateFormData(validFormData, "192.168.1.1");
+
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.errorCode).toBe("SERVICE_UNAVAILABLE");
+        expect(result.error).toBe("Security verification unavailable");
+        expect(result.statusCode).toBe(503);
+      }
     });
 
     it("should return result with expected structure", async () => {

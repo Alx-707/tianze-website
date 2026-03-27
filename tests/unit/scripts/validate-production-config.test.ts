@@ -27,7 +27,9 @@ describe("validate-production-config runtime contract", () => {
     expect(
       shouldValidateProductionRuntimeContract({ NODE_ENV: "development" }),
     ).toBe(false);
-    expect(shouldValidateProductionRuntimeContract({})).toBe(false);
+    expect(
+      shouldValidateProductionRuntimeContract({} as NodeJS.ProcessEnv),
+    ).toBe(false);
   });
 
   it("passes when the release-critical production contract is satisfied", () => {

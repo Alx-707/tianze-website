@@ -16,7 +16,7 @@ vi.mock("@/components/whatsapp/whatsapp-fab-button", () => ({
       className?: string;
       onClick: () => void;
       "aria-controls"?: string;
-      "aria-haspopup"?: string;
+      "aria-haspopup"?: React.ButtonHTMLAttributes<HTMLButtonElement>["aria-haspopup"];
     }
   >(function MockWhatsAppFabButton(
     {
@@ -36,7 +36,7 @@ vi.mock("@/components/whatsapp/whatsapp-fab-button", () => ({
         aria-label={buttonLabel}
         aria-expanded={isChatOpen}
         aria-controls={ariaControls}
-        aria-haspopup={ariaHaspopup}
+        aria-haspopup={ariaHaspopup ?? undefined}
         className={`text-emerald-600 ${className}`}
         onClick={onClick}
         style={{

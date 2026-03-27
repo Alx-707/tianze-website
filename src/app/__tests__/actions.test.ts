@@ -3,7 +3,7 @@ import { API_ERROR_CODES } from "@/constants/api-error-codes";
 import { resetIdempotencyState } from "@/lib/idempotency";
 import { checkDistributedRateLimit } from "@/lib/security/distributed-rate-limit";
 import { INTERNAL_TRUSTED_CLIENT_IP_HEADER } from "@/lib/security/client-ip-headers";
-import { verifyTurnstile } from "@/lib/turnstile";
+import { verifyTurnstile, verifyTurnstileDetailed } from "@/lib/turnstile";
 import { contactFormAction } from "../actions";
 
 // Mock dependencies before imports
@@ -41,6 +41,7 @@ vi.mock("@/lib/security/distributed-rate-limit", () => ({
 
 vi.mock("@/lib/turnstile", () => ({
   verifyTurnstile: vi.fn(() => Promise.resolve(true)),
+  verifyTurnstileDetailed: vi.fn(() => Promise.resolve({ success: true })),
 }));
 
 vi.mock("@/lib/contact-form-processing", async (importOriginal) => {
@@ -129,6 +130,9 @@ describe("actions.ts", () => {
 
     it("should return error when turnstile verification fails", async () => {
       vi.mocked(verifyTurnstile).mockResolvedValueOnce(false);
+      vi.mocked(verifyTurnstileDetailed).mockResolvedValueOnce({
+        success: false,
+      });
       const formData = createFormData(createValidFormData());
 
       const result = await contactFormAction(null, formData);
@@ -298,8 +302,8 @@ describe("actions.ts", () => {
         expect(result.success).toBe(true);
         expect(result.data?.emailSent).toBe(false);
         expect(result.data?.recordCreated).toBe(false);
-        // verifyTurnstile should NOT be called (blocked before validation)
-        expect(verifyTurnstile).not.toHaveBeenCalled();
+        // verifyTurnstileDetailed should NOT be called (blocked before validation)
+        expect(verifyTurnstileDetailed).not.toHaveBeenCalled();
       });
 
       it("should process normally when honeypot field is empty", async () => {
@@ -312,7 +316,7 @@ describe("actions.ts", () => {
         await contactFormAction(null, formData);
 
         // Should proceed to Turnstile verification
-        expect(verifyTurnstile).toHaveBeenCalled();
+        expect(verifyTurnstileDetailed).toHaveBeenCalled();
       });
 
       it("should process normally when honeypot field is absent", async () => {
@@ -321,7 +325,7 @@ describe("actions.ts", () => {
         await contactFormAction(null, formData);
 
         // Should proceed to Turnstile verification
-        expect(verifyTurnstile).toHaveBeenCalled();
+        expect(verifyTurnstileDetailed).toHaveBeenCalled();
       });
     });
 
@@ -354,7 +358,7 @@ describe("actions.ts", () => {
         const formData = createFormData(getValidFormData());
         await contactFormAction(null, formData);
 
-        expect(verifyTurnstile).toHaveBeenCalledWith(
+        expect(verifyTurnstileDetailed).toHaveBeenCalledWith(
           "valid-token",
           "172.16.0.100",
         );
@@ -374,7 +378,7 @@ describe("actions.ts", () => {
         const formData = createFormData(getValidFormData());
         await contactFormAction(null, formData);
 
-        expect(verifyTurnstile).toHaveBeenCalledWith(
+        expect(verifyTurnstileDetailed).toHaveBeenCalledWith(
           "valid-token",
           "198.51.100.77",
         );

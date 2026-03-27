@@ -71,7 +71,7 @@ const POST_RATE_LIMITED = withRateLimit(
               errorCode:
                 validation.errorCode ??
                 API_ERROR_CODES.CONTACT_VALIDATION_FAILED,
-              statusCode: HTTP_BAD_REQUEST,
+              statusCode: validation.statusCode ?? HTTP_BAD_REQUEST,
             };
           }
 

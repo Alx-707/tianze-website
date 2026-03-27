@@ -14,7 +14,7 @@ import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { API_ERROR_CODES } from "@/constants/api-error-codes";
 import { processLead } from "@/lib/lead-pipeline";
-import { verifyTurnstile } from "@/lib/turnstile";
+import { verifyTurnstile, verifyTurnstileDetailed } from "@/lib/turnstile";
 import { POST } from "../route";
 
 vi.unmock("zod");
@@ -47,6 +47,7 @@ vi.mock("@/lib/security/distributed-rate-limit", () => ({
 // Turnstile — external Cloudflare API
 vi.mock("@/lib/turnstile", () => ({
   verifyTurnstile: vi.fn(() => Promise.resolve(true)),
+  verifyTurnstileDetailed: vi.fn(() => Promise.resolve({ success: true })),
 }));
 
 // Lead pipeline — external services (Resend + Airtable)
@@ -148,7 +149,7 @@ describe("/api/inquiry — integration (protection chain)", () => {
       const { checkDistributedRateLimit } =
         await import("@/lib/security/distributed-rate-limit");
       expect(checkDistributedRateLimit).toHaveBeenCalledTimes(1);
-      expect(verifyTurnstile).toHaveBeenCalledWith(
+      expect(verifyTurnstileDetailed).toHaveBeenCalledWith(
         "valid-turnstile-token",
         expect.any(String),
       );
@@ -189,7 +190,7 @@ describe("/api/inquiry — integration (protection chain)", () => {
 
       expect(response.status).toBe(429);
       // Turnstile and processLead should NOT be called
-      expect(verifyTurnstile).not.toHaveBeenCalled();
+      expect(verifyTurnstileDetailed).not.toHaveBeenCalled();
       expect(processLead).not.toHaveBeenCalled();
     });
 
@@ -204,7 +205,7 @@ describe("/api/inquiry — integration (protection chain)", () => {
       expect(response.status).toBe(400);
       expect(data.success).toBe(false);
       expect(data.errorCode).toBe(API_ERROR_CODES.INVALID_JSON_BODY);
-      expect(verifyTurnstile).not.toHaveBeenCalled();
+      expect(verifyTurnstileDetailed).not.toHaveBeenCalled();
       expect(processLead).not.toHaveBeenCalled();
     });
 
@@ -224,6 +225,9 @@ describe("/api/inquiry — integration (protection chain)", () => {
 
     it("turnstile verification failure returns 400 with INQUIRY_SECURITY_FAILED", async () => {
       vi.mocked(verifyTurnstile).mockResolvedValueOnce(false);
+      vi.mocked(verifyTurnstileDetailed).mockResolvedValueOnce({
+        success: false,
+      });
 
       const request = createRequest(validInquiryData());
       const response = await POST(request);
@@ -270,7 +274,7 @@ describe("/api/inquiry — integration (protection chain)", () => {
       const response = await POST(request);
 
       expect(response.status).toBe(429);
-      expect(verifyTurnstile).not.toHaveBeenCalled();
+      expect(verifyTurnstileDetailed).not.toHaveBeenCalled();
       expect(processLead).not.toHaveBeenCalled();
     });
 
@@ -287,7 +291,7 @@ describe("/api/inquiry — integration (protection chain)", () => {
       const response = await POST(request);
 
       expect(response.status).toBe(400);
-      expect(verifyTurnstile).not.toHaveBeenCalled();
+      expect(verifyTurnstileDetailed).not.toHaveBeenCalled();
       expect(processLead).not.toHaveBeenCalled();
     });
   });

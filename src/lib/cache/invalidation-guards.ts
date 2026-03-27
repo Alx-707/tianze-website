@@ -33,10 +33,6 @@ export function validateCacheInvalidationApiKey(
 ): ApiKeyValidationResult {
   const secret = process.env.CACHE_INVALIDATION_SECRET;
 
-  if (!secret && process.env.NODE_ENV === "development") {
-    return { ok: true };
-  }
-
   if (!secret) {
     logger.error("CACHE_INVALIDATION_SECRET not configured");
     return {

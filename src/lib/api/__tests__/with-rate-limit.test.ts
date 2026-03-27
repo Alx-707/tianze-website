@@ -17,6 +17,11 @@ const mockLoggerError = vi.hoisted(() => vi.fn());
 vi.mock("@/lib/security/distributed-rate-limit", () => ({
   checkDistributedRateLimit: mockCheckDistributedRateLimit,
   createRateLimitHeaders: mockCreateRateLimitHeaders,
+  RATE_LIMIT_PRESETS: {
+    contact: { failureMode: "closed", windowMs: 60000 },
+    turnstile: { failureMode: "closed", windowMs: 60000 },
+    whatsapp: { failureMode: "open", windowMs: 60000 },
+  },
 }));
 
 vi.mock("@/lib/security/client-ip", () => ({
@@ -259,6 +264,24 @@ describe("withRateLimit", () => {
         success: false,
         errorCode: "SERVICE_UNAVAILABLE",
       });
+      expect(mockHandler).not.toHaveBeenCalled();
+    });
+
+    it("should return 503 when key generation fails before the rate-limit check", async () => {
+      const mockHandler = createMockHandler({ success: true });
+      const wrappedHandler = withRateLimit("turnstile", mockHandler, () => {
+        throw new Error("pepper missing");
+      });
+
+      const response = await wrappedHandler(createMockRequest());
+      const body = await response.json();
+
+      expect(response.status).toBe(503);
+      expect(body).toEqual({
+        success: false,
+        errorCode: "SERVICE_UNAVAILABLE",
+      });
+      expect(mockCheckDistributedRateLimit).not.toHaveBeenCalled();
       expect(mockHandler).not.toHaveBeenCalled();
     });
   });

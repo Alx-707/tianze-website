@@ -17,7 +17,7 @@ import { API_ERROR_CODES } from "@/constants/api-error-codes";
 import { resetIdempotencyState } from "@/lib/idempotency";
 import { checkDistributedRateLimit } from "@/lib/security/distributed-rate-limit";
 import { INTERNAL_TRUSTED_CLIENT_IP_HEADER } from "@/lib/security/client-ip-headers";
-import { verifyTurnstile } from "@/lib/turnstile";
+import { verifyTurnstile, verifyTurnstileDetailed } from "@/lib/turnstile";
 import { processFormSubmission } from "@/lib/contact-form-processing";
 import { contactFormAction } from "../actions";
 
@@ -62,6 +62,7 @@ vi.mock("@/lib/security/distributed-rate-limit", () => ({
 // Turnstile — external Cloudflare API
 vi.mock("@/lib/turnstile", () => ({
   verifyTurnstile: vi.fn(() => Promise.resolve(true)),
+  verifyTurnstileDetailed: vi.fn(() => Promise.resolve({ success: true })),
 }));
 
 // Lead pipeline — external services (Resend + Airtable)
@@ -140,7 +141,7 @@ describe("Contact form — integration (happy path chain)", () => {
 
       // Protection chain was invoked in order
       expect(checkDistributedRateLimit).toHaveBeenCalledTimes(1);
-      expect(verifyTurnstile).toHaveBeenCalledWith(
+      expect(verifyTurnstileDetailed).toHaveBeenCalledWith(
         "valid-turnstile-token",
         expect.any(String),
       );
@@ -174,7 +175,7 @@ describe("Contact form — integration (happy path chain)", () => {
       const result = await contactFormAction(null, formData);
 
       expect(result.success).toBe(true);
-      expect(verifyTurnstile).toHaveBeenCalledWith(
+      expect(verifyTurnstileDetailed).toHaveBeenCalledWith(
         "valid-turnstile-token",
         "198.51.100.77",
       );
@@ -196,7 +197,7 @@ describe("Contact form — integration (happy path chain)", () => {
       expect(result.success).toBe(false);
       expect(result.errorCode).toBe(API_ERROR_CODES.RATE_LIMIT_EXCEEDED);
       // Turnstile and processLead should NOT be called
-      expect(verifyTurnstile).not.toHaveBeenCalled();
+      expect(verifyTurnstileDetailed).not.toHaveBeenCalled();
       expect(processFormSubmission).not.toHaveBeenCalled();
     });
 
@@ -212,7 +213,7 @@ describe("Contact form — integration (happy path chain)", () => {
       expect(result.data?.emailSent).toBe(false);
       expect(result.data?.recordCreated).toBe(false);
       // Turnstile should NOT be called (blocked before validation)
-      expect(verifyTurnstile).not.toHaveBeenCalled();
+      expect(verifyTurnstileDetailed).not.toHaveBeenCalled();
       expect(processFormSubmission).not.toHaveBeenCalled();
     });
 
@@ -225,7 +226,7 @@ describe("Contact form — integration (happy path chain)", () => {
 
       expect(result.success).toBe(false);
       expect(result.errorCode).toBe(API_ERROR_CODES.TURNSTILE_MISSING_TOKEN);
-      expect(verifyTurnstile).not.toHaveBeenCalled();
+      expect(verifyTurnstileDetailed).not.toHaveBeenCalled();
       expect(processFormSubmission).not.toHaveBeenCalled();
     });
 
@@ -242,7 +243,7 @@ describe("Contact form — integration (happy path chain)", () => {
       // Rate limit was checked (first gate)
       expect(checkDistributedRateLimit).toHaveBeenCalledTimes(1);
       // Turnstile NOT called (time check failed first)
-      expect(verifyTurnstile).not.toHaveBeenCalled();
+      expect(verifyTurnstileDetailed).not.toHaveBeenCalled();
       expect(processFormSubmission).not.toHaveBeenCalled();
     });
 
@@ -257,12 +258,15 @@ describe("Contact form — integration (happy path chain)", () => {
       expect(result.success).toBe(false);
       expect(result.errorCode).toBe(API_ERROR_CODES.CONTACT_SUBMISSION_EXPIRED);
       // Turnstile should NOT be called (time check failed first)
-      expect(verifyTurnstile).not.toHaveBeenCalled();
+      expect(verifyTurnstileDetailed).not.toHaveBeenCalled();
       expect(processFormSubmission).not.toHaveBeenCalled();
     });
 
     it("turnstile verification failure blocks before lead processing", async () => {
       vi.mocked(verifyTurnstile).mockResolvedValueOnce(false);
+      vi.mocked(verifyTurnstileDetailed).mockResolvedValueOnce({
+        success: false,
+      });
 
       const formData = createFormData(validContactFields());
       const result = await contactFormAction(null, formData);
@@ -274,7 +278,7 @@ describe("Contact form — integration (happy path chain)", () => {
       // Rate limit was checked
       expect(checkDistributedRateLimit).toHaveBeenCalledTimes(1);
       // Turnstile was called (failed)
-      expect(verifyTurnstile).toHaveBeenCalledTimes(1);
+      expect(verifyTurnstileDetailed).toHaveBeenCalledTimes(1);
       // processLead NOT called
       expect(processFormSubmission).not.toHaveBeenCalled();
     });
@@ -298,7 +302,7 @@ describe("Contact form — integration (happy path chain)", () => {
 
       expect(result.success).toBe(false);
       expect(result.errorCode).toBe(API_ERROR_CODES.RATE_LIMIT_EXCEEDED);
-      expect(verifyTurnstile).not.toHaveBeenCalled();
+      expect(verifyTurnstileDetailed).not.toHaveBeenCalled();
     });
   });
 });

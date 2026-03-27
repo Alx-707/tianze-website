@@ -55,6 +55,29 @@ const VALID_ENTITIES = VALID_CACHE_ENTITIES;
 
 type ProcessResult = InvalidationResult | { errorCode: string; status: number };
 
+async function finalizePostResponse({
+  observability,
+  response,
+  startTime,
+  path,
+}: {
+  observability: ReturnType<typeof getRequestObservability>;
+  response: NextResponse;
+  startTime: number;
+  path: string;
+}): Promise<NextResponse> {
+  const enrichedResponse = applyRequestObservability(response, observability);
+  await recordApiResponseSignal({
+    context: observability,
+    response: enrichedResponse,
+    name: "cache.invalidate.post",
+    route: "/api/cache/invalidate",
+    latencyMs: Date.now() - startTime,
+    meta: { path },
+  });
+  return enrichedResponse;
+}
+
 function processDomainInvalidation(
   options: InvalidationRequest,
 ): ProcessResult {
@@ -95,15 +118,25 @@ export async function POST(request: NextRequest) {
     "pre-auth",
   );
   if (preAuthBlock) {
-    return applyRequestObservability(preAuthBlock, observability);
+    return finalizePostResponse({
+      observability,
+      response: preAuthBlock,
+      startTime,
+      path: "pre-auth-rate-limit",
+    });
   }
 
   const authResult = validateCacheInvalidationApiKey(request);
   if (!authResult.ok) {
-    return applyRequestObservability(
-      createCacheHealthErrorResponse(authResult.errorCode, authResult.status),
+    return finalizePostResponse({
       observability,
-    );
+      response: createCacheHealthErrorResponse(
+        authResult.errorCode,
+        authResult.status,
+      ),
+      startTime,
+      path: "auth",
+    });
   }
 
   const postAuthBlock = await checkCacheInvalidationRateLimit(
@@ -112,45 +145,35 @@ export async function POST(request: NextRequest) {
     "post-auth",
   );
   if (postAuthBlock) {
-    return applyRequestObservability(postAuthBlock, observability);
+    return finalizePostResponse({
+      observability,
+      response: postAuthBlock,
+      startTime,
+      path: "post-auth-rate-limit",
+    });
   }
 
   try {
-    const response = applyRequestObservability(
-      await handleCacheInvalidation(request, observability),
+    return finalizePostResponse({
       observability,
-    );
-    await recordApiResponseSignal({
-      context: observability,
-      response,
-      name: "cache.invalidate.post",
-      route: "/api/cache/invalidate",
-      latencyMs: Date.now() - startTime,
+      response: await handleCacheInvalidation(request, observability),
+      startTime,
+      path: "handler",
     });
-    return response;
   } catch (error) {
     logger.error(
       "Cache invalidation failed",
       withObservabilityContext(observability, { error }),
     );
-    const response = applyRequestObservability(
-      createCacheHealthErrorResponse(
+    return finalizePostResponse({
+      observability,
+      response: createCacheHealthErrorResponse(
         API_ERROR_CODES.CACHE_INVALIDATION_FAILED,
         HTTP_INTERNAL_ERROR,
       ),
-      observability,
-    );
-    await recordApiResponseSignal({
-      context: observability,
-      response,
-      name: "cache.invalidate.post",
-      route: "/api/cache/invalidate",
-      latencyMs: Date.now() - startTime,
-      meta: {
-        path: "unexpected-error",
-      },
+      startTime,
+      path: "unexpected-error",
     });
-    return response;
   }
 }
 
