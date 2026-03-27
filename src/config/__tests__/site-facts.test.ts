@@ -7,6 +7,8 @@ describe("site-facts", () => {
 
     expect(typeof siteFacts.company.name).toBe("string");
     expect(typeof siteFacts.company.established).toBe("number");
+    expect(typeof siteFacts.company.yearsInBusiness).toBe("number");
+    expect(siteFacts.company.yearsInBusiness).toBeGreaterThan(0);
     expect(typeof siteFacts.company.location.country).toBe("string");
     expect(typeof siteFacts.company.location.city).toBe("string");
 

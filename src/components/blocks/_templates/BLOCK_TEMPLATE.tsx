@@ -175,8 +175,7 @@ export function BlockTemplate({
             <p>
               {t("footer", {
                 companyName: siteFacts.company.name,
-                yearsInBusiness:
-                  new Date().getFullYear() - siteFacts.company.established,
+                yearsInBusiness: siteFacts.company.yearsInBusiness,
               })}
             </p>
           </div>

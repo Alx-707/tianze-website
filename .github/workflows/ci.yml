@@ -193,6 +193,7 @@ jobs:
         run: pnpm build
         env:
           NODE_ENV: production
+          VALIDATE_CONFIG_SKIP_RUNTIME: 'true'
 
       - name: 运行E2E测试
         run: pnpm test:e2e
@@ -254,6 +255,7 @@ jobs:
         run: pnpm build
         env:
           NODE_ENV: production
+          VALIDATE_CONFIG_SKIP_RUNTIME: 'true'
 
       - name: Lighthouse CI（包含 Core Web Vitals 和 Bundle 大小监控）
         timeout-minutes: 15

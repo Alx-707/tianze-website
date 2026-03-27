@@ -470,5 +470,47 @@ describe("client-ip", () => {
       const ip = getClientIP(request);
       expect(ip).toBe("10.0.0.1");
     });
+
+    it("should reject malformed IPv6 with triple colons", () => {
+      setEnv("VERCEL", "1");
+      const request = createMockRequest({
+        headers: { "x-real-ip": "2001:db8:::1" },
+        ip: "10.0.0.1",
+      });
+      const ip = getClientIP(request);
+      expect(ip).toBe("10.0.0.1");
+    });
+
+    it("should reject malformed IPv6 with trailing single colon", () => {
+      setEnv("VERCEL", "1");
+      const request = createMockRequest({
+        headers: { "x-real-ip": "2001:db8::1:" },
+        ip: "10.0.0.1",
+      });
+      const ip = getClientIP(request);
+      expect(ip).toBe("10.0.0.1");
+    });
+
+    it("should reject malformed IPv6 with leading single colon", () => {
+      setEnv("VERCEL", "1");
+      const request = createMockRequest({
+        headers: { "x-real-ip": ":1::2" },
+        ip: "10.0.0.1",
+      });
+      const ip = getClientIP(request);
+      expect(ip).toBe("10.0.0.1");
+    });
+
+    it("should accept valid compressed IPv6 forms", () => {
+      setEnv("VERCEL", "1");
+      const valid = ["::1", "::", "fe80::", "2001:db8::1", "::ffff:192.0.2.1"];
+      for (const addr of valid) {
+        const request = createMockRequest({
+          headers: { "x-real-ip": addr },
+        });
+        const ip = getClientIP(request);
+        expect(ip).toBe(addr);
+      }
+    });
   });
 });

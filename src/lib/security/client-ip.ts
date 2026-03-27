@@ -249,8 +249,18 @@ function normalizeIPv6Segments(segments: string[]): string[] | null {
   return segments;
 }
 
+const MALFORMED_IPV6_TRIPLE_COLON = /:::/u;
+
+function hasValidIPv6Structure(ip: string): boolean {
+  if (MALFORMED_IPV6_TRIPLE_COLON.test(ip)) return false;
+  if (ip.startsWith(":") && !ip.startsWith("::")) return false;
+  if (ip.endsWith(":") && !ip.endsWith("::")) return false;
+  return true;
+}
+
 function ipv6ToBigInt(ip: string): bigint | null {
   if (!ip.includes(":")) return null;
+  if (!hasValidIPv6Structure(ip)) return null;
 
   const compressedParts = ip.split("::");
   if (compressedParts.length > 2) return null;
