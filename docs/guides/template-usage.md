@@ -1,6 +1,13 @@
-# B2B Website Template Usage Guide
+# Template Usage Guide
 
-This document explains how to use the B2B website template for new client projects.
+> Historical / optional guide:
+> the current repository is **Tianze Website**, not a generic starter template.
+> Use this document only when deliberately adapting the codebase structure for another project.
+> For current repository truth, use:
+> - [`CANONICAL-TRUTH-REGISTRY.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/CANONICAL-TRUTH-REGISTRY.md)
+> - [`POLICY-SOURCE-OF-TRUTH.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/POLICY-SOURCE-OF-TRUTH.md)
+
+This document explains how to adapt the codebase patterns for a future derivative project.
 
 ## Quick Start
 

@@ -1,6 +1,6 @@
 # Dependency Upgrade Playbook
 
-This document records the project's dependency upgrade workflow, current constraints, and the verified outcomes from the 2026-03-19 upgrade round.
+This document records the project's dependency upgrade workflow, current constraints, and the verified outcomes from the 2026-03-19 and 2026-03-27 upgrade rounds.
 
 ## Why This Lives In `docs/guides/`
 
@@ -60,6 +60,9 @@ Completed upgrades in this round:
 - `@vercel/speed-insights` `1.3.1 -> 2.0.0`
 - `lucide-react` `0.562.0 -> 0.577.0`
 - `react-grab` `0.0.98 -> 0.1.28`
+
+Follow-up verified upgrade:
+- `@opennextjs/cloudflare` `1.17.1 -> 1.17.3` (`2026-03-27`)
 
 Post-upgrade validation status:
 - `pnpm type-check`: pass
@@ -127,7 +130,7 @@ Rule:
 
 After upgrading to:
 - `next@16.2.0`
-- `@opennextjs/cloudflare@1.17.1`
+- `@opennextjs/cloudflare@1.17.3`
 
 `pnpm build:cf` failed when OpenNext minification was enabled.
 
@@ -152,6 +155,10 @@ Current file:
 Rule:
 - keep OpenNext minification disabled until the upstream bug is fixed
 - once upstream fixes the minifier, re-enable and retest `pnpm build:cf`
+
+Current baseline note:
+- `1.17.3` resolved the old optional-manifest crash family that affected local Cloudflare preview page routes
+- it did **not** make OpenNext minification safe to re-enable by default in this repository
 
 Expected tradeoff:
 - slightly larger worker/server bundle output

@@ -63,7 +63,6 @@ content/
 - **class-variance-authority 0.7.1** - 样式变体管理
 - **clsx 2.1.1 + tailwind-merge 3.5.0** - 条件类名合并
 - **lucide-react 0.577.0** - SVG 图标库
-- **sonner 2.0.7** - 通知系统
 - **nextjs-toploader 3.9.17** - 页面加载进度条
 
 ### 字体与排版
@@ -257,6 +256,25 @@ content/
   - **包大小**: ~15KB (gzipped ~5KB)
   - **实施成本**: 1-2天开发时间
   - **替代方案**: 当前使用简单的loading状态，体验一般
+
+## 13. 当前构建与部署真相
+
+### 默认本地与标准构建
+- `pnpm dev` - 默认本地开发（Turbopack）
+- `pnpm build` - 标准 Next.js 生产构建
+
+### 当前 Cloudflare 正式链路
+- `pnpm build:cf` - 当前正式 Cloudflare 构建链路，走仓库内的 Webpack 包装器
+- `pnpm preview:cf` - 基于当前 `build:cf` 产物的本地 Wrangler preview
+- `pnpm deploy:cf` - 基于当前 `build:cf` 产物的 Cloudflare 部署
+
+### 对照 / 排查链路
+- `pnpm build:cf:turbo` - 仅用于对照和上游兼容性排查，不是默认生产构建
+
+### 发布验证
+- `pnpm release:verify` - 当前统一发布门禁
+- `pnpm smoke:cf:preview` - 本地 Cloudflare 页面/跳转/cookie/header 证明
+- `pnpm smoke:cf:deploy -- --base-url <url>` - 真实部署后的 Cloudflare 最终 smoke
 
 #### 长期考虑（低优先级）
 - **lottie-react** - 品牌动画和交互反馈

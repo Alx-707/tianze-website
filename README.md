@@ -1,9 +1,11 @@
-# B2B Web Template
+# Tianze Website
 
 [![Test Coverage](https://img.shields.io/badge/coverage-85%25-brightgreen)](./reports/coverage/)
-[![CI/CD](https://github.com/user/b2b-web-template/actions/workflows/ci.yml/badge.svg)](https://github.com/user/b2b-web-template/actions/workflows/ci.yml)
+[![CI/CD](https://github.com/Alx-707/tianze-website/actions/workflows/ci.yml/badge.svg)](https://github.com/Alx-707/tianze-website/actions/workflows/ci.yml)
 
-现代化 B2B 企业网站模板，采用 Next.js 16 + React 19 + TypeScript 5.9 + Tailwind CSS 4 技术栈，实现英中双语国际化、主题切换、响应式设计，确保企业级质量标准。
+天泽管业海外站点仓库，采用 Next.js 16 + React 19 + TypeScript 5.9 + Tailwind CSS 4 技术栈，支持英中双语、Cloudflare 主部署链路、Contact 询盘主转化路径，以及当前仓库约定的发布门禁与部署验证流程。
+
+> 说明：`package.json` 中的包名仍为 `b2b-web-template`，这是历史遗留的内部包名，不代表当前项目身份。当前业务站点和文档默认都以 Tianze Website 为准。
 
 ## ✨ 特性
 
@@ -77,7 +79,7 @@ NEXT_PUBLIC_TURNSTILE_SITE_KEY=你的站点公钥
 TURNSTILE_SECRET_KEY=你的服务端私钥
 ```
 
-> ⚠️ 请勿将真实密钥提交到版本库。若需要示例值，可在本地 `.env.example` 中添加占位符，实际密钥通过环境变量注入。
+> ⚠️ 请勿将真实密钥提交到版本库。当前仓库不提交可用示例密钥文件，真实值请通过本地环境变量或部署平台的 Secret 管理注入。
 
 针对额外安全策略（如限制域名、Action 值）可使用：`TURNSTILE_ALLOWED_HOSTS`、`TURNSTILE_EXPECTED_ACTION`、`NEXT_PUBLIC_TURNSTILE_ACTION`。
 
@@ -87,15 +89,15 @@ TURNSTILE_SECRET_KEY=你的服务端私钥
 - **WhatsApp 支持**：`FEATURE_FLAGS.ENABLE_WHATSAPP_CHAT`（可通过 `ENABLE_WHATSAPP_CHAT` 环境变量关闭）配合 `SITE_CONFIG.contact.whatsappNumber`（可通过 `NEXT_PUBLIC_WHATSAPP_NUMBER` 覆盖）自动在右下角注入 `WhatsAppFloatingButton`。
 - **主题与变量**：`src/app/globals.css` 定义品牌色、布局与 CSS 变量，通过 Tailwind CSS 4 的 `@theme inline` 和 `:root/.dark` 实现明暗主题切换。
 
-## 🔧 二次开发
+## 🔧 维护与扩展
 
-如果您计划基于此模板进行二次开发，请参阅 **[DEVELOPMENT.md](./DEVELOPMENT.md)** 了解：
+当前仓库的活跃维护文档集中在 `docs/guides/`：
 
-- **快速定制清单** - 品牌、SEO、功能模块配置指南
-- **已知问题与遗留事项** - 生产就绪检查项、测试覆盖率说明
-- **架构约束与最佳实践** - 路由注册、i18n 规范、Server Components 原则
-- **质量门禁说明** - Git hooks、commit 规范、紧急推送方式
-- **部署检查清单** - 环境变量、SEO 资源、构建验证步骤
+- **[tech-stack.md](./docs/guides/tech-stack.md)** - 当前技术栈、构建链路和关键依赖
+- **[RELEASE-PROOF-RUNBOOK.md](./docs/guides/RELEASE-PROOF-RUNBOOK.md)** - 发布前验证与发布门禁执行顺序
+- **[QUALITY-PROOF-LEVELS.md](./docs/guides/QUALITY-PROOF-LEVELS.md)** - 不同级别检查各自证明什么
+- **[POLICY-SOURCE-OF-TRUTH.md](./docs/guides/POLICY-SOURCE-OF-TRUTH.md)** - 当前规则和政策以哪些文件为准
+- **[CANONICAL-TRUTH-REGISTRY.md](./docs/guides/CANONICAL-TRUTH-REGISTRY.md)** - 当前运行时、i18n、Contact、Cloudflare 证明边界的正式真相表
 
 ---
 
@@ -105,7 +107,7 @@ TURNSTILE_SECRET_KEY=你的服务端私钥
 
 ```bash
 git clone <repository-url>
-cd b2b-web-template
+cd tianze-website
 ```
 
 ### 2. 安装依赖
@@ -130,6 +132,21 @@ pnpm dev          # 开发服务器（默认 Turbopack）
 pnpm build
 pnpm start
 ```
+
+### 6. Cloudflare 与发布验证
+
+```bash
+pnpm build:cf
+pnpm release:verify
+pnpm smoke:cf:preview
+pnpm smoke:cf:deploy -- --base-url <deployed-url>
+```
+
+说明：
+- `pnpm build:cf` 是当前正式 Cloudflare 构建路径
+- `pnpm build:cf:turbo` 只保留为对照/排查链路
+- 本地 `smoke:cf:preview` 主要验证页面、跳转、cookie 和 header
+- Cloudflare API 的最终证明依赖真实部署后的 `smoke:cf:deploy`
 
 ## 📁 项目结构
 
@@ -179,6 +196,10 @@ pnpm build             # 构建生产版本（默认 Turbopack）
 pnpm build:webpack     # 使用 Webpack 构建（回退/对比）
 pnpm build:analyze     # 生成 Turbopack 构建分析
 pnpm start             # 启动生产服务器
+pnpm build:cf          # 当前正式 Cloudflare 构建链路（Webpack 包装器）
+pnpm build:cf:turbo    # Cloudflare 对照/排查构建链路
+pnpm preview:cf        # 本地 Cloudflare preview（有证明边界）
+pnpm deploy:cf         # Cloudflare 正式部署
 ```
 
 ### 代码质量
@@ -200,6 +221,10 @@ pnpm quality:monitor        # 本地质量监控
 pnpm quality:report:local   # 生成质量报告
 pnpm quality:gate           # 类型+lint+质量关卡
 pnpm quality:quick:staged   # 暂存区快速质量检查
+pnpm release:verify         # 当前统一发布门禁
+pnpm smoke:cf:preview       # Cloudflare 本地页面/跳转/cookie/header smoke
+pnpm smoke:cf:preview:strict # 诊断用本地严格 smoke（含 /api/health）
+pnpm smoke:cf:deploy -- --base-url <url> # 真实部署后的最终 Cloudflare smoke
 pnpm arch:check             # 依赖与架构检查
 pnpm circular:check         # 循环依赖检测
 pnpm security:check         # 安全扫描（npm audit + semgrep）
@@ -215,6 +240,49 @@ pnpm unused:check           # 未使用代码检查（knip）
 >     1. 在代码附近补充安全说明注释；
 >     2. 使用 `// nosemgrep: <rule-id>` 标注具体规则；
 >   - 严禁简单在 `semgrep.yml` 全局禁用规则，除非在安全评审中已有明确结论。
+
+## 🔐 当前生产配置要点
+
+当前生产链路最关键的环境变量分为三类：
+
+### 1. Cloudflare 部署
+
+```bash
+CLOUDFLARE_API_TOKEN=
+CLOUDFLARE_ACCOUNT_ID=
+```
+
+### 2. Contact / 反滥用 / Server Actions
+
+```bash
+RATE_LIMIT_PEPPER=
+NEXT_SERVER_ACTIONS_ENCRYPTION_KEY=
+NEXT_PUBLIC_TURNSTILE_SITE_KEY=
+TURNSTILE_SECRET_KEY=
+```
+
+### 3. 询盘写入与通知
+
+```bash
+RESEND_API_KEY=
+AIRTABLE_API_KEY=
+AIRTABLE_BASE_ID=
+```
+
+可选但常用的补充项包括：
+- `AIRTABLE_TABLE_NAME`
+- `EMAIL_FROM`
+- `EMAIL_REPLY_TO`
+- `CACHE_INVALIDATION_SECRET`
+- `ADMIN_API_TOKEN`
+- `NEXT_PUBLIC_WHATSAPP_NUMBER`
+- `NEXT_PUBLIC_GA_MEASUREMENT_ID`
+- `NEXT_PUBLIC_VERCEL_ANALYTICS_ID`
+- `GOOGLE_SITE_VERIFICATION`
+
+关于哪些文件才是真正的当前规则，请优先看：
+- [POLICY-SOURCE-OF-TRUTH.md](./docs/guides/POLICY-SOURCE-OF-TRUTH.md)
+- [CANONICAL-TRUTH-REGISTRY.md](./docs/guides/CANONICAL-TRUTH-REGISTRY.md)
 
 ### 测试相关
 

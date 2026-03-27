@@ -41,12 +41,12 @@
   - 每次涉及该入口文件的改动，至少执行一次 `pnpm build` 和 `pnpm build:cf`
   - 如果未来再次迁移 `middleware -> proxy`，`config.matcher` 仍必须只写静态字面量；不能引用常量、拼装数组或动态值，否则 Turbopack 会报 `matcher[...] need to be static strings or static objects`
 
-### 5. 当前 `@opennextjs/cloudflare@1.17.1` 下，先不要重新打开 OpenNext `minify`
-- 本仓库已验证：升级到 `next@16.2.0` + `@opennextjs/cloudflare@1.17.1` 后，Cloudflare 打包链路在 OpenNext 的 minify 阶段会因为 pnpm 风格 `node_modules` 触发 `ENOENT`。
+### 5. 当前 `@opennextjs/cloudflare@1.17.3` 下，先不要重新打开 OpenNext `minify`
+- 本仓库已验证：升级到 `next@16.2.0` + `@opennextjs/cloudflare@1.17.3` 后，Cloudflare 打包链路的默认稳定做法仍然是关闭 OpenNext `minify`；在当前 pnpm 结构下，重新打开仍有较高概率重新触发打包层问题。
 - 当前稳定做法是：在 `open-next.config.ts` 中把 split functions 和 default worker 的 `minify` 关闭。
 - 默认动作：
   - 如果有人想重新打开 `minify`，必须先重新执行 `pnpm build:cf`
-  - 只有在确认上游修复后，才允许恢复
+  - 只有在确认上游修复且本仓库重新验证通过后，才允许恢复
   - 不要把这个开关当作“纯性能优化”随手改动
 
 ### 6. 不要并行执行 `pnpm build` 和 `pnpm build:cf`
