@@ -143,8 +143,8 @@ describe("Mobile Navigation - Integration Tests", () => {
       render(<MobileNavigation />);
 
       const trigger = screen.getByRole("button");
-      // 实际的 aria-label 是 "Toggle mobile menu"
-      expect(trigger).toHaveAttribute("aria-label", "Toggle mobile menu");
+      // aria-label comes from t("accessibility.openMenu") = "Open menu"
+      expect(trigger).toHaveAttribute("aria-label", "Open menu");
     });
 
     it("integrates with routing system", async () => {

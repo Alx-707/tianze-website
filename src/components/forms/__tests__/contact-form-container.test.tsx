@@ -212,9 +212,9 @@ describe("ContactFormContainer - 剩余高级测试", () => {
         screen.getByText("Form submitted successfully!"),
       ).toBeInTheDocument();
 
-      // 检查消息样式 - 匹配实际的CSS类名
-      const alertElement = screen.getByRole("alert");
-      expect(alertElement).toHaveClass("text-green-800");
+      // 检查消息样式 - success uses role="status" with aria-live="polite"
+      const statusElement = screen.getByRole("status");
+      expect(statusElement).toHaveClass("text-green-800");
     });
 
     it("应该显示错误状态消息样式", async () => {
@@ -232,9 +232,14 @@ describe("ContactFormContainer - 剩余高级测试", () => {
         screen.getByText("Failed to submit form. Please try again."),
       ).toBeInTheDocument();
 
-      // 检查错误消息样式 - 匹配实际的CSS类名
-      const alertElement = screen.getByRole("alert");
-      expect(alertElement).toHaveClass("text-red-800");
+      // 检查错误消息样式 - both StatusMessage and ErrorDisplay render role="alert"
+      const alertElements = screen.getAllByRole("alert");
+      expect(alertElements.length).toBeGreaterThanOrEqual(1);
+      // StatusMessage has text-red-800
+      const statusAlert = alertElements.find((el) =>
+        el.classList.contains("text-red-800"),
+      );
+      expect(statusAlert).toBeDefined();
     });
   });
 });

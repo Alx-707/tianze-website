@@ -190,7 +190,7 @@ describe("Logo", () => {
       const image = screen.getByRole("img", {
         name: `${SITE_CONFIG.name} Logo`,
       });
-      expect(image).toHaveClass("transition-all");
+      expect(image).toHaveClass("transition-[filter,opacity]");
     });
   });
 

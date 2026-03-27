@@ -284,7 +284,7 @@ describe("Mobile Navigation - Advanced Integration Tests", () => {
 
       const trigger = screen.getByRole("button");
       expect(trigger).toHaveAttribute("type", "button");
-      expect(trigger).toHaveAttribute("aria-label", "Toggle mobile menu");
+      expect(trigger).toHaveAttribute("aria-label", "Open menu");
       expect(trigger).toHaveAttribute("aria-expanded", "false");
     });
 
@@ -295,8 +295,8 @@ describe("Mobile Navigation - Advanced Integration Tests", () => {
       fireEvent.click(trigger);
 
       expect(trigger).toHaveAttribute("aria-expanded", "true");
-      // The aria-label remains "Toggle mobile menu" - it doesn't change
-      expect(trigger).toHaveAttribute("aria-label", "Toggle mobile menu");
+      // aria-label changes to "Close menu" when menu is open
+      expect(trigger).toHaveAttribute("aria-label", "Close menu");
     });
 
     it("provides proper navigation landmark", () => {
@@ -454,12 +454,12 @@ describe("Mobile Navigation - Advanced Integration Tests", () => {
       render(<MobileNavigation />);
 
       const trigger = screen.getByRole("button");
-      // The aria-label comes from NAVIGATION_ARIA.mobileMenuButton which is "Toggle mobile menu"
-      expect(trigger).toHaveAttribute("aria-label", "Toggle mobile menu");
+      // The aria-label comes from t("accessibility.openMenu") which is "打开菜单"
+      expect(trigger).toHaveAttribute("aria-label", "打开菜单");
 
       fireEvent.click(trigger);
-      // The aria-label doesn't change when menu opens
-      expect(trigger).toHaveAttribute("aria-label", "Toggle mobile menu");
+      // aria-label changes to t("accessibility.closeMenu") which is "关闭菜单"
+      expect(trigger).toHaveAttribute("aria-label", "关闭菜单");
 
       expect(screen.getByText("首页")).toBeInTheDocument();
       expect(screen.getByText("关于我们")).toBeInTheDocument();

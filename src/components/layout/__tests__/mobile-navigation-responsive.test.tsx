@@ -231,9 +231,9 @@ describe("Mobile Navigation Responsive - Main Tests", () => {
       render(<MobileNavigation className="transition-all duration-300" />);
 
       const trigger = screen.getByRole("button");
-      // transition类应该在外层容器上，但button本身已有transition-all
-      expect(trigger).toHaveClass("transition-all");
+      // transition classes are on the outer container div
       const container = trigger.closest("div");
+      expect(container).toHaveClass("transition-all");
       expect(container).toHaveClass("duration-300");
     });
 

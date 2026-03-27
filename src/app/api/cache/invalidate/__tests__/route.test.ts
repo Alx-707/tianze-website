@@ -143,7 +143,9 @@ describe("cache invalidate route", () => {
   });
 
   it("GET returns usage metadata", async () => {
-    const response = GET();
+    const response = GET(
+      new NextRequest("http://localhost:3000/api/cache/invalidate"),
+    );
     expect(response.status).toBe(200);
     const body = await response.json();
     expect(body).toHaveProperty("usage");

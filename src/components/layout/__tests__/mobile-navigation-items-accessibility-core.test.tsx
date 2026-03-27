@@ -295,7 +295,7 @@ describe("Mobile Navigation - Core Tests", () => {
       render(<MobileNavigation />);
 
       const toggleButton = screen.getByRole("button", {
-        name: /toggle mobile menu/i,
+        name: /menu/i,
       });
       // Use fireEvent to avoid pointer-events issues
       fireEvent.click(toggleButton);

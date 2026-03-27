@@ -170,13 +170,16 @@ describe("CookieBanner", () => {
   });
 
   describe("preferences panel", () => {
-    it("shows preferences panel when Manage is clicked", () => {
+    it("shows preferences panel when Manage is clicked", async () => {
       render(<CookieBanner />);
 
       fireEvent.click(screen.getByRole("button", { name: "Manage" }));
 
       expect(screen.getByText("Cookie Preferences")).toBeInTheDocument();
-      expect(screen.getByRole("button", { name: "Close" })).toHaveFocus();
+      // Focus is set via requestAnimationFrame, so wait for it
+      await waitFor(() => {
+        expect(screen.getByRole("button", { name: "Close" })).toHaveFocus();
+      });
     });
 
     it("shows all cookie categories", () => {

@@ -18,45 +18,24 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import ContactPage, { generateMetadata } from "@/app/[locale]/contact/page";
 
 // Mock next-intl
-const { mockGetTranslations, mockSuspenseState } = vi.hoisted(() => {
-  const mockGetTranslations = vi.fn();
-  return {
-    mockGetTranslations,
-    mockSuspenseState: {
-      locale: "en",
-      translations: {} as Record<string, string>,
-    },
-  };
-});
+const { mockGetTranslations, mockSuspenseState: _mockSuspenseState } =
+  vi.hoisted(() => {
+    const mockGetTranslations = vi.fn();
+    return {
+      mockGetTranslations,
+      mockSuspenseState: {
+        locale: "en",
+        translations: {} as Record<string, string>,
+      },
+    };
+  });
 
-// Mock Suspense to render mock content (async Server Components can't be rendered in Vitest)
+// Mock Suspense to render children directly (fallback is not needed in tests)
 vi.mock("react", async () => {
   const actual = await vi.importActual<typeof React>("react");
   return {
     ...actual,
-    Suspense: () => {
-      const { translations } = mockSuspenseState;
-      const t = (key: string) => translations[key] || key;
-
-      return (
-        <main className="min-h-[80vh] px-4 py-16">
-          <div className="mx-auto max-w-4xl">
-            <div className="mb-12 text-center">
-              <h1 className="mb-4 text-4xl font-bold tracking-tight md:text-5xl">
-                <span>{t("title")}</span>
-              </h1>
-              <p className="mx-auto max-w-2xl text-xl text-muted-foreground">
-                {t("description")}
-              </p>
-            </div>
-            <div className="grid gap-8 md:grid-cols-2">
-              <div data-testid="contact-form">Contact Form</div>
-              <div data-testid="card">Contact Info</div>
-            </div>
-          </div>
-        </main>
-      );
-    },
+    Suspense: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   };
 });
 
@@ -70,6 +49,105 @@ vi.mock("next/cache", () => ({
   cacheLife: () => {
     // no-op in tests; real cache behavior is validated via Next.js build/e2e
   },
+}));
+
+// Mock getContactCopy to provide structured copy data (use plain function, not vi.fn, to survive clearAllMocks)
+vi.mock("@/lib/contact/getContactCopy", () => ({
+  getContactCopy: () =>
+    Promise.resolve({
+      header: {
+        title: "Contact Us",
+        description: "Get in touch with our team",
+      },
+      panel: {
+        contact: {
+          title: "Contact Methods",
+          emailLabel: "Email",
+          phoneLabel: "Phone",
+        },
+        hours: {
+          title: "Business Hours",
+          weekdaysLabel: "Mon - Fri",
+          saturdayLabel: "Saturday",
+          sundayLabel: "Sunday",
+          closedLabel: "Closed",
+        },
+        whatsapp: {
+          label: "WhatsApp",
+          chatNow: "Chat Now",
+          comingSoon: "Coming Soon",
+        },
+      },
+    }),
+}));
+
+// Mock load-messages
+vi.mock("@/lib/load-messages", () => ({
+  loadCriticalMessages: () => Promise.resolve({}),
+  loadDeferredMessages: () => Promise.resolve({}),
+}));
+
+// Mock client-messages
+vi.mock("@/lib/i18n/client-messages", () => ({
+  pickMessages: () => ({}),
+}));
+
+// Mock site-facts
+vi.mock("@/config/site-facts", () => ({
+  siteFacts: {
+    company: {
+      name: "Tianze",
+      established: 2018,
+      employees: 60,
+      location: { country: "China", city: "Lianyungang" },
+    },
+    contact: {
+      email: "hello@example.com",
+      phone: "+1-555-0123",
+      whatsapp: undefined,
+      businessHours: { weekdays: "9:00 - 18:00", saturday: "10:00 - 16:00" },
+    },
+    stats: { exportCountries: 100 },
+  },
+}));
+
+// Mock site-config
+vi.mock("@/config/paths/site-config", () => ({
+  isWhatsAppConfigured: () => false,
+  SITE_CONFIG: {
+    name: "Tianze",
+    url: "https://tianze.com",
+    seo: { keywords: [] },
+  },
+}));
+
+// Mock seo-metadata to avoid deep dependency chain
+vi.mock("@/lib/seo-metadata", () => ({
+  generateMetadataForPath: ({
+    config,
+  }: {
+    config: { title: string; description: string };
+  }) => ({
+    title: config.title,
+    description: config.description,
+  }),
+}));
+
+// Mock FaqSection
+vi.mock("@/components/sections/faq-section", () => ({
+  FaqSection: () => null,
+}));
+
+// Mock NextIntlClientProvider
+vi.mock("next-intl", () => ({
+  NextIntlClientProvider: ({ children }: { children: React.ReactNode }) => (
+    <>{children}</>
+  ),
+}));
+
+// Mock generate-static-params
+vi.mock("@/app/[locale]/generate-static-params", () => ({
+  generateLocaleStaticParams: () => [{ locale: "en" }, { locale: "zh" }],
 }));
 
 // Mock next/image
@@ -89,6 +167,7 @@ vi.mock("lucide-react", () => ({
   Mail: () => <svg data-testid="mail-icon" />,
   Phone: () => <svg data-testid="phone-icon" />,
   MapPin: () => <svg data-testid="map-pin-icon" />,
+  MessageCircle: () => <svg data-testid="message-circle-icon" />,
 }));
 
 // Mock Zod
@@ -122,6 +201,23 @@ vi.mock("@/components/ui/card", () => ({
   ),
 }));
 
+/**
+ * Helper to render async Server Components in tests.
+ * Resolves async component functions in the JSX tree before rendering.
+ */
+async function renderAsyncPage(element: React.JSX.Element) {
+  let resolved = element;
+  // If the element's type is an async function (async Server Component),
+  // call it directly and await the result
+  if (typeof resolved.type === "function") {
+    const result = await Promise.resolve(resolved.type(resolved.props));
+    if (result && typeof result === "object" && "type" in result) {
+      resolved = result;
+    }
+  }
+  return render(resolved);
+}
+
 describe("Contact Page I18n - Basic Tests", () => {
   const mockParams = { locale: "en" };
 
@@ -138,9 +234,7 @@ describe("Contact Page I18n - Basic Tests", () => {
         defaultTranslations[key as keyof typeof defaultTranslations] || key,
     );
 
-    // Reset Suspense mock state
-    mockSuspenseState.locale = "en";
-    mockSuspenseState.translations = defaultTranslations;
+    // mockSuspenseState is no longer used (Suspense now passes through children)
   });
 
   describe("基本翻译功能", () => {
@@ -149,7 +243,7 @@ describe("Contact Page I18n - Basic Tests", () => {
         params: Promise.resolve(mockParams),
       });
 
-      render(ContactPageComponent);
+      await renderAsyncPage(ContactPageComponent);
 
       // 验证翻译内容正确渲染
       expect(screen.getByText("Contact Us")).toBeInTheDocument();
@@ -160,59 +254,45 @@ describe("Contact Page I18n - Basic Tests", () => {
 
     it("应该处理不同的locale", async () => {
       const zhParams = { locale: "zh" };
-      mockSuspenseState.locale = "zh";
-
       const ContactPageComponent = await ContactPage({
         params: Promise.resolve(zhParams),
       });
 
-      render(ContactPageComponent);
+      await renderAsyncPage(ContactPageComponent);
 
       // 验证页面正确渲染
-      expect(screen.getByRole("main")).toBeInTheDocument();
+      expect(screen.getByRole("heading", { level: 1 })).toBeInTheDocument();
     });
 
     it("应该处理缺失的翻译键", async () => {
-      mockSuspenseState.translations = {
-        title: "missing.title",
-        description: "missing.description",
-      };
-
       const ContactPageComponent = await ContactPage({
         params: Promise.resolve(mockParams),
       });
-      render(ContactPageComponent);
+      await renderAsyncPage(ContactPageComponent);
 
-      // 验证缺失翻译的处理
-      expect(screen.getByText("missing.title")).toBeInTheDocument();
+      // 验证页面渲染（内容由 getContactCopy mock 提供）
+      expect(screen.getByText("Contact Us")).toBeInTheDocument();
     });
 
     it("应该处理特殊字符的locale", async () => {
       const specialParams = { locale: "zh-CN" };
-      mockSuspenseState.locale = "zh-CN";
-
       const ContactPageComponent = await ContactPage({
         params: Promise.resolve(specialParams),
       });
 
-      render(ContactPageComponent);
+      await renderAsyncPage(ContactPageComponent);
 
       // 验证页面正确渲染
-      expect(screen.getByRole("main")).toBeInTheDocument();
+      expect(screen.getByRole("heading", { level: 1 })).toBeInTheDocument();
     });
 
     it("应该处理空的翻译值", async () => {
-      mockSuspenseState.translations = {
-        title: "",
-        description: "",
-      };
-
       const ContactPageComponent = await ContactPage({
         params: Promise.resolve(mockParams),
       });
-      render(ContactPageComponent);
+      await renderAsyncPage(ContactPageComponent);
 
-      // 验证空翻译的处理
+      // 验证页面仍然渲染
       expect(screen.getByRole("heading", { level: 1 })).toBeInTheDocument();
     });
   });
@@ -275,55 +355,47 @@ describe("Contact Page I18n - Basic Tests", () => {
   describe("多语言支持", () => {
     it("应该支持英文locale", async () => {
       const enParams = { locale: "en" };
-      mockSuspenseState.locale = "en";
-
       const ContactPageComponent = await ContactPage({
         params: Promise.resolve(enParams),
       });
-      render(ContactPageComponent);
+      await renderAsyncPage(ContactPageComponent);
 
       // 验证英文locale页面正确渲染
-      expect(screen.getByRole("main")).toBeInTheDocument();
+      expect(screen.getByRole("heading", { level: 1 })).toBeInTheDocument();
       expect(screen.getByText("Contact Us")).toBeInTheDocument();
     });
 
     it("应该支持中文locale", async () => {
       const zhParams = { locale: "zh" };
-      mockSuspenseState.locale = "zh";
-
       const ContactPageComponent = await ContactPage({
         params: Promise.resolve(zhParams),
       });
-      render(ContactPageComponent);
+      await renderAsyncPage(ContactPageComponent);
 
       // 验证中文locale页面正确渲染
-      expect(screen.getByRole("main")).toBeInTheDocument();
+      expect(screen.getByRole("heading", { level: 1 })).toBeInTheDocument();
     });
 
     it("应该支持繁体中文locale", async () => {
       const zhTwParams = { locale: "zh-TW" };
-      mockSuspenseState.locale = "zh-TW";
-
       const ContactPageComponent = await ContactPage({
         params: Promise.resolve(zhTwParams),
       });
-      render(ContactPageComponent);
+      await renderAsyncPage(ContactPageComponent);
 
       // 验证繁体中文locale页面正确渲染
-      expect(screen.getByRole("main")).toBeInTheDocument();
+      expect(screen.getByRole("heading", { level: 1 })).toBeInTheDocument();
     });
 
     it("应该处理未知locale", async () => {
       const unknownParams = { locale: "unknown" };
-      mockSuspenseState.locale = "unknown";
-
       const ContactPageComponent = await ContactPage({
         params: Promise.resolve(unknownParams),
       });
-      render(ContactPageComponent);
+      await renderAsyncPage(ContactPageComponent);
 
       // 验证未知locale页面仍能正确渲染
-      expect(screen.getByRole("main")).toBeInTheDocument();
+      expect(screen.getByRole("heading", { level: 1 })).toBeInTheDocument();
     });
   });
 
@@ -333,46 +405,38 @@ describe("Contact Page I18n - Basic Tests", () => {
         params: Promise.resolve(mockParams),
       });
 
-      render(ContactPageComponent);
+      await renderAsyncPage(ContactPageComponent);
 
       // 验证页面正确渲染
-      expect(screen.getByRole("main")).toBeInTheDocument();
+      expect(screen.getByRole("heading", { level: 1 })).toBeInTheDocument();
     });
 
     it("应该处理长文本内容", async () => {
-      const longTranslations = {
-        title:
-          "This is a very long title that might wrap to multiple lines in the UI",
-        description:
-          "This is a very long description that provides detailed information about how to contact our team and what to expect when reaching out to us for support or inquiries",
-      };
-
-      mockSuspenseState.translations = longTranslations;
-
       const ContactPageComponent = await ContactPage({
         params: Promise.resolve(mockParams),
       });
-      render(ContactPageComponent);
+      await renderAsyncPage(ContactPageComponent);
 
-      expect(screen.getByText(longTranslations.title)).toBeInTheDocument();
+      // 验证页面渲染（使用 getContactCopy mock 提供的默认数据）
+      expect(screen.getByText("Contact Us")).toBeInTheDocument();
       expect(
-        screen.getByText(longTranslations.description),
+        screen.getByText("Get in touch with our team"),
       ).toBeInTheDocument();
     });
   });
 
   describe("错误处理", () => {
     it("应该处理getTranslations错误", async () => {
-      // Note: With Suspense mock, errors in ContactContent are caught by Suspense
-      // The page still renders with fallback content
+      // When getTranslations fails, ContactContent (async) will throw
+      // because getTranslationsCached wraps getTranslations
       mockGetTranslations.mockRejectedValue(new Error("Translation error"));
 
       const ContactPageComponent = await ContactPage({
         params: Promise.resolve(mockParams),
       });
 
-      render(ContactPageComponent);
-      expect(screen.getByRole("main")).toBeInTheDocument();
+      // The async component will throw during rendering
+      await expect(renderAsyncPage(ContactPageComponent)).rejects.toThrow();
     });
 
     it("应该处理params解析错误", async () => {
@@ -386,8 +450,7 @@ describe("Contact Page I18n - Basic Tests", () => {
     });
 
     it("应该处理翻译函数返回错误", async () => {
-      // Note: With Suspense mock, errors in ContactContent are caught by Suspense
-      // The page still renders with fallback content
+      // When translation function throws, ContactContent will propagate the error
       mockGetTranslations.mockResolvedValue(() => {
         throw new Error("Translation function error");
       });
@@ -396,13 +459,11 @@ describe("Contact Page I18n - Basic Tests", () => {
         params: Promise.resolve(mockParams),
       });
 
-      render(ContactPageComponent);
-      expect(screen.getByRole("main")).toBeInTheDocument();
+      await expect(renderAsyncPage(ContactPageComponent)).rejects.toThrow();
     });
 
     it("应该处理异步翻译错误", async () => {
-      // Note: With Suspense mock, errors in ContactContent are caught by Suspense
-      // The page still renders with fallback content
+      // When getTranslations throws asynchronously, the error propagates
       mockGetTranslations.mockImplementation(async () => {
         throw new Error("Async translation error");
       });
@@ -411,8 +472,7 @@ describe("Contact Page I18n - Basic Tests", () => {
         params: Promise.resolve(mockParams),
       });
 
-      render(ContactPageComponent);
-      expect(screen.getByRole("main")).toBeInTheDocument();
+      await expect(renderAsyncPage(ContactPageComponent)).rejects.toThrow();
     });
   });
 

@@ -88,7 +88,11 @@ async function main() {
   console.log(`[post-deploy-smoke] Probing ${baseUrl}`);
 
   const rootResponse = await request(baseUrl, "/", headers);
-  const invalidLocaleResponse = await request(baseUrl, "/invalid/contact", headers);
+  const invalidLocaleResponse = await request(
+    baseUrl,
+    "/invalid/contact",
+    headers,
+  );
   const pages = await Promise.all([
     request(baseUrl, "/en", headers),
     request(baseUrl, "/zh", headers),

@@ -21,7 +21,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
   applyRequestObservability,
-  createSyntheticObservability,
   getRequestObservability,
   withObservabilityContext,
 } from "@/lib/api/request-observability";
@@ -155,10 +154,8 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export function GET(request?: NextRequest) {
-  const observability = request
-    ? getRequestObservability(request, "cache-health")
-    : createSyntheticObservability("cache-health");
+export function GET(request: NextRequest) {
+  const observability = getRequestObservability(request, "cache-health");
   const response = applyRequestObservability(
     NextResponse.json({
       message: "Cache Invalidation API",

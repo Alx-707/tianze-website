@@ -42,6 +42,8 @@ Drive the repair program forward with dependency-aware execution, sub-agent coor
   - Recent `wrangler dev` attempts against the generated `web`, `apiLead`, and `gateway` configs show local Wrangler/Miniflare runtime startup failures even with `--no-bundle` and unique inspector ports, so continuing to build a bespoke local harness is not the highest-value next move right now.
 - Add a canonical repo-side release entrypoint now, even before the final Cloudflare proof split is fully closed.
   - `release:verify` can cover the repo-owned checks immediately, while the remaining Cloudflare split-worker proof stays explicitly tracked as an open A2/A5 edge.
+- Treat real Cloudflare deployment verification as passed based on external execution evidence, so the remaining program scope is no longer release truth. The final cleanup phase now focuses on third-party service completion, guardrails, and governance.
+- Use `docs/plans/final_cleanup_execution_checklist.md` as the new execution handoff for the close-out phase.
 
 ## Errors Encountered
 - A targeted mobile-navigation unit test failed after localizing the language section label because the assertion expected the wrong casing.
@@ -127,3 +129,19 @@ Drive the repair program forward with dependency-aware execution, sub-agent coor
 Policy reference: `.claude/rules/architecture.md` → Cloudflare Verification Policy
 
 Remaining program work is in Tracks B (performance), C (accessibility), and D (governance) — none of which are release blockers.
+
+## Final Cleanup Snapshot
+- Deliverable created: `docs/plans/final_cleanup_execution_checklist.md`
+- Main remaining work:
+  - fill production secrets / third-party service config
+  - finish performance guardrails
+  - finish accessibility guardrails
+  - align documentation and canonical truth registry
+- Parallel sub-agent attempts for inventory and dependency mapping failed due upstream `503 Service Unavailable`; main-thread review completed the checklist directly.
+- Pre-commit cleanup verified:
+  - targeted Contact/navigation/cookie/header tests passed
+  - `pnpm build` passed
+  - `pnpm build:cf` passed
+  - `pnpm build:cf:webpack` passed
+  - `pnpm deploy:cf:webpack:dry-run` passed
+  - local Wrangler preview for the webpack fallback was explicitly downgraded and removed from public scripts because it still fails in local runtime proof.

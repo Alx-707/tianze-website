@@ -163,7 +163,9 @@ async function main() {
 
   if (rootResponse.setCookie && invalidLocaleResponse.setCookie) {
     const rootFlags = normalizeSetCookieFlags(rootResponse.setCookie);
-    const invalidFlags = normalizeSetCookieFlags(invalidLocaleResponse.setCookie);
+    const invalidFlags = normalizeSetCookieFlags(
+      invalidLocaleResponse.setCookie,
+    );
     assert(
       JSON.stringify(rootFlags) === JSON.stringify(invalidFlags),
       `NEXT_LOCALE cookie flags differ between / and /invalid/contact (${rootFlags.join(", ") || "none"} vs ${invalidFlags.join(", ") || "none"})`,

@@ -13,7 +13,7 @@ const HANDLER_PATH = path.join(
 const NEEDLE =
   ";throw new Error(`Unexpected loadManifest(${path2}) call!`)}function evalManifest";
 const PATCH =
-  ';if(/(?:^|\\/)(?:[^/]*manifest(?:\\.json)?|prefetch-hints\\.json)$/.test(path2))return{};throw new Error(`Unexpected loadManifest(${path2}) call!`)}function evalManifest';
+  ";if(/(?:^|\\/)(?:[^/]*manifest(?:\\.json)?|prefetch-hints\\.json)$/.test(path2))return{};throw new Error(`Unexpected loadManifest(${path2}) call!`)}function evalManifest";
 
 async function main() {
   const source = await readFile(HANDLER_PATH, "utf8");

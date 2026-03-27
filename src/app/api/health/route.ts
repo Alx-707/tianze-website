@@ -2,7 +2,6 @@ import { NextRequest } from "next/server";
 import { createCacheHealthResponse } from "@/lib/api/cache-health-response";
 import {
   applyRequestObservability,
-  createSyntheticObservability,
   getRequestObservability,
 } from "@/lib/api/request-observability";
 import { recordApiResponseSignal } from "@/lib/observability/api-signals";
@@ -13,10 +12,8 @@ import { recordApiResponseSignal } from "@/lib/observability/api-signals";
  * Returns a minimal, stable JSON payload so that both automated checks
  * and e2e tests can reliably assert service availability.
  */
-export function GET(request?: NextRequest) {
-  const observability = request
-    ? getRequestObservability(request, "cache-health")
-    : createSyntheticObservability("cache-health");
+export function GET(request: NextRequest) {
+  const observability = getRequestObservability(request, "cache-health");
 
   const response = applyRequestObservability(
     createCacheHealthResponse(),

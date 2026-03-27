@@ -122,7 +122,12 @@ describe("Header Integration Tests", () => {
 
   describe("Component Integration", () => {
     it("should render all child components correctly", async () => {
-      await renderAsyncComponent(Header({ locale: "en" }));
+      await renderAsyncComponent(
+        Header({
+          locale: "en",
+          mainNavItems: [{ key: "home", href: "/", label: "Home" }],
+        }),
+      );
 
       // Verify all child components are rendered
       expect(screen.getByTestId("logo")).toBeInTheDocument();
@@ -141,7 +146,9 @@ describe("Header Integration Tests", () => {
       expect(header).toHaveClass("sticky");
       expect(header).toHaveClass("top-0");
       expect(header).toHaveClass("z-50");
-      expect(header).toHaveClass("transition-all");
+      expect(header).toHaveClass(
+        "transition-[background-color,border-color,box-shadow]",
+      );
       expect(header).toHaveClass("duration-200");
     });
 
@@ -223,7 +230,12 @@ describe("Header Integration Tests", () => {
     });
 
     it("should render both desktop and mobile navigation", async () => {
-      await renderAsyncComponent(Header({ locale: "en" }));
+      await renderAsyncComponent(
+        Header({
+          locale: "en",
+          mainNavItems: [{ key: "home", href: "/", label: "Home" }],
+        }),
+      );
 
       // Both navigation components should be present
       // (visibility is controlled by CSS classes)
@@ -242,7 +254,12 @@ describe("Header Integration Tests", () => {
     });
 
     it("should be keyboard navigable", async () => {
-      await renderAsyncComponent(Header({ locale: "en" }));
+      await renderAsyncComponent(
+        Header({
+          locale: "en",
+          mainNavItems: [{ key: "home", href: "/", label: "Home" }],
+        }),
+      );
 
       const header = screen.getByRole("banner");
 
@@ -257,7 +274,12 @@ describe("Header Integration Tests", () => {
 
   describe("Component Interaction", () => {
     it("should maintain component hierarchy", async () => {
-      await renderAsyncComponent(Header({ locale: "en" }));
+      await renderAsyncComponent(
+        Header({
+          locale: "en",
+          mainNavItems: [{ key: "home", href: "/", label: "Home" }],
+        }),
+      );
 
       const header = screen.getByRole("banner");
       const container = header.querySelector(".mx-auto.max-w-7xl");

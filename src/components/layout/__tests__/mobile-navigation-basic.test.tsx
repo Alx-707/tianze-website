@@ -118,7 +118,7 @@ describe("Mobile Navigation - Main Tests", () => {
       render(<MobileNavigation />);
 
       const trigger = screen.getByRole("button");
-      expect(trigger).toHaveAttribute("aria-label", "Toggle mobile menu");
+      expect(trigger).toHaveAttribute("aria-label", "Open menu");
       expect(trigger).toHaveAttribute("aria-expanded", "false");
     });
 
@@ -205,8 +205,8 @@ describe("Mobile Navigation - Main Tests", () => {
       const trigger = screen.getByRole("button");
       fireEvent.click(trigger);
 
-      // The aria-label remains "Toggle mobile menu" - it doesn't change
-      expect(trigger).toHaveAttribute("aria-label", "Toggle mobile menu");
+      // aria-label changes to "Close menu" when menu is open
+      expect(trigger).toHaveAttribute("aria-label", "Close menu");
     });
 
     it("closes menu when trigger is clicked again", async () => {
