@@ -3,6 +3,7 @@ import createMiddleware from "next-intl/middleware";
 import { generateNonce, getSecurityHeaders } from "@/config/security";
 import { routing, type Locale } from "@/i18n/routing-config";
 import { INTERNAL_TRUSTED_CLIENT_IP_HEADER } from "@/lib/security/client-ip-headers";
+import { getTrustedClientIPForInternalHeader } from "@/lib/security/client-ip";
 
 const intlMiddleware = createMiddleware(routing);
 const SUPPORTED_LOCALES = new Set<string>(routing.locales);
@@ -31,42 +32,6 @@ function applyRequestHeaderOverride(
   response.headers.set(
     "x-middleware-override-headers",
     Array.from(keys).join(","),
-  );
-}
-
-function stripPort(ip: string): string {
-  if (ip.startsWith("[")) {
-    const bracketEnd = ip.indexOf("]");
-    if (bracketEnd !== -1) {
-      return ip.slice(1, bracketEnd);
-    }
-  }
-
-  const colonCount = (ip.match(/:/g) ?? []).length;
-  if (colonCount === 1) {
-    return ip.split(":")[0] ?? ip;
-  }
-
-  return ip;
-}
-
-function normalizeForwardedIP(headerValue: string | null): string | null {
-  if (!headerValue) return null;
-
-  const firstValue = headerValue.split(",")[0]?.trim();
-  if (!firstValue || firstValue.toLowerCase() === "unknown") {
-    return null;
-  }
-
-  const normalized = stripPort(firstValue);
-  return normalized.length > 0 ? normalized : null;
-}
-
-function getTrustedClientIPForRequest(request: NextRequest): string | null {
-  return (
-    normalizeForwardedIP(request.headers.get("cf-connecting-ip")) ??
-    normalizeForwardedIP(request.headers.get("x-real-ip")) ??
-    normalizeForwardedIP(request.headers.get("x-forwarded-for"))
   );
 }
 
@@ -122,16 +87,85 @@ function extractLocaleFromLocationHeader(
   }
 }
 
+function splitPathSegments(pathname: string): string[] {
+  return pathname.split("/").filter(Boolean);
+}
+
+function getRoutingPathPatterns(): string[] {
+  const pathnames = routing.pathnames as Record<string, unknown> | undefined;
+  if (!pathnames) return [];
+  return Object.keys(pathnames);
+}
+
+function isOptionalCatchAllPattern(segment: string): boolean {
+  return /^\[\[\.\.\..+\]\]$/u.test(segment);
+}
+
+function isCatchAllPattern(segment: string): boolean {
+  return /^\[\.\.\..+\]$/u.test(segment);
+}
+
+function isDynamicPattern(segment: string): boolean {
+  return /^\[.+\]$/u.test(segment);
+}
+
+function matchesRoutePattern(pattern: string, pathname: string): boolean {
+  const patternSegments = splitPathSegments(pattern);
+  const pathnameSegments = splitPathSegments(pathname);
+
+  let patternIndex = 0;
+  let pathIndex = 0;
+
+  while (
+    patternIndex < patternSegments.length &&
+    pathIndex < pathnameSegments.length
+  ) {
+    const patternSegment = patternSegments[patternIndex];
+    const pathSegment = pathnameSegments[pathIndex];
+
+    if (!patternSegment || !pathSegment) return false;
+
+    if (
+      isOptionalCatchAllPattern(patternSegment) ||
+      isCatchAllPattern(patternSegment)
+    ) {
+      return true;
+    }
+
+    if (isDynamicPattern(patternSegment)) {
+      patternIndex += 1;
+      pathIndex += 1;
+      continue;
+    }
+
+    if (patternSegment !== pathSegment) {
+      return false;
+    }
+
+    patternIndex += 1;
+    pathIndex += 1;
+  }
+
+  return (
+    patternIndex === patternSegments.length &&
+    pathIndex === pathnameSegments.length
+  );
+}
+
+function isKnownLocalizedPath(pathname: string): boolean {
+  return getRoutingPathPatterns().some((pattern) =>
+    matchesRoutePattern(pattern, pathname),
+  );
+}
+
 function tryHandleInvalidLocalePrefix(
   request: NextRequest,
   nonce: string,
 ): NextResponse | null {
   const { pathname } = request.nextUrl;
-  const segments = pathname.split("/").filter(Boolean);
+  const segments = splitPathSegments(pathname);
 
-  if (segments.length < 2) {
-    return null;
-  }
+  if (segments.length === 0) return null;
 
   const [first, ...rest] = segments;
 
@@ -139,11 +173,12 @@ function tryHandleInvalidLocalePrefix(
     return null;
   }
 
-  const candidatePath = `/${rest.join("/")}`;
-  const pathnames = routing.pathnames as Record<string, unknown> | undefined;
-  const isKnownPath = Boolean(
-    pathnames && Object.prototype.hasOwnProperty.call(pathnames, candidatePath),
-  );
+  if (segments.length === 1 && isKnownLocalizedPath(pathname)) {
+    return null;
+  }
+
+  const candidatePath = rest.length === 0 ? "/" : `/${rest.join("/")}`;
+  const isKnownPath = isKnownLocalizedPath(candidatePath);
 
   if (!isKnownPath) {
     return null;
@@ -162,7 +197,7 @@ function tryHandleInvalidLocalePrefix(
 
 export default function middleware(request: NextRequest) {
   const nonce = generateNonce();
-  const trustedClientIP = getTrustedClientIPForRequest(request);
+  const trustedClientIP = getTrustedClientIPForInternalHeader(request);
 
   const invalidLocaleHandled = tryHandleInvalidLocalePrefix(request, nonce);
   if (invalidLocaleHandled) {

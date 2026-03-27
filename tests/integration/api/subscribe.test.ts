@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import * as route from "@/app/api/subscribe/route";
 import { API_ERROR_CODES } from "@/constants/api-error-codes";
+import { resetIdempotencyState } from "@/lib/idempotency";
 
 vi.mock("@/lib/security/distributed-rate-limit", () => ({
   checkDistributedRateLimit: vi.fn(async () => ({
@@ -15,6 +16,7 @@ vi.mock("@/lib/security/distributed-rate-limit", () => ({
 
 vi.mock("@/lib/turnstile", () => ({
   verifyTurnstile: vi.fn(async () => true),
+  verifyTurnstileDetailed: vi.fn(async () => ({ success: true })),
 }));
 
 vi.mock("@/lib/lead-pipeline", () => ({
@@ -43,6 +45,7 @@ const makeReq = (body: unknown, headers: HeadersInit = {}) =>
 describe("api/subscribe", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    resetIdempotencyState();
   });
 
   it("handles malformed payload gracefully (returns JSON response)", async () => {
@@ -157,9 +160,12 @@ describe("api/subscribe", () => {
 
   it("returns 400 when turnstile verification fails", async () => {
     const utils = await import("@/lib/turnstile");
-    (utils.verifyTurnstile as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
-      false,
-    );
+    (
+      utils.verifyTurnstileDetailed as ReturnType<typeof vi.fn>
+    ).mockResolvedValueOnce({
+      success: false,
+      errorCodes: ["invalid-input-response"],
+    });
 
     const res = await route.POST(
       makeReq({ email: "test@example.com", turnstileToken: "invalid-token" }),
@@ -168,6 +174,24 @@ describe("api/subscribe", () => {
     const json = await res.json();
     expect(json.success).toBe(false);
     expect(json.errorCode).toBe(API_ERROR_CODES.SUBSCRIBE_SECURITY_FAILED);
+  });
+
+  it("returns 503 when turnstile verification is unavailable", async () => {
+    const utils = await import("@/lib/turnstile");
+    (
+      utils.verifyTurnstileDetailed as ReturnType<typeof vi.fn>
+    ).mockResolvedValueOnce({
+      success: false,
+      errorCodes: ["network-error"],
+    });
+
+    const res = await route.POST(
+      makeReq({ email: "test@example.com", turnstileToken: "invalid-token" }),
+    );
+    expect(res.status).toBe(503);
+    const json = await res.json();
+    expect(json.success).toBe(false);
+    expect(json.errorCode).toBe(API_ERROR_CODES.SERVICE_UNAVAILABLE);
   });
 
   it("returns 429 when rate limited", async () => {

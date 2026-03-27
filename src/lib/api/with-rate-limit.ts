@@ -43,6 +43,7 @@ export type { KeyStrategy } from "@/lib/security/rate-limit-key-strategies";
 
 /** Header for degraded mode indication */
 const RATE_LIMIT_DEGRADED_HEADER = "X-RateLimit-Degraded";
+const FALLBACK_CLIENT_IP = "0.0.0.0";
 
 /**
  * Storage failure tracking for alert threshold
@@ -199,13 +200,15 @@ export function withRateLimit<T = unknown>(
   keyStrategy: KeyStrategy = getIPKey,
 ): (request: NextRequest) => Promise<NextResponse<T>> {
   return async (request: NextRequest): Promise<NextResponse<T>> => {
-    const clientIP = getTrustedClientIP(request);
-    const rateLimitKey = keyStrategy(request);
+    let clientIP = FALLBACK_CLIENT_IP;
+    let rateLimitKey = "";
 
     // Defensive catch: checkDistributedRateLimit is designed to always resolve,
     // but guard against unexpected rejections (e.g. store factory exceptions).
     let result: Awaited<ReturnType<typeof checkDistributedRateLimit>>;
     try {
+      clientIP = getTrustedClientIP(request);
+      rateLimitKey = keyStrategy(request);
       result = await checkDistributedRateLimit(rateLimitKey, preset);
     } catch (error) {
       logger.error("Unexpected rate limit infrastructure failure", {

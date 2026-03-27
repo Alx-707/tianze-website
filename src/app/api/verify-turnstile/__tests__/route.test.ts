@@ -223,6 +223,31 @@ describe("Verify Turnstile API Route", () => {
       expect(data.errorCode).toBe(API_ERROR_CODES.TURNSTILE_NETWORK_ERROR);
     });
 
+    it("应该在限流基础设施失败时返回 503", async () => {
+      const rateLimit = await import("@/lib/security/distributed-rate-limit");
+      vi.mocked(rateLimit.checkDistributedRateLimit).mockRejectedValueOnce(
+        new Error("pepper missing"),
+      );
+
+      const request = new NextRequest(
+        "http://localhost:3000/api/verify-turnstile",
+        {
+          method: "POST",
+          body: JSON.stringify(validRequestBody),
+          headers: {
+            "content-type": "application/json",
+          },
+        },
+      );
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(503);
+      expect(data.success).toBe(false);
+      expect(data.errorCode).toBe(API_ERROR_CODES.SERVICE_UNAVAILABLE);
+    });
+
     it("应该处理Cloudflare API响应错误", async () => {
       // Mock HTTP error response — Cloudflare returning non-2xx is an upstream failure (503)
       mockFetch.mockResolvedValue({

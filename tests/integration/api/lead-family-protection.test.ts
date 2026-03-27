@@ -20,6 +20,7 @@ vi.mock("@/lib/security/distributed-rate-limit", () => ({
 
 vi.mock("@/lib/turnstile", () => ({
   verifyTurnstile: vi.fn(async () => true),
+  verifyTurnstileDetailed: vi.fn(async () => ({ success: true })),
 }));
 
 vi.mock("@/app/api/contact/contact-api-validation", () => ({

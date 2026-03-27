@@ -9,14 +9,16 @@ import { processLead } from "@/lib/lead-pipeline/process-lead";
 import { CONTACT_SUBJECTS, LEAD_TYPES } from "@/lib/lead-pipeline/lead-schema";
 import { logger, sanitizeEmail } from "@/lib/logger";
 import { contactFieldValidators } from "@/lib/form-schema/contact-field-validators";
-import { verifyTurnstile } from "@/lib/turnstile";
+import { verifyTurnstileDetailed } from "@/lib/turnstile";
 import { mapZodIssueToErrorKey } from "@/lib/contact-form-error-utils";
 import {
   CONTACT_FORM_CONFIG,
   createContactFormSchemaFromConfig,
   type ContactFormFieldValues,
 } from "@/config/contact-form-config";
+import { HTTP_SERVICE_UNAVAILABLE } from "@/constants";
 import { TEN_MINUTES_MS } from "@/constants/time";
+import { API_ERROR_CODES } from "@/constants/api-error-codes";
 
 const contactFormSchema = createContactFormSchemaFromConfig(
   CONTACT_FORM_CONFIG,
@@ -40,6 +42,7 @@ interface ContactValidationFailure {
   error: string;
   details: string[] | null;
   data: null;
+  statusCode?: number;
 }
 
 interface ContactValidationSuccess {
@@ -95,7 +98,7 @@ export async function validateContactSubmission(
   ) {
     return {
       success: false,
-      errorCode: "TURNSTILE_MISSING_TOKEN",
+      errorCode: API_ERROR_CODES.TURNSTILE_MISSING_TOKEN,
       error: "Security verification required",
       details: null,
       data: null,
@@ -107,7 +110,7 @@ export async function validateContactSubmission(
   if (!validationResult.success) {
     return {
       success: false,
-      errorCode: "CONTACT_VALIDATION_FAILED",
+      errorCode: API_ERROR_CODES.CONTACT_VALIDATION_FAILED,
       error: "Validation failed",
       details: validationResult.error.issues.map(mapZodIssueToErrorKey),
       data: null,
@@ -120,17 +123,28 @@ export async function validateContactSubmission(
     return timeValidationError;
   }
 
-  const turnstileValid = await verifyTurnstile(
+  const verificationResult = await verifyTurnstileDetailed(
     formData.turnstileToken,
     clientIP,
   );
-  if (!turnstileValid) {
+
+  if (!verificationResult.success) {
+    const errorCodes = verificationResult.errorCodes ?? [];
+    const isServiceFailure = errorCodes.some((code) =>
+      ["not-configured", "network-error", "timeout"].includes(code),
+    );
+
     return {
       success: false,
-      errorCode: "TURNSTILE_VERIFICATION_FAILED",
-      error: "Security verification failed",
+      errorCode: isServiceFailure
+        ? API_ERROR_CODES.SERVICE_UNAVAILABLE
+        : API_ERROR_CODES.TURNSTILE_VERIFICATION_FAILED,
+      error: isServiceFailure
+        ? "Security verification unavailable"
+        : "Security verification failed",
       details: null,
       data: null,
+      ...(isServiceFailure ? { statusCode: HTTP_SERVICE_UNAVAILABLE } : {}),
     };
   }
 

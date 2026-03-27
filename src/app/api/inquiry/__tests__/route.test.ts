@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { API_ERROR_CODES } from "@/constants/api-error-codes";
 import { processLead } from "@/lib/lead-pipeline";
-import { verifyTurnstile } from "@/lib/turnstile";
+import { verifyTurnstile, verifyTurnstileDetailed } from "@/lib/turnstile";
 import { OPTIONS, POST } from "../route";
 
 vi.unmock("zod");
@@ -64,6 +64,7 @@ vi.mock("@/lib/lead-pipeline/lead-schema", () => ({
 
 vi.mock("@/lib/turnstile", () => ({
   verifyTurnstile: vi.fn(() => Promise.resolve(true)),
+  verifyTurnstileDetailed: vi.fn(() => Promise.resolve({ success: true })),
 }));
 
 // Mock CORS utilities
@@ -255,6 +256,9 @@ describe("/api/inquiry route", () => {
 
     it("should return 400 when turnstile verification fails", async () => {
       vi.mocked(verifyTurnstile).mockResolvedValueOnce(false);
+      vi.mocked(verifyTurnstileDetailed).mockResolvedValueOnce({
+        success: false,
+      });
 
       const request = createInquiryRequest(JSON.stringify(validInquiryData));
 

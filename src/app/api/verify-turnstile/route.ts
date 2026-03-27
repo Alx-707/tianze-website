@@ -102,12 +102,24 @@ async function handlePost(request: NextRequest) {
     const configError = checkTurnstileConfigured();
     if (configError) return configError;
 
-    // Rate limiting: security-sensitive endpoint uses fail-closed preset
-    const rateLimitKey = getIPKey(request);
-    const rateLimitResult = await checkDistributedRateLimit(
-      rateLimitKey,
-      "turnstile",
-    );
+    let rateLimitResult: Awaited<ReturnType<typeof checkDistributedRateLimit>>;
+    try {
+      // Rate limiting: security-sensitive endpoint uses fail-closed preset
+      const rateLimitKey = getIPKey(request);
+      rateLimitResult = await checkDistributedRateLimit(
+        rateLimitKey,
+        "turnstile",
+      );
+    } catch (rateLimitError) {
+      logger.error("Turnstile rate limit infrastructure failure", {
+        error: rateLimitError as Error,
+      });
+      return createApiErrorResponse(
+        API_ERROR_CODES.SERVICE_UNAVAILABLE,
+        HTTP_SERVICE_UNAVAILABLE,
+      );
+    }
+
     if (!rateLimitResult.allowed) {
       const rateLimitHeaders = createRateLimitHeaders(rateLimitResult);
       const statusCode =

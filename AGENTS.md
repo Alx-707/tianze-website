@@ -120,9 +120,11 @@
   - `pnpm build:cf` 的正式实现现在是 `node scripts/cloudflare/build-webpack.mjs`；
   - `pnpm build:cf:turbo` 仅保留为对照/排查链路，不再是默认 Cloudflare 构建入口；
   - 直接基于当前 Webpack 产物跑 `wrangler dev --env preview`，仍会在本地 bundling/runtime 层触发 `middleware-manifest.json` 动态 require 错误；
+  - 这个错误当前会让 `/en`、`/zh`、`/en/contact`、`/zh/contact` 之类页面在 stock local preview 下返回 500，但不会阻止 `/`、invalid locale redirect、动态产品 redirect 这类纯 middleware / redirect 路径返回正确结果；
   - 改成 `wrangler dev --env preview --no-bundle` 后，本地又会卡在 `cloudflare/images.js` 模块缺失。
 - 当前默认动作：
   - 把 Webpack 视为当前正式 Cloudflare 构建链路；
   - 不要把本地 Wrangler preview 当成这条主链路的完整 release proof；
+  - 如果这类 local preview 500 只出现在页面渲染阶段，而 redirect / cookie / internal header 检查仍然正常，先归类为 stock preview 边界，不要直接回滚业务改动；
   - 本地 Cloudflare 页面验证仍优先走既有的 `smoke:cf:preview` 分层策略；
   - 如果未来要把 Wrangler 本地 preview 提升为更强的正式证明面，必须先补一轮本地可运行证据。

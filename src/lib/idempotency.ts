@@ -91,6 +91,35 @@ const MAX_IDEMPOTENCY_KEY_LENGTH = 256;
 /** Maximum in-flight entries across all Maps (prevents unbounded memory growth) */
 const MAX_IN_FLIGHT_ENTRIES = 1000;
 
+function normalizeHandlerResult(result: unknown): {
+  body: unknown;
+  statusCode: number;
+} {
+  if (typeof result !== "object" || result === null) {
+    return { body: result, statusCode: HTTP_OK };
+  }
+
+  if (Array.isArray(result)) {
+    return { body: result, statusCode: HTTP_OK };
+  }
+
+  const record = result as Record<string, unknown>;
+  if (!Object.prototype.hasOwnProperty.call(record, "statusCode")) {
+    return { body: result, statusCode: HTTP_OK };
+  }
+
+  const { statusCode } = record;
+  if (typeof statusCode !== "number") {
+    return { body: result, statusCode: HTTP_OK };
+  }
+
+  // Strip statusCode from the JSON payload; keep it on the stored entry.
+  // This mirrors `createApiErrorResponse()` which communicates status via HTTP,
+  // not via a redundant JSON field.
+  const { statusCode: _statusCode, ...rest } = record;
+  return { body: rest, statusCode };
+}
+
 /**
  * 从请求中提取幂等键
  * Rejects keys exceeding MAX_IDEMPOTENCY_KEY_LENGTH to prevent memory exhaustion.
@@ -254,31 +283,7 @@ async function handleWithIdempotencyKey<T>(
         return result;
       }
 
-      const normalized = (() => {
-        if (typeof result !== "object" || result === null) {
-          return { body: result, statusCode: HTTP_OK };
-        }
-
-        if (Array.isArray(result)) {
-          return { body: result, statusCode: HTTP_OK };
-        }
-
-        const record = result as Record<string, unknown>;
-        if (!Object.prototype.hasOwnProperty.call(record, "statusCode")) {
-          return { body: result, statusCode: HTTP_OK };
-        }
-
-        const { statusCode } = record;
-        if (typeof statusCode !== "number") {
-          return { body: result, statusCode: HTTP_OK };
-        }
-
-        // Strip statusCode from the JSON payload; keep it on the stored entry.
-        // This mirrors `createApiErrorResponse()` which communicates status via HTTP,
-        // not via a redundant JSON field.
-        const { statusCode: _statusCode, ...rest } = record;
-        return { body: rest, statusCode };
-      })();
+      const normalized = normalizeHandlerResult(result);
 
       // PENDING → COMPLETED transition.
       // Important: never delete a claimed key after the handler has finished, even
@@ -337,7 +342,10 @@ async function handleWithoutIdempotencyKey<T>(
     if (result instanceof NextResponse) {
       return result;
     }
-    return NextResponse.json(result, { status: HTTP_OK });
+    const normalized = normalizeHandlerResult(result);
+    return NextResponse.json(normalized.body, {
+      status: normalized.statusCode,
+    });
   } catch (error) {
     logger.error("Request handler failed", { error: error as Error });
     throw error;

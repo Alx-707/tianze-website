@@ -77,6 +77,10 @@ async function main() {
 
   const rootResponse = await request(baseUrl, "/");
   const invalidLocaleResponse = await request(baseUrl, "/invalid/contact");
+  const invalidLocaleDynamicResponse = await request(
+    baseUrl,
+    "/fr/products/eu/fittings",
+  );
   const pageResponses = await Promise.all([
     request(baseUrl, "/en"),
     request(baseUrl, "/zh"),
@@ -111,10 +115,21 @@ async function main() {
     `Expected /invalid/contact redirect location to be /en/contact, got ${invalidLocaleResponse.location ?? "(missing)"}`,
     failures,
   );
+  assert(
+    [307, 308].includes(invalidLocaleDynamicResponse.status),
+    `Expected /fr/products/eu/fittings to redirect, got ${invalidLocaleDynamicResponse.status}`,
+    failures,
+  );
+  assert(
+    invalidLocaleDynamicResponse.location === "/en/products/eu/fittings",
+    `Expected /fr/products/eu/fittings redirect location to be /en/products/eu/fittings, got ${invalidLocaleDynamicResponse.location ?? "(missing)"}`,
+    failures,
+  );
 
   for (const response of [
     rootResponse,
     invalidLocaleResponse,
+    invalidLocaleDynamicResponse,
     ...pageResponses,
     ...(apiHealthResponse ? [apiHealthResponse] : []),
   ]) {
@@ -161,14 +176,26 @@ async function main() {
     );
   }
 
-  if (rootResponse.setCookie && invalidLocaleResponse.setCookie) {
+  if (
+    rootResponse.setCookie &&
+    invalidLocaleResponse.setCookie &&
+    invalidLocaleDynamicResponse.setCookie
+  ) {
     const rootFlags = normalizeSetCookieFlags(rootResponse.setCookie);
     const invalidFlags = normalizeSetCookieFlags(
       invalidLocaleResponse.setCookie,
     );
+    const invalidDynamicFlags = normalizeSetCookieFlags(
+      invalidLocaleDynamicResponse.setCookie,
+    );
     assert(
       JSON.stringify(rootFlags) === JSON.stringify(invalidFlags),
       `NEXT_LOCALE cookie flags differ between / and /invalid/contact (${rootFlags.join(", ") || "none"} vs ${invalidFlags.join(", ") || "none"})`,
+      failures,
+    );
+    assert(
+      JSON.stringify(rootFlags) === JSON.stringify(invalidDynamicFlags),
+      `NEXT_LOCALE cookie flags differ between / and /fr/products/eu/fittings (${rootFlags.join(", ") || "none"} vs ${invalidDynamicFlags.join(", ") || "none"})`,
       failures,
     );
   }

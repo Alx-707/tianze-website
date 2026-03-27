@@ -1,7 +1,12 @@
 import { NextRequest } from "next/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { INTERNAL_TRUSTED_CLIENT_IP_HEADER } from "../client-ip-headers";
-import { getClientIP, getClientIPFromHeaders, getIPChain } from "../client-ip";
+import {
+  getClientIP,
+  getClientIPFromHeaders,
+  getIPChain,
+  getTrustedClientIPForInternalHeader,
+} from "../client-ip";
 
 /**
  * Type-safe environment variable helper for tests.
@@ -153,6 +158,15 @@ describe("client-ip", () => {
         const ip = getClientIP(request);
         expect(ip).toBe("198.51.100.50");
       });
+
+      it("should trust Cloudflare IPv6 edge ranges", () => {
+        const request = createMockRequest({
+          ip: "2400:cb00::1",
+          headers: { "cf-connecting-ip": "192.0.2.100" },
+        });
+        const ip = getClientIP(request);
+        expect(ip).toBe("192.0.2.100");
+      });
     });
 
     describe("development platform", () => {
@@ -280,6 +294,34 @@ describe("client-ip", () => {
         const ip = getClientIP(request);
         expect(ip).toBe("203.0.113.50");
       });
+    });
+  });
+
+  describe("getTrustedClientIPForInternalHeader", () => {
+    it("should only promote Cloudflare IPs when the request source is trusted", () => {
+      setEnv("CF_PAGES", "1");
+
+      const trustedRequest = createMockRequest({
+        ip: "173.245.48.25",
+        headers: { "cf-connecting-ip": "192.0.2.100" },
+      });
+      expect(getTrustedClientIPForInternalHeader(trustedRequest)).toBe(
+        "192.0.2.100",
+      );
+
+      const untrustedRequest = createMockRequest({
+        ip: "198.51.100.25",
+        headers: { "cf-connecting-ip": "192.0.2.100" },
+      });
+      expect(getTrustedClientIPForInternalHeader(untrustedRequest)).toBeNull();
+    });
+
+    it("should return null when no trusted proxy platform is configured", () => {
+      const request = createMockRequest({
+        headers: { "cf-connecting-ip": "192.0.2.100" },
+      });
+
+      expect(getTrustedClientIPForInternalHeader(request)).toBeNull();
     });
   });
 
