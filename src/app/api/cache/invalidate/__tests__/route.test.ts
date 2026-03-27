@@ -24,10 +24,11 @@ const {
       error: vi.fn(),
     },
     mockCheckDistributedRateLimit: vi.fn(async () => ({
-      allowed: true,
+      allowed: true as boolean,
       remaining: 10,
       resetTime: Date.now() + 60000,
-      retryAfter: null,
+      retryAfter: null as number | null,
+      deniedReason: undefined as string | undefined,
     })),
     mockCreateRateLimitHeaders: vi.fn(() => new Headers()),
     mockInvalidateI18n: {

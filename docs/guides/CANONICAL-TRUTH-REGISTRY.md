@@ -17,24 +17,24 @@ If another document conflicts with this file, treat this file plus the linked ca
 ## Runtime Entrypoints
 
 ### Web request entry
-- Canonical file: [`src/middleware.ts`](/Users/Data/Warehouse/Pipe/tianze-website/src/middleware.ts)
+- Canonical file: [`src/middleware.ts`](../../src/middleware.ts)
 - Why:
   - current locale redirect, security header, and Cloudflare client-IP derivation logic live here
   - current Cloudflare build path still depends on `middleware.ts`, not `src/proxy.ts`
 
 ### Root layout truth
-- Canonical file: [`src/app/[locale]/layout.tsx`](/Users/Data/Warehouse/Pipe/tianze-website/src/app/[locale]/layout.tsx)
+- Canonical file: [`src/app/[locale]/layout.tsx`](../../src/app/[locale]/layout.tsx)
 - Why:
   - SSR locale and `<html lang>` truth live here
   - do not treat client-side `document.documentElement.lang` patches as runtime truth
 
 ## i18n Runtime Truth
-- Canonical loader: [`src/lib/load-messages.ts`](/Users/Data/Warehouse/Pipe/tianze-website/src/lib/load-messages.ts)
+- Canonical loader: [`src/lib/load-messages.ts`](../../src/lib/load-messages.ts)
 - Canonical runtime sources:
-  - [`messages/en/critical.json`](/Users/Data/Warehouse/Pipe/tianze-website/messages/en/critical.json)
-  - [`messages/en/deferred.json`](/Users/Data/Warehouse/Pipe/tianze-website/messages/en/deferred.json)
-  - [`messages/zh/critical.json`](/Users/Data/Warehouse/Pipe/tianze-website/messages/zh/critical.json)
-  - [`messages/zh/deferred.json`](/Users/Data/Warehouse/Pipe/tianze-website/messages/zh/deferred.json)
+  - [`messages/en/critical.json`](../../messages/en/critical.json)
+  - [`messages/en/deferred.json`](../../messages/en/deferred.json)
+  - [`messages/zh/critical.json`](../../messages/zh/critical.json)
+  - [`messages/zh/deferred.json`](../../messages/zh/deferred.json)
 - Important non-truth sources:
   - `messages/en.json`
   - `messages/zh.json`
@@ -45,11 +45,11 @@ If another document conflicts with this file, treat this file plus the linked ca
 ## Main Shipped Lead Path
 - Canonical production path: **Contact page Server Action**
 - Canonical files:
-  - [`src/app/[locale]/contact/page.tsx`](/Users/Data/Warehouse/Pipe/tianze-website/src/app/[locale]/contact/page.tsx)
-  - [`src/lib/actions/contact.ts`](/Users/Data/Warehouse/Pipe/tianze-website/src/lib/actions/contact.ts)
+  - [`src/app/[locale]/contact/page.tsx`](../../src/app/[locale]/contact/page.tsx)
+  - [`src/lib/actions/contact.ts`](../../src/lib/actions/contact.ts)
 - Supporting security path:
-  - [`src/lib/security/client-ip.ts`](/Users/Data/Warehouse/Pipe/tianze-website/src/lib/security/client-ip.ts)
-  - [`src/lib/security/client-ip-headers.ts`](/Users/Data/Warehouse/Pipe/tianze-website/src/lib/security/client-ip-headers.ts)
+  - [`src/lib/security/client-ip.ts`](../../src/lib/security/client-ip.ts)
+  - [`src/lib/security/client-ip-headers.ts`](../../src/lib/security/client-ip-headers.ts)
 - Rule:
   - do not treat `/api/inquiry` or `/api/subscribe` as the default primary conversion surface without current reachability evidence
 
@@ -57,7 +57,7 @@ If another document conflicts with this file, treat this file plus the linked ca
 
 ### Canonical build path
 - `pnpm build:cf`
-- Backed by: [`scripts/cloudflare/build-webpack.mjs`](/Users/Data/Warehouse/Pipe/tianze-website/scripts/cloudflare/build-webpack.mjs)
+- Backed by: [`scripts/cloudflare/build-webpack.mjs`](../../scripts/cloudflare/build-webpack.mjs)
 
 ### Comparison-only path
 - `pnpm build:cf:turbo`
@@ -81,14 +81,14 @@ If another document conflicts with this file, treat this file plus the linked ca
 ## Release Gate Truth
 - Canonical release command: `pnpm release:verify`
 - Canonical script:
-  - [`scripts/release-proof.sh`](/Users/Data/Warehouse/Pipe/tianze-website/scripts/release-proof.sh)
+  - [`scripts/release-proof.sh`](../../scripts/release-proof.sh)
 - Rule:
   - this is the repository’s unified technical release gate
   - release signoff is still a separate human decision
 
 ## Production Config Truth
 - Canonical validation script:
-  - [`scripts/validate-production-config.ts`](/Users/Data/Warehouse/Pipe/tianze-website/scripts/validate-production-config.ts)
+  - [`scripts/validate-production-config.ts`](../../scripts/validate-production-config.ts)
 - Current production-critical env families:
   - Cloudflare deployment credentials
   - Contact / Turnstile / Server Actions secrets
@@ -102,7 +102,7 @@ If another document conflicts with this file, treat this file plus the linked ca
 - generated and experimental worktree copies under `.claude/worktrees/**`
 
 ## Current Canonical Companions
-- [`POLICY-SOURCE-OF-TRUTH.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/POLICY-SOURCE-OF-TRUTH.md)
-- [`QUALITY-PROOF-LEVELS.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/QUALITY-PROOF-LEVELS.md)
-- [`RELEASE-PROOF-RUNBOOK.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/RELEASE-PROOF-RUNBOOK.md)
-- [`.claude/rules/architecture.md`](/Users/Data/Warehouse/Pipe/tianze-website/.claude/rules/architecture.md)
+- [`POLICY-SOURCE-OF-TRUTH.md`](../../docs/guides/POLICY-SOURCE-OF-TRUTH.md)
+- [`QUALITY-PROOF-LEVELS.md`](../../docs/guides/QUALITY-PROOF-LEVELS.md)
+- [`RELEASE-PROOF-RUNBOOK.md`](../../docs/guides/RELEASE-PROOF-RUNBOOK.md)
+- [`.claude/rules/architecture.md`](../../.claude/rules/architecture.md)

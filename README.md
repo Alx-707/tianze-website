@@ -444,17 +444,15 @@ Page content in MDX format...
 
 ## 🚀 部署
 
-推荐使用 [Vercel平台](https://vercel.com) 部署，由Next.js创建者提供：
+**主力平台：Cloudflare**（通过 OpenNext 适配）
 
 ```bash
-# 使用Vercel CLI部署
-npx vercel
-
-# 或连接GitHub自动部署
-# 1. 推送代码到GitHub
-# 2. 在Vercel导入项目
-# 3. 自动部署和CI/CD
+pnpm build:cf              # 正式 Cloudflare 构建
+pnpm deploy:cf             # 部署到 Cloudflare
+pnpm smoke:cf:deploy -- --base-url <url>  # 部署后验证
 ```
+
+Vercel 作为备用/对照平台，CI 中自动部署 preview。
 
 ### 生产环境 Rate Limiting
 

@@ -225,9 +225,11 @@ describe("contact-api-validation", () => {
       const result = await validateFormData(validFormData, "192.168.1.1");
 
       expect(result.success).toBe(false);
-      expect(result.errorCode).toBe("SERVICE_UNAVAILABLE");
-      expect(result.error).toBe("Security verification unavailable");
-      expect(result).toHaveProperty("statusCode", 503);
+      if (!result.success) {
+        expect(result.errorCode).toBe("SERVICE_UNAVAILABLE");
+        expect(result.error).toBe("Security verification unavailable");
+        expect(result.statusCode).toBe(503);
+      }
     });
 
     it("should return result with expected structure", async () => {
