@@ -104,6 +104,7 @@ vi.mock("@/config/site-facts", () => ({
     company: {
       name: "Tianze",
       established: 2018,
+      yearsInBusiness: new Date().getFullYear() - 2018,
       employees: 60,
       location: { country: "China", city: "Lianyungang" },
     },
@@ -139,9 +140,17 @@ vi.mock("@/lib/seo-metadata", () => ({
   }),
 }));
 
-// Mock FaqSection
+// Mock FaqSection — render visible structure so tests can verify presence
 vi.mock("@/components/sections/faq-section", () => ({
-  FaqSection: () => null,
+  FaqSection: ({ items }: { items: string[] }) => (
+    <section data-testid="faq-section">
+      {items.map((key: string) => (
+        <div key={key} data-testid={`faq-item-${key}`}>
+          {key}
+        </div>
+      ))}
+    </section>
+  ),
 }));
 
 // Mock NextIntlClientProvider
@@ -258,6 +267,18 @@ describe("ContactPage", () => {
       expect(screen.getByText("10:00 - 16:00")).toBeInTheDocument();
       expect(screen.getByText("Sunday")).toBeInTheDocument();
       expect(screen.getByText("Closed")).toBeInTheDocument();
+    });
+
+    it("应该渲染FAQ区块", async () => {
+      const ContactPageComponent = await ContactPage({
+        params: Promise.resolve(mockParams),
+      });
+
+      await renderAsyncPage(ContactPageComponent);
+
+      expect(screen.getByTestId("faq-section")).toBeInTheDocument();
+      expect(screen.getByTestId("faq-item-moq")).toBeInTheDocument();
+      expect(screen.getByTestId("faq-item-leadTime")).toBeInTheDocument();
     });
   });
 
