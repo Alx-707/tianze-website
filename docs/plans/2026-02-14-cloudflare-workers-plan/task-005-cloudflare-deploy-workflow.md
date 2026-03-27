@@ -1,10 +1,15 @@
 # Task 005: 创建 Cloudflare 部署 GitHub Actions Workflow
 
+> **Status (2026-03-27): historical task.** This file describes the original workflow design target. The live workflow and live scripts are now the source of truth:
+> - `.github/workflows/cloudflare-deploy.yml`
+> - `package.json`
+> - `.claude/rules/architecture.md`
+
 **depends-on:** task-003
 
 ## Description
 
-创建 `.github/workflows/cloudflare-deploy.yml`，支持手动触发部署到 Cloudflare Workers。复用 Vercel workflow 的 MISSING_MESSAGE 检测和部署后验证模式。现有 Vercel 和 CI workflow 完全不动。
+创建 `.github/workflows/cloudflare-deploy.yml`，支持手动触发部署到 Cloudflare Workers。本文记录的是当时的设计目标，当前 workflow 细节已经演进，不应再把本页当作现行脚本或步骤定义。
 
 ## Execution Context
 
@@ -40,7 +45,7 @@ Steps 设计要点：
 5. 构建：`pnpm build:cf 2>&1 | tee cf_build.log`（环境变量已内置在脚本中）
 6. MISSING_MESSAGE 检测：`grep -E -i "MISSING_MESSAGE" cf_build.log`
 7. 上传构建日志 artifact（`actions/upload-artifact@v4`）
-8. 部署：`pnpm exec opennextjs-cloudflare deploy --env ${{ inputs.environment }}`（使用 `pnpm exec` 确保 CLI 可从 `node_modules/.bin/` 找到）
+8. 历史设计里的部署命令是 `pnpm exec opennextjs-cloudflare deploy --env ${{ inputs.environment }}`；当前现行 workflow 以仓库中的 `deploy:cf` / Wrangler 主链路为准
 9. 输出部署 URL
 
 **Job 2: `post-deploy-verification`**（needs: build-and-deploy）

@@ -1,5 +1,11 @@
 # Cloudflare Workers 双环境并行部署 — 实施计划
 
+> **Status (2026-03-27): superseded as an implementation plan.** This folder remains as historical planning context. The current canonical truth is:
+> - `pnpm build:cf` is now the formal Cloudflare build path and uses the repo's Webpack wrapper
+> - `pnpm preview:cf` / `pnpm deploy:cf` follow that same current build output
+> - `pnpm build:cf:turbo` is the comparison path, not the default production build path
+> - verification policy lives in `.claude/rules/architecture.md` → `Cloudflare Verification Policy`
+
 > **For Claude:** Optional: Use Skill tool load `superpowers:executing-plans` skill for orchestrated execution, or execute tasks manually in order.
 
 **Goal:** 在不破坏 Vercel 部署的前提下，新增 Cloudflare Workers 部署能力（POC 阶段）。
@@ -73,8 +79,8 @@ Task 003 与 Task 004 可并行（互不依赖文件）。
 
 以下 7 项修正来自 Codex 审查，已纳入各 task 文件：
 
-1. `build:cf` 使用 `opennextjs-cloudflare build`（内含 `next build`，避免双重构建）
-2. `preview:cf` / `deploy:cf` 使用 OpenNext CLI（不直接调 wrangler）
+1. 历史方案里 `build:cf` 使用 `opennextjs-cloudflare build`；当前正式链路已切换为 Webpack 包装器
+2. 历史方案里 `preview:cf` / `deploy:cf` 使用 OpenNext CLI；当前正式脚本已切换为基于 `build:cf` 产物的 Wrangler 流程
 3. POC 阶段不配置 Cron Triggers（`scheduled()` handler 需 custom worker entry）
 4. `wrangler.jsonc` 添加 `global_fetch_strictly_public` flag + `WORKER_SELF_REFERENCE` service binding
 5. `env.ts` 新增变量必须同步 schema + runtimeEnv

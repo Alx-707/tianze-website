@@ -115,12 +115,14 @@
     - stock preview 边界内的问题，
     - 还是必须由 deployed smoke 证明的问题。
 
-### 12. `build:cf:webpack` 可以当构建/部署后备链路，但不要把 Wrangler 本地预览当成这条链路的真相证明
+### 12. `build:cf` 现在走 Webpack 主链路，但 Wrangler 本地预览仍然不是完整真相证明
 - 截至 2026-03-27，本仓库已验证：
-  - `pnpm build:cf:webpack` 可以成功产出 OpenNext Cloudflare bundle；
-  - 但直接基于该产物跑 `wrangler dev --env preview`，会在本地 bundling/runtime 层触发 `middleware-manifest.json` 动态 require 错误；
+  - `pnpm build:cf` 的正式实现现在是 `node scripts/cloudflare/build-webpack.mjs`；
+  - `pnpm build:cf:turbo` 仅保留为对照/排查链路，不再是默认 Cloudflare 构建入口；
+  - 直接基于当前 Webpack 产物跑 `wrangler dev --env preview`，仍会在本地 bundling/runtime 层触发 `middleware-manifest.json` 动态 require 错误；
   - 改成 `wrangler dev --env preview --no-bundle` 后，本地又会卡在 `cloudflare/images.js` 模块缺失。
 - 当前默认动作：
-  - 把 webpack 链路视为“构建/部署后备方案”，不要把它扩展成新的本地 release proof；
-  - 本地 Cloudflare 页面验证仍优先走既有的 `smoke:cf:preview` / `opennextjs-cloudflare preview` 分层策略；
-  - 如果未来要重新启用 webpack 本地 preview，必须先补一轮本地可运行证据，再把命令公开为正式脚本。
+  - 把 Webpack 视为当前正式 Cloudflare 构建链路；
+  - 不要把本地 Wrangler preview 当成这条主链路的完整 release proof；
+  - 本地 Cloudflare 页面验证仍优先走既有的 `smoke:cf:preview` 分层策略；
+  - 如果未来要把 Wrangler 本地 preview 提升为更强的正式证明面，必须先补一轮本地可运行证据。

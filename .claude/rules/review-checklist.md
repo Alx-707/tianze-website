@@ -36,6 +36,10 @@ pnpm build:cf
 grep -r "unpkg.com\|cdn.jsdelivr" .next/ 2>/dev/null | grep -v ".map"
 ```
 
+Notes:
+- `pnpm build:cf` is the current canonical Cloudflare build path and now runs through the repo's Webpack wrapper.
+- If the diff touches Cloudflare build tooling, OpenNext integration, or Wrangler-specific aliases, also run `pnpm build:cf:turbo` as a comparison check.
+
 ### Quality Gates
 
 ```bash

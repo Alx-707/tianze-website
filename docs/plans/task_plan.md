@@ -144,4 +144,4 @@ Remaining program work is in Tracks B (performance), C (accessibility), and D (g
   - `pnpm build:cf` passed
   - `pnpm build:cf:webpack` passed
   - `pnpm deploy:cf:webpack:dry-run` passed
-  - local Wrangler preview for the webpack fallback was explicitly downgraded and removed from public scripts because it still fails in local runtime proof.
+  - local Wrangler preview is still a bounded proof surface under the current Webpack-based Cloudflare mainline and must not be treated as full deployed proof.

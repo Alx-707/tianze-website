@@ -66,7 +66,7 @@
 
 运行 `pnpm build:cf`（环境变量已内置在脚本中）
 
-`opennextjs-cloudflare build` 仅产出 worker 文件和静态资源（`.open-next/`），不执行 cache population。如果 `wrangler.jsonc` 中资源占位符未替换（R2/D1），build 阶段仍可成功。cache population 在 `preview`/`deploy` 阶段发生，此处只需确认 build 产物正常生成。
+当前正式 `build:cf` 走的是仓库内的 Webpack 包装器，但底层仍是为了产出 `.open-next/` worker 产物与静态资源；这里的验证重点仍然是“Cloudflare build 产物能否正常生成”，而不是沿用旧计划里的脚本实现细节。
 
 ## Verification Commands
 

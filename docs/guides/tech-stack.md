@@ -117,8 +117,8 @@ content/
 ### 构建工具
 - **@next/bundle-analyzer 16.2.0** - 包大小分析
 - **Turbopack** - 开发环境构建（`next dev --turbopack`）
-- **Turbopack** - 默认生产环境构建（Next.js 16.2 当前输出）
-- **Webpack** - 兜底生产构建（`pnpm build:webpack`）
+- **Webpack** - 当前 Cloudflare 正式构建链路（`pnpm build:cf` 通过 `scripts/cloudflare/build-webpack.mjs`）
+- **Turbopack / OpenNext CLI** - Cloudflare 对照构建链路（`pnpm build:cf:turbo`，用于兼容性排查）
 - **pnpm 10.13.1** - 包管理器
 - **Lighthouse CI** - 性能监控（替代 size-limit）
 - **dependency-cruiser 17.3.9** - 依赖分析
@@ -333,7 +333,7 @@ messages/              # next-intl 国际化文件
 
 ### 性能优化策略
 - **开发模式** - Turbopack (`next dev --turbopack`)
-- **生产构建** - Turbopack（默认）；Webpack 保留为兼容/排查兜底
+- **生产构建** - 标准 Next 构建仍为 `pnpm build`；Cloudflare 生产构建默认走 `pnpm build:cf`（Webpack 主链路），`pnpm build:cf:turbo` 仅作对照/排查
 - **缓存策略** - SSG/ISR 混合渲染
 - **图片优化** - sharp + WebP/AVIF 支持
 
@@ -348,6 +348,7 @@ messages/              # next-intl 国际化文件
 # 开发环境
 pnpm dev                    # 启动开发服务器（Turbopack）
 pnpm dev:webpack            # Webpack 开发模式（兼容/排查用）
+pnpm preview:cf            # 本地 Cloudflare preview（基于当前 build:cf 主链路）
 
 # 代码质量检查
 pnpm type-check            # TypeScript 类型检查

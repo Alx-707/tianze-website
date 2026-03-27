@@ -91,12 +91,18 @@ Notes:
 
 **Cloudflare is the primary deployment platform.** Verification is split into two layers:
 
+- Current canonical build chain:
+  - `pnpm build:cf` → formal Cloudflare build path, now backed by the repo's Webpack-based wrapper
+  - `pnpm preview:cf` / `pnpm deploy:cf` → follow the same current canonical `build:cf` output
+  - `pnpm build:cf:turbo` → comparison / fallback path for debugging upstream Turbopack/OpenNext behavior, not the default production build path
+
 | Layer | Scope | Command | Release-blocking? |
 |-------|-------|---------|-------------------|
 | **Local preview** | Pages, redirects, cookies, headers, middleware behavior | `pnpm smoke:cf:preview` | Yes |
 | **Deployed smoke** | API routes (`/api/health`, Server Actions) | `node scripts/deploy/post-deploy-smoke.mjs --base-url <url>` | Yes (post-deploy) |
 
 - `pnpm smoke:cf:preview:strict` (includes `/api/health` in local preview) is a **diagnostic tool**, not a release gate. Its failure does not block releases.
+- Local preview is still a bounded proof surface even though `build:cf` now uses Webpack by default; do not treat local Wrangler behavior as a complete substitute for deployed Cloudflare evidence.
 - Final API proof happens **only after real Cloudflare deployment**, via the post-deploy smoke in the deploy workflow.
 - If post-deploy smoke fails, rollback to the previous deployment.
 

@@ -54,6 +54,7 @@ Minimum bundle:
 
 Add when relevant:
 - `pnpm build:cf` for platform/runtime/build-chain changes
+- `pnpm build:cf:turbo` when the change touches the Cloudflare build toolchain itself and you need to keep the comparison path healthy
 - `CI=1 pnpm test:e2e` for key-path UI/runtime changes
 
 What it proves:

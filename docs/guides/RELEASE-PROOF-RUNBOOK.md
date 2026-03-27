@@ -34,6 +34,7 @@ CI=1 pnpm test:e2e
 - Do not run `pnpm build` and `pnpm build:cf` in parallel.
 - Fast local gates are not release proof.
 - Release proof is stronger than CI proof because it is change-type aware and platform aware.
+- If the change touches the Cloudflare build chain itself, add `pnpm build:cf:turbo` as a comparison check before signoff.
 
 ## Minimal Accept/Reject Rule
 - If any step in the release-proof flow fails, do not treat the change as release-proven.

@@ -1,5 +1,10 @@
 # Task 001: 更新迁移报告
 
+> **Status (2026-03-27): historical task.** The script details in this task describe the original migration-plan target, not the current canonical implementation. For current truth, use:
+> - `package.json`
+> - `.claude/rules/architecture.md`
+> - `docs/guides/RELEASE-PROOF-RUNBOOK.md`
+
 **depends-on:** —
 
 ## Description
@@ -16,7 +21,7 @@
 
 - Given: 迁移报告包含原始（未修正）的脚本方案和配置建议
 - When: 报告更新完成
-- Then: 报告中 `build:cf` 使用 `opennextjs-cloudflare build`；`preview:cf`/`deploy:cf` 使用 OpenNext CLI；Cron 标注"POC 阶段延后"；`wrangler.jsonc` 示例包含 `global_fetch_strictly_public` 和 `WORKER_SELF_REFERENCE`；提及 `.dev.vars` 和 env 分层；`env.ts` 章节明确 runtimeEnv 映射要求
+- Then: 报告能够反映当时那一轮迁移计划的脚本方案与配置建议；当前正式脚本真相以仓库现状为准，不再由此任务定义
 
 ## Files to Modify/Create
 

@@ -33,7 +33,8 @@ Do not run `pnpm build` and `pnpm build:cf` in parallel.
 
 - `@types/node` must align with `package.json > engines.node`, not npm `latest`
 - `eslint@10` is currently blocked by the active Next/React ESLint plugin chain
-- `@opennextjs/cloudflare@1.17.1` currently requires OpenNext `minify` to remain disabled in `open-next.config.ts`
+- `@opennextjs/cloudflare@1.17.3` is the current project baseline
+- OpenNext `minify` remains disabled in `open-next.config.ts`; if an upgrade aims to re-enable it, treat that as a separate compatibility validation task
 
 ## Core Dependencies
 
@@ -51,6 +52,7 @@ These require full validation and careful batching:
 - Upgrade in small batches, not all at once
 - Keep low-risk patch/minor upgrades separate from higher-risk major upgrades
 - Treat Cloudflare deploy-path changes as incomplete until `pnpm build:cf` passes
+- If the upgrade touches the Cloudflare build chain itself, also run `pnpm build:cf:turbo` to keep the comparison path from silently rotting
 - If a package also drives a CDN asset, update the CDN version together
 
 Current example:
