@@ -276,13 +276,14 @@ function ipv6ToBigInt(ip: string): bigint | null {
 
   if (!leftSegments || !rightSegments) return null;
 
-  const hasCompression = ip.includes("::");
-  const missingSegments =
-    IPV6_SEGMENT_COUNT - (leftSegments.length + rightSegments.length);
+  const hasCompression = compressedParts.length === 2;
+  const totalProvided = leftSegments.length + rightSegments.length;
+  const missingSegments = IPV6_SEGMENT_COUNT - totalProvided;
 
-  if ((!hasCompression && missingSegments !== 0) || missingSegments < 0) {
-    return null;
-  }
+  const validCount = hasCompression
+    ? missingSegments > 0
+    : missingSegments === 0;
+  if (!validCount) return null;
 
   const segments = hasCompression
     ? [

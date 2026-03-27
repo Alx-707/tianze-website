@@ -501,6 +501,16 @@ describe("client-ip", () => {
       expect(ip).toBe("10.0.0.1");
     });
 
+    it("should reject IPv6 with redundant compression (zero missing segments)", () => {
+      setEnv("VERCEL", "1");
+      const request = createMockRequest({
+        headers: { "x-real-ip": "1:2:3:4:5:6:7::8" },
+        ip: "10.0.0.1",
+      });
+      const ip = getClientIP(request);
+      expect(ip).toBe("10.0.0.1");
+    });
+
     it("should accept valid compressed IPv6 forms", () => {
       setEnv("VERCEL", "1");
       const valid = ["::1", "::", "fe80::", "2001:db8::1", "::ffff:192.0.2.1"];
