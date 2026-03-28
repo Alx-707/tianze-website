@@ -15,9 +15,6 @@ import { expect, test } from "@playwright/test";
  * - Contact: form layout
  */
 
-const isDaily = process.env.CI_DAILY === "true";
-test.skip(!isDaily, "Visual regression only runs in CI_DAILY mode");
-
 const VISUAL_PAGES = [
   { path: "/en", name: "homepage" },
   { path: "/en/products", name: "products" },
