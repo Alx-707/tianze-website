@@ -497,8 +497,8 @@ jobs:
       - name: 安装依赖
         run: pnpm install --frozen-lockfile
 
-      - name: 运行变异测试
-        run: pnpm test:mutation
+      - name: 运行变异测试（lead-pipeline）
+        run: pnpm test:mutation:lead
 
       - name: 上传变异测试报告
         if: always()
