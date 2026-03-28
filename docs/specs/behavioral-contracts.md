@@ -1,0 +1,406 @@
+# Behavioral Contracts
+
+> What users must be able to do. Each contract is a testable promise.
+>
+> This document is the single source of truth for user-facing behavioral guarantees.
+> Every contract maps to at least one test file. If a contract has no test, it is a gap.
+
+## Contract Format
+
+| Field | Description |
+|-------|-------------|
+| ID | BC-XXX |
+| Contract | User-facing promise in plain language |
+| Priority | Critical / High / Medium |
+| Test Type | E2E / Integration / Static Truth / Unit |
+| Test File | Path to test file(s) that verify this contract |
+| Status | Untested / Covered / Partial |
+
+## Contracts
+
+### Navigation & Discovery
+
+#### BC-001: Homepage loads and shows core value proposition
+
+A buyer landing on the homepage sees the hero section with a clear heading, proof metrics (countries, experience), and two CTA buttons leading to /contact and /products.
+
+| Field | Value |
+|-------|-------|
+| Priority | Critical |
+| Test Type | E2E |
+| Test File | `tests/e2e/homepage.spec.ts` |
+| Status | Partial |
+
+Notes: Hero section visibility and CTA link count are tested. CTA `href` targets (/contact, /products) are not explicitly verified.
+
+---
+
+#### BC-002: Buyer can navigate to all main pages from the header
+
+Desktop: Navigation bar shows links to Home, Products, Blog, and About. Mobile: Hamburger menu opens a sheet with the same links. Clicking any link reaches the correct page.
+
+| Field | Value |
+|-------|-------|
+| Priority | Critical |
+| Test Type | E2E |
+| Test File | `tests/e2e/navigation.spec.ts`, `tests/e2e/basic-navigation.spec.ts` |
+| Status | Covered |
+
+---
+
+#### BC-003: Buyer can switch between English and Chinese
+
+Language toggle (desktop dropdown / mobile sheet link) switches the UI language, updates `html[lang]`, translates navigation labels, and preserves the current page path (e.g., /en/about becomes /zh/about).
+
+| Field | Value |
+|-------|-------|
+| Priority | Critical |
+| Test Type | E2E |
+| Test File | `tests/e2e/i18n.spec.ts` |
+| Status | Covered |
+
+---
+
+#### BC-004: Root URL redirects to default locale
+
+Visiting `/` redirects to `/en` (or the detected locale). No blank page, no infinite redirect loop.
+
+| Field | Value |
+|-------|-------|
+| Priority | Critical |
+| Test Type | E2E |
+| Test File | `tests/e2e/navigation.spec.ts`, `tests/e2e/i18n-redirect-validation.spec.ts` |
+| Status | Covered |
+
+---
+
+#### BC-005: Non-existent routes return a 404 page
+
+Visiting a URL that does not match any route (e.g., `/en/this-does-not-exist`) returns HTTP 404 and renders a user-friendly "not found" page, not a blank screen.
+
+| Field | Value |
+|-------|-------|
+| Priority | High |
+| Test Type | E2E |
+| Test File | `tests/e2e/navigation.spec.ts` |
+| Status | Covered |
+
+---
+
+#### BC-006: Mobile menu opens, navigates, and auto-closes
+
+On mobile viewports, tapping the hamburger opens a navigation sheet. Selecting a link navigates to the page and auto-closes the sheet. Pressing Escape closes the sheet and returns focus to the trigger button.
+
+| Field | Value |
+|-------|-------|
+| Priority | High |
+| Test Type | E2E |
+| Test File | `tests/e2e/navigation.spec.ts` |
+| Status | Covered |
+
+---
+
+### Inquiry & Conversion
+
+#### BC-007: Buyer can submit a contact inquiry
+
+The /contact page renders a form with fields: firstName, lastName, email, company, message, and a privacy policy checkbox. Filling all required fields and passing Turnstile verification enables the submit button. Submission POSTs to /api/contact and displays a success or error message.
+
+| Field | Value |
+|-------|-------|
+| Priority | Critical |
+| Test Type | E2E + Integration |
+| Test File | `tests/e2e/contact-form-smoke.spec.ts`, `src/app/__tests__/contact-integration.test.ts`, `src/app/api/contact/__tests__/contact-api-validation.test.ts` |
+| Status | Partial |
+
+Notes: Form field rendering and required attributes are tested. Actual submission (POST to /api/contact with Turnstile token) and success feedback are not end-to-end tested due to Turnstile dependency.
+
+---
+
+#### BC-008: Contact form validates required fields before submission
+
+Empty required fields (firstName, lastName, email, message, acceptPrivacy) prevent submission. Email field validates email format. Submit button stays disabled until Turnstile verification completes.
+
+| Field | Value |
+|-------|-------|
+| Priority | Critical |
+| Test Type | E2E + Unit |
+| Test File | `tests/e2e/contact-form-smoke.spec.ts`, `src/app/api/contact/__tests__/contact-api-validation.test.ts` |
+| Status | Partial |
+
+Notes: Required attribute presence is verified. Client-side validation UX (error messages appearing inline) is not fully tested.
+
+---
+
+#### BC-009: Product inquiry drawer submits to /api/inquiry
+
+On any /products/[market] page, clicking a product's inquiry button opens a drawer. The drawer form submits to /api/inquiry with product context (market, product name). Successful submission shows confirmation.
+
+| Field | Value |
+|-------|-------|
+| Priority | Critical |
+| Test Type | E2E + Integration |
+| Test File | `src/app/api/inquiry/__tests__/inquiry-integration.test.ts` |
+| Status | Partial |
+
+Notes: API-level integration test exists. No E2E test covers the drawer open/fill/submit flow from the product page.
+
+---
+
+#### BC-010: Contact form works in both English and Chinese
+
+Form labels, placeholder text, validation messages, and success/error feedback render in the active locale. Both /en/contact and /zh/contact produce valid submissions.
+
+| Field | Value |
+|-------|-------|
+| Priority | High |
+| Test Type | E2E |
+| Test File | `tests/e2e/contact-form-smoke.spec.ts` |
+| Status | Covered |
+
+---
+
+#### BC-011: API endpoints enforce rate limiting
+
+/api/contact, /api/inquiry, and /api/subscribe return HTTP 429 when the same client exceeds the configured request limit within the time window.
+
+| Field | Value |
+|-------|-------|
+| Priority | High |
+| Test Type | Integration |
+| Test File | `src/app/api/contact/__tests__/contact-api-validation.test.ts` |
+| Status | Partial |
+
+Notes: Contact API rate limiting is tested at integration level. Inquiry and subscribe rate limiting are not explicitly tested.
+
+---
+
+#### BC-012: API endpoints reject invalid Turnstile tokens
+
+/api/contact and /api/inquiry reject requests with missing, empty, or invalid Turnstile tokens, returning an appropriate error response.
+
+| Field | Value |
+|-------|-------|
+| Priority | High |
+| Test Type | Integration |
+| Test File | `src/app/api/contact/__tests__/contact-api-validation.test.ts` |
+| Status | Partial |
+
+Notes: Contact API Turnstile validation is tested. Inquiry API Turnstile validation coverage is less clear.
+
+---
+
+### Content & Information
+
+#### BC-013: Products page shows all market cards with working links
+
+/products displays market cards for all 5 markets (North America, Australia & New Zealand, Mexico, Europe, Pneumatic Tube Systems) plus a link to /capabilities/bending-machines. Each card links to its /products/[market] page.
+
+| Field | Value |
+|-------|-------|
+| Priority | Critical |
+| Test Type | E2E + Static Truth |
+| Test File | `scripts/static-truth-check.js` |
+| Status | Partial |
+
+Notes: Static truth check validates that link hrefs resolve to real routes. No E2E test verifies the products page card layout and click-through.
+
+---
+
+#### BC-014: Market product page displays specs and product listings
+
+Each /products/[market] page renders the market name, product families with specifications (dimensions, standards), and at least one product with an inquiry action.
+
+| Field | Value |
+|-------|-------|
+| Priority | Critical |
+| Test Type | Unit + E2E |
+| Test File | `src/constants/product-specs/__tests__/north-america.test.ts`, `src/constants/product-specs/__tests__/australia-new-zealand.test.ts`, `src/constants/product-specs/__tests__/mexico.test.ts`, `src/constants/product-specs/__tests__/europe.test.ts`, `src/constants/product-specs/__tests__/pneumatic-tube-systems.test.ts` |
+| Status | Partial |
+
+Notes: Product spec data integrity is unit-tested. No E2E test verifies that specs render correctly on the page.
+
+---
+
+#### BC-015: Blog listing page shows published posts
+
+/blog renders a list of published blog posts with titles, dates, and excerpts. Each post links to /blog/[slug]. The listing loads without errors in both locales.
+
+| Field | Value |
+|-------|-------|
+| Priority | Medium |
+| Test Type | E2E |
+| Test File | -- |
+| Status | Untested |
+
+---
+
+#### BC-016: Blog post page renders full content
+
+/blog/[slug] renders the post title, date, author, and full MDX content. Navigation back to /blog works.
+
+| Field | Value |
+|-------|-------|
+| Priority | Medium |
+| Test Type | E2E |
+| Test File | -- |
+| Status | Untested |
+
+---
+
+#### BC-017: About page communicates factory capability
+
+/about renders company information including manufacturing history, factory capability indicators, and a CTA linking to /contact. Content displays in the active locale.
+
+| Field | Value |
+|-------|-------|
+| Priority | High |
+| Test Type | E2E |
+| Test File | -- |
+| Status | Untested |
+
+Notes: Navigation to /about is tested extensively (basic-navigation, navigation, i18n). Page content and CTA behavior are not verified.
+
+---
+
+#### BC-018: Bending machines page shows equipment specifications
+
+/capabilities/bending-machines displays equipment specs and images that demonstrate upstream manufacturing capability. The page loads in both locales.
+
+| Field | Value |
+|-------|-------|
+| Priority | Medium |
+| Test Type | E2E |
+| Test File | -- |
+| Status | Untested |
+
+---
+
+#### BC-019: OEM page communicates custom manufacturing capability
+
+/oem-custom-manufacturing renders OEM capabilities, customization options, and a CTA to /contact. The page loads in both locales without errors.
+
+| Field | Value |
+|-------|-------|
+| Priority | Medium |
+| Test Type | E2E |
+| Test File | -- |
+| Status | Untested |
+
+---
+
+### Resilience & Edge Cases
+
+#### BC-020: All internal links point to real routes
+
+Every `<Link href="...">` and `<a href="...">` in the codebase that targets an internal route resolves to an actual page or API route. No dead links exist in production code.
+
+| Field | Value |
+|-------|-------|
+| Priority | Critical |
+| Test Type | Static Truth |
+| Test File | `scripts/static-truth-check.js` |
+| Status | Covered |
+
+---
+
+#### BC-021: Pages render meaningful HTML without JavaScript
+
+Homepage and contact page deliver server-rendered HTML with navigation, headings, and form structure visible before client-side hydration. No "BAILOUT_TO_CLIENT_SIDE_RENDERING" markers in the HTML.
+
+| Field | Value |
+|-------|-------|
+| Priority | High |
+| Test Type | E2E |
+| Test File | `tests/e2e/no-js-html-contract.spec.ts` |
+| Status | Covered |
+
+---
+
+#### BC-022: Health endpoint responds with 200
+
+GET /api/health returns HTTP 200 with a JSON body indicating service status. Used for deployment verification and uptime monitoring.
+
+| Field | Value |
+|-------|-------|
+| Priority | High |
+| Test Type | Integration |
+| Test File | -- |
+| Status | Untested |
+
+Notes: Post-deploy smoke script (`scripts/deploy/post-deploy-smoke.mjs`) checks this on deployed environments. No unit or integration test exists in the test suite.
+
+---
+
+#### BC-023: Sitemap includes all public pages in both locales
+
+/sitemap.xml lists all public pages (homepage, about, contact, products, products/[market], blog, blog/[slug], capabilities/bending-machines, oem-custom-manufacturing, privacy, terms) with hreflang alternates for en and zh.
+
+| Field | Value |
+|-------|-------|
+| Priority | High |
+| Test Type | Unit |
+| Test File | `src/app/__tests__/sitemap.test.ts`, `src/lib/__tests__/sitemap-utils.test.ts` |
+| Status | Covered |
+
+---
+
+#### BC-024: API endpoints handle duplicate submissions idempotently
+
+/api/contact, /api/inquiry, and /api/subscribe accept an Idempotency-Key header. Resubmitting the same request with the same key returns the cached response instead of creating a duplicate lead.
+
+| Field | Value |
+|-------|-------|
+| Priority | High |
+| Test Type | Integration |
+| Test File | `src/app/api/contact/__tests__/contact-api-validation.test.ts` |
+| Status | Partial |
+
+Notes: Contact API idempotency is tested. Inquiry and subscribe idempotency are not explicitly tested.
+
+---
+
+#### BC-025: Product spec data is complete and consistent across markets
+
+All 5 market spec files contain required fields (product families, dimensions, standards). i18n translation keys exist for both en and zh for every spec entry.
+
+| Field | Value |
+|-------|-------|
+| Priority | High |
+| Test Type | Unit |
+| Test File | `src/constants/product-specs/__tests__/i18n-parity.test.ts` |
+| Status | Covered |
+
+---
+
+## Coverage Summary
+
+| Category | Total | Covered | Partial | Untested |
+|----------|-------|---------|---------|----------|
+| Navigation & Discovery | 6 | 5 | 1 | 0 |
+| Inquiry & Conversion | 6 | 1 | 4 | 1 |
+| Content & Information | 7 | 0 | 2 | 5 |
+| Resilience & Edge Cases | 6 | 4 | 1 | 1 |
+| **Total** | **25** | **10** | **8** | **7** |
+
+## Priority Gap Analysis
+
+### Critical gaps (no or partial coverage on Critical contracts)
+
+- **BC-001** (Partial): Hero CTA links need `href` verification for /contact and /products
+- **BC-007** (Partial): End-to-end contact form submission flow not tested (Turnstile blocker)
+- **BC-009** (Partial): Product inquiry drawer has no E2E test
+- **BC-013** (Partial): Products page market cards have no E2E test
+
+### High-priority gaps
+
+- **BC-017** (Untested): About page content and CTA
+- **BC-022** (Untested): Health endpoint has no test in suite
+- **BC-011** (Partial): Rate limiting only tested for contact, not inquiry/subscribe
+- **BC-024** (Partial): Idempotency only tested for contact, not inquiry/subscribe
+
+### Medium-priority gaps
+
+- **BC-015, BC-016** (Untested): Blog listing and post pages
+- **BC-018** (Untested): Bending machines page
+- **BC-019** (Untested): OEM page

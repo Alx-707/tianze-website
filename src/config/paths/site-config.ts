@@ -2,6 +2,8 @@
  * 站点配置
  */
 
+import { env } from "@/lib/env";
+
 export interface SiteConfig {
   baseUrl: string;
   name: string;
@@ -26,10 +28,7 @@ export interface SiteConfig {
 
 // 站点配置
 export const SITE_CONFIG = {
-  baseUrl:
-    process.env["NEXT_PUBLIC_BASE_URL"] ||
-    process.env["NEXT_PUBLIC_SITE_URL"] ||
-    "https://tianze-pipe.com",
+  baseUrl: env.NEXT_PUBLIC_BASE_URL,
   name: "Tianze Pipe",
   description:
     "Pipe Bending Experts - Equipment, Process & Fittings Integrated Solutions",
@@ -65,8 +64,7 @@ export const SITE_CONFIG = {
   contact: {
     phone: "+86-518-0000-0000",
     email: "sales@tianze-pipe.com",
-    whatsappNumber:
-      process.env["NEXT_PUBLIC_WHATSAPP_NUMBER"] || "+86-518-0000-0000",
+    whatsappNumber: env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "+86-518-0000-0000",
   },
 } as const satisfies SiteConfig;
 

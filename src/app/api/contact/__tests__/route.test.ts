@@ -13,7 +13,7 @@ const {
 } = vi.hoisted(() => ({
   mockAirtableService: {
     isReady: vi.fn(),
-    createContact: vi.fn(),
+    createLead: vi.fn(),
     getStatistics: vi.fn(),
   },
   mockResendService: {
@@ -156,7 +156,7 @@ describe("Contact API Route", () => {
       } as any);
 
       // Mock successful service responses
-      mockAirtableService.createContact.mockResolvedValue({ id: "record-123" });
+      mockAirtableService.createLead.mockResolvedValue({ id: "record-123" });
       mockResendService.sendContactFormEmail.mockResolvedValue("email-123");
       mockResendService.sendConfirmationEmail.mockResolvedValue(
         "confirmation-123",
@@ -265,7 +265,7 @@ describe("Contact API Route", () => {
         json: () => Promise.resolve({ success: true }),
       });
 
-      mockAirtableService.createContact.mockResolvedValue("record-123");
+      mockAirtableService.createLead.mockResolvedValue("record-123");
       mockResendService.sendContactFormEmail.mockResolvedValue("email-123");
 
       // 前 5 次请求允许通过

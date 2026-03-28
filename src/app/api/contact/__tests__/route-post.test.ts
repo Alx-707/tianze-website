@@ -44,7 +44,7 @@ const {
   return {
     mockAirtableService: {
       isReady: vi.fn(),
-      createContact: vi.fn(),
+      createLead: vi.fn(),
       getStatistics: vi.fn(),
     },
     mockResendService: {
@@ -196,7 +196,7 @@ describe("Contact API Route - POST Tests", () => {
     // Reset default mock implementations
     mockAirtableService.isReady.mockReturnValue(true);
     mockResendService.isReady.mockReturnValue(true);
-    mockAirtableService.createContact.mockResolvedValue({ id: "test-id" });
+    mockAirtableService.createLead.mockResolvedValue({ id: "test-id" });
     mockResendService.sendContactFormEmail.mockResolvedValue({
       id: "email-id",
     });
@@ -403,7 +403,7 @@ describe("Contact API Route - POST Tests", () => {
       expect(data.success).toBe(true);
 
       // 应该仍然成功，但没有调用外部服务
-      expect(mockAirtableService.createContact).not.toHaveBeenCalled();
+      expect(mockAirtableService.createLead).not.toHaveBeenCalled();
       expect(mockResendService.sendContactFormEmail).not.toHaveBeenCalled();
     });
 
