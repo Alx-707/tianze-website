@@ -462,6 +462,51 @@ jobs:
       - name: 循环依赖检查
         run: pnpm circular:check
 
+  # 变异测试作业
+  mutation-testing:
+    name: 变异测试
+    runs-on: ubuntu-latest
+    needs: tests
+    timeout-minutes: 30
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+        with:
+          submodules: false
+          persist-credentials: false
+
+      - name: 设置pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.13.1
+
+      - name: 设置Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-node20-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-node20-pnpm-
+
+      - name: 安装依赖
+        run: pnpm install --frozen-lockfile
+
+      - name: 运行变异测试
+        run: pnpm test:mutation
+
+      - name: 上传变异测试报告
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mutation-report
+          path: reports/mutation/
+
   # 汇总作业
   ci-summary:
     name: CI汇总
@@ -475,6 +520,7 @@ jobs:
         security,
         translation-quality,
         architecture,
+        mutation-testing,
       ]
     if: always()
     timeout-minutes: 5
@@ -489,6 +535,7 @@ jobs:
           echo "安全检查: ${{ needs.security.result }}"
           echo "翻译质量: ${{ needs.translation-quality.result }}"
           echo "架构检查: ${{ needs.architecture.result }}"
+          echo "变异测试: ${{ needs.mutation-testing.result }}"
 
           if [[ "${{ needs.basic-checks.result }}" != "success" ||
                 "${{ needs.tests.result }}" != "success" ||
@@ -496,7 +543,8 @@ jobs:
                 "${{ needs.performance.result }}" != "success" ||
                 "${{ needs.security.result }}" != "success" ||
                 "${{ needs.translation-quality.result }}" != "success" ||
-                "${{ needs.architecture.result }}" != "success" ]]; then
+                "${{ needs.architecture.result }}" != "success" ||
+                "${{ needs.mutation-testing.result }}" != "success" ]]; then
             echo "❌ CI流水线失败"
             exit 1
           else
