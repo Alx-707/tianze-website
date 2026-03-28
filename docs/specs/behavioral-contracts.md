@@ -408,5 +408,5 @@ All 5 market spec files contain required fields (product families, dimensions, s
 ### Medium-priority gaps
 
 - **BC-015, BC-016** (Untested): Blog listing and post pages
-- **BC-018** (Untested): Bending machines page
+- **BC-018** (Partial): Bending machines page — E2E verifies load + heading + content, not specific specs
 - **BC-019** (Untested): OEM page
