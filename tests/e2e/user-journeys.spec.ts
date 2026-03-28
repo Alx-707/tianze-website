@@ -119,8 +119,10 @@ test.describe("Journey: 404 for Invalid Routes (BC-005)", () => {
     const notFoundText = page.getByText("404");
     await expect(notFoundText).toBeVisible({ timeout: 5_000 });
 
-    // Should have a link back to home
-    const homeLink = page.getByRole("link", { name: /home|go back/i });
+    // The 404 body should offer a dedicated recovery action, not just reuse nav/footer links
+    const homeLink = page
+      .getByRole("main")
+      .getByRole("link", { name: /back to homepage|go back/i });
     await expect(homeLink).toBeVisible();
   });
 });
