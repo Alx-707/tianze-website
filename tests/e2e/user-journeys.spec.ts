@@ -12,14 +12,15 @@ import {
  * Aligned to Behavioral Contracts (docs/specs/behavioral-contracts.md).
  * Each test covers a real user journey, not individual component checks.
  *
- * BC-001: Browse products by market
- * BC-004: Navigate between all pages
+ * BC-002: Navigate to all main pages from header
  * BC-005: 404 for invalid routes
  * BC-013: Products page shows market cards
  * BC-014: Market page shows product specs
+ * BC-018: Bending machines page shows equipment specs
+ * BC-020: All internal links point to real routes
  */
 
-test.describe("Journey: Browse Products (BC-001, BC-013, BC-014)", () => {
+test.describe("Journey: Browse Products (BC-013, BC-014)", () => {
   test("user navigates from homepage to products to a market page", async ({
     page,
   }) => {
@@ -71,7 +72,7 @@ test.describe("Journey: Browse Products (BC-001, BC-013, BC-014)", () => {
   });
 });
 
-test.describe("Journey: Navigate All Pages (BC-004)", () => {
+test.describe("Journey: Navigate All Pages (BC-002)", () => {
   const pages = [
     { path: "/en", titlePattern: /Tianze Pipe/i },
     { path: "/en/about", titlePattern: /About/i },
@@ -124,7 +125,7 @@ test.describe("Journey: 404 for Invalid Routes (BC-005)", () => {
   });
 });
 
-test.describe("Journey: CTA Links Resolve (BC-006, BC-007)", () => {
+test.describe("Journey: CTA Links Resolve (BC-020)", () => {
   test("homepage CTAs link to valid destinations", async ({ page }) => {
     await page.goto("/en");
     await waitForLoadWithFallback(page, {
@@ -158,7 +159,7 @@ test.describe("Journey: CTA Links Resolve (BC-006, BC-007)", () => {
   });
 });
 
-test.describe("Journey: Language Parity (BC-010)", () => {
+test.describe("Journey: Language Parity (BC-003)", () => {
   test("key pages exist in both en and zh", async ({ page }) => {
     const paths = ["/", "/about", "/products", "/contact"];
 

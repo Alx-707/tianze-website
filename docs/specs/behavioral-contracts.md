@@ -76,14 +76,16 @@ Visiting `/` redirects to `/en` (or the detected locale). No blank page, no infi
 
 #### BC-005: Non-existent routes return a 404 page
 
-Visiting a URL that does not match any route (e.g., `/en/this-does-not-exist`) returns HTTP 404 and renders a user-friendly "not found" page, not a blank screen.
+Visiting a URL that does not match any route (e.g., `/en/this-does-not-exist`) returns HTTP 404 and renders the localized "not found" page with a "Go Home" link, not the Next.js default blank 404.
 
 | Field | Value |
 |-------|-------|
 | Priority | High |
 | Test Type | E2E |
-| Test File | `tests/e2e/navigation.spec.ts` |
-| Status | Covered |
+| Test File | `tests/e2e/user-journeys.spec.ts` (Journey: 404 for Invalid Routes) |
+| Status | Partial |
+
+Notes: Catch-all route `[...rest]/page.tsx` added to trigger the custom not-found boundary. E2E test verifies 404 status, "404" text, and home link. The localized not-found page depends on `useTranslations("errors.notFound")` — translation key completeness is not separately verified.
 
 ---
 
@@ -200,10 +202,10 @@ Notes: Contact API Turnstile validation is tested. Inquiry API Turnstile validat
 |-------|-------|
 | Priority | Critical |
 | Test Type | E2E + Static Truth |
-| Test File | `scripts/static-truth-check.js` |
+| Test File | `scripts/static-truth-check.js`, `tests/e2e/user-journeys.spec.ts` (Journey: Browse Products) |
 | Status | Partial |
 
-Notes: Static truth check validates that link hrefs resolve to real routes. No E2E test verifies the products page card layout and click-through.
+Notes: Static truth check validates literal hrefs. E2E journey test navigates from homepage to products page and verifies market card links exist and one click-through works. Full card layout verification is not covered.
 
 ---
 
@@ -215,10 +217,10 @@ Each /products/[market] page renders the market name, product families with spec
 |-------|-------|
 | Priority | Critical |
 | Test Type | Unit + E2E |
-| Test File | `src/constants/product-specs/__tests__/north-america.test.ts`, `src/constants/product-specs/__tests__/australia-new-zealand.test.ts`, `src/constants/product-specs/__tests__/mexico.test.ts`, `src/constants/product-specs/__tests__/europe.test.ts`, `src/constants/product-specs/__tests__/pneumatic-tube-systems.test.ts` |
+| Test File | `src/constants/product-specs/__tests__/*.test.ts`, `tests/e2e/user-journeys.spec.ts` (Journey: Browse Products) |
 | Status | Partial |
 
-Notes: Product spec data integrity is unit-tested. No E2E test verifies that specs render correctly on the page.
+Notes: Product spec data integrity is unit-tested. E2E journey test verifies a market page loads with heading, content sections, and valid market slug. Specific spec rendering is not verified.
 
 ---
 
@@ -271,8 +273,10 @@ Notes: Navigation to /about is tested extensively (basic-navigation, navigation,
 |-------|-------|
 | Priority | Medium |
 | Test Type | E2E |
-| Test File | -- |
-| Status | Untested |
+| Test File | `tests/e2e/user-journeys.spec.ts` (Journey: Bending Machines Page) |
+| Status | Partial |
+
+Notes: E2E test verifies page loads with 200 status, heading visible, and substantive content (>100 chars). Does not verify specific equipment specs or images.
 
 ---
 
@@ -291,16 +295,18 @@ Notes: Navigation to /about is tested extensively (basic-navigation, navigation,
 
 ### Resilience & Edge Cases
 
-#### BC-020: All internal links point to real routes
+#### BC-020: Internal links with literal hrefs point to real routes
 
-Every `<Link href="...">` and `<a href="...">` in the codebase that targets an internal route resolves to an actual page or API route. No dead links exist in production code.
+String-literal `href="/..."` values in source code resolve to actual page or API routes. Variable-based hrefs (e.g., `HOMEPAGE_SECTION_LINKS.contact`, template literals with expressions) are NOT covered by static analysis — they require E2E verification.
 
 | Field | Value |
 |-------|-------|
 | Priority | Critical |
-| Test Type | Static Truth |
-| Test File | `scripts/static-truth-check.js` |
-| Status | Covered |
+| Test Type | Static Truth + E2E |
+| Test File | `scripts/static-truth-check.js`, `tests/e2e/user-journeys.spec.ts` (Journey: CTA Links Resolve) |
+| Status | Partial |
+
+Notes: Static truth check validates ~13 literal hrefs in <50ms. CTA link E2E test clicks actual buttons and verifies destinations load. Together they cover most link integrity, but dynamically constructed URLs (e.g., market slugs from data) are only covered by the market page E2E journey.
 
 ---
 
@@ -377,11 +383,11 @@ All 5 market spec files contain required fields (product families, dimensions, s
 
 | Category | Total | Covered | Partial | Untested |
 |----------|-------|---------|---------|----------|
-| Navigation & Discovery | 6 | 5 | 1 | 0 |
-| Inquiry & Conversion | 6 | 1 | 4 | 1 |
-| Content & Information | 7 | 0 | 2 | 5 |
-| Resilience & Edge Cases | 6 | 4 | 1 | 1 |
-| **Total** | **25** | **10** | **8** | **7** |
+| Navigation & Discovery | 6 | 4 | 2 | 0 |
+| Inquiry & Conversion | 6 | 1 | 5 | 0 |
+| Content & Information | 7 | 0 | 3 | 4 |
+| Resilience & Edge Cases | 6 | 3 | 2 | 1 |
+| **Total** | **25** | **8** | **12** | **5** |
 
 ## Priority Gap Analysis
 
