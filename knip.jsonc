@@ -26,14 +26,15 @@
   // 跳过模板/测试脚手架文件，避免误报（所有问题类型）。
   "ignore": [
     // 预留的性能测试常量文件，用于后续性能基准/回归测试构建
+    ".devtools/react-grab-dev.mjs",
     "src/constants/test-performance-constants.ts",
-    "src/app/[locale]/layout-test.tsx",
+    "src/types/react19.ts",
     "src/templates/**",
     "src/test/**",
     "src/testing/**",
   ],
   // 系统自带的命令无需额外二进制依赖，忽略告警。
-  "ignoreBinaries": ["open", "du"],
+  "ignoreBinaries": ["open", "du", "openssl"],
   // 工具型依赖由 CI/lint/分析脚本消费，标记为已使用以便聚焦业务未用项。
   "ignoreDependencies": [
     // Prettier plugins are auto-loaded by Prettier when installed; knip may not detect usage reliably.
@@ -47,6 +48,7 @@
     "eslint-plugin-react",
     "eslint-plugin-react-hooks",
     "prettier-plugin-tailwindcss",
+    "react-scan",
     "sharp",
     "tailwindcss",
     "tailwindcss-animate",

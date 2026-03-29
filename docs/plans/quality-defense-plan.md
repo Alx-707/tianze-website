@@ -14,23 +14,7 @@ The project has 16+ quality gates that verify code **form** (types, lint, covera
 
 User-facing promises that define "what must work". Each contract maps to test files.
 
-| ID | Contract | Test Type | Priority |
-|----|----------|-----------|----------|
-| BC-001 | User can browse products by market | E2E | Critical |
-| BC-002 | User can submit contact inquiry | E2E + Integration | Critical |
-| BC-003 | User can submit product inquiry | E2E + Integration | Critical |
-| BC-004 | User can navigate between all pages | E2E | Critical |
-| BC-005 | User can switch language (en/zh) | E2E | High |
-| BC-006 | All CTA buttons link to valid routes | Static Truth | Critical |
-| BC-007 | All navigation links resolve | Static Truth | Critical |
-| BC-008 | Form validation prevents bad submissions | Unit + E2E | High |
-| BC-009 | Rate limiting protects API endpoints | Integration | High |
-| BC-010 | User sees localized content on all pages | E2E | High |
-| BC-011 | User can subscribe to newsletter | E2E + Integration | Medium |
-| BC-012 | 404 page renders for invalid routes | E2E | Medium |
-| BC-013 | Mobile navigation works | E2E | High |
-| BC-014 | Product specs display correctly per market | E2E | High |
-| BC-015 | WhatsApp link works when configured | Integration | Medium |
+See [Behavioral Contracts](../specs/behavioral-contracts.md) for the full contract registry.
 
 ### Layer 2: Static Truth Check
 

@@ -70,6 +70,9 @@ jobs:
       - name: 静态真相检查
         run: pnpm truth:check
 
+      - name: 未使用代码检查
+        run: pnpm unused:check
+
   # 测试作业
   tests:
     name: 单元测试

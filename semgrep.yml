@@ -404,3 +404,41 @@ rules:
       technology: [nodejs, react, nextjs]
       cwe: 'CWE-94: Improper Control of Generation of Code'
       owasp: 'A03:2021 - Injection'
+
+  - id: no-raw-request-json-in-api
+    pattern: |
+      await $REQ.json()
+    message: 'API 路由中避免直接使用 request.json()，请走 safeParseJson 或 readAndHashJsonBody'
+    languages: [typescript, javascript]
+    severity: WARNING
+    paths:
+      include:
+        - "src/app/api/**/*.ts"
+        - "src/app/api/**/*.tsx"
+      exclude:
+        - "**/__tests__/**"
+        - "**/*.test.*"
+        - "**/*.spec.*"
+        - "src/app/api/whatsapp/**"
+    metadata:
+      category: correctness
+      technology: [nextjs]
+
+  - id: env-access-bypass-in-config
+    patterns:
+      - pattern: process.env.$VAR
+      - pattern-not: process.env.NODE_ENV
+    message: 'src/config 下避免直接读 process.env，优先通过 env.ts 统一访问'
+    languages: [typescript, javascript]
+    severity: WARNING
+    paths:
+      include:
+        - "src/config/**/*.ts"
+        - "src/config/**/*.tsx"
+      exclude:
+        - "**/__tests__/**"
+        - "**/*.test.*"
+        - "**/*.spec.*"
+    metadata:
+      category: maintainability
+      technology: [nodejs]

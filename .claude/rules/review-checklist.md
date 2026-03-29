@@ -115,6 +115,27 @@ pnpm review:cache-health
 Also use:
 - [`docs/guides/CACHE-HEALTH-CONTRACT.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/CACHE-HEALTH-CONTRACT.md)
 
+## AI Blind Spot Detection
+
+以下 6 个问题在审查 AI 生成代码时必须逐条回答：
+
+1. **门禁游戏化**：这次 PR 是否新增了 ignore/bypass/skip/eslint-disable？
+   如果是，是否有理由注释说明为什么不修底层问题？
+
+2. **测试共用实现真相**：测试是否引用了生产常量作为期望值？
+   （如果常量本身就错了，测试和生产会一起错一起过）
+
+3. **测试/生产路径分叉**：是否新增了 TEST_MODE、PLAYWRIGHT_TEST、
+   ALLOW_MEMORY_ 等开关？每个开关都意味着一条生产路径未被测试覆盖。
+
+4. **低流量页面忽略**：这次变更是否只验证了主路径（首页、联系表单），
+   而忽略了次要页面（privacy、terms、blog、capabilities）？
+
+5. **比例原则**：新增的文件/函数/抽象层数量，和它解决的问题是否成比例？
+
+6. **静默故障**：每个新的 catch/fallback 是否有可观察后果（告警/指标/
+   可区分的错误码）？只 log 然后继续正常流程 = 藏 bug。
+
 ## Severity Rules
 
 - Findings must be tagged: `PROD` / `DEV` / `CI` / `DOC`

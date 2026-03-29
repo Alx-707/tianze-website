@@ -21,6 +21,23 @@ module.exports = {
       to: { path: "^src/app/" },
     },
     {
+      name: "no-config-to-components",
+      severity: "error",
+      comment: "src/config 不能依赖 src/components — config 层必须与 UI 层解耦",
+      from: { path: "^src/config/" },
+      to: { path: "^src/components/" },
+    },
+    {
+      name: "no-cross-route-import",
+      severity: "error",
+      comment: "不同路由目录不能直接导入彼此 — 共享逻辑应抽到 src/lib",
+      from: { path: "^src/app/\\[locale\\]/([^/]+)/" },
+      to: {
+        path: "^src/app/\\[locale\\]/[^/]+/",
+        pathNot: "^src/app/\\[locale\\]/$1/",
+      },
+    },
+    {
       name: "no-non-test-imports-api-routes",
       severity: "error",
       comment:
