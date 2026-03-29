@@ -1,6 +1,12 @@
 # Methodology Framework Phase 1: Foundation (Ring 1-2) Execution Plan
 
-> **For agentic workers:** This is a methodology execution plan, not a code implementation plan. Each task produces a strategy document, not source code. Use `dispatching-parallel-agents` for independent research tasks. Owner confirmation gates are mandatory -- do not proceed past a gate without explicit approval.
+> **For agentic workers:** This is a methodology execution plan, not a code implementation plan. Each task produces a strategy document, not source code. Owner confirmation gates are mandatory -- do not proceed past a gate without explicit approval.
+>
+> **Tool glossary** (these are installed Claude Code superpowers skills, not external tools):
+> - `dispatching-parallel-agents`: Skill that launches multiple independent subagents in parallel, each with its own context. Used when 2+ tasks have no shared state.
+> - `brainstorming`: Skill for collaborative design exploration before implementation. Produces design specs through iterative Q&A.
+> - `do-digger`: Subagent for deep web research. Executes multi-phase research with source verification.
+> - `content-strategy`: Skill with built-in content strategy methodology (topic clusters, editorial calendars, content audits).
 
 **Goal:** Execute Ring 1 (Core Layer) and Ring 2 (Structure Layer) of the methodology-driven framework, producing all foundational strategy documents that Ring 3 (Expression) depends on.
 
@@ -16,6 +22,23 @@
 
 ---
 
+## Pre-Task: Owner Input Collection
+
+**Before any task begins**, collect these inputs from the owner in a single conversation. Tasks 1 and 2 both need owner input before they can truly start.
+
+- [ ] **Collect competitor information** (needed by Task 2):
+  - Which competitors do buyers mention during negotiations?
+  - Any specific competitor websites you've seen?
+  - Which Alibaba stores are your main competitors?
+
+- [ ] **Confirm business goal priorities** (needed by Task 1):
+  - Is inquiry form submission the #1 goal, or is there something else?
+  - Which metric matters most to you personally?
+
+Once collected, Task 1 and Task 2 can proceed in parallel.
+
+---
+
 ## Deliverable Map
 
 All documents produced by this plan:
@@ -27,15 +50,16 @@ docs/strategy/
     02-competitive-analysis.md     -- Task 2
     03-brand-positioning.md        -- Task 3
     04-personas/                   -- Task 4
-      pipe-distributor.md
-      pipe-contractor.md
+      pvc-distributor.md
+      pvc-contractor.md
       petg-integrator.md
       equipment-manufacturer.md
       oem-buyer.md
     05-value-propositions.md       -- Task 5
   ring2/
     06-buyer-question-chains/      -- Task 6
-      pipes.md
+      pvc-conduit.md
+      petg-pneumatic.md
       equipment.md
       custom-molds.md
     07-information-architecture.md -- Task 7
@@ -51,30 +75,32 @@ docs/strategy/
 ## Parallel Execution Map
 
 ```
-Phase 1a (parallel):
+Pre-Task: Owner input collection (competitor names, goal confirmation)
+  |
+Phase 1a (parallel, after pre-task):
   Task 1: Business Goals         ──┐
   Task 2: Competitive Analysis   ──┼── both independent, run in parallel
                                    │
 Phase 1b (sequential, needs 1+2):  │
-  Task 3: Brand Positioning      ◄─┘
-  Task 4: User Personas          ◄── needs 3
-  Task 5: Value Propositions     ◄── needs 3+4
+  Task 3: Brand Positioning      <─┘
+  Task 4: User Personas          <── needs 3
+  Task 5: Value Propositions     <── needs 3+4
 
-  ═══════ OWNER GATE 1 ═══════
+  ======= OWNER GATE 1 =======
   Owner confirms Ring 1 outputs before Ring 2 begins
 
 Phase 2a (sequential):
-  Task 6: Buyer Question Chains  ◄── needs 4 (3 lines, can be parallel)
-  Task 7: Information Architecture ◄── needs 6
+  Task 6: Buyer Question Chains  <── needs 4 (4 sub-lines, can be parallel)
+  Task 7: Information Architecture <── needs 6
 
 Phase 2b (parallel, needs 7+8):
-  Task 8: Content Strategy       ◄── needs 6+7
-  Task 9: Multilingual Architecture ◄── needs 8
-  Task 10: SEO IA                ◄── needs 8 (parallel with 9)
-  Task 11: Legal/Compliance      ◄── needs 7 (parallel with 9,10)
-  Task 12: Content Inventory     ◄── needs 7+8 (parallel with 9,10,11)
+  Task 8: Content Strategy       <── needs 6+7
+  Task 9: Multilingual Architecture <── needs 8
+  Task 10: SEO IA                <── needs 8 (parallel with 9)
+  Task 11: Legal/Compliance      <── needs 7 (parallel with 9,10)
+  Task 12: Content Inventory     <── needs 7+8 (parallel with 9,10,11)
 
-  ═══════ OWNER GATE 2 ═══════
+  ======= OWNER GATE 2 =======
   Owner confirms Ring 2 outputs before Phase 2 (Ring 3) begins
 ```
 
@@ -85,7 +111,7 @@ Phase 2b (parallel, needs 7+8):
 **Deliverable:** `docs/strategy/ring1/01-business-goals.md`
 **Methodology:** Conversion Goal Framework
 **Skill:** None (direct analysis)
-**Depends on:** Nothing -- can start immediately
+**Depends on:** Pre-Task owner input
 **Parallel with:** Task 2
 
 - [ ] **Step 1: Review existing goal definitions**
@@ -106,7 +132,6 @@ Produce document with:
 Present goal hierarchy in business language. Ask:
 - Does this match your actual business priorities?
 - Are there goals missing?
-- Which metric matters most to you personally?
 
 - [ ] **Step 4: Finalize and save**
 
@@ -119,46 +144,39 @@ Save confirmed document to `docs/strategy/ring1/01-business-goals.md`.
 **Deliverable:** `docs/strategy/ring1/02-competitive-analysis.md`
 **Methodology:** Competition Matrix + Alternative Analysis
 **Skill:** `do-digger` (standard mode) for web research
-**Depends on:** Nothing -- can start immediately
+**Depends on:** Pre-Task owner input (competitor names)
 **Parallel with:** Task 1
 
-- [ ] **Step 1: Ask owner for competitor names**
+- [ ] **Step 1: Research competitor websites**
 
-Ask owner:
-- Which competitors do buyers mention during negotiations?
-- Any specific competitor websites you've seen?
-- Which Alibaba stores are your main competitors?
-
-- [ ] **Step 2: Research competitor websites**
-
-Use `do-digger` to audit 5-8 competitor websites:
+Use `do-digger` to audit 5-8 competitor websites (names from Pre-Task):
 - Site structure (what pages exist, how products are organized)
 - Trust signals (certifications displayed, factory photos, customer logos)
 - Conversion paths (how many clicks to inquiry, what CTA types)
 - Content depth (specs detail level, case studies, blog presence)
 - Positioning claims (how they describe themselves)
 
-- [ ] **Step 3: Build competitive landscape matrix**
+- [ ] **Step 2: Build competitive landscape matrix**
 
 Create matrix comparing:
 - Tianze vs Trading companies vs Small factories vs Large manufacturers
 - Dimensions: price, quality, customization, certifications, technical support, MOQ flexibility
 
-- [ ] **Step 4: Identify differentiation opportunities**
+- [ ] **Step 3: Identify differentiation opportunities**
 
 Based on competitor audit:
 - What do competitors NOT say that Tianze can?
 - Where are competitor websites weakest?
 - What trust signals do competitors use that Tianze lacks?
 
-- [ ] **Step 5: Owner confirmation**
+- [ ] **Step 4: Owner confirmation**
 
 Present competitive landscape. Ask:
 - Is this map accurate to your experience?
 - Any competitors missing?
 - Do the differentiation opportunities feel real?
 
-- [ ] **Step 6: Finalize and save**
+- [ ] **Step 5: Finalize and save**
 
 Save to `docs/strategy/ring1/02-competitive-analysis.md`.
 
@@ -168,7 +186,7 @@ Save to `docs/strategy/ring1/02-competitive-analysis.md`.
 
 **Deliverable:** `docs/strategy/ring1/03-brand-positioning.md`
 **Methodology:** Positioning Theory + B2B Differentiation Strategy
-**Skill:** `brainstorming` (lite -- no full spec cycle, just collaborative refinement)
+**Skill:** None (synthesis of Task 1+2 outputs + existing context)
 **Depends on:** Task 1 (goals), Task 2 (competitive landscape)
 
 - [ ] **Step 1: Synthesize inputs**
@@ -184,7 +202,8 @@ Read:
 Produce:
 - Company-level positioning statement (one sentence)
 - Per-line positioning angles:
-  - Pipes: standards-compliant, factory-direct, margin-friendly
+  - PVC conduit: standards-compliant, factory-direct, margin-friendly
+  - PETG pneumatic: high-transparency, leak-proof, stable supply to major integrators
   - Equipment: technical monopoly, upstream manufacturer credibility
   - Custom molds: flexible MOQ, in-house mold development
 - Differentiation matrix (Tianze vs each competitor type)
@@ -213,8 +232,8 @@ Save to `docs/strategy/ring1/03-brand-positioning.md`.
 - [ ] **Step 1: Draft persona cards**
 
 Create 5 persona cards based on business line taxonomy:
-1. **Pipe Distributor** -- local chain store owner importing PVC conduit
-2. **Pipe Contractor** -- project engineer specifying conduit for commercial builds
+1. **PVC Distributor** -- local chain store owner importing PVC conduit
+2. **PVC Contractor** -- project engineer specifying conduit for commercial builds
 3. **PETG Integrator** -- hospital/lab system integrator needing pneumatic tubes
 4. **Equipment Manufacturer** -- PVC pipe factory expanding to bends
 5. **OEM Buyer** -- company needing private-label production
@@ -300,14 +319,14 @@ Ask: "Ring 1 is the foundation. Everything in Ring 2 builds on these. Before con
 
 ## Task 6: Buyer Question Chains
 
-**Deliverable:** `docs/strategy/ring2/06-buyer-question-chains/` (one file per line)
+**Deliverable:** `docs/strategy/ring2/06-buyer-question-chains/` (one file per sub-line)
 **Methodology:** Buyer Question Chain + Cognitive Stage Model
-**Skill:** `dispatching-parallel-agents` (3 independent chains)
+**Skill:** `dispatching-parallel-agents` (4 independent chains in parallel)
 **Depends on:** Task 4 (personas)
 
-- [ ] **Step 1: Draft question chains per business line**
+- [ ] **Step 1: Draft question chains per sub-line**
 
-Dispatch 3 parallel agents, one per line. Each produces:
+Dispatch 4 parallel agents. Each produces a question chain for its sub-line:
 
 **Chain format:**
 ```
@@ -327,9 +346,11 @@ Stage 3 (Decision): Questions when ready to act but still hesitant
   Content needed: ...
 ```
 
-Pipe chain uses buyer's known questions: certifications -> price -> shipping.
-Equipment chain uses: technical capability -> ROI -> market scarcity -> support.
-Custom molds chain uses: mold development capability -> MOQ -> turnaround -> references.
+**Sub-line specific question seeds** (starting points, not exhaustive):
+- **PVC conduit**: certifications -> standards compliance -> price -> MOQ -> shipping -> lead time
+- **PETG pneumatic**: transparency/seal quality -> custom specs -> integration compatibility -> supply stability -> references from other integrators
+- **Equipment (bending machines)**: technical capabilities -> ROI calculation -> market scarcity -> installation support -> spare parts
+- **Custom molds**: mold development capability -> MOQ flexibility -> turnaround time -> brand references -> IP protection
 
 - [ ] **Step 2: Map questions to existing pages**
 
@@ -340,13 +361,13 @@ For each question, identify:
 
 - [ ] **Step 3: Owner confirmation**
 
-Present chains. Ask per line:
+Present chains. Ask per sub-line:
 - Does this sequence match how real conversations go?
 - Any questions missing that buyers always ask?
 
 - [ ] **Step 4: Finalize and save**
 
-Save to `docs/strategy/ring2/06-buyer-question-chains/{pipes,equipment,custom-molds}.md`.
+Save to `docs/strategy/ring2/06-buyer-question-chains/{pvc-conduit,petg-pneumatic,equipment,custom-molds}.md`.
 
 ---
 
@@ -354,33 +375,43 @@ Save to `docs/strategy/ring2/06-buyer-question-chains/{pipes,equipment,custom-mo
 
 **Deliverable:** `docs/strategy/ring2/07-information-architecture.md`
 **Methodology:** IA Faceted Classification + Task-Oriented Navigation
-**Skill:** `brainstorming` (structural design)
+**Skill:** None (structural design using Task 6 outputs)
 **Depends on:** Task 6 (question chains)
 
 - [ ] **Step 1: Audit current site structure**
 
-Read current sitemap (`docs/design/system/sitemap.md`) and actual page files. Map:
+Read current sitemap (`docs/design/system/sitemap.md`) and actual page files at `src/app/[locale]/`. Map:
 - Current URL structure vs three-line taxonomy
-- Gap: bending machines at `/capabilities/` but should be product line
-- Gap: PETG pneumatic tubes have no dedicated sub-section
+- Gap: bending machines at `/capabilities/bending-machines/` but owner confirmed this is a sellable product line
+- Gap: PETG pneumatic tubes have no dedicated sub-section under `/products/`
 - Existing pages that serve multiple lines (homepage, about, contact)
+- Current OEM path: `/oem-custom-manufacturing/` (existing, implemented)
 
 - [ ] **Step 2: Draft revised site structure**
+
+Proposed structure (all paths are proposals -- existing paths noted for migration planning):
 
 ```
 / (homepage -- company narrative -> 3 lines)
 /products/
   /products/pvc-conduit/           -- PVC conduit overview
-  /products/pvc-conduit/[market]/  -- per-market specs (existing pattern)
-  /products/pneumatic-tubes/       -- PETG pneumatic tubes
+  /products/pvc-conduit/[market]/  -- per-market specs (existing pattern, keep)
+  /products/pneumatic-tubes/       -- PETG pneumatic tubes (NEW)
 /equipment/
   /equipment/bending-machines/     -- bending machines as product
-/custom-manufacturing/             -- OEM / custom molds (existing)
-/about/
-/contact/
-/blog/
-/faq/
+                                      (MIGRATE from /capabilities/bending-machines/)
+/oem-custom-manufacturing/         -- OEM / custom molds (EXISTING, keep current path)
+/about/                            -- (EXISTING, keep)
+/contact/                          -- (EXISTING, keep)
+/blog/                             -- (EXISTING, keep)
+/faq/                              -- (EXISTING, keep)
 ```
+
+For each path change, document:
+- Current path -> proposed path
+- Redirect needed (301)
+- Internal links to update
+- Route config changes (`src/config/paths/paths-config.ts`)
 
 - [ ] **Step 3: Design navigation scheme**
 
@@ -389,23 +420,19 @@ Read current sitemap (`docs/design/system/sitemap.md`) and actual page files. Ma
 - Shared trust assets: about page, certifications section, factory photos -- accessible from all lines
 - Cross-guidance decision: based on owner input (do lines need to link to each other?)
 
-- [ ] **Step 4: Content inventory**
-
-List every existing page and content asset. For each:
-- Current status (exists / needs update / needs creation)
-- Which business line it serves
-- Which buyer question chain stage it addresses
-
-- [ ] **Step 5: Owner confirmation**
+- [ ] **Step 4: Owner confirmation**
 
 Present revised structure. Ask:
 - Does the navigation make sense from a buyer's perspective?
 - Is the bending machine move from `/capabilities/` to `/equipment/` correct?
+- Keep `/oem-custom-manufacturing/` as-is or rename?
 - Do you need cross-links between lines?
 
-- [ ] **Step 6: Finalize and save**
+- [ ] **Step 5: Finalize and save**
 
 Save to `docs/strategy/ring2/07-information-architecture.md`.
+
+Note: Task 7 does NOT produce a content inventory. It produces a structural IA with migration notes. The comprehensive content inventory is Task 12's sole responsibility.
 
 ---
 
@@ -419,16 +446,18 @@ Save to `docs/strategy/ring2/07-information-architecture.md`.
 - [ ] **Step 1: Map content to decision stages**
 
 Using question chains (Task 6) and IA (Task 7):
-- Which pages address which decision stage per business line
+- Which pages address which decision stage per sub-line (PVC, PETG, equipment, molds)
 - Where are content gaps (stage has questions but no page answers them)
-- Content priority matrix: page x business line x decision stage
+- Content priority matrix: page x sub-line x decision stage
 
 - [ ] **Step 2: Define content depth per page type**
 
-- Homepage: company-level, all 3 stages briefly, primarily routing
+- Homepage: company-level, all 3 stages briefly, primarily routing to 3 lines
 - Product overview pages: Stage 1-2 (awareness + comparison)
 - Product detail pages: Stage 2-3 (comparison + decision)
-- About page: Stage 2-3 (trust building)
+- PETG dedicated page: Stage 1-3 (smaller audience needs full journey on fewer pages)
+- Equipment page: Stage 2-3 (buyers arrive with clear intent)
+- About page: Stage 2-3 (trust building, shared across all lines)
 - Contact page: Stage 3 (decision support + conversion)
 - Blog: Stage 1 (awareness, SEO entry points)
 - FAQ: Stage 2-3 (objection handling)
@@ -454,7 +483,7 @@ Save to `docs/strategy/ring2/08-content-strategy.md`.
 
 ## Tasks 9-12 (Parallel Block)
 
-Tasks 9, 10, 11, and 12 are independent of each other. Use `dispatching-parallel-agents` to run them simultaneously after Task 8 completes.
+Tasks 9, 10, 11, and 12 are independent of each other. Run them simultaneously after Task 8 completes. Use `dispatching-parallel-agents` skill or execute sequentially if preferred.
 
 ---
 
@@ -491,17 +520,17 @@ Save to `docs/strategy/ring2/09-multilingual-architecture.md`.
 ### Task 10: SEO Information Architecture
 
 **Deliverable:** `docs/strategy/ring2/10-seo-ia.md`
-**Skill:** `dispatching-parallel-agents` (parallel keyword research per market)
+**Skill:** `do-digger` (for keyword research per market)
 **Depends on:** Task 8
 
 - [ ] **Step 1: Research keyword opportunities**
 
-Dispatch parallel research agents per market:
+Research per market and sub-line:
 - Australia: PVC conduit + AS/NZS standards keywords
 - North America: PVC conduit + ASTM/UL651 keywords
 - Southeast Asia: PVC conduit + regional standard keywords
 - Cross-market: bending machine keywords, OEM/custom manufacturing keywords
-- PETG/pneumatic tube keywords
+- PETG/pneumatic tube keywords (niche, likely low volume but high intent)
 
 - [ ] **Step 2: Design topic clusters**
 
@@ -529,8 +558,12 @@ Save to `docs/strategy/ring2/10-seo-ia.md`.
 
 - [ ] **Step 1: Audit existing legal pages**
 
-Read `/privacy/page.tsx` and `/terms/page.tsx`. Check:
-- Privacy policy completeness (GDPR, CCPA if targeting NA/EU)
+Read actual page files:
+- `src/app/[locale]/privacy/page.tsx`
+- `src/app/[locale]/terms/page.tsx`
+
+Check:
+- Privacy policy completeness (GDPR, CCPA if targeting NA/AU)
 - Terms of service adequacy for B2B export context
 - Cookie consent implementation status
 
@@ -551,12 +584,14 @@ Save to `docs/strategy/ring2/11-legal-compliance-audit.md`.
 **Deliverable:** `docs/strategy/ring2/12-content-inventory.md`
 **Depends on:** Task 7 (IA), Task 8 (content strategy)
 
+This is the **single authoritative content inventory**. Task 7 produces the structural IA; this task audits every page and asset against that structure.
+
 - [ ] **Step 1: Inventory all existing content**
 
-For every page and content asset in the project:
-- URL path
+For every page and content asset in the project (scan `src/app/[locale]/`):
+- URL path (current, real path -- not proposed)
 - Current status (implemented / placeholder / missing)
-- Business line served
+- Business sub-line served (PVC / PETG / equipment / molds / shared)
 - Decision stage addressed
 - Content quality (complete / partial / needs rewrite)
 - Assets needed (photos, specs, downloads)
@@ -564,8 +599,8 @@ For every page and content asset in the project:
 - [ ] **Step 2: Gap analysis**
 
 Cross-reference inventory with:
-- Task 7 IA (are all planned pages accounted for?)
-- Task 8 content strategy (are all content needs met?)
+- Task 7 IA (are all planned pages accounted for? which are new?)
+- Task 8 content strategy (are all content needs met? which stages have gaps?)
 - Asset availability (owner confirmed 7 types available, need enhancement)
 
 - [ ] **Step 3: Produce prioritized action list**
@@ -588,8 +623,8 @@ Save to `docs/strategy/ring2/12-content-inventory.md`.
 
 | Document | Core output |
 |----------|-------------|
-| Buyer question chains | 3 chains (pipes, equipment, molds) with stage mapping |
-| Information architecture | Revised sitemap, navigation scheme, URL restructuring plan |
+| Buyer question chains | 4 chains (PVC conduit, PETG pneumatic, equipment, molds) with stage mapping |
+| Information architecture | Revised sitemap, navigation scheme, URL migration plan |
 | Content strategy | Content priority matrix, gap list, depth-per-page specs |
 | Multilingual architecture | Content layering, translation scope, glossary |
 | SEO IA | Keyword opportunities, topic clusters, intent mapping |
