@@ -134,9 +134,9 @@ Canonical source:
    rate limit、Turnstile、validation、pipeline 等核心链路几乎全 mock 掉了？
 
 4. 是否新增了 warning-only / bypass / degraded override / runtime skip，
-   导致“绿色结果”不再等于原本承诺的证明强度？
+   导致”绿色结果”不再等于原本承诺的证明强度？
 
-5. 关键页面测试是否已经变成“假舞台”：
+5. 关键页面测试是否已经变成”假舞台”：
    同时 mock `Suspense`、翻译、loader、表单、schema、内容源，
    却仍把自己当页面主证明？
 
