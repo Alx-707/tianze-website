@@ -920,6 +920,8 @@ Consolidated assumption checklist (collected from all rings):
   - "Company-level value proposition resonates more than product-line-level"
   - "Persona segmentation matches actual inquiry distribution"
   - "Inquiry form submissions have higher close rate than WhatsApp contacts"
+  - "Spec sheet downloads indicate serious buyer intent"
+  - "Decision chain stages match actual page visit sequences (observable via GA4 flow)"
 
   Ring 2:
   - "Pipe buyers look at certifications before price"
