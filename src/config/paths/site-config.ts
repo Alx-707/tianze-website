@@ -31,7 +31,7 @@ export const SITE_CONFIG = {
   baseUrl:
     env.NEXT_PUBLIC_BASE_URL !== "http://localhost:3000"
       ? env.NEXT_PUBLIC_BASE_URL
-      : "https://tianze-pipe.com",
+      : (process.env.NEXT_PUBLIC_SITE_URL ?? "https://tianze-pipe.com"),
   name: "Tianze Pipe",
   description:
     "Pipe Bending Experts - Equipment, Process & Fittings Integrated Solutions",
