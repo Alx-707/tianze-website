@@ -49,7 +49,7 @@ function getMergeBaseTimestampMs() {
 function loadMutationReport() {
   if (!fs.existsSync(REPORT_PATH)) {
     throw new Error(
-      "缺少 reports/mutation/mutation-report.json，请先运行 pnpm test:mutation:lead",
+      "缺少 reports/mutation/mutation-report.json，请先运行 pnpm test:mutation",
     );
   }
 
@@ -88,7 +88,7 @@ function main() {
 
   if (!isReportFreshEnough(REPORT_PATH, branchStartMs)) {
     throw new Error(
-      "变异测试报告早于当前分支起点，请重新运行 pnpm test:mutation:lead",
+      "变异测试报告早于当前分支起点，请重新运行 pnpm test:mutation",
     );
   }
 
@@ -98,13 +98,19 @@ function main() {
   );
 
   if (uncoveredDirectories.length > 0) {
+    const needsFullScope = uncoveredDirectories.some(
+      (d) => !d.startsWith("src/lib/lead-pipeline/"),
+    );
+    const command = needsFullScope
+      ? "pnpm test:mutation"
+      : "pnpm test:mutation:lead";
     throw new Error(
       [
         "变异测试报告 scope 不覆盖本次改动。",
         `命中目录: ${touchedDirectories.join(", ")}`,
         `报告 mutate scope: ${mutateScopes.join(", ") || "(empty)"}`,
         `未覆盖目录: ${uncoveredDirectories.join(", ")}`,
-        "请运行 pnpm test:mutation:lead 并更新 reports/mutation/mutation-report.json",
+        `请运行 ${command} 并更新 reports/mutation/mutation-report.json`,
       ].join("\n"),
     );
   }

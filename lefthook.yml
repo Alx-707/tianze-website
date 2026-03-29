@@ -151,7 +151,7 @@ pre-push:
         else
           node scripts/check-mutation-required.js
         fi
-      fail_text: '变异测试报告过期 — 请运行 pnpm test:mutation:lead'
+      fail_text: '变异测试报告过期 — 请运行 pnpm test:mutation'
 
     # 架构检查（A+：全量巡航 + 循环依赖；使用 err 报告减少噪音；可用 RUN_FAST_PUSH=1 跳过应急推送）
     arch-check:

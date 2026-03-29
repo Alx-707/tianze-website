@@ -35,6 +35,8 @@ function discoverPageRoutes() {
         if (entry.name.startsWith("__") || entry.name.startsWith(".")) continue;
         walk(path.join(dir, entry.name), `${routePath}/${entry.name}`);
       } else if (entry.name === "page.tsx" || entry.name === "page.ts") {
+        // Skip catch-all routes ([...rest]) — they are 404 fallbacks, not valid pages
+        if (/\/\[\.\.\./.test(routePath)) continue;
         routes.add(routePath || "/");
       }
     }
