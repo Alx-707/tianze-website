@@ -4,7 +4,7 @@
 > First instance: Tianze Pipe (tianze-website). Framework is reusable for same-category projects.
 
 **Date**: 2026-03-29
-**Status**: Design approved, spec review v2
+**Status**: Design approved, pending spec review
 **Scope**: Full-chain methodology framework (strategy to post-launch operations)
 
 ---
@@ -57,49 +57,7 @@ Ring 1: Core Layer           (business strategy, brand positioning, user persona
 
 ---
 
-## 3. Business Line Taxonomy
-
-Tianze has **three independent business lines**, confirmed by owner:
-
-```
-Tianze Pipe (company level)
-|
-+-- Pipes (管道)
-|   +-- PVC Conduit Fittings - Australian Standard (AS/NZS)
-|   +-- PVC Conduit Fittings - North American Standard (ASTM/UL651)
-|   +-- PVC Conduit Fittings - Southeast Asian Standards
-|   +-- PETG Pneumatic Tubes (气动物流管)
-|
-+-- Equipment (设备)
-|   +-- Bending Machines (弯管机)
-|
-+-- Custom Molds (定制模具)
-    +-- OEM / Custom Manufacturing
-```
-
-### Buyer profiles per line
-
-| Line | Primary buyer | Decision drivers |
-|------|--------------|-----------------|
-| Pipes - PVC conduit | Local distributors (chain stores), project contractors | Standards compliance, price, certifications, shipping |
-| Pipes - PETG pneumatic | Hospital/lab system integrators | Transparency, seal quality, custom specs |
-| Equipment | PVC pipe manufacturers expanding to bends | ROI, technical capability, market scarcity |
-| Custom molds | OEM customers needing private-label production | Mold development capability, MOQ flexibility, brand references |
-
-### Existing project structure alignment
-
-| Business line | Current URL path | Status | Note |
-|--------------|-----------------|--------|------|
-| PVC conduit | `/products`, `/products/[market]` | Implemented (North America first) | Aligns with taxonomy |
-| PETG pneumatic | Under `/products` | Partially implemented | Needs dedicated sub-section |
-| Bending machines | `/capabilities/bending-machines/` | Implemented | Current path frames as "capability" not "product" -- **needs reconciliation**: owner confirmed this is a sellable product line, not just a trust signal |
-| Custom molds | `/oem-custom-manufacturing/` | Implemented | Aligns with taxonomy |
-
-**Action**: Ring 2 IA workbook must reconcile bending machine URL structure with its status as an independent sellable product line.
-
----
-
-## 4. Ring 1: Core Layer
+## 3. Ring 1: Core Layer
 
 ### Stages
 
@@ -114,15 +72,12 @@ Tianze Pipe (company level)
 ### Tianze context (validated business truths)
 
 **Target customers (ideal, not current)**:
-- PVC conduit: Local distributors (with chain stores/websites), project contractors
-- PETG pneumatic: Hospital/lab system integrators
-- Equipment: PVC pipe manufacturers who need bending capability
-- Custom molds: OEM customers needing private-label production
+- Pipe line: Local distributors (with chain stores/websites), project contractors
+- Equipment line: PVC pipe manufacturers who need bending capability
 
 **Win reasons**:
 - Pipes: quality + price + margin space
 - Bending machines: near-zero market alternatives + technical superiority
-- Custom molds: in-house mold development, low MOQ
 
 **Loss reasons**:
 - Missing certifications (industry door-opener)
@@ -140,48 +95,7 @@ Tianze Pipe (company level)
 - Other regions planned or available for cooperative application
 - Positioning: "We meet the standards. Certification is underway." -- honest, not evasive
 
-**Priority markets**: Australia > North America > Southeast Asia
-- Note: North America implementation is most advanced (PR #41 completed). Australia is the strategic priority. These are different -- "build next" vs "already built."
-
-### Workbook: Business Goal Definition
-
-```
-Stage: Business Goal Definition
-
-Methodology: Conversion Goal Framework
-  - Primary conversion: inquiry submission (quote request, sample request, technical consultation)
-  - Secondary conversion: spec sheet download, certification status view
-  - Micro-conversion: page depth, time on product pages, return visits
-
-Prerequisites:
-  - Business owner available to confirm goals [done]
-
-Input (owner provides):
-  - Primary business goal for the website [done: high-quality inquiry generation]
-  - Conversion action definition [done: inquiry form + WhatsApp]
-  - How to distinguish high-quality from low-quality inquiries [done: target customer match + need clarity]
-
-Execution (Claude does):
-  - Define conversion goal hierarchy (primary / secondary / micro)
-  - Define measurable success metrics per goal
-  - Map each goal to specific page types
-
-Confirmation (owner judges):
-  - Does the goal hierarchy reflect your actual business priorities?
-  - Are the metrics something you can observe in practice?
-
-Deliverables:
-  - Conversion goal document with metrics
-  - Goal-to-page mapping table
-
-Capability compensation:
-  - Claude's weakness: cannot judge which inquiry types convert to actual orders
-  - Compensation: owner provides feedback loop post-launch (which inquiries became deals)
-
-Assumptions to verify post-launch:
-  - "Inquiry form submissions have higher close rate than WhatsApp contacts"
-  - "Spec sheet downloads indicate serious buyer intent"
-```
+**Product lines**: Pipes and bending equipment are parallel, equal weight on website
 
 ### Workbook: Brand Positioning
 
@@ -192,7 +106,7 @@ Methodology: Positioning Theory + B2B Differentiation Strategy
 
 Prerequisites:
   - Clear target customer definition [done]
-  - Competitor positioning in front of same customers [needs competitive analysis -- see below]
+  - Competitor positioning in front of same customers [needs research]
 
 Input (owner provides):
   - Real win/loss reasons [done]
@@ -201,22 +115,19 @@ Input (owner provides):
 
 Execution (Claude does):
   - Produce positioning statement based on methodology
-  - Produce differentiation matrix (Tianze vs trading companies vs small factories vs large manufacturers)
+  - Produce differentiation matrix
   - Produce certification gap positioning strategy
-  - Produce positioning per business line (pipes vs equipment vs custom molds may need different angles)
 
 Confirmation (owner judges):
   - Does the positioning statement match your business instinct?
   - Does the differentiation capture the real core?
-  - Does the per-line positioning feel accurate?
 
-Deliverables:
+Deliverable:
   - Brand positioning document (referenced by rings 2-3)
-  - Per-line positioning statements
 
 Capability compensation:
   - Claude's weakness: no firsthand knowledge of competitive landscape
-  - Compensation: owner provides competitor info + do-digger research skill supplements
+  - Compensation: owner provides competitor info + research skill supplements
 
 Assumptions to verify post-launch:
   - "End distributors convert better on website than trading companies"
@@ -231,78 +142,25 @@ Stage: User Personas & Decision Chain
 Methodology: Jobs-to-be-Done + Buyer Persona
 
 Prerequisites:
-  - Business goal defined [this ring's output]
+  - Business goal defined [done]
   - Real customer data available [done -- from owner's experience]
 
 Input (owner provides):
-  - Typical buyer profile per business line [done]
+  - Typical buyer profile per product line [done]
   - Stage at which buyers typically inquire [done -- already have some understanding]
-  - Differences between pipe/equipment/mold buyer question chains [done -- confirmed different]
+  - Differences between pipe buyers and equipment buyers [done -- confirmed different]
 
 Execution (Claude does):
   - Build detailed persona cards for each buyer type
   - Map decision chain per persona (awareness -> consideration -> decision)
   - Identify information needs at each stage
-  - Cross-reference with product-marketing-context.md personas and reconcile
 
 Confirmation (owner judges):
   - Do these personas feel like real people you've dealt with?
-  - Is anything missing that you encounter in actual buyer conversations?
 
-Deliverables:
-  - Persona cards per line:
-    - PVC conduit: distributor persona, contractor persona
-    - PETG pneumatic: system integrator persona
-    - Equipment: pipe manufacturer persona
-    - Custom molds: OEM buyer persona
+Deliverable:
+  - Persona cards (pipe line: 2-3 personas, equipment line: 1-2 personas)
   - Decision chain maps per persona
-
-Capability compensation:
-  - Claude's weakness: cannot distinguish between what buyers say they want and what actually drives their decision
-  - Compensation: owner's experience with real deal patterns + post-launch inquiry content analysis
-
-Assumptions to verify post-launch:
-  - "Persona segmentation matches actual inquiry distribution"
-  - "Decision chain stages match actual page visit sequences (observable via GA4 flow)"
-```
-
-### Workbook: Competitive Analysis
-
-```
-Stage: Competitive Analysis
-
-Methodology: Competition Matrix + Alternative Analysis
-
-Prerequisites:
-  - Target customers defined [this ring's output]
-  - Business lines defined [done -- Section 3]
-
-Input (owner provides):
-  - Names of known competitors (domestic manufacturers with export sites)
-  - Which competitors buyers mention during negotiations
-  - Where Tianze wins vs loses against specific competitors
-
-Execution (Claude does -- via do-digger research skill):
-  - Audit competitor websites (structure, content, trust signals, conversion paths)
-  - Map competitor positioning matrix (price vs quality vs customization vs certifications)
-  - Identify competitive gaps Tianze can exploit
-  - Identify competitive strengths Tianze must defend
-
-Confirmation (owner judges):
-  - Is the competitive landscape map accurate to your experience?
-  - Are there competitors missing from the analysis?
-
-Deliverables:
-  - Competitive landscape matrix
-  - Competitor website audit summary (structure, strengths, weaknesses)
-  - Differentiation opportunity map
-
-Capability compensation:
-  - Claude's weakness: can only see what's publicly visible on competitor websites
-  - Compensation: owner provides deal-level competitive intelligence (who loses to whom, and why)
-
-Assumptions to verify post-launch:
-  - "Tianze's differentiation (equipment manufacturer background) is not claimed by competitors"
 ```
 
 ### Workbook: Value Proposition
@@ -314,7 +172,7 @@ Methodology: Value Proposition Canvas (Strategyzer)
 
 Prerequisites:
   - Personas defined [this ring's output]
-  - Competitive landscape understood [this ring's output -- competitive analysis]
+  - Competitive landscape understood [needs research]
 
 Input (owner provides):
   - What customers gain from choosing Tianze vs alternatives [done]
@@ -323,29 +181,16 @@ Input (owner provides):
 Execution (Claude does):
   - Map customer jobs, pains, gains per persona
   - Map Tianze's pain relievers and gain creators
-  - Produce fit analysis and value proposition statement per business line
-  - Produce unified company-level value proposition (for homepage hero)
+  - Produce fit analysis and value proposition statement
 
-Confirmation (owner judges):
-  - Does the value proposition feel like the real reason customers choose you?
-  - Is the company-level statement something you'd be proud to put on a billboard?
-
-Deliverables:
-  - Value Proposition Canvas per business line
-  - One-sentence company-level value proposition (for homepage hero)
-  - Per-line value proposition statements
-
-Capability compensation:
-  - Claude's weakness: may over-intellectualize value proposition; real B2B decisions often come down to simpler factors
-  - Compensation: owner gut-checks against "what actually closes deals"
-
-Assumptions to verify post-launch:
-  - "Company-level value proposition resonates more than product-line-level propositions"
+Deliverable:
+  - Value Proposition Canvas per product line
+  - One-sentence value proposition (for homepage hero)
 ```
 
 ---
 
-## 5. Ring 2: Structure Layer
+## 4. Ring 2: Structure Layer
 
 ### Stages
 
@@ -356,8 +201,6 @@ Assumptions to verify post-launch:
 | Page planning & cognitive path | AIDA / question chain / cognitive load theory | High |
 | SEO information architecture | Topic cluster model + search intent matching | High |
 | Multilingual content architecture | i18n content layering strategy | Medium |
-| Legal/compliance content | Privacy, terms, export compliance, cookie consent | High |
-| Content inventory & gap analysis | Existing content audit + gap identification | High |
 
 ### Tianze context
 
@@ -368,9 +211,9 @@ Assumptions to verify post-launch:
 - CRO evaluation across 5 prototypes
 - Homepage AIDA flow validated (v3 "The Forge" and Stitch A scored highest)
 
-**Key decision**: Homepage uses company-level narrative leading into three business lines, not product-first approach. Rationale: core differentiator (upstream equipment manufacturer) is a company-level story that serves all three lines.
+**Key decision**: Homepage uses company-level narrative leading into both product lines, not product-first approach. Rationale: core differentiator (upstream equipment manufacturer) is a company-level story.
 
-**Buyer stage**: Buyers arrive with some existing understanding -- content should prioritize comparison/decision stage over awareness/education. Exception: some Google top-of-funnel traffic may be awareness-stage.
+**Buyer stage**: Buyers arrive with some existing understanding -- content should prioritize comparison/decision stage over awareness/education.
 
 ### Workbook: Content Strategy -- Decision Stage Matching
 
@@ -387,12 +230,11 @@ Prerequisites:
   - Buyer real high-frequency questions collected [done: certifications -> price -> shipping]
 
 Input (owner provides):
-  - Confirm that question chains differ across business lines [done]
+  - Whether pipe buyer vs equipment buyer question chains differ [done -- confirmed different]
   - At what stage buyers typically inquire [done -- already have some understanding]
 
 Execution (Claude does):
-  - Draw buyer question chain for each sub-line separately
-    (PVC conduit, PETG pneumatic, equipment, custom molds -- 4 chains, not 3)
+  - Draw buyer question chain for pipe line and equipment line separately
   - Map existing page content to 3-layer model
   - Identify content gaps (which layer is missing information)
   - Produce content priority ranking per page
@@ -402,7 +244,7 @@ Confirmation (owner judges):
   - Are the content gaps consistent with your impression?
 
 Deliverables:
-  - Buyer question chain documents (one per business line)
+  - Buyer question chain documents (one per product line)
   - Page content priority matrix
   - Content gap list (with required assets marked)
 
@@ -414,48 +256,31 @@ Capability compensation:
 Assumptions to verify post-launch:
   - "Pipe buyers look at certifications before price"
   - "Equipment buyers enter website with clear intent"
-  - "Some Google traffic arrives at awareness stage, requiring different content depth than direct/referral traffic"
 ```
 
-### Workbook: Information Architecture -- Three Business Lines
+### Workbook: Information Architecture -- Dual Product Line
 
 ```
-Stage: Information Architecture -- Three Business Lines
+Stage: Information Architecture -- Dual Product Line Parallel Structure
 
 Methodology: IA faceted classification + task-oriented navigation
 
 Prerequisites:
-  - Three business lines defined [done -- Section 3]
+  - Two product lines parallel, different customers [confirmed]
   - Each line's buyer question chain drawn [this ring's output]
 
 Input (owner provides):
-  - Whether any buyer types overlap across lines (e.g., a distributor buying both pipes and molds) [to be confirmed]
-  - Whether cross-guidance needed between lines [to be confirmed]
+  - Whether pipe and equipment buyers overlap in the same company [to be confirmed]
+  - Whether cross-guidance needed (pipe viewer -> equipment, vice versa) [to be confirmed]
 
 Execution (Claude does):
-  - Design three-line navigation structure
-  - Reconcile bending machine URL path (/capabilities/ -> /equipment/ or /products/equipment/)
+  - Design dual-line parallel navigation structure
   - Plan independent content depth layering per line
-  - Ensure all lines share brand trust assets (about page, certifications, factory capability)
-  - Produce content inventory audit: what exists, what needs updating, what needs creating
-
-Confirmation (owner judges):
-  - Does the navigation make sense from a buyer's perspective?
-  - Is the bending machine repositioning (from capability to product) correct?
+  - Ensure both lines share brand trust assets (about page, certifications, factory capability)
 
 Deliverables:
-  - Updated sitemap (three-line structure)
+  - Updated sitemap (dual-line structure)
   - Navigation scheme (main nav + per-line sub-nav)
-  - Content inventory and gap audit
-  - URL restructuring plan (if bending machine path changes)
-
-Capability compensation:
-  - Claude's weakness: IA decisions are hard to validate without real user behavior data
-  - Compensation: benchmark against competitor site structures + post-launch navigation flow analysis
-
-Assumptions to verify post-launch:
-  - "Three-line parallel structure does not confuse buyers who come for one specific product"
-  - "Buyers do not need cross-guidance between lines (pipe buyer doesn't care about equipment)"
 ```
 
 ### Workbook: SEO Information Architecture
@@ -467,91 +292,26 @@ Methodology: Topic Cluster Model + Search Intent Matching
 
 Prerequisites:
   - Page planning completed [this ring's output]
-  - Target markets prioritized [done: Australia > North America > Southeast Asia]
+  - Target markets prioritized [done: Australia, North America, Southeast Asia]
 
 Input (owner provides):
   - Alibaba backend hot search term data (if available)
 
 Execution (Claude does):
-  - Research keyword opportunities per business line and market
+  - Research keyword opportunities for both product lines
   - Design topic clusters (pillar pages + sub-pages + blog articles)
   - Match search intent to each page
-  - Define which pages target which markets
+  - Plan Schema structured data
 
 Deliverables:
-  - Keyword opportunity research (strategic -- what to target)
-  - Topic cluster map (which pages support which clusters)
-  - Search intent classification per page
-
-Note: Technical SEO implementation (Schema markup, metadata templates, sitemap config)
-is Ring 4's responsibility. This stage produces the strategic plan; Ring 4 implements it.
-
-Capability compensation:
-  - Claude's weakness: keyword research tools are limited without paid SEO tool access
-  - Compensation: do-digger research + Alibaba data from owner + Google Search Console data post-launch
-
-Assumptions to verify post-launch:
-  - "Topic cluster structure improves ranking for target keywords"
-  - "Blog content drives meaningful organic traffic in B2B industrial niche"
-```
-
-### Workbook: Multilingual Content Architecture
-
-```
-Stage: Multilingual Content Architecture
-
-Methodology: i18n Content Layering Strategy
-
-Prerequisites:
-  - Content strategy defined [this ring's output]
-  - Target markets prioritized [done]
-
-Input (owner provides):
-  - Which content truly needs localization vs translation
-  - Whether Chinese content serves domestic customers or overseas Chinese-speaking buyers
-
-Execution (Claude does):
-  - Define content layering: shared content (both languages) vs market-specific content
-  - Determine translation scope per page (full translation vs partial)
-  - Define glossary for consistent technical term translation
-  - Plan market-specific content (e.g., Australian standard details only for en, not zh)
-
-Confirmation (owner judges):
-  - Does the translation priority match business value?
-
-Deliverables:
-  - Multilingual content matrix (page x language x scope)
-  - Translation glossary (technical terms)
-  - Market-specific content plan
-
-Capability compensation:
-  - Claude's weakness: may not know which B2B industrial terms have established translations vs need new coinage
-  - Compensation: owner reviews technical term translations + reference competitor multilingual sites
-```
-
-### Workbook: Legal/Compliance Content
-
-```
-Stage: Legal/Compliance Content Planning
-
-Methodology: B2B export website compliance checklist
-
-Prerequisites:
-  - Target markets defined [done: Australia, North America, Southeast Asia]
-
-Execution (Claude does):
-  - Audit existing legal pages (privacy, terms -- both exist)
-  - Identify gaps: cookie consent (GDPR if EU traffic), export compliance statements
-  - Plan trust-relevant compliance content (certifications page, standards compliance page)
-
-Deliverables:
-  - Legal content gap list
-  - Compliance content plan (what needs creating/updating)
+  - Keyword strategy document
+  - Topic cluster map
+  - Per-page SEO metadata template
 ```
 
 ---
 
-## 6. Ring 3: Expression Layer
+## 5. Ring 3: Expression Layer
 
 ### Stages
 
@@ -562,7 +322,6 @@ Deliverables:
 | Copywriting strategy | Conversion copy frameworks (PAS/AIDA/BAB) + B2B principles | High |
 | Copywriting execution | Verifiable info > self-assessment + results-first | High |
 | Conversion path design | CRO methodology (funnel + friction elimination + trust ladder) | High |
-| Inquiry form design | Form optimization methodology + lead qualification | High |
 | Trust building system | Trust signal hierarchy (Social Proof Hierarchy) | High |
 | Asset processing strategy | Product photography + industrial visual standards | Medium |
 
@@ -592,22 +351,18 @@ Prerequisites:
   - Buyer actual vocabulary collected [done -- product-marketing-context.md]
 
 Input (owner provides):
-  - Confirm core selling point ranking per business line
+  - Confirm core selling point ranking per product line
   - Confirm certification expression comfort boundary (how far can we go)
 
 Execution (Claude does -- via /cwf workflow):
   - Produce copy framework per page (heading hierarchy + module copy)
-  - Adapt copy tone for each business line:
-    - Pipes: standards/specs/value language
-    - Equipment: ROI/capability/scarcity language
-    - Custom molds: flexibility/partnership language
+  - Adapt copy tone separately for pipe line and equipment line
   - Certification expression proposal (2-3 specific wording options)
   - All copy follows "verifiable > self-assessment" principle
 
 Confirmation (owner judges):
   - Does the copy read like "something our company would say"?
   - Does the certification expression feel honest without being weak?
-  - Does each business line's copy tone feel distinct but on-brand?
 
 Deliverables:
   - Per-page copy documents (Chinese + English)
@@ -617,46 +372,6 @@ Capability compensation:
   - Claude's weakness: lacks industrial sector language intuition
   - Compensation: reference Swagelok etc. benchmark copy patterns +
     owner calibrates "does this sound credible in the industry"
-
-Assumptions to verify post-launch:
-  - "Verifiable claims convert better than aspirational statements"
-  - "Per-line tone differences don't fragment the brand experience"
-```
-
-### Workbook: Page Visual Design
-
-```
-Stage: Page Visual Design
-
-Methodology: Visual hierarchy theory + attention path design
-  - First glance (0-3s): page subject clear
-  - Scan (3-10s): know what to do next
-  - Engage (10-30s): find relevant detail
-  - Act: CTA naturally follows comprehension
-
-Prerequisites:
-  - Ring 2 page planning and content priority defined
-  - Ring 3 copy framework defined
-  - Design system exists [done]
-
-Execution (Claude does -- via /dwf workflow):
-  - Design attention path per page type
-  - Apply visual hierarchy to content priority (from Ring 2)
-  - Ensure design system consistency across all pages
-  - Produce page-by-page design specs
-
-Confirmation (owner judges):
-  - Within 3 seconds of seeing the page, is the subject clear?
-  - Does the page feel trustworthy and professional?
-  - Can you find the "next step" action without hunting?
-
-Deliverables:
-  - Per-page visual design specs (for development)
-  - Attention path diagrams
-
-Capability compensation:
-  - Claude's weakness: aesthetic judgment limited to principles; cannot "feel" visual impact like a human
-  - Compensation: owner gut-check + benchmark comparison against reference sites (Swagelok, Linear)
 ```
 
 ### Workbook: Trust Building System -- Certification Adaptation
@@ -688,14 +403,6 @@ Tianze adaptation strategy:
 Deliverables:
   - Trust signal deployment plan (which signal on which page)
   - Certification expression template (reusable across product pages, about page, homepage)
-
-Capability compensation:
-  - Claude's weakness: cannot gauge how much weight real buyers give to each trust signal type
-  - Compensation: owner's deal experience (what tips buyers over the edge) + post-launch inquiry correlation
-
-Assumptions to verify post-launch:
-  - "Transparent certification timeline does not reduce inquiry rate"
-  - "Level 2-5 signals adequately compensate for Level 1 gaps"
 ```
 
 ### Workbook: Conversion Path Design
@@ -723,57 +430,6 @@ Tianze adaptation:
 Deliverables:
   - CTA deployment matrix (page x CTA tier)
   - Conversion path flowchart
-
-Capability compensation:
-  - Claude's weakness: CTA wording effectiveness requires real conversion data to validate
-  - Compensation: A/B test CTA variants post-launch (or qualitative if traffic too low)
-
-Assumptions to verify post-launch:
-  - "2-click-to-inquiry rule improves conversion vs current path length"
-  - "Free sample CTA is a more effective entry point than direct inquiry"
-```
-
-### Workbook: Inquiry Form Design
-
-```
-Stage: Inquiry Form Design
-
-Methodology: Form Optimization + Lead Qualification
-
-Prerequisites:
-  - Ring 1 personas defined (determines what information to capture)
-  - Ring 2 content strategy defined (determines form context)
-  - Conversion path design defined (determines where forms appear)
-
-Input (owner provides):
-  - What information do you need to qualify an inquiry? (product type, quantity, market, timeline?)
-  - What information do you need to prepare a quote?
-  - Is WhatsApp or email your preferred first-response channel?
-
-Execution (Claude does):
-  - Design form fields per context:
-    - Quick inquiry (product page): minimal fields -- name, email, product interest, message
-    - Detailed quote request (contact page): more fields -- company, market, quantity, timeline
-    - Sample request: shipping address + product selection
-  - Plan form routing by business line (pipe inquiries vs equipment inquiries)
-  - Design auto-reply and follow-up workflow
-
-Confirmation (owner judges):
-  - Would this form capture what you need to start a conversation?
-  - Is the field count acceptable (not too many, not too few)?
-
-Deliverables:
-  - Form specification per context (fields, validation, routing)
-  - Auto-reply template
-  - Lead qualification criteria
-
-Capability compensation:
-  - Claude's weakness: doesn't know which form fields correlate with serious vs casual inquiries
-  - Compensation: owner's experience + post-launch analysis of form completion vs deal conversion
-
-Assumptions to verify post-launch:
-  - "Shorter forms get more submissions without reducing inquiry quality"
-  - "Business-line routing improves response time and relevance"
 ```
 
 ### Workbook: Asset Processing Strategy
@@ -791,38 +447,29 @@ Input (owner provides):
   - Raw assets (7 types, all basically available, need enhancement)
 
 Execution (Claude does):
-  - Define processing standards per asset type:
-    - Product photos: consistent background (white or light gray), proper lighting, multiple angles
-    - Factory photos: authentic feel with professional color grading aligned to brand palette
-    - Certificate scans: clean, high-resolution, consistently framed
-    - Equipment photos: in-context (on factory floor) + isolated (product shots)
+  - Define processing standards per asset type (background, lighting, framing)
   - Determine balance: professional enhancement vs factory-authentic feel
   - Create processing brief for each asset type
 
 Confirmation (owner judges):
-  - Do sample processed images look like "our factory, but polished"?
-  - Is the product detail clear enough for a buyer evaluating specs?
-  - Does the overall visual quality match reference sites (Swagelok level)?
+  - Do processed samples feel right for the brand?
 
 Deliverables:
   - Asset processing guidelines document
   - Sample processed images for approval before batch processing
-
-Capability compensation:
-  - Claude's weakness: limited ability to execute image processing (can specify, not perform)
-  - Compensation: processing brief as input for image editing tools or contractors
 ```
 
 ---
 
-## 7. Ring 4: Implementation Layer
+## 6. Ring 4: Implementation Layer
 
 ### Stages
 
 | Stage | Methodology | Maturity |
 |-------|-------------|----------|
 | Frontend development | BDD -> TDD, Server Components First | High (fully established) |
-| SEO technical implementation | Technical SEO checklist + structured data | High |
+| SEO technical implementation | Technical SEO checklist + structured data + topic clusters | High |
+| SEO content implementation | Search intent matching + keyword strategy + GEO optimization | High |
 | Performance optimization | Core Web Vitals + Lighthouse budget | High (gates exist) |
 | i18n implementation | next-intl multilingual layering | High (system exists) |
 | Deployment & verification | Cloudflare layered verification strategy | High (strategy exists) |
@@ -837,29 +484,33 @@ This ring has the most mature methodology in the project:
 - i18n translation system + validation scripts
 - Static truth checks + mutation testing
 
-**Primary gap**: Asset processing pipeline (from raw photos to web-ready images).
+**Primary gaps**: SEO keyword strategy and asset processing pipeline.
 
-### Workbook: SEO Technical Implementation
+### Workbook: SEO Content Strategy
 
 ```
-Stage: SEO Technical Implementation
+Stage: SEO Content Strategy
 
-Methodology: Technical SEO Checklist + Schema Structured Data
+Methodology: Topic Cluster + Search Intent Matching + GEO Optimization
 
 Prerequisites:
-  - Ring 2 SEO IA strategy defined (keywords, topic clusters, intent mapping)
-  - Ring 3 copy defined (provides content for meta descriptions)
+  - Ring 2 page planning confirmed
+  - Ring 3 copy strategy confirmed
+  - Target markets prioritized [done: Australia, North America, Southeast Asia]
+
+Input (owner provides):
+  - Alibaba backend hot search data (if available)
 
 Execution (Claude does):
-  - Implement Schema markup per page type (Organization, Product, FAQ, BreadcrumbList)
-  - Generate SEO metadata templates based on Ring 2 keyword strategy
-  - Configure sitemap generation for three-line structure
-  - Implement hreflang tags per i18n architecture
+  - Research keyword opportunities for both product lines
+  - Design topic clusters (pillar page + child pages + blog articles)
+  - Match search intent per page with target keywords
+  - Schema structured data plan
 
 Deliverables:
-  - Schema implementation per page type
-  - SEO metadata for all pages
-  - Technical SEO audit checklist (crawlability, indexability, speed)
+  - Keyword strategy document
+  - Topic cluster map
+  - Per-page SEO metadata template
 ```
 
 ### Frontend Development (existing methodology -- interface only)
@@ -870,7 +521,7 @@ Stage: Frontend Development
 Methodology: brainstorming -> BDD spec -> writing-plans -> TDD -> /review -> /pr
 
 Interface with this framework:
-  - Input: Ring 3 deliverables (design specs + copy documents)
+  - Input: Ring 3 deliverables (design mockups + copy documents)
   - /dwf produces designs -> brainstorming converts to requirements
   - /cwf produces copy -> directly fills into pages
   - Development process fully driven by existing workflow, no additional methodology needed
@@ -880,7 +531,7 @@ No workbook needed -- reuse existing workflow.
 
 ---
 
-## 8. Ring 5: Operations Layer
+## 7. Ring 5: Operations Layer
 
 ### Stages
 
@@ -912,36 +563,12 @@ Prerequisites:
   - GA4 + event tracking deployed
   - Rings 1-4 "assumptions to verify" compiled into checklist
 
-Consolidated assumption checklist (collected from all rings):
-
-  Ring 1:
+Assumption checklist (collected from all rings):
   - "End distributors convert better on website than trading companies"
   - "Transparent certification disclosure does not scare off buyers"
-  - "Tianze's differentiation (equipment manufacturer) is not claimed by competitors"
-  - "Company-level value proposition resonates more than product-line-level"
-  - "Persona segmentation matches actual inquiry distribution"
-  - "Inquiry form submissions have higher close rate than WhatsApp contacts"
-  - "Spec sheet downloads indicate serious buyer intent"
-  - "Decision chain stages match actual page visit sequences (observable via GA4 flow)"
-
-  Ring 2:
   - "Pipe buyers look at certifications before price"
   - "Equipment buyers enter website with clear intent"
-  - "Some Google traffic arrives at awareness stage (different from direct/referral)"
-  - "Three-line parallel structure does not confuse single-product buyers"
-  - "Buyers do not need cross-guidance between business lines"
-  - "Topic cluster structure improves ranking for target keywords"
-  - "Blog content drives meaningful organic traffic in B2B industrial niche"
-
-  Ring 3:
-  - "Verifiable claims convert better than aspirational statements"
-  - "Per-line tone differences don't fragment the brand experience"
-  - "Transparent certification timeline does not reduce inquiry rate"
-  - "Level 2-5 trust signals adequately compensate for Level 1 gaps"
-  - "2-click-to-inquiry rule improves conversion vs current path length"
-  - "Free sample CTA is more effective entry point than direct inquiry"
-  - "Shorter forms get more submissions without reducing quality"
-  - "Business-line routing improves response time and relevance"
+  - "Homepage company narrative -> product line routing" path is effective
 
 Execution (Claude does):
   - Define verification metric and data source per assumption
@@ -954,7 +581,7 @@ Confirmation (owner judges):
   - Are iteration suggestions worth the investment?
 
 Deliverables:
-  - Assumption verification tracking table (with metric, data source, verification timeline per assumption)
+  - Assumption verification tracking table
   - Monthly data brief (business language, not technical report)
   - Iteration priority ranking
 ```
@@ -966,15 +593,10 @@ Stage: Inquiry Quality Analysis
 
 Methodology: Inquiry Scoring Model + Source Attribution
 
-Prerequisites:
-  - Inquiry form deployed with business-line routing [Ring 3/4 output]
-  - GA4 source tracking configured [this ring's output]
-
 Execution (Claude does):
-  - Build inquiry scoring criteria (target customer match + need clarity + market fit)
+  - Build inquiry scoring criteria (target customer match + need clarity)
   - Track inquiry sources (Google organic / Google Ads / Alibaba overflow / direct / referral)
   - Analyze which pages and content drive high-quality inquiries
-  - Correlate inquiry quality with landing page and navigation path
 
 Confirmation (owner judges):
   - Does inquiry scoring criteria match your business judgment?
@@ -983,16 +605,11 @@ Confirmation (owner judges):
 Deliverables:
   - Inquiry scoring template
   - Channel effectiveness comparison (website vs Alibaba)
-  - Page-to-inquiry quality correlation report
-
-Capability compensation:
-  - Claude's weakness: cannot see what happens after inquiry (deal negotiation, conversion, repeat orders)
-  - Compensation: owner feeds back deal outcomes quarterly to refine the scoring model
 ```
 
 ---
 
-## 9. Execution Sequence
+## 8. Execution Sequence
 
 ### Phase 1: Foundation (Rings 1-2)
 
@@ -1000,18 +617,13 @@ Using `dispatching-parallel-agents` for methodology research across domains, fol
 
 | Step | Ring | Stage | Depends on | Skill/workflow |
 |------|------|-------|------------|----------------|
-| 1.1 | 1 | Business goal definition | -- | brainstorming |
-| 1.2 | 1 | Competitive analysis | -- | do-digger research |
-| 1.3 | 1 | Brand positioning | 1.1, 1.2 | brainstorming |
-| 1.4 | 1 | User personas | 1.3 | brainstorming |
-| 1.5 | 1 | Value proposition | 1.3, 1.4 | brainstorming |
-| 1.6 | 2 | Buyer question chains (x3 lines) | 1.4 | parallel-agents |
-| 1.7 | 2 | Information architecture | 1.6 | brainstorming |
-| 1.8 | 2 | Content strategy | 1.6, 1.7 | content-strategy skill |
-| 1.9 | 2 | Multilingual content architecture | 1.8 | brainstorming |
-| 1.10 | 2 | SEO IA | 1.8 | parallel-agents research |
-| 1.11 | 2 | Legal/compliance audit | 1.7 | checklist |
-| 1.12 | 2 | Content inventory & gap analysis | 1.7, 1.8 | parallel with 1.9-1.11 |
+| 1.1 | 1 | Brand positioning | -- | brainstorming |
+| 1.2 | 1 | User personas | 1.1 | brainstorming |
+| 1.3 | 1 | Value proposition | 1.1, 1.2 | brainstorming |
+| 1.4 | 2 | Buyer question chains (x2) | 1.2 | parallel-agents |
+| 1.5 | 2 | Information architecture | 1.4 | brainstorming |
+| 1.6 | 2 | Content strategy | 1.4, 1.5 | content-strategy skill |
+| 1.7 | 2 | SEO IA | 1.6 | parallel-agents research |
 
 ### Phase 2: Expression (Ring 3)
 
@@ -1022,11 +634,8 @@ Methodology-driven design and copy production.
 | 2.1 | 3 | Trust building system | Phase 1 | brainstorming |
 | 2.2 | 3 | Copywriting strategy | Phase 1, 2.1 | /cwf |
 | 2.3 | 3 | Conversion path design | 2.1, 2.2 | page-cro skill |
-| 2.4 | 3 | Inquiry form design | 2.3 | form-cro skill |
-| 2.5 | 3 | Page visual design | 2.2, 2.3 | /dwf |
-| 2.6 | 3 | Asset processing | Phase 1 | parallel with 2.1-2.5 |
-
-**Case study phase**: After 2.2 (copy) and before 2.5 (visual design), run benchmark analysis.
+| 2.4 | 3 | Page visual design | 2.2, 2.3 | /dwf |
+| 2.5 | 3 | Asset processing | Phase 1 | parallel with 2.1-2.4 |
 
 ### Phase 3: Implementation (Ring 4)
 
@@ -1034,10 +643,11 @@ Existing development workflow takes over.
 
 | Step | Ring | Stage | Depends on | Skill/workflow |
 |------|------|-------|------------|----------------|
-| 3.1 | 4 | SEO technical implementation | 1.10, 2.2 | schema-markup skill |
+| 3.1 | 4 | SEO keyword strategy | 1.7 | parallel-agents research |
 | 3.2 | 4 | Page development | Phase 2 | brainstorming -> BDD -> TDD |
-| 3.3 | 4 | Performance optimization | 3.2 | Lighthouse CI |
-| 3.4 | 4 | Deployment verification | 3.2, 3.3 | Cloudflare layered verification |
+| 3.3 | 4 | SEO implementation | 3.1, 3.2 | schema-markup skill |
+| 3.4 | 4 | Performance optimization | 3.2 | Lighthouse CI |
+| 3.5 | 4 | Deployment verification | 3.2-3.4 | Cloudflare layered verification |
 
 ### Phase 4: Operations (Ring 5)
 
@@ -1045,14 +655,14 @@ Post-launch, ongoing.
 
 | Step | Ring | Stage | Depends on | Skill/workflow |
 |------|------|-------|------------|----------------|
-| 4.1 | 5 | GA4 + event tracking setup | 3.4 (launch) | analytics-tracking skill |
+| 4.1 | 5 | GA4 + event tracking setup | 3.5 (launch) | analytics-tracking skill |
 | 4.2 | 5 | Assumption verification | 4.1 + 30 days data | monthly analysis |
 | 4.3 | 5 | Inquiry quality analysis | live inquiries | ongoing |
 | 4.4 | 5 | Content iteration | 4.2, 4.3 | data-driven prioritization |
 
 ---
 
-## 10. Workbook Unit Template
+## 9. Workbook Unit Template
 
 Every stage in this framework uses this standard structure:
 
@@ -1071,7 +681,7 @@ Execution (Claude does):
   - [specific actions taken using the methodology]
 
 Confirmation (owner judges):
-  - [what to evaluate, in business language -- be specific about what to look for]
+  - [what to evaluate, in business language]
 
 Deliverables:
   - [concrete outputs that feed into subsequent stages]
@@ -1086,9 +696,9 @@ Assumptions to verify post-launch:
 
 ---
 
-## 11. Case Study Phase
+## 10. Case Study Phase (Final Step)
 
-After Ring 3 produces copy strategy (step 2.2), before page visual design (step 2.5):
+After rings 1-3 produce their deliverables, before ring 4 implementation:
 
 **Benchmark analysis** using `dispatching-parallel-agents`:
 
@@ -1096,7 +706,7 @@ After Ring 3 produces copy strategy (step 2.2), before page visual design (step 
 |---------------|----------|---------|
 | Same-industry | Swagelok, Georg Fischer, Aliaxis | B2B industrial site structure, trust signals, content depth |
 | Cross-industry excellence | Linear, Vercel | Modern digital craft, visual precision, interaction quality |
-| Direct competitors | Top PVC conduit suppliers with independent sites | Identify gaps and differentiation opportunities |
+| Direct competitors | Top Alibaba PVC conduit suppliers with independent sites | Identify gaps and differentiation opportunities |
 
 Case studies are used to **calibrate and supplement**, not to copy. Specific calibration targets:
 - Copy tone benchmark (how do top industrial sites express certification, capability, differentiation?)
@@ -1106,15 +716,14 @@ Case studies are used to **calibrate and supplement**, not to copy. Specific cal
 
 ---
 
-## 12. Framework Reusability
+## 11. Framework Reusability
 
 This framework is designed for B2B industrial/manufacturing/trade websites. To reuse for a new project:
 
-1. **Section 3**: Replace business line taxonomy
-2. **Ring 1**: Replace business truths (personas, value proposition, competitive landscape)
-3. **Ring 2**: Rebuild question chains and IA for new product/industry
-4. **Ring 3**: Adapt expression to new brand personality and trust situation
-5. **Ring 4**: Reuse technical methodology as-is (BDD/TDD, SEO, performance)
-6. **Ring 5**: Reuse operations methodology, replace assumption checklist
+1. **Ring 1**: Replace business truths (personas, value proposition, competitive landscape)
+2. **Ring 2**: Rebuild question chains and IA for new product/industry
+3. **Ring 3**: Adapt expression to new brand personality and trust situation
+4. **Ring 4**: Reuse technical methodology as-is (BDD/TDD, SEO, performance)
+5. **Ring 5**: Reuse operations methodology, replace assumption checklist
 
 The concentric ring structure, workbook template, and capability compensation model remain constant across projects.
