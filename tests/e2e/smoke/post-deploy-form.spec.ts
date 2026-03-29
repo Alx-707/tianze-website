@@ -22,7 +22,9 @@ import { expect, test } from "@playwright/test";
 
 // Skip this test if not in post-deploy mode
 const isPostDeploy = Boolean(
-  process.env.POST_DEPLOY_TEST || process.env.STAGING_URL,
+  process.env.POST_DEPLOY_TEST ||
+  process.env.STAGING_URL ||
+  process.env.PLAYWRIGHT_BASE_URL,
 );
 
 test.describe("Post-Deploy: Contact Form Chain", () => {
