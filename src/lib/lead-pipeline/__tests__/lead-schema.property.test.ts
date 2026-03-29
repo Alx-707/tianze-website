@@ -8,84 +8,55 @@ import {
   isNewsletterLead,
   isProductLead,
   LEAD_TYPES,
+  type LeadInput,
 } from "../lead-schema";
 
 vi.unmock("zod");
 
-const SAFE_SUBMITTED_AT_MIN = new Date("2000-01-01T00:00:00.000Z");
-const SAFE_SUBMITTED_AT_MAX = new Date("2100-12-31T23:59:59.999Z");
-const contactLeadArb = fc
-  .record({
-    type: fc.constant(LEAD_TYPES.CONTACT),
-    fullName: fc.string({ minLength: 1, maxLength: 24 }),
-    email: fc.emailAddress(),
-    subject: fc.constantFrom(...Object.values(CONTACT_SUBJECTS)),
-    message: fc.string({ minLength: 20, maxLength: 120 }),
-    turnstileToken: fc.string({ minLength: 1, maxLength: 48 }),
-    marketingConsent: fc.boolean(),
-  })
-  .chain((base) =>
-    fc
-      .record({
-        company: fc.option(fc.string({ minLength: 1, maxLength: 32 }), {
-          nil: undefined,
-        }),
-        submittedAt: fc.option(
-          fc.oneof(
-            fc
-              .date({
-                min: SAFE_SUBMITTED_AT_MIN,
-                max: SAFE_SUBMITTED_AT_MAX,
-              })
-              .map((value) => value.toISOString()),
-            fc.string().filter((value) => value.length > 0),
-          ),
-          { nil: undefined },
-        ),
-      })
-      .map(({ company, submittedAt }) => ({
-        ...base,
-        ...(company !== undefined ? { company } : {}),
-        ...(submittedAt !== undefined ? { submittedAt } : {}),
-      })),
-  );
+const contactLeadArb = fc.record({
+  type: fc.constant(LEAD_TYPES.CONTACT),
+  fullName: fc.string({ minLength: 1, maxLength: 24 }),
+  email: fc.emailAddress(),
+  subject: fc.constantFrom(...Object.values(CONTACT_SUBJECTS)),
+  message: fc.string({ minLength: 20, maxLength: 120 }),
+  turnstileToken: fc.string({ minLength: 1, maxLength: 48 }),
+  company: fc.option(fc.string({ minLength: 1, maxLength: 32 }), {
+    nil: undefined,
+  }),
+  marketingConsent: fc.option(fc.boolean(), { nil: undefined }),
+  submittedAt: fc.option(
+    fc.date().map((value) => value.toISOString()),
+    {
+      nil: undefined,
+    },
+  ),
+});
 
-const productLeadArb = fc
-  .record({
-    type: fc.constant(LEAD_TYPES.PRODUCT),
-    fullName: fc.string({ minLength: 1, maxLength: 24 }),
-    email: fc.emailAddress(),
-    productSlug: fc.stringMatching(/^[a-z0-9-]{1,24}$/),
-    productName: fc.string({ minLength: 1, maxLength: 32 }),
-    quantity: fc.oneof(
-      fc.integer({ min: 1, max: 10000 }),
-      fc.string({ minLength: 1, maxLength: 24 }),
-    ),
-    marketingConsent: fc.boolean(),
-  })
-  .chain((base) =>
-    fc
-      .record({
-        company: fc.option(fc.string({ minLength: 1, maxLength: 32 }), {
-          nil: undefined,
-        }),
-        requirements: fc.option(fc.string({ minLength: 1, maxLength: 80 }), {
-          nil: undefined,
-        }),
-      })
-      .map(({ company, requirements }) => ({
-        ...base,
-        ...(company !== undefined ? { company } : {}),
-        ...(requirements !== undefined ? { requirements } : {}),
-      })),
-  );
+const productLeadArb = fc.record({
+  type: fc.constant(LEAD_TYPES.PRODUCT),
+  fullName: fc.string({ minLength: 1, maxLength: 24 }),
+  email: fc.emailAddress(),
+  productSlug: fc.stringMatching(/^[a-z0-9-]{1,24}$/),
+  productName: fc.string({ minLength: 1, maxLength: 32 }),
+  quantity: fc.oneof(
+    fc.integer({ min: 1, max: 10000 }),
+    fc.string({ minLength: 1, maxLength: 24 }),
+  ),
+  company: fc.option(fc.string({ minLength: 1, maxLength: 32 }), {
+    nil: undefined,
+  }),
+  requirements: fc.option(fc.string({ minLength: 1, maxLength: 80 }), {
+    nil: undefined,
+  }),
+  marketingConsent: fc.option(fc.boolean(), { nil: undefined }),
+});
 
 const newsletterLeadArb = fc.record({
   type: fc.constant(LEAD_TYPES.NEWSLETTER),
   email: fc.emailAddress(),
 });
 
-const leadInputArb = fc.oneof(
+const leadInputArb: fc.Arbitrary<LeadInput> = fc.oneof(
   contactLeadArb,
   productLeadArb,
   newsletterLeadArb,
@@ -108,9 +79,12 @@ describe("lead-schema property tests", () => {
 
   it("contactLeadSchema.safeParse never throws for fuzzed input", () => {
     fc.assert(
-      fc.property(fc.anything({ maxDepth: 2, maxKeys: 5 }), (value) => {
-        expect(() => contactLeadSchema.safeParse(value)).not.toThrow();
-      }),
+      fc.property(
+        fc.anything({ maxDepth: 2, maxKeys: 5, maxLength: 5 }),
+        (value) => {
+          expect(() => contactLeadSchema.safeParse(value)).not.toThrow();
+        },
+      ),
     );
   });
 

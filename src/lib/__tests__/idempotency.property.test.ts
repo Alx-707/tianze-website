@@ -49,7 +49,7 @@ const fingerprintPartsArb: fc.Arbitrary<FingerprintParts> = fc
   .map(({ method, segments, bodyHash }) => ({
     method,
     path: segments.length === 0 ? "/" : `/${segments.join("/")}`,
-    ...(bodyHash !== undefined ? { bodyHash } : {}),
+    bodyHash,
   }));
 
 describe("idempotency property tests", () => {
