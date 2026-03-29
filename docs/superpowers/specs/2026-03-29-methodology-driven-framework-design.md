@@ -391,7 +391,8 @@ Input (owner provides):
   - At what stage buyers typically inquire [done -- already have some understanding]
 
 Execution (Claude does):
-  - Draw buyer question chain for each business line separately
+  - Draw buyer question chain for each sub-line separately
+    (PVC conduit, PETG pneumatic, equipment, custom molds -- 4 chains, not 3)
   - Map existing page content to 3-layer model
   - Identify content gaps (which layer is missing information)
   - Produce content priority ranking per page
