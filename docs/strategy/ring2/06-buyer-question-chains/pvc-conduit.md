@@ -110,15 +110,17 @@ The final trust question. Buyers want evidence that someone like them has alread
 
 ## Question-to-Page Mapping
 
+**Path note:** the `Existing Page` column reflects today's codebase. `Where It Should Live` reflects the approved target IA under `/products/`.
+
 | # | Question | Persona | Existing Page | Coverage | Where It Should Live |
 |---|----------|---------|---------------|----------|---------------------|
 | Q1 | Real factory or trader? | Mark | Homepage (`/`) — ChainSection, QualitySection | **Partially** — bending machine narrative exists but "factory vs trader" proof could be stronger | Homepage hero + About page |
-| Q2 | Do they make my specific fittings? | James | Products (`/products`) + Market pages (`/products/[market]`) | **Partially** — catalog exists but spec-level filtering is limited | Products page with standards-based filtering |
+| Q2 | Do they make my specific fittings? | James | Products (`/products`) + Market pages (`/products/[market]`) | **Partially** — catalog exists but spec-level filtering is limited | Products page + target market pages (`/products/pipes/[market]`) with standards-based filtering |
 | Q3 | What standards do they manufacture to? | Mark | Products (`/products`) | **Partially** — standards mentioned but not prominently filterable | Products page + dedicated Standards page |
-| Q4 | Can they match custom specs? | James | OEM page (`/oem-custom-manufacturing`) | **Partially** — page exists, but custom drawing workflow unclear | OEM page with clearer process steps |
+| Q4 | Can they match custom specs? | James | OEM page (`/oem-custom-manufacturing`) | **Partially** — page exists, but custom drawing workflow unclear | Custom Manufacturing page (`/products/custom-manufacturing/`) with clearer process steps |
 | Q5 | Show me the certificates | Mark | About (`/about`) — FAQ mentions certifications | **Not well** — no downloadable cert documents, no dedicated section | Dedicated Certifications page or About sub-section with downloads |
 | Q6 | Best price for a container? | Mark | Contact (`/contact`) — FAQ mentions MOQ/pricing | **Not at all** — no pricing guidance, no container loading info | Contact page + Product pages (container qty reference) |
-| Q7 | Exact tolerances? | James | Product market pages (`/products/[market]`) | **Partially** — specs exist but tolerance detail varies | Product detail pages with full engineering specs |
+| Q7 | Exact tolerances? | James | Product market pages (`/products/[market]`) | **Partially** — specs exist but tolerance detail varies | Target market pages (`/products/pipes/[market]`) with full engineering specs |
 | Q8 | MOQ / trial order? | Mark | Contact (`/contact`) — FAQ item | **Partially** — FAQ mentions MOQ but not trial order specifics | Contact FAQ + dedicated Trade Terms page |
 | Q9 | Test reports? | James | None | **Not at all** | Certifications/Standards page with downloadable reports |
 | Q10 | Why you vs Ledes/Ctube? | Mark | Homepage — ChainSection | **Partially** — "we make the machines" exists but not framed as competitive answer | Homepage + About page differentiator section |
@@ -126,8 +128,8 @@ The final trust question. Buyers want evidence that someone like them has alread
 | Q12 | Shortest lead time? | James | Contact (`/contact`) — FAQ item | **Partially** — FAQ mentions lead time but lacks detail | Contact FAQ + dedicated Shipping/Lead Time section |
 | Q13 | Shipping arrangement? | Mark | None dedicated | **Not at all** | Trade Terms or Shipping FAQ page |
 | Q14 | Quality claims process? | Mark | None | **Not at all** | Quality Assurance page or About sub-section |
-| Q15 | Custom mold timeline? | James | OEM page (`/oem-custom-manufacturing`) | **Partially** — capability stated but timeline not specific | OEM page with process timeline |
-| Q16 | Private label? | Mark | OEM page (`/oem-custom-manufacturing`) | **Partially** — OEM mentioned but private label packaging not explicit | OEM page — add packaging/labeling section |
+| Q15 | Custom mold timeline? | James | OEM page (`/oem-custom-manufacturing`) | **Partially** — capability stated but timeline not specific | Custom Manufacturing page (`/products/custom-manufacturing/`) with process timeline |
+| Q16 | Private label? | Mark | OEM page (`/oem-custom-manufacturing`) | **Partially** — OEM mentioned but private label packaging not explicit | Custom Manufacturing page (`/products/custom-manufacturing/`) — add packaging/labeling section |
 | Q17 | References / who else? | Both | About (`/about`) — export stats mentioned | **Partially** — "100+ countries" claim exists but lacks specificity | About page + Case Studies (future) |
 
 ### Coverage Summary

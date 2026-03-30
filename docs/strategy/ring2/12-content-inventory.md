@@ -1,8 +1,9 @@
 # Content Inventory & Gap Analysis — Tianze Website
 
-> Ring 2, Task 12 | Status: Draft
+> Ring 2, Task 12 | Status: Confirmed by owner (2026-03-30), codebase snapshot audited the same day
 > Inputs: Task 6 (buyer question chains x4), Task 7 (information architecture), Task 8 (content strategy)
 > Method: Cross-referenced proposed IA against actual codebase (`src/app/[locale]/`), product constants, MDX content, and sitemap
+> Reading rule: `Current URL` = today's implemented code path. `Proposed URL` = approved target path for Ring 4 migration.
 
 ---
 

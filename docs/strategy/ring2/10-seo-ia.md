@@ -6,6 +6,16 @@
 > 搜索轮次：8 | Hop 深度：3
 > 输入：Task 7（信息架构）、Task 8（内容策略）、Task 2（竞争分析）
 
+> URL 口径说明：
+> - 本文的 **SEO 市场意图** 和 **当前批准的实现 slug 集** 不是一回事。
+> - 当前实现层应先对齐 Ring 2 IA 的目标路径：
+>   `/products/pipes/north-america/`
+>   `/products/pipes/australia-new-zealand/`
+>   `/products/pipes/mexico/`
+>   `/products/pipes/europe/`
+>   `/products/pipes/pneumatic-tubes/`
+> - 如果未来明确决定新增 `/products/pipes/southeast-asia/`，需要同步修改 IA、内容盘点、重定向计划与代码，不要只改 SEO 文档。
+
 ---
 
 ## 核心结论
@@ -151,21 +161,22 @@
 
 | 页面 URL | 目标主词 | 目标副词 | 意图 |
 |---------|---------|---------|------|
-| `/products/pipes/australia` | `AS/NZS 2053 PVC conduit supplier` | `rigid PVC conduit Australia manufacturer` | 商业/交易 |
+| `/products/pipes/australia-new-zealand` | `AS/NZS 2053 PVC conduit supplier` | `rigid PVC conduit Australia manufacturer` | 商业/交易 |
 | `/products/pipes/north-america` | `Schedule 40 PVC conduit manufacturer` | `UL 651 conduit China wholesale` | 商业/交易 |
-| `/products/pipes/southeast-asia` | `IEC 61386 PVC conduit manufacturer` | `uPVC conduit IEC supplier` | 商业/交易 |
+| `/products/pipes/mexico` | `NOM PVC conduit manufacturer` | `NOM-001-SEDE conduit supplier` | 商业/交易 |
+| `/products/pipes/europe` | `IEC 61386 PVC conduit manufacturer` | `uPVC conduit IEC supplier` | 商业/交易 |
 | `/products/pipes/pneumatic-tubes` | `PETG pneumatic tube manufacturer` | `clear PETG tubing OEM supplier` | 商业/交易 |
 
 **集群页（内容层，Blog 文章）**：
 
 | 文章标题（建议） | 主词 | 意图 | 链接目标 |
 |---------------|------|------|---------|
-| Understanding AS/NZS 2053 Standard: Complete Guide | `AS/NZS 2053 electrical conduit guide` | 信息 | `/products/pipes/australia` |
-| AS/NZS 2053 vs IEC 61386: Key Differences for Buyers | `AS/NZS 2053 vs IEC 61386` | 信息 | `/products/pipes/australia` + `/products/pipes/southeast-asia` |
+| Understanding AS/NZS 2053 Standard: Complete Guide | `AS/NZS 2053 electrical conduit guide` | 信息 | `/products/pipes/australia-new-zealand` |
+| AS/NZS 2053 vs IEC 61386: Key Differences for Buyers | `AS/NZS 2053 vs IEC 61386` | 信息 | `/products/pipes/australia-new-zealand` + `/products/pipes/europe` |
 | How to Select PVC Conduit by Market Standard | `how to choose PVC conduit standard` | 信息 | `/products/pipes/` |
-| UV and Heat Resistance: PVC Conduit in Australian Conditions | `UV resistant PVC conduit Australia` | 信息 | `/products/pipes/australia` |
+| UV and Heat Resistance: PVC Conduit in Australian Conditions | `UV resistant PVC conduit Australia` | 信息 | `/products/pipes/australia-new-zealand` |
 | PETG vs PVC Tubing: Which Material for Pneumatic Applications | `PETG vs PVC pneumatic tubing` | 信息 | `/products/pipes/pneumatic-tubes` |
-| IEC 61386 Certified Conduit: What Southeast Asian Buyers Need to Know | `IEC 61386 conduit Southeast Asia` | 信息 | `/products/pipes/southeast-asia` |
+| IEC 61386 Certified Conduit: What Southeast Asian Buyers Need to Know | `IEC 61386 conduit Southeast Asia` | 信息 | `/products/pipes/europe`（当前 IEC 承载页；如后续拆分东南亚专页再迁移） |
 
 ---
 
@@ -213,9 +224,10 @@
 | `/` (首页) | `PVC conduit manufacturer China` | `electrical conduit supplier factory` | 商业 | 所有产品页 → 首页 |
 | `/products/` | `PVC conduit fittings manufacturer` | `electrical conduit products supplier` | 商业 | 集群页 → 产品页 |
 | `/products/pipes/` | `PVC conduit supplier wholesale` | `electrical conduit pipe manufacturer` | 商业 | 市场子页 → 管道总页 |
-| `/products/pipes/australia` | `AS/NZS 2053 PVC conduit` | `rigid PVC conduit Australia supplier` | 商业/交易 | Blog AS/NZS 文章 → 此页 |
+| `/products/pipes/australia-new-zealand` | `AS/NZS 2053 PVC conduit` | `rigid PVC conduit Australia supplier` | 商业/交易 | Blog AS/NZS 文章 → 此页 |
 | `/products/pipes/north-america` | `Schedule 40 PVC conduit manufacturer` | `UL 651 conduit wholesale China` | 商业/交易 | Blog Sch40 文章 → 此页 |
-| `/products/pipes/southeast-asia` | `IEC 61386 PVC conduit manufacturer` | `uPVC conduit Southeast Asia supplier` | 商业/交易 | Blog IEC 文章 → 此页 |
+| `/products/pipes/mexico` | `NOM PVC conduit manufacturer` | `NOM conduit wholesale China` | 商业/交易 | NOM / Mexico 内容 → 此页 |
+| `/products/pipes/europe` | `IEC 61386 PVC conduit manufacturer` | `uPVC conduit Southeast Asia supplier` | 商业/交易 | Blog IEC 文章 → 此页 |
 | `/products/pipes/pneumatic-tubes` | `PETG pneumatic tube manufacturer` | `clear PETG tubing OEM` | 商业/交易 | Blog PETG 文章 → 此页 |
 | `/products/equipment/` | `PVC bending machine manufacturer` | `PVC pipe bending equipment` | 商业 | Blog 弯管文章 → 此页 |
 | `/products/equipment/bending-machines/` | `PVC conduit bending machine manufacturer` | `hot bending elbow machine PVC` | 商业/交易 | 弯管集群所有 Blog → 此页 |

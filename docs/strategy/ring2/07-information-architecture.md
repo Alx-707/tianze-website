@@ -2,6 +2,7 @@
 
 > Ring 2, Task 7 | Status: Confirmed by owner (2026-03-30)
 > Inputs: Task 6 (buyer question chains), Section 3 (business line taxonomy)
+> Path terminology rule: `Current path` = codebase today. `Target path` = approved Ring 4 implementation structure.
 
 ## Current Site Structure (Actual)
 
@@ -42,7 +43,11 @@ All sellable products/services live under `/products/` as a unified tree.
 │   │
 │   ├── /products/pipes/                   Pipes overview (PVC + PETG)
 │   │   ├── /products/pipes/[market]/      PVC conduit by market standard
-│   │   │   (e.g., /products/pipes/australia, /products/pipes/north-america)
+│   │   │   (current approved slug set:
+│   │   │    /products/pipes/north-america
+│   │   │    /products/pipes/australia-new-zealand
+│   │   │    /products/pipes/mexico
+│   │   │    /products/pipes/europe)
 │   │   └── /products/pipes/pneumatic-tubes/   PETG pneumatic tubes
 │   │
 │   ├── /products/equipment/               Equipment overview
@@ -65,6 +70,13 @@ All sellable products/services live under `/products/` as a unified tree.
 - **Clean hierarchy**: Products -> Business Line -> Specific Product
 - **SEO friendly**: URL path reflects content hierarchy
 - **Scalable**: adding a new market or product type is just another node
+
+### Market labels vs slug set
+
+- **Strategic market priority** still follows the Ring 1 decision: Australia > North America > Southeast Asia.
+- **Current approved implementation slug set** keeps the existing market-series pages first:
+  `north-america`, `australia-new-zealand`, `mexico`, `europe`.
+- If the team later wants a dedicated `/products/pipes/southeast-asia/` route, that is a separate routing decision and must be reflected in IA, SEO IA, content inventory, redirects, and code together.
 
 ## Change Summary
 
@@ -89,9 +101,10 @@ All sellable products/services live under `/products/` as a unified tree.
 ```
 Products ▾                       About      [Contact - CTA button]
 ├── Pipes
-│   ├── Australia Standard
+│   ├── Australia / New Zealand
 │   ├── North America
-│   ├── Southeast Asia
+│   ├── Mexico
+│   ├── Europe / IEC Series
 │   └── Pneumatic Tubes
 ├── Equipment
 │   └── Bending Machines

@@ -79,12 +79,14 @@
 
 ## Question-to-Page Mapping
 
+**Path note:** `Existing Page` reflects today's codebase. Final implementation should follow the approved target IA under `/products/pipes/`.
+
 | Question | Existing Page | Status | Notes |
 |----------|--------------|--------|-------|
 | Q1: PETG specialization | `/products` | Partial | Products page exists but no dedicated PETG pneumatic section |
 | Q2: Transparency specs | `/products` | Gap | No transparency test data or visual evidence |
 | Q3: Burst pressure | `/products` | Gap | No pressure test data published |
-| Q4: Custom specs range | `/products` + `/oem-custom-manufacturing` | Partial | OEM page exists but focused on PVC molds, not PETG custom tubes |
+| Q4: Custom specs range | `/products` + `/oem-custom-manufacturing` | Partial | OEM page exists but focused on PVC molds, not PETG custom tubes. Final home should be `/products/pipes/pneumatic-tubes/` with optional support from `/products/custom-manufacturing/` |
 | Q5: Batch consistency | `/products` | Gap | No tolerance or QC data published |
 | Q6: Seal test results | `/products` | Gap | No seal integrity test data |
 | Q7: Supply capacity | `/about` | Partial | About page has factory info but no PETG-specific capacity data |

@@ -77,6 +77,8 @@
 
 ## Question-to-Page Mapping
 
+**Path note:** the mapping below separates today's codebase paths from the approved target IA. Current implementation still uses `/oem-custom-manufacturing` and `/capabilities/bending-machines`; target implementation moves them under `/products/`.
+
 ### Existing pages
 
 | Question(s) | Page | Current coverage | Gap level |
@@ -94,16 +96,22 @@
 | D7 | `/contact` | Can request visit, but no explicit "factory visit" invitation | **Gap** — missing commitment mechanism |
 | `/products/[market]` | Product catalog by market/standard | Supports C7 (standards) and general credibility | Indirect support |
 
+**Target implementation mapping (approved IA):**
+
+- `/oem-custom-manufacturing` -> `/products/custom-manufacturing/`
+- `/capabilities/bending-machines` -> `/products/equipment/bending-machines/`
+- `/products/[market]` -> `/products/pipes/[market]`
+
 ### Proposed new content (Ring 3 candidates)
 
 | Content need | Suggested location | Priority |
 |--------------|-------------------|----------|
-| MOQ policy & scaling path | New section on `/oem-custom-manufacturing` | High — answers C4, D8 |
-| IP protection & NDA policy | New section on `/oem-custom-manufacturing` or dedicated anchor | High — answers D1, D2 (deal-breaker) |
+| MOQ policy & scaling path | New section on `/products/custom-manufacturing/` | High — answers C4, D8 |
+| IP protection & NDA policy | New section on `/products/custom-manufacturing/` or dedicated anchor | High — answers D1, D2 (deal-breaker) |
 | OEM case studies (anonymized) | New section or blog posts | High — answers C5 |
-| QC documentation process | New section on `/oem-custom-manufacturing` or `/about` | Medium — answers D3, D4 |
+| QC documentation process | New section on `/products/custom-manufacturing/` or `/about` | Medium — answers D3, D4 |
 | Mold development deep-dive | Expand existing scope card or new section | Medium — answers A2, C2 in depth |
-| Factory visit invitation | CTA on `/oem-custom-manufacturing` + `/contact` | Medium — answers D7 |
+| Factory visit invitation | CTA on `/products/custom-manufacturing/` + `/contact` | Medium — answers D7 |
 | Packaging & labeling detail | Expand private label scope card | Low — answers D5 |
 
 ---
@@ -114,7 +122,7 @@
 
 **Missing entirely.** No mention of NDA availability, design exclusivity, or mold ownership policy anywhere on the site. For OEM buyers, IP protection is a deal-breaker — it's in Sarah's top 3 concerns. A brand will not share CAD files with a factory that has no visible IP protection commitment.
 
-**Recommendation:** Add a dedicated "IP Protection" section to `/oem-custom-manufacturing` covering:
+**Recommendation:** Add a dedicated "IP Protection" section to `/products/custom-manufacturing/` covering:
 - NDA available (standard practice, not special request)
 - Mold ownership policy (buyer pays for tooling = buyer owns the mold)
 - Design exclusivity options
@@ -124,7 +132,7 @@
 
 **Implied but not explicit.** The process flow shows "Trial Run" as a step, but there's no stated minimum order quantity, no "start small, scale later" language, and no pricing model for first-order vs. repeat-order. Sarah's #2 concern ("We need 5,000 pieces first, not 50,000") has no direct answer.
 
-**Recommendation:** Add a "Flexible Order Quantities" section or FAQ entry with:
+**Recommendation:** Add a "Flexible Order Quantities" section or FAQ entry on `/products/custom-manufacturing/` with:
 - Trial order MOQ (e.g., "as low as X pieces for custom products")
 - Scaling path: trial > first production > ongoing partnership
 - Explicit language: "We support graduated volumes — start with a trial batch and scale as your market responds"
@@ -158,7 +166,7 @@
 
 **Missing commitment mechanism.** Competitive analysis identified that no competitor explicitly invites factory visits. This is a low-cost, high-trust action that Tianze can own. Currently, a buyer would need to proactively request a visit through the contact form — there's no invitation.
 
-**Recommendation:** Add factory visit CTA to `/oem-custom-manufacturing`:
+**Recommendation:** Add factory visit CTA to `/products/custom-manufacturing/`:
 - "Visit our factory in Lianyungang — see the machines we built and the production lines they run."
 - Combine with free sample offer for a dual commitment mechanism
 

@@ -1,6 +1,6 @@
 # Value Propositions — Tianze Website
 
-> Ring 1, Task 5 | Status: Draft, pending owner confirmation
+> Ring 1, Task 5 | Status: Confirmed by owner (2026-03-29)
 > Inputs: Task 3 (positioning), Task 4 (personas)
 
 ## Company-Level Value Proposition
