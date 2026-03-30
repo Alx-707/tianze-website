@@ -120,11 +120,9 @@ describe("Feature: FaqSection Reusable Component", () => {
   describe("Scenario 1.5: Keyboard navigation", () => {
     it("toggles accordion with Enter key", async () => {
       await renderFaqSection({ items: ["moq"] });
-      const question = screen.getByText(
-        "What is the minimum order quantity (MOQ)?",
-      );
-      const trigger = question.closest("button");
-      expect(trigger).not.toBeNull();
+      const trigger = screen.getByRole("button", {
+        name: "What is the minimum order quantity (MOQ)?",
+      });
       trigger.focus();
       await userEvent.keyboard("{Enter}");
       expect(screen.getByText(/500 to 1,000 pieces/)).toBeVisible();
