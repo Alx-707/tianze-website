@@ -63,9 +63,19 @@ const initialState: FormState = {
  */
 function SuccessMessage({ message }: { message: string }) {
   return (
-    <div className="flex items-center gap-3 py-4 text-green-600">
+    <div
+      className="flex items-center gap-3 py-4 text-green-600"
+      data-testid="blog-newsletter-success-message"
+      role="status"
+      aria-live="polite"
+    >
       <CheckCircle className="h-5 w-5 shrink-0" />
-      <p className="text-sm font-medium">{message}</p>
+      <p
+        className="text-sm font-medium"
+        data-testid="blog-newsletter-success-text"
+      >
+        {message}
+      </p>
     </div>
   );
 }
@@ -75,9 +85,14 @@ function SuccessMessage({ message }: { message: string }) {
  */
 function ErrorMessage({ error }: { error: string }) {
   return (
-    <div className="flex items-center gap-2 rounded-md bg-red-50 p-3 text-sm text-red-600">
+    <div
+      className="flex items-center gap-2 rounded-md bg-red-50 p-3 text-sm text-red-600"
+      data-testid="blog-newsletter-error-message"
+      role="alert"
+      aria-live="assertive"
+    >
       <XCircle className="h-4 w-4 shrink-0" />
-      {error}
+      <span data-testid="blog-newsletter-error-text">{error}</span>
     </div>
   );
 }
@@ -129,18 +144,22 @@ function NewsletterForm({
           type="submit"
           disabled={isButtonDisabled}
           className={cn(!isInline && "w-full")}
+          data-testid="blog-newsletter-submit-button"
         >
-          {isSubmitting ? (
-            <>
+          <span
+            className="inline-flex min-w-[1.5rem] items-center justify-center"
+            data-testid="blog-newsletter-submit-icon"
+            aria-hidden="true"
+          >
+            {isSubmitting ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              {submittingLabel}
-            </>
-          ) : (
-            <>
+            ) : (
               <Mail className="mr-2 h-4 w-4" />
-              {submitLabel}
-            </>
-          )}
+            )}
+          </span>
+          <span data-testid="blog-newsletter-submit-label">
+            {isSubmitting ? submittingLabel : submitLabel}
+          </span>
         </Button>
       </div>
       <TurnstileWidget

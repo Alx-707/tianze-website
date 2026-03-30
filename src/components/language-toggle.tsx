@@ -109,7 +109,7 @@ export const LanguageToggle = memo(({ locale }: { locale?: "en" | "zh" }) => {
   const currentLanguageName = effectiveLocale === "en" ? "English" : "简体中文";
 
   return (
-    <div data-testid="language-switcher">
+    <div data-testid="language-switcher" className="notranslate" translate="no">
       <DropdownMenu
         data-testid="language-dropdown-menu"
         onOpenChange={setIsOpen}
@@ -135,7 +135,11 @@ export const LanguageToggle = memo(({ locale }: { locale?: "en" | "zh" }) => {
               className="h-3.5 w-3.5 text-foreground/70"
               data-testid="globe-icon"
             />
-            <span className="text-xs font-medium text-foreground/70">
+            <span
+              className="text-xs font-medium text-foreground/70"
+              data-testid="language-current-label"
+              translate="no"
+            >
               {currentLanguageName}
             </span>
             {isPending ? (
@@ -165,8 +169,9 @@ export const LanguageToggle = memo(({ locale }: { locale?: "en" | "zh" }) => {
         <DropdownMenuContent
           align="end"
           data-testid="language-dropdown-content"
+          translate="no"
           className={cn(
-            "min-w-[180px] px-0 py-2.5",
+            "notranslate min-w-[180px] px-0 py-2.5",
             "rounded-xl border border-border",
             "bg-popover text-popover-foreground",
             "shadow-lg",
@@ -197,8 +202,15 @@ export const LanguageToggle = memo(({ locale }: { locale?: "en" | "zh" }) => {
               data-testid="language-link-en"
               data-locale="en"
               role="menuitem"
+              translate="no"
             >
-              <span className="text-xs">English</span>
+              <span
+                className="text-xs"
+                data-testid="language-option-label-en"
+                translate="no"
+              >
+                English
+              </span>
               {switchingTo === "en" && (
                 <Loader2 className="h-4 w-4 animate-spin" />
               )}
@@ -235,8 +247,15 @@ export const LanguageToggle = memo(({ locale }: { locale?: "en" | "zh" }) => {
               data-testid="language-link-zh"
               data-locale="zh"
               role="menuitem"
+              translate="no"
             >
-              <span className="text-xs">简体中文</span>
+              <span
+                className="text-xs"
+                data-testid="language-option-label-zh"
+                translate="no"
+              >
+                简体中文
+              </span>
               {switchingTo === "zh" && (
                 <Loader2 className="h-4 w-4 animate-spin" />
               )}

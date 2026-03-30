@@ -148,8 +148,14 @@ describe("BlogNewsletter", () => {
       render(<BlogNewsletter />);
 
       expect(
-        screen.getByRole("button", { name: /Subscribe/i }),
+        screen.getByTestId("blog-newsletter-submit-button"),
       ).toBeInTheDocument();
+      expect(
+        screen.getByTestId("blog-newsletter-submit-icon"),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByTestId("blog-newsletter-submit-label"),
+      ).toHaveTextContent("Subscribe");
     });
 
     it("renders mail icon", () => {
@@ -382,9 +388,12 @@ describe("BlogNewsletter", () => {
       // Verify success state
       await waitFor(() => {
         expect(
-          screen.getByText("Successfully subscribed!"),
+          screen.getByTestId("blog-newsletter-success-message"),
         ).toBeInTheDocument();
       });
+      expect(
+        screen.getByTestId("blog-newsletter-success-text"),
+      ).toHaveTextContent("Successfully subscribed!");
     });
 
     it("shows error message when API returns error", async () => {
@@ -411,8 +420,13 @@ describe("BlogNewsletter", () => {
 
       // Wait for error message
       await waitFor(() => {
-        expect(screen.getByText("Invalid email")).toBeInTheDocument();
+        expect(
+          screen.getByTestId("blog-newsletter-error-message"),
+        ).toBeInTheDocument();
       });
+      expect(
+        screen.getByTestId("blog-newsletter-error-text"),
+      ).toHaveTextContent("Invalid email");
     });
 
     it("handles network error gracefully", async () => {
@@ -433,8 +447,13 @@ describe("BlogNewsletter", () => {
 
       // Wait for error message (should show generic error)
       await waitFor(() => {
-        expect(screen.getByText("Something went wrong")).toBeInTheDocument();
+        expect(
+          screen.getByTestId("blog-newsletter-error-message"),
+        ).toBeInTheDocument();
       });
+      expect(
+        screen.getByTestId("blog-newsletter-error-text"),
+      ).toHaveTextContent("Something went wrong");
     });
 
     it("shows turnstile required error when token is missing", async () => {

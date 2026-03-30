@@ -230,7 +230,7 @@ export async function generateMetadata({
     namespace: "underConstruction.pages.contact",
   });
 
-  return generateMetadataForPath({
+  const metadata = generateMetadataForPath({
     locale: locale as SeoLocale,
     pageType: "contact",
     path: "/contact",
@@ -239,6 +239,14 @@ export async function generateMetadata({
       description: t("description"),
     },
   });
+
+  return {
+    ...metadata,
+    other: {
+      ...metadata.other,
+      google: "notranslate",
+    },
+  };
 }
 
 // 页面标题组件
@@ -394,7 +402,11 @@ async function ContactContent({ locale }: { locale: string }) {
   ]);
 
   return (
-    <div className="min-h-[80vh] px-4 py-16">
+    <div
+      className="notranslate min-h-[80vh] px-4 py-16"
+      data-testid="contact-page-content"
+      translate="no"
+    >
       <div className="mx-auto max-w-4xl">
         <ContactPageHeader
           title={copy.header.title}

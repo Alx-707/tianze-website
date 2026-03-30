@@ -62,9 +62,19 @@ const initialState: FormState = {
 // Success message component
 function SuccessMessage({ message }: { message: string }) {
   return (
-    <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+    <CardContent
+      className="flex flex-col items-center justify-center py-12 text-center"
+      data-testid="product-inquiry-success-message"
+      role="status"
+      aria-live="polite"
+    >
       <CheckCircle className="mb-4 h-12 w-12 text-green-500" />
-      <p className="text-lg font-medium">{message}</p>
+      <p
+        className="text-lg font-medium"
+        data-testid="product-inquiry-success-text"
+      >
+        {message}
+      </p>
     </CardContent>
   );
 }
@@ -90,9 +100,14 @@ function FormHeader({ title, description }: FormHeaderProps) {
 // Error display component
 function ErrorMessage({ error }: { error: string }) {
   return (
-    <div className="flex items-center gap-2 rounded-md bg-red-50 p-3 text-sm text-red-600">
+    <div
+      className="flex items-center gap-2 rounded-md bg-red-50 p-3 text-sm text-red-600"
+      data-testid="product-inquiry-error-message"
+      role="alert"
+      aria-live="assertive"
+    >
       <XCircle className="h-4 w-4" />
-      {error}
+      <span data-testid="product-inquiry-error-text">{error}</span>
     </div>
   );
 }
@@ -116,15 +131,20 @@ function SubmitButton({
       type="submit"
       className="w-full"
       disabled={isSubmitting || disabled}
+      data-testid="product-inquiry-submit-button"
     >
-      {isSubmitting ? (
-        <>
+      <span
+        className="inline-flex min-w-[1.5rem] items-center justify-center"
+        data-testid="product-inquiry-submit-icon"
+        aria-hidden="true"
+      >
+        {isSubmitting ? (
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          {submittingLabel}
-        </>
-      ) : (
-        submitLabel
-      )}
+        ) : null}
+      </span>
+      <span data-testid="product-inquiry-submit-label">
+        {isSubmitting ? submittingLabel : submitLabel}
+      </span>
     </Button>
   );
 }

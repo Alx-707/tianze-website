@@ -101,6 +101,9 @@ export async function generateMetadata({
       description: marketDescription,
       type: "website",
     },
+    other: {
+      google: "notranslate",
+    },
   };
 }
 
@@ -273,7 +276,11 @@ export default async function MarketPage({ params }: MarketPageProps) {
   );
 
   return (
-    <main className="mx-auto max-w-[1080px] px-6 py-8 md:py-12">
+    <main
+      className="notranslate mx-auto max-w-[1080px] px-6 py-8 md:py-12"
+      data-testid="market-page-content"
+      translate="no"
+    >
       <CatalogBreadcrumb market={market} marketLabel={marketLabel} />
 
       <header className="mb-8 md:mb-12">

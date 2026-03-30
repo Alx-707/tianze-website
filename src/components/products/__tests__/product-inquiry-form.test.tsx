@@ -171,8 +171,14 @@ describe("ProductInquiryForm", () => {
       );
 
       expect(
-        screen.getByRole("button", { name: /Send Inquiry/i }),
+        screen.getByTestId("product-inquiry-submit-button"),
       ).toBeInTheDocument();
+      expect(
+        screen.getByTestId("product-inquiry-submit-icon"),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByTestId("product-inquiry-submit-label"),
+      ).toHaveTextContent("Send Inquiry");
     });
 
     it("renders Turnstile widget", () => {
@@ -432,6 +438,9 @@ describe("ProductInquiryForm", () => {
         name: /Send Inquiry/i,
       });
       expect(submitButton).toHaveTextContent("Send Inquiry");
+      expect(
+        screen.getByTestId("product-inquiry-submit-label"),
+      ).toHaveTextContent("Send Inquiry");
     });
   });
 
@@ -520,6 +529,15 @@ describe("ProductInquiryForm", () => {
           }),
         );
       });
+
+      await waitFor(() => {
+        expect(
+          screen.getByTestId("product-inquiry-success-message"),
+        ).toBeInTheDocument();
+      });
+      expect(
+        screen.getByTestId("product-inquiry-success-text"),
+      ).toHaveTextContent("Inquiry sent successfully!");
     });
 
     it("calls onSuccess callback after successful submission", async () => {
@@ -587,6 +605,19 @@ describe("ProductInquiryForm", () => {
       fireEvent.change(screen.getByLabelText(/Quantity/i), {
         target: { value: "100 pcs" },
       });
+
+      fireEvent.submit(
+        screen.getByTestId("product-inquiry-submit-button").closest("form")!,
+      );
+
+      await waitFor(() => {
+        expect(
+          screen.getByTestId("product-inquiry-error-message"),
+        ).toBeInTheDocument();
+      });
+      expect(
+        screen.getByTestId("product-inquiry-error-text"),
+      ).not.toBeEmptyDOMElement();
     });
 
     it("handles network error gracefully", async () => {
@@ -601,6 +632,25 @@ describe("ProductInquiryForm", () => {
 
       // Enable turnstile
       fireEvent.click(screen.getByTestId("turnstile-success-trigger"));
+      fireEvent.change(screen.getByLabelText(/Name/i), {
+        target: { value: "John Doe" },
+      });
+      fireEvent.change(screen.getByLabelText(/Email/i), {
+        target: { value: "john@example.com" },
+      });
+      fireEvent.change(screen.getByLabelText(/Quantity/i), {
+        target: { value: "100 pcs" },
+      });
+
+      fireEvent.submit(
+        screen.getByTestId("product-inquiry-submit-button").closest("form")!,
+      );
+
+      await waitFor(() => {
+        expect(
+          screen.getByTestId("product-inquiry-error-message"),
+        ).toBeInTheDocument();
+      });
     });
 
     it("includes optional fields in submission", async () => {

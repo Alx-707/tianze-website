@@ -42,8 +42,13 @@ vi.mock("@/components/ui/sheet", () => ({
   SheetHeader: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="sheet-header">{children}</div>
   ),
-  SheetTitle: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="sheet-title">{children}</div>
+  SheetTitle: ({
+    children,
+    ...props
+  }: React.ComponentProps<"div"> & { children: React.ReactNode }) => (
+    <div data-testid="sheet-title" {...props}>
+      {children}
+    </div>
   ),
   SheetDescription: ({
     children,
@@ -87,6 +92,34 @@ describe("InquiryDrawer", () => {
     );
     expect(screen.getByTestId("sheet-description")).toHaveTextContent(
       "Inquiry drawer description",
+    );
+  });
+
+  it("protects the product header semantics from browser translation", () => {
+    render(
+      <InquiryDrawer
+        open
+        onOpenChange={vi.fn()}
+        productSlug="test-product"
+        productName="Test Product"
+        productSku="SKU-001"
+      />,
+    );
+
+    expect(screen.getByTestId("inquiry-drawer-product-header")).toHaveClass(
+      "notranslate",
+    );
+    expect(screen.getByTestId("inquiry-drawer-product-header")).toHaveAttribute(
+      "translate",
+      "no",
+    );
+    expect(screen.getByTestId("inquiry-drawer-product-title")).toHaveAttribute(
+      "translate",
+      "no",
+    );
+    expect(screen.getByTestId("inquiry-drawer-product-sku")).toHaveAttribute(
+      "translate",
+      "no",
     );
   });
 });

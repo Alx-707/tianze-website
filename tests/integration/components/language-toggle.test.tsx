@@ -183,6 +183,30 @@ describe("LanguageToggle Integration Tests", () => {
   });
 
   describe("Complete Language Switching Workflow", () => {
+    it("should apply translate protection to the switcher and language labels", () => {
+      render(<LanguageToggle />);
+
+      expect(screen.getByTestId("language-switcher")).toHaveClass(
+        "notranslate",
+      );
+      expect(screen.getByTestId("language-switcher")).toHaveAttribute(
+        "translate",
+        "no",
+      );
+      expect(screen.getByTestId("language-current-label")).toHaveAttribute(
+        "translate",
+        "no",
+      );
+      expect(screen.getByTestId("language-option-label-en")).toHaveAttribute(
+        "translate",
+        "no",
+      );
+      expect(screen.getByTestId("language-option-label-zh")).toHaveAttribute(
+        "translate",
+        "no",
+      );
+    });
+
     it("should complete full language switch from English to Chinese", async () => {
       render(<LanguageToggle />);
 

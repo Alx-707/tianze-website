@@ -85,10 +85,13 @@ const StatusMessage = memo(({ status, t }: StatusMessageProps) => {
   return (
     <div
       className={`rounded-md border p-4 ${config.className}`}
+      data-testid="contact-form-status-message"
       role={isError ? "alert" : "status"}
       aria-live={isError ? "assertive" : "polite"}
     >
-      {config.message}
+      <span data-testid="contact-form-status-message-text">
+        {config.message}
+      </span>
     </div>
   );
 });
@@ -231,11 +234,14 @@ function ErrorDisplay({
     <div
       ref={containerRef}
       className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-800"
+      data-testid="contact-form-error-display"
       role="alert"
       aria-live="assertive"
       tabIndex={-1}
     >
-      <p className="font-medium">{translateForm("error")}</p>
+      <p className="font-medium" data-testid="contact-form-error-heading">
+        {translateForm("error")}
+      </p>
       {shouldShowTranslatedMessage && (
         <p className="text-sm">{translatedError}</p>
       )}
@@ -431,8 +437,11 @@ function SubmitButton({
       disabled={isDisabled}
       aria-disabled={isDisabled}
       aria-busy={pending}
+      data-testid="contact-form-submit-button"
     >
-      {pending ? pendingLabel : idleLabel}
+      <span data-testid="contact-form-submit-label">
+        {pending ? pendingLabel : idleLabel}
+      </span>
     </Button>
   );
 }
