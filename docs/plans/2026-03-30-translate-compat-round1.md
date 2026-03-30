@@ -27,3 +27,8 @@
 - Component-level translation protection for language and inquiry controls
 - Stable status, error, and submit-button structure for the three target forms
 - Focused regression tests for protection attributes and stable containers
+
+## Later-Stage Note
+
+- Shared navigation, CTA, and other follow-up protections were added in later stages on the same branch.
+- The current source of truth for the combined protected surface list is `docs/guides/BROWSER-TRANSLATION-COMPATIBILITY.md`.

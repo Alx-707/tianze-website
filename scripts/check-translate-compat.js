@@ -2,7 +2,6 @@
 
 const fs = require("fs");
 const path = require("path");
-const { globSync } = require("glob");
 const parser = require("@babel/parser");
 const traverse = require("@babel/traverse").default;
 
@@ -106,12 +105,7 @@ const PROTECTED_SURFACE_RULES = [
   },
   {
     file: "src/components/sections/faq-accordion.tsx",
-    markers: [
-      "faq-accordion",
-      "faq-question-",
-      "faq-answer-",
-      'translate="no"',
-    ],
+    markers: ["faq-accordion", "faq-question-"],
   },
   {
     file: "src/components/sections/final-cta.tsx",
@@ -128,7 +122,7 @@ const PROTECTED_SURFACE_RULES = [
 ];
 
 const RISK_SCAN_FILES = PROTECTED_SURFACE_RULES.map((rule) => rule.file).filter(
-  (file) => file.endsWith(".tsx"),
+  (file) => file.endsWith(".tsx") && !file.startsWith("src/app/"),
 );
 
 function ensureDir(dir) {
@@ -153,6 +147,18 @@ function isStringish(node) {
   return false;
 }
 
+function isTextCarrier(node) {
+  if (!node) return false;
+
+  if (isStringish(node)) return true;
+
+  return (
+    node.type === "Identifier" ||
+    node.type === "MemberExpression" ||
+    node.type === "OptionalMemberExpression"
+  );
+}
+
 function isNullable(node) {
   return (
     node?.type === "NullLiteral" ||
@@ -166,6 +172,69 @@ function isDirectJsxChild(pathRef) {
     (pathRef.parentPath.parentPath?.isJSXElement() ||
       pathRef.parentPath.parentPath?.isJSXFragment())
   );
+}
+
+function hasLiteralAttribute(openingElement, name, value) {
+  return openingElement.attributes.some((attribute) => {
+    if (
+      attribute.type !== "JSXAttribute" ||
+      attribute.name?.type !== "JSXIdentifier" ||
+      attribute.name.name !== name
+    ) {
+      return false;
+    }
+
+    if (attribute.value?.type === "StringLiteral") {
+      return attribute.value.value === value;
+    }
+
+    if (attribute.value?.type === "JSXExpressionContainer") {
+      return (
+        attribute.value.expression?.type === "StringLiteral" &&
+        attribute.value.expression.value === value
+      );
+    }
+
+    return false;
+  });
+}
+
+function hasNotranslateClass(openingElement) {
+  return openingElement.attributes.some((attribute) => {
+    if (
+      attribute.type !== "JSXAttribute" ||
+      attribute.name?.type !== "JSXIdentifier" ||
+      attribute.name.name !== "className"
+    ) {
+      return false;
+    }
+
+    if (attribute.value?.type === "StringLiteral") {
+      return attribute.value.value.includes("notranslate");
+    }
+
+    return false;
+  });
+}
+
+function hasProtectedAncestor(pathRef) {
+  let current = pathRef.parentPath;
+
+  while (current) {
+    if (current.isJSXElement()) {
+      const openingElement = current.node.openingElement;
+      if (
+        hasLiteralAttribute(openingElement, "translate", "no") ||
+        hasNotranslateClass(openingElement)
+      ) {
+        return true;
+      }
+    }
+
+    current = current.parentPath;
+  }
+
+  return false;
 }
 
 function scanForRiskPatterns(repoPath) {
@@ -182,8 +251,9 @@ function scanForRiskPatterns(repoPath) {
     LogicalExpression(logicalPath) {
       if (
         logicalPath.node.operator === "&&" &&
-        isStringish(logicalPath.node.right) &&
-        isDirectJsxChild(logicalPath)
+        isTextCarrier(logicalPath.node.right) &&
+        isDirectJsxChild(logicalPath) &&
+        !hasProtectedAncestor(logicalPath)
       ) {
         findings.push({
           file: repoPath,
@@ -195,16 +265,16 @@ function scanForRiskPatterns(repoPath) {
       }
     },
     ConditionalExpression(condPath) {
-      if (!isDirectJsxChild(condPath)) {
+      if (!isDirectJsxChild(condPath) || hasProtectedAncestor(condPath)) {
         return;
       }
 
       const { consequent, alternate } = condPath.node;
       const hasRiskyBranch =
-        (isStringish(consequent) &&
-          (isStringish(alternate) || isNullable(alternate))) ||
-        (isStringish(alternate) &&
-          (isStringish(consequent) || isNullable(consequent)));
+        (isTextCarrier(consequent) &&
+          (isTextCarrier(alternate) || isNullable(alternate))) ||
+        (isTextCarrier(alternate) &&
+          (isTextCarrier(consequent) || isNullable(consequent)));
 
       if (hasRiskyBranch) {
         findings.push({

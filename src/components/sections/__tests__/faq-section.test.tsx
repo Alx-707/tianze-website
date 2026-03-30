@@ -80,22 +80,16 @@ describe("Feature: FaqSection Reusable Component", () => {
       ).toBeInTheDocument();
     });
 
-    it("marks accordion questions and answers as notranslate", async () => {
+    it("marks question labels without blocking answer translation", async () => {
       await renderFaqSection({ items: ["moq"] });
 
-      expect(screen.getByTestId("faq-accordion")).toHaveClass("notranslate");
-      expect(screen.getByTestId("faq-accordion")).toHaveAttribute(
-        "translate",
-        "no",
-      );
       expect(screen.getByTestId("faq-question-moq")).toHaveAttribute(
         "translate",
         "no",
       );
       await userEvent.click(screen.getByText(/minimum order quantity/i));
-      expect(screen.getByTestId("faq-answer-moq")).toHaveAttribute(
+      expect(screen.getByTestId("faq-answer-moq")).not.toHaveAttribute(
         "translate",
-        "no",
       );
     });
   });

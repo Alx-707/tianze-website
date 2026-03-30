@@ -20,9 +20,8 @@ export function FaqAccordion({ items }: FaqAccordionProps) {
   return (
     <Accordion
       type="multiple"
-      className="notranslate divide-y-0 rounded-lg border-0 bg-card shadow-card"
+      className="divide-y-0 rounded-lg border-0 bg-card shadow-card"
       data-testid="faq-accordion"
-      translate="no"
     >
       {items.map((item) => (
         <AccordionItem
@@ -40,7 +39,6 @@ export function FaqAccordion({ items }: FaqAccordionProps) {
             <p
               className="whitespace-pre-line text-sm leading-relaxed text-muted-foreground"
               data-testid={`faq-answer-${item.key}`}
-              translate="no"
             >
               {item.answer}
             </p>

@@ -4,6 +4,8 @@
 
 This guide defines the guarded surfaces and checks that keep browser translation tools from breaking critical UI flows.
 
+This guide reflects the combined hardening delivered across the follow-up stages on the same branch, not just the initial round 1 surface list.
+
 ## Protected Surfaces
 
 ### Page-level protection
@@ -22,11 +24,16 @@ These pages are intentionally marked as non-translatable because they contain hi
 - `src/components/layout/header-client.tsx`
 - `src/components/layout/vercel-navigation.tsx`
 - `src/components/blocks/tech/tech-tabs-block.tsx`
-- `src/components/sections/faq-accordion.tsx`
 - `src/components/sections/final-cta.tsx`
 - `src/components/sections/sample-cta.tsx`
 
 These components now carry explicit `translate="no"` and `notranslate` protections on critical labels and controls.
+
+### Limited FAQ protection
+
+- `src/components/sections/faq-accordion.tsx`
+
+Only FAQ question labels are guarded to stabilize the accordion controls. FAQ answer body content remains translatable.
 
 ### Stable state surfaces
 
