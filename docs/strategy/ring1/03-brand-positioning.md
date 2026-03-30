@@ -3,21 +3,42 @@
 > Ring 1, Task 3 | Status: Confirmed by owner (2026-03-29)
 > Inputs: Task 1 (business goals), Task 2 (competitive analysis), product-marketing-context.md
 
-## Company-Level Positioning Statement
+## Company-Level Positioning
+
+### Foundation (internal positioning)
 
 **"We make the machines that make the pipes."**
 
-Tianze is a PVC conduit fittings manufacturer that designs and builds its own bending equipment — giving us full-chain control from machine to finished product. This is what separates a technical factory from a trading company.
+This is the positioning base — a true, unique, defensible fact. But it is NOT the buyer-facing headline. Buyers don't care that we make machines; they care about what that means for their products.
 
-### Why this works
+### Buyer-Facing Narrative (external messaging)
+
+**"Precision from the engineers who design the bending machines."**
+
+The logic chain:
+1. We design and build bending machines (fact — uncontested, Task 2 verified)
+2. Therefore we understand bending tolerances at an engineering level (capability)
+3. Therefore our pipe fittings have superior precision (buyer benefit)
+
+This transforms "we make machines" from a self-introduction into a **quality promise with a verifiable cause**. Competitors can only say "our pipes are good" (self-assessment). Tianze can say "our pipes are precise, because we engineer the machines that form them" (causal claim, verifiable).
+
+### Messaging hierarchy
+
+| Layer | Content | Purpose |
+|-------|---------|---------|
+| **Headline** | Precision you can measure | Buyer benefit, attention |
+| **Support** | Because we design the bending machines ourselves | Reason to believe |
+| **Evidence** | Tolerance data, test reports, machine evolution | Proof |
+
+### Positioning tests
 
 | Test | Result |
 |------|--------|
-| Is it true? | Yes — Tianze actually manufactures bending machines |
-| Is it unique? | Yes — 0 of 8 competitors claim this (Task 2 verified) |
-| Is it relevant to buyers? | Yes — it directly addresses the #1 trust gap: "is this a real factory or a trader?" |
-| Is it defensible? | Yes — competitors cannot copy this without building equipment manufacturing capability |
-| Can the owner say it face-to-face? | To be confirmed |
+| Is it true? | Yes — Tianze designs bending machines |
+| Is it unique? | Yes — 0 of 8 competitors can make this causal claim |
+| Is it relevant to buyers? | Yes — precision/tolerance is a top concern for distributors and contractors |
+| Is it defensible? | Yes — requires actual equipment manufacturing capability |
+| Can the owner say it face-to-face? | Confirmed (2026-03-29) |
 
 ## Per-Line Positioning (3 Business Lines)
 
