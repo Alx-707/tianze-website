@@ -131,8 +131,18 @@ function ensureDir(dir) {
   }
 }
 
+function warnFileRead(repoPath, err) {
+  const message = err instanceof Error ? err.message : String(err);
+  console.warn(`translate-compat: failed to read ${repoPath}: ${message}`);
+}
+
 function readFile(repoPath) {
-  return fs.readFileSync(path.join(ROOT, repoPath), "utf8");
+  try {
+    return fs.readFileSync(path.join(ROOT, repoPath), "utf8");
+  } catch (err) {
+    warnFileRead(repoPath, err);
+    return null;
+  }
 }
 
 function isStringish(node) {
@@ -238,8 +248,19 @@ function hasProtectedAncestor(pathRef) {
 }
 
 function scanForRiskPatterns(repoPath) {
-  const absolute = path.join(ROOT, repoPath);
-  const source = fs.readFileSync(absolute, "utf8");
+  const source = readFile(repoPath);
+  if (source === null) {
+    return [
+      {
+        file: repoPath,
+        line: null,
+        kind: "unreadable-file",
+        message:
+          "Protected surface file could not be read, so risk pattern scanning was skipped.",
+      },
+    ];
+  }
+
   const ast = parser.parse(source, {
     sourceType: "module",
     plugins: ["typescript", "jsx"],
@@ -296,6 +317,16 @@ function collectMissingMarkers() {
 
   for (const rule of PROTECTED_SURFACE_RULES) {
     const source = readFile(rule.file);
+    if (source === null) {
+      missing.push({
+        file: rule.file,
+        marker: "(file unreadable)",
+        message:
+          "Protected surface file is missing or unreadable, so marker checks could not be completed.",
+      });
+      continue;
+    }
+
     for (const marker of rule.markers) {
       if (!source.includes(marker)) {
         missing.push({
