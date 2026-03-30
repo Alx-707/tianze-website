@@ -69,7 +69,9 @@ vi.mock("@/components/layout/header-client", () => ({
   MobileNavigationIsland: () => (
     <nav data-testid="mobile-navigation">Mobile Navigation</nav>
   ),
-  NavSwitcherIsland: () => <nav data-testid="nav-switcher">Nav Switcher</nav>,
+  NavSwitcherIsland: () => (
+    <nav data-testid="header-desktop-nav">Nav Switcher</nav>
+  ),
   LanguageToggleIsland: () => (
     <div data-testid="language-toggle">Language Toggle</div>
   ),
@@ -131,9 +133,34 @@ describe("Header Integration Tests", () => {
 
       // Verify all child components are rendered
       expect(screen.getByTestId("logo")).toBeInTheDocument();
-      expect(screen.getByTestId("nav-switcher")).toBeInTheDocument();
+      expect(screen.getByTestId("header-desktop-nav")).toBeInTheDocument();
       expect(screen.getByTestId("mobile-navigation")).toBeInTheDocument();
       expect(screen.getByTestId("language-toggle")).toBeInTheDocument();
+    });
+
+    it("should mark desktop navigation and CTA labels as notranslate", async () => {
+      await renderAsyncComponent(
+        Header({
+          locale: "en",
+          mainNavItems: [{ key: "home", href: "/", label: "Home" }],
+        }),
+      );
+
+      expect(screen.getByTestId("header-desktop-nav")).toHaveClass(
+        "notranslate",
+      );
+      expect(screen.getByTestId("header-desktop-nav")).toHaveAttribute(
+        "translate",
+        "no",
+      );
+      expect(screen.getByTestId("header-nav-label-home")).toHaveAttribute(
+        "translate",
+        "no",
+      );
+      expect(screen.getByTestId("header-contact-sales-label")).toHaveAttribute(
+        "translate",
+        "no",
+      );
     });
 
     it("should have correct default structure and classes", async () => {
@@ -181,7 +208,9 @@ describe("Header Integration Tests", () => {
       expect(header).toHaveClass("border-b");
       expect(header).toHaveClass("backdrop-blur-md");
       // Minimal variant hides center nav
-      expect(screen.queryByTestId("nav-switcher")).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId("header-desktop-nav"),
+      ).not.toBeInTheDocument();
     });
 
     it("should apply transparent variant styles", async () => {
@@ -239,7 +268,7 @@ describe("Header Integration Tests", () => {
 
       // Both navigation components should be present
       // (visibility is controlled by CSS classes)
-      expect(screen.getByTestId("nav-switcher")).toBeInTheDocument();
+      expect(screen.getByTestId("header-desktop-nav")).toBeInTheDocument();
       expect(screen.getByTestId("mobile-navigation")).toBeInTheDocument();
     });
   });
@@ -267,7 +296,7 @@ describe("Header Integration Tests", () => {
       expect(header).toBeInTheDocument();
 
       // Child components should handle their own keyboard navigation
-      expect(screen.getByTestId("nav-switcher")).toBeInTheDocument();
+      expect(screen.getByTestId("header-desktop-nav")).toBeInTheDocument();
       expect(screen.getByTestId("language-toggle")).toBeInTheDocument();
     });
   });
@@ -289,7 +318,7 @@ describe("Header Integration Tests", () => {
 
       // All components should be within the container
       const logo = screen.getByTestId("logo");
-      const navSwitcher = screen.getByTestId("nav-switcher");
+      const navSwitcher = screen.getByTestId("header-desktop-nav");
       const mobileNav = screen.getByTestId("mobile-navigation");
       const langToggle = screen.getByTestId("language-toggle");
 

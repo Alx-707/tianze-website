@@ -255,68 +255,108 @@ function TechStackTabs({
           tabsVisible ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
         }`}
       >
-        <TabsList className="mb-8 grid w-full grid-cols-3 gap-1 sm:grid-cols-5 lg:grid-cols-7">
+        <TabsList
+          className="notranslate mb-8 grid w-full grid-cols-3 gap-1 sm:grid-cols-5 lg:grid-cols-7"
+          data-testid="tech-tabs-list"
+          translate="no"
+        >
           {categoryKeys.map((key) => (
-            <TabsTrigger key={key} value={key} className="text-xs sm:text-sm">
-              {t(`categories.${key}`)}
+            <TabsTrigger
+              key={key}
+              value={key}
+              className="text-xs sm:text-sm"
+              translate="no"
+            >
+              <span data-testid={`tech-tab-label-${key}`} translate="no">
+                {t(`categories.${key}`)}
+              </span>
             </TabsTrigger>
           ))}
         </TabsList>
 
-        {/* Tech content */}
-        {categoryKeys.map((category, index) => (
-          <TabsContent
-            key={`category-${index}`}
-            value={category}
-            className="mt-0"
-          >
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {(categorizedTech[category] || []).map((tech, techIndex) => (
-                <Card
-                  key={`tech-${techIndex}`}
-                  className="group transition-all duration-200 hover:shadow-lg hover:shadow-primary/5"
-                >
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="text-lg">{tech.name}</CardTitle>
-                      <Badge variant="secondary" className="text-xs">
-                        v{tech.version}
-                      </Badge>
-                    </div>
-                    <CardDescription className="text-sm">
-                      {t(`technologies.${tech.id}`)}
-                    </CardDescription>
-                  </CardHeader>
-                  {tech.url && (
-                    <CardContent className="pt-0">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 px-2 text-xs opacity-0 transition-opacity group-hover:opacity-100"
-                        asChild
-                      >
-                        <a
-                          href={tech.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-1"
-                          aria-label={t("learnMoreLabel", {
-                            target: tech.name,
-                          })}
-                        >
-                          {t("learnMoreLabel", { target: tech.name })}
-                          <ExternalLink className="h-3 w-3" />
-                        </a>
-                      </Button>
-                    </CardContent>
-                  )}
-                </Card>
-              ))}
-            </div>
-          </TabsContent>
-        ))}
+        <TechCategoryPanels
+          categoryKeys={categoryKeys}
+          categorizedTech={categorizedTech}
+          t={t}
+        />
       </div>
     </Tabs>
+  );
+}
+
+function TechCategoryPanels({
+  categoryKeys,
+  categorizedTech,
+  t,
+}: {
+  categoryKeys: string[];
+  categorizedTech: Record<string, TechItem[]>;
+  t: TFunc;
+}) {
+  return categoryKeys.map((category, index) => (
+    <TabsContent key={`category-${index}`} value={category} className="mt-0">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {(categorizedTech[category] || []).map((tech, techIndex) => (
+          <Card
+            key={`tech-${techIndex}`}
+            className="group transition-all duration-200 hover:shadow-lg hover:shadow-primary/5"
+          >
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle
+                  className="text-lg"
+                  data-testid={`tech-card-title-${tech.id}`}
+                  translate="no"
+                >
+                  {tech.name}
+                </CardTitle>
+                <Badge
+                  variant="secondary"
+                  className="text-xs"
+                  data-testid={`tech-card-version-${tech.id}`}
+                  translate="no"
+                >
+                  v{tech.version}
+                </Badge>
+              </div>
+              <CardDescription className="text-sm">
+                {t(`technologies.${tech.id}`)}
+              </CardDescription>
+            </CardHeader>
+            {tech.url && <TechCardLink tech={tech} t={t} />}
+          </Card>
+        ))}
+      </div>
+    </TabsContent>
+  ));
+}
+
+function TechCardLink({ tech, t }: { tech: TechItem; t: TFunc }) {
+  return (
+    <CardContent className="pt-0">
+      <Button
+        variant="ghost"
+        size="sm"
+        className="h-8 px-2 text-xs opacity-0 transition-opacity group-hover:opacity-100"
+        asChild
+      >
+        <a
+          href={tech.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-1"
+          aria-label={t("learnMoreLabel", {
+            target: tech.name,
+          })}
+          translate="no"
+        >
+          <span data-testid={`tech-card-link-label-${tech.id}`} translate="no">
+            {t("learnMoreLabel", { target: tech.name })}
+          </span>
+          <ExternalLink className="h-3 w-3" />
+        </a>
+      </Button>
+    </CardContent>
   );
 }
 

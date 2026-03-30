@@ -50,4 +50,17 @@ describe("FinalCTA", () => {
     expect(trustItems).toHaveLength(1);
     expect(within(trustList).getByText("trust")).toBeInTheDocument();
   });
+
+  it("marks both CTA labels as notranslate", async () => {
+    await renderAsyncComponent(FinalCTA());
+
+    expect(screen.getByTestId("final-cta-primary-label")).toHaveAttribute(
+      "translate",
+      "no",
+    );
+    expect(screen.getByTestId("final-cta-secondary-label")).toHaveAttribute(
+      "translate",
+      "no",
+    );
+  });
 });

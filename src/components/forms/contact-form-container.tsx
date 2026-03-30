@@ -88,8 +88,9 @@ const StatusMessage = memo(({ status, t }: StatusMessageProps) => {
       data-testid="contact-form-status-message"
       role={isError ? "alert" : "status"}
       aria-live={isError ? "assertive" : "polite"}
+      translate="no"
     >
-      <span data-testid="contact-form-status-message-text">
+      <span data-testid="contact-form-status-message-text" translate="no">
         {config.message}
       </span>
     </div>
@@ -238,8 +239,13 @@ function ErrorDisplay({
       role="alert"
       aria-live="assertive"
       tabIndex={-1}
+      translate="no"
     >
-      <p className="font-medium" data-testid="contact-form-error-heading">
+      <p
+        className="font-medium"
+        data-testid="contact-form-error-heading"
+        translate="no"
+      >
         {translateForm("error")}
       </p>
       {shouldShowTranslatedMessage && (
@@ -438,8 +444,9 @@ function SubmitButton({
       aria-disabled={isDisabled}
       aria-busy={pending}
       data-testid="contact-form-submit-button"
+      translate="no"
     >
-      <span data-testid="contact-form-submit-label">
+      <span data-testid="contact-form-submit-label" translate="no">
         {pending ? pendingLabel : idleLabel}
       </span>
     </Button>

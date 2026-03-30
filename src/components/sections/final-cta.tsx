@@ -21,13 +21,27 @@ export async function FinalCTA() {
 
         <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <Button variant="on-dark" size="lg" asChild>
-            <Link href={HOMEPAGE_SECTION_LINKS.contact} prefetch={false}>
-              {t("primary")}
+            <Link
+              href={HOMEPAGE_SECTION_LINKS.contact}
+              prefetch={false}
+              className="notranslate"
+              translate="no"
+            >
+              <span data-testid="final-cta-primary-label" translate="no">
+                {t("primary")}
+              </span>
             </Link>
           </Button>
           <Button variant="ghost-dark" size="lg" asChild>
-            <Link href={HOMEPAGE_SECTION_LINKS.products} prefetch={false}>
-              {t("secondary")}
+            <Link
+              href={HOMEPAGE_SECTION_LINKS.products}
+              prefetch={false}
+              className="notranslate"
+              translate="no"
+            >
+              <span data-testid="final-cta-secondary-label" translate="no">
+                {t("secondary")}
+              </span>
             </Link>
           </Button>
         </div>

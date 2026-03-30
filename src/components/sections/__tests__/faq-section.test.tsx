@@ -79,6 +79,25 @@ describe("Feature: FaqSection Reusable Component", () => {
         screen.getByText("What is the minimum order quantity (MOQ)?"),
       ).toBeInTheDocument();
     });
+
+    it("marks accordion questions and answers as notranslate", async () => {
+      await renderFaqSection({ items: ["moq"] });
+
+      expect(screen.getByTestId("faq-accordion")).toHaveClass("notranslate");
+      expect(screen.getByTestId("faq-accordion")).toHaveAttribute(
+        "translate",
+        "no",
+      );
+      expect(screen.getByTestId("faq-question-moq")).toHaveAttribute(
+        "translate",
+        "no",
+      );
+      await userEvent.click(screen.getByText(/minimum order quantity/i));
+      expect(screen.getByTestId("faq-answer-moq")).toHaveAttribute(
+        "translate",
+        "no",
+      );
+    });
   });
 
   describe("Scenario 1.3: Buyer expands a question", () => {
@@ -107,9 +126,11 @@ describe("Feature: FaqSection Reusable Component", () => {
   describe("Scenario 1.5: Keyboard navigation", () => {
     it("toggles accordion with Enter key", async () => {
       await renderFaqSection({ items: ["moq"] });
-      const trigger = screen.getByText(
+      const question = screen.getByText(
         "What is the minimum order quantity (MOQ)?",
       );
+      const trigger = question.closest("button");
+      expect(trigger).not.toBeNull();
       trigger.focus();
       await userEvent.keyboard("{Enter}");
       expect(screen.getByText(/500 to 1,000 pieces/)).toBeVisible();

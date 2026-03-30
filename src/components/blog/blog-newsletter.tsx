@@ -68,11 +68,13 @@ function SuccessMessage({ message }: { message: string }) {
       data-testid="blog-newsletter-success-message"
       role="status"
       aria-live="polite"
+      translate="no"
     >
       <CheckCircle className="h-5 w-5 shrink-0" />
       <p
         className="text-sm font-medium"
         data-testid="blog-newsletter-success-text"
+        translate="no"
       >
         {message}
       </p>
@@ -90,9 +92,12 @@ function ErrorMessage({ error }: { error: string }) {
       data-testid="blog-newsletter-error-message"
       role="alert"
       aria-live="assertive"
+      translate="no"
     >
       <XCircle className="h-4 w-4 shrink-0" />
-      <span data-testid="blog-newsletter-error-text">{error}</span>
+      <span data-testid="blog-newsletter-error-text" translate="no">
+        {error}
+      </span>
     </div>
   );
 }
@@ -145,6 +150,7 @@ function NewsletterForm({
           disabled={isButtonDisabled}
           className={cn(!isInline && "w-full")}
           data-testid="blog-newsletter-submit-button"
+          translate="no"
         >
           <span
             className="inline-flex min-w-[1.5rem] items-center justify-center"
@@ -157,7 +163,7 @@ function NewsletterForm({
               <Mail className="mr-2 h-4 w-4" />
             )}
           </span>
-          <span data-testid="blog-newsletter-submit-label">
+          <span data-testid="blog-newsletter-submit-label" translate="no">
             {isSubmitting ? submittingLabel : submitLabel}
           </span>
         </Button>

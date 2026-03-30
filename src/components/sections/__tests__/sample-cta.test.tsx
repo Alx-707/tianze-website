@@ -29,4 +29,13 @@ describe("SampleCTA", () => {
     const link = screen.getByRole("link", { name: "sample.cta" });
     expect(link).toHaveAttribute("href", HOMEPAGE_SECTION_LINKS.contact);
   });
+
+  it("marks the CTA label as notranslate", async () => {
+    await renderAsyncComponent(SampleCTA());
+
+    expect(screen.getByTestId("sample-cta-label")).toHaveAttribute(
+      "translate",
+      "no",
+    );
+  });
 });

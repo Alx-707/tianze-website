@@ -67,11 +67,13 @@ function SuccessMessage({ message }: { message: string }) {
       data-testid="product-inquiry-success-message"
       role="status"
       aria-live="polite"
+      translate="no"
     >
       <CheckCircle className="mb-4 h-12 w-12 text-green-500" />
       <p
         className="text-lg font-medium"
         data-testid="product-inquiry-success-text"
+        translate="no"
       >
         {message}
       </p>
@@ -105,9 +107,12 @@ function ErrorMessage({ error }: { error: string }) {
       data-testid="product-inquiry-error-message"
       role="alert"
       aria-live="assertive"
+      translate="no"
     >
       <XCircle className="h-4 w-4" />
-      <span data-testid="product-inquiry-error-text">{error}</span>
+      <span data-testid="product-inquiry-error-text" translate="no">
+        {error}
+      </span>
     </div>
   );
 }
@@ -132,6 +137,7 @@ function SubmitButton({
       className="w-full"
       disabled={isSubmitting || disabled}
       data-testid="product-inquiry-submit-button"
+      translate="no"
     >
       <span
         className="inline-flex min-w-[1.5rem] items-center justify-center"
@@ -142,7 +148,7 @@ function SubmitButton({
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
         ) : null}
       </span>
-      <span data-testid="product-inquiry-submit-label">
+      <span data-testid="product-inquiry-submit-label" translate="no">
         {isSubmitting ? submittingLabel : submitLabel}
       </span>
     </Button>
