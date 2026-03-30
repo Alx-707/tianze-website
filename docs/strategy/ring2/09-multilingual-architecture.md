@@ -1,28 +1,19 @@
 # Multilingual Content Architecture -- Tianze Website
 
-> Ring 2, Task 9 | Status: Draft (pending owner decision on Chinese content purpose)
+> Ring 2, Task 9 | Status: Confirmed by owner (2026-03-30)
 > Inputs: Task 7 (information architecture), Task 8 (content strategy), Task 3 (brand positioning), routing config
 
-## Open Question: Chinese Content Purpose
+## Chinese Content Purpose: Domestic Buyers (Confirmed 2026-03-30)
 
-**This document cannot be finalized until the owner decides what Chinese content is for.**
+Owner confirmed: Chinese content serves **domestic Chinese buyers** (Purpose B).
 
-The site currently supports two locales (`en`, `zh`) with `localePrefix: "always"` -- every page has both `/en/...` and `/zh/...` URLs. But the strategic purpose of the Chinese version has never been confirmed.
-
-### Possible purposes (not mutually exclusive)
-
-| Purpose | Target audience | Content implication | SEO implication |
-|---------|----------------|--------------------|--------------------|
-| **A. Overseas Chinese-speaking buyers** | Distributors/contractors in SE Asia, Taiwan, etc. who prefer Chinese | Full mirror of English site, same product focus | hreflang targeting, same keyword intent |
-| **B. Domestic Chinese buyers** | PVC buyers within China (different competitive landscape) | Different value proposition -- price, logistics, local standards (GB) | Separate keyword strategy for Baidu |
-| **C. Factory credibility signal** | English-speaking buyers who click "Chinese" to verify it's a real Chinese factory | Minimal translation effort, just enough to look legitimate | Negligible SEO value |
-| **D. Owner/internal convenience** | Owner and staff who operate in Chinese | Admin-facing, not buyer-facing | No SEO relevance |
-
-**Recommendation**: Purpose A (overseas Chinese-speaking buyers) is the most strategically coherent. The site targets export buyers; some speak Chinese. This means the Chinese version should be a content mirror of the English version, not a separate domestic strategy.
-
-**If the owner chooses Purpose B**, significant additional content work is needed (domestic pricing, GB standards emphasis, Baidu SEO), and the two language versions would diverge substantially.
-
-**Action required**: Owner to confirm which purpose(s) apply. The rest of this document assumes Purpose A unless noted.
+**Implications**:
+- Chinese version is NOT a mirror of English -- it may need different value propositions, domestic pricing context, GB standard emphasis
+- Baidu SEO becomes relevant for the Chinese version
+- The two language versions will diverge in content focus:
+  - English: export buyers, international standards (AS/NZS, ASTM, UL), factory-direct pricing
+  - Chinese: domestic buyers, national standards (GB), domestic competitive positioning
+- This divergence is a **Phase 2+ concern** -- current Phase 1 focuses on the English site for export markets. Chinese content strategy to be developed separately when domestic market work begins.
 
 ---
 
