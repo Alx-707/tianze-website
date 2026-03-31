@@ -144,6 +144,18 @@ module.exports = {
       },
     },
     {
+      name: "no-test-support-imports-in-production",
+      severity: "error",
+      comment: "禁止生产代码导入 src/test、src/testing 或 test-* 常量",
+      from: {
+        path: "^src/(app|components|config|hooks|i18n|lib|services)/",
+        pathNot: "\\.(spec|test|stories)\\.(js|ts|tsx)$|/__tests__/",
+      },
+      to: {
+        path: "^src/(test|testing)/|^src/constants/test-",
+      },
+    },
+    {
       name: "no-dev-dependencies-in-production",
       severity: "error",
       comment: "禁止生产代码导入开发依赖",

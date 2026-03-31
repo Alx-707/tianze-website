@@ -185,6 +185,14 @@ test.todo('should support advanced caching');
 it.skip('some test', () => { ... });
 ```
 
+## AI-Smell Guardrails
+
+- Critical smoke / E2E tests must fail on runtime errors. Do not convert broken contact, inquiry, subscribe, or deploy flows into `skip`.
+- Tests named `integration`, `contract`, or `protection` must not mock away the core proof path and still present themselves as the main proof. If they are mostly mocked, document them as auxiliary.
+- Critical page tests must not simultaneously mock `Suspense`, translations, loaders, schema, form components, and content sources, then claim page-level proof.
+- Global or local `console.warn/error` suppression must include a narrow reason comment. Suppress known fixed noise, not broad classes of real failures.
+- Production-path tests must not use production constants/config as the only source of truth for expected behavior. Keep an independent assertion angle.
+
 ## Testing SSR-Safe Hooks
 
 For `'use client'` hooks with SSR safety:

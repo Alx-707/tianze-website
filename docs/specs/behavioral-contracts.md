@@ -112,10 +112,10 @@ The /contact page renders a form with fields: firstName, lastName, email, compan
 |-------|-------|
 | Priority | Critical |
 | Test Type | E2E + Integration |
-| Test File | `tests/e2e/contact-form-smoke.spec.ts`, `src/app/__tests__/contact-integration.test.ts`, `src/app/api/contact/__tests__/contact-api-validation.test.ts` |
+| Test File | `tests/e2e/contact-form-smoke.spec.ts`, `tests/e2e/smoke/post-deploy-form.spec.ts`, `src/app/__tests__/contact-integration.test.ts`, `src/app/api/contact/__tests__/contact-api-validation.test.ts` |
 | Status | Partial |
 
-Notes: Form field rendering and required attributes are tested. Actual submission (POST to /api/contact with Turnstile token) and success feedback are not end-to-end tested due to Turnstile dependency.
+Notes: `tests/e2e/contact-form-smoke.spec.ts` is a test-mode smoke only; it proves local structure and interaction under Playwright test settings. The final production-like submission proof lives in `tests/e2e/smoke/post-deploy-form.spec.ts` against a deployed URL. The contact chain is therefore partially covered, not fully proven by local E2E alone.
 
 ---
 
@@ -158,7 +158,9 @@ Form labels, placeholder text, validation messages, and success/error feedback r
 | Priority | High |
 | Test Type | E2E |
 | Test File | `tests/e2e/contact-form-smoke.spec.ts` |
-| Status | Covered |
+| Status | Partial |
+
+Notes: Locale-specific labels and field rendering are covered in local test-mode smoke for both `/en/contact` and `/zh/contact`. Production-like submission proof is currently only exercised against the deployed English flow, so this contract remains partial.
 
 ---
 
@@ -170,10 +172,10 @@ Form labels, placeholder text, validation messages, and success/error feedback r
 |-------|-------|
 | Priority | High |
 | Test Type | Integration |
-| Test File | `src/app/api/contact/__tests__/contact-api-validation.test.ts` |
-| Status | Partial |
+| Test File | `src/app/api/contact/__tests__/contact-api-validation.test.ts`, `tests/integration/api/lead-family-protection.test.ts` |
+| Status | Covered |
 
-Notes: Contact API rate limiting is tested at integration level. Inquiry and subscribe rate limiting are not explicitly tested.
+Notes: `tests/integration/api/lead-family-protection.test.ts` verifies 429 behavior for contact, inquiry, and subscribe across the shared lead API family.
 
 ---
 
@@ -331,10 +333,10 @@ GET /api/health returns HTTP 200 with a JSON body indicating service status. Use
 |-------|-------|
 | Priority | High |
 | Test Type | Integration |
-| Test File | -- |
-| Status | Untested |
+| Test File | `tests/integration/api/health.test.ts`, `scripts/deploy/post-deploy-smoke.mjs` |
+| Status | Covered |
 
-Notes: Post-deploy smoke script (`scripts/deploy/post-deploy-smoke.mjs`) checks this on deployed environments. No unit or integration test exists in the test suite.
+Notes: `tests/integration/api/health.test.ts` covers the route in-suite. Deployed smoke still matters as the final platform proof, but this contract is no longer untested.
 
 ---
 
@@ -359,10 +361,10 @@ Notes: Post-deploy smoke script (`scripts/deploy/post-deploy-smoke.mjs`) checks 
 |-------|-------|
 | Priority | High |
 | Test Type | Integration |
-| Test File | `src/app/api/contact/__tests__/contact-api-validation.test.ts` |
+| Test File | `src/app/api/contact/__tests__/contact-api-validation.test.ts`, `tests/integration/api/lead-family-protection.test.ts` |
 | Status | Partial |
 
-Notes: Contact API idempotency is tested. Inquiry and subscribe idempotency are not explicitly tested.
+Notes: All three write routes now prove `Idempotency-Key` is required via `tests/integration/api/lead-family-protection.test.ts`. Replay/cached-response behavior is still only explicitly tested for the contact API, so the full family contract remains partial.
 
 ---
 
@@ -386,8 +388,8 @@ All 5 market spec files contain required fields (product families, dimensions, s
 | Navigation & Discovery | 6 | 4 | 2 | 0 |
 | Inquiry & Conversion | 6 | 1 | 5 | 0 |
 | Content & Information | 7 | 0 | 3 | 4 |
-| Resilience & Edge Cases | 6 | 3 | 2 | 1 |
-| **Total** | **25** | **8** | **12** | **5** |
+| Resilience & Edge Cases | 6 | 4 | 2 | 0 |
+| **Total** | **25** | **9** | **12** | **4** |
 
 ## Priority Gap Analysis
 
@@ -401,8 +403,7 @@ All 5 market spec files contain required fields (product families, dimensions, s
 ### High-priority gaps
 
 - **BC-017** (Untested): About page content and CTA
-- **BC-022** (Untested): Health endpoint has no test in suite
-- **BC-011** (Partial): Rate limiting only tested for contact, not inquiry/subscribe
+- **BC-010** (Partial): Contact submission proof is not production-like in both locales
 - **BC-024** (Partial): Idempotency only tested for contact, not inquiry/subscribe
 
 ### Medium-priority gaps

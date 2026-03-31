@@ -19,7 +19,7 @@ export function FamilySection({
   familyDescription,
   className,
 }: FamilySectionProps) {
-  const firstImage = specs.images[0] ?? "/images/products/placeholder.svg";
+  const firstImage = specs.images[0] ?? "/images/products/pvc-conduit-bend.svg";
 
   return (
     <section id={family.slug} className={cn("py-12", className)}>

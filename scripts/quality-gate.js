@@ -804,6 +804,8 @@ class QualityGate {
     // SEO/Config placeholder check (production only)
     if (this.config.environment === "production") {
       this.results.gates.seoConfig = await this.checkSeoConfigPlaceholders();
+      this.results.gates.livePlaceholders =
+        await this.checkLivePlaceholderArtifacts();
     }
 
     // 执行各项门禁检查
@@ -1365,6 +1367,80 @@ class QualityGate {
     }
 
     log(`${this.getStatusEmoji(gate.status)} SEO/Config 门禁: ${gate.status}`);
+    return gate;
+  }
+
+  /**
+   * Live placeholder artifact check for production-facing source files.
+   * Blocks obvious placeholder assets/copy from shipping in app/components.
+   */
+  async checkLivePlaceholderArtifacts() {
+    log("🔍 执行 live placeholder 产物检查...");
+
+    const gate = {
+      name: "Live Placeholders",
+      status: "unknown",
+      checks: {},
+      blocking: true,
+      issues: [],
+    };
+
+    const targetFiles = [
+      ...glob.sync("src/app/**/*.{ts,tsx}"),
+      ...glob.sync("src/components/**/*.{ts,tsx}"),
+      ...glob.sync("src/constants/**/*.{ts,tsx}"),
+    ].filter((filePath) => {
+      return ![
+        "__tests__",
+        ".test.",
+        ".spec.",
+        "src/components/blocks/_templates/",
+      ].some((segment) => filePath.includes(segment));
+    });
+
+    const placeholderPatterns = [
+      /\/images\/products\/placeholder[-\w]*\.svg/g,
+      /\bLogo wall placeholder\b/g,
+      /\bImage placeholder\b/g,
+      /\bComing Soon\b/g,
+      /Customer and partner logo placeholders/g,
+      /客户与合作伙伴 Logo 展位/g,
+    ];
+
+    const findings = [];
+
+    for (const filePath of targetFiles) {
+      const content = fs.readFileSync(filePath, "utf8");
+      const matched = placeholderPatterns.flatMap((pattern) =>
+        [...content.matchAll(pattern)].map((match) => match[0]),
+      );
+
+      if (matched.length > 0) {
+        findings.push({
+          file: filePath,
+          matches: [...new Set(matched)],
+        });
+      }
+    }
+
+    gate.checks.filesScanned = targetFiles.length;
+    gate.checks.findings = findings;
+
+    if (findings.length > 0) {
+      gate.status = "failed";
+      gate.issues.push(
+        ...findings.map(
+          ({ file, matches }) =>
+            `${file}: 发现 live placeholder 信号 (${matches.join(", ")})`,
+        ),
+      );
+    } else {
+      gate.status = "passed";
+    }
+
+    log(
+      `${this.getStatusEmoji(gate.status)} Live placeholder 门禁: ${gate.status}`,
+    );
     return gate;
   }
 

@@ -27,11 +27,14 @@ vi.mock("lucide-react", async () => {
   // Keep this list minimal: only icons used in this repo.
   // Update it when a new icon import appears.
   const iconNames = [
+    "ArrowUpRight",
     "ArrowLeft",
     "ArrowRight",
     "Award",
     "BadgeCheck",
+    "Building2",
     "Calendar",
+    "Cable",
     "Check",
     "CheckCircle",
     "CheckIcon",
@@ -69,6 +72,7 @@ vi.mock("lucide-react", async () => {
     "Settings",
     "Share2",
     "Shield",
+    "ShieldCheck",
     "Star",
     "Sun",
     "Tag",

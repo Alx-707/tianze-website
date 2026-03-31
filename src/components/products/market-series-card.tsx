@@ -9,6 +9,14 @@ interface MarketSeriesCardProps {
   familyCountLabel: string;
 }
 
+const MARKET_CARD_IMAGES: Record<string, string> = {
+  "north-america": "/images/products/pvc-conduit-bend.svg",
+  "australia-new-zealand": "/images/products/pvc-conduit-bend.svg",
+  mexico: "/images/products/pvc-conduit-bend.svg",
+  europe: "/images/products/pvc-conduit-bend.svg",
+  "pneumatic-tube-systems": "/images/products/petg-pneumatic-tube.svg",
+};
+
 export function MarketSeriesCard({
   slug,
   label,
@@ -16,6 +24,9 @@ export function MarketSeriesCard({
   standardLabel,
   familyCountLabel,
 }: MarketSeriesCardProps) {
+  const imageSrc =
+    MARKET_CARD_IMAGES[slug] ?? "/images/products/pvc-conduit-bend.svg";
+
   return (
     <Link
       href={{ pathname: "/products/[market]", params: { market: slug } }}
@@ -23,11 +34,11 @@ export function MarketSeriesCard({
     >
       <div className="relative mb-4 aspect-[16/9] w-full overflow-hidden rounded-md bg-muted">
         <Image
-          src="/images/products/placeholder-conduit.svg"
+          src={imageSrc}
           alt={label}
           fill
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-          className="object-cover"
+          className="object-contain p-4 transition-transform duration-200 group-hover:scale-[1.02]"
         />
       </div>
       <span className="mb-2 inline-block rounded bg-muted px-2 py-0.5 font-mono text-xs text-muted-foreground">

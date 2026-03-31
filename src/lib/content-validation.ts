@@ -11,10 +11,7 @@ import type {
 import { PRODUCT_STANDARDS } from "@/constants/product-standards";
 import { SECONDS_PER_MINUTE, ZERO } from "@/constants";
 import { COUNT_160 } from "@/constants/count";
-import {
-  TEST_CONTENT_LIMITS,
-  TEST_COUNT_CONSTANTS,
-} from "@/constants/test-constants";
+import { CONTENT_VALIDATION_LIMITS } from "@/constants/content-validation";
 
 // Known content types for validation
 const KNOWN_CONTENT_TYPES: ContentType[] = ["posts", "pages", "products"];
@@ -49,9 +46,9 @@ const DEFAULT_VALIDATION_CONFIG: ValidationConfig = {
   requireDescription: false,
   requireTags: false,
   requireCategories: false,
-  maxTitleLength: TEST_CONTENT_LIMITS.TITLE_MAX,
-  maxDescriptionLength: TEST_CONTENT_LIMITS.DESCRIPTION_MAX,
-  maxExcerptLength: TEST_CONTENT_LIMITS.DESCRIPTION_MAX,
+  maxTitleLength: CONTENT_VALIDATION_LIMITS.TITLE_MAX,
+  maxDescriptionLength: CONTENT_VALIDATION_LIMITS.DESCRIPTION_MAX,
+  maxExcerptLength: CONTENT_VALIDATION_LIMITS.DESCRIPTION_MAX,
   products: {
     requireCoverImage: true,
     requireCategory: true,
@@ -141,7 +138,8 @@ function validateTitle(
   config: ValidationConfig,
 ): string[] {
   const errors: string[] = [];
-  const maxLength = config.maxTitleLength ?? TEST_CONTENT_LIMITS.TITLE_MAX;
+  const maxLength =
+    config.maxTitleLength ?? CONTENT_VALIDATION_LIMITS.TITLE_MAX;
 
   if (metadata["title"] && typeof metadata["title"] !== "string") {
     errors.push("Title must be a string");
@@ -186,7 +184,7 @@ function validateExcerpt(
 ): string[] {
   const errors: string[] = [];
   const maxLength =
-    config.maxExcerptLength ?? TEST_CONTENT_LIMITS.DESCRIPTION_MAX;
+    config.maxExcerptLength ?? CONTENT_VALIDATION_LIMITS.DESCRIPTION_MAX;
 
   if (metadata["excerpt"] && typeof metadata["excerpt"] !== "string") {
     errors.push("Excerpt must be a string");
@@ -313,9 +311,9 @@ function validateTypeSpecific(
   // Check for too many tags (applies to all content types)
   if (metadata["tags"] && Array.isArray(metadata["tags"])) {
     const tags = metadata["tags"] as unknown[];
-    if (tags.length > TEST_COUNT_CONSTANTS.LARGE) {
+    if (tags.length > CONTENT_VALIDATION_LIMITS.RECOMMENDED_MAX_TAGS) {
       warnings.push(
-        `Too many tags (${tags.length}). Maximum recommended: ${TEST_COUNT_CONSTANTS.LARGE}`,
+        `Too many tags (${tags.length}). Maximum recommended: ${CONTENT_VALIDATION_LIMITS.RECOMMENDED_MAX_TAGS}`,
       );
     }
   }

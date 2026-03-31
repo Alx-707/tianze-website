@@ -5,7 +5,7 @@ export interface EquipmentSpec {
   params: Record<string, string>;
   /** Key selling points (raw English strings) */
   highlights: string[];
-  /** Placeholder image path */
+  /** Product/equipment image path */
   image: string;
 }
 
@@ -28,7 +28,7 @@ export const EQUIPMENT_SPECS = [
       "Multi-Station Design",
       "Remote Diagnostics",
     ],
-    image: "/images/products/placeholder-conduit.svg",
+    image: "/images/products/full-auto-bending-machine.svg",
   },
   {
     slug: "semi-auto-bending-machine",
@@ -47,7 +47,7 @@ export const EQUIPMENT_SPECS = [
       "Quick-Swap Mold System",
       "Safety Features",
     ],
-    image: "/images/products/placeholder-conduit.svg",
+    image: "/images/products/semi-auto-bending-machine.svg",
   },
 ] satisfies readonly EquipmentSpec[];
 

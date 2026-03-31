@@ -249,6 +249,9 @@
     "scenarios": {
       "title": "我们的管件在哪里使用",
       "subtitle": "在{countries}+国家的建筑、基础设施和工业安装中经过实地验证。",
+      "cardEyebrow": "应用场景 {count}",
+      "countryBadge": "{countries}+ 个国家",
+      "proofLabel": "现场验证布线方案",
       "item1": {
         "title": "地下预埋",
         "desc": "直埋式预弯管件。一致的弯曲半径消除了土壤压力下的现场开裂问题。",
@@ -302,7 +305,12 @@
         "iec": "IEC 61386",
         "nom": "NOM-001-SEDE"
       },
-      "logoWall": "客户与合作伙伴 Logo 展位"
+      "logoWall": "代表性项目与客户参考",
+      "proofStrip": {
+        "note": "ISO 9001 文件、质检记录和项目参考资料可在 RFQ 评审阶段提供。",
+        "standards": "覆盖中的市场标准",
+        "countries": "已服务出口国家"
+      }
     },
     "finalCta": {
       "title": "准备开始了吗？",

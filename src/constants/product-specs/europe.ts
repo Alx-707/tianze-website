@@ -23,7 +23,7 @@ export const EUROPE_SPECS = {
   families: [
     {
       slug: "conduit-bends",
-      images: ["/images/products/placeholder-sweep.svg"],
+      images: ["/images/products/pvc-conduit-bend.svg"],
       highlights: ["IEC 61386 Certified", "Three Duty Ratings", "Metric Sizes"],
       specGroups: [
         {
@@ -69,7 +69,7 @@ export const EUROPE_SPECS = {
     },
     {
       slug: "couplings",
-      images: ["/images/products/placeholder-coupling.svg"],
+      images: ["/images/products/sample-product.svg"],
       highlights: ["IEC 61386 Certified", "Double-Bell Design", "Metric Sizes"],
       specGroups: [
         {
@@ -115,7 +115,7 @@ export const EUROPE_SPECS = {
     },
     {
       slug: "conduit-pipes",
-      images: ["/images/products/placeholder-pipe.svg"],
+      images: ["/images/products/sample-product.svg"],
       highlights: ["IEC 61386 Certified", "Standard Lengths", "Metric Sizes"],
       specGroups: [
         {
