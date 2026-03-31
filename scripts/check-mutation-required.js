@@ -46,6 +46,18 @@ function getMergeBaseTimestampMs() {
   return Number.parseInt(timestamp, 10) * 1000;
 }
 
+function getLatestCommittedChangeTimestampMs(filePath) {
+  const timestamp = runGit([
+    "log",
+    "-1",
+    "--format=%ct",
+    "HEAD",
+    "--",
+    filePath,
+  ]);
+  return Number.parseInt(timestamp || "0", 10) * 1000;
+}
+
 function loadMutationReport() {
   if (!fs.existsSync(REPORT_PATH)) {
     throw new Error(
@@ -58,7 +70,32 @@ function loadMutationReport() {
 }
 
 function isReportFreshEnough(reportPath, branchStartMs) {
-  return fs.statSync(reportPath).mtimeMs > branchStartMs;
+  return fs.statSync(reportPath).mtimeMs >= branchStartMs;
+}
+
+function getLatestRelevantChangeTimestampMs(
+  changedFiles,
+  {
+    cwd = process.cwd(),
+    getLatestCommittedChangeTimestampMsFn = getLatestCommittedChangeTimestampMs,
+  } = {},
+) {
+  const relevantFiles = changedFiles.filter((file) =>
+    TARGET_DIRECTORIES.some((directory) => file.startsWith(directory)),
+  );
+
+  return relevantFiles.reduce((latestTimestamp, filePath) => {
+    const absolutePath = path.join(cwd, filePath);
+
+    if (fs.existsSync(absolutePath)) {
+      return Math.max(latestTimestamp, fs.statSync(absolutePath).mtimeMs);
+    }
+
+    return Math.max(
+      latestTimestamp,
+      getLatestCommittedChangeTimestampMsFn(filePath),
+    );
+  }, 0);
 }
 
 function normalizeMutateScopes(report) {
@@ -72,9 +109,18 @@ function isDirectoryCovered(directory, mutateScopes) {
   return mutateScopes.some((scope) => scope.startsWith(directory));
 }
 
-function main() {
-  const changedFiles = getChangedFiles();
-  const touchedDirectories = getTouchedTargetDirectories(changedFiles);
+function main({
+  getChangedFilesFn = getChangedFiles,
+  getTouchedTargetDirectoriesFn = getTouchedTargetDirectories,
+  getMergeBaseTimestampMsFn = getMergeBaseTimestampMs,
+  getLatestRelevantChangeTimestampMsFn = getLatestRelevantChangeTimestampMs,
+  loadMutationReportFn = loadMutationReport,
+  isReportFreshEnoughFn = isReportFreshEnough,
+  normalizeMutateScopesFn = normalizeMutateScopes,
+  isDirectoryCoveredFn = isDirectoryCovered,
+} = {}) {
+  const changedFiles = getChangedFilesFn();
+  const touchedDirectories = getTouchedTargetDirectoriesFn(changedFiles);
 
   if (touchedDirectories.length === 0) {
     console.log(
@@ -83,18 +129,21 @@ function main() {
     return;
   }
 
-  const branchStartMs = getMergeBaseTimestampMs();
-  const report = loadMutationReport();
+  const freshnessBaselineMs = Math.max(
+    getMergeBaseTimestampMsFn(),
+    getLatestRelevantChangeTimestampMsFn(changedFiles),
+  );
+  const report = loadMutationReportFn();
 
-  if (!isReportFreshEnough(REPORT_PATH, branchStartMs)) {
+  if (!isReportFreshEnoughFn(REPORT_PATH, freshnessBaselineMs)) {
     throw new Error(
-      "变异测试报告早于当前分支起点，请重新运行 pnpm test:mutation",
+      "变异测试报告早于本次受保护改动的最新变更，请重新运行 pnpm test:mutation",
     );
   }
 
-  const mutateScopes = normalizeMutateScopes(report);
+  const mutateScopes = normalizeMutateScopesFn(report);
   const uncoveredDirectories = touchedDirectories.filter(
-    (directory) => !isDirectoryCovered(directory, mutateScopes),
+    (directory) => !isDirectoryCoveredFn(directory, mutateScopes),
   );
 
   if (uncoveredDirectories.length > 0) {
@@ -120,10 +169,27 @@ function main() {
   );
 }
 
-try {
-  main();
-} catch (error) {
-  const message = error instanceof Error ? error.message : String(error);
-  console.error(`❌ ${message}`);
-  process.exit(1);
+if (require.main === module) {
+  try {
+    main();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error(`❌ ${message}`);
+    process.exit(1);
+  }
 }
+
+module.exports = {
+  TARGET_DIRECTORIES,
+  REPORT_PATH,
+  getChangedFiles,
+  getTouchedTargetDirectories,
+  getMergeBaseTimestampMs,
+  getLatestCommittedChangeTimestampMs,
+  loadMutationReport,
+  isReportFreshEnough,
+  getLatestRelevantChangeTimestampMs,
+  normalizeMutateScopes,
+  isDirectoryCovered,
+  main,
+};
