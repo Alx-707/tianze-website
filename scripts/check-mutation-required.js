@@ -76,7 +76,6 @@ function isReportFreshEnough(reportPath, branchStartMs) {
 function getLatestRelevantChangeTimestampMs(
   changedFiles,
   {
-    cwd = process.cwd(),
     getLatestCommittedChangeTimestampMsFn = getLatestCommittedChangeTimestampMs,
   } = {},
 ) {
@@ -85,12 +84,6 @@ function getLatestRelevantChangeTimestampMs(
   );
 
   return relevantFiles.reduce((latestTimestamp, filePath) => {
-    const absolutePath = path.join(cwd, filePath);
-
-    if (fs.existsSync(absolutePath)) {
-      return Math.max(latestTimestamp, fs.statSync(absolutePath).mtimeMs);
-    }
-
     return Math.max(
       latestTimestamp,
       getLatestCommittedChangeTimestampMsFn(filePath),

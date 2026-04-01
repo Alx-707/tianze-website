@@ -177,7 +177,7 @@ See [Behavioral Contracts](../specs/behavioral-contracts.md) for the full contra
 1. `git diff origin/main...HEAD --name-only` 检测变更文件
 2. 匹配 `src/lib/lead-pipeline/**`、`src/lib/security/**`、`src/lib/form-schema/**`（排除 `__tests__/`）
 3. 有匹配 → 检查 `reports/mutation/mutation-report.json`：
-   a. 文件是否存在且晚于本次受保护目录的最新相关修改
+   a. 报告时间是否晚于本次受保护目录的最新相关提交
    b. 读取报告中的 `mutate` scope，确认覆盖了变更的目录
    （因为 `test:mutation` 和 `test:mutation:lead` 共享同一报告路径，仅检查时间戳不够——必须验证 scope 匹配）
 4. 未更新或 scope 不匹配 → exit 1 + 提示信息

@@ -1,44 +1,15 @@
-import fs from "node:fs";
-import os from "node:os";
-import path from "node:path";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 const mutationCheck =
   await import("../../../scripts/check-mutation-required.js");
 
 describe("check-mutation-required", () => {
-  let tempDir: string;
-
-  beforeEach(() => {
-    vi.clearAllMocks();
-    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "mutation-check-"));
-  });
-
-  afterEach(() => {
-    fs.rmSync(tempDir, { recursive: true, force: true });
-  });
-
-  function writeFileWithMtime(
-    relativePath: string,
-    mtimeMs: number,
-    content = "x",
-  ) {
-    const absolutePath = path.join(tempDir, relativePath);
-    // eslint-disable-next-line security/detect-non-literal-fs-filename -- temp test workspace path is synthesized inside the test sandbox
-    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
-    // eslint-disable-next-line security/detect-non-literal-fs-filename -- temp test workspace path is synthesized inside the test sandbox
-    fs.writeFileSync(absolutePath, content);
-    const timestamp = new Date(mtimeMs);
-    // eslint-disable-next-line security/detect-non-literal-fs-filename -- temp test workspace path is synthesized inside the test sandbox
-    fs.utimesSync(absolutePath, timestamp, timestamp);
-    return absolutePath;
-  }
-
   describe("getLatestRelevantChangeTimestampMs", () => {
-    it("uses the latest working-tree mtime for touched protected files", () => {
-      writeFileWithMtime("src/lib/security/rate-limit.ts", 2_500);
-      writeFileWithMtime("src/lib/lead-pipeline/submit.ts", 4_500);
+    beforeEach(() => {
+      vi.clearAllMocks();
+    });
 
+    it("uses the latest committed timestamp for touched protected files", () => {
       const latest = mutationCheck.getLatestRelevantChangeTimestampMs(
         [
           "src/lib/security/rate-limit.ts",
@@ -46,18 +17,18 @@ describe("check-mutation-required", () => {
           "src/components/hero.tsx",
         ],
         {
-          cwd: tempDir,
+          getLatestCommittedChangeTimestampMsFn: (filePath: string) =>
+            filePath.includes("submit") ? 4_500 : 2_500,
         },
       );
 
       expect(latest).toBe(4_500);
     });
 
-    it("falls back to the latest committed timestamp when the touched file was deleted", () => {
+    it("returns the latest committed timestamp for deleted protected files too", () => {
       const latest = mutationCheck.getLatestRelevantChangeTimestampMs(
         ["src/lib/security/deleted-guard.ts"],
         {
-          cwd: tempDir,
           getLatestCommittedChangeTimestampMsFn: () => 1_710_000_000_000,
         },
       );
@@ -67,6 +38,10 @@ describe("check-mutation-required", () => {
   });
 
   describe("main freshness enforcement", () => {
+    beforeEach(() => {
+      vi.clearAllMocks();
+    });
+
     it("rejects reports older than the latest protected change even if they are newer than branch start", () => {
       const isReportFreshEnoughFn = vi.fn(() => false);
 
