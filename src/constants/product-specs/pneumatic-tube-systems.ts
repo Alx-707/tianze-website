@@ -23,7 +23,7 @@ export const PNEUMATIC_SPECS = {
   families: [
     {
       slug: "petg-tubes",
-      images: ["/images/products/placeholder-petg-tube.svg"],
+      images: ["/images/products/petg-pneumatic-tube.svg"],
       highlights: [
         "Crystal Clear PETG",
         "Silent Operation",
@@ -68,7 +68,7 @@ export const PNEUMATIC_SPECS = {
     },
     {
       slug: "fittings",
-      images: ["/images/products/placeholder-fitting.svg"],
+      images: ["/images/products/sample-product.svg"],
       highlights: [
         "Impact Resistant",
         "Hospital Grade",

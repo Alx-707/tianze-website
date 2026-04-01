@@ -82,15 +82,13 @@ describe("Airtable Error Handling Tests", () => {
     vi.clearAllMocks();
   });
 
-  describe("Error Handling - createContact", () => {
-    const validFormData = {
+  describe("Error Handling - createLead (contact)", () => {
+    const validLeadData = {
       firstName: "John",
       lastName: "Doe",
       email: "john.doe@example.com",
       company: "Test Company",
       message: "This is a test message",
-      acceptPrivacy: true,
-      website: "",
     };
 
     it("should handle API errors during creation", async () => {
@@ -110,9 +108,9 @@ describe("Airtable Error Handling Tests", () => {
       mockCreate.mockClear();
       mockCreate.mockRejectedValue(new Error("API Error"));
 
-      await expect(service.createContact(validFormData)).rejects.toThrow(
-        "Failed to create contact record",
-      );
+      await expect(
+        service.createLead("contact", validLeadData),
+      ).rejects.toThrow("Failed to create lead record");
     });
 
     it("should handle validation errors", async () => {
@@ -129,17 +127,17 @@ describe("Airtable Error Handling Tests", () => {
         ),
       );
 
-      const invalidFormData = {
-        ...validFormData,
+      const invalidLeadData = {
+        ...validLeadData,
         email: "invalid-email", // Invalid email format
       };
 
       mockCreate.mockClear();
       mockCreate.mockRejectedValue(new Error("Invalid email format"));
 
-      await expect(service.createContact(invalidFormData)).rejects.toThrow(
-        "Failed to create contact record",
-      );
+      await expect(
+        service.createLead("contact", invalidLeadData),
+      ).rejects.toThrow("Failed to create lead record");
     });
 
     it("should handle network timeouts", async () => {
@@ -159,9 +157,9 @@ describe("Airtable Error Handling Tests", () => {
       mockCreate.mockClear();
       mockCreate.mockRejectedValue(new Error("Network timeout"));
 
-      await expect(service.createContact(validFormData)).rejects.toThrow(
-        "Failed to create contact record",
-      );
+      await expect(
+        service.createLead("contact", validLeadData),
+      ).rejects.toThrow("Failed to create lead record");
     });
   });
 

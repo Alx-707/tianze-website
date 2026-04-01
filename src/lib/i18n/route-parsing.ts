@@ -97,7 +97,10 @@ export const LOCALE_PREFIX_RE = new RegExp(
  */
 export function normalizePathnameForLink(pathname: string): string {
   const normalized = pathname === "" ? "/" : pathname;
-  const stripped = normalized.replace(LOCALE_PREFIX_RE, "");
+  const withLeadingSlash = normalized.startsWith("/")
+    ? normalized
+    : `/${normalized}`;
+  const stripped = withLeadingSlash.replace(LOCALE_PREFIX_RE, "");
   return stripped === "" ? "/" : stripped;
 }
 

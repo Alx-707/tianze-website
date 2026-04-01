@@ -117,18 +117,16 @@ describe("Airtable Service - Create Operations Tests", () => {
     vi.clearAllMocks();
   });
 
-  const validFormData = {
+  const validLeadData = {
     firstName: "John",
     lastName: "Doe",
     email: "john.doe@example.com",
     company: "Test Company",
     message: "This is a test message",
-    acceptPrivacy: true,
-    website: "",
   };
 
-  describe("创建联系人记录", () => {
-    it("should create contact record successfully", async () => {
+  describe("创建 Lead 记录 (contact type)", () => {
+    it("should create lead record successfully", async () => {
       const service = new AirtableServiceClass();
 
       // Override service configuration to make it ready
@@ -143,13 +141,12 @@ describe("Airtable Service - Create Operations Tests", () => {
           Email: "john.doe@example.com",
           Company: "Test Company",
           Message: "This is a test message",
-          "Accept Privacy": true,
         },
         createdTime: "2023-01-01T00:00:00Z",
       };
       mockCreate.mockResolvedValue([createMockRecord(mockRecordData)]);
 
-      const result = await service.createContact(validFormData);
+      const result = await service.createLead("contact", validLeadData);
 
       expect(result).toEqual({
         id: "rec123456",
@@ -165,7 +162,6 @@ describe("Airtable Service - Create Operations Tests", () => {
             Company: "Test Company",
             Message: "This is a test message",
             "Marketing Consent": false,
-            Phone: "",
             Subject: "",
             Status: "New",
             Source: "Website Contact Form",
@@ -181,22 +177,22 @@ describe("Airtable Service - Create Operations Tests", () => {
       // Override service configuration to make it ready
       setServiceReady(service);
 
-      const formDataWithOptionals = {
-        ...validFormData,
-        phone: "+1234567890",
-        website: "https://example.com",
+      const leadDataWithOptionals = {
+        ...validLeadData,
+        subject: "Product Inquiry",
+        marketingConsent: true,
       };
 
       const mockRecordDataWithOptionals = {
         id: "rec123456",
-        fields: formDataWithOptionals,
+        fields: leadDataWithOptionals,
         createdTime: "2023-01-01T00:00:00Z",
       };
       mockCreate.mockResolvedValue([
         createMockRecord(mockRecordDataWithOptionals),
       ]);
 
-      await service.createContact(formDataWithOptionals);
+      await service.createLead("contact", leadDataWithOptionals);
 
       expect(mockCreate).toHaveBeenCalledWith([
         {
@@ -206,9 +202,8 @@ describe("Airtable Service - Create Operations Tests", () => {
             Email: "john.doe@example.com",
             Company: "Test Company",
             Message: "This is a test message",
-            "Marketing Consent": false,
-            Phone: "+1234567890",
-            Subject: "",
+            "Marketing Consent": true,
+            Subject: "Product Inquiry",
             Status: "New",
             Source: "Website Contact Form",
             "Submitted At": expect.any(String),
@@ -229,9 +224,9 @@ describe("Airtable Service - Create Operations Tests", () => {
         // Do nothing - prevent initialization
       });
 
-      await expect(service.createContact(validFormData)).rejects.toThrow(
-        "Airtable service is not configured",
-      );
+      await expect(
+        service.createLead("contact", validLeadData),
+      ).rejects.toThrow("Airtable service is not configured");
     });
 
     it("should handle creation errors gracefully", async () => {
@@ -241,55 +236,51 @@ describe("Airtable Service - Create Operations Tests", () => {
 
       mockCreate.mockRejectedValue(new Error("Creation failed"));
 
-      await expect(service.createContact(validFormData)).rejects.toThrow(
-        "Failed to create contact record",
-      );
+      await expect(
+        service.createLead("contact", validLeadData),
+      ).rejects.toThrow("Failed to create lead record");
     });
 
-    it("should handle empty form data", async () => {
+    it("should handle empty lead data", async () => {
       const service = new AirtableServiceClass();
 
       setServiceReady(service);
 
-      const emptyFormData = {
+      const emptyLeadData = {
         firstName: "",
         lastName: "",
         email: "",
         company: "",
         message: "",
-        acceptPrivacy: false,
-        website: "",
       };
 
-      // Empty email should cause validation error
-      await expect(service.createContact(emptyFormData)).rejects.toThrow(
-        "Failed to create contact record",
-      );
+      // Empty email should cause creation error
+      await expect(
+        service.createLead("contact", emptyLeadData),
+      ).rejects.toThrow("Failed to create lead record");
     });
 
-    it("should handle special characters in form data", async () => {
+    it("should handle special characters in lead data", async () => {
       const service = new AirtableServiceClass();
 
       setServiceReady(service);
 
-      const specialFormData = {
+      const specialLeadData = {
         firstName: "José",
         lastName: "García-López",
-        email: "jose.garcia@example.com", // Use valid email format
+        email: "jose.garcia@example.com",
         company: "Test & Co.",
         message: 'Message with "quotes" and special chars: @#$%',
-        acceptPrivacy: true,
-        website: "https://example.com/path?param=value&other=test",
       };
 
       const mockRecordDataSpecial = {
         id: "rec123456",
-        fields: specialFormData,
+        fields: specialLeadData,
         createdTime: "2023-01-01T00:00:00Z",
       };
       mockCreate.mockResolvedValue([createMockRecord(mockRecordDataSpecial)]);
 
-      const result = await service.createContact(specialFormData);
+      const result = await service.createLead("contact", specialLeadData);
 
       expect(result).toEqual({
         id: "rec123456",
@@ -305,7 +296,6 @@ describe("Airtable Service - Create Operations Tests", () => {
             Company: "Test & Co.",
             Message: 'Message with "quotes" and special chars: @#$%',
             "Marketing Consent": false,
-            Phone: "",
             Subject: "",
             Status: "New",
             Source: "Website Contact Form",
@@ -321,19 +311,19 @@ describe("Airtable Service - Create Operations Tests", () => {
       setServiceReady(service);
 
       const longMessage = "A".repeat(1000); // Very long message
-      const longFormData = {
-        ...validFormData,
+      const longLeadData = {
+        ...validLeadData,
         message: longMessage,
       };
 
       const mockRecordDataLong = {
         id: "rec123456",
-        fields: longFormData,
+        fields: longLeadData,
         createdTime: "2023-01-01T00:00:00Z",
       };
       mockCreate.mockResolvedValue([createMockRecord(mockRecordDataLong)]);
 
-      const result = await service.createContact(longFormData);
+      const result = await service.createLead("contact", longLeadData);
 
       expect(result).toEqual({
         id: "rec123456",
@@ -349,7 +339,6 @@ describe("Airtable Service - Create Operations Tests", () => {
             Company: "Test Company",
             Message: longMessage,
             "Marketing Consent": false,
-            Phone: "",
             Subject: "",
             Status: "New",
             Source: "Website Contact Form",
@@ -368,9 +357,9 @@ describe("Airtable Service - Create Operations Tests", () => {
       timeoutError.name = "TimeoutError";
       mockCreate.mockRejectedValue(timeoutError);
 
-      await expect(service.createContact(validFormData)).rejects.toThrow(
-        "Failed to create contact record",
-      );
+      await expect(
+        service.createLead("contact", validLeadData),
+      ).rejects.toThrow("Failed to create lead record");
     });
 
     it("should handle rate limiting errors", async () => {
@@ -382,9 +371,9 @@ describe("Airtable Service - Create Operations Tests", () => {
       rateLimitError.name = "RateLimitError";
       mockCreate.mockRejectedValue(rateLimitError);
 
-      await expect(service.createContact(validFormData)).rejects.toThrow(
-        "Failed to create contact record",
-      );
+      await expect(
+        service.createLead("contact", validLeadData),
+      ).rejects.toThrow("Failed to create lead record");
     });
   });
 });

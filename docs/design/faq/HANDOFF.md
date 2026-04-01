@@ -1,5 +1,13 @@
 # FaqSection Component — Development Handoff
 
+> Historical handoff for the earlier distributed-FAQ implementation pass.
+> Current strategy source of truth is now:
+> - `docs/strategy/ring2/07-information-architecture.md`
+> - `docs/strategy/ring2/08-content-strategy.md`
+> - `docs/strategy/ring2/12-content-inventory.md`
+>
+> Important: this file's earlier "remove standalone /faq" decision is not the current source of truth. Ring 2 currently reserves `/faq/` as a planned page in the approved strategy set.
+
 ## Design Overview
 - **Component**: Reusable `FaqSection` — embeds contextual FAQ into any page
 - **Prototype**: `docs/design/faq/prototype/v2/index.html`

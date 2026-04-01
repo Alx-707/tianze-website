@@ -211,6 +211,9 @@ export const env = createEnv({
       .enum(["strict", "moderate", "relaxed"])
       .default("strict"),
 
+    // Contact
+    NEXT_PUBLIC_WHATSAPP_NUMBER: z.string().optional(),
+
     // Deployment Platform
     NEXT_PUBLIC_DEPLOYMENT_PLATFORM: z
       .enum(["vercel", "cloudflare", "self-hosted"])
@@ -343,6 +346,7 @@ export const env = createEnv({
     NEXT_PUBLIC_SUPPORTED_LOCALES: process.env.NEXT_PUBLIC_SUPPORTED_LOCALES,
     NEXT_PUBLIC_CSP_NONCE: process.env.NEXT_PUBLIC_CSP_NONCE,
     NEXT_PUBLIC_SECURITY_MODE: process.env.NEXT_PUBLIC_SECURITY_MODE,
+    NEXT_PUBLIC_WHATSAPP_NUMBER: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER,
     NEXT_PUBLIC_DEPLOYMENT_PLATFORM:
       process.env.NEXT_PUBLIC_DEPLOYMENT_PLATFORM,
   },

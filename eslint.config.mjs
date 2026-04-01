@@ -32,6 +32,7 @@ export default [
       "reports/**",
       ".next/**",
       ".context/**",
+      ".stryker-tmp/**",
       "coverage/**",
       "dist/**",
       "build/**",

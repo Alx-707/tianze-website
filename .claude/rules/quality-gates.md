@@ -79,6 +79,17 @@ Flow: type-check → lint → format → test → security → build → lightho
 - Repo-local agent/tooling directories (for example `.agent/`, `.agents/`, `.continue/`, `.factory/`, `.kiro/`, `skills/`) must stay outside lint gates unless intentionally brought under project governance
 - If `lint:check` fails on local workspace assets rather than project code, fix scope before trusting the gate result
 
+## AI Smell Hard Gates
+
+- Production code must not import `src/test/**`, `src/testing/**`, or `src/constants/test-*`
+  - Enforced structurally by `dependency-cruiser`
+- Production quality gates must fail on obvious live placeholder artifacts in `src/app`, `src/components`, or production constants
+  - Enforced by `scripts/quality-gate.js`
+- `release-proof` must not run with `VALIDATE_CONFIG_SKIP_RUNTIME`, `ALLOW_MEMORY_RATE_LIMIT`, or `ALLOW_MEMORY_IDEMPOTENCY`
+  - Enforced by `scripts/release-proof.sh`
+- Preview-only degraded modes are not release proof
+  - They may exist for preview/debug workflows, but must stay out of final proof claims
+
 ## Dependency Upgrade Gate
 
 When upgrading `next` / `react` / `typescript` or dependencies with security alerts, run validation:

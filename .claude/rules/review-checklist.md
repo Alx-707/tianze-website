@@ -115,6 +115,48 @@ pnpm review:cache-health
 Also use:
 - [`docs/guides/CACHE-HEALTH-CONTRACT.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/CACHE-HEALTH-CONTRACT.md)
 
+## AI Smell Review (Required)
+
+Canonical source:
+- [`ai-smells.md`](/Users/Data/Warehouse/Pipe/tianze-website/.claude/rules/ai-smells.md)
+
+审查 AI 生成或 AI 主导修改的代码时，以下问题必须逐条回答：
+
+1. 是否新增了 `TEST_MODE` / `PLAYWRIGHT_TEST` / `NEXT_PUBLIC_TEST_MODE` /
+   `SKIP_ENV_VALIDATION` / `ALLOW_MEMORY_*` 等测试专用分支？
+
+2. 关键 smoke / E2E 在运行时错误下是否会 `skip`，而不是 `fail`？
+
+3. 名称带 `integration` / `contract` / `protection` 的测试，是否把
+   rate limit、Turnstile、validation、pipeline 等核心链路几乎全 mock 掉了？
+
+4. 是否新增了 warning-only / bypass / degraded override / runtime skip，
+   导致“绿色结果”不再等于原本承诺的证明强度？
+
+5. 关键页面测试是否已经变成“假舞台”：
+   同时 mock `Suspense`、翻译、loader、表单、schema、内容源，
+   却仍把自己当页面主证明？
+
+6. 是否把 `src/test/**`、`src/testing/**`、`src/constants/test-*`、
+   测试消息或测试工具引进了生产代码？
+
+7. 是否在 live 页面留下 placeholder 资源、明显占位块、或 `Coming Soon`
+   这类未收口设计？
+
+8. 是否新增了只 log 不改变语义的静默故障，尤其落在安全、限流、幂等、
+   去重、反滥用链路？
+
+9. 这次改动是否要求同步更新行为合同、runbook、或 proof 文档？
+   如果真实证明边界变了，文档不能继续假装没变。
+
+默认严重度：
+
+- 关键路径上的测试分叉、skip、fail-open、warning/bypass 放行：默认 `High`
+- 关键页面主证明依赖假舞台测试：默认 `High`
+- 生产代码引入测试资产：默认 `High`
+- 线上 placeholder 设计：默认 `Medium`，主转化页可升 `High`
+- 真相源失真：默认 `Medium | DOC`
+
 ## Severity Rules
 
 - Findings must be tagged: `PROD` / `DEV` / `CI` / `DOC`

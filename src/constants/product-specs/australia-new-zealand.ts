@@ -24,7 +24,7 @@ export const AUSTRALIA_NZ_SPECS = {
   families: [
     {
       slug: "conduit-bends",
-      images: ["/images/products/placeholder-sweep.svg"],
+      images: ["/images/products/pvc-conduit-bend.svg"],
       highlights: [
         "AS/NZS 2053 Certified",
         "Medium & Heavy Duty",
@@ -67,7 +67,7 @@ export const AUSTRALIA_NZ_SPECS = {
     },
     {
       slug: "bellmouths",
-      images: ["/images/products/placeholder-sweep.svg"],
+      images: ["/images/products/sample-product.svg"],
       highlights: [
         "Flared Entry Protection",
         "AS/NZS 2053 Compliant",
@@ -104,7 +104,7 @@ export const AUSTRALIA_NZ_SPECS = {
     },
     {
       slug: "couplings",
-      images: ["/images/products/placeholder-coupling.svg"],
+      images: ["/images/products/sample-product.svg"],
       highlights: [
         "Double-Bell Design",
         "AS/NZS 2053 Compliant",
@@ -141,7 +141,7 @@ export const AUSTRALIA_NZ_SPECS = {
     },
     {
       slug: "conduit-pipes",
-      images: ["/images/products/placeholder-pipe.svg"],
+      images: ["/images/products/sample-product.svg"],
       highlights: [
         "Medium & Heavy Duty",
         "Standard Metric Lengths",

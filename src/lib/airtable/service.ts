@@ -10,7 +10,6 @@ import type AirtableNS from "airtable";
 import type {
   AirtableQueryOptions,
   AirtableRecord,
-  ContactFormData,
   ContactLeadData,
   ContactStatus,
   NewsletterLeadData,
@@ -20,7 +19,6 @@ import { env } from "@/lib/env";
 import type { LeadType } from "@/lib/lead-pipeline/lead-schema";
 import { logger } from "@/lib/logger";
 import {
-  createContactRecord,
   deleteContactRecord,
   getContactRecords,
   isDuplicateEmailAddress,
@@ -125,17 +123,6 @@ export class AirtableService {
   private async getBaseIfReady(): Promise<AirtableNS.Base | null> {
     await this.ensureReady();
     return this.isReady() ? (this.base as AirtableNS.Base) : null;
-  }
-
-  /**
-   * 创建联系人记录
-   * Create contact record in Airtable
-   */
-  public async createContact(
-    formData: ContactFormData,
-  ): Promise<AirtableRecord> {
-    const base = await this.requireBase();
-    return createContactRecord({ base, tableName: this.tableName, formData });
   }
 
   /**

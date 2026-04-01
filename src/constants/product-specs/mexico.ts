@@ -23,7 +23,7 @@ export const MEXICO_SPECS = {
   families: [
     {
       slug: "conduit-bends",
-      images: ["/images/products/placeholder-sweep.svg"],
+      images: ["/images/products/pvc-conduit-bend.svg"],
       highlights: ["NOM Compliant", "Metric Sizes", "Light & Heavy Duty"],
       specGroups: [
         {
@@ -62,7 +62,7 @@ export const MEXICO_SPECS = {
     },
     {
       slug: "couplings",
-      images: ["/images/products/placeholder-coupling.svg"],
+      images: ["/images/products/sample-product.svg"],
       highlights: ["NOM Compliant", "Double-Bell Design", "Metric Sizes"],
       specGroups: [
         {
@@ -95,7 +95,7 @@ export const MEXICO_SPECS = {
     },
     {
       slug: "conduit-pipes",
-      images: ["/images/products/placeholder-pipe.svg"],
+      images: ["/images/products/sample-product.svg"],
       highlights: ["NOM Compliant", "Standard Lengths", "Metric Sizes"],
       specGroups: [
         {

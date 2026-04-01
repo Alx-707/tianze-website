@@ -117,12 +117,14 @@ run_basic_checks() {
     fi
 
     # 测试文件类型检查
-    print_step "测试文件类型检查"
-    if pnpm type-check:tests; then
-        print_success "测试文件类型检查通过"
-    else
-        print_error "测试文件类型检查失败"
-        return 1
+    if [ "$QUICK_MODE" != "true" ]; then
+        print_step "测试文件类型检查"
+        if pnpm type-check:tests; then
+            print_success "测试文件类型检查通过"
+        else
+            print_error "测试文件类型检查失败"
+            return 1
+        fi
     fi
 
     # 代码格式检查
@@ -145,26 +147,49 @@ run_basic_checks() {
         return 1
     fi
 
-    # 构建检查
-    print_step "构建检查 (Next.js Build)"
-    if pnpm build:check; then
-        print_success "构建检查通过"
+    # Static Truth Check (Layer 2: catch disconnected links/CTAs)
+    print_step "静态真相检查 (Static Truth Check)"
+    if pnpm truth:check; then
+        print_success "静态真相检查通过"
     else
-        print_error "构建检查失败"
+        print_error "静态真相检查失败 — 存在断链或孤立文件"
         return 1
+    fi
+
+    # 构建检查
+    if [ "$QUICK_MODE" = "true" ]; then
+        print_skip "构建检查（快速模式跳过，仅在完整模式运行）"
+    else
+        print_step "构建检查 (Next.js Build)"
+        if pnpm build:check; then
+            print_success "构建检查通过"
+        else
+            print_error "构建检查失败"
+            return 1
+        fi
     fi
 }
 
-# 单元测试（带覆盖率）
+# 单元测试
 run_unit_tests() {
     print_header "🧪 单元测试 (Unit Tests)"
 
-    print_step "运行单元测试（覆盖率模式）"
-    if pnpm test:coverage; then
-        print_success "单元测试通过"
+    if [ "$QUICK_MODE" = "true" ]; then
+        print_step "运行单元测试（快速模式，无覆盖率）"
+        if pnpm test --run; then
+            print_success "单元测试通过"
+        else
+            print_error "单元测试失败"
+            return 1
+        fi
     else
-        print_error "单元测试失败"
-        return 1
+        print_step "运行单元测试（覆盖率模式）"
+        if pnpm test:coverage; then
+            print_success "单元测试通过"
+        else
+            print_error "单元测试失败"
+            return 1
+        fi
     fi
 }
 
@@ -336,6 +361,11 @@ run_translation_checks() {
 # 架构检查
 run_architecture_checks() {
     print_header "🏗️  架构检查 (Architecture Checks)"
+
+    if [ "$QUICK_MODE" = "true" ]; then
+        print_skip "架构检查（快速模式跳过）"
+        return 0
+    fi
 
     # 依赖关系检查
     print_step "依赖关系检查"

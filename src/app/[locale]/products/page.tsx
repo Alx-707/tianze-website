@@ -104,11 +104,11 @@ export default async function ProductsPage({ params }: ProductsPageProps) {
           >
             <div className="relative mb-4 aspect-[16/9] w-full overflow-hidden rounded-md bg-muted">
               <Image
-                src="/images/products/placeholder-conduit.svg"
+                src="/images/products/full-auto-bending-machine.svg"
                 alt={t("overview.equipmentTitle")}
                 fill
                 sizes="(max-width: 640px) 100vw, 50vw"
-                className="object-cover"
+                className="object-contain p-4"
               />
             </div>
             <h3 className="mb-2 text-lg font-semibold text-foreground group-hover:text-primary">

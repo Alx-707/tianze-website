@@ -249,6 +249,9 @@
     "scenarios": {
       "title": "Where Our Conduits Work",
       "subtitle": "Field-proven in construction, infrastructure, and industrial installations across {countries}+ countries.",
+      "cardEyebrow": "Use Case {count}",
+      "countryBadge": "{countries}+ countries",
+      "proofLabel": "Field-proven routing",
       "item1": {
         "title": "Underground Pre-Burial",
         "desc": "Pre-bent conduits for direct burial. Consistent bend radius eliminates field cracking under soil pressure.",
@@ -302,7 +305,12 @@
         "iec": "IEC 61386",
         "nom": "NOM-001-SEDE"
       },
-      "logoWall": "Customer and partner logo placeholders"
+      "logoWall": "Representative project and customer references",
+      "proofStrip": {
+        "note": "ISO 9001 documentation, QC records, and project references are available during RFQ review.",
+        "standards": "Active market standards",
+        "countries": "Export countries served"
+      }
     },
     "finalCta": {
       "title": "Ready to Get Started?",
