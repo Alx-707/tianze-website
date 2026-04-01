@@ -73,6 +73,29 @@
   - 要么测试在保活旧实现
   - 要么仓库里还留着一个会误导维护者的假入口
 
+### 2.1 Node 版本真相要同时看 `engines`、`.nvmrc`、CI 和依赖最低门槛，不要只看“大版本 20”
+- 截至 2026-04-01，本仓库已经确认：
+  - `package.json > engines.node` 当前是 `>=20.19 <23`
+  - `.nvmrc` / `.node-version` 当前固定为 `20.19.0`
+  - GitHub Actions 当前也固定在 `20.19.0`
+  - 但本地机器仍可能实际跑在 `22.x`
+  - 同时，一批直接依赖已经把 Node 20 的最低线抬到了 `20.19.x`
+- 这意味着：
+  - “支持 Node 20”已经不够精确
+  - 本地 `22.x` 通过，不等于 CI 的 `20.19.0` 一定通过
+  - 只看 `@types/node` 或只看 `engines`，都不足以代表完整真相
+- 默认动作：
+  - 只要升级会影响运行时、构建链路、Lint/Test 基础设施，就同时核对：
+    - `package.json > engines.node`
+    - `.nvmrc`
+    - `.node-version`
+    - `.github/workflows/**` 里的 `setup-node`
+  - 如果依赖已经抬高 Node 20 的最低补丁版本，必须把这些文件一起更新，不要只改其中一个
+  - 汇报时要明确区分：
+    - 默认开发版本
+    - CI 合并真相版本
+    - 本地允许版本范围
+
 ### 3. 修改 `apiErrors` 时，必须同步 `messages/*.json` 和 `messages/*/critical.json`
 - 本仓库的翻译会同时从完整消息文件和 critical bundle 读取。
 - 如果只改 `messages/en.json` / `messages/zh.json`，不改 `messages/en/critical.json` / `messages/zh/critical.json`，就会出现：

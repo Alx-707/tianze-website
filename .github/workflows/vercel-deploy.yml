@@ -61,14 +61,14 @@ jobs:
         if: steps.vercel_secrets.outputs.configured == 'true'
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "20.19.0"
           cache: "pnpm"
 
       - name: 设置 Node.js（跳过 pnpm 缓存）
         if: steps.vercel_secrets.outputs.configured != 'true'
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "20.19.0"
 
       - name: 安装 Vercel CLI
         if: steps.vercel_secrets.outputs.configured == 'true'
@@ -237,14 +237,14 @@ jobs:
         if: steps.vercel_secrets.outputs.configured == 'true'
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "20.19.0"
           cache: "pnpm"
 
       - name: 设置 Node.js（跳过 pnpm 缓存）
         if: steps.vercel_secrets.outputs.configured != 'true'
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "20.19.0"
 
       - name: 安装 Vercel CLI
         run: |

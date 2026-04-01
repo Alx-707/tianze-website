@@ -182,7 +182,7 @@ Completed framework and tooling support batches on this branch:
 - `lucide-react` `0.577.0 -> 1.7.0`
 - `jsdom` `27.4.0 -> 29.0.1`
 - `knip` `5.88.0 -> 6.1.1`
-- `@types/node` `22.19.1 -> 25.5.0`
+- `@types/node` `22.19.1 -> 22.19.15`
 
 Verification completed on this branch:
 - `pnpm ci:local:quick`: pass
@@ -234,35 +234,61 @@ Current branch truth after re-validation:
 
 ## Current Constraints
 
-### 1. `@types/node` is now technically green, but still ahead of the declared runtime majors
+### 1. Keep `@types/node` aligned with the declared runtime majors
 
-Do not treat npm `latest` as policy just because the local type-check passed.
+Current stable rule:
+- keep `@types/node` on `22.x` while `engines.node` remains `>=20.19 <23`
+- do not follow `npm latest` into `25.x` just because local type-check still passes
+
+Reason:
+- newer Node typings can silently expose APIs that the declared runtime support window does not actually guarantee
+- several direct dev/build dependencies now already require the Node 20 line to be at least `20.19.x`, so the older broad `>=20 <23` wording was no longer precise enough
+- this repo has already re-checked that the safer `22.x` line remains green, so treat that as the current stable truth
+
+Current stable status:
+- `@types/node`: `22.19.15`
+- local verification after realignment:
+  - `pnpm type-check`: pass
+  - `pnpm build`: pass
+  - `pnpm build:cf`: pass
+
+### 2. Do not keep `NEXT_IGNORE_BUILD_TYPE_ERRORS` in the stable branch
+
+Current stable rule:
+- remove the `next.config.ts` `typescript.ignoreBuildErrors` escape hatch from the main upgrade branch
+- if TypeScript migration work temporarily needs a bypass, keep it in an isolated experiment branch only
+
+Reason:
+- this repo already decided not to continue the TypeScript 6 line in the current stable upgrade batch
+- leaving a silent type-check bypass in shared config weakens the quality gate even when no active migration depends on it
 
 Project runtime support is defined by:
 - `package.json > engines.node`
 
 Current declared range:
-- `>=20 <23`
+- `>=20.19 <23`
 
 That means the supported Node majors are:
 - `20`
 - `21`
 - `22`
 
+Current runtime truth:
+- default local baseline: `.nvmrc` / `.node-version` pin `20.19.0`
+- remote CI truth: GitHub Actions also pin `20.19.0`
+- local Node `22.x` remains allowed by policy, but it is not the final merge truth
+
 Current branch result:
-- `@types/node@25.5.0` passed `pnpm type-check`
-- `rm -rf .next && pnpm build` also passed
-- so this is not a hard technical blocker in the current repo state
+- `@types/node@22.19.15` now matches the declared runtime range
+- the earlier `25.x` experiment is no longer the branch truth
+- treat runtime-aligned typings as the stable default going forward
 
 Alignment note:
 - `@types/node@22.x` matches the declared runtime range
-- `@types/node@25.x` is still ahead of the declared runtime range
+- do not reintroduce `@types/node@25.x` without a conscious policy change
+- if the direct dependency floor moves again, update `package.json > engines.node`, `.nvmrc`, `.node-version`, and the workflow `setup-node` version together in one batch
 
-Rule:
-- keep the runtime-alignment rule visible in docs
-- if this branch is promoted, treat `@types/node@25.x` as a conscious tooling choice, not as an automatic future default
-
-### 2. ESLint 10 is not ready in this repo yet
+### 3. ESLint 10 is not ready in this repo yet
 
 Attempted but intentionally rolled back:
 - `eslint` `9.39.2 -> 10.0.3`
@@ -421,7 +447,7 @@ Reason summary:
 
 Suggested order for the next round:
 1. Keep the current branch as the integration branch for the upgrades already proven locally.
-2. Decide whether to keep `@types/node@25.x` as a conscious tooling choice or roll it back for stricter runtime alignment.
+2. Keep `@types/node` aligned with the declared runtime range unless the runtime support policy itself changes.
 3. Re-check the Next/OpenNext/Wrangler line at the deployed smoke layer, because the local page-preview regression now has a repo-local explanation and fix.
    Update after the latest phase6 work:
    - deployed phase6 preview smoke is now available as the stronger proof path

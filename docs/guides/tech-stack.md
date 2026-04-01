@@ -118,6 +118,7 @@ content/
 - **@next/bundle-analyzer 16.2.2** - 包大小分析
 - **@opennextjs/cloudflare 1.18.0** - Cloudflare 适配器（当前 `build:cf` 可过，真实 phase6 preview smoke 也已通过）
 - **wrangler 4.79.0** - Cloudflare 本地预览与部署 CLI
+- **Node.js 20.19.0** - 当前默认开发版本与 CI 基线；仓库声明支持 `>=20.19 <23`，但真正的合并真相仍以 Node 20.19.0 为准
 - **Turbopack** - 开发环境构建（`next dev --turbopack`）
 - **Webpack** - 当前 Cloudflare 正式构建链路（`pnpm build:cf` 通过 `scripts/cloudflare/build-webpack.mjs`）
 - **Turbopack / OpenNext CLI** - Cloudflare 对照构建链路（`pnpm build:cf:turbo`，用于兼容性排查）
@@ -144,7 +145,7 @@ content/
 - **@commitlint/config-conventional 20.5.0** - 约定式提交
 
 ### TypeScript 类型定义
-- **@types/node 25.5.0** - Node.js 类型定义（技术上已通过，但版本号仍领先于仓库声明支持的 Node 20-22）
+- **@types/node 22.19.15** - Node.js 类型定义（当前稳定版本；与仓库声明的运行时范围 `>=20.19 <23` 对齐）
 - **@types/react 19.2.14** - React 19 类型定义
 - **@types/react-dom 19.2.3** - React DOM 类型定义
 - **@types/js-yaml 4.0.9** - JS-YAML 类型定义

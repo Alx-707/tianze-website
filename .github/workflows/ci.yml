@@ -38,7 +38,7 @@ jobs:
       - name: 设置Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "20.19.0"
 
       - name: 生成缓存键
         id: cache-key
@@ -99,7 +99,7 @@ jobs:
       - name: 设置Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "20.19.0"
 
       - name: Cache pnpm store
         uses: actions/cache@v4
@@ -171,7 +171,7 @@ jobs:
       - name: 设置Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "20.19.0"
 
       - name: Cache pnpm store
         uses: actions/cache@v4
@@ -236,7 +236,7 @@ jobs:
       - name: 设置Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "20.19.0"
 
       - name: Cache pnpm store
         uses: actions/cache@v4
@@ -297,7 +297,7 @@ jobs:
       - name: 设置Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "20.19.0"
 
       - name: Cache pnpm store
         uses: actions/cache@v4
@@ -370,7 +370,7 @@ jobs:
       - name: 设置Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "20.19.0"
 
       - name: Cache pnpm store
         uses: actions/cache@v4
@@ -434,7 +434,7 @@ jobs:
       - name: 设置Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "20.19.0"
 
       - name: Cache pnpm store
         uses: actions/cache@v4
