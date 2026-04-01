@@ -95,6 +95,8 @@ Notes:
   - `pnpm build:cf` → formal Cloudflare build path, now backed by the repo's Webpack-based wrapper
   - `pnpm preview:cf` / `pnpm deploy:cf` → follow the same current canonical `build:cf` output
   - `pnpm build:cf:turbo` → comparison / fallback path for debugging upstream Turbopack/OpenNext behavior, not the default production build path
+  - `pnpm release:verify` → current unified release gate; now includes clean standard build, `build:cf`, `deploy:cf:phase6:dry-run`, and release smoke
+  - `node scripts/cloudflare/deploy-phase6.mjs --env preview` → current stronger real preview path for Cloudflare proof
 
 | Layer | Scope | Command | Release-blocking? |
 |-------|-------|---------|-------------------|
@@ -103,7 +105,9 @@ Notes:
 
 - `pnpm smoke:cf:preview:strict` (includes `/api/health` in local preview) is a **diagnostic tool**, not a release gate. Its failure does not block releases.
 - Local preview is still a bounded proof surface even though `build:cf` now uses Webpack by default; do not treat local Wrangler behavior as a complete substitute for deployed Cloudflare evidence.
-- As of 2026-03-27, the local preview server can still render middleware-only redirects correctly while returning 500 for page requests like `/en` and `/en/contact` because Wrangler local runtime hits a `middleware-manifest.json` dynamic-require failure. Treat that as a local preview limitation unless the same failure reproduces after deployment.
+- As of 2026-04-01, the repo-local compatibility patch in `scripts/cloudflare/patch-prefetch-hints-manifest.mjs` restores stock local page preview on the upgraded stack; page routes are no longer the main blocker.
+- `pnpm preview:cf:wrangler` remains a diagnostics-only path. If it still hangs or returns request-context/runtime errors while `pnpm smoke:cf:preview` passes, treat that as a Wrangler local-runtime boundary rather than a page-level regression.
+- The stronger current proof surface is the real phase6 preview deploy plus post-deploy smoke, not stock local preview alone.
 - Final API proof happens **only after real Cloudflare deployment**, via the post-deploy smoke in the deploy workflow.
 - If post-deploy smoke fails, rollback to the previous deployment.
 

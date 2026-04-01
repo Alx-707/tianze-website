@@ -33,12 +33,15 @@ For each public write endpoint, must verify:
 ```bash
 pnpm build
 pnpm build:cf
+pnpm release:verify
 grep -r "unpkg.com\|cdn.jsdelivr" .next/ 2>/dev/null | grep -v ".map"
 ```
 
 Notes:
+- Run `pnpm build` and `pnpm build:cf` serially, never in parallel.
 - `pnpm build:cf` is the current canonical Cloudflare build path and now runs through the repo's Webpack wrapper.
 - If the diff touches Cloudflare build tooling, OpenNext integration, or Wrangler-specific aliases, also run `pnpm build:cf:turbo` as a comparison check.
+- If the diff touches Next/OpenNext/Wrangler/Cloudflare proof scripts, `pnpm release:verify` is part of the expected review evidence, not an optional extra.
 
 ### Quality Gates
 

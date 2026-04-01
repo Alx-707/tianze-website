@@ -95,6 +95,8 @@ Flow: type-check → lint → format → test → security → build → lightho
 When upgrading `next` / `react` / `typescript` or dependencies with security alerts, run validation:
 - Rules: `/.claude/rules/dependency-upgrade.md`
 - Minimum validation: `pnpm ci:local:quick` + `pnpm build`
+- For `next` / `@opennextjs/cloudflare` / `wrangler` / Cloudflare-proof changes, raise the minimum bar to `pnpm release:verify`
+- If the upgrade changes the repo's verified truth, docs and rules must be updated in the same branch before the work is considered complete
 
 ## Zero Tolerance
 

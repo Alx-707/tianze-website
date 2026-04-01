@@ -19,6 +19,12 @@ pnpm build
 pnpm build:cf
 ```
 
+For upgrades that touch `next`, `@opennextjs/cloudflare`, `wrangler`, release proof, or Cloudflare deploy tooling, also run:
+
+```bash
+pnpm release:verify
+```
+
 Recommended extras when relevant:
 
 ```bash
@@ -33,7 +39,9 @@ Do not run `pnpm build` and `pnpm build:cf` in parallel.
 
 - `@types/node` must align with `package.json > engines.node`, not npm `latest`
 - `eslint@10` is currently blocked by the active Next/React ESLint plugin chain
-- `@opennextjs/cloudflare@1.17.3` is the current project baseline
+- `typescript@6` is currently deferred on this repo; keep the branch on `typescript@5.9.3` until standard `next build` is stable again
+- keep `eslint` / `@eslint/js` on `9.x` until the current Next/React ESLint chain supports ESLint 10 cleanly
+- `@opennextjs/cloudflare@1.18.0` is the current project baseline on the active upgrade line
 - OpenNext `minify` remains disabled in `open-next.config.ts`; if an upgrade aims to re-enable it, treat that as a separate compatibility validation task
 
 ## Core Dependencies
@@ -53,7 +61,9 @@ These require full validation and careful batching:
 - Keep low-risk patch/minor upgrades separate from higher-risk major upgrades
 - Treat Cloudflare deploy-path changes as incomplete until `pnpm build:cf` passes
 - If the upgrade touches the Cloudflare build chain itself, also run `pnpm build:cf:turbo` to keep the comparison path from silently rotting
+- If the upgrade touches Next/OpenNext/Wrangler/Cloudflare proof scripts, do not stop at local build success; also run `pnpm release:verify`
 - If a package also drives a CDN asset, update the CDN version together
+- If an upgrade changes the verified project truth, update both `docs/guides/**` and the matching `.claude/rules/**` entries in the same batch
 
 Current example:
 - `react-scan` CDN version in `src/app/[locale]/layout.tsx`
