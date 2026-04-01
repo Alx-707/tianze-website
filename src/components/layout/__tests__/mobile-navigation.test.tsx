@@ -174,6 +174,22 @@ vi.mock("@/components/ui/sheet", () => {
         </div>
       );
     },
+    SheetClose: ({
+      children,
+      asChild,
+    }: {
+      children?: React.ReactNode;
+      asChild?: boolean;
+    }) => {
+      if (asChild && React.isValidElement(children)) {
+        const child = React.Children.only(children);
+        return React.cloneElement(child, {
+          ...(React.isValidElement(child) ? (child as any).props : {}),
+        });
+      }
+
+      return <div data-testid="sheet-close">{children}</div>;
+    },
   };
 });
 

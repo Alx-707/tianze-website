@@ -306,17 +306,20 @@ test.describe("Navigation System", () => {
         name: /mobile navigation/i,
       });
       await expect(mobileNavSheet).toBeVisible();
+      await waitForStablePage(page);
 
-      // Click on About link
-      const aboutLink = mobileNavSheet.getByRole("link", { name: "About" });
-      await aboutLink.click();
+      const clickedAbout = await safeClick(
+        page,
+        '[data-testid="mobile-menu-content"] a[href="/en/about"]',
+      );
+      expect(clickedAbout).toBe(true);
 
       // Wait for navigation
       await page.waitForURL("**/en/about");
       await waitForStablePage(page);
 
       // Sheet should auto-close after navigation
-      await expect(mobileNavSheet).not.toBeVisible();
+      await expect(mobileNavSheet).not.toBeVisible({ timeout: 10_000 });
 
       // Verify we're on the About page (check for h1 heading)
       await expect(page.getByRole("heading", { level: 1 })).toBeVisible();

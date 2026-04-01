@@ -55,6 +55,7 @@ async function ensureWebpackStandaloneCompatibility() {
 }
 
 async function main() {
+  run("node", ["scripts/clean-next-build-artifacts.mjs"]);
   run("pnpm", ["prebuild"]);
   run("pnpm", ["exec", "next", "build", "--webpack"]);
   await ensureWebpackStandaloneCompatibility();

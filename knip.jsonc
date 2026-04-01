@@ -43,8 +43,6 @@
     "@tailwindcss/typography",
     "@next/eslint-plugin-next",
     "axe-core",
-    "eslint-import-resolver-typescript",
-    "eslint-plugin-import",
     "eslint-plugin-react",
     "eslint-plugin-react-hooks",
     "prettier-plugin-tailwindcss",

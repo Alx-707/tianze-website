@@ -155,6 +155,10 @@ function runDeploy(configFile) {
 
   const result = spawnSync("pnpm", commandArgs, {
     cwd: ROOT_DIR,
+    env: {
+      ...process.env,
+      OPEN_NEXT_DEPLOY: "true",
+    },
     stdio: args.dryRun ? "pipe" : "inherit",
     encoding: args.dryRun ? "utf8" : undefined,
   });

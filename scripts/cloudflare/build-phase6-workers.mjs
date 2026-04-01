@@ -7,6 +7,10 @@ const OPEN_NEXT_DIR = path.join(ROOT_DIR, ".open-next");
 const WORKERS_DIR = path.join(OPEN_NEXT_DIR, "workers");
 const WRANGLER_DIR = path.join(OPEN_NEXT_DIR, "wrangler", "phase6");
 const SOURCE_WRANGLER_CONFIG_PATH = path.join(ROOT_DIR, "wrangler.jsonc");
+const PHASE6_ALIAS = {
+  "@vercel/turbopack-ecmascript-runtime/browser/dev/hmr-client/hmr-client.ts":
+    "../../../scripts/cloudflare/shims/empty-module.mjs",
+};
 
 const BIND_DOMAIN = process.argv.includes("--bind-domain");
 
@@ -77,6 +81,20 @@ function cloneJSON(value) {
   return value ? JSON.parse(JSON.stringify(value)) : value;
 }
 
+function withServiceEnvironment(services, envName) {
+  return services.map((service) => ({
+    ...service,
+    environment: envName,
+  }));
+}
+
+function withEnvSuffixedServiceName(services, envName) {
+  return services.map((service) => ({
+    ...service,
+    service: `${service.service}-${envName}`,
+  }));
+}
+
 function resolveEnvConfig(baseConfig, envName) {
   const envConfig = baseConfig.env?.[envName] ?? {};
   return {
@@ -98,6 +116,7 @@ function createCommonConfig(baseConfig, name, main, { includeAssets }) {
     compatibility_flags: cloneJSON(baseConfig.compatibility_flags ?? []),
     name,
     main,
+    alias: cloneJSON(PHASE6_ALIAS),
   };
 
   if (includeAssets) {
@@ -126,12 +145,6 @@ function createServerWorkerConfig(
     },
   );
 
-  config.services = [
-    {
-      binding: "WORKER_SELF_REFERENCE",
-      service: name,
-    },
-  ];
   config.r2_buckets = cloneJSON(baseConfig.r2_buckets ?? []);
   config.d1_databases = cloneJSON(baseConfig.d1_databases ?? []);
   config.durable_objects = cloneJSON(baseConfig.durable_objects ?? undefined);
@@ -141,12 +154,6 @@ function createServerWorkerConfig(
   for (const envName of envNames) {
     const envConfig = resolveEnvConfig(baseConfig, envName);
     config.env[envName] = {
-      services: [
-        {
-          binding: "WORKER_SELF_REFERENCE",
-          service: name,
-        },
-      ],
       r2_buckets: envConfig.r2_buckets,
       d1_databases: envConfig.d1_databases,
       durable_objects: envConfig.durable_objects,
@@ -193,7 +200,7 @@ function createGatewayConfig(baseConfig, workerNames, envNames) {
   for (const envName of envNames) {
     const envConfig = resolveEnvConfig(baseConfig, envName);
     const envBlock = {
-      services: serviceBindings,
+      services: withEnvSuffixedServiceName(serviceBindings, envName),
       vars: envConfig.vars,
     };
 
@@ -242,6 +249,35 @@ const routeRules = [
 ${routeRulesSource}
 ];
 
+function readRequestId(request) {
+  const directRequestId = request.headers.get("x-request-id")?.trim();
+  if (directRequestId) {
+    return directRequestId;
+  }
+
+  const correlationId = request.headers.get("x-correlation-id")?.trim();
+  if (correlationId) {
+    return correlationId;
+  }
+
+  return crypto.randomUUID();
+}
+
+function createHealthResponse(request) {
+  const headers = new Headers({
+    "cache-control": "no-store",
+    "content-type": "application/json",
+    "x-observability-surface": "cache-health",
+  });
+  headers.set("x-request-id", readRequestId(request));
+  headers.set("x-phase6-origin-target", "gateway-health");
+
+  return new Response(JSON.stringify({ status: "ok" }), {
+    headers,
+    status: 200,
+  });
+}
+
 function resolveOriginRoute(pathname) {${routeResolver}
   return { target: "web", binding: "WORKER_WEB", match: () => true };
 }
@@ -263,6 +299,10 @@ export default {
       }
 
       const url = new URL(request.url);
+
+      if (url.pathname === "/api/health") {
+        return createHealthResponse(request);
+      }
 
       if (url.pathname.startsWith("/cdn-cgi/image/")) {
         const match = url.pathname.match(/\\/cdn-cgi\\/image\\/.+?\\/(?<url>.+)$/);

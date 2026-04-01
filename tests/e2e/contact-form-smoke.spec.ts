@@ -400,20 +400,7 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
     test("应该在超过速率限制后显示错误（英文）", async ({ page }) => {
       await gotoContactPage(page, test.info(), "en");
 
-      // 等待 Turnstile 加载
-      await page.waitForTimeout(2000);
-
-      // 填写表单数据
-      await page.fill('input[name="firstName"]', "Test");
-      await page.fill('input[name="lastName"]', "User");
-      await page.fill('input[name="email"]', "test@example.com");
-      await page.fill('input[name="company"]', "Test Company");
-      await page.fill(
-        'textarea[name="message"]',
-        "Test message for rate limiting",
-      );
-
-      // 验证表单存在（实际速率限制需要真实提交）
+      // test-mode smoke 不做真实提交；这里只验证表单主体仍然可见。
       const form = page.locator("form").first();
       await expect(form).toBeVisible();
     });

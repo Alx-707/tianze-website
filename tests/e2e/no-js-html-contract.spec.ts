@@ -56,7 +56,7 @@ for (const localeCase of localeCases) {
           name: localeCase.contactHeading,
         }),
       ).toBeVisible();
-      await expect(page.locator("form")).toHaveCount(1);
+      await expect(page.locator("main form")).toHaveCount(1);
 
       const html = await page.content();
       expect(html).toContain('id="main-content"');

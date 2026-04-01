@@ -136,6 +136,8 @@ What it proves:
 - Treating broad coverage totals as proof of key-path stability
 
 ## Repository-Specific Notes
-- `build:cf` internally runs the build chain. Do not run `pnpm build` and `pnpm build:cf` in parallel.
+- `build:cf` now uses the repo-local Webpack wrapper and self-cleans before rebuilding, but it still shares the same `.next` family of artifacts with the standard build line. Keep the verification order serial.
+- For the strongest standard-build proof, prefer `pnpm clean:next-artifacts && pnpm build` before `pnpm build:cf`.
+- When the change touches Cloudflare / OpenNext / split-worker behavior, `pnpm deploy:cf:phase6:dry-run` is the stronger local proof than stock preview alone.
 - For current Cloudflare compatibility, `src/middleware.ts` remains the preferred runtime entrypoint over `proxy.ts`.
 - Translation proof for runtime-facing changes must include both full message bundles and critical bundles.

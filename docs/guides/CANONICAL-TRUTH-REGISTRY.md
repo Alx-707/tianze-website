@@ -70,11 +70,17 @@ If another document conflicts with this file, treat this file plus the linked ca
   - `pnpm smoke:cf:preview`
 - Local strict diagnostic:
   - `pnpm smoke:cf:preview:strict`
+- Stronger local split-worker proof:
+  - `pnpm deploy:cf:phase6:dry-run`
+- Stronger real preview publish path:
+  - `pnpm deploy:cf:phase6:preview`
 - Final deployed Cloudflare proof:
   - `pnpm smoke:cf:deploy -- --base-url <url>`
 
 ### Rule
 - stock local preview is useful, but bounded
+- stock local preview is not the same thing as split-worker proof
+- phase6 dry-run is the stronger local Cloudflare proof for the current repo
 - deployed smoke is the final proof for Cloudflare API behavior
 - do not treat local preview alone as complete deployed truth
 

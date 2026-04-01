@@ -6,7 +6,7 @@
  */
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { Check, Globe, Menu, X } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import {
@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
   Sheet,
+  SheetClose,
   SheetContent,
   SheetDescription,
   SheetHeader,
@@ -45,14 +46,6 @@ export function MobileNavigation({
   const t = useTranslations();
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(initialOpen);
-  const previousPathnameRef = useRef(pathname);
-
-  useEffect(() => {
-    if (previousPathnameRef.current !== pathname && isOpen) {
-      queueMicrotask(() => setIsOpen(false));
-    }
-    previousPathnameRef.current = pathname;
-  }, [pathname, isOpen]);
 
   return (
     <div className={cn("header-mobile-only", className)}>
@@ -108,21 +101,22 @@ export function MobileNavigation({
             {mobileNavigation.map((item) => {
               const isActive = isActivePath(pathname, item.href);
               return (
-                <Link
-                  key={item.key}
-                  href={item.href as "/"}
-                  prefetch={false}
-                  className={cn(
-                    "flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors duration-200",
-                    isActive
-                      ? "bg-accent text-accent-foreground"
-                      : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
-                  )}
-                  aria-current={isActive ? "page" : undefined}
-                  onClick={() => setIsOpen(false)}
-                >
-                  {t(item.translationKey)}
-                </Link>
+                <SheetClose key={item.key} asChild>
+                  <Link
+                    href={item.href as "/"}
+                    prefetch={false}
+                    className={cn(
+                      "flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors duration-200",
+                      isActive
+                        ? "bg-accent text-accent-foreground"
+                        : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
+                    )}
+                    aria-current={isActive ? "page" : undefined}
+                    onClick={() => setIsOpen(false)}
+                  >
+                    {t(item.translationKey)}
+                  </Link>
+                </SheetClose>
               );
             })}
             <div className="pt-4">
@@ -132,16 +126,18 @@ export function MobileNavigation({
                 asChild
                 className="w-full justify-start"
               >
-                <Link
-                  href={{
-                    pathname: "/contact",
-                    query: { source: "mobile_nav_cta" },
-                  }}
-                  prefetch={false}
-                  onClick={() => setIsOpen(false)}
-                >
-                  {t("navigation.contactSales")}
-                </Link>
+                <SheetClose asChild>
+                  <Link
+                    href={{
+                      pathname: "/contact",
+                      query: { source: "mobile_nav_cta" },
+                    }}
+                    prefetch={false}
+                    onClick={() => setIsOpen(false)}
+                  >
+                    {t("navigation.contactSales")}
+                  </Link>
+                </SheetClose>
               </Button>
             </div>
             <Separator className="my-4" />
@@ -186,22 +182,23 @@ function MobileLanguageSwitcher({
       {languages.map(({ locale, label }) => {
         const isActive = currentLocale === locale;
         return (
-          <Link
-            key={locale}
-            href={(pathname || "/") as "/"}
-            locale={locale}
-            prefetch={false}
-            className={cn(
-              "flex items-center justify-between rounded-md px-3 py-2 text-sm font-medium transition-colors duration-200",
-              isActive
-                ? "bg-accent text-accent-foreground"
-                : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
-            )}
-            onClick={onSelect}
-          >
-            {label}
-            {isActive && <Check className="h-4 w-4" />}
-          </Link>
+          <SheetClose key={locale} asChild>
+            <Link
+              href={(pathname || "/") as "/"}
+              locale={locale}
+              prefetch={false}
+              className={cn(
+                "flex items-center justify-between rounded-md px-3 py-2 text-sm font-medium transition-colors duration-200",
+                isActive
+                  ? "bg-accent text-accent-foreground"
+                  : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
+              )}
+              onClick={onSelect}
+            >
+              {label}
+              {isActive && <Check className="h-4 w-4" />}
+            </Link>
+          </SheetClose>
         );
       })}
     </div>

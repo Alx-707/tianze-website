@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
+import { connection } from "next/server";
 import { NextIntlClientProvider } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
 import { MessageCircle } from "lucide-react";
@@ -15,6 +16,12 @@ import {
   generateMetadataForPath,
   type Locale as SeoLocale,
 } from "@/lib/seo-metadata";
+import {
+  ContactFaqFallback,
+  ContactFormFallback,
+  ContactPageFallback,
+  ContactPageHeader,
+} from "@/app/[locale]/contact/contact-page-shell";
 import { ContactForm } from "@/components/contact/contact-form";
 import { FaqSection } from "@/components/sections/faq-section";
 import { Card } from "@/components/ui/card";
@@ -55,162 +62,6 @@ function buildFaqItems(
   }));
 }
 
-function ContactFormFallback({
-  title,
-  description,
-  labels,
-}: {
-  title: string;
-  description: string;
-  labels: {
-    firstName: string;
-    lastName: string;
-    email: string;
-    company: string;
-    subject: string;
-    message: string;
-    acceptPrivacy: string;
-    submit: string;
-  };
-}) {
-  return (
-    <Card className="mx-auto w-full max-w-2xl">
-      <div className="space-y-6 p-6">
-        <div className="space-y-2">
-          <h2 className="text-2xl font-semibold tracking-tight">{title}</h2>
-          <p className="text-sm text-muted-foreground">{description}</p>
-        </div>
-
-        <form className="space-y-6">
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <label className="space-y-2 text-sm">
-              <span>{labels.firstName}</span>
-              <input
-                className="flex h-10 w-full rounded-xl border border-input bg-transparent px-4 py-1 text-base md:text-sm"
-                autoComplete="given-name"
-                disabled
-                name="firstName"
-                required
-                type="text"
-              />
-            </label>
-            <label className="space-y-2 text-sm">
-              <span>{labels.lastName}</span>
-              <input
-                className="flex h-10 w-full rounded-xl border border-input bg-transparent px-4 py-1 text-base md:text-sm"
-                autoComplete="family-name"
-                disabled
-                name="lastName"
-                required
-                type="text"
-              />
-            </label>
-            <label className="space-y-2 text-sm">
-              <span>{labels.email}</span>
-              <input
-                className="flex h-10 w-full rounded-xl border border-input bg-transparent px-4 py-1 text-base md:text-sm"
-                autoComplete="email"
-                disabled
-                name="email"
-                required
-                type="email"
-              />
-            </label>
-            <label className="space-y-2 text-sm">
-              <span>{labels.company}</span>
-              <input
-                className="flex h-10 w-full rounded-xl border border-input bg-transparent px-4 py-1 text-base md:text-sm"
-                autoComplete="organization"
-                disabled
-                name="company"
-                required
-                type="text"
-              />
-            </label>
-          </div>
-
-          <label className="space-y-2 text-sm">
-            <span>{labels.subject}</span>
-            <input
-              className="flex h-10 w-full rounded-xl border border-input bg-transparent px-4 py-1 text-base md:text-sm"
-              autoComplete="off"
-              disabled
-              name="subject"
-              type="text"
-            />
-          </label>
-
-          <label className="space-y-2 text-sm">
-            <span>{labels.message}</span>
-            <textarea
-              className="flex min-h-[80px] w-full rounded-xl border border-input bg-background px-3 py-2 text-sm"
-              autoComplete="off"
-              disabled
-              name="message"
-              required
-              rows={4}
-            />
-          </label>
-
-          <label className="flex items-center gap-2 text-sm">
-            <input
-              className="h-4 w-4 rounded border border-input"
-              disabled
-              name="acceptPrivacy"
-              required
-              type="checkbox"
-            />
-            <span>{labels.acceptPrivacy}</span>
-          </label>
-
-          <button
-            className="inline-flex h-[38px] w-full items-center justify-center rounded-[6px] bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground opacity-80"
-            disabled
-            type="submit"
-          >
-            {labels.submit}
-          </button>
-        </form>
-      </div>
-    </Card>
-  );
-}
-
-function ContactFaqFallback({
-  title,
-  items,
-}: {
-  title: string;
-  items: Array<{ key: string; question: string; answer: string }>;
-}) {
-  return (
-    <section className="section-divider py-14 md:py-[72px]">
-      <div className="mx-auto max-w-[1080px] px-6">
-        <div className="mb-9">
-          <h2 className="text-[32px] font-bold leading-[1.2] tracking-[-0.02em]">
-            {title}
-          </h2>
-        </div>
-        <div className="rounded-xl border bg-card">
-          {items.map((item, index) => (
-            <details
-              key={item.key}
-              className={index === 0 ? "" : "border-t border-border"}
-            >
-              <summary className="cursor-pointer px-6 py-4 text-left text-sm font-medium">
-                {item.question}
-              </summary>
-              <div className="px-6 pb-4 text-sm leading-relaxed text-muted-foreground">
-                {item.answer}
-              </div>
-            </details>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
 interface ContactPageProps {
   params: Promise<{
     locale: string;
@@ -239,28 +90,6 @@ export async function generateMetadata({
       description: t("description"),
     },
   });
-}
-
-// 页面标题组件
-function ContactPageHeader({
-  title,
-  description,
-}: {
-  title: string;
-  description: string;
-}) {
-  return (
-    <div className="mb-12 text-center">
-      <h1 className="mb-4 text-4xl font-bold tracking-tight md:text-5xl">
-        <span className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-          {title}
-        </span>
-      </h1>
-      <p className="mx-auto max-w-2xl text-xl text-muted-foreground">
-        {description}
-      </p>
-    </div>
-  );
 }
 
 interface ContactMethodsCardProps {
@@ -480,6 +309,16 @@ async function ContactContent({ locale }: { locale: string }) {
 
 export default async function ContactPage({ params }: ContactPageProps) {
   const { locale } = await params;
+
+  return (
+    <Suspense fallback={<ContactPageFallback locale={locale} />}>
+      <ContactPageInner locale={locale} />
+    </Suspense>
+  );
+}
+
+async function ContactPageInner({ locale }: { locale: string }) {
+  await connection();
 
   return <ContactContent locale={locale} />;
 }

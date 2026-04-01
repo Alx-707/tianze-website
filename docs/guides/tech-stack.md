@@ -6,9 +6,9 @@
 ## 1. 核心框架
 
 ### 前端框架
-- **Next.js 16.2.0** - React 全栈框架，App Router 架构
+- **Next.js 16.2.2** - React 全栈框架，App Router 架构
 - **React 19.2.4** - 用户界面库，支持服务器组件
-- **TypeScript 5.9.3** - 类型安全的 JavaScript 超集
+- **TypeScript 6.0.2** - 类型安全的 JavaScript 超集
 - **Tailwind CSS 4.2.2** - 原子化 CSS 框架
 
 ### 渲染策略
@@ -19,7 +19,7 @@
 ## 2. 内容管理系统
 
 ### MDX 内容管理
-- **@next/mdx 16.2.0** - Next.js 原生 MDX 支持
+- **@next/mdx 16.2.2** - Next.js 原生 MDX 支持
 - **@mdx-js/loader 3.1.1** - MDX 文件加载器
 - **@mdx-js/react 3.1.1** - React 组件嵌入支持
 - **gray-matter 4.0.3** - Front Matter 解析
@@ -46,7 +46,7 @@ content/
 
 ### 数据服务
 - **Airtable 0.12.2** - 联系表单数据存储
-- **Resend 6.9.4** - 邮件发送服务
+- **Resend 6.10.0** - 邮件发送服务
 
 ## 3. UI 设计系统
 
@@ -62,7 +62,7 @@ content/
   - tabs 1.1.13 - 标签页组件
 - **class-variance-authority 0.7.1** - 样式变体管理
 - **clsx 2.1.1 + tailwind-merge 3.5.0** - 条件类名合并
-- **lucide-react 0.577.0** - SVG 图标库
+- **lucide-react 1.7.0** - SVG 图标库
 - **nextjs-toploader 3.9.17** - 页面加载进度条
 
 ### 字体与排版
@@ -96,17 +96,18 @@ content/
 - **eslint 9.39.2** - 代码质量检查（Flat Config）
   - @eslint/eslintrc 3.3.5 - ESLint 配置工具
   - @eslint/js 9.39.2 - ESLint JavaScript 配置
-- **typescript-eslint 8.57.1** - TypeScript 专用规则
+- **typescript-eslint 8.58.0** - TypeScript 专用规则
 - **eslint-plugin-react 7.37.5** - React 组件规则
 - **eslint-plugin-react-hooks 7.0.1** - React Hooks 最佳实践
 - **eslint-plugin-react-you-might-not-need-an-effect 0.8.5** - useEffect 优化
-- **@next/eslint-plugin-next 16.2.0** - Next.js 专用规则
+- **@next/eslint-plugin-next 16.2.2** - Next.js 专用规则
 - **eslint-plugin-import 2.32.0** - 导入语句规则
 - **eslint-plugin-promise 7.2.1** - Promise 最佳实践
 - **eslint-config-prettier 10.1.8** - Prettier 冲突解决
 - **eslint-plugin-security 3.0.1** - 安全规则检查
 - **eslint-plugin-security-node 1.1.4** - Node.js 安全规则
-- **eslint-config-next 16.2.0** - Next.js ESLint 配置预设
+- **eslint-config-next 16.2.2** - Next.js ESLint 配置预设
+- **当前策略** - 有意保持 ESLint 9；ESLint 10 在这个仓库里仍有上游兼容阻塞，不是漏升级
 
 ### 代码格式化
 - **prettier 3.8.1** - 代码格式化核心
@@ -114,14 +115,16 @@ content/
 - **prettier-plugin-tailwindcss 0.7.2** - Tailwind CSS 类名排序
 
 ### 构建工具
-- **@next/bundle-analyzer 16.2.0** - 包大小分析
+- **@next/bundle-analyzer 16.2.2** - 包大小分析
+- **@opennextjs/cloudflare 1.18.0** - Cloudflare 适配器（当前 `build:cf` 可过，真实 phase6 preview smoke 也已通过）
+- **wrangler 4.79.0** - Cloudflare 本地预览与部署 CLI
 - **Turbopack** - 开发环境构建（`next dev --turbopack`）
 - **Webpack** - 当前 Cloudflare 正式构建链路（`pnpm build:cf` 通过 `scripts/cloudflare/build-webpack.mjs`）
 - **Turbopack / OpenNext CLI** - Cloudflare 对照构建链路（`pnpm build:cf:turbo`，用于兼容性排查）
 - **pnpm 10.13.1** - 包管理器
 - **Lighthouse CI** - 性能监控（替代 size-limit）
-- **dependency-cruiser 17.3.9** - 依赖分析
-- **knip 5.88.0** - 未使用代码检测
+- **dependency-cruiser 17.3.10** - 依赖分析
+- **knip 6.1.1** - 未使用代码检测
 
 ### AST 处理工具
 - **@babel/parser 7.29.2** - Babel AST 解析器
@@ -141,7 +144,7 @@ content/
 - **@commitlint/config-conventional 20.5.0** - 约定式提交
 
 ### TypeScript 类型定义
-- **@types/node 22.19.1** - Node.js 类型定义
+- **@types/node 25.5.0** - Node.js 类型定义（技术上已通过，但版本号仍领先于仓库声明支持的 Node 20-22）
 - **@types/react 19.2.14** - React 19 类型定义
 - **@types/react-dom 19.2.3** - React DOM 类型定义
 - **@types/js-yaml 4.0.9** - JS-YAML 类型定义
@@ -155,9 +158,9 @@ content/
 ## 5. 测试框架
 
 ### 核心测试工具
-- **vitest 4.1.0** - 现代化测试框架
-- **@vitest/coverage-v8 4.1.0** - V8 引擎覆盖率工具
-- **jsdom 27.4.0** - 浏览器环境模拟
+- **vitest 4.1.2** - 现代化测试框架
+- **@vitest/coverage-v8 4.1.2** - V8 引擎覆盖率工具
+- **jsdom 29.0.1** - 浏览器环境模拟
 - **happy-dom 20.3.7** - 轻量级 DOM 环境（性能优化）
 - **@testing-library/react 16.3.2** - React 组件测试
 - **@testing-library/dom 10.4.1** - DOM 测试工具
@@ -165,12 +168,12 @@ content/
 - **@testing-library/user-event 14.6.1** - 用户交互模拟
 
 ### 端到端测试
-- **@playwright/test 1.58.2** - 端到端测试框架
-- **playwright 1.58.2** - Playwright 核心库
+- **@playwright/test 1.59.0** - 端到端测试框架
+- **playwright 1.59.0** - Playwright 核心库
 
 ### 无障碍性和性能测试
 - **@axe-core/playwright 4.11.1** - 无障碍性测试
-- **axe-core 4.11.1** - 无障碍性测试核心
+- **axe-core 4.11.2** - 无障碍性测试核心
 - **@lhci/cli 0.15.1** - Lighthouse CI 性能监控
 - **lighthouse 12.8.2** - 性能和质量审计
 
@@ -191,10 +194,10 @@ content/
 ## 7. 安全与部署
 
 ### 安全防护
-- **@marsidev/react-turnstile 1.4.2** - Cloudflare Turnstile 机器人防护
+- **@marsidev/react-turnstile 1.5.0** - Cloudflare Turnstile 机器人防护
 - **Next.js 安全头配置** - CSP、X-Frame-Options 等
 - **Next.js Middleware** - 中间件安全防护
-- **@t3-oss/env-nextjs 0.13.10** - 类型安全环境变量
+- **@t3-oss/env-nextjs 0.13.11** - 类型安全环境变量
 
 ### 监控与日志
 - **Vercel 函数日志** - 服务端监控
@@ -205,7 +208,7 @@ content/
 ## 8. 国际化与 SEO
 
 ### 国际化
-- **next-intl 4.8.3** - Next.js 国际化框架
+- **next-intl 4.8.4** - Next.js 国际化框架
 - **支持语言** - 英语(en) + 中文(zh)
 - **翻译管理** - 基于Git工作流的手动翻译管理
 - **类型安全** - strictMessageTypeSafety 确保翻译完整性
@@ -261,20 +264,23 @@ content/
 
 ### 默认本地与标准构建
 - `pnpm dev` - 默认本地开发（Turbopack）
-- `pnpm build` - 标准 Next.js 生产构建
+- `pnpm build` - 标准 Next.js 生产构建；当前更稳的人工复核方式是 `pnpm clean:next-artifacts && pnpm build`
 
 ### 当前 Cloudflare 正式链路
-- `pnpm build:cf` - 当前正式 Cloudflare 构建链路，走仓库内的 Webpack 包装器
-- `pnpm preview:cf` - 基于当前 `build:cf` 产物的本地 Wrangler preview
+- `pnpm build:cf` - 当前正式 Cloudflare 构建链路，走仓库内的 Webpack 包装器，并在构建前自动清理 `.next` / `.open-next` / `.wrangler/tmp`
+- `pnpm preview:cf` - 当前默认的本地 Cloudflare 页面预览，走 stock `opennextjs-cloudflare preview`
+- `pnpm preview:cf:wrangler` - 直接基于当前 `build:cf` 产物的本地 Wrangler preview，仅用于诊断
 - `pnpm deploy:cf` - 基于当前 `build:cf` 产物的 Cloudflare 部署
+- `node scripts/cloudflare/deploy-phase6.mjs --env preview` - 当前更强的真实 phase6 preview 发布路径
 
 ### 对照 / 排查链路
 - `pnpm build:cf:turbo` - 仅用于对照和上游兼容性排查，不是默认生产构建
 
 ### 发布验证
-- `pnpm release:verify` - 当前统一发布门禁
+- `pnpm release:verify` - 当前统一发布门禁；现在会串行执行 clean standard build、`build:cf`、`deploy:cf:phase6:dry-run` 和 release smoke
 - `pnpm smoke:cf:preview` - 本地 Cloudflare 页面/跳转/cookie/header 证明
 - `pnpm smoke:cf:deploy -- --base-url <url>` - 真实部署后的 Cloudflare 最终 smoke
+- 当前更可信的 preview proof 地址：`https://tianze-website-gateway-preview.kei-tang.workers.dev`
 
 #### 长期考虑（低优先级）
 - **lottie-react** - 品牌动画和交互反馈
@@ -351,7 +357,7 @@ messages/              # next-intl 国际化文件
 
 ### 性能优化策略
 - **开发模式** - Turbopack (`next dev --turbopack`)
-- **生产构建** - 标准 Next 构建仍为 `pnpm build`；Cloudflare 生产构建默认走 `pnpm build:cf`（Webpack 主链路），`pnpm build:cf:turbo` 仅作对照/排查
+- **生产构建** - 标准 Next 构建仍为 `pnpm build`；最稳的人工复核方式是 `pnpm clean:next-artifacts && pnpm build`。Cloudflare 生产构建默认走 `pnpm build:cf`（Webpack 主链路，现已内置自清理），`pnpm build:cf:turbo` 仅作对照/排查
 - **缓存策略** - SSG/ISR 混合渲染
 - **图片优化** - sharp + WebP/AVIF 支持
 
