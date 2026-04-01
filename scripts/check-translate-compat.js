@@ -105,7 +105,7 @@ const PROTECTED_SURFACE_RULES = [
   },
   {
     file: "src/components/sections/faq-accordion.tsx",
-    markers: ["faq-accordion", "faq-question-"],
+    markers: ["faq-accordion", "faq-question-", 'translate="no"'],
   },
   {
     file: "src/components/sections/final-cta.tsx",
@@ -397,7 +397,7 @@ function collectRiskFindingsFromSource(source, repoPath) {
     LogicalExpression(logicalPath) {
       if (
         logicalPath.node.operator === "&&" &&
-        isTextCarrier(logicalPath.node.right) &&
+        branchIsTextCarrier(logicalPath.get("right")) &&
         isDirectJsxChild(logicalPath) &&
         !hasProtectedAncestor(logicalPath)
       ) {
@@ -602,7 +602,9 @@ function collectMissingMarkers() {
       continue;
     }
 
-    missing.push(...collectMissingMarkersFromSource(source, rule.file, rule.markers));
+    missing.push(
+      ...collectMissingMarkersFromSource(source, rule.file, rule.markers),
+    );
   }
 
   return missing;

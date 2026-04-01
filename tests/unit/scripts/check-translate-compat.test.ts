@@ -61,6 +61,31 @@ describe("check-translate-compat risk scanning", () => {
     );
   });
 
+  it("flags direct JSX logical branches that resolve to template text", () => {
+    const findings = collectRiskFindingsFromSource(
+      `
+        export function Example({
+          shouldShow,
+          count,
+        }: {
+          shouldShow: boolean;
+          count: number;
+        }) {
+          return <div>{shouldShow && \`Ready \${count}\`}</div>;
+        }
+      `,
+      "src/components/forms/example.tsx",
+    );
+
+    expect(findings).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          kind: "logical-direct-string",
+        }),
+      ]),
+    );
+  });
+
   it("follows simple alias chains before JSX render", () => {
     const findings = collectRiskFindingsFromSource(
       `
@@ -143,6 +168,26 @@ describe("check-translate-compat marker scanning", () => {
       `,
       "src/components/layout/header.tsx",
       ["header-nav-label-", "notranslate", 'translate="no"'],
+    );
+
+    expect(missing).toEqual([]);
+  });
+
+  it("requires FAQ markers to include the translation guard", () => {
+    const missing = collectMissingMarkersFromSource(
+      `
+        export function Example({ item }: { item: { key: string } }) {
+          return (
+            <div data-testid="faq-accordion">
+              <span data-testid={\`faq-question-\${item.key}\`} translate="no">
+                Question
+              </span>
+            </div>
+          );
+        }
+      `,
+      "src/components/sections/faq-accordion.tsx",
+      ["faq-accordion", "faq-question-", 'translate="no"'],
     );
 
     expect(missing).toEqual([]);
