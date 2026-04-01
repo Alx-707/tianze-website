@@ -106,6 +106,8 @@ function normalizeMutateScopes(report) {
 }
 
 function isDirectoryCovered(directory, mutateScopes) {
+  // Stryker mutate scopes are glob prefixes like "src/lib/security/**/*.ts",
+  // so startsWith(directory) is enough to tell whether a scope targets that directory tree.
   return mutateScopes.some((scope) => scope.startsWith(directory));
 }
 

@@ -116,5 +116,37 @@ describe("check-mutation-required", () => {
         1_700_000_000_900,
       );
     });
+
+    it("rejects a fresh report when mutate scope misses the touched protected directory", () => {
+      const isReportFreshEnoughFn = vi.fn(() => true);
+
+      expect(() =>
+        mutationCheck.main({
+          getChangedFilesFn: () => ["src/lib/security/rate-limit.ts"],
+          getTouchedTargetDirectoriesFn:
+            mutationCheck.getTouchedTargetDirectories,
+          getMergeBaseTimestampMsFn: () => 1_700_000_000_000,
+          getLatestRelevantChangeTimestampMsFn: () => 1_700_000_000_900,
+          loadMutationReportFn: () => ({
+            config: {
+              mutate: ["src/lib/lead-pipeline/**/*.ts"],
+            },
+          }),
+          isReportFreshEnoughFn,
+        }),
+      ).toThrow(
+        [
+          "变异测试报告 scope 不覆盖本次改动。",
+          "命中目录: src/lib/security/",
+          "报告 mutate scope: src/lib/lead-pipeline/**/*.ts",
+          "未覆盖目录: src/lib/security/",
+          "请运行 pnpm test:mutation 并更新 reports/mutation/mutation-report.json",
+        ].join("\n"),
+      );
+      expect(isReportFreshEnoughFn).toHaveBeenCalledWith(
+        mutationCheck.REPORT_PATH,
+        1_700_000_000_900,
+      );
+    });
   });
 });
