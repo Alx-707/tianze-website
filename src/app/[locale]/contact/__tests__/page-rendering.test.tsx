@@ -448,6 +448,7 @@ describe("Contact Page - Main Rendering Tests", () => {
 
       expect(metadata).toBeDefined();
       expect(metadata.title).toBe("Contact Us");
+      expect(metadata).toHaveProperty("other.google", "notranslate");
     });
 
     it("应该处理空翻译", async () => {

@@ -321,6 +321,9 @@ describe("ContactPage", () => {
       expect(metadata).toMatchObject({
         title: "Contact Us",
         description: "Get in touch with our team",
+        other: {
+          google: "notranslate",
+        },
       });
     });
 

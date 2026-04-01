@@ -295,6 +295,9 @@ describe("Contact Page I18n - Main Tests", () => {
       expect(metadata).toMatchObject({
         title: "Contact Us",
         description: "Get in touch with our team",
+        other: {
+          google: "notranslate",
+        },
       });
     });
 
@@ -337,6 +340,7 @@ describe("Contact Page I18n - Main Tests", () => {
 
       expect(metadata).toHaveProperty("title", "Custom Title");
       expect(metadata).toHaveProperty("description", "Custom Description");
+      expect(metadata).toHaveProperty("other.google", "notranslate");
     });
 
     it("应该支持英文locale", async () => {

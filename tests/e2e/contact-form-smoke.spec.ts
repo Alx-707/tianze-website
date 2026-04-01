@@ -116,6 +116,19 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
     if (!hasForm) {
       throw new Error(`Contact form did not render: ${targetUrl}`);
     }
+
+    await expectInteractiveContactForm(page);
+  };
+
+  const expectInteractiveContactForm = async (page: Page): Promise<void> => {
+    const firstNameInput = page.locator('input[name="firstName"]').first();
+    const messageInput = page.locator('textarea[name="message"]').first();
+    const privacyCheckbox = page.locator('input[name="acceptPrivacy"]').first();
+
+    await expect(firstNameInput).toBeVisible();
+    await expect(firstNameInput).toBeEditable();
+    await expect(messageInput).toBeEditable();
+    await expect(privacyCheckbox).toBeEnabled();
   };
 
   test.beforeEach(async ({ page }) => {
@@ -400,17 +413,56 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
     test("应该在超过速率限制后显示错误（英文）", async ({ page }) => {
       await gotoContactPage(page, test.info(), "en");
 
-      // test-mode smoke 不做真实提交；这里只验证表单主体仍然可见。
-      const form = page.locator("form").first();
-      await expect(form).toBeVisible();
+      await page.fill('input[name="firstName"]', "Test");
+      await page.fill('input[name="lastName"]', "User");
+      await page.fill('input[name="email"]', "test@example.com");
+      await page.fill('input[name="company"]', "Test Company");
+      await page.fill(
+        'textarea[name="message"]',
+        "Test message for rate limiting",
+      );
+
+      const privacyCheckbox = page.getByRole("checkbox", {
+        name: /privacy|accept/i,
+      });
+      if (await privacyCheckbox.isVisible()) {
+        await privacyCheckbox.check();
+      }
+
+      await expect(page.locator('input[name="firstName"]')).toHaveValue("Test");
+      await expect(page.locator('input[name="lastName"]')).toHaveValue("User");
+      await expect(page.locator('input[name="email"]')).toHaveValue(
+        "test@example.com",
+      );
+      await expect(page.locator('textarea[name="message"]')).toHaveValue(
+        "Test message for rate limiting",
+      );
     });
 
     test("应该在超过速率限制后显示错误（中文）", async ({ page }) => {
       await gotoContactPage(page, test.info(), "zh");
 
-      // 验证表单存在
-      const form = page.locator("form").first();
-      await expect(form).toBeVisible();
+      await page.fill('input[name="firstName"]', "测试");
+      await page.fill('input[name="lastName"]', "用户");
+      await page.fill('input[name="email"]', "test@example.com");
+      await page.fill('input[name="company"]', "测试公司");
+      await page.fill('textarea[name="message"]', "用于速率限制验证的测试消息");
+
+      const privacyCheckbox = page.getByRole("checkbox", {
+        name: /隐私政策|同意/i,
+      });
+      if (await privacyCheckbox.isVisible()) {
+        await privacyCheckbox.check();
+      }
+
+      await expect(page.locator('input[name="firstName"]')).toHaveValue("测试");
+      await expect(page.locator('input[name="lastName"]')).toHaveValue("用户");
+      await expect(page.locator('input[name="email"]')).toHaveValue(
+        "test@example.com",
+      );
+      await expect(page.locator('textarea[name="message"]')).toHaveValue(
+        "用于速率限制验证的测试消息",
+      );
     });
   });
 

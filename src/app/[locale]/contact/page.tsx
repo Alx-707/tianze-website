@@ -81,7 +81,7 @@ export async function generateMetadata({
     namespace: "underConstruction.pages.contact",
   });
 
-  return generateMetadataForPath({
+  const metadata = generateMetadataForPath({
     locale: locale as SeoLocale,
     pageType: "contact",
     path: "/contact",
@@ -90,6 +90,14 @@ export async function generateMetadata({
       description: t("description"),
     },
   });
+
+  return {
+    ...metadata,
+    other: {
+      ...metadata.other,
+      google: "notranslate",
+    },
+  };
 }
 
 interface ContactMethodsCardProps {

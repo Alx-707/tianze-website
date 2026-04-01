@@ -6,7 +6,7 @@
  */
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Check, Globe, Menu, X } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import {
@@ -36,6 +36,22 @@ interface MobileNavigationProps {
   languageLabel?: string;
 }
 
+function useCloseMenuOnPathChange(
+  pathname: string,
+  isOpen: boolean,
+  onClose: () => void,
+) {
+  const previousPathnameRef = useRef(pathname);
+
+  useEffect(() => {
+    if (previousPathnameRef.current !== pathname && isOpen) {
+      queueMicrotask(onClose);
+    }
+
+    previousPathnameRef.current = pathname;
+  }, [isOpen, onClose, pathname]);
+}
+
 export function MobileNavigation({
   className,
   initialOpen = false,
@@ -46,6 +62,7 @@ export function MobileNavigation({
   const t = useTranslations();
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(initialOpen);
+  useCloseMenuOnPathChange(pathname, isOpen, () => setIsOpen(false));
 
   return (
     <div className={cn("header-mobile-only", className)}>
