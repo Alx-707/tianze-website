@@ -90,20 +90,18 @@ describe("Airtable Advanced Tests", () => {
   });
 
   describe("Edge Cases", () => {
-    it("should handle very large form data", async () => {
+    it("should handle very large lead data", async () => {
       const service = new AirtableServiceClass();
 
       // Override service configuration to make it ready
       setServiceReady(service);
 
-      const largeFormData = {
+      const largeLeadData = {
         firstName: "John",
         lastName: "Doe",
         email: "john.doe@example.com",
         company: "Test Company",
         message: "A".repeat(10000), // Very large message
-        acceptPrivacy: true,
-        website: "",
       };
 
       const mockRecord = {
@@ -115,26 +113,24 @@ describe("Airtable Advanced Tests", () => {
       mockCreate.mockClear();
       mockCreate.mockResolvedValue([mockRecord]);
 
-      const result = await service.createContact(largeFormData);
+      const result = await service.createLead("contact", largeLeadData);
 
       expect(result).toBeDefined();
       expect(mockCreate).toHaveBeenCalled();
     });
 
-    it("should handle special characters in form data", async () => {
+    it("should handle special characters in lead data", async () => {
       const service = new AirtableServiceClass();
 
       // Override service configuration to make it ready
       setServiceReady(service);
 
-      const specialCharFormData = {
+      const specialCharLeadData = {
         firstName: "José",
         lastName: "García-López",
         email: "jose.garcia@example.com", // Use ASCII-compatible email
         company: "Tëst Çömpäny",
         message: "Special chars: àáâãäåæçèéêë",
-        acceptPrivacy: true,
-        website: "",
       };
 
       const mockRecord = {
@@ -146,7 +142,7 @@ describe("Airtable Advanced Tests", () => {
       mockCreate.mockClear();
       mockCreate.mockResolvedValue([mockRecord]);
 
-      const result = await service.createContact(specialCharFormData);
+      const result = await service.createLead("contact", specialCharLeadData);
 
       expect(result).toBeDefined();
       expect(mockCreate).toHaveBeenCalledWith([
@@ -187,21 +183,19 @@ describe("Airtable Advanced Tests", () => {
       mockSelect.mockClear();
       mockSelect.mockReturnValue(mockSelectChain);
 
-      const formData = {
+      const leadData = {
         firstName: "John",
         lastName: "Doe",
         email: "john.doe@example.com",
         company: "Test Company",
         message: "Test message",
-        acceptPrivacy: true,
-        website: "",
       };
 
       // Run concurrent operations
       const promises = [
-        service.createContact(formData),
+        service.createLead("contact", leadData),
         service.getContacts(),
-        service.createContact({ ...formData, firstName: "Jane" }),
+        service.createLead("contact", { ...leadData, firstName: "Jane" }),
       ];
 
       const results = await Promise.all(promises);

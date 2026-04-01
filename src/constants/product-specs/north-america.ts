@@ -23,7 +23,7 @@ export const NORTH_AMERICA_SPECS = {
   families: [
     {
       slug: "conduit-sweeps-elbows",
-      images: ["/images/products/placeholder-sweep.svg"],
+      images: ["/images/products/pvc-conduit-bend.svg"],
       highlights: [
         "UL 651 Certified",
         "100% Virgin PVC",
@@ -70,7 +70,7 @@ export const NORTH_AMERICA_SPECS = {
     },
     {
       slug: "couplings",
-      images: ["/images/products/placeholder-coupling.svg"],
+      images: ["/images/products/sample-product.svg"],
       highlights: [
         "Double-Bell Design",
         "Secure Conduit Joints",
@@ -111,7 +111,7 @@ export const NORTH_AMERICA_SPECS = {
     },
     {
       slug: "conduit-pipes",
-      images: ["/images/products/placeholder-pipe.svg"],
+      images: ["/images/products/sample-product.svg"],
       highlights: [
         "Schedule 40 & 80",
         "Standard Lengths",

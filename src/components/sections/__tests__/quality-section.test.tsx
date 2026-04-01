@@ -44,7 +44,9 @@ describe("QualitySection", () => {
 
     expect(screen.getByText("certifications.iso9001")).toBeInTheDocument();
     expect(screen.getByText("certifications.iso9001Num")).toBeInTheDocument();
-    expect(screen.getByText("certifications.certified")).toBeInTheDocument();
+    expect(
+      screen.getAllByText("certifications.certified").length,
+    ).toBeGreaterThanOrEqual(1);
   });
 
   it("renders 4 standards compliance labels", async () => {

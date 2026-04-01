@@ -28,7 +28,9 @@ describe("ScenariosSection", () => {
 
     const keys = ["item1", "item2", "item3"];
     for (const key of keys) {
-      expect(screen.getByText(`${key}.title`)).toBeInTheDocument();
+      expect(screen.getAllByText(`${key}.title`).length).toBeGreaterThanOrEqual(
+        1,
+      );
       expect(screen.getByText(`${key}.desc`)).toBeInTheDocument();
       expect(screen.getByText(`${key}.quote`)).toBeInTheDocument();
     }

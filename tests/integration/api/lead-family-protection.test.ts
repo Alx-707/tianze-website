@@ -8,6 +8,13 @@ import * as subscribeRoute from "@/app/api/subscribe/route";
 import { validateFormData } from "@/app/api/contact/contact-api-validation";
 import { processLead } from "@/lib/lead-pipeline";
 
+/**
+ * Protection contract checks for the lead API family.
+ *
+ * This suite asserts shared idempotency, rate-limit, and Turnstile semantics,
+ * but still uses mocks around the deeper processing pipeline. Treat it as an
+ * integration-layer guard, not deployed proof.
+ */
 vi.mock("@/lib/security/distributed-rate-limit", () => ({
   checkDistributedRateLimit: vi.fn(async () => ({
     allowed: true,

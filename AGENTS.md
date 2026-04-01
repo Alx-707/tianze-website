@@ -128,3 +128,12 @@
   - 如果这类 local preview 500 只出现在页面渲染阶段，而 redirect / cookie / internal header 检查仍然正常，先归类为 stock preview 边界，不要直接回滚业务改动；
   - 本地 Cloudflare 页面验证仍优先走既有的 `smoke:cf:preview` 分层策略；
   - 如果未来要把 Wrangler 本地 preview 提升为更强的正式证明面，必须先补一轮本地可运行证据。
+
+### 13. AI 味道 No-Go Defaults
+- 不要为关键路径新增测试专用分支。`TEST_MODE`、`PLAYWRIGHT_TEST`、`ALLOW_MEMORY_*` 只能作为明确的 test/preview 边界，不能拿来充当最终证明。
+- 不要把关键失败改成 `skip`。Contact / inquiry / subscribe / deploy smoke 一旦坏了，默认应该报红。
+- 不要给安全 / 限流 / 幂等 / 去重链路新增静默 fail-open。必要降级必须可观察、可区分，而且不能伪装成正常成功。
+- 不要把测试常量、测试工具、`src/test/**`、`src/testing/**` 引进生产代码。
+- 不要在 live 页面留下 placeholder 资源、明显占位块或 `Coming Soon` 设计。
+- 不要让主要依赖 heavy mock 的弱测试在文档里被描述成主证明。
+- 只要改动了 contact / inquiry / subscribe / health / behavioral contracts / smoke tests，就必须同步检查行为合同和最终证明面是否仍然成立。

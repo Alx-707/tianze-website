@@ -119,14 +119,12 @@ describe("Airtable Service - Main Operations Tests", () => {
     vi.clearAllMocks();
   });
 
-  const validFormData = {
+  const validLeadData = {
     firstName: "John",
     lastName: "Doe",
     email: "john.doe@example.com",
     company: "Test Company",
     message: "This is a test message",
-    acceptPrivacy: true,
-    website: "",
   };
 
   describe("核心服务导出验证", () => {
@@ -142,7 +140,7 @@ describe("Airtable Service - Main Operations Tests", () => {
   });
 
   describe("基本操作集成测试", () => {
-    it("should handle basic contact creation", async () => {
+    it("should handle basic lead creation (contact type)", async () => {
       const service = new AirtableServiceClass();
 
       // Override service configuration to make it ready
@@ -151,12 +149,12 @@ describe("Airtable Service - Main Operations Tests", () => {
       // Mock successful creation
       const mockRecordData = {
         id: "rec123456",
-        fields: validFormData,
+        fields: validLeadData,
         createdTime: "2023-01-01T00:00:00Z",
       };
       mockCreate.mockResolvedValue([createMockRecord(mockRecordData)]);
 
-      const result = await service.createContact(validFormData);
+      const result = await service.createLead("contact", validLeadData);
 
       expect(result).toEqual({
         id: "rec123456",
@@ -250,9 +248,9 @@ describe("Airtable Service - Main Operations Tests", () => {
         // Do nothing - prevent initialization
       });
 
-      await expect(service.createContact(validFormData)).rejects.toThrow(
-        "Airtable service is not configured",
-      );
+      await expect(
+        service.createLead("contact", validLeadData),
+      ).rejects.toThrow("Airtable service is not configured");
     });
 
     it("should handle API errors gracefully", async () => {
@@ -262,9 +260,9 @@ describe("Airtable Service - Main Operations Tests", () => {
 
       mockCreate.mockRejectedValue(new Error("API Error"));
 
-      await expect(service.createContact(validFormData)).rejects.toThrow(
-        "Failed to create contact record",
-      );
+      await expect(
+        service.createLead("contact", validLeadData),
+      ).rejects.toThrow("Failed to create lead record");
     });
 
     it("should handle retrieval errors gracefully", async () => {

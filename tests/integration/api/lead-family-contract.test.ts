@@ -14,6 +14,13 @@ import * as contactRoute from "@/app/api/contact/route";
 import * as inquiryRoute from "@/app/api/inquiry/route";
 import * as subscribeRoute from "@/app/api/subscribe/route";
 
+/**
+ * Auxiliary contract surface checks only.
+ *
+ * This suite intentionally mocks the core protection and submission pipeline so
+ * it can verify response shape and observability headers. It is not the primary
+ * proof for runtime protection semantics.
+ */
 vi.mock("@/lib/security/distributed-rate-limit", () => ({
   checkDistributedRateLimit: vi.fn(async () => ({
     allowed: true,
@@ -112,7 +119,7 @@ function expectLeadObservabilityHeaders(
   expect(response.headers.get(REQUEST_ID_HEADER)).toBeTruthy();
 }
 
-describe("lead API family contract", () => {
+describe("lead API family response contract (auxiliary)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     resetIdempotencyState();

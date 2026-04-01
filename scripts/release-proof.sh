@@ -1,6 +1,21 @@
 #!/bin/bash
 set -euo pipefail
 
+if [[ "${VALIDATE_CONFIG_SKIP_RUNTIME:-}" == "true" || "${VALIDATE_CONFIG_SKIP_RUNTIME:-}" == "1" ]]; then
+  echo "release-proof must not run with VALIDATE_CONFIG_SKIP_RUNTIME enabled" >&2
+  exit 1
+fi
+
+if [[ "${ALLOW_MEMORY_RATE_LIMIT:-}" == "true" || "${ALLOW_MEMORY_RATE_LIMIT:-}" == "1" ]]; then
+  echo "release-proof must not run with ALLOW_MEMORY_RATE_LIMIT enabled" >&2
+  exit 1
+fi
+
+if [[ "${ALLOW_MEMORY_IDEMPOTENCY:-}" == "true" || "${ALLOW_MEMORY_IDEMPOTENCY:-}" == "1" ]]; then
+  echo "release-proof must not run with ALLOW_MEMORY_IDEMPOTENCY enabled" >&2
+  exit 1
+fi
+
 echo "== Release verification flow =="
 pnpm type-check
 pnpm lint:check

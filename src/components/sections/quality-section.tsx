@@ -1,5 +1,6 @@
 import {
   type LucideIcon,
+  Building2,
   Check,
   Clock,
   FileText,
@@ -8,6 +9,7 @@ import {
   User,
 } from "lucide-react";
 import { getTranslations } from "next-intl/server";
+import { siteFacts } from "@/config/site-facts";
 import { HomepageSectionShell } from "@/components/sections/homepage-section-shell";
 
 const COMMITMENT_KEYS = [
@@ -105,9 +107,47 @@ export async function QualitySection() {
         ))}
       </div>
 
-      {/* Logo wall placeholder */}
-      <div className="mt-8 flex h-20 items-center justify-center rounded-lg border-2 border-dashed border-border">
-        <span className="text-sm text-muted-foreground">{t("logoWall")}</span>
+      <div className="mt-8 rounded-lg border bg-card px-5 py-4">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+              <Building2 size={18} aria-hidden />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-foreground">
+                {t("logoWall")}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {t("proofStrip.note")}
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-3 text-center md:min-w-[320px]">
+            <div className="rounded-md bg-muted/60 px-3 py-2">
+              <div className="text-sm font-semibold text-foreground">
+                ISO 9001
+              </div>
+              <div className="text-[11px] text-muted-foreground">
+                {t("certifications.certified")}
+              </div>
+            </div>
+            <div className="rounded-md bg-muted/60 px-3 py-2">
+              <div className="text-sm font-semibold text-foreground">4</div>
+              <div className="text-[11px] text-muted-foreground">
+                {t("proofStrip.standards")}
+              </div>
+            </div>
+            <div className="rounded-md bg-muted/60 px-3 py-2">
+              <div className="text-sm font-semibold text-foreground">
+                {siteFacts.stats.exportCountries}+
+              </div>
+              <div className="text-[11px] text-muted-foreground">
+                {t("proofStrip.countries")}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </HomepageSectionShell>
   );

@@ -3,6 +3,12 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { resetIdempotencyState } from "@/lib/idempotency";
 import * as contactRoute from "@/app/api/contact/route";
 
+/**
+ * Auxiliary route-level checks for /api/contact.
+ *
+ * The heavy mocks here keep this suite fast, but they also mean it should not
+ * be treated as the main proof for contact protection behavior.
+ */
 vi.mock("@/lib/security/distributed-rate-limit", () => ({
   checkDistributedRateLimit: vi.fn(async () => ({
     allowed: true,

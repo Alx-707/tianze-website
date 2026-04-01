@@ -122,18 +122,16 @@ describe("Airtable Tests - Index", () => {
     });
   });
 
-  describe("Basic createContact", () => {
-    const validFormData = {
+  describe("Basic createLead (contact)", () => {
+    const validLeadData = {
       firstName: "John",
       lastName: "Doe",
       email: "john.doe@example.com",
       company: "Test Company",
       message: "This is a test message",
-      acceptPrivacy: true,
-      website: "",
     };
 
-    it("should create contact record successfully", async () => {
+    it("should create lead record successfully", async () => {
       const service = new AirtableServiceClass();
 
       // Override service configuration to make it ready
@@ -163,7 +161,7 @@ describe("Airtable Tests - Index", () => {
       mockCreate.mockClear();
       mockCreate.mockResolvedValue([mockRecord]);
 
-      const result = await service.createContact(validFormData);
+      const result = await service.createLead("contact", validLeadData);
 
       expect(result).toEqual({
         id: "rec123456",
@@ -199,9 +197,9 @@ describe("Airtable Tests - Index", () => {
       (service as unknown as AirtableServicePrivate).isConfigured = false;
       (service as unknown as AirtableServicePrivate).base = null;
 
-      await expect(service.createContact(validFormData)).rejects.toThrow(
-        "Airtable service is not configured",
-      );
+      await expect(
+        service.createLead("contact", validLeadData),
+      ).rejects.toThrow("Airtable service is not configured");
 
       initSpy.mockRestore();
     });

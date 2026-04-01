@@ -166,6 +166,7 @@ export default defineConfig({
             NEXT_PUBLIC_SECURITY_MODE: "relaxed",
             SECURITY_HEADERS_ENABLED: "false",
             SKIP_ENV_VALIDATION: "true",
+            VALIDATE_CONFIG_SKIP_RUNTIME: "true",
           },
         },
       }),

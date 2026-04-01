@@ -1,20 +1,19 @@
 import { expect, test, type Page, type TestInfo } from "@playwright/test";
 
 /**
- * Contact Form Smoke Tests - Staging Environment
+ * Contact Form Smoke Tests - Test Mode
  *
- * 测试范围：
- * 1. Turnstile 验证流程
- * 2. 速率限制（Rate Limiting）
- * 3. 国际化错误信息
- * 4. 表单提交与反馈
+ * 这是本地/CI 的 test-mode smoke：
+ * - 允许使用 Playwright 注入的测试环境与 Turnstile 测试路径
+ * - 用来验证联系页结构、基础交互、国际化和 smoke 级行为
+ * - 不是生产态最终证明；真实提交链路由 post-deploy smoke 负责
  */
 
 // Contact 页面较重，在完整 E2E + 4 workers 下容易在高峰期超时，
 // 这里将本文件内用例串行执行，降低瞬时负载。
 test.describe.configure({ mode: "serial" });
 
-test.describe("Contact Form - Smoke Tests (Staging)", () => {
+test.describe("Contact Form - Test-Mode Smoke", () => {
   const supportedLocales = (process.env.NEXT_PUBLIC_SUPPORTED_LOCALES || "en")
     .split(",")
     .map((locale) => locale.trim())
@@ -68,7 +67,7 @@ test.describe("Contact Form - Smoke Tests (Staging)", () => {
     page: Page,
     info: TestInfo,
     locale: "en" | "zh" = "en",
-  ): Promise<{ hasForm: boolean; hasError: boolean }> => {
+  ): Promise<void> => {
     const targetUrl = resolveContactUrl(info, locale);
     await page.goto(targetUrl, {
       waitUntil: "domcontentloaded",
@@ -104,11 +103,19 @@ test.describe("Contact Form - Smoke Tests (Staging)", () => {
       await page.waitForTimeout(2000);
       const formCountRetry = await page.locator("form").count();
       if (formCountRetry === 0) {
-        hasError = true; // 表单未加载，跳过测试
+        hasError = true;
       }
     }
 
-    return { hasForm, hasError };
+    if (hasError) {
+      throw new Error(
+        `Contact form rendered an error state in test-mode smoke: ${targetUrl}`,
+      );
+    }
+
+    if (!hasForm) {
+      throw new Error(`Contact form did not render: ${targetUrl}`);
+    }
   };
 
   test.beforeEach(async ({ page }) => {
@@ -121,16 +128,7 @@ test.describe("Contact Form - Smoke Tests (Staging)", () => {
 
   test.describe("1. Turnstile 验证流程", () => {
     test("应该加载 Turnstile widget（英文页面）", async ({ page }) => {
-      const { hasError } = await gotoContactPage(page, test.info(), "en");
-
-      // 如果表单组件显示错误状态，跳过此测试（业务逻辑问题，非测试问题）
-      if (hasError) {
-        console.warn(
-          "⚠️  Contact form showing error state - skipping Turnstile test",
-        );
-        test.skip(true, "Contact form component rendered error boundary");
-        return;
-      }
+      await gotoContactPage(page, test.info(), "en");
 
       // 检查页面标题
       await expect(page).toHaveTitle(/Contact/i);
@@ -144,8 +142,8 @@ test.describe("Contact Form - Smoke Tests (Staging)", () => {
       await page.waitForTimeout(3000);
 
       // 检查 Turnstile widget 容器或 iframe
-      // 注意：Production 环境可能因为 CSP、环境变量或其他原因未加载 Turnstile
-      // 这是非阻塞性问题，只记录警告
+      // 注意：test-mode smoke 仍可能因为懒加载时机等原因暂时看不到 Turnstile 元素
+      // 这是非阻塞性检查，只记录警告
       const hasTurnstileIframe =
         (await page
           .locator('iframe[src*="challenges.cloudflare.com"]')
@@ -164,13 +162,13 @@ test.describe("Contact Form - Smoke Tests (Staging)", () => {
 
       // 记录 Turnstile 状态（非阻塞性检查）
       if (!hasTurnstileElement) {
+        console.warn("⚠️  Turnstile widget not detected in test-mode smoke");
         console.warn(
-          "⚠️  Turnstile widget not detected in Production environment",
+          "    This may be due to lazy loading timing or local test harness configuration",
         );
         console.warn(
-          "    This may be due to CSP, missing environment variables, or lazy loading timing",
+          "    Real submission behavior must still be verified by post-deploy smoke",
         );
-        console.warn("    Turnstile functionality should be verified manually");
       } else {
         console.log("✅ Turnstile element detected");
       }
@@ -180,12 +178,7 @@ test.describe("Contact Form - Smoke Tests (Staging)", () => {
     });
 
     test("应该加载 Turnstile widget（中文页面）", async ({ page }) => {
-      const { hasError } = await gotoContactPage(page, test.info(), "zh");
-
-      if (hasError) {
-        test.skip(true, "Contact form component rendered error boundary");
-        return;
-      }
+      await gotoContactPage(page, test.info(), "zh");
 
       // 检查页面标题
       await expect(page).toHaveTitle(/联系/i);
@@ -196,12 +189,7 @@ test.describe("Contact Form - Smoke Tests (Staging)", () => {
     });
 
     test("提交按钮初始状态应该被禁用", async ({ page }) => {
-      const { hasError } = await gotoContactPage(page, test.info(), "en");
-
-      if (hasError) {
-        test.skip(true, "Contact form component rendered error boundary");
-        return;
-      }
+      await gotoContactPage(page, test.info(), "en");
 
       const submitButton = page.getByRole("button", {
         name: /send message|submit/i,
@@ -212,11 +200,7 @@ test.describe("Contact Form - Smoke Tests (Staging)", () => {
 
   test.describe("2. 表单验证与错误信息", () => {
     test("应该显示必填字段错误（英文）", async ({ page }) => {
-      const { hasError } = await gotoContactPage(page, test.info(), "en");
-      if (hasError) {
-        test.skip(true, "Contact form component rendered error boundary");
-        return;
-      }
+      await gotoContactPage(page, test.info(), "en");
 
       // 检查所有必填字段的 required 属性
       // 注意：必填标记 (*) 使用 CSS ::after 伪元素，Playwright 无法直接检测
@@ -247,11 +231,7 @@ test.describe("Contact Form - Smoke Tests (Staging)", () => {
     });
 
     test("应该显示必填字段错误（中文）", async ({ page }) => {
-      const { hasError } = await gotoContactPage(page, test.info(), "zh");
-      if (hasError) {
-        test.skip(true, "Contact form component rendered error boundary");
-        return;
-      }
+      await gotoContactPage(page, test.info(), "zh");
 
       // 检查所有必填字段的 required 属性
       const requiredInputs = page.locator(
@@ -270,11 +250,7 @@ test.describe("Contact Form - Smoke Tests (Staging)", () => {
     });
 
     test("应该验证邮箱格式", async ({ page }) => {
-      const { hasError } = await gotoContactPage(page, test.info(), "en");
-      if (hasError) {
-        test.skip(true, "Contact form component rendered error boundary");
-        return;
-      }
+      await gotoContactPage(page, test.info(), "en");
 
       const emailInput = page.locator('input[name="email"]');
       await expect(emailInput).toHaveAttribute("type", "email");
@@ -283,11 +259,7 @@ test.describe("Contact Form - Smoke Tests (Staging)", () => {
 
   test.describe("3. 表单字段渲染", () => {
     test("应该渲染所有必需字段（英文）", async ({ page }) => {
-      const { hasError } = await gotoContactPage(page, test.info(), "en");
-      if (hasError) {
-        test.skip(true, "Contact form component rendered error boundary");
-        return;
-      }
+      await gotoContactPage(page, test.info(), "en");
 
       // 检查所有必需字段
       await expect(page.locator('input[name="firstName"]')).toBeVisible();
@@ -301,11 +273,7 @@ test.describe("Contact Form - Smoke Tests (Staging)", () => {
     });
 
     test("应该渲染所有必需字段（中文）", async ({ page }) => {
-      const { hasError } = await gotoContactPage(page, test.info(), "zh");
-      if (hasError) {
-        test.skip(true, "Contact form component rendered error boundary");
-        return;
-      }
+      await gotoContactPage(page, test.info(), "zh");
 
       // 检查所有必需字段
       await expect(page.locator('input[name="firstName"]')).toBeVisible();
@@ -318,11 +286,7 @@ test.describe("Contact Form - Smoke Tests (Staging)", () => {
 
   test.describe("4. 国际化（i18n）验证", () => {
     test("英文页面应该显示英文标签", async ({ page }) => {
-      const { hasError } = await gotoContactPage(page, test.info(), "en");
-      if (hasError) {
-        test.skip(true, "Contact form component rendered error boundary");
-        return;
-      }
+      await gotoContactPage(page, test.info(), "en");
 
       // 检查英文标签
       await expect(page.getByText(/first name/i).first()).toBeVisible();
@@ -332,11 +296,7 @@ test.describe("Contact Form - Smoke Tests (Staging)", () => {
     });
 
     test("中文页面应该显示中文标签", async ({ page }) => {
-      const { hasError } = await gotoContactPage(page, test.info(), "zh");
-      if (hasError) {
-        test.skip(true, "Contact form component rendered error boundary");
-        return;
-      }
+      await gotoContactPage(page, test.info(), "zh");
 
       // 检查中文标签
       await expect(page.getByText(/名字/).first()).toBeVisible();
@@ -363,11 +323,7 @@ test.describe("Contact Form - Smoke Tests (Staging)", () => {
     });
 
     test("表单应该有正确的 ARIA 属性", async ({ page }) => {
-      const { hasError } = await gotoContactPage(page, test.info(), "en");
-      if (hasError) {
-        test.skip(true, "Contact form component rendered error boundary");
-        return;
-      }
+      await gotoContactPage(page, test.info(), "en");
 
       // 检查表单的可访问性
       const form = page.locator("form").first();
@@ -388,11 +344,7 @@ test.describe("Contact Form - Smoke Tests (Staging)", () => {
       // 设置移动设备视口
       await page.setViewportSize({ width: 375, height: 667 });
 
-      const { hasError } = await gotoContactPage(page, test.info(), "en");
-      if (hasError) {
-        test.skip(true, "Contact form component rendered error boundary");
-        return;
-      }
+      await gotoContactPage(page, test.info(), "en");
 
       // 检查表单在移动设备上可见
       const form = page.locator("form").first();
@@ -409,11 +361,7 @@ test.describe("Contact Form - Smoke Tests (Staging)", () => {
       // 设置桌面设备视口
       await page.setViewportSize({ width: 1920, height: 1080 });
 
-      const { hasError } = await gotoContactPage(page, test.info(), "en");
-      if (hasError) {
-        test.skip(true, "Contact form component rendered error boundary");
-        return;
-      }
+      await gotoContactPage(page, test.info(), "en");
 
       // 检查表单在桌面设备上可见
       const form = page.locator("form").first();
@@ -450,11 +398,7 @@ test.describe("Contact Form - Smoke Tests (Staging)", () => {
 
   test.describe("8. 速率限制（Rate Limiting）", () => {
     test("应该在超过速率限制后显示错误（英文）", async ({ page }) => {
-      const { hasError } = await gotoContactPage(page, test.info(), "en");
-      if (hasError) {
-        test.skip(true, "Contact form component rendered error boundary");
-        return;
-      }
+      await gotoContactPage(page, test.info(), "en");
 
       // 等待 Turnstile 加载
       await page.waitForTimeout(2000);
@@ -475,11 +419,7 @@ test.describe("Contact Form - Smoke Tests (Staging)", () => {
     });
 
     test("应该在超过速率限制后显示错误（中文）", async ({ page }) => {
-      const { hasError } = await gotoContactPage(page, test.info(), "zh");
-      if (hasError) {
-        test.skip(true, "Contact form component rendered error boundary");
-        return;
-      }
+      await gotoContactPage(page, test.info(), "zh");
 
       // 验证表单存在
       const form = page.locator("form").first();
@@ -489,11 +429,7 @@ test.describe("Contact Form - Smoke Tests (Staging)", () => {
 
   test.describe("9. 表单提交验证", () => {
     test("应该能够成功提交表单（英文）", async ({ page }) => {
-      const { hasError } = await gotoContactPage(page, test.info(), "en");
-      if (hasError) {
-        test.skip(true, "Contact form component rendered error boundary");
-        return;
-      }
+      await gotoContactPage(page, test.info(), "en");
 
       // 等待 Turnstile 加载
       await page.waitForTimeout(2000);
@@ -525,11 +461,7 @@ test.describe("Contact Form - Smoke Tests (Staging)", () => {
     });
 
     test("应该能够成功提交表单（中文）", async ({ page }) => {
-      const { hasError } = await gotoContactPage(page, test.info(), "zh");
-      if (hasError) {
-        test.skip(true, "Contact form component rendered error boundary");
-        return;
-      }
+      await gotoContactPage(page, test.info(), "zh");
 
       // 等待 Turnstile 加载
       await page.waitForTimeout(2000);
