@@ -169,6 +169,38 @@ function isTextCarrier(node) {
   );
 }
 
+function unwrapExpression(node) {
+  let current = node;
+
+  while (
+    current &&
+    (current.type === "TSAsExpression" ||
+      current.type === "TSTypeAssertion" ||
+      current.type === "TSNonNullExpression" ||
+      current.type === "ParenthesizedExpression")
+  ) {
+    current = current.expression;
+  }
+
+  return current;
+}
+
+function getUnwrappedExpressionPath(pathRef) {
+  let current = pathRef;
+
+  while (
+    current?.node &&
+    (current.isTSAsExpression?.() ||
+      current.isTSTypeAssertion?.() ||
+      current.isTSNonNullExpression?.() ||
+      current.isParenthesizedExpression?.())
+  ) {
+    current = current.get("expression");
+  }
+
+  return current;
+}
+
 function isNullable(node) {
   return (
     node?.type === "NullLiteral" ||
@@ -182,6 +214,112 @@ function isDirectJsxChild(pathRef) {
     (pathRef.parentPath.parentPath?.isJSXElement() ||
       pathRef.parentPath.parentPath?.isJSXFragment())
   );
+}
+
+function resolveIdentifierInit(pathRef, seen = new Set()) {
+  if (!pathRef?.isIdentifier()) {
+    return null;
+  }
+
+  const { name } = pathRef.node;
+  if (seen.has(name)) {
+    return null;
+  }
+
+  seen.add(name);
+
+  const binding = pathRef.scope.getBinding(name);
+  if (!binding?.path?.isVariableDeclarator()) {
+    return null;
+  }
+
+  const initPath = binding.path.get("init");
+  if (!initPath?.node) {
+    return null;
+  }
+
+  return initPath;
+}
+
+function branchIsTextCarrier(pathRef, seen = new Set()) {
+  const expressionPath = getUnwrappedExpressionPath(pathRef);
+  if (!expressionPath?.node) {
+    return false;
+  }
+
+  const node = expressionPath.node;
+  if (!node) {
+    return false;
+  }
+
+  if (isTextCarrier(node)) {
+    if (node.type !== "Identifier") {
+      return true;
+    }
+
+    const resolvedInit = resolveIdentifierInit(expressionPath, seen);
+    if (!resolvedInit) {
+      return true;
+    }
+
+    return expressionHasRiskyText(resolvedInit, seen);
+  }
+
+  if (node.type === "TemplateLiteral") {
+    return true;
+  }
+
+  if (
+    node.type === "BinaryExpression" &&
+    node.operator === "+" &&
+    (branchIsTextCarrier(expressionPath.get("left"), seen) ||
+      branchIsTextCarrier(expressionPath.get("right"), seen))
+  ) {
+    return true;
+  }
+
+  return false;
+}
+
+function expressionHasRiskyText(pathRef, seen = new Set()) {
+  const expressionPath = getUnwrappedExpressionPath(pathRef);
+  if (!expressionPath?.node) {
+    return false;
+  }
+
+  const node = expressionPath.node;
+  if (!node) {
+    return false;
+  }
+
+  if (node.type === "LogicalExpression" && node.operator === "&&") {
+    return branchIsTextCarrier(expressionPath.get("right"), seen);
+  }
+
+  if (node.type === "ConditionalExpression") {
+    const consequentPath = expressionPath.get("consequent");
+    const alternatePath = expressionPath.get("alternate");
+
+    return (
+      (branchIsTextCarrier(consequentPath, seen) &&
+        (branchIsTextCarrier(alternatePath, seen) ||
+          isNullable(unwrapExpression(alternatePath.node)))) ||
+      (branchIsTextCarrier(alternatePath, seen) &&
+        (branchIsTextCarrier(consequentPath, seen) ||
+          isNullable(unwrapExpression(consequentPath.node))))
+    );
+  }
+
+  if (node.type === "Identifier") {
+    const resolvedInit = resolveIdentifierInit(expressionPath, seen);
+    if (!resolvedInit) {
+      return false;
+    }
+
+    return expressionHasRiskyText(resolvedInit, seen);
+  }
+
+  return false;
 }
 
 function hasLiteralAttribute(openingElement, name, value) {
@@ -247,20 +385,7 @@ function hasProtectedAncestor(pathRef) {
   return false;
 }
 
-function scanForRiskPatterns(repoPath) {
-  const source = readFile(repoPath);
-  if (source === null) {
-    return [
-      {
-        file: repoPath,
-        line: null,
-        kind: "unreadable-file",
-        message:
-          "Protected surface file could not be read, so risk pattern scanning was skipped.",
-      },
-    ];
-  }
-
+function collectRiskFindingsFromSource(source, repoPath) {
   const ast = parser.parse(source, {
     sourceType: "module",
     plugins: ["typescript", "jsx"],
@@ -290,12 +415,15 @@ function scanForRiskPatterns(repoPath) {
         return;
       }
 
-      const { consequent, alternate } = condPath.node;
+      const consequentPath = condPath.get("consequent");
+      const alternatePath = condPath.get("alternate");
+      const consequent = unwrapExpression(consequentPath.node);
+      const alternate = unwrapExpression(alternatePath.node);
       const hasRiskyBranch =
-        (isTextCarrier(consequent) &&
-          (isTextCarrier(alternate) || isNullable(alternate))) ||
-        (isTextCarrier(alternate) &&
-          (isTextCarrier(consequent) || isNullable(consequent)));
+        (branchIsTextCarrier(consequentPath) &&
+          (branchIsTextCarrier(alternatePath) || isNullable(alternate))) ||
+        (branchIsTextCarrier(alternatePath) &&
+          (branchIsTextCarrier(consequentPath) || isNullable(consequent)));
 
       if (hasRiskyBranch) {
         findings.push({
@@ -307,9 +435,53 @@ function scanForRiskPatterns(repoPath) {
         });
       }
     },
+    JSXExpressionContainer(containerPath) {
+      if (
+        !(
+          containerPath.parentPath?.isJSXElement() ||
+          containerPath.parentPath?.isJSXFragment()
+        ) ||
+        hasProtectedAncestor(containerPath)
+      ) {
+        return;
+      }
+
+      const expressionPath = containerPath.get("expression");
+      if (
+        !expressionPath.isIdentifier() ||
+        !expressionHasRiskyText(expressionPath)
+      ) {
+        return;
+      }
+
+      findings.push({
+        file: repoPath,
+        line: expressionPath.node.loc?.start.line ?? null,
+        kind: "alias-direct-string",
+        message:
+          "Direct JSX identifier render resolves to a conditional bare text branch. Keep state text inside a stable wrapper instead of routing it through an alias variable.",
+      });
+    },
   });
 
   return findings;
+}
+
+function scanForRiskPatterns(repoPath) {
+  const source = readFile(repoPath);
+  if (source === null) {
+    return [
+      {
+        file: repoPath,
+        line: null,
+        kind: "unreadable-file",
+        message:
+          "Protected surface file could not be read, so risk pattern scanning was skipped.",
+      },
+    ];
+  }
+
+  return collectRiskFindingsFromSource(source, repoPath);
 }
 
 function collectMissingMarkers() {
@@ -422,4 +594,11 @@ function main() {
   process.exit(1);
 }
 
-main();
+module.exports = {
+  collectRiskFindingsFromSource,
+  scanForRiskPatterns,
+};
+
+if (require.main === module) {
+  main();
+}
