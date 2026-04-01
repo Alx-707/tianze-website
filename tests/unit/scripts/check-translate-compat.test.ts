@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { collectRiskFindingsFromSource } from "../../../scripts/check-translate-compat.js";
+import {
+  collectMissingMarkersFromSource,
+  collectRiskFindingsFromSource,
+  RISK_SCAN_FILES,
+} from "../../../scripts/check-translate-compat.js";
 
 describe("check-translate-compat risk scanning", () => {
   it("flags direct JSX aliases backed by ternary text branches", () => {
@@ -120,5 +124,59 @@ describe("check-translate-compat risk scanning", () => {
     );
 
     expect(findings).toEqual([]);
+  });
+});
+
+describe("check-translate-compat marker scanning", () => {
+  it("matches real JSX markers without relying on raw substring search", () => {
+    const missing = collectMissingMarkersFromSource(
+      `
+        export function Example({ item }: { item: { key: string } }) {
+          return (
+            <nav className="header-nav-center notranslate" translate="no">
+              <span data-testid={\`header-nav-label-\${item.key}\`} translate="no">
+                Label
+              </span>
+            </nav>
+          );
+        }
+      `,
+      "src/components/layout/header.tsx",
+      ["header-nav-label-", "notranslate", 'translate="no"'],
+    );
+
+    expect(missing).toEqual([]);
+  });
+
+  it("does not let comments satisfy required markers", () => {
+    const missing = collectMissingMarkersFromSource(
+      `
+        // header-nav-label-
+        // notranslate
+        // translate="no"
+        export function Example() {
+          return <nav><span>Label</span></nav>;
+        }
+      `,
+      "src/components/layout/header.tsx",
+      ["header-nav-label-", "notranslate", 'translate="no"'],
+    );
+
+    expect(missing).toEqual([
+      expect.objectContaining({ marker: "header-nav-label-" }),
+      expect.objectContaining({ marker: "notranslate" }),
+      expect.objectContaining({ marker: 'translate="no"' }),
+    ]);
+  });
+});
+
+describe("check-translate-compat protected surface coverage", () => {
+  it("risk-scans protected page surfaces in src/app", () => {
+    expect(RISK_SCAN_FILES).toEqual(
+      expect.arrayContaining([
+        "src/app/[locale]/contact/page.tsx",
+        "src/app/[locale]/products/[market]/page.tsx",
+      ]),
+    );
   });
 });

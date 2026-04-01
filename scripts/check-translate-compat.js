@@ -122,7 +122,7 @@ const PROTECTED_SURFACE_RULES = [
 ];
 
 const RISK_SCAN_FILES = PROTECTED_SURFACE_RULES.map((rule) => rule.file).filter(
-  (file) => file.endsWith(".tsx") && !file.startsWith("src/app/"),
+  (file) => file.endsWith(".tsx"),
 );
 
 function ensureDir(dir) {
@@ -467,6 +467,109 @@ function collectRiskFindingsFromSource(source, repoPath) {
   return findings;
 }
 
+function collectMarkerTokensFromSource(source) {
+  const ast = parser.parse(source, {
+    sourceType: "module",
+    plugins: ["typescript", "jsx"],
+  });
+
+  const tokens = new Set();
+
+  traverse(ast, {
+    JSXAttribute(attributePath) {
+      const attribute = attributePath.node;
+      if (attribute.name?.type !== "JSXIdentifier") {
+        return;
+      }
+
+      const attributeName = attribute.name.name;
+
+      if (attribute.value?.type === "StringLiteral") {
+        tokens.add(attribute.value.value);
+
+        if (attributeName === "translate") {
+          tokens.add(`${attributeName}="${attribute.value.value}"`);
+        }
+      }
+
+      if (attribute.value?.type === "JSXExpressionContainer") {
+        const expression = unwrapExpression(attribute.value.expression);
+
+        if (expression?.type === "StringLiteral") {
+          tokens.add(expression.value);
+
+          if (attributeName === "translate") {
+            tokens.add(`${attributeName}="${expression.value}"`);
+          }
+        }
+
+        if (expression?.type === "TemplateLiteral") {
+          for (const quasi of expression.quasis) {
+            if (quasi.value.cooked) {
+              tokens.add(quasi.value.cooked);
+            }
+          }
+        }
+      }
+    },
+    StringLiteral(stringPath) {
+      tokens.add(stringPath.node.value);
+    },
+    TemplateLiteral(templatePath) {
+      for (const quasi of templatePath.node.quasis) {
+        if (quasi.value.cooked) {
+          tokens.add(quasi.value.cooked);
+        }
+      }
+    },
+  });
+
+  return tokens;
+}
+
+function markerMatchesToken(marker, token) {
+  if (!token) {
+    return false;
+  }
+
+  if (marker === 'translate="no"') {
+    return token === marker;
+  }
+
+  if (marker === "notranslate") {
+    return token === marker || token.split(/\s+/).includes(marker);
+  }
+
+  if (marker.endsWith("-")) {
+    return token.startsWith(marker);
+  }
+
+  return token === marker;
+}
+
+function collectMissingMarkersFromSource(source, repoPath, markers) {
+  const tokens = collectMarkerTokensFromSource(source);
+
+  return markers.flatMap((marker) => {
+    const present = Array.from(tokens).some((token) =>
+      markerMatchesToken(marker, token),
+    );
+
+    if (present) {
+      return [];
+    }
+
+    return [
+      {
+        file: repoPath,
+        marker,
+        message:
+          "Protected translation compatibility marker is missing from a guarded surface.",
+      },
+    ];
+  });
+}
+
 function scanForRiskPatterns(repoPath) {
   const source = readFile(repoPath);
   if (source === null) {
@@ -499,16 +602,7 @@ function collectMissingMarkers() {
       continue;
     }
 
-    for (const marker of rule.markers) {
-      if (!source.includes(marker)) {
-        missing.push({
-          file: rule.file,
-          marker,
-          message:
-            "Protected translation compatibility marker is missing from a guarded surface.",
-        });
-      }
-    }
+    missing.push(...collectMissingMarkersFromSource(source, rule.file, rule.markers));
   }
 
   return missing;
@@ -595,7 +689,10 @@ function main() {
 }
 
 module.exports = {
+  collectMissingMarkersFromSource,
+  collectMarkerTokensFromSource,
   collectRiskFindingsFromSource,
+  RISK_SCAN_FILES,
   scanForRiskPatterns,
 };
 
