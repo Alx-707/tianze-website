@@ -176,7 +176,6 @@ Completed framework and tooling support batches on this branch:
 - `eslint-config-next` `16.2.0 -> 16.2.2`
 - `@opennextjs/cloudflare` `1.17.3 -> 1.18.0`
 - `wrangler` `4.75.0 -> 4.79.0`
-- `typescript` `5.9.3 -> 6.0.2`
 - `react-server-dom-webpack` `added (19.2.4)`
 - `react-server-dom-turbopack` `added (19.2.4)`
 - `critters` `added (0.0.25)`
@@ -193,7 +192,6 @@ Verification completed on this branch:
 
 Execution note:
 - this branch now carries both the lower-risk dependency updates and the additional framework/tooling upgrades that were re-verified locally
-- TypeScript 6 required adding `"ignoreDeprecations": "6.0"` to `tsconfig.json`
 - the `jsdom` upgrade exposed a real tab-focus edge case; the repo now fixes it in `src/components/ui/tabs.tsx` instead of weakening the test
 - `knip 6` ran clean after removing two stale ignore entries from `knip.jsonc`
 - the Next/OpenNext/Wrangler line now includes a repo-local compatibility patch for the generated middleware manifest loader, which restores local page preview on the upgraded stack
@@ -324,22 +322,27 @@ Rule:
   - keep `@eslint/js` on `9.39.2`
   - treat this as an explicit hold, not as an unfinished upgrade
 
-### 3. TypeScript 6 is workable here, but clean-build verification is still the safer read
+### 3. TypeScript 6 is currently deferred on this repo
 
-Observed branch result:
-- `typescript` `5.9.3 -> 6.0.2`
-- `tsconfig.json` needed `"ignoreDeprecations": "6.0"` because `baseUrl` is now a deprecated option in TypeScript 6
-- `pnpm type-check`: pass
-- clean `pnpm build`: pass
-- clean `pnpm build:cf`: pass
+Current branch truth:
+- `typescript 6.0.2` was attempted on this branch
+- the repo needed `"ignoreDeprecations": "6.0"` in `tsconfig.json` to satisfy the TypeScript 6 deprecation gate
+- but `pnpm build` then stopped being a reliable green check:
+  - one failure mode was `Maximum call stack size exceeded` during `next build`
+  - after downgrading back to `typescript 5.9.3`, that `tsconfig.json` value also became invalid and had to return to `"ignoreDeprecations": "5.0"`
 
-Observed caveat:
-- repeated builds on top of an existing `.next` directory were more likely to trigger the existing `Maximum call stack size exceeded` failure family
+Decision:
+- keep `typescript` on `5.9.3` for this branch
+- do not describe TypeScript 6 as "completed" in this repo
 
 Rule:
-- when validating this repo on TypeScript 6, prefer clean-build evidence
-- if a repeated build fails after a previous successful clean build, clear `.next` before treating it as a new regression
-- for repeatable operational commands, prefer scripts that self-clean instead of relying on humans to remember the cleanup step
+- treat TypeScript 6 as deferred, not as a safe follow-up patch
+- if revisiting it later, require all of:
+  - `pnpm type-check`
+  - `pnpm build`
+  - `pnpm build:cf`
+  - pre-push `build:check`
+- only promote it after the standard Next build line is green without hand-waving
 
 ### 4. OpenNext Cloudflare minify should stay disabled by default
 

@@ -249,3 +249,17 @@
   - 对 contact / inquiry / subscribe 这类关键转化页，优先让 route-level loading 保持“有意义的首屏内容”，或者直接不要单独的 `loading.tsx`；
   - 如果 no-JS / SSR / 慢流式首屏合同失败，先检查是不是 route-level loading 抢先输出了空骨架；
   - 不要把“开发时看起来正常的 skeleton”默认当作线上首屏也合理。
+
+### 18. 当前升级线先保留 `TypeScript 5.9.3`，不要把 `TypeScript 6` 当成已经完成的升级
+- 截至 2026-04-01，本仓库已验证：
+  - `typescript 6.0.2` 虽然能通过 `pnpm type-check`，但会把 `pnpm build` 重新带回不稳定状态；
+  - 一类失败表现为 `next build` 在 TypeScript 阶段报 `Maximum call stack size exceeded`；
+  - 当回退到 `typescript 5.9.3` 后，`tsconfig.json` 里的 `"ignoreDeprecations"` 也必须从 `"6.0"` 改回 `"5.0"`，否则标准构建会直接因为无效参数失败。
+- 默认动作：
+  - 当前主线和升级分支都优先保留 `typescript 5.9.3`；
+  - 不要把 “TypeScript 6 类型检查能过” 误写成 “TypeScript 6 已经安全升级”；
+  - 如果以后再次尝试升级 TypeScript 6，至少重新执行：
+    - `pnpm type-check`
+    - `pnpm build`
+    - `pnpm build:cf`
+    - 一次真实的 pre-push `build:check`

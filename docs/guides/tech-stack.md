@@ -8,7 +8,7 @@
 ### 前端框架
 - **Next.js 16.2.2** - React 全栈框架，App Router 架构
 - **React 19.2.4** - 用户界面库，支持服务器组件
-- **TypeScript 6.0.2** - 类型安全的 JavaScript 超集
+- **TypeScript 5.9.3** - 类型安全的 JavaScript 超集（当前稳定保留；TypeScript 6 在这条升级线上先不继续推进）
 - **Tailwind CSS 4.2.2** - 原子化 CSS 框架
 
 ### 渲染策略
