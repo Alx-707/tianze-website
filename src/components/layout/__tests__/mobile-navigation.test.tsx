@@ -223,6 +223,10 @@ describe("MobileNavigation Component", () => {
 
       expect(screen.getByRole("button", { name: /menu/i })).toBeInTheDocument();
       expect(screen.getByTestId("menu-icon")).toBeInTheDocument();
+      expect(screen.getByTestId("mobile-menu-toggle-label")).toHaveAttribute(
+        "translate",
+        "no",
+      );
     });
 
     it("is visible only on mobile screens", () => {
@@ -283,6 +287,27 @@ describe("MobileNavigation Component", () => {
   });
 
   describe("Navigation Items", () => {
+    it("renders protected language switcher labels when open", async () => {
+      renderWithIntl(<MobileNavigation />);
+
+      const trigger = screen.getByRole("button", { name: /menu/i });
+      await user.click(trigger);
+
+      expect(screen.getByTestId("mobile-language-switcher")).toHaveClass(
+        "notranslate",
+      );
+      expect(screen.getByTestId("mobile-language-switcher")).toHaveAttribute(
+        "translate",
+        "no",
+      );
+      expect(
+        screen.getByTestId("mobile-language-option-label-en"),
+      ).toHaveAttribute("translate", "no");
+      expect(
+        screen.getByTestId("mobile-language-option-label-zh"),
+      ).toHaveAttribute("translate", "no");
+    });
+
     it("displays all navigation items when open", async () => {
       renderWithIntl(<MobileNavigation />);
 
@@ -367,6 +392,15 @@ describe("MobileNavigation Component", () => {
       // Enter should be handled (we can't easily test state change in this mock setup)
       await user.keyboard("{Enter}");
       expect(trigger).toBeInTheDocument(); // Basic keyboard interaction test
+    });
+
+    it("applies translate protection to the standalone mobile menu button", () => {
+      renderWithIntl(<MobileMenuButton isOpen={false} onClick={vi.fn()} />);
+
+      expect(screen.getByTestId("mobile-menu-button-label")).toHaveAttribute(
+        "translate",
+        "no",
+      );
     });
 
     it("supports escape key to close menu", async () => {

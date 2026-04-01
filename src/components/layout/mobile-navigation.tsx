@@ -35,6 +35,37 @@ interface MobileNavigationProps {
   languageLabel?: string;
 }
 
+function MobileNavLinks({
+  pathname,
+  onSelect,
+  t,
+}: {
+  pathname: string;
+  onSelect: () => void;
+  t: ReturnType<typeof useTranslations>;
+}) {
+  return mobileNavigation.map((item) => {
+    const isActive = isActivePath(pathname, item.href);
+    return (
+      <Link
+        key={item.key}
+        href={item.href as "/"}
+        prefetch={false}
+        className={cn(
+          "flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors duration-200",
+          isActive
+            ? "bg-accent text-accent-foreground"
+            : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
+        )}
+        aria-current={isActive ? "page" : undefined}
+        onClick={onSelect}
+      >
+        {t(item.translationKey)}
+      </Link>
+    );
+  });
+}
+
 export function MobileNavigation({
   className,
   initialOpen = false,
@@ -74,7 +105,11 @@ export function MobileNavigation({
             data-testid="header-mobile-menu-button"
           >
             <Menu className="h-5 w-5" />
-            <span className="sr-only">
+            <span
+              className="sr-only"
+              data-testid="mobile-menu-toggle-label"
+              translate="no"
+            >
               {isOpen
                 ? t("accessibility.closeMenu")
                 : t("accessibility.openMenu")}
@@ -105,26 +140,11 @@ export function MobileNavigation({
             className="flex flex-col space-y-1"
             aria-label={NAVIGATION_ARIA.mobileMenu}
           >
-            {mobileNavigation.map((item) => {
-              const isActive = isActivePath(pathname, item.href);
-              return (
-                <Link
-                  key={item.key}
-                  href={item.href as "/"}
-                  prefetch={false}
-                  className={cn(
-                    "flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors duration-200",
-                    isActive
-                      ? "bg-accent text-accent-foreground"
-                      : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
-                  )}
-                  aria-current={isActive ? "page" : undefined}
-                  onClick={() => setIsOpen(false)}
-                >
-                  {t(item.translationKey)}
-                </Link>
-              );
-            })}
+            <MobileNavLinks
+              pathname={pathname}
+              onSelect={() => setIsOpen(false)}
+              t={t}
+            />
             <div className="pt-4">
               <Button
                 variant="default"
@@ -178,10 +198,17 @@ function MobileLanguageSwitcher({
   ];
 
   return (
-    <div className="space-y-1">
-      <div className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-muted-foreground">
+    <div
+      className="notranslate space-y-1"
+      data-testid="mobile-language-switcher"
+      translate="no"
+    >
+      <div
+        className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-muted-foreground"
+        data-testid="mobile-language-switcher-label"
+      >
         <Globe className="h-4 w-4" />
-        <span>{languageLabel}</span>
+        <span translate="no">{languageLabel}</span>
       </div>
       {languages.map(({ locale, label }) => {
         const isActive = currentLocale === locale;
@@ -198,8 +225,14 @@ function MobileLanguageSwitcher({
                 : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
             )}
             onClick={onSelect}
+            translate="no"
           >
-            {label}
+            <span
+              data-testid={`mobile-language-option-label-${locale}`}
+              translate="no"
+            >
+              {label}
+            </span>
             {isActive && <Check className="h-4 w-4" />}
           </Link>
         );
@@ -234,7 +267,11 @@ export function MobileMenuButton({
       data-testid="header-mobile-menu-button"
     >
       {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-      <span className="sr-only">
+      <span
+        className="sr-only"
+        data-testid="mobile-menu-button-label"
+        translate="no"
+      >
         {isOpen ? t("accessibility.closeMenu") : t("accessibility.openMenu")}
       </span>
     </Button>

@@ -23,6 +23,7 @@ vi.mock("@/i18n/routing", () => ({
     href,
     children,
     className,
+    ...props
   }: {
     href: string;
     children: React.ReactNode;
@@ -32,6 +33,7 @@ vi.mock("@/i18n/routing", () => ({
       href={href}
       className={className}
       data-testid={`nav-link-${href.replace(/\//g, "-").replace(/^-/, "")}`}
+      {...props}
     >
       {children}
     </a>
@@ -128,6 +130,7 @@ vi.mock("@/components/ui/navigation-menu", () => ({
     onClick,
     className,
     "aria-expanded": ariaExpanded,
+    ...props
   }: {
     children: React.ReactNode;
     onClick?: () => void;
@@ -139,6 +142,7 @@ vi.mock("@/components/ui/navigation-menu", () => ({
       onClick={onClick}
       className={className}
       aria-expanded={ariaExpanded}
+      {...props}
     >
       {children}
     </button>
@@ -220,8 +224,10 @@ describe("VercelNavigation", () => {
     it("uses semantic desktop-only class for responsive display", () => {
       render(<VercelNavigation />);
 
-      const nav = screen.getByRole("navigation");
+      const nav = screen.getByTestId("vercel-navigation-root");
       expect(nav).toHaveClass("header-desktop-only");
+      expect(nav).toHaveClass("notranslate");
+      expect(nav).toHaveAttribute("translate", "no");
     });
   });
 
@@ -240,6 +246,12 @@ describe("VercelNavigation", () => {
 
       expect(screen.getByText("Home")).toBeInTheDocument();
       expect(screen.getByText("Blog")).toBeInTheDocument();
+      expect(
+        screen.getByTestId("vercel-navigation-link-label-home"),
+      ).toHaveAttribute("translate", "no");
+      expect(
+        screen.getByTestId("vercel-navigation-link-label-blog"),
+      ).toHaveAttribute("translate", "no");
     });
 
     it("wraps links with NavigationMenuLink asChild", () => {
@@ -259,6 +271,10 @@ describe("VercelNavigation", () => {
       const trigger = screen.getByTestId("navigation-menu-trigger");
       expect(trigger).toBeInTheDocument();
       expect(trigger).toHaveTextContent("Products");
+      expect(trigger).toHaveAttribute("translate", "no");
+      expect(
+        screen.getByTestId("vercel-navigation-trigger-label-products"),
+      ).toHaveAttribute("translate", "no");
     });
 
     it("renders dropdown content", () => {

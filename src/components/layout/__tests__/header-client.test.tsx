@@ -89,6 +89,15 @@ describe("MobileNavigationIsland", () => {
     const dynamicComponent = screen.getByTestId("dynamic-component");
     expect(dynamicComponent).toHaveAttribute("data-ssr", "false");
   });
+
+  it("marks the deferred menu label as notranslate", () => {
+    render(<MobileNavigationIsland openMenuLabel="Open navigation menu" />);
+
+    expect(screen.getByTestId("header-mobile-menu-label")).toHaveAttribute(
+      "translate",
+      "no",
+    );
+  });
 });
 
 describe("NavSwitcherIsland", () => {

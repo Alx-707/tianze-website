@@ -79,6 +79,19 @@ describe("Feature: FaqSection Reusable Component", () => {
         screen.getByText("What is the minimum order quantity (MOQ)?"),
       ).toBeInTheDocument();
     });
+
+    it("marks question labels without blocking answer translation", async () => {
+      await renderFaqSection({ items: ["moq"] });
+
+      expect(screen.getByTestId("faq-question-moq")).toHaveAttribute(
+        "translate",
+        "no",
+      );
+      await userEvent.click(screen.getByText(/minimum order quantity/i));
+      expect(screen.getByTestId("faq-answer-moq")).not.toHaveAttribute(
+        "translate",
+      );
+    });
   });
 
   describe("Scenario 1.3: Buyer expands a question", () => {
@@ -107,9 +120,9 @@ describe("Feature: FaqSection Reusable Component", () => {
   describe("Scenario 1.5: Keyboard navigation", () => {
     it("toggles accordion with Enter key", async () => {
       await renderFaqSection({ items: ["moq"] });
-      const trigger = screen.getByText(
-        "What is the minimum order quantity (MOQ)?",
-      );
+      const trigger = screen.getByRole("button", {
+        name: "What is the minimum order quantity (MOQ)?",
+      });
       trigger.focus();
       await userEvent.keyboard("{Enter}");
       expect(screen.getByText(/500 to 1,000 pieces/)).toBeVisible();

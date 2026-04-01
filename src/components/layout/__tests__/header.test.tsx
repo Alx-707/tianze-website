@@ -35,7 +35,7 @@ vi.mock("@/components/layout/header-client", () => ({
     <nav data-testid="mobile-navigation">Mobile Navigation</nav>
   ),
   NavSwitcherIsland: () => (
-    <nav data-testid="nav-switcher">Main Navigation</nav>
+    <nav data-testid="header-desktop-nav">Main Navigation</nav>
   ),
   LanguageToggleIsland: () => (
     <button data-testid="language-toggle-button">Language Toggle</button>
@@ -99,9 +99,31 @@ describe("Header Component", () => {
       );
 
       expect(screen.getByTestId("logo")).toBeInTheDocument();
-      expect(screen.getByTestId("nav-switcher")).toBeInTheDocument();
+      expect(screen.getByTestId("header-desktop-nav")).toBeInTheDocument();
       expect(screen.getByTestId("mobile-navigation")).toBeInTheDocument();
       expect(screen.getByTestId("language-toggle-button")).toBeInTheDocument();
+    });
+
+    it("marks desktop navigation labels and CTA as notranslate", async () => {
+      await renderAsyncComponent(
+        Header({ locale: "en", mainNavItems: MAIN_NAV_ITEMS }),
+      );
+
+      expect(screen.getByTestId("header-desktop-nav")).toHaveAttribute(
+        "translate",
+        "no",
+      );
+      expect(screen.getByTestId("header-desktop-nav")).toHaveClass(
+        "notranslate",
+      );
+      expect(screen.getByTestId("header-nav-label-home")).toHaveAttribute(
+        "translate",
+        "no",
+      );
+      expect(screen.getByTestId("header-contact-sales-label")).toHaveAttribute(
+        "translate",
+        "no",
+      );
     });
 
     it("applies default sticky positioning", async () => {
@@ -137,7 +159,9 @@ describe("Header Component", () => {
       expect(header).toBeInTheDocument();
       expect(screen.getByTestId("logo")).toBeInTheDocument();
       // Minimal variant hides center nav
-      expect(screen.queryByTestId("nav-switcher")).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId("header-desktop-nav"),
+      ).not.toBeInTheDocument();
     });
 
     it("renders transparent variant correctly", async () => {
@@ -222,7 +246,7 @@ describe("Header Component", () => {
       );
 
       // Both should be present, visibility controlled by CSS
-      expect(screen.getByTestId("nav-switcher")).toBeInTheDocument();
+      expect(screen.getByTestId("header-desktop-nav")).toBeInTheDocument();
       expect(screen.getByTestId("mobile-navigation")).toBeInTheDocument();
     });
   });
