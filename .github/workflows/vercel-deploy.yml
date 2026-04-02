@@ -61,14 +61,14 @@ jobs:
         if: steps.vercel_secrets.outputs.configured == 'true'
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "20.19.0"
           cache: "pnpm"
 
       - name: 设置 Node.js（跳过 pnpm 缓存）
         if: steps.vercel_secrets.outputs.configured != 'true'
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "20.19.0"
 
       - name: 安装 Vercel CLI
         if: steps.vercel_secrets.outputs.configured == 'true'
@@ -226,6 +226,17 @@ jobs:
           submodules: false
           persist-credentials: false
 
+      - name: 检查 Vercel 凭据是否配置
+        id: vercel_secrets
+        run: |
+          set -euo pipefail
+          if [ -z "${{ secrets.VERCEL_TOKEN }}" ] || [ -z "${{ secrets.VERCEL_ORG_ID }}" ] || [ -z "${{ secrets.VERCEL_PROJECT_ID }}" ]; then
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "⚠️ Vercel secrets 未配置；Production 手动部署后续步骤会按原设计自然失败。" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: 设置 pnpm
         uses: pnpm/action-setup@v4
         with:
@@ -237,14 +248,14 @@ jobs:
         if: steps.vercel_secrets.outputs.configured == 'true'
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "20.19.0"
           cache: "pnpm"
 
       - name: 设置 Node.js（跳过 pnpm 缓存）
         if: steps.vercel_secrets.outputs.configured != 'true'
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "20.19.0"
 
       - name: 安装 Vercel CLI
         run: |

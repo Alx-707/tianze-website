@@ -15,9 +15,10 @@
  */
 
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import ContactPage, { generateMetadata } from "@/app/[locale]/contact/page";
+import { renderAsyncPage } from "@/testing/render-async-page";
 
 // Mock next-intl
 const { mockGetTranslations, mockSuspenseState: _mockSuspenseState } =
@@ -43,6 +44,10 @@ vi.mock("react", async () => {
 vi.mock("next-intl/server", () => ({
   getTranslations: mockGetTranslations,
   setRequestLocale: vi.fn(),
+}));
+
+vi.mock("next/server", () => ({
+  connection: vi.fn(() => Promise.resolve()),
 }));
 
 // 在测试环境中将 cacheLife 处理为 no-op，避免依赖 Next.js cacheComponents 运行时配置
@@ -201,21 +206,6 @@ vi.mock("next-intl", () => ({
 vi.mock("@/app/[locale]/generate-static-params", () => ({
   generateLocaleStaticParams: () => [{ locale: "en" }, { locale: "zh" }],
 }));
-/**
- * Helper to render async Server Components in tests.
- * Resolves async component functions in the JSX tree before rendering.
- */
-async function renderAsyncPage(element: React.JSX.Element) {
-  let resolved = element;
-  if (typeof resolved.type === "function") {
-    const result = await Promise.resolve(resolved.type(resolved.props));
-    if (result && typeof result === "object" && "type" in result) {
-      resolved = result;
-    }
-  }
-  return render(resolved);
-}
-
 describe("Contact Page I18n - Main Tests", () => {
   const mockParams = { locale: "en" };
 
@@ -305,6 +295,9 @@ describe("Contact Page I18n - Main Tests", () => {
       expect(metadata).toMatchObject({
         title: "Contact Us",
         description: "Get in touch with our team",
+        other: {
+          google: "notranslate",
+        },
       });
     });
 
@@ -347,6 +340,7 @@ describe("Contact Page I18n - Main Tests", () => {
 
       expect(metadata).toHaveProperty("title", "Custom Title");
       expect(metadata).toHaveProperty("description", "Custom Description");
+      expect(metadata).toHaveProperty("other.google", "notranslate");
     });
 
     it("应该支持英文locale", async () => {
@@ -476,11 +470,12 @@ describe("Contact Page I18n - Main Tests", () => {
       await expect(renderAsyncPage(ContactPageComponent)).rejects.toThrow();
     });
 
-    it("应该是异步服务器组件", async () => {
+    it("应该返回可等待的异步页面结果", async () => {
       const result = ContactPage({ params: Promise.resolve(mockParams) });
 
-      // 验证返回Promise
+      expect(result).toBeDefined();
       expect(result).toBeInstanceOf(Promise);
+      await expect(result).resolves.toBeDefined();
     });
 
     it("应该正确处理异步参数", async () => {
@@ -488,10 +483,13 @@ describe("Contact Page I18n - Main Tests", () => {
         setTimeout(() => resolve(mockParams), 10),
       );
 
-      const ContactPageComponent = await ContactPage({ params: asyncParams });
+      const ContactPageComponent = await ContactPage({
+        params: asyncParams,
+      });
 
-      // 验证异步参数处理
-      expect(ContactPageComponent).toBeDefined();
+      await expect(
+        renderAsyncPage(ContactPageComponent),
+      ).resolves.toBeDefined();
     });
 
     it("应该缓存翻译结果", async () => {

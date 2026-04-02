@@ -12,13 +12,8 @@ import {
 
 vi.unmock("zod");
 
-const isoTimestampArb = fc
-  .integer({
-    min: Date.UTC(2000, 0, 1),
-    max: Date.UTC(2100, 0, 1),
-  })
-  .map((value) => new Date(value).toISOString());
-
+const SAFE_SUBMITTED_AT_MIN = new Date("2000-01-01T00:00:00.000Z");
+const SAFE_SUBMITTED_AT_MAX = new Date("2100-12-31T23:59:59.999Z");
 const contactLeadArb = fc
   .record({
     type: fc.constant(LEAD_TYPES.CONTACT),
@@ -35,7 +30,18 @@ const contactLeadArb = fc
         company: fc.option(fc.string({ minLength: 1, maxLength: 32 }), {
           nil: undefined,
         }),
-        submittedAt: fc.option(isoTimestampArb, { nil: undefined }),
+        submittedAt: fc.option(
+          fc.oneof(
+            fc
+              .date({
+                min: SAFE_SUBMITTED_AT_MIN,
+                max: SAFE_SUBMITTED_AT_MAX,
+              })
+              .map((value) => value.toISOString()),
+            fc.string().filter((value) => value.length > 0),
+          ),
+          { nil: undefined },
+        ),
       })
       .map(({ company, submittedAt }) => ({
         ...base,

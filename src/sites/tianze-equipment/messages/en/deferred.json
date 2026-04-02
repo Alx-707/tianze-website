@@ -1,0 +1,54 @@
+{
+  "organization": {
+    "name": "Tianze Equipment",
+    "description": "Pipe bending machines, tooling, and production support for conduit manufacturers."
+  },
+  "website": {
+    "name": "Tianze Equipment",
+    "description": "Pipe bending machines, tooling, and production support for conduit manufacturers."
+  },
+  "article": {
+    "defaultAuthor": "Tianze Equipment"
+  },
+  "contact": {
+    "form": {
+      "title": "Talk to the Equipment Team",
+      "description": "Share your machine, tooling, or production-line needs and our equipment team will follow up."
+    }
+  },
+  "about": {
+    "pageTitle": "About Tianze Equipment",
+    "pageDescription": "Learn how Tianze Equipment supports conduit manufacturers with bending machines, tooling, and process support.",
+    "hero": {
+      "title": "Equipment-First Manufacturing Support",
+      "subtitle": "Machines + Tooling + Process Guidance",
+      "description": "Tianze Equipment focuses on the upstream side of conduit production: bending machines, tooling, and practical factory support for teams scaling pipe and fitting programs."
+    },
+    "mission": {
+      "title": "Our Mission",
+      "content": "To help conduit and fitting manufacturers scale with better machines, better tooling, and practical production know-how."
+    },
+    "values": {
+      "title": "Why Equipment Buyers Work With Us"
+    },
+    "cta": {
+      "title": "Talk Through Your Production Line",
+      "description": "Share your pipe range, bend geometry, and output goals. Our team will help you map the right equipment path.",
+      "button": "Request Equipment Guidance"
+    }
+  },
+  "capabilities": {
+    "meta": {
+      "title": "Pipe Bending Machines | Tianze Equipment",
+      "description": "Full-auto and semi-auto pipe bending machines, tooling, and process support from Tianze Equipment."
+    },
+    "hero": {
+      "title": "Pipe Bending Machines",
+      "subtitle": "Built for conduit and fitting manufacturers."
+    },
+    "cta": {
+      "heading": "Ready to discuss your production line?",
+      "description": "Tell us about your pipe range, bend geometry, and output goals. We'll recommend the right equipment path."
+    }
+  }
+}

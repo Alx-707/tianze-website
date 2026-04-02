@@ -15,8 +15,9 @@ const splitFunctions: Record<string, SplittedFunctionOptions> = {
   apiLead: {
     runtime: "node",
     placement: "regional",
-    // OpenNext 1.17.x hits an ENOENT during Cloudflare minification with pnpm-style node_modules.
-    // TODO: Re-enable after upstream OpenNext minifier support for this packaging shape is fixed and `pnpm build:cf` passes cleanly again.
+    // Keep disabled by default. The 2026-04-01 isolated re-check no longer reproduced
+    // the old build-time ENOENT, but local Cloudflare preview still did not produce
+    // a clean proof after re-enabling minification.
     minify: false,
     routes: [
       "app/api/contact/route",
@@ -36,7 +37,8 @@ const splitFunctions: Record<string, SplittedFunctionOptions> = {
   apiOps: {
     runtime: "node",
     placement: "regional",
-    // TODO: Keep aligned with the default worker minify workaround until upstream fix lands.
+    // Keep aligned with the default worker minify policy until the repo has fresh
+    // build + preview + deploy proof with minification re-enabled.
     minify: false,
     routes: ["app/api/cache/invalidate/route", "app/api/csp-report/route"],
     patterns: ["/api/cache/invalidate", "/api/csp-report"],
@@ -44,7 +46,8 @@ const splitFunctions: Record<string, SplittedFunctionOptions> = {
   apiWhatsapp: {
     runtime: "node",
     placement: "regional",
-    // TODO: Keep aligned with the default worker minify workaround until upstream fix lands.
+    // Keep aligned with the default worker minify policy until the repo has fresh
+    // build + preview + deploy proof with minification re-enabled.
     minify: false,
     routes: ["app/api/whatsapp/send/route", "app/api/whatsapp/webhook/route"],
     patterns: ["/api/whatsapp/*"],
@@ -52,8 +55,9 @@ const splitFunctions: Record<string, SplittedFunctionOptions> = {
 };
 
 cloudflareConfig.functions = splitFunctions;
-// OpenNext minifier crashes with pnpm symlink structure (ENOENT on .pnpm/node_modules/).
-// Keep disabled until upstream fix lands. Bundle size relies on paid Workers plan (10MB compressed).
+// Keep disabled by default. The old build-time minifier crash is no longer treated as
+// guaranteed, but this repo still lacks a clean local/deployed proof with minify enabled.
+// Bundle size relies on the paid Workers plan (10MB compressed).
 cloudflareConfig.default.minify = false;
 
 export default cloudflareConfig;

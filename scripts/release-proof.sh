@@ -25,12 +25,17 @@ pnpm test:locale-runtime
 pnpm test:lead-family
 pnpm test:cache-health
 pnpm validate:translations
+pnpm clean:next-artifacts
 pnpm build
+pnpm build:site:equipment
 pnpm build:cf
+pnpm deploy:cf:phase6:dry-run
 pnpm test:release-smoke
 
 echo "Cloudflare proof split:"
 echo "  - Local stock preview: pnpm smoke:cf:preview"
 echo "  - Strict local stock preview (includes /api/health): pnpm smoke:cf:preview:strict"
+echo "  - Stronger local split-worker proof: pnpm deploy:cf:phase6:dry-run"
+echo "  - Real preview publish path: pnpm deploy:cf:phase6:preview"
 echo "  - Final deployed proof: pnpm smoke:cf:deploy -- --base-url <deployment-url>"
 echo "Release verification completed successfully."

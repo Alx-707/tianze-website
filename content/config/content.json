@@ -9,16 +9,16 @@
   "dateFormat": "YYYY-MM-DD",
   "timeZone": "UTC",
   "seo": {
-    "defaultTitle": "B2B Web Template",
-    "titleTemplate": "%s | B2B Web Template",
-    "defaultDescription": "Modern B2B enterprise website template with Next.js 16, React 19, TypeScript, and Tailwind CSS",
+    "defaultTitle": "Tianze Pipe - Pipe Bending Experts",
+    "titleTemplate": "%s | Tianze Pipe - Pipe Bending Experts",
+    "defaultDescription": "Professional PVC conduit bends, fittings, pipe bending equipment, and PETG pneumatic tubes for global B2B projects.",
     "defaultKeywords": [
-      "Next.js",
-      "React",
-      "TypeScript",
-      "Tailwind CSS",
-      "B2B",
-      "Enterprise"
+      "Tianze Pipe",
+      "PVC conduit fittings",
+      "pipe bending machine",
+      "PETG pneumatic tube",
+      "Schedule 80 conduit",
+      "pipe manufacturer China"
     ],
     "defaultOgImage": "/images/og-image.jpg"
   },

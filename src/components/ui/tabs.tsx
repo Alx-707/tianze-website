@@ -4,6 +4,33 @@ import * as React from "react";
 import * as TabsPrimitive from "@radix-ui/react-tabs";
 import { cn } from "@/lib/utils";
 
+function assignRef<T>(ref: React.Ref<T> | undefined, value: T) {
+  if (typeof ref === "function") {
+    ref(value);
+    return;
+  }
+
+  if (ref) {
+    (ref as React.RefObject<T | null>).current = value;
+  }
+}
+
+function composeRefs<T>(...refs: Array<React.Ref<T> | undefined>) {
+  return (value: T) => {
+    for (const ref of refs) {
+      assignRef(ref, value);
+    }
+  };
+}
+
+function syncTabPanelFocusability(element: HTMLElement | null) {
+  if (!element) return;
+
+  // Keep inactive/hidden panels out of the sequential tab order.
+  element.tabIndex =
+    element.dataset.state === "active" && !element.hidden ? 0 : -1;
+}
+
 function Tabs({
   className,
   ...props
@@ -49,17 +76,39 @@ function TabsTrigger({
   );
 }
 
-function TabsContent({
-  className,
-  ...props
-}: React.ComponentProps<typeof TabsPrimitive.Content>) {
+const TabsContent = React.forwardRef<
+  React.ElementRef<typeof TabsPrimitive.Content>,
+  React.ComponentPropsWithoutRef<typeof TabsPrimitive.Content>
+>(({ className, ...props }, forwardedRef) => {
+  const localRef =
+    React.useRef<React.ElementRef<typeof TabsPrimitive.Content>>(null);
+
+  React.useEffect(() => {
+    const element = localRef.current;
+    if (!element) return undefined;
+
+    const sync = () => syncTabPanelFocusability(element);
+    sync();
+
+    const observer = new MutationObserver(sync);
+    observer.observe(element, {
+      attributes: true,
+      attributeFilter: ["data-state", "hidden"],
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <TabsPrimitive.Content
+      ref={composeRefs(localRef, forwardedRef)}
       data-slot="tabs-content"
       className={cn("flex-1 outline-none", className)}
       {...props}
     />
   );
-}
+});
+
+TabsContent.displayName = TabsPrimitive.Content.displayName;
 
 export { Tabs, TabsList, TabsTrigger, TabsContent };

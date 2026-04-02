@@ -17,10 +17,11 @@ git clone <repo> client-project-name
 cd client-project-name
 
 # 2. Update business data
-# Edit src/config/paths/site-config.ts as the primary source of truth
+# Edit src/sites/<site-key>.ts as the primary site identity source
 
 # 3. Update translations
-# Edit messages/en/*.json and messages/zh/*.json
+# Edit shared messages in messages/* only when every site should inherit them
+# Edit src/sites/<site-key>/messages/* for site-specific copy
 
 # 4. Run development server
 pnpm install
@@ -29,9 +30,9 @@ pnpm dev
 
 ## Key Configuration Files
 
-### 1. Site Configuration (`src/config/paths/site-config.ts`)
+### 1. Site Configuration (`src/sites/<site-key>.ts`)
 
-Primary source of truth for brand, SEO, contact, and social links:
+Primary source of truth for brand, SEO, contact, social links, and site-level facts:
 
 ```typescript
 export const SITE_CONFIG = {
@@ -57,9 +58,9 @@ export const SITE_CONFIG = {
 } as const;
 ```
 
-### 2. Derived Site Facts (`src/config/site-facts.ts`)
+### 2. Compatibility Wrappers (`src/config/site-facts.ts`, `src/config/paths/site-config.ts`)
 
-Derived business data used by blocks and content interpolation:
+These wrappers point to the active site, but they are not the place to define new canonical brand truth:
 
 ```typescript
 export const siteFacts: SiteFacts = {
@@ -86,17 +87,29 @@ export const siteFacts: SiteFacts = {
 };
 ```
 
-Prefer updating `site-config.ts` first. Adjust `site-facts.ts` only when the derived business narrative itself needs to change.
+Prefer updating `src/sites/<site-key>.ts` first. Treat wrappers as consumption surfaces, not authoring surfaces.
 
 ### 3. Translation Files (`messages/[locale]/`)
 
-User-facing text that changes per language:
+Shared user-facing text that every site can inherit:
 
 ```
 messages/
 ├── en/
 │   ├── critical.json    # Above-fold content
 │   └── deferred.json    # Below-fold content
+└── zh/
+    ├── critical.json
+    └── deferred.json
+```
+
+For site-specific copy, use:
+
+```
+src/sites/<site-key>/messages/
+├── en/
+│   ├── critical.json
+│   └── deferred.json
 └── zh/
     ├── critical.json
     └── deferred.json

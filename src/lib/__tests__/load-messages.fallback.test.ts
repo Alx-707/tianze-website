@@ -48,4 +48,25 @@ describe("load-messages canonical runtime source", () => {
 
     expect(cached).toEqual(direct);
   });
+
+  it("applies site-specific message overrides for the equipment pilot site", async () => {
+    vi.resetModules();
+    vi.doMock("@/sites", () => ({
+      currentSiteKey: "tianze-equipment",
+    }));
+
+    const equipmentModule = await import("@/lib/load-messages");
+    const messages = (await equipmentModule.loadCompleteMessagesFromSource(
+      "en",
+    )) as {
+      seo?: { siteName?: string };
+      home?: { hero?: { title?: string } };
+    };
+
+    expect(messages.seo?.siteName).toBe("Tianze Equipment");
+    expect(messages.home?.hero?.title).toBe("Build Your Pipe Bending Line.");
+
+    vi.doUnmock("@/sites");
+    vi.resetModules();
+  });
 });

@@ -12,9 +12,10 @@
  */
 
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import ContactPage from "@/app/[locale]/contact/page";
+import { renderAsyncPage } from "@/testing/render-async-page";
 
 // Mock next-intl
 const { mockGetTranslations, mockSuspenseState: _mockSuspenseState } =
@@ -40,6 +41,10 @@ vi.mock("react", async () => {
 vi.mock("next-intl/server", () => ({
   getTranslations: mockGetTranslations,
   setRequestLocale: vi.fn(),
+}));
+
+vi.mock("next/server", () => ({
+  connection: vi.fn(() => Promise.resolve()),
 }));
 
 // 在测试环境中将 cacheLife 处理为 no-op，避免依赖 Next.js cacheComponents 运行时配置
@@ -198,21 +203,6 @@ vi.mock("next-intl", () => ({
 vi.mock("@/app/[locale]/generate-static-params", () => ({
   generateLocaleStaticParams: () => [{ locale: "en" }, { locale: "zh" }],
 }));
-/**
- * Helper to render async Server Components in tests.
- * Resolves async component functions in the JSX tree before rendering.
- */
-async function renderAsyncPage(element: React.JSX.Element) {
-  let resolved = element;
-  if (typeof resolved.type === "function") {
-    const result = await Promise.resolve(resolved.type(resolved.props));
-    if (result && typeof result === "object" && "type" in result) {
-      resolved = result;
-    }
-  }
-  return render(resolved);
-}
-
 describe("Contact Page Rendering - Core Basic Tests", () => {
   const mockParams = { locale: "en" };
 

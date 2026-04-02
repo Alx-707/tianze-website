@@ -1,6 +1,8 @@
 import { URL } from "node:url";
 
 const DEFAULT_BASE_URL = process.env.DEPLOY_SMOKE_BASE_URL || "";
+const REQUEST_TIMEOUT_MS = 30000;
+const REQUEST_RETRIES = 2;
 
 function parseArgs(argv) {
   const args = {
@@ -61,17 +63,43 @@ function buildHeaders(headerName, headerValue) {
 
 async function request(baseUrl, pathname, headers) {
   const url = new URL(pathname, baseUrl);
-  const response = await fetch(url, {
-    redirect: "manual",
-    headers,
-  });
 
-  return {
-    pathname,
-    status: response.status,
-    location: response.headers.get("location"),
-    body: await response.text(),
-  };
+  let lastError;
+
+  for (let attempt = 0; attempt <= REQUEST_RETRIES; attempt++) {
+    try {
+      const response = await fetch(url, {
+        redirect: "manual",
+        headers,
+        signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+      });
+
+      return {
+        pathname,
+        status: response.status,
+        location: response.headers.get("location"),
+        body: await response.text(),
+      };
+    } catch (error) {
+      lastError = error;
+      if (!isRetriableFetchError(error) || attempt === REQUEST_RETRIES) {
+        throw error;
+      }
+    }
+  }
+
+  throw lastError;
+}
+
+function isRetriableFetchError(error) {
+  return (
+    error instanceof Error &&
+    "cause" in error &&
+    typeof error.cause === "object" &&
+    error.cause !== null &&
+    "code" in error.cause &&
+    error.cause.code === "UND_ERR_CONNECT_TIMEOUT"
+  );
 }
 
 function assert(condition, message, failures) {

@@ -38,7 +38,7 @@ jobs:
       - name: 设置Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "20.19.0"
 
       - name: 生成缓存键
         id: cache-key
@@ -99,7 +99,7 @@ jobs:
       - name: 设置Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "20.19.0"
 
       - name: Cache pnpm store
         uses: actions/cache@v4
@@ -171,7 +171,7 @@ jobs:
       - name: 设置Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "20.19.0"
 
       - name: Cache pnpm store
         uses: actions/cache@v4
@@ -236,7 +236,7 @@ jobs:
       - name: 设置Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "20.19.0"
 
       - name: Cache pnpm store
         uses: actions/cache@v4
@@ -269,6 +269,46 @@ jobs:
         env:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
 
+  site-pilot-proof:
+    name: 站点试装验证
+    runs-on: ubuntu-latest
+    needs: basic-checks
+    timeout-minutes: 18
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+        with:
+          submodules: false
+          persist-credentials: false
+
+      - name: 设置pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.13.1
+
+      - name: 验证pnpm版本
+        run: pnpm --version
+
+      - name: 设置Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.19.0"
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-node20-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-node20-pnpm-
+
+      - name: 安装依赖
+        run: pnpm install --frozen-lockfile
+
+      - name: 构建非默认站点
+        run: pnpm build:site:equipment
+
   # 安全检查作业
   security:
     name: 安全检查
@@ -297,7 +337,7 @@ jobs:
       - name: 设置Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "20.19.0"
 
       - name: Cache pnpm store
         uses: actions/cache@v4
@@ -370,7 +410,7 @@ jobs:
       - name: 设置Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "20.19.0"
 
       - name: Cache pnpm store
         uses: actions/cache@v4
@@ -434,7 +474,7 @@ jobs:
       - name: 设置Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "20.19.0"
 
       - name: Cache pnpm store
         uses: actions/cache@v4

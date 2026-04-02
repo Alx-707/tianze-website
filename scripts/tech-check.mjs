@@ -168,21 +168,58 @@ function classifyUpdateRisk(current, latest) {
   return "recommended_update";
 }
 
-function parseSupportedNodeMajors(engineRange) {
-  const match = String(engineRange).match(/^>=\s*(\d+)\s*<\s*(\d+)$/);
-  if (!match) {
-    return [];
+function compareVersionParts(left, right) {
+  if (left.major !== right.major) {
+    return left.major - right.major;
   }
 
-  const min = Number(match[1]);
-  const maxExclusive = Number(match[2]);
+  if (left.minor !== right.minor) {
+    return left.minor - right.minor;
+  }
+
+  return left.patch - right.patch;
+}
+
+function formatVersionParts(parts) {
+  return `${parts.major}.${parts.minor}.${parts.patch}`;
+}
+
+function parseNodeEngineRange(engineRange) {
+  const match = String(engineRange).match(
+    /^>=\s*(\d+)(?:\.(\d+))?(?:\.(\d+))?\s*<\s*(\d+)(?:\.(\d+))?(?:\.(\d+))?$/,
+  );
+  if (!match) {
+    return null;
+  }
+
+  const min = {
+    major: Number(match[1]),
+    minor: Number(match[2] ?? 0),
+    patch: Number(match[3] ?? 0),
+  };
+  const maxExclusive = {
+    major: Number(match[4]),
+    minor: Number(match[5] ?? 0),
+    patch: Number(match[6] ?? 0),
+  };
   const supportedMajors = [];
 
-  for (let major = min; major < maxExclusive; major += 1) {
+  for (let major = min.major; major < maxExclusive.major; major += 1) {
     supportedMajors.push(major);
   }
 
-  return supportedMajors;
+  return {
+    min,
+    maxExclusive,
+    supportedMajors,
+  };
+}
+
+function isVersionWithinRange(version, range) {
+  return (
+    compareVersionParts(version, range.min) >= 0 &&
+    compareVersionParts(version, range.maxExclusive) < 0
+  );
 }
 
 function detectRuntimeAlignmentRisk(pkg, supportedNodeMajors) {
@@ -251,9 +288,24 @@ function summarizeUpdates(outdatedPackages, vulnerabilities) {
 
 const stepResults = [];
 const packageJson = readPackageJson();
-const supportedNodeMajors = parseSupportedNodeMajors(packageJson.engines?.node);
+const nodeEngineRange = parseNodeEngineRange(packageJson.engines?.node);
+const supportedNodeMajors = nodeEngineRange?.supportedMajors ?? [];
+const currentNodeVersion = parseVersionParts(process.version.replace(/^v/, ""));
+const nodeRuntimeWithinPolicy =
+  nodeEngineRange && currentNodeVersion
+    ? isVersionWithinRange(currentNodeVersion, nodeEngineRange)
+    : null;
 
 console.log(`Node.js: ${process.version}`);
+if (nodeEngineRange && currentNodeVersion) {
+  console.log(
+    `Node policy: ${packageJson.engines?.node} (current=${formatVersionParts(
+      currentNodeVersion,
+    )}, min=${formatVersionParts(nodeEngineRange.min)}, max_exclusive=${formatVersionParts(
+      nodeEngineRange.maxExclusive,
+    )}, status=${nodeRuntimeWithinPolicy ? "within_range" : "outside_range"})`,
+  );
+}
 stepResults.push(runCommand("pnpm version", "pnpm", ["--version"]));
 
 const outdatedResult = runCommand("dependency updates", "pnpm", [
@@ -306,6 +358,10 @@ const failedChecks = stepResults
   .filter((step) => !step.ok)
   .map((step) => step.label);
 
+if (nodeRuntimeWithinPolicy === false) {
+  failedChecks.unshift("node runtime policy");
+}
+
 const needsFix = stepResults
   .filter(
     (step) =>
@@ -335,6 +391,15 @@ console.log(`overall: ${failedChecks.length === 0 ? "PASS" : "FAIL"}`);
 
 printList("failed_checks", failedChecks);
 printList("passed_checks", passedChecks);
+if (nodeEngineRange && currentNodeVersion) {
+  printList("node_runtime_policy", [
+    `${packageJson.engines?.node} (current=${formatVersionParts(
+      currentNodeVersion,
+    )}, min=${formatVersionParts(nodeEngineRange.min)}, max_exclusive=${formatVersionParts(
+      nodeEngineRange.maxExclusive,
+    )}, status=${nodeRuntimeWithinPolicy ? "within_range" : "outside_range"})`,
+  ]);
+}
 
 printList("needs_update", needsUpdate, (item) => {
   const securityNote = item.vulnerability

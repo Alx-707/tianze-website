@@ -10,13 +10,7 @@ import type {
 import { SITE_CONFIG } from "@/config/paths/site-config";
 import { routing } from "@/i18n/routing";
 
-const DEFAULT_BASE_URL =
-  process.env.NODE_ENV === "production" ? SITE_CONFIG.baseUrl : undefined;
-const FALLBACK_BASE_URL =
-  DEFAULT_BASE_URL ||
-  process.env["NEXT_PUBLIC_BASE_URL"] ||
-  process.env["NEXT_PUBLIC_SITE_URL"] ||
-  SITE_CONFIG.baseUrl;
+const FALLBACK_BASE_URL = SITE_CONFIG.baseUrl;
 
 const DEFAULT_LOGO_PATH = "/next.svg";
 

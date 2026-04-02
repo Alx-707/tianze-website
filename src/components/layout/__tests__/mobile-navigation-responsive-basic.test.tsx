@@ -222,7 +222,7 @@ describe("Mobile Navigation Responsive - Basic Tests", () => {
   });
 
   describe("路由变化行为", () => {
-    it("closes menu when pathname changes", async () => {
+    it("closes the menu when pathname changes", async () => {
       const { rerender } = render(<MobileNavigation />);
 
       const trigger = screen.getByRole("button");
@@ -234,7 +234,6 @@ describe("Mobile Navigation Responsive - Basic Tests", () => {
       mockPathname.current = "/about";
       rerender(<MobileNavigation />);
 
-      // Menu should be closed after route change
       const newTrigger = screen.getByRole("button");
       expect(newTrigger).toHaveAttribute("aria-expanded", "false");
     });
@@ -242,21 +241,21 @@ describe("Mobile Navigation Responsive - Basic Tests", () => {
     it("updates active navigation item on route change", async () => {
       const { rerender } = render(<MobileNavigation />);
 
-      let trigger = screen.getByRole("button");
+      const trigger = screen.getByRole("button");
       await user.click(trigger);
 
       // Simulate route change to about page
       mockPathname.current = "/about";
       rerender(<MobileNavigation />);
 
-      trigger = screen.getByRole("button");
-      await user.click(trigger);
+      const reopenedTrigger = screen.getByRole("button");
+      await user.click(reopenedTrigger);
 
       const aboutLink = screen.getByRole("link", { name: "About" });
       expect(aboutLink).toHaveAttribute("aria-current", "page");
     });
 
-    it("handles route changes during open state", async () => {
+    it("closes the menu during route changes", async () => {
       const { rerender } = render(<MobileNavigation />);
 
       const trigger = screen.getByRole("button");

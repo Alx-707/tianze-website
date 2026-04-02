@@ -13,47 +13,13 @@ import {
   PERCENTAGE_FULL,
 } from "@/constants";
 import { COUNT_250 } from "@/constants/count";
+import { currentSite, type SiteNavigationItem } from "@/sites";
 
-// Navigation item interface
-export interface NavigationItem {
-  key: string;
-  href: string;
-  translationKey: string;
-  icon?: string;
-  external?: boolean;
-  children?: NavigationItem[];
-}
+export type NavigationItem = SiteNavigationItem;
 
 // Main navigation configuration
 // 导航顺序：首页、产品、博客、关于、隐私政策
-export const mainNavigation: NavigationItem[] = [
-  {
-    key: "home",
-    href: "/",
-    translationKey: "navigation.home",
-  },
-  {
-    key: "products",
-    href: "/products",
-    translationKey: "navigation.products",
-  },
-  {
-    key: "blog",
-    href: "/blog",
-    translationKey: "navigation.blog",
-  },
-  {
-    key: "about",
-    href: "/about",
-    translationKey: "navigation.about",
-  },
-  {
-    key: "privacy",
-    href: "/privacy",
-    translationKey: "navigation.privacy",
-  },
-  // Note: contact page is accessible via direct URL but not shown in navigation
-];
+export const mainNavigation: NavigationItem[] = currentSite.navigation.main;
 
 // Mobile navigation configuration (can be different from main nav)
 export const mobileNavigation: NavigationItem[] = mainNavigation;

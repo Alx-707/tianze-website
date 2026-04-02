@@ -9,8 +9,8 @@
 #   pnpm ci:local:quick     # 快速预检（跳过耗时任务）
 #   pnpm ci:local:fix       # 自动修复可修复的问题
 # 口径说明：
-#   - 远程 GitHub Actions 当前固定 Node 20
-#   - 本地脚本遵循 package.json engines（Node >=20 <23），并显式提示与远程 CI 的偏差
+#   - 远程 GitHub Actions 当前固定 Node 20.19.0
+#   - 本地脚本遵循 package.json engines（Node >=20.19 <23），并显式提示与远程 CI 的偏差
 # =============================================================================
 # CI 架构说明：
 #   - ci.yml: 主流水线，PR 必需检查（type-check, lint, test, security, etc.）
@@ -69,21 +69,29 @@ print_skip() {
 check_node_version() {
     print_step "检查 Node.js 版本"
 
-    CURRENT_VERSION=$(node --version | cut -d'v' -f2 | cut -d'.' -f1)
-    CI_VERSION=20
-    MIN_SUPPORTED_VERSION=20
-    MAX_SUPPORTED_VERSION=22
+    CURRENT_VERSION=$(node --version | cut -d'v' -f2)
+    CI_VERSION="20.19.0"
+    MIN_SUPPORTED_VERSION="20.19.0"
+    MAX_EXCLUSIVE_VERSION="23.0.0"
 
-    if [ "$CURRENT_VERSION" -lt "$MIN_SUPPORTED_VERSION" ] || [ "$CURRENT_VERSION" -gt "$MAX_SUPPORTED_VERSION" ]; then
-        print_error "Node.js 版本不受支持: v$CURRENT_VERSION (本地支持 v$MIN_SUPPORTED_VERSION-v$MAX_SUPPORTED_VERSION，远程 CI 固定 v$CI_VERSION)"
-        echo "  建议: nvm install 20 && nvm use 20"
+    version_lt() {
+        [ "$(printf '%s\n' "$1" "$2" | sort -V | head -n1)" != "$2" ]
+    }
+
+    version_ge() {
+        [ "$(printf '%s\n' "$1" "$2" | sort -V | head -n1)" = "$2" ]
+    }
+
+    if version_lt "$CURRENT_VERSION" "$MIN_SUPPORTED_VERSION" || version_ge "$CURRENT_VERSION" "$MAX_EXCLUSIVE_VERSION"; then
+        print_error "Node.js 版本不受支持: v$CURRENT_VERSION (本地支持 >=v$MIN_SUPPORTED_VERSION 且 <v$MAX_EXCLUSIVE_VERSION，远程 CI 固定 v$CI_VERSION)"
+        echo "  建议: 使用 Node v$CI_VERSION 或其他 >=v$MIN_SUPPORTED_VERSION 且 <v$MAX_EXCLUSIVE_VERSION 的版本"
         return 1
     fi
 
-    if [ "$CURRENT_VERSION" -eq "$CI_VERSION" ]; then
+    if [ "$CURRENT_VERSION" = "$CI_VERSION" ]; then
         print_success "Node.js 版本与远程 CI 一致: v$CURRENT_VERSION"
     else
-        print_success "Node.js 版本受支持: v$CURRENT_VERSION (远程 CI 固定 v$CI_VERSION，可能仍存在本地绿/CI红差异)"
+        print_success "Node.js 版本受支持: v$CURRENT_VERSION (远程 CI 固定 v$CI_VERSION，本地与 CI 仍可能存在差异)"
     fi
 }
 

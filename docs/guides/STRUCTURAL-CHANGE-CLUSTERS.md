@@ -13,6 +13,8 @@ Files:
 - `messages/zh.json`
 - `messages/en/critical.json`
 - `messages/zh/critical.json`
+- `src/sites/message-overrides.ts`
+- `src/sites/**/messages/**`
 
 Why it matters:
 - This is the strongest logical-coupling cluster in the repository.
@@ -20,6 +22,7 @@ Why it matters:
 
 Review rule:
 - If one file in the quartet changes, reviewers should inspect the other three.
+- If the change touches a site overlay, reviewers should also inspect whether the shared base bundle still needs to change or should remain untouched.
 - If the change affects runtime-facing copy or error semantics, use at least `local-full proof`.
 - Run `pnpm review:translation-quartet` to execute the quartet validation path.
 

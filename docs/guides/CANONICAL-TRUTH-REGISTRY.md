@@ -14,6 +14,29 @@ If another document conflicts with this file, treat this file plus the linked ca
   - treat the repository as Tianze Website in docs, reviews, and deployment decisions
   - do not use the package name as proof of current product identity
 
+## Site Identity Truth
+- Canonical site registry:
+  - [`src/sites/index.ts`](../../src/sites/index.ts)
+- Canonical site definitions:
+  - [`src/sites/tianze.ts`](../../src/sites/tianze.ts)
+  - [`src/sites/tianze-equipment.ts`](../../src/sites/tianze-equipment.ts)
+- Canonical current site product catalog:
+  - [`src/sites/tianze/product-catalog.ts`](../../src/sites/tianze/product-catalog.ts)
+- Canonical site-specific message overlays:
+  - [`src/sites/message-overrides.ts`](../../src/sites/message-overrides.ts)
+  - `src/sites/<site-key>/messages/<locale>/{critical,deferred}.json`
+- Compatibility wrappers that still point at the active site truth:
+  - [`src/config/paths/site-config.ts`](../../src/config/paths/site-config.ts)
+  - [`src/config/site-facts.ts`](../../src/config/site-facts.ts)
+  - [`src/constants/product-catalog.ts`](../../src/constants/product-catalog.ts)
+  - [`src/config/footer-links.ts`](../../src/config/footer-links.ts)
+  - [`src/lib/navigation.ts`](../../src/lib/navigation.ts)
+- Rule:
+  - when site identity, contact facts, default SEO, navigation, footer, or market structure change, update `src/sites/**` first
+  - when only a non-default site’s copy or metadata changes, update `src/sites/**/messages/**` first
+  - treat wrapper modules as compatibility surfaces, not the place to invent new Tianze-only truth
+  - non-default sites must not silently inherit a global `NEXT_PUBLIC_BASE_URL`; prefer explicit per-site base URL truth in `src/sites/**`, `NEXT_PUBLIC_SITE_URL`, or a site-specific env key
+
 ## Runtime Entrypoints
 
 ### Web request entry
@@ -30,17 +53,34 @@ If another document conflicts with this file, treat this file plus the linked ca
 
 ## i18n Runtime Truth
 - Canonical loader: [`src/lib/load-messages.ts`](../../src/lib/load-messages.ts)
-- Canonical runtime sources:
+- Canonical shared runtime sources:
   - [`messages/en/critical.json`](../../messages/en/critical.json)
   - [`messages/en/deferred.json`](../../messages/en/deferred.json)
   - [`messages/zh/critical.json`](../../messages/zh/critical.json)
   - [`messages/zh/deferred.json`](../../messages/zh/deferred.json)
+- Canonical site-specific overlay sources:
+  - [`src/sites/message-overrides.ts`](../../src/sites/message-overrides.ts)
+  - `src/sites/<site-key>/messages/<locale>/{critical,deferred}.json`
 - Important non-truth sources:
   - `messages/en.json`
   - `messages/zh.json`
 - Rule:
   - the flat files are for tests and validation shape checks
   - runtime does not load them directly
+  - runtime message truth is now two-layered:
+    - shared base bundles under `messages/**`
+    - optional site-specific overlays under `src/sites/**/messages/**`
+  - do not put second-site-only copy straight into shared bundles unless it is intentionally shared by every site
+
+## About Page Runtime Truth
+- Canonical runtime route:
+  - [`src/app/[locale]/about/page.tsx`](../../src/app/[locale]/about/page.tsx)
+- Supplemental content assets:
+  - [`content/pages/en/about.mdx`](../../content/pages/en/about.mdx)
+  - [`content/pages/zh/about.mdx`](../../content/pages/zh/about.mdx)
+- Rule:
+  - current `/about` output comes from the route component plus translation bundles, not directly from the MDX files
+  - treat the MDX files as content assets and draft truth, not the active route renderer, until the route is explicitly migrated
 
 ## Main Shipped Lead Path
 - Canonical production path: **Contact page Server Action**
@@ -70,11 +110,17 @@ If another document conflicts with this file, treat this file plus the linked ca
   - `pnpm smoke:cf:preview`
 - Local strict diagnostic:
   - `pnpm smoke:cf:preview:strict`
+- Stronger local split-worker proof:
+  - `pnpm deploy:cf:phase6:dry-run`
+- Stronger real preview publish path:
+  - `pnpm deploy:cf:phase6:preview`
 - Final deployed Cloudflare proof:
   - `pnpm smoke:cf:deploy -- --base-url <url>`
 
 ### Rule
 - stock local preview is useful, but bounded
+- stock local preview is not the same thing as split-worker proof
+- phase6 dry-run is the stronger local Cloudflare proof for the current repo
 - deployed smoke is the final proof for Cloudflare API behavior
 - do not treat local preview alone as complete deployed truth
 

@@ -5,10 +5,35 @@
 
 ## Project Decisions
 
+- Node runtime truth:
+  - `package.json > engines.node`: `>=20.19 <23`
+  - `.nvmrc` / `.node-version`: `20.19.0`
+  - GitHub Actions merge-proof baseline: `20.19.0`
+  - local `22.x` may still be allowed, but do not treat it as the final CI truth
 - `cacheComponents: true` enabled in `next.config.ts` — Cache Components (`"use cache"`) are enabled
 - **PPR** (`experimental.ppr`): Not enabled — it still requires canary and remains commented out. Note: `dynamicIO` was an older Next.js 15 canary flag that has already been superseded by `cacheComponents`; they are not two separate features.
 - **Optional Cache APIs** (not yet used): `cacheTag()`, `revalidateTag()`, `updateTag()`
 - Migration record: `docs/known-issues/cache-i18n-upgrade-status.md`
+- Current execution order for repository evolution:
+  - non-structural adoption first
+  - current single-site cleanup second
+  - second real site pilot next
+  - formal multi-site structure last
+- Current site identity truth-source:
+  - `src/sites/index.ts`
+  - `src/sites/tianze.ts`
+  - `src/sites/tianze-equipment.ts`
+  - `src/sites/tianze/product-catalog.ts`
+  - `src/sites/message-overrides.ts`
+  - `src/sites/types.ts`
+- Compatibility wrappers remain in:
+  - `src/config/paths/site-config.ts`
+  - `src/config/site-facts.ts`
+  - `src/constants/product-catalog.ts`
+  - `src/config/footer-links.ts`
+  - `src/lib/navigation.ts`
+  - New site identity work should prefer `src/sites/**`, not duplicate values in wrappers
+  - Site-specific copy work should prefer `src/sites/**/messages/**`, not direct edits to shared bundles unless the copy is intentionally global
 
 ### Page Props Convention
 
@@ -32,15 +57,17 @@ The project uses **dual content strategies** (details in `.claude/rules/content.
 
 | Content type | Strategy | Location |
 |-------------|----------|----------|
-| Blog, About, FAQ, Legal | MDX | `content/{posts,pages}/{locale}/` |
-| Product catalog (specs, markets, families) | TypeScript constants | `src/constants/product-{catalog,specs,standards}.ts` |
+| Blog, FAQ, Legal | MDX | `content/{posts,pages}/{locale}/` |
+| About route runtime | Route component + translation bundles | `src/app/[locale]/about/page.tsx` + `messages/**` / `src/sites/**/messages/**` |
+| Product catalog (specs, markets, families) | Site-layer truth + compatibility wrapper | `src/sites/**` + `src/constants/product-{catalog,specs,standards}.ts` |
 
-**Decision rule**: Structured/tabular data consumed by multiple components → TypeScript. Narrative/editorial content → MDX.
+**Decision rule**: Structured/tabular data consumed by multiple components → TypeScript. Narrative/editorial content → MDX, except when the active route runtime has already moved into `src/app/**` and MDX is only a supporting content asset.
 
 ## Data Fetching
 
 **Blog/pages**: Content query system in `src/lib/content-query/`
-**Product catalog**: Direct imports from `src/constants/product-catalog.ts` + `src/constants/product-specs/`
+**Product catalog**: Current site truth in `src/sites/**`, consumed through `src/constants/product-catalog.ts` + `src/constants/product-specs/`
+**Site-specific copy**: shared messages in `messages/**`, optional per-site overlays in `src/sites/**/messages/**`
 
 ## Project-Specific Pitfalls
 
@@ -95,6 +122,8 @@ Notes:
   - `pnpm build:cf` → formal Cloudflare build path, now backed by the repo's Webpack-based wrapper
   - `pnpm preview:cf` / `pnpm deploy:cf` → follow the same current canonical `build:cf` output
   - `pnpm build:cf:turbo` → comparison / fallback path for debugging upstream Turbopack/OpenNext behavior, not the default production build path
+- `pnpm release:verify` → current unified release gate; now includes clean standard build, `build:site:equipment`, `build:cf`, `deploy:cf:phase6:dry-run` (dry-run only, not a real publish), and release smoke
+  - `node scripts/cloudflare/deploy-phase6.mjs --env preview` → current stronger real preview path for Cloudflare proof
 
 | Layer | Scope | Command | Release-blocking? |
 |-------|-------|---------|-------------------|
@@ -103,7 +132,10 @@ Notes:
 
 - `pnpm smoke:cf:preview:strict` (includes `/api/health` in local preview) is a **diagnostic tool**, not a release gate. Its failure does not block releases.
 - Local preview is still a bounded proof surface even though `build:cf` now uses Webpack by default; do not treat local Wrangler behavior as a complete substitute for deployed Cloudflare evidence.
-- As of 2026-03-27, the local preview server can still render middleware-only redirects correctly while returning 500 for page requests like `/en` and `/en/contact` because Wrangler local runtime hits a `middleware-manifest.json` dynamic-require failure. Treat that as a local preview limitation unless the same failure reproduces after deployment.
+- As of 2026-04-01, the repo-local compatibility patch in `scripts/cloudflare/patch-prefetch-hints-manifest.mjs` restores stock local page preview on the upgraded stack; page routes are no longer the main blocker.
+- `pnpm preview:cf:wrangler` remains a diagnostics-only path. If it still hangs or returns request-context/runtime errors while `pnpm smoke:cf:preview` passes, treat that as a Wrangler local-runtime boundary rather than a page-level regression.
+- The strongest current proof surface is the real phase6 preview deploy plus post-deploy smoke, not stock local preview alone.
+- `pnpm release:verify` still stops at `pnpm deploy:cf:phase6:dry-run`; do not describe that dry-run path as the same thing as a real preview publish.
 - Final API proof happens **only after real Cloudflare deployment**, via the post-deploy smoke in the deploy workflow.
 - If post-deploy smoke fails, rollback to the previous deployment.
 

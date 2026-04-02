@@ -2,74 +2,11 @@
  * 站点配置
  */
 
-import { env } from "@/lib/env";
+import { currentSite, type SiteConfig } from "@/sites";
 
-export interface SiteConfig {
-  baseUrl: string;
-  name: string;
-  description: string;
-  seo: {
-    titleTemplate: string;
-    defaultTitle: string;
-    defaultDescription: string;
-    keywords: string[];
-  };
-  social: {
-    twitter: string;
-    linkedin: string;
-    github: string;
-  };
-  contact: {
-    phone: string;
-    email: string;
-    whatsappNumber: string;
-  };
-}
+export type { SiteConfig } from "@/sites";
 
-// 站点配置
-export const SITE_CONFIG = {
-  baseUrl:
-    env.NEXT_PUBLIC_BASE_URL !== "http://localhost:3000"
-      ? env.NEXT_PUBLIC_BASE_URL
-      : (process.env.NEXT_PUBLIC_SITE_URL ?? "https://tianze-pipe.com"),
-  name: "Tianze Pipe",
-  description:
-    "Pipe Bending Experts - Equipment, Process & Fittings Integrated Solutions",
-
-  // SEO配置
-  seo: {
-    titleTemplate: "%s | Tianze Pipe - Pipe Bending Experts",
-    defaultTitle: "Tianze Pipe - Pipe Bending Experts",
-    defaultDescription:
-      "Professional PVC pipe bending machinery and pipe fittings manufacturer. Equipment + Process + Fittings integrated solutions for global B2B customers.",
-    keywords: [
-      "pipe bending machine",
-      "PVC pipe bending",
-      "pipe bending equipment",
-      "PVC conduit",
-      "PETG pneumatic tube",
-      "pipe fittings",
-      "pipe manufacturer China",
-      "industrial pipes",
-      "Schedule 80 conduit",
-      "hospital pneumatic tube system",
-    ],
-  },
-
-  // 社交媒体链接
-  social: {
-    twitter: "https://x.com/tianzepipe",
-    linkedin: "https://www.linkedin.com/company/tianze-pipe",
-    github: "https://github.com/tianze-pipe",
-  },
-
-  // 联系信息
-  contact: {
-    phone: "+86-518-0000-0000",
-    email: "sales@tianze-pipe.com",
-    whatsappNumber: env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "+86-518-0000-0000",
-  },
-} as const satisfies SiteConfig;
+export const SITE_CONFIG = currentSite.config;
 
 /**
  * Default placeholder phone number used when no real number is configured.

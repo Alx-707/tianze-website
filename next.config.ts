@@ -20,7 +20,6 @@ const withMDX = createMDX({
 });
 
 const isCloudflare = process.env.DEPLOY_TARGET === "cloudflare";
-
 const nextConfig: NextConfig = {
   // Exclude test/report artifacts from OpenNext bundle
   outputFileTracingExcludes: {

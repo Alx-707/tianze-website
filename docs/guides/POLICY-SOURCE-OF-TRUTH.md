@@ -24,6 +24,9 @@ Use this file when multiple documents appear to describe the same rule.
 ### System Observability
 - [`SYSTEM-OBSERVABILITY.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/SYSTEM-OBSERVABILITY.md) - current signal model, collector scope, and next-step boundary
 
+### Cloudflare Interpretation
+- [`CLOUDFLARE-ISSUE-TAXONOMY.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/CLOUDFLARE-ISSUE-TAXONOMY.md)
+
 ### Archive and Supersession Hygiene
 - [`ARCHIVE-HYGIENE.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/ARCHIVE-HYGIENE.md)
 

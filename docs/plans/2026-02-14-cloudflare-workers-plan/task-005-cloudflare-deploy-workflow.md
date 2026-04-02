@@ -40,7 +40,7 @@
 Steps 设计要点：
 1. Checkout 代码（`actions/checkout@v4`，`persist-credentials: false`）
 2. 检查 Cloudflare 凭据（`CLOUDFLARE_API_TOKEN`、`CLOUDFLARE_ACCOUNT_ID`）
-3. 设置 pnpm + Node.js（版本与 vercel-deploy.yml 保持一致：pnpm 10.13.1、Node 20）
+3. 设置 pnpm + Node.js（版本与 vercel-deploy.yml 保持一致：pnpm 10.13.1、Node 20.19.0）
 4. `pnpm install --frozen-lockfile`
 5. 构建：`pnpm build:cf 2>&1 | tee cf_build.log`（环境变量已内置在脚本中）
 6. MISSING_MESSAGE 检测：`grep -E -i "MISSING_MESSAGE" cf_build.log`

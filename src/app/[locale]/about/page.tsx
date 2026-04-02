@@ -236,7 +236,11 @@ function StatsSection({ stats }: StatsSectionProps) {
       value: `${siteFacts.company.employees}+`,
       label: stats.happyClients,
     },
-    { key: "factory", value: "100", label: stats.productsDelivered },
+    {
+      key: "factory",
+      value: `${siteFacts.stats.factoryAreaAcres ?? 100}`,
+      label: stats.productsDelivered,
+    },
   ];
 
   return (
