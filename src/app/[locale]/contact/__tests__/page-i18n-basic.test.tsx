@@ -435,11 +435,9 @@ describe("Contact Page I18n - Basic Tests", () => {
       const invalidParams = Promise.reject(new Error("Params error"));
 
       await expect(
-        renderAsyncPage(
-          ContactPage({
-            params: invalidParams,
-          }),
-        ),
+        ContactPage({
+          params: invalidParams,
+        }),
       ).rejects.toThrow("Params error");
     });
 
@@ -484,12 +482,12 @@ describe("Contact Page I18n - Basic Tests", () => {
         setTimeout(() => resolve(mockParams), 10),
       );
 
+      const ContactPageComponent = await ContactPage({
+        params: asyncParams,
+      });
+
       await expect(
-        renderAsyncPage(
-          ContactPage({
-            params: asyncParams,
-          }),
-        ),
+        renderAsyncPage(ContactPageComponent),
       ).resolves.toBeDefined();
     });
   });
