@@ -105,6 +105,16 @@
   - 同步搜索并更新 4 个文件
   - 至少执行一次 `pnpm validate:translations`
 
+### 3.1 当前已经支持站点消息覆盖，不要把第二站专属文案继续塞进共享消息
+- 截至 2026-04-01，本仓库当前消息真相已经分成两层：
+  - 共享基础消息：`messages/{locale}/{critical,deferred}.json`
+  - 站点覆盖消息：`src/sites/<site-key>/messages/<locale>/{critical,deferred}.json`
+- 当前第二站试装键值是：`tianze-equipment`
+- 默认动作：
+  - 所有站都要继承的文案，改共享基础消息
+  - 只有第二站或未来某个站点要改的文案，优先改对应 `src/sites/**/messages/**`
+  - 不要为了图省事，把第二站专属标题、SEO、联系页文案直接写回共享基础消息
+
 ### 4. 当前双平台部署下，优先保留 `src/middleware.ts`
 - 截至 2026-03-19，本仓库为了兼容当前 Cloudflare 链路，运行时入口仍保留为 `src/middleware.ts`。
 - 原因是：`src/proxy.ts` 虽然能通过 `next build`，但会阻塞 `pnpm build:cf`。
@@ -242,7 +252,74 @@
 - 不要让主要依赖 heavy mock 的弱测试在文档里被描述成主证明。
 - 只要改动了 contact / inquiry / subscribe / health / behavioral contracts / smoke tests，就必须同步检查行为合同和最终证明面是否仍然成立。
 
-### 15. phase6 真实 preview 已有一条可运行主路，不要再回到会重复踩坑的旧写法
+### 15. 多站点 base URL 真相必须按站点显式收口
+- 当前仓库已经确认：第二站不能默认继承全局 `NEXT_PUBLIC_BASE_URL`，否则 canonical、OG URL、sitemap、结构化数据、Turnstile host 校验都可能继续吐主站域名。
+- 默认动作：
+  - 站点对外 URL 先看 `src/sites/**` 的默认值；
+  - 当前激活站点如需覆盖，优先用 `NEXT_PUBLIC_SITE_URL`；
+  - 如果要给某个站点长期单独配置，使用该站点专属 env，而不是继续偷用全局主站 URL；
+  - 任何改动后至少验证 metadata、sitemap/structured data 与联系页标题没有跨站串值。
+
+### 16. 当前已经存在非默认站点验证入口，不要只验证默认站
+- 截至 2026-04-01，本仓库当前已经有：
+  - `NEXT_PUBLIC_SITE_KEY=tianze-equipment`
+  - `pnpm build:site:equipment`
+  - `pnpm start:site:equipment`
+  - `pnpm build:cf:site:equipment`
+- 默认动作：
+  - 如果改动涉及站点身份、SEO 默认值、消息覆盖、导航、页脚、产品目录或切站逻辑，至少补一次非默认站点验证
+  - 不要只看默认 Tianze 站通过，就宣布多站结构这条线没问题
+
+### 17. 当前执行顺序：先吸收，再清理，再试装，最后才上多站结构
+- 当前仓库的默认推进顺序已经固定：
+  - 先固定真相源和总入口
+  - 先吸收参考仓库的非结构性做法
+  - 先整理当前单站的站点身份、内容资产、SEO 资产和证明边界
+  - 再更新 AI 规则文档
+  - 再做第二个真实站点最小试装
+  - 最后才进入多站结构正式落地
+- 默认动作：
+  - 不要跳过前面的非结构性吸收和单站清理，直接把仓库改成多站壳层
+  - 如果有人要求“现在就上多站结构”，先核对当前阶段是否已经完成上面前五步
+
+### 18. 站点身份层当前真相已经进入 `src/sites/**`
+- 当前仓库已经建立站点定义层：
+  - `src/sites/index.ts`
+  - `src/sites/tianze.ts`
+  - `src/sites/tianze/product-catalog.ts`
+  - `src/sites/types.ts`
+- `src/config/paths/site-config.ts`、`src/config/site-facts.ts`、`src/constants/product-catalog.ts`、`src/config/footer-links.ts`、`src/lib/navigation.ts` 现在是兼容包装层，不再是第一真相源。
+- 默认动作：
+  - 改品牌、联系信息、默认 SEO、导航、页脚、市场结构时，先改 `src/sites/**`
+  - 不要在兼容包装层重新发明 Tianze 专属真相
+
+### 19. `/about` 的当前运行时真相不是 MDX
+- 截至 2026-04-01，`content/pages/en/about.mdx` / `content/pages/zh/about.mdx` 是内容资产，但当前真正渲染 `/[locale]/about` 的仍是 `src/app/[locale]/about/page.tsx` 加消息文件。
+- 默认动作：
+  - 如果要改当前 about 页面实际输出，先检查 `src/app/[locale]/about/page.tsx` 和 `messages/*/deferred.json`
+  - 不要以为只改 MDX 就一定会直接影响当前 about 页面
+
+### 20. Cloudflare 问题先归类，再下判断
+- 当前仓库对 Cloudflare 相关失败，默认先按四类归因：
+  - 平台入口 / 本地运行时问题
+  - 生成产物兼容问题
+  - 当前站运行时回归
+  - 最终部署行为问题
+- 参考：
+  - `docs/guides/CLOUDFLARE-ISSUE-TAXONOMY.md`
+- 默认动作：
+  - 先说清是哪一类，再说症状
+  - 不要把 local preview 的失败直接写成生产事实
+  - 新增品牌、联系信息、社媒、基础 SEO、导航、页脚链接时，优先改 `src/sites/**`
+  - 不要绕过 `src/sites/**` 直接在多个兼容入口里重复写站点信息
+
+### 21. 模板残留默认必须持续清理，不允许重新回流到正式内容
+- `content/config/content.json`、`content/pages/**`、`content/posts/**` 已开始从模板默认值切回 Tianze 真实内容。
+- 默认动作：
+  - 如果新增或改写内容，先确认不是把 `B2B Web Template` 一类模板语境重新写回正式内容
+  - 如果发现模板残留，优先把它当成内容真相污染，而不是“小问题以后再说”
+
+### 22. phase6 真实 preview 已有一条可运行主路，不要再回到会重复踩坑的旧写法
 - 截至 2026-04-01，本仓库已验证：
   - `phase6` 真实 preview deploy 在 API token 认证下，`scripts/cloudflare/deploy-phase6.mjs` 必须强制带 `OPEN_NEXT_DEPLOY=true`，否则会掉回 OpenNext 自己的 deploy 包装路径，并卡在 remote R2 cache provisioning；
   - `phase6` 的 `gateway` 在 preview 环境里引用 `web/api-*` worker 时，必须直接指向带 `-preview` 后缀的真实 worker 名，不能再写成 `service + environment` 组合；
@@ -250,11 +327,11 @@
   - `phase6` 下的 `/api/health` 当前稳定做法是由 gateway 直接返回合同化 health 响应；继续穿过 `apiLead` 的完整 Next/OpenNext 运行时，会反复踩到 Cloudflare 侧的 CommonJS / fs 兼容边界。
 - 默认动作：
   - 要验证 `phase6`，优先用 `node scripts/cloudflare/build-phase6-workers.mjs` 生成 worker/config，再用 `node scripts/cloudflare/deploy-phase6.mjs --env preview` 做真实 preview deploy；
-  - 当前更可信的 phase6 proof 地址是 `https://tianze-website-gateway-preview.kei-tang.workers.dev`；
-  - 最终以 `pnpm smoke:cf:deploy -- --base-url https://tianze-website-gateway-preview.kei-tang.workers.dev` 为准；
+  - 当前更可信的 phase6 proof 形态是“真实 preview deploy 输出的 gateway URL”，不要把某一次临时 preview 地址写死进规则；
+  - 最终以 `pnpm smoke:cf:deploy -- --base-url <preview-url>` 为准；运行前必须先从 deploy 输出里拿到你自己的 preview URL；
   - 如果以后有人想把 `/api/health` 再改回 `apiLead` 运行链路，必须先重新拿到 deployed smoke 级别的 200 证据，不能只看 dry-run 或本地 preview。
 
-### 16. 不要把 route 目录里的测试辅助文件随手丢进 `__tests__` 邻近位置
+### 23. 不要把 route 目录里的测试辅助文件随手丢进 `__tests__` 邻近位置
 - 截至 2026-04-01，本仓库已验证：
   - 如果把测试辅助文件直接放在 `src/app/[locale]/contact/` 这样的 route 目录下，`truth:check` 会把它当成 route 目录里的孤儿文件；
   - 如果把没有测试用例的 helper 放进 `__tests__`，Vitest 又会把它当成空测试文件，导致整套 CI 假红。

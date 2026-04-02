@@ -437,7 +437,7 @@ Reason summary:
 - Next/OpenNext/Wrangler line:
   - `pnpm clean:next-artifacts && pnpm build`, `pnpm build:cf`, and local page preview now pass with the repo-local compatibility patch
   - real phase6 preview deploy is now runnable with the repo-local phase6 fixes
-  - `pnpm smoke:cf:deploy -- --base-url https://tianze-website-gateway-preview.kei-tang.workers.dev` now passes
+  - `pnpm smoke:cf:deploy -- --base-url <preview-url>` now passes once it points at the real preview deploy URL produced by the current run
   - the strengthened `pnpm release:verify` flow now also passes end-to-end on this branch
   - the remaining caution is that stock/default-worker preview still should not be treated as the final truth for `/api/health`
 - ESLint 10 line: current React lint plugin chain still fails at runtime

@@ -281,7 +281,7 @@ content/
 - `pnpm release:verify` - 当前统一发布门禁；现在会串行执行 clean standard build、`build:cf`、`deploy:cf:phase6:dry-run` 和 release smoke
 - `pnpm smoke:cf:preview` - 本地 Cloudflare 页面/跳转/cookie/header 证明
 - `pnpm smoke:cf:deploy -- --base-url <url>` - 真实部署后的 Cloudflare 最终 smoke
-- 当前更可信的 preview proof 地址：`https://tianze-website-gateway-preview.kei-tang.workers.dev`
+- 当前更可信的 preview proof 形态：真实 preview deploy 输出的 gateway URL；运行 deployed smoke 时请用 `pnpm smoke:cf:deploy -- --base-url <preview-url>`
 
 #### 长期考虑（低优先级）
 - **lottie-react** - 品牌动画和交互反馈
