@@ -14,6 +14,34 @@ import { expect, test, type Page, type TestInfo } from "@playwright/test";
 test.describe.configure({ mode: "serial" });
 
 test.describe("Contact Form - Test-Mode Smoke", () => {
+  const resolveSiteMode = (url: string): "tianze" | "tianze-equipment" => {
+    const explicitSiteKey =
+      process.env.PLAYWRIGHT_SITE_KEY || process.env.NEXT_PUBLIC_SITE_KEY;
+
+    if (explicitSiteKey === "tianze-equipment") {
+      return "tianze-equipment";
+    }
+
+    return url.includes("equipment.") ? "tianze-equipment" : "tianze";
+  };
+
+  const getExpectedContactTitle = (
+    locale: "en" | "zh",
+    url: string,
+  ): RegExp => {
+    const siteMode = resolveSiteMode(url);
+
+    if (siteMode === "tianze-equipment") {
+      return locale === "zh"
+        ? /联系 Tianze Equipment|对接设备团队|联系设备团队/i
+        : /Contact Tianze Equipment|Talk to the Equipment Team/i;
+    }
+
+    return locale === "zh"
+      ? /联系我们.*Tianze Pipe|联系我们/i
+      : /Contact Us.*Tianze Pipe|Get a Quote/i;
+  };
+
   const supportedLocales = (process.env.NEXT_PUBLIC_SUPPORTED_LOCALES || "en")
     .split(",")
     .map((locale) => locale.trim())
@@ -117,6 +145,7 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
       throw new Error(`Contact form did not render: ${targetUrl}`);
     }
 
+    await expect(page).toHaveTitle(getExpectedContactTitle(locale, targetUrl));
     await expectInteractiveContactForm(page);
   };
 
@@ -142,9 +171,6 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
   test.describe("1. Turnstile 验证流程", () => {
     test("应该加载 Turnstile widget（英文页面）", async ({ page }) => {
       await gotoContactPage(page, test.info(), "en");
-
-      // 检查页面标题
-      await expect(page).toHaveTitle(/Contact/i);
 
       // 检查表单存在
       const form = page.locator("form").first();
@@ -192,9 +218,6 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
 
     test("应该加载 Turnstile widget（中文页面）", async ({ page }) => {
       await gotoContactPage(page, test.info(), "zh");
-
-      // 检查页面标题
-      await expect(page).toHaveTitle(/联系/i);
 
       // 检查表单存在
       const form = page.locator("form").first();
@@ -409,8 +432,10 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
     });
   });
 
-  test.describe("8. 速率限制（Rate Limiting）", () => {
-    test("应该在超过速率限制后显示错误（英文）", async ({ page }) => {
+  test.describe("8. 交互式表单可用性", () => {
+    test("英文页面应该保持真实表单可编辑，而不是只停留在备用壳子", async ({
+      page,
+    }) => {
       await gotoContactPage(page, test.info(), "en");
 
       await page.fill('input[name="firstName"]', "Test");
@@ -439,7 +464,9 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
       );
     });
 
-    test("应该在超过速率限制后显示错误（中文）", async ({ page }) => {
+    test("中文页面应该保持真实表单可编辑，而不是只停留在备用壳子", async ({
+      page,
+    }) => {
       await gotoContactPage(page, test.info(), "zh");
 
       await page.fill('input[name="firstName"]', "测试");
