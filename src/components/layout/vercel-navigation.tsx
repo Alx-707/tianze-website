@@ -124,8 +124,14 @@ function renderDropdownItem({
         )}
         onClick={() => hoverState.handleClick(item.key)}
         aria-expanded={isOpen}
+        translate="no"
       >
-        {t(item.translationKey)}
+        <span
+          data-testid={`vercel-navigation-trigger-label-${item.key}`}
+          translate="no"
+        >
+          {t(item.translationKey)}
+        </span>
       </NavigationMenuTrigger>
       <NavigationMenuContent>
         <DropdownContent items={item.children || []} t={t} />
@@ -149,6 +155,7 @@ function renderLinkItem(
         <Link
           href={href}
           {...(prefetchDisabled ? { prefetch: false } : {})}
+          translate="no"
           className={cn(
             "relative inline-flex items-center rounded-full bg-transparent px-3 py-2 text-sm font-medium tracking-[0.01em]",
             "text-muted-foreground hover:text-foreground",
@@ -158,7 +165,12 @@ function renderLinkItem(
             "transition-colors duration-100 ease-out",
           )}
         >
-          {t(item.translationKey)}
+          <span
+            data-testid={`vercel-navigation-link-label-${item.key}`}
+            translate="no"
+          >
+            {t(item.translationKey)}
+          </span>
         </Link>
       </NavigationMenuLink>
     </NavigationMenuItem>
@@ -188,8 +200,10 @@ export function VercelNavigation({ className }: VercelNavigationProps) {
 
   return (
     <nav
-      className={cn("header-desktop-only", className)}
+      className={cn("header-desktop-only notranslate", className)}
       aria-label={NAVIGATION_ARIA.mainNav}
+      data-testid="vercel-navigation-root"
+      translate="no"
     >
       <NavigationMenu>
         <NavigationMenuList>

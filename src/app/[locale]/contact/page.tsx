@@ -177,7 +177,7 @@ function ContactMethodsCard({
           </div>
           <div className="flex-1">
             <p className="font-medium">{whatsappCopy.label}</p>
-            <p className="text-muted-foreground">
+            <p className="text-muted-foreground" translate="no">
               {isWhatsAppConfigured ? whatsappNumber : whatsappCopy.comingSoon}
             </p>
           </div>
@@ -229,7 +229,11 @@ async function ContactContent({ locale }: { locale: string }) {
   ]);
 
   return (
-    <div className="min-h-[80vh] px-4 py-16">
+    <div
+      className="notranslate min-h-[80vh] px-4 py-16"
+      data-testid="contact-page-content"
+      translate="no"
+    >
       <div className="mx-auto max-w-4xl">
         <ContactPageHeader
           title={copy.header.title}

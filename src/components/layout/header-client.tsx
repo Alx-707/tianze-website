@@ -68,7 +68,13 @@ export function MobileNavigationIsland({
           strokeWidth="2"
         />
       </svg>
-      <span className="sr-only">{openMenuLabel}</span>
+      <span
+        className="sr-only"
+        data-testid="header-mobile-menu-label"
+        translate="no"
+      >
+        {openMenuLabel}
+      </span>
     </button>
   );
 }

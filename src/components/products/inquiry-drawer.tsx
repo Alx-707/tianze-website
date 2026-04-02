@@ -43,7 +43,11 @@ function DrawerProductHeader({
   productSku: string | undefined;
 }) {
   return (
-    <div className="flex items-start gap-4">
+    <div
+      className="notranslate flex items-start gap-4"
+      data-testid="inquiry-drawer-product-header"
+      translate="no"
+    >
       {productImage && (
         <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-md border bg-muted">
           <Image
@@ -57,9 +61,19 @@ function DrawerProductHeader({
         </div>
       )}
       <div className="min-w-0 flex-1">
-        <SheetTitle className="truncate text-base">{productName}</SheetTitle>
+        <SheetTitle
+          className="truncate text-base"
+          data-testid="inquiry-drawer-product-title"
+          translate="no"
+        >
+          {productName}
+        </SheetTitle>
         {productSku && (
-          <p className="mt-1 text-xs text-muted-foreground">
+          <p
+            className="mt-1 text-xs text-muted-foreground"
+            data-testid="inquiry-drawer-product-sku"
+            translate="no"
+          >
             SKU: {productSku}
           </p>
         )}

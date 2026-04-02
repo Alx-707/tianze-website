@@ -215,6 +215,12 @@ describe("ContactFormContainer - 剩余高级测试", () => {
       // 检查消息样式 - success uses role="status" with aria-live="polite"
       const statusElement = screen.getByRole("status");
       expect(statusElement).toHaveClass("text-green-800");
+      expect(
+        screen.getByTestId("contact-form-status-message"),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByTestId("contact-form-status-message-text"),
+      ).toHaveTextContent("Form submitted successfully!");
     });
 
     it("应该显示错误状态消息样式", async () => {
@@ -240,6 +246,9 @@ describe("ContactFormContainer - 剩余高级测试", () => {
         el.classList.contains("text-red-800"),
       );
       expect(statusAlert).toBeDefined();
+      expect(
+        screen.getByTestId("contact-form-status-message-text"),
+      ).toHaveTextContent("Failed to submit form. Please try again.");
     });
   });
 });
@@ -320,6 +329,12 @@ describe("ContactFormContainer - ErrorDisplay", () => {
     render(<ContactFormContainer />);
 
     // Should show error container with details
+    expect(
+      screen.getByTestId("contact-form-error-display"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId("contact-form-error-heading"),
+    ).toBeInTheDocument();
     expect(screen.getByText("errors.invalidEmail")).toBeInTheDocument();
     expect(screen.getByText("errors.messageTooShort")).toBeInTheDocument();
   });
@@ -395,6 +410,15 @@ describe("ContactFormContainer - 提交状态计算", () => {
 
     // Should show submitting message
     expect(screen.getByText("Submitting...")).toBeInTheDocument();
+    expect(
+      screen.getByTestId("contact-form-status-message"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId("contact-form-submit-button"),
+    ).toBeInTheDocument();
+    expect(screen.getByTestId("contact-form-submit-label")).toHaveTextContent(
+      "Submit",
+    );
   });
 
   it("should show idle status when no state changes", () => {

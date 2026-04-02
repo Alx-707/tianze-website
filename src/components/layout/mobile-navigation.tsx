@@ -6,7 +6,7 @@
  */
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ComponentProps } from "react";
 import { Check, Globe, Menu, X } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import {
@@ -36,6 +36,48 @@ interface MobileNavigationProps {
   languageLabel?: string;
 }
 
+interface MobileMenuButtonProps extends ComponentProps<"button"> {
+  isOpen: boolean;
+  openMenuLabel?: string;
+  closeMenuLabel?: string;
+  labelTestId?: string;
+}
+
+export function MobileMenuButton({
+  isOpen,
+  className,
+  onClick,
+  openMenuLabel,
+  closeMenuLabel,
+  labelTestId = "mobile-menu-button-label",
+  ...props
+}: MobileMenuButtonProps) {
+  const t = useTranslations();
+  const label = isOpen
+    ? (closeMenuLabel ?? t("accessibility.closeMenu"))
+    : (openMenuLabel ?? t("accessibility.openMenu"));
+
+  return (
+    <Button
+      variant="ghost"
+      size="icon"
+      className={cn("relative", className)}
+      aria-label={label}
+      aria-expanded={isOpen}
+      aria-haspopup="dialog"
+      data-state={isOpen ? "open" : "closed"}
+      data-testid="header-mobile-menu-button"
+      onClick={onClick}
+      {...props}
+    >
+      {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+      <span className="sr-only" data-testid={labelTestId} translate="no">
+        {label}
+      </span>
+    </Button>
+  );
+}
+
 function useCloseMenuOnPathChange(
   pathname: string,
   isOpen: boolean,
@@ -62,6 +104,7 @@ export function MobileNavigation({
   const t = useTranslations();
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(initialOpen);
+
   useCloseMenuOnPathChange(pathname, isOpen, () => setIsOpen(false));
 
   return (
@@ -84,7 +127,11 @@ export function MobileNavigation({
             data-testid="header-mobile-menu-button"
           >
             <Menu className="h-5 w-5" />
-            <span className="sr-only">
+            <span
+              className="sr-only"
+              data-testid="mobile-menu-toggle-label"
+              translate="no"
+            >
               {isOpen
                 ? t("accessibility.closeMenu")
                 : t("accessibility.openMenu")}
@@ -161,7 +208,7 @@ export function MobileNavigation({
             <MobileLanguageSwitcher
               languageLabel={languageLabel}
               pathname={pathname}
-              onSelect={() => setIsOpen(false)}
+              onNavigate={() => setIsOpen(false)}
             />
           </nav>
         </SheetContent>
@@ -177,11 +224,11 @@ export function MobileNavigation({
 function MobileLanguageSwitcher({
   languageLabel,
   pathname,
-  onSelect,
+  onNavigate,
 }: {
   languageLabel: string;
   pathname: string;
-  onSelect: () => void;
+  onNavigate?: () => void;
 }) {
   const currentLocale = useLocale() === "zh" ? "zh" : "en";
 
@@ -191,10 +238,17 @@ function MobileLanguageSwitcher({
   ];
 
   return (
-    <div className="space-y-1">
-      <div className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-muted-foreground">
+    <div
+      className="notranslate space-y-1"
+      data-testid="mobile-language-switcher"
+      translate="no"
+    >
+      <div
+        className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-muted-foreground"
+        data-testid="mobile-language-switcher-label"
+      >
         <Globe className="h-4 w-4" />
-        <span>{languageLabel}</span>
+        <span translate="no">{languageLabel}</span>
       </div>
       {languages.map(({ locale, label }) => {
         const isActive = currentLocale === locale;
@@ -210,47 +264,20 @@ function MobileLanguageSwitcher({
                   ? "bg-accent text-accent-foreground"
                   : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
               )}
-              onClick={onSelect}
+              onClick={onNavigate}
+              translate="no"
             >
-              {label}
+              <span
+                data-testid={`mobile-language-option-label-${locale}`}
+                translate="no"
+              >
+                {label}
+              </span>
               {isActive && <Check className="h-4 w-4" />}
             </Link>
           </SheetClose>
         );
       })}
     </div>
-  );
-}
-
-// Hamburger menu button component (can be used separately)
-export function MobileMenuButton({
-  isOpen,
-  onClick,
-  className,
-}: {
-  isOpen: boolean;
-  onClick: () => void;
-  className?: string;
-}) {
-  const t = useTranslations();
-
-  return (
-    <Button
-      variant="ghost"
-      size="icon"
-      className={cn("header-mobile-only", className)}
-      onClick={onClick}
-      aria-label={NAVIGATION_ARIA.mobileMenuButton}
-      aria-expanded={isOpen}
-      aria-haspopup="dialog"
-      aria-controls="mobile-navigation"
-      data-state={isOpen ? "open" : "closed"}
-      data-testid="header-mobile-menu-button"
-    >
-      {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-      <span className="sr-only">
-        {isOpen ? t("accessibility.closeMenu") : t("accessibility.openMenu")}
-      </span>
-    </Button>
   );
 }

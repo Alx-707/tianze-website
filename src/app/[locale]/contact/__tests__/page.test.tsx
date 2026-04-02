@@ -348,10 +348,10 @@ describe("ContactPage", () => {
 
       await renderAsyncPage(ContactPageComponent);
 
-      // 验证页面布局结构 - 查找最外层容器
-      const mainContainer = screen.getByText("Contact Us").closest("div")
-        ?.parentElement?.parentElement;
+      const mainContainer = screen.getByTestId("contact-page-content");
       expect(mainContainer).toHaveClass("min-h-[80vh]", "px-4", "py-16");
+      expect(mainContainer).toHaveClass("notranslate");
+      expect(mainContainer).toHaveAttribute("translate", "no");
     });
 
     it("应该有响应式网格布局", async () => {

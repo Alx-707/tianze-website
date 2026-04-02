@@ -137,6 +137,13 @@ describe("Market Landing Page", () => {
     return render(page);
   }
 
+  async function generatePageMetadata(market: string, locale = "en") {
+    const { generateMetadata } = await import("../page");
+    return generateMetadata({
+      params: Promise.resolve({ locale, market }),
+    });
+  }
+
   describe("Scenario 1.1: Page renders with title and standard label", () => {
     it("renders the market title as h1 and standard label badge", async () => {
       await renderPage("north-america");
@@ -152,6 +159,26 @@ describe("Market Landing Page", () => {
       expect(
         screen.getByText(/PVC conduit fittings engineered to UL 651/),
       ).toBeInTheDocument();
+    });
+
+    it("renders the protected page content wrapper", async () => {
+      await renderPage("north-america");
+
+      const pageContent = screen.getByTestId("market-page-content");
+      expect(pageContent).toHaveClass("notranslate");
+      expect(pageContent).toHaveAttribute("translate", "no");
+    });
+  });
+
+  describe("metadata", () => {
+    it("adds google notranslate metadata", async () => {
+      const metadata = await generatePageMetadata("north-america");
+
+      expect(metadata).toMatchObject({
+        other: {
+          google: "notranslate",
+        },
+      });
     });
   });
 
