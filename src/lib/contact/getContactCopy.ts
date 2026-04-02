@@ -1,4 +1,6 @@
 import { cacheLife } from "next/cache";
+import { currentSiteKey } from "@/sites";
+import type { SiteKey } from "@/sites/types";
 import type { Locale } from "@/types/i18n";
 import { getTranslationsCached } from "@/lib/i18n/server/getTranslationsCached";
 
@@ -50,6 +52,7 @@ export interface ContactCopyModel {
  */
 export async function getContactCopy(
   locale: Locale,
+  _siteKey: SiteKey = currentSiteKey,
 ): Promise<ContactCopyModel> {
   "use cache";
 

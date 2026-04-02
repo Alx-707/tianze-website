@@ -1,4 +1,5 @@
 import { env } from "@/lib/env";
+import { SITE_CONFIG } from "@/config/paths/site-config";
 import { logger } from "@/lib/logger";
 
 /**
@@ -19,14 +20,14 @@ function parseConfiguredHosts(): string[] {
  */
 function deriveFallbackHosts(): string[] {
   const hosts = new Set<string>();
+  const { baseUrl } = SITE_CONFIG;
 
-  const baseUrl = env.NEXT_PUBLIC_BASE_URL;
   if (baseUrl) {
     try {
       hosts.add(new URL(baseUrl).hostname.toLowerCase());
     } catch (error) {
       logger.warn(
-        "Failed to parse NEXT_PUBLIC_BASE_URL for Turnstile host validation",
+        "Failed to parse site base URL for Turnstile host validation",
         {
           baseUrl,
           error,
