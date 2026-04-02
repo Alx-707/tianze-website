@@ -158,8 +158,12 @@ export const env = createEnv({
   client: {
     // Base Configuration
     NEXT_PUBLIC_BASE_URL: z.string().url().default("http://localhost:3000"),
+    NEXT_PUBLIC_SITE_URL: z.string().url().optional(),
+    NEXT_PUBLIC_TIANZE_BASE_URL: z.string().url().optional(),
+    NEXT_PUBLIC_TIANZE_EQUIPMENT_BASE_URL: z.string().url().optional(),
     NEXT_PUBLIC_APP_NAME: z.string().default("Tianze Pipe"),
     NEXT_PUBLIC_APP_VERSION: z.string().default("1.0.0"),
+    NEXT_PUBLIC_SITE_KEY: z.string().default("tianze"),
 
     // Analytics & Monitoring
     NEXT_PUBLIC_VERCEL_ANALYTICS_ID: z.string().optional(),
@@ -326,8 +330,13 @@ export const env = createEnv({
 
     // Client
     NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
+    NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
+    NEXT_PUBLIC_TIANZE_BASE_URL: process.env.NEXT_PUBLIC_TIANZE_BASE_URL,
+    NEXT_PUBLIC_TIANZE_EQUIPMENT_BASE_URL:
+      process.env.NEXT_PUBLIC_TIANZE_EQUIPMENT_BASE_URL,
     NEXT_PUBLIC_APP_NAME: process.env.NEXT_PUBLIC_APP_NAME,
     NEXT_PUBLIC_APP_VERSION: process.env.NEXT_PUBLIC_APP_VERSION,
+    NEXT_PUBLIC_SITE_KEY: process.env.NEXT_PUBLIC_SITE_KEY,
     NEXT_PUBLIC_VERCEL_ANALYTICS_ID:
       process.env.NEXT_PUBLIC_VERCEL_ANALYTICS_ID,
     NEXT_PUBLIC_GA_MEASUREMENT_ID: process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID,

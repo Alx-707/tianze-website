@@ -1,0 +1,65 @@
+{
+  "home": {
+    "hero": {
+      "eyebrow": "Equipment Division · Est. {established}",
+      "title": "Build Your Pipe Bending Line.",
+      "subtitle": "Pipe bending machines, tooling, and production support for conduit manufacturers."
+    },
+    "products": {
+      "title": "Equipment-Led Solutions",
+      "subtitle": "Start with the machines, then scale with tooling, process support, and production collaboration."
+    }
+  },
+  "footer": {
+    "copyright": "(c) {year} Tianze Equipment. All rights reserved.",
+    "description": "Pipe bending machines, tooling, and production support for conduit manufacturers."
+  },
+  "seo": {
+    "title": "Tianze Equipment - Pipe Bending Systems",
+    "description": "Pipe bending machines, tooling, and production support for conduit manufacturers.",
+    "siteName": "Tianze Equipment",
+    "pages": {
+      "home": {
+        "title": "Tianze Equipment - Pipe Bending Systems",
+        "description": "Pipe bending machines, tooling, and production support for conduit manufacturers."
+      },
+      "about": {
+        "title": "About Tianze Equipment | Equipment-Focused Manufacturing",
+        "description": "Learn how Tianze Equipment supports conduit producers with bending machines, tooling, and process know-how."
+      },
+      "contact": {
+        "title": "Contact Tianze Equipment | Talk to the Equipment Team",
+        "description": "Speak with our equipment team about bending machines, tooling, and factory integration support."
+      },
+      "products": {
+        "title": "Products | Tianze Equipment",
+        "description": "Explore bending machines, tooling, and related manufacturing support."
+      },
+      "blog": {
+        "title": "Insights | Tianze Equipment",
+        "description": "Equipment notes, process guidance, and manufacturing updates from Tianze Equipment."
+      }
+    }
+  },
+  "underConstruction": {
+    "pages": {
+      "contact": {
+        "title": "Talk to the Equipment Team",
+        "description": "Get in touch about bending machines, tooling, and production support."
+      }
+    }
+  },
+  "structured-data": {
+    "organization": {
+      "name": "Tianze Equipment",
+      "description": "Pipe bending machines, tooling, and production support for conduit manufacturers."
+    },
+    "website": {
+      "name": "Tianze Equipment",
+      "description": "Pipe bending machines, tooling, and production support for conduit manufacturers."
+    },
+    "article": {
+      "defaultAuthor": "Tianze Equipment"
+    }
+  }
+}

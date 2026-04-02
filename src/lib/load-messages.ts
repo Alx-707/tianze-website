@@ -12,6 +12,8 @@ import { mergeObjects } from "@/lib/merge-objects";
 import { MONITORING_INTERVALS } from "@/constants/performance-constants";
 import { type Locale } from "@/i18n/routing";
 import { coerceLocale } from "@/i18n/locale-utils";
+import { getSiteMessageOverride } from "@/sites/message-overrides";
+import { currentSiteKey } from "@/sites";
 
 type Messages = Record<string, unknown>;
 type MessageType = "critical" | "deferred";
@@ -43,13 +45,16 @@ async function loadMessageSource(
 ): Promise<Messages> {
   const safeLocale = coerceLocale(locale);
   const loadedMessages = await MESSAGE_LOADERS[safeLocale][type]();
-  return loadedMessages.default;
+  return mergeObjects(
+    loadedMessages.default,
+    getSiteMessageOverride(currentSiteKey, safeLocale, type),
+  );
 }
 
 function createCached(locale: Locale, type: MessageType) {
   return unstable_cache(
     () => loadMessageSource(locale, type),
-    [`i18n-${type}`, locale],
+    [`i18n-${type}`, currentSiteKey, locale],
     {
       revalidate: revalidate(),
       tags: [

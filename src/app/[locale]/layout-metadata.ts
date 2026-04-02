@@ -19,13 +19,10 @@ export async function generateLocaleMetadata({
 }): Promise<Metadata> {
   // await params 是 Next.js 16 的要求，但解析很快
   await params;
+  const metadataBaseUrl = SITE_CONFIG.baseUrl || "http://localhost:3000";
 
   return {
-    metadataBase: new URL(
-      process.env.NEXT_PUBLIC_BASE_URL ||
-        process.env.NEXT_PUBLIC_SITE_URL ||
-        "http://localhost:3000",
-    ),
+    metadataBase: new URL(metadataBaseUrl),
     title: {
       default: SITE_CONFIG.seo.defaultTitle,
       template: SITE_CONFIG.seo.titleTemplate,

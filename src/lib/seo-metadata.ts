@@ -9,6 +9,9 @@ import {
   generateCanonicalURL,
   generateLanguageAlternates,
 } from "@/services/url-generator";
+import { mergeObjects } from "@/lib/merge-objects";
+import { currentSiteKey } from "@/sites";
+import { getSiteMessageOverride } from "@/sites/message-overrides";
 
 // 重新导出类型以保持向后兼容
 export type { Locale, PageType } from "@/config/paths";
@@ -42,8 +45,20 @@ const FALLBACK_LOCALE: Locale = "en";
 
 // 静态 SEO 翻译映射（同步访问，避免 async getTranslations）
 const SEO_TRANSLATIONS: Record<Locale, SEOMessages> = {
-  en: ((enCritical as { seo?: SEOMessages })?.seo ?? {}) as SEOMessages,
-  zh: ((zhCritical as { seo?: SEOMessages })?.seo ?? {}) as SEOMessages,
+  en:
+    (
+      mergeObjects(
+        enCritical as Record<string, unknown>,
+        getSiteMessageOverride(currentSiteKey, "en", "critical"),
+      ) as { seo?: SEOMessages }
+    ).seo ?? ({} as SEOMessages),
+  zh:
+    (
+      mergeObjects(
+        zhCritical as Record<string, unknown>,
+        getSiteMessageOverride(currentSiteKey, "zh", "critical"),
+      ) as { seo?: SEOMessages }
+    ).seo ?? ({} as SEOMessages),
 };
 
 function resolveLocale(locale: Locale): Locale {

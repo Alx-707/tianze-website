@@ -20,9 +20,6 @@ const withMDX = createMDX({
 });
 
 const isCloudflare = process.env.DEPLOY_TARGET === "cloudflare";
-const shouldIgnoreBuildTypeErrors =
-  process.env.NEXT_IGNORE_BUILD_TYPE_ERRORS === "true";
-
 const nextConfig: NextConfig = {
   // Exclude test/report artifacts from OpenNext bundle
   outputFileTracingExcludes: {
@@ -62,10 +59,6 @@ const nextConfig: NextConfig = {
 
   // Cloudflare deploy artifacts prioritize bundle size; disable browser source maps there.
   productionBrowserSourceMaps: !isCloudflare,
-
-  typescript: {
-    ignoreBuildErrors: shouldIgnoreBuildTypeErrors,
-  },
 
   images: {
     // Remote image patterns allow Next.js Image component to optimize external images.

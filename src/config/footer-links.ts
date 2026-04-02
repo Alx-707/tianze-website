@@ -8,27 +8,17 @@ import {
   FOOTER_STYLE_TOKENS,
   WHATSAPP_STYLE_TOKENS,
 } from "@/config/footer-style-tokens";
-import { SITE_CONFIG } from "@/config/paths/site-config";
+import {
+  currentSite,
+  type SiteFooterColumnConfig,
+  type SiteFooterLinkItem,
+} from "@/sites";
 
 export { FOOTER_STYLE_TOKENS, WHATSAPP_STYLE_TOKENS };
 export type { WhatsAppStyleTokens } from "@/config/footer-style-tokens";
 
-export interface FooterLinkItem {
-  key: string;
-  label: string;
-  href: string;
-  external?: boolean;
-  /** 是否显示外链箭头图标，默认 false */
-  showExternalIcon?: boolean;
-  translationKey: string;
-}
-
-export interface FooterColumnConfig {
-  key: string;
-  title: string;
-  translationKey: string;
-  links: FooterLinkItem[];
-}
+export type FooterLinkItem = SiteFooterLinkItem;
+export type FooterColumnConfig = SiteFooterColumnConfig;
 
 export interface FooterLayoutTokens {
   /** 容器最大宽度（接近 Vercel 抓取的 1080px） */
@@ -106,98 +96,6 @@ export interface FooterStyleTokens {
   hover: FooterHoverTokens;
 }
 
-export const FOOTER_COLUMNS: FooterColumnConfig[] = [
-  {
-    key: "navigation",
-    title: "Navigation",
-    translationKey: "footer.sections.navigation.title",
-    links: [
-      {
-        key: "home",
-        label: "Home",
-        href: "/",
-        external: false,
-        translationKey: "footer.sections.navigation.home",
-      },
-      {
-        key: "about",
-        label: "About",
-        href: "/about",
-        external: false,
-        translationKey: "footer.sections.navigation.about",
-      },
-      {
-        key: "products",
-        label: "Products",
-        href: "/products",
-        external: false,
-        translationKey: "footer.sections.navigation.products",
-      },
-      {
-        key: "blog",
-        label: "Blog",
-        href: "/blog",
-        external: false,
-        translationKey: "footer.sections.navigation.blog",
-      },
-      {
-        key: "contact",
-        label: "Contact",
-        href: "/contact",
-        external: false,
-        translationKey: "footer.sections.navigation.contact",
-      },
-    ],
-  },
-  {
-    key: "support",
-    title: "Support",
-    translationKey: "footer.sections.support.title",
-    links: [
-      {
-        key: "privacy",
-        label: "Privacy Policy",
-        href: "/privacy",
-        external: false,
-        translationKey: "footer.sections.support.privacy",
-      },
-      {
-        key: "terms",
-        label: "Terms of Service",
-        href: "/terms",
-        external: false,
-        translationKey: "footer.sections.support.terms",
-      },
-    ],
-  },
-  {
-    key: "social",
-    title: "Social",
-    translationKey: "footer.sections.social.title",
-    links: [
-      {
-        key: "twitter",
-        label: "Twitter",
-        href: SITE_CONFIG.social.twitter,
-        external: true,
-        translationKey: "footer.sections.social.twitter",
-      },
-      {
-        key: "linkedin",
-        label: "LinkedIn",
-        href: SITE_CONFIG.social.linkedin,
-        external: true,
-        translationKey: "footer.sections.social.linkedin",
-      },
-      {
-        key: "github",
-        label: "GitHub",
-        href: SITE_CONFIG.social.github,
-        external: true,
-        translationKey: "footer.sections.social.github",
-      },
-    ],
-  },
-];
+export const FOOTER_COLUMNS: FooterColumnConfig[] = currentSite.footerColumns;
 
 export type FooterTokens = typeof FOOTER_STYLE_TOKENS;

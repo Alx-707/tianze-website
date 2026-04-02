@@ -88,7 +88,7 @@ export async function generateMetadata({
   const canonical = `${SITE_CONFIG.baseUrl}/${locale}${path}`;
 
   return {
-    title: `${marketLabel} | Tianze`,
+    title: `${marketLabel} | ${SITE_CONFIG.name}`,
     description: marketDescription,
     alternates: {
       canonical,
@@ -97,7 +97,7 @@ export async function generateMetadata({
       ),
     },
     openGraph: {
-      title: `${marketLabel} | Tianze`,
+      title: `${marketLabel} | ${SITE_CONFIG.name}`,
       description: marketDescription,
       type: "website",
     },

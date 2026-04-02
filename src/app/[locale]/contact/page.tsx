@@ -1,6 +1,5 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
-import { connection } from "next/server";
 import { NextIntlClientProvider } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
 import { MessageCircle } from "lucide-react";
@@ -29,6 +28,7 @@ import { generateLocaleStaticParams } from "@/app/[locale]/generate-static-param
 import { siteFacts } from "@/config/site-facts";
 import { isWhatsAppConfigured as checkWhatsApp } from "@/config/paths/site-config";
 import { COUNT_TWO } from "@/constants";
+import { currentSiteKey } from "@/sites";
 
 const CONTACT_FAQ_ITEMS = [
   "moq",
@@ -198,11 +198,9 @@ function ContactMethodsCard({
 }
 
 async function ContactContent({ locale }: { locale: string }) {
-  setRequestLocale(locale);
-
   const [copy, formT, faqT, criticalMessages, deferredMessages] =
     await Promise.all([
-      getContactCopy(locale as Locale),
+      getContactCopy(locale as Locale, currentSiteKey),
       getTranslationsCached({
         locale,
         namespace: "contact.form",
@@ -317,16 +315,11 @@ async function ContactContent({ locale }: { locale: string }) {
 
 export default async function ContactPage({ params }: ContactPageProps) {
   const { locale } = await params;
+  setRequestLocale(locale);
 
   return (
     <Suspense fallback={<ContactPageFallback locale={locale} />}>
-      <ContactPageInner locale={locale} />
+      <ContactContent locale={locale} />
     </Suspense>
   );
-}
-
-async function ContactPageInner({ locale }: { locale: string }) {
-  await connection();
-
-  return <ContactContent locale={locale} />;
 }
