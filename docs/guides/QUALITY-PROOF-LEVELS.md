@@ -56,6 +56,8 @@ Add when relevant:
 - `pnpm build:cf` for platform/runtime/build-chain changes
 - `pnpm build:cf:turbo` when the change touches the Cloudflare build toolchain itself and you need to keep the comparison path healthy
 - `CI=1 pnpm test:e2e` for key-path UI/runtime changes
+- `pnpm build:site:equipment` when the change touches `src/sites/**`, site-specific message overlays, or site-switching behavior
+- `pnpm build:cf:site:equipment` when the same change must also be proven on the Cloudflare build path
 
 What it proves:
 - the developer has run the heavier local checks intentionally
@@ -141,3 +143,4 @@ What it proves:
 - When the change touches Cloudflare / OpenNext / split-worker behavior, `pnpm deploy:cf:phase6:dry-run` is the stronger local proof than stock preview alone.
 - For current Cloudflare compatibility, `src/middleware.ts` remains the preferred runtime entrypoint over `proxy.ts`.
 - Translation proof for runtime-facing changes must include both full message bundles and critical bundles.
+- Site-aware proof is not only structure proof; at least one non-default-site build should be exercised when site identity or overlays change.

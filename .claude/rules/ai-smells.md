@@ -84,3 +84,24 @@ Use this file as the single source of truth for project-specific AI smell review
 - Review check: if docs say “covered” or “untested”, is that still true in the current tree?
 - Exceptions: none; drift should be corrected quickly.
 - New drift: not always blocking, but must be fixed before treating the doc as proof.
+
+### 11. Premature Structure Hardening
+
+- Definition: code introduces multi-site shells, abstractions, or package-style layering before current site identity, content assets, and proof boundaries are actually stabilized.
+- Review check: is the structure solving a validated problem now, or freezing a guess too early?
+- Exceptions: minimal site-definition scaffolding that reduces current truth-source drift without forcing a full structural migration.
+- New occurrences on broad project surfaces without pilot proof: strong review.
+
+### 12. Business Truth Hidden in Shared-Looking Layers
+
+- Definition: brand identity, contact data, SEO defaults, export claims, or market facts are added to wrappers or generic-looking config files instead of the canonical site-definition layer.
+- Review check: if a second site were added, would this value be found in one place or scattered again?
+- Exceptions: temporary compatibility wrappers that transparently proxy the canonical source.
+- New occurrences: block on critical identity surfaces.
+
+### 13. Site-Specific Copy Leaking Into Shared Base Bundles
+
+- Definition: non-default-site homepage/contact/SEO copy is edited directly in `messages/**` even though `src/sites/**/messages/**` already exists.
+- Review check: should every site inherit this wording, or was the shared bundle just the fastest place to paste it?
+- Exceptions: intentionally global copy that all sites must share.
+- New occurrences on homepage, contact, products, SEO, or structured-data copy: strong review.

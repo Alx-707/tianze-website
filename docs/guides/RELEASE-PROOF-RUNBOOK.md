@@ -8,7 +8,11 @@ Use this when changes affect:
 - locale redirect / nonce / security headers
 - Cloudflare / OpenNext build chain
 - Tier A translation critical path
+- `src/sites/**` or `src/sites/**/messages/**`
 - contact / inquiry / abuse-protection runtime behavior
+
+Before naming a Cloudflare failure, classify it with:
+- [`CLOUDFLARE-ISSUE-TAXONOMY.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/CLOUDFLARE-ISSUE-TAXONOMY.md)
 
 ## Release-Proof Flow
 
@@ -33,6 +37,7 @@ CI=1 pnpm test:e2e
 - `build` before `build:cf` because both lines still share the same build-artifact family even though `build:cf` now uses the repo-local Webpack wrapper and self-cleans before rebuilding.
 - `deploy:cf:phase6:dry-run` after `build:cf` because it is the stronger local Cloudflare proof for the current split-worker line.
 - E2E last because it is the heaviest proof step.
+- If the change is site-aware, add `pnpm build:site:equipment` and, when relevant, `pnpm build:cf:site:equipment` before signoff.
 
 ## Important Constraints
 - Do not run `pnpm build` and `pnpm build:cf` in parallel.
@@ -40,6 +45,7 @@ CI=1 pnpm test:e2e
 - Release proof is stronger than CI proof because it is change-type aware and platform aware.
 - If the change touches the Cloudflare build chain itself, add `pnpm build:cf:turbo` as a comparison check before signoff.
 - For the final deployed Cloudflare proof, follow release-proof with a real preview publish plus `pnpm smoke:cf:deploy -- --base-url <deployment-url>`.
+- When a Cloudflare-related step fails, record whether it is a platform-entry issue, generated-artifact issue, current-site runtime regression, or final deployed behavior issue.
 
 ## Minimal Accept/Reject Rule
 - If any step in the release-proof flow fails, do not treat the change as release-proven.

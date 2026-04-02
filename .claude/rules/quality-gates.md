@@ -6,6 +6,7 @@ For proof semantics, use:
 - [`docs/guides/QUALITY-PROOF-LEVELS.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/QUALITY-PROOF-LEVELS.md)
 - [`docs/guides/RELEASE-PROOF-RUNBOOK.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/RELEASE-PROOF-RUNBOOK.md)
 - [`docs/guides/POLICY-SOURCE-OF-TRUTH.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/POLICY-SOURCE-OF-TRUTH.md)
+- [`docs/guides/CLOUDFLARE-ISSUE-TAXONOMY.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/CLOUDFLARE-ISSUE-TAXONOMY.md)
 
 That file is the single current definition for:
 - `fast gate`
@@ -15,6 +16,14 @@ That file is the single current definition for:
 
 Do not infer those meanings from comments spread across scripts or workflows.
 This file is a reviewer-facing summary, not the final source of truth when canonical files disagree.
+
+## Current Evolution Rule
+
+- The repository now has a landed site registry, site-specific message overlays, and a second-site pilot build path.
+- Quality review must still distinguish:
+  - structure landed
+  - behavior proven
+- Do not declare a site-aware change safe only because the registry compiles; pair it with at least one non-default-site proof run.
 
 ## Complexity Limits
 
@@ -89,6 +98,13 @@ Flow: type-check → lint → format → test → security → build → lightho
   - Enforced by `scripts/release-proof.sh`
 - Preview-only degraded modes are not release proof
   - They may exist for preview/debug workflows, but must stay out of final proof claims
+- Do not declare multi-site readiness only because a site registry or site key exists
+  - readiness requires behavior proof, not just structure scaffolding
+- Do not declare site-identity cleanup complete while product catalog or default market structure still bypass `src/sites/**`
+  - site registry, site facts, navigation, footer, and product catalog must all agree on the same active site truth
+- When a change touches `src/sites/**`, `src/sites/**/messages/**`, or `NEXT_PUBLIC_SITE_KEY` behavior, include at least one site-specific proof run
+  - preferred: `pnpm build:site:equipment`
+  - stronger platform proof: `pnpm build:cf:site:equipment`
 
 ## Dependency Upgrade Gate
 
