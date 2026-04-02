@@ -46,7 +46,7 @@ standards_compliance:
   - GB (China National)
 
 export:
-  countries_count: 100+
+  countries_count: 20+
   primary_regions:
     - Eastern Europe
     - North America
@@ -59,7 +59,6 @@ export:
     - Alibaba International (tzepipe.en.alibaba.com)
 
 contact:
-  # TODO: Add specific contact details when available
-  website: null
-  email: null
-  phone: null
+  website: https://tianze-pipe.com
+  email: sales@tianze-pipe.com
+  phone: +86-518-0000-0000
