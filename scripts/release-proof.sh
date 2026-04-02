@@ -27,6 +27,7 @@ pnpm test:cache-health
 pnpm validate:translations
 pnpm clean:next-artifacts
 pnpm build
+pnpm build:site:equipment
 pnpm build:cf
 pnpm deploy:cf:phase6:dry-run
 pnpm test:release-smoke

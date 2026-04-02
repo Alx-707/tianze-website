@@ -1,38 +1,78 @@
 import { Card } from "@/components/ui/card";
+import { currentSiteKey } from "@/sites";
 
 const CONTACT_PAGE_FALLBACK_COPY = {
-  en: {
-    title: "Contact Us",
-    description:
-      "Get in touch with our team for inquiries, support, or partnership opportunities.",
-    formTitle: "Send us a message",
-    formDescription:
-      "Share your project details and our team will follow up with the right next step.",
-    labels: {
-      firstName: "First Name",
-      lastName: "Last Name",
-      email: "Email Address",
-      company: "Company Name",
-      subject: "Subject",
-      message: "Message",
-      acceptPrivacy: "I agree to the privacy policy and terms of service",
-      submit: "Send Message",
+  tianze: {
+    en: {
+      title: "Contact Us",
+      description:
+        "Get in touch with our team for inquiries, support, or partnership opportunities.",
+      formTitle: "Send us a message",
+      formDescription:
+        "Share your project details and our team will follow up with the right next step.",
+      labels: {
+        firstName: "First Name",
+        lastName: "Last Name",
+        email: "Email Address",
+        company: "Company Name",
+        subject: "Subject",
+        message: "Message",
+        acceptPrivacy: "I agree to the privacy policy and terms of service",
+        submit: "Send Message",
+      },
+    },
+    zh: {
+      title: "联系我们",
+      description: "欢迎联系天泽团队，咨询合作、产品支持或项目需求。",
+      formTitle: "给我们留言",
+      formDescription: "告诉我们您的项目需求，我们会尽快安排合适的同事跟进。",
+      labels: {
+        firstName: "名字",
+        lastName: "姓氏",
+        email: "邮箱",
+        company: "公司名称",
+        subject: "主题",
+        message: "留言内容",
+        acceptPrivacy: "我同意隐私政策和服务条款",
+        submit: "发送消息",
+      },
     },
   },
-  zh: {
-    title: "联系我们",
-    description: "欢迎联系天泽团队，咨询合作、产品支持或项目需求。",
-    formTitle: "给我们留言",
-    formDescription: "告诉我们您的项目需求，我们会尽快安排合适的同事跟进。",
-    labels: {
-      firstName: "名字",
-      lastName: "姓氏",
-      email: "邮箱",
-      company: "公司名称",
-      subject: "主题",
-      message: "留言内容",
-      acceptPrivacy: "我同意隐私政策和服务条款",
-      submit: "发送消息",
+  "tianze-equipment": {
+    en: {
+      title: "Contact Tianze Equipment",
+      description:
+        "Talk to the equipment team about bending machines, tooling, or production support.",
+      formTitle: "Talk to the Equipment Team",
+      formDescription:
+        "Share your equipment plan and we will route it to the right production support contact.",
+      labels: {
+        firstName: "First Name",
+        lastName: "Last Name",
+        email: "Email Address",
+        company: "Company Name",
+        subject: "Equipment Focus",
+        message: "Project Details",
+        acceptPrivacy: "I agree to the privacy policy and terms of service",
+        submit: "Send Equipment Request",
+      },
+    },
+    zh: {
+      title: "联系 Tianze Equipment",
+      description: "欢迎联系设备团队，咨询弯管设备、工装或生产支持。",
+      formTitle: "对接设备团队",
+      formDescription:
+        "告诉我们您的设备计划，我们会安排合适的生产支持同事跟进。",
+      labels: {
+        firstName: "名字",
+        lastName: "姓氏",
+        email: "邮箱",
+        company: "公司名称",
+        subject: "设备需求主题",
+        message: "项目详情",
+        acceptPrivacy: "我同意隐私政策和服务条款",
+        submit: "发送设备咨询",
+      },
     },
   },
 } as const;
@@ -214,9 +254,15 @@ export function ContactPageHeader({
   );
 }
 
-export function ContactPageFallback({ locale }: { locale: string }) {
+export function ContactPageFallback({
+  locale,
+  siteKey = currentSiteKey,
+}: {
+  locale: string;
+  siteKey?: keyof typeof CONTACT_PAGE_FALLBACK_COPY;
+}) {
   const fallbackCopy =
-    CONTACT_PAGE_FALLBACK_COPY[locale === "zh" ? "zh" : "en"];
+    CONTACT_PAGE_FALLBACK_COPY[siteKey][locale === "zh" ? "zh" : "en"];
 
   return (
     <div className="min-h-[80vh] px-4 py-16">

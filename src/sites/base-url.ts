@@ -14,6 +14,13 @@ function readSiteSpecificBaseUrl(siteKey: SiteKey): string | undefined {
   return value && value.trim().length > 0 ? value : undefined;
 }
 
+function readActiveSiteKey(): SiteKey | undefined {
+  const siteKey = env.NEXT_PUBLIC_SITE_KEY;
+  return siteKey === "tianze" || siteKey === "tianze-equipment"
+    ? siteKey
+    : undefined;
+}
+
 export function resolveSiteBaseUrl(
   siteKey: SiteKey,
   defaultBaseUrl: string,
@@ -25,7 +32,11 @@ export function resolveSiteBaseUrl(
   }
 
   const activeSiteBaseUrl = process.env.NEXT_PUBLIC_SITE_URL;
-  if (activeSiteBaseUrl && activeSiteBaseUrl.trim().length > 0) {
+  if (
+    readActiveSiteKey() === siteKey &&
+    activeSiteBaseUrl &&
+    activeSiteBaseUrl.trim().length > 0
+  ) {
     return activeSiteBaseUrl;
   }
 

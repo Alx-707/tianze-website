@@ -122,7 +122,7 @@ Notes:
   - `pnpm build:cf` → formal Cloudflare build path, now backed by the repo's Webpack-based wrapper
   - `pnpm preview:cf` / `pnpm deploy:cf` → follow the same current canonical `build:cf` output
   - `pnpm build:cf:turbo` → comparison / fallback path for debugging upstream Turbopack/OpenNext behavior, not the default production build path
-- `pnpm release:verify` → current unified release gate; now includes clean standard build, `build:cf`, `deploy:cf:phase6:dry-run` (dry-run only, not a real publish), and release smoke
+- `pnpm release:verify` → current unified release gate; now includes clean standard build, `build:site:equipment`, `build:cf`, `deploy:cf:phase6:dry-run` (dry-run only, not a real publish), and release smoke
   - `node scripts/cloudflare/deploy-phase6.mjs --env preview` → current stronger real preview path for Cloudflare proof
 
 | Layer | Scope | Command | Release-blocking? |

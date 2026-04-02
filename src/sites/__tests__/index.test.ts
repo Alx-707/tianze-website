@@ -130,4 +130,27 @@ describe("site registry", () => {
 
     vi.doUnmock("@/lib/env");
   });
+
+  it("does not leak the active site URL into other site definitions", async () => {
+    vi.resetModules();
+    vi.doMock("@/lib/env", () => ({
+      env: {
+        NEXT_PUBLIC_SITE_KEY: "tianze-equipment",
+        NEXT_PUBLIC_SITE_URL: "https://equipment.tianze-pipe.com",
+        NEXT_PUBLIC_BASE_URL: "https://tianze-pipe.com",
+        NEXT_PUBLIC_WHATSAPP_NUMBER: "+86-518-0000-0000",
+      },
+    }));
+
+    const siteModule = await import("@/sites");
+
+    expect(siteModule.resolveSiteDefinition("tianze").config.baseUrl).toBe(
+      "https://tianze-pipe.com",
+    );
+    expect(
+      siteModule.resolveSiteDefinition("tianze-equipment").config.baseUrl,
+    ).toBe("https://equipment.tianze-pipe.com");
+
+    vi.doUnmock("@/lib/env");
+  });
 });
