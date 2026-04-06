@@ -34,6 +34,17 @@ vi.mock("@/components/sections/faq-section", () => ({
   FaqSection: () => <section data-testid="faq-section">FAQ</section>,
 }));
 
+vi.mock("@/lib/seo-metadata", () => ({
+  generateMetadataForPath: ({
+    config,
+  }: {
+    config: { title: string; description: string };
+  }) => ({
+    title: config.title,
+    description: config.description,
+  }),
+}));
+
 describe("Feature: OEM Custom Manufacturing Page", () => {
   beforeEach(() => {
     vi.resetModules();
@@ -101,5 +112,29 @@ describe("Feature: OEM Custom Manufacturing Page", () => {
       params: Promise.resolve({ locale: "en" }),
     });
     expect(result).toBeInstanceOf(Promise);
+  });
+
+  describe("generateMetadata", () => {
+    it("returns metadata with correct title from oem namespace", async () => {
+      const { generateMetadata } = await import("../page");
+      const metadata = await generateMetadata({
+        params: Promise.resolve({ locale: "en" }),
+      });
+      expect(metadata).toMatchObject({
+        title: "meta.title",
+        description: "meta.description",
+      });
+    });
+
+    it("passes locale to getTranslations", async () => {
+      const { generateMetadata } = await import("../page");
+      await generateMetadata({
+        params: Promise.resolve({ locale: "zh" }),
+      });
+      expect(mockGetTranslations).toHaveBeenCalledWith({
+        locale: "zh",
+        namespace: "oem",
+      });
+    });
   });
 });
