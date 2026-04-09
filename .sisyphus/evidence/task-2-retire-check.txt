@@ -1,0 +1,338 @@
+TASK-2 RETIRE-CHECK: Retirement Candidacy Assessment
+Wave 1 Task 2 — cloudflare-official-alignment plan
+Generated: Fri Apr 10 2026
+Repo: /Users/Data/Warehouse/Pipe/tianze-website
+Status: ASSESSMENT ONLY — no retirements executed
+
+Approach: Conservative. Only items with documented exit criteria OR with
+clear evidence that the upstream now handles the need are flagged as
+retirement candidates. All others are Non-Candidates or Deferred.
+
+================================================================================
+ASSESSMENT CRITERIA
+================================================================================
+
+An item is a RETIREMENT CANDIDATE if ANY of the following hold:
+  RC-1  The item has explicit, machine-readable exit criteria (EXCEPTION-CONTRACT)
+        AND there is at least one credible signal those criteria may now be met.
+  RC-2  The upstream (OpenNext / Cloudflare / Next.js) now handles the need
+        natively, with documented evidence (not inference).
+  RC-3  The item is documented as legacy/backup in code AND is superseded by
+        a currently active replacement in this repo.
+
+An item is a NON-CANDIDATE (MUST RETAIN) if:
+  NC-1  It is currently on the critical build/deploy path with no replacement.
+  NC-2  Removing it would break a CI check or deployment contract.
+  NC-3  It is a REPO-SPECIFIC-CONFIG with no official equivalent that could
+        replace it (i.e., the config IS the feature).
+  NC-4  It has exception contract exit criteria that are explicitly NOT yet met
+        (per code comments or AGENTS.md).
+  NC-5  Its retirement requires external upstream evidence not yet available.
+
+An item is DEFERRED if:
+  D-1   The retirement question requires a build/smoke run to answer
+        (forbidden in this inventory task).
+  D-2   The item has unknown/undocumented interaction with other components.
+  D-3   Official upstream parity is plausible but not confirmed by docs or code.
+
+================================================================================
+RETIREMENT CANDIDATES
+================================================================================
+
+────────────────────────────────────────────────────────────────────────────────
+CANDIDATE A: scripts/cloudflare/patch-prefetch-hints-manifest.mjs
+  (and its build integration in build-webpack.mjs + build:cf:turbo)
+────────────────────────────────────────────────────────────────────────────────
+
+Classification: WORKAROUND + EXCEPTION-CONTRACT
+Retirement basis: RC-1 (explicit exit criteria in generated-artifact-exception-contract.mjs)
+
+Exit criteria from generated-artifact-exception-contract.mjs:
+  1. OpenNext generates the artifact without dynamic require() for middleware
+     manifest.  [STATUS: UNKNOWN — not verifiable without building]
+  2. Cloudflare Workers natively support the require() call pattern used.
+     [STATUS: UNKNOWN — CF Workers do not support dynamic require() as of last
+     check; no public announcement of this changing]
+  3. The route is moved to a different worker that supports the pattern.
+     [STATUS: NOT MET — route is still in default worker]
+  4. The route is removed from the codebase entirely.
+     [STATUS: NOT MET — still present]
+
+Evidence FOR retirement:
+  - AGENTS.md §2026-04-01 note: "isolated re-check no longer reproduced the
+    old build-time ENOENT" — one of the original triggering failure modes no
+    longer reproduces.
+  - open-next.config.ts comment: "2026-04-01 isolated re-check no longer
+    reproduced the old build-time ENOENT" — same signal.
+  - This suggests at least one upstream fix may have landed in
+    @opennextjs/cloudflare between when the patch was written and 2026-04-01.
+
+Evidence AGAINST retirement (must retain until):
+  - pnpm smoke:cf:preview restoring to 200 is explicitly attributed to this
+    patch in AGENTS.md §12: "当前仓库已经把这个兼容修复收敛到
+    scripts/cloudflare/patch-prefetch-hints-manifest.mjs"
+  - AGENTS.md §12: "如果 local preview 页面 500 重新落回 middleware-manifest.json
+    动态 require 这类生成产物回归，优先检查 scripts/cloudflare/
+    patch-prefetch-hints-manifest.mjs 有没有生效"
+  - None of the 4 official exit criteria can be confirmed without a build run.
+  - The absolute path bug (Fix A part 2) means CI may silently not apply the
+    patch — which could mask whether the patch is still needed.
+
+Retirement verdict: CANDIDATE — but requires a build smoke run to confirm
+  exit criterion #1 is met. Cannot be retired from inventory evidence alone.
+  Additionally, the absolute path bug must be fixed first or the retirement
+  check will be unreliable.
+
+Known defect requiring fix before retirement check is valid:
+  Fix A part 2 contains a machine-specific absolute path:
+    /Users/Data/Warehouse/Pipe/tianze-website/
+  This must be replaced with a process.cwd()-relative path before any
+  retirement validation build is run; otherwise the "does the patch still
+  work?" check is only valid on the original developer's machine.
+
+────────────────────────────────────────────────────────────────────────────────
+CANDIDATE B: scripts/cloudflare/build-phase5-worker.mjs
+────────────────────────────────────────────────────────────────────────────────
+
+Classification: REPO-SPECIFIC-CONFIG
+Retirement basis: RC-3 (documented as legacy/backup; superseded by phase6)
+
+Evidence FOR retirement:
+  - package.json: `build:cf:phase5` is not referenced in deploy scripts,
+    smoke scripts, or any CI workflow reference found in this inventory.
+  - phase6 is the primary and only active deploy topology.
+  - AGENTS.md references only phase6 for deployment truth; phase5 is not
+    mentioned as an active fallback anywhere in AGENTS.md.
+  - The file itself generates a "phase5" worker config — a single-worker
+    topology that is structurally superseded by phase6's split-worker model.
+
+Evidence AGAINST retirement:
+  - The script exists and is in package.json — it may be an intentional
+    emergency fallback ("if phase6 breaks, roll back to phase5").
+  - No explicit `@deprecated` annotation or comment in the file itself was
+    noted during reading.
+  - Removing an emergency fallback path without a documented replacement
+    increases rollback risk.
+  - The plan does not explicitly list this for retirement.
+
+Retirement verdict: WEAK CANDIDATE — structurally superseded but may be
+  an intentional emergency fallback. Requires explicit confirmation from
+  the plan owner before retiring. Recommend: annotate as emergency-fallback-only
+  in the script header if it is to be kept; or retire with explicit sign-off.
+
+================================================================================
+NON-CANDIDATES (MUST RETAIN)
+================================================================================
+
+────────────────────────────────────────────────────────────────────────────────
+#1  scripts/cloudflare/build-webpack.mjs
+────────────────────────────────────────────────────────────────────────────────
+Reason: NC-1 — primary Cloudflare build entry (`pnpm build:cf`).
+  Removing it breaks every Cloudflare build. No official replacement for the
+  webpack-mode build entry + post-build patch orchestration.
+
+────────────────────────────────────────────────────────────────────────────────
+#2  scripts/cloudflare/build-phase6-workers.mjs
+────────────────────────────────────────────────────────────────────────────────
+Reason: NC-1 + NC-3 — on the active deploy path (`pnpm build:cf:phase6`).
+  Generates all 5 phase6 worker configs. No official OpenNext equivalent for
+  multi-worker config generation.
+
+────────────────────────────────────────────────────────────────────────────────
+#3  scripts/cloudflare/deploy-phase6.mjs
+────────────────────────────────────────────────────────────────────────────────
+Reason: NC-1 + NC-3 — active deploy orchestrator. No official equivalent for
+  ordered multi-worker deployment with preview-URL service bindings.
+
+────────────────────────────────────────────────────────────────────────────────
+#4  scripts/cloudflare/generated-artifact-exception-contract.mjs
+────────────────────────────────────────────────────────────────────────────────
+Reason: NC-2 — the machine-readable exit criteria for the patch. Retiring this
+  before the patch itself is retired would break the contract enforcement chain.
+  Must be retired together with (and after) the patch script.
+
+────────────────────────────────────────────────────────────────────────────────
+#5  scripts/cloudflare/alias-shim-exception-contract.mjs
+────────────────────────────────────────────────────────────────────────────────
+Reason: NC-2 + NC-4 — declares SINGLE_WORKER_ALIAS and PHASE6_ALIAS.
+  Both shims are still needed:
+  - @vercel/og is not CF Workers compatible (no upstream fix noted)
+  - HMR client shim is needed to prevent dev browser assets from entering
+    split worker bundles
+  Cannot be retired until both upstream incompatibilities are resolved.
+
+────────────────────────────────────────────────────────────────────────────────
+#6  scripts/cloudflare/preview-degraded-contract.mjs
+────────────────────────────────────────────────────────────────────────────────
+Reason: NC-2 + NC-4 — active contract for degraded-mode flags in CI workflow.
+  The degraded flags (SKIP_RATE_LIMIT_IN_PREVIEW etc.) reflect real runtime
+  differences between preview and production; not yet eliminated.
+
+────────────────────────────────────────────────────────────────────────────────
+#7  scripts/cloudflare/phase-topology-contract.mjs
+────────────────────────────────────────────────────────────────────────────────
+Reason: NC-3 — the single source of truth for phase6 worker topology.
+  Cannot be retired while phase6 split-worker deployment is active.
+  Retiring it would mean phase-topology knowledge is scattered across
+  build-phase6-workers.mjs and deploy-phase6.mjs with no single truth source.
+
+────────────────────────────────────────────────────────────────────────────────
+#8  scripts/cloudflare/server-actions-secret-contract.mjs
+────────────────────────────────────────────────────────────────────────────────
+Reason: NC-1 + NC-4 — active on phase6 deploy path. Server Actions encryption
+  key must be present on every split worker before wrangler deploy. No upstream
+  mechanism to eliminate this requirement has been documented.
+
+────────────────────────────────────────────────────────────────────────────────
+#9  scripts/cloudflare/check-alias-shim-contract.mjs
+────────────────────────────────────────────────────────────────────────────────
+Reason: NC-2 — contract enforcement for SINGLE_WORKER_ALIAS in wrangler.jsonc.
+  Must remain as long as SINGLE_WORKER_ALIAS is required.
+
+────────────────────────────────────────────────────────────────────────────────
+#10  scripts/cloudflare/check-generated-artifact-log.mjs
+────────────────────────────────────────────────────────────────────────────────
+Reason: NC-2 — contract enforcement for build-log regression detection.
+  Must remain as long as generated-artifact-exception-contract.mjs exists
+  (i.e., as long as the patch is needed). Retire together with the patch.
+
+────────────────────────────────────────────────────────────────────────────────
+#11  scripts/cloudflare/check-preview-degraded-contract.mjs
+────────────────────────────────────────────────────────────────────────────────
+Reason: NC-2 — enforcement for degraded flags in CI workflow and release-proof.
+  Must remain as long as preview-degraded-contract.mjs declares active flags.
+
+────────────────────────────────────────────────────────────────────────────────
+#12  scripts/cloudflare/check-server-actions-secret-contract.mjs
+────────────────────────────────────────────────────────────────────────────────
+Reason: NC-2 — static self-check that prevents accidental truncation of the
+  SA key contract. Must remain while the SA key exception is in effect.
+
+────────────────────────────────────────────────────────────────────────────────
+#13  scripts/cloudflare/shims/empty-module.mjs
+────────────────────────────────────────────────────────────────────────────────
+Reason: NC-1 + NC-4 — required by PHASE6_ALIAS to shim out the HMR client.
+  If removed, phase6 worker bundle includes browser-only dev assets that
+  cause CF Workers runtime failures.
+
+────────────────────────────────────────────────────────────────────────────────
+#14  scripts/cloudflare/stubs/vercel-og-empty.mjs
+────────────────────────────────────────────────────────────────────────────────
+Reason: NC-1 + NC-4 — required by SINGLE_WORKER_ALIAS to stub @vercel/og.
+  @vercel/og uses Node.js canvas/image APIs not available in CF Workers.
+  No evidence that upstream has resolved this for CF Workers edge runtime.
+
+────────────────────────────────────────────────────────────────────────────────
+#15  open-next.config.ts — minify: false
+────────────────────────────────────────────────────────────────────────────────
+Reason: NC-4 + NC-5 — exit criteria explicitly NOT met.
+  AGENTS.md §5 states: re-enabling requires pnpm build:cf PLUS Cloudflare
+  preview/deploy smoke to confirm clean proof. That verification has not been
+  done. Additionally, the potential conflict with wrangler.jsonc `minify: true`
+  (cross-cutting observation E in inventory) is unresolved.
+
+================================================================================
+DEFERRED ASSESSMENT
+================================================================================
+
+────────────────────────────────────────────────────────────────────────────────
+DEFERRED-1: patch-prefetch-hints-manifest.mjs absolute path bug (Fix A part 2)
+────────────────────────────────────────────────────────────────────────────────
+Reason: D-1 — resolving whether the bug matters for retirement requires
+  a build run on a non-matching machine path to confirm whether patching
+  still works on CI. This is a bug fix that should happen before any
+  retirement build validation is attempted.
+Recommendation: Fix the absolute path to use process.cwd()-relative path
+  as a prerequisite to the retirement validation build.
+
+────────────────────────────────────────────────────────────────────────────────
+DEFERRED-2: wrangler.jsonc minify:true vs open-next.config.ts minify:false
+────────────────────────────────────────────────────────────────────────────────
+Reason: D-2 + D-1 — interaction between the two config layers is undocumented.
+  The question "does OpenNext's minify:false override wrangler.jsonc minify:true
+  or vice versa?" requires either upstream documentation or a build experiment
+  (forbidden in this task).
+Recommendation: Clarify the precedence in open-next.config.ts comment or
+  align wrangler.jsonc to minify:false to remove ambiguity.
+
+────────────────────────────────────────────────────────────────────────────────
+DEFERRED-3: OPEN_NEXT_DEPLOY_ENV naming discrepancy
+────────────────────────────────────────────────────────────────────────────────
+Reason: D-2 — server-actions-secret-contract.mjs exports OPEN_NEXT_DEPLOY_ENV
+  (the exported constant name) whose value is "OPEN_NEXT_DEPLOY" (the actual
+  env var name). deploy-phase6.mjs reads process.env.OPEN_NEXT_DEPLOY directly
+  and does not import the contract constant. The behavior is correct today, but
+  if someone renames the env var in the contract without updating deploy-phase6.mjs,
+  the discrepancy would cause a silent failure.
+Recommendation: Either have deploy-phase6.mjs import OPEN_NEXT_DEPLOY_ENV from
+  the contract, or rename the contract export to OPEN_NEXT_DEPLOY_VAR_NAME to
+  clarify it is the env var name, not the env var itself.
+
+────────────────────────────────────────────────────────────────────────────────
+DEFERRED-4: PHASE6_ALIAS drift — no dedicated contract checker
+────────────────────────────────────────────────────────────────────────────────
+Reason: D-2 — PHASE6_ALIAS is declared in alias-shim-exception-contract.mjs
+  and injected by build-phase6-workers.mjs, but check-alias-shim-contract.mjs
+  only checks SINGLE_WORKER_ALIAS against wrangler.jsonc. There is no enforcer
+  that verifies PHASE6_ALIAS appears correctly in generated phase6 worker configs.
+  If build-phase6-workers.mjs stops injecting it (analogous to the §24 drift
+  incident), no contract check would catch it until deploy smoke fails.
+Recommendation: Add PHASE6_ALIAS to the contract enforcement chain, either by
+  extending check-alias-shim-contract.mjs to also validate a generated phase6
+  config, or by adding a separate check.
+
+================================================================================
+RETIREMENT SUMMARY TABLE
+================================================================================
+
+| # | File / Item                                    | Verdict          | Basis         | Blocker                                          |
+|---|------------------------------------------------|------------------|---------------|--------------------------------------------------|
+| A | patch-prefetch-hints-manifest.mjs             | CANDIDATE        | RC-1          | Needs build smoke + absolute path bug fix first  |
+| B | build-phase5-worker.mjs                       | WEAK CANDIDATE   | RC-3          | Needs explicit owner sign-off; may be intentional fallback |
+| 1 | build-webpack.mjs                             | NON-CANDIDATE    | NC-1          | Primary build entry                              |
+| 2 | build-phase6-workers.mjs                      | NON-CANDIDATE    | NC-1+NC-3     | Active deploy path                               |
+| 3 | deploy-phase6.mjs                             | NON-CANDIDATE    | NC-1+NC-3     | Active deploy orchestrator                       |
+| 4 | generated-artifact-exception-contract.mjs     | NON-CANDIDATE    | NC-2          | Retire with patch, not before                    |
+| 5 | alias-shim-exception-contract.mjs             | NON-CANDIDATE    | NC-2+NC-4     | Both shims still needed                          |
+| 6 | preview-degraded-contract.mjs                 | NON-CANDIDATE    | NC-2+NC-4     | Degraded flags still active                      |
+| 7 | phase-topology-contract.mjs                   | NON-CANDIDATE    | NC-3          | Source of truth for active topology              |
+| 8 | server-actions-secret-contract.mjs            | NON-CANDIDATE    | NC-1+NC-4     | SA key sync still required                       |
+| 9 | check-alias-shim-contract.mjs                 | NON-CANDIDATE    | NC-2          | Contract enforcer; needed while alias needed     |
+|10 | check-generated-artifact-log.mjs              | NON-CANDIDATE    | NC-2          | Retire with patch, not before                    |
+|11 | check-preview-degraded-contract.mjs           | NON-CANDIDATE    | NC-2          | Contract enforcer; needed while flags active     |
+|12 | check-server-actions-secret-contract.mjs      | NON-CANDIDATE    | NC-2          | Retire with SA key exception                     |
+|13 | shims/empty-module.mjs                        | NON-CANDIDATE    | NC-1+NC-4     | HMR shim still required                          |
+|14 | stubs/vercel-og-empty.mjs                     | NON-CANDIDATE    | NC-1+NC-4     | OG stub still required                           |
+|15 | open-next.config.ts minify:false              | NON-CANDIDATE    | NC-4+NC-5     | Exit proof not yet obtained                      |
+| D1| patch Fix A part 2 absolute path bug          | DEFERRED         | D-1           | Fix before retirement validation                 |
+| D2| wrangler.jsonc minify conflict                | DEFERRED         | D-2+D-1       | Precedence undocumented                          |
+| D3| OPEN_NEXT_DEPLOY_ENV naming discrepancy       | DEFERRED         | D-2           | Low risk today; naming clarity recommended       |
+| D4| PHASE6_ALIAS no dedicated checker             | DEFERRED         | D-2           | Gap in contract enforcement coverage             |
+
+================================================================================
+RECOMMENDED PREREQUISITE ACTIONS BEFORE ANY RETIREMENT ATTEMPT
+================================================================================
+
+1. Fix the absolute path bug in patch-prefetch-hints-manifest.mjs Fix A part 2.
+   Replace the hardcoded /Users/Data/Warehouse/Pipe/tianze-website/ path with a
+   process.cwd()-relative or __dirname-relative path. This is a prerequisite for
+   any build-based retirement validation (D-1).
+
+2. Clarify wrangler.jsonc minify:true vs open-next.config.ts minify:false
+   precedence. Document which takes effect and align them to be consistent (D-2).
+
+3. Before retiring patch-prefetch-hints-manifest.mjs (Candidate A): run the
+   official exit criteria check:
+   a. pnpm build:cf (clean)
+   b. Check generated artifact for dynamic require() patterns
+   c. pnpm smoke:cf:preview
+   d. pnpm smoke:cf:deploy -- --base-url <preview-url>
+   All four must pass with GENERATED_ARTIFACT_LOG_BLOCKERS patterns absent.
+
+4. Before retiring build-phase5-worker.mjs (Weak Candidate B): get explicit
+   sign-off from plan owner that phase5 is no longer needed as an emergency
+   fallback path.
+
+================================================================================
+END OF RETIRE-CHECK
+================================================================================

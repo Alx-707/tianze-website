@@ -1,0 +1,260 @@
+TASK 3 PROOF MATRIX — cloudflare-official-alignment
+Generated: Fri Apr 10 2026
+Plan: .sisyphus/plans/cloudflare-official-alignment.md
+Author: Sisyphus agent (Wave 1, Task 3)
+
+════════════════════════════════════════════════════════════════════════
+PURPOSE
+════════════════════════════════════════════════════════════════════════
+
+This file maps each known risk area in the cloudflare-official-alignment
+plan to:
+  - The minimum proof level required to close that risk
+  - The specific proof command(s) required
+  - Current proof status (pre-alignment baseline, Fri Apr 10 2026)
+  - Whether a gap exists
+
+It is a READ ONLY reference for plan execution. It does NOT claim proof
+that has not been obtained. It does NOT treat build passing as runtime
+proof. It does NOT treat local preview as deployed proof.
+
+════════════════════════════════════════════════════════════════════════
+PROOF LEVEL LEGEND
+════════════════════════════════════════════════════════════════════════
+
+L1  fast-gate             lint + type-check + unit tests locally
+L2  local-full-proof      pnpm build + test:coverage + quality gate
+                          + pnpm build:cf (for platform changes)
+L3  preview-preflight     degraded-contract checks + CF preview
+                          pre-deploy gate (NOT a real publish)
+L4  deployed-preview-proof  real preview publish + deployed smoke
+                            against published URL
+L5  ci-proof              central CI gates in clean environment
+L6  release-proof         local-full + CI + dual-platform build +
+                          key-path runtime checks
+                          (ALLOW_MEMORY_* flags MUST be absent)
+
+════════════════════════════════════════════════════════════════════════
+PROOF MATRIX
+════════════════════════════════════════════════════════════════════════
+
+Each row format:
+  RISK AREA | MIN LEVEL | REQUIRED COMMAND(S) | CURRENT STATUS | GAP?
+
+────────────────────────────────────────────────────────────────────────
+RISK-01  CF page routing correctness (locale pages, redirects, 404)
+────────────────────────────────────────────────────────────────────────
+Min level : L4  deployed-preview-proof
+Commands  : pnpm build:cf  (with CF_APPLY_GENERATED_PATCH=true)
+            pnpm proof:cf:preview-deployed
+            pnpm smoke:cf:deploy -- --base-url <url>
+Status    : PARTIAL — pnpm proof:cf:preview-deployed passed for
+            /en and /zh locale pages as of 2026-04-09.
+            /en/contact and /zh/contact also restored to 200.
+            Full smoke:cf:deploy not yet re-run post-alignment.
+Gap?      : YES — deployed smoke not re-confirmed against alignment
+            branch output. Needs re-run after Wave 2 changes land.
+
+────────────────────────────────────────────────────────────────────────
+RISK-02  Generated artifact manifest compatibility (patch still active)
+────────────────────────────────────────────────────────────────────────
+Min level : L2  local-full-proof (build chain)
+            + L4 for runtime confirmation of patch behavior
+Commands  : CF_APPLY_GENERATED_PATCH=true pnpm build:cf
+            Check for GENERATED_ARTIFACT_LOG_BLOCKERS absence in output:
+              - "Unexpected loadManifest"
+              - "patch-prefetch-hints-manifest failure"
+              - "missing middleware manifest loader patch point"
+              - "missing manifest guard patch point"
+              - "missing cache handler patch point"
+              - "missing composable cache handler patch point"
+            pnpm smoke:cf:preview  (page-level signal)
+Status    : ACTIVE DEBT — patch is still required.
+            CF_APPLY_GENERATED_PATCH=true must be set.
+            Exit criteria for retiring patch NOT YET MET (4 of 4 open).
+Gap?      : YES — patch is a temporary-compat-layer, not closed.
+            Exit criteria must be tracked explicitly; none closed yet.
+
+────────────────────────────────────────────────────────────────────────
+RISK-03  Preview degraded mode contaminating proof
+────────────────────────────────────────────────────────────────────────
+Min level : L3  preview-preflight (to confirm degraded flags are absent
+            in release-bound runs)
+Commands  : Verify ALLOW_MEMORY_RATE_LIMIT is NOT set in release runs
+            Verify ALLOW_MEMORY_IDEMPOTENCY is NOT set in release runs
+            Verify placeholder secrets (7 total) are NOT present in
+            release-proof runs:
+              RATE_LIMIT_PEPPER
+              NEXT_SERVER_ACTIONS_ENCRYPTION_KEY
+              TURNSTILE_SECRET_KEY
+              NEXT_PUBLIC_TURNSTILE_SITE_KEY
+              RESEND_API_KEY
+              AIRTABLE_API_KEY
+              AIRTABLE_BASE_ID
+            pnpm smoke:cf:preview  (must pass without degraded flags)
+Status    : OPEN — degraded flags are correctly scoped to preview env.
+            No known contamination. But no explicit audit confirming
+            release-proof runs are clean of these flags.
+Gap?      : YES — no explicit gate enforcing absence of degraded flags
+            in release-proof CI runs. Needs a declared check.
+
+────────────────────────────────────────────────────────────────────────
+RISK-04  Phase6 split-worker behavior
+────────────────────────────────────────────────────────────────────────
+Min level : L4  deployed-preview-proof (only provable via real deploy)
+Commands  : node scripts/cloudflare/build-phase6-workers.mjs
+            OPEN_NEXT_DEPLOY=true node scripts/cloudflare/deploy-phase6.mjs --env preview
+            pnpm smoke:cf:deploy -- --base-url <preview-url>
+Status    : PARTIAL — deploy:cf:phase6:dry-run passed as of recent
+            baseline. Gateway worker with inline /api/health response
+            verified. But no confirmed deployed smoke re-run against
+            current alignment branch.
+Gap?      : YES — phase6 proof requires a real preview deploy URL.
+            Local dry-run alone is NOT sufficient proof of split-worker
+            runtime behavior.
+
+────────────────────────────────────────────────────────────────────────
+RISK-05  /api/health and API worker paths
+────────────────────────────────────────────────────────────────────────
+Min level : L4  deployed-preview-proof
+Commands  : pnpm smoke:cf:preview:strict
+            (includes /api/health; may fail on stock preview —
+             stock preview ≠ phase6 split-worker proof)
+            pnpm smoke:cf:deploy -- --base-url <url>
+            (final proof for /api/health in deployed context)
+Status    : KNOWN DEBT — /api/health via stock preview
+            (smoke:cf:preview:strict) currently fails because
+            generated app/api/health/route.js dynamic require is not
+            accepted by local preview runtime.
+            Gateway worker returns inline health response in phase6.
+            Only provable via deployed smoke.
+Gap?      : YES — no deployed smoke re-confirmed for /api/health
+            post-alignment. Strict preview failure acknowledged as
+            known; does NOT block page-level proof, but must be
+            resolved before release-proof.
+
+────────────────────────────────────────────────────────────────────────
+RISK-06  server-functions handler paths (API worker debt)
+────────────────────────────────────────────────────────────────────────
+Min level : L4  deployed-preview-proof
+Commands  : Inspect generated:
+              server-functions/${target}/index.mjs
+              default/handler.mjs
+            pnpm smoke:cf:deploy -- --base-url <url>
+            (static route-wrapper experiments not yet in proof scope)
+Status    : OPEN DEBT — no deployed proof for these paths.
+            Acknowledged as technical debt in repo notes.
+            No bucket-3 proof obtained for handler paths.
+Gap?      : YES — explicit gap. Must be closed before release-proof.
+
+────────────────────────────────────────────────────────────────────────
+RISK-07  middleware.ts runtime semantics (locale redirect, CSP nonce,
+         security headers, x-internal-client-ip derivation)
+────────────────────────────────────────────────────────────────────────
+Min level : L2  local-full-proof
+            + L4 for Cloudflare-specific header behavior
+Commands  : pnpm exec vitest run tests/unit/middleware.test.ts
+            pnpm exec vitest run src/__tests__/middleware-locale-cookie.test.ts
+            pnpm build && pnpm build:cf
+            pnpm smoke:cf:preview  (checks redirects, cookie flags,
+            internal header non-leakage, manifest crash)
+Status    : PARTIAL — middleware.ts is the authoritative runtime entry.
+            Unit tests exist. smoke:cf:preview checks redirects and
+            cookie flags. x-internal-client-ip derivation tested via
+            client-ip tests. No post-alignment re-run confirmed.
+Gap?      : YES — needs re-run after alignment changes to confirm no
+            regression.
+
+────────────────────────────────────────────────────────────────────────
+RISK-08  Contact page runtime regression
+────────────────────────────────────────────────────────────────────────
+Min level : L4  deployed-preview-proof
+Commands  : pnpm exec vitest run src/app/__tests__/actions.test.ts
+            pnpm exec vitest run src/app/__tests__/contact-integration.test.ts
+            pnpm proof:cf:preview-deployed
+Status    : CLOSED (as of 2026-04-09) — /en/contact and /zh/contact
+            restored to 200. Root cause: Uncached data outside Suspense
+            + setTimeout/Cache Components boundary. Fix: static message
+            metadata, getContactCopy() removed use cache/cacheLife,
+            ContactForm via client-only dynamic import.
+Gap?      : NO (for current contact page state). Must re-confirm if
+            alignment changes touch contact page or caching layer.
+
+────────────────────────────────────────────────────────────────────────
+RISK-09  Deployed environment vs. local preview divergence
+────────────────────────────────────────────────────────────────────────
+Min level : L4  deployed-preview-proof
+Commands  : pnpm smoke:cf:deploy -- --base-url <url>
+            (local preview signal ≠ deployed behavior for API paths,
+             split-worker routing, /api/health, service bindings)
+Status    : STRUCTURAL GAP — this is not a bug but a permanent
+            proof-boundary constraint. Local preview gives page-level
+            signal only. Deployed smoke is the only valid proof for
+            API paths and split-worker routing.
+Gap?      : PERMANENT — must be enforced as a proof discipline, not
+            closed by fixing code. See task-3-proof-boundary.txt.
+
+────────────────────────────────────────────────────────────────────────
+RISK-10  TypeScript / build chain stability (TS 5.9.3 constraint)
+────────────────────────────────────────────────────────────────────────
+Min level : L2  local-full-proof
+Commands  : pnpm type-check
+            pnpm build
+            pnpm build:cf
+            (TypeScript 6 known to cause Maximum call stack exceeded
+             in next build — must stay on 5.9.3 until resolved)
+Status    : STABLE — currently on TypeScript 5.9.3.
+            ignoreDeprecations must be "5.0" not "6.0".
+Gap?      : NO active gap — constraint is documented and stable.
+            Risk is accidental upgrade. Needs guarding.
+
+────────────────────────────────────────────────────────────────────────
+RISK-11  phase-topology-contract.mjs / build-phase6-workers.mjs drift
+────────────────────────────────────────────────────────────────────────
+Min level : L2  local-full-proof (syntax) + L4 (runtime)
+Commands  : node --check scripts/cloudflare/build-phase6-workers.mjs
+            pnpm build:cf:phase6
+            (must confirm shared contract constants are in sync:
+             PHASE_WORKER_NAME_SUFFIX not WORKER_NAME_SUFFIX,
+             kind+values+createSerializedRoute*Source() not rule.match)
+Status    : HISTORICAL DEBT — drift was found and fixed in prior session.
+            No re-confirmation that alignment branch has not re-introduced
+            drift.
+Gap?      : YES — needs explicit re-check after any topology contract
+            changes in Wave 2+.
+
+════════════════════════════════════════════════════════════════════════
+SUMMARY: OPEN GAPS (pre-alignment baseline)
+════════════════════════════════════════════════════════════════════════
+
+RISK-01  CF page routing        — needs re-run post-alignment
+RISK-02  Generated artifact     — patch exit criteria: 0/4 closed
+RISK-03  Degraded mode          — no explicit release-proof gate
+RISK-04  Phase6 split-worker    — needs real deployed preview proof
+RISK-05  /api/health            — only closeable via deployed smoke
+RISK-06  server-functions       — explicit open debt, no proof
+RISK-07  middleware.ts          — needs re-run post-alignment
+RISK-09  Local/deployed gap     — permanent structural constraint
+RISK-11  Topology contract      — needs re-check after Wave 2
+
+CLOSED:
+RISK-08  Contact page           — closed 2026-04-09
+RISK-10  TS build chain         — stable, no active gap
+
+════════════════════════════════════════════════════════════════════════
+ANTI-PATTERNS (FORBIDDEN CLAIMS)
+════════════════════════════════════════════════════════════════════════
+
+- "build:cf passes" DOES NOT MEAN "CF page routing is proven"
+- "smoke:cf:preview passes" DOES NOT MEAN "API paths are proven"
+- "smoke:cf:preview:strict fails" DOES NOT MEAN "deployed phase6 is broken"
+- "phase6 dry-run passes" DOES NOT MEAN "phase6 split-worker runtime is proven"
+- "local preview 500" DOES NOT MEAN "production fact"
+- "contact page 200" DOES NOT MEAN "API worker chain is healthy"
+- "TypeScript type-check passes" DOES NOT MEAN "build is stable under TS6"
+- "test passes" DOES NOT MEAN "production contract is met" if test uses
+  TEST_MODE, PLAYWRIGHT_TEST, or ALLOW_MEMORY_* flags
+
+════════════════════════════════════════════════════════════════════════
+END OF DOCUMENT
+════════════════════════════════════════════════════════════════════════

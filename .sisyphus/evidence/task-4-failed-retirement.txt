@@ -1,0 +1,162 @@
+## Task 4: Failed Retirement Documentation Template
+Date: Fri Apr 10 2026
+Plan: cloudflare-official-alignment
+
+### Purpose
+
+This file provides the canonical template for documenting a failed retirement attempt.
+When a wave task tries to remove a Cloudflare deviation and cannot do so safely, the
+result MUST be a documentation commit — not a force-removal commit.
+
+### Core Principle
+
+> Failed retirement attempts should produce documentation commits, not force-removal commits.
+
+Force-removing a load-bearing deviation without proof is the most dangerous kind of
+Cloudflare change in this repo. It converts a known deviation into a silent regression
+that will only surface during deployed smoke or in production.
+
+The correct outcome of a failed retirement:
+  1. Understand WHY retirement is not yet safe.
+  2. Document what was learned.
+  3. Register the exception in the retained-exception register.
+  4. Commit the documentation — not the broken removal.
+  5. Leave the deviation in place, untouched.
+
+### Usage Instructions
+
+1. Copy the template block below (between the --- markers).
+2. Fill in every field. Do not leave any field blank.
+3. Link to the retained exception ID that was created as a result of this attempt
+   (from task-4-register-template.txt format).
+4. Commit this as a documentation commit with message:
+   docs(cloudflare): record failed retirement of [exception-id]
+5. Do NOT commit the incomplete removal code. Revert it first, then commit documentation.
+
+### Proof Level Reference (from CLOUDFLARE-ISSUE-TAXONOMY.md)
+
+Proof levels in ascending strength:
+  L1: pnpm type-check / pnpm lint:check
+  L2: pnpm build (Next.js standard build)
+  L3: pnpm build:cf (Cloudflare Webpack build)
+  L4: pnpm smoke:cf:preview (local page / redirect / cookie / header smoke)
+  L4s: pnpm smoke:cf:preview:strict (adds /api/health; may fail on stock preview)
+  L5: pnpm smoke:cf:deploy -- --base-url <url> (final deployed smoke)
+
+Record which level was the first to fail. Do not claim higher-level proof if you
+only reached a lower level before the failure.
+
+---
+
+## FAILED RETIREMENT ATTEMPT: [exception-id]
+Date: [date — e.g., Fri Apr 10 2026]
+Attempted by: [task-N — the wave task that attempted this retirement]
+Exception registered: [CF-EXCEPT-NNN — the retained exception ID created from this attempt]
+
+### What Was Attempted
+
+Describe the retirement approach in plain language:
+[What was the plan? What change was made or would have been made?
+e.g., "Removed the call to patch-prefetch-hints-manifest.mjs from the build:cf pipeline
+and ran a clean build to confirm the patch was no longer needed."]
+
+Specific commands / changes tried:
+[e.g.:
+  - Commented out patch invocation in scripts/cloudflare/build-webpack.mjs
+  - Ran: pnpm build:cf
+  - Ran: pnpm smoke:cf:preview]
+
+### What Broke
+
+Exact error or failure mode:
+[Copy the relevant error output here. Be precise. Include the file name and line
+from generated artifacts if applicable.
+e.g.:
+  Error: Cannot find module './.next/server/middleware-manifest.json'
+  at getMiddlewareManifest (.open-next/default-function/handler.mjs:1234:5)]
+
+Which proof level it failed at:
+[State the level explicitly using the scale above. e.g.: "Failure at L4 (smoke:cf:preview).
+/en returned HTTP 500. /zh also returned 500. Build (L3) succeeded without error."]
+
+Issue bucket (from CLOUDFLARE-ISSUE-TAXONOMY.md):
+[State the bucket: platform-entry | generated-artifact | runtime-regression | deployment-behavior
+e.g.: "Generated artifact compatibility issue; manifest load regression after removing patch."]
+
+### Root Cause of Failure
+
+Why retirement is not yet possible:
+[Explain the technical dependency. What is the deviation actually doing that upstream
+does not yet do?
+e.g., "The patch converts dynamic require() in the generated OpenNext handler to
+loadManifest() calls. Without it, the generated artifact uses a CommonJS dynamic require
+that Cloudflare workers cannot execute. OpenNext has not yet absorbed this rewrite."]
+
+What upstream dependency is blocking it:
+[Name the specific upstream component and what it needs to change.
+e.g.: "OpenNext >= 1.19 or a Next.js 17 build output change that stops emitting
+dynamic require() in the default function handler for this manifest path."]
+
+### What Was Produced Instead
+
+Documentation written:
+[List documents created or updated as a result of this attempt.
+e.g.:
+  - .sisyphus/evidence/task-4-failed-retirement.txt (this file, filled in)
+  - Exception registered: docs/guides/CLOUDFLARE-RETAINED-EXCEPTION-REGISTER.md entry CF-EXCEPT-001]
+
+Revert action taken:
+[Describe what was reverted to restore the working state.
+e.g., "Reverted the removal of the patch invocation in build-webpack.mjs.
+Ran pnpm build:cf and pnpm smoke:cf:preview again to confirm recovery to baseline."]
+
+Recovery proof:
+[State what proof was re-run after reverting to confirm no net regression.
+e.g.:
+  - pnpm build:cf: PASS
+  - pnpm smoke:cf:preview: PASS (/en, /zh, /en/contact, /zh/contact all 200)]
+
+### Lessons Learned
+
+What was discovered about the deviation during the attempt:
+[Document anything new learned. This is the durable value of a failed attempt.
+e.g.:
+  - The patch is called on every build:cf invocation, not just on dry-run.
+  - The generated handler file path changed between OpenNext 1.17 and 1.18.
+  - The retirement requires both Next.js AND OpenNext version gates, not just one.]
+
+Does this change the retirement criteria vs. what was previously assumed?
+[YES / NO — and if YES, explain what changed in your understanding.]
+
+### Revised Retirement Criteria
+
+Updated criteria for future retry:
+[Refine the criteria from the original exception registration if this attempt revealed
+new information about what is actually required.
+e.g.:
+  - Previous criteria: "OpenNext >= 1.19 absorbs the patch"
+  - Revised criteria: "OpenNext >= 1.19 AND Next.js >= 16.3 (build output format also changed)"]
+
+Suggested next attempt timing:
+[e.g., "Retry after next OpenNext minor release; monitor release notes for
+middleware manifest handling changes."]
+
+---
+
+### Commit Convention for Failed Retirement
+
+When committing a failed retirement, use:
+
+  git commit -m "docs(cloudflare): record failed retirement of [exception-id]"
+
+Include in the commit:
+  - This completed failed-retirement template file
+  - The newly created or updated retained-exception register entry
+  - Any AGENTS.md updates if new cautions were discovered
+
+Do NOT include in the commit:
+  - Any partially-removed deviation code
+  - Any broken build artifacts
+  - Any speculative "halfway fixed" state
+
+The working state of the repo must be fully restored BEFORE creating the commit.

@@ -1,0 +1,13 @@
+## Task 0: Evidence Workspace Setup
+Date: Fri Apr 10 2026
+Plan: cloudflare-official-alignment
+
+### Evidence Directory
+.sisyphus/evidence/
+├── final-qa/           (subdirectory, pre-existing)
+├── task-0-workspace.txt  (this file)
+└── task-0-baseline.txt
+
+### Status
+Workspace confirmed ready for Wave 1 evidence writing.
+Both task-0 evidence files written successfully on Fri Apr 10 2026.

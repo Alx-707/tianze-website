@@ -1,0 +1,358 @@
+TASK 3 PROOF BOUNDARY DEFINITION — cloudflare-official-alignment
+Generated: Fri Apr 10 2026
+Plan: .sisyphus/plans/cloudflare-official-alignment.md
+Author: Sisyphus agent (Wave 1, Task 3)
+
+════════════════════════════════════════════════════════════════════════
+PURPOSE
+════════════════════════════════════════════════════════════════════════
+
+This file documents the explicit boundaries between proof levels used
+in this repository. For each proof level it states:
+
+  WHAT IT PROVES
+  WHAT IT DOES NOT PROVE
+  WHICH COMMANDS CONSTITUTE THIS LEVEL
+  FORBIDDEN CLAIMS at this level
+
+This document is a constraint reference. It does NOT collapse all proof
+into a single "green build" concept. It does NOT allow local preview
+results to be cited as production facts.
+
+════════════════════════════════════════════════════════════════════════
+PROOF LEVEL BOUNDARIES
+════════════════════════════════════════════════════════════════════════
+
+────────────────────────────────────────────────────────────────────────
+LEVEL 1 — fast-gate
+────────────────────────────────────────────────────────────────────────
+Commands:
+  pnpm lint
+  pnpm type-check
+  pnpm exec vitest run (unit tests, no build required)
+
+PROVES:
+  - Code is syntactically valid and passes static analysis
+  - TypeScript types are consistent at the declared version (5.9.3)
+  - Unit-level logic matches declared contracts
+  - No obvious import errors or undefined symbols
+
+DOES NOT PROVE:
+  - Build succeeds (Next.js or Cloudflare)
+  - Runtime behavior under any platform
+  - Page routing is correct
+  - Any Cloudflare-specific behavior
+  - API paths are reachable
+  - Any deployed behavior
+
+FORBIDDEN CLAIMS at this level:
+  - "Type-check passes, so the build is stable"
+  - "Unit tests pass, so production behavior is correct"
+  - "Lint passes, so there are no runtime errors"
+
+────────────────────────────────────────────────────────────────────────
+LEVEL 2 — local-full-proof
+────────────────────────────────────────────────────────────────────────
+Commands:
+  pnpm build                              (Next.js standard build)
+  pnpm build:cf                           (Cloudflare Webpack build)
+    → requires: CF_APPLY_GENERATED_PATCH=true while patch is active
+  pnpm test:coverage                      (full test suite with coverage)
+  pnpm quality-gate                       (lint + type-check + format)
+
+PROVES:
+  - Build chain is intact for both Node and Cloudflare targets
+  - No generated artifact log blockers present (if patch applied)
+  - Code coverage meets declared threshold
+  - TypeScript 5.9.3 + tsconfig is stable under build
+  - Dual-platform build does not fail on current branch
+
+DOES NOT PROVE:
+  - Any runtime behavior (nothing is running)
+  - Page routing is correct under Cloudflare
+  - Generated artifact behaves correctly at runtime
+  - Middleware semantics are correct
+  - API paths are reachable
+  - Deployed behavior
+
+FORBIDDEN CLAIMS at this level:
+  - "build:cf passes, so CF page routing is proven"
+  - "build passes, so the generated artifact is runtime-safe"
+  - "build passes, so the middleware patch is working"
+
+IMPORTANT CONSTRAINT:
+  pnpm build and pnpm build:cf must NOT run in parallel.
+  Both write .next; parallel runs produce polluted artifacts.
+  Order: pnpm clean:next-artifacts && pnpm build, then pnpm build:cf.
+
+────────────────────────────────────────────────────────────────────────
+LEVEL 3 — preview-preflight
+────────────────────────────────────────────────────────────────────────
+Commands:
+  pnpm preflight:site-cutover             (single-site identity checks)
+  pnpm preflight:site-cutover:strict      (strict single-site checks)
+  pnpm validate:translations              (4-file translation sync check)
+  Verify ALLOW_MEMORY_RATE_LIMIT is absent
+  Verify ALLOW_MEMORY_IDEMPOTENCY is absent
+  Verify placeholder secrets are absent from release-bound env:
+    RATE_LIMIT_PEPPER, NEXT_SERVER_ACTIONS_ENCRYPTION_KEY,
+    TURNSTILE_SECRET_KEY, NEXT_PUBLIC_TURNSTILE_SITE_KEY,
+    RESEND_API_KEY, AIRTABLE_API_KEY, AIRTABLE_BASE_ID
+
+PROVES:
+  - Site identity, SEO defaults, and translation keys are consistent
+  - Critical translation bundle is in sync with deferred bundle
+  - Release-bound run is not contaminated by degraded-mode flags
+  - Placeholder secrets are not present in release-bound configuration
+
+DOES NOT PROVE:
+  - Runtime page behavior
+  - Cloudflare routing is correct
+  - Any deployed behavior
+  - API paths work
+  - Contact form submissions work
+
+FORBIDDEN CLAIMS at this level:
+  - "preflight passes, so the site is ready to deploy"
+  - "translations validated, so i18n is correct at runtime"
+  - "degraded flags absent, so rate-limiting works correctly"
+
+────────────────────────────────────────────────────────────────────────
+LEVEL 4 — deployed-preview-proof
+────────────────────────────────────────────────────────────────────────
+
+Sub-level 4a — stock preview (page-level signal only):
+  Commands:
+    pnpm preview:cf                       (stock opennextjs-cloudflare preview)
+    pnpm smoke:cf:preview                 (page-level checks:
+      / locale pages, redirects, cookie flags, internal header
+      non-leakage, manifest crash recovery)
+    pnpm proof:cf:preview-deployed        (canonical page-level proof)
+
+  PROVES:
+    - Page routing returns 200 for locale pages
+    - Locale redirects behave correctly
+    - Cookie flags are set correctly (httpOnly, secure, sameSite)
+    - Internal headers (x-internal-client-ip etc.) do not leak to client
+    - Manifest crash does not occur for page routes
+    - Contact pages (/en/contact, /zh/contact) return 200
+
+  DOES NOT PROVE:
+    - /api/health or any API path is reachable in this preview mode
+    - Phase6 split-worker routing is correct
+    - Service bindings between workers are functional
+    - Rate-limiting or idempotency logic works (degraded flags may be set)
+    - Actual form submissions succeed
+
+Sub-level 4b — phase6 real deployed preview:
+  Commands:
+    node scripts/cloudflare/build-phase6-workers.mjs
+    OPEN_NEXT_DEPLOY=true node scripts/cloudflare/deploy-phase6.mjs --env preview
+    pnpm smoke:cf:deploy -- --base-url <preview-url-from-deploy-output>
+
+  PROVES:
+    - Phase6 split-worker topology is deployable
+    - Gateway worker routes correctly to page and API workers
+    - /api/health returns inline health response from gateway
+    - Deployed environment accepts the generated worker bundle
+    - Worker naming (PHASE_WORKER_NAME_SUFFIX) is correct
+
+  DOES NOT PROVE:
+    - Production environment behavior
+    - All API paths work through server-functions handlers
+    - Rate-limiting works with real secrets
+    - Form submission succeeds end-to-end
+
+IMPORTANT CONSTRAINT — Sub-level 4a vs 4b:
+  stock opennextjs-cloudflare preview (4a) is NOT phase6 proof (4b).
+  smoke:cf:preview:strict may fail for API paths in 4a — this is a
+  known limitation, NOT a business regression requiring code fixes.
+  Do NOT conflate 4a failure with 4b failure.
+
+IMPORTANT CONSTRAINT — phase6 deploy:
+  deploy-phase6.mjs must be called with OPEN_NEXT_DEPLOY=true.
+  Without it, the script falls back to OpenNext's own deploy wrapper
+  and blocks on remote R2 cache provisioning.
+  Gateway service bindings for preview must use worker names with
+  -preview suffix, NOT service + environment combinations.
+  Workers must NOT include WORKER_SELF_REFERENCE service bindings
+  (causes publish-time sequencing deadlock on first deploy).
+
+FORBIDDEN CLAIMS at this level:
+  - "smoke:cf:preview passes, so /api/health is proven"
+  - "smoke:cf:preview:strict fails, so deployed phase6 is broken"
+  - "phase6 dry-run passes, so phase6 split-worker runtime is proven"
+  - "local preview page 200, so production is correct"
+  - "preview deploy URL smoke passes, so production deploy is ready"
+
+────────────────────────────────────────────────────────────────────────
+LEVEL 5 — ci-proof
+────────────────────────────────────────────────────────────────────────
+Commands:
+  All GitHub Actions CI gates on the PR/branch
+  (clean environment, no local state contamination)
+
+PROVES:
+  - Build chain is reproducible in a clean environment
+  - Unit tests pass without local machine state
+  - Type-check and lint pass at declared dependency versions
+  - No implicit local dependency on developer machine state
+
+DOES NOT PROVE:
+  - Deployment health
+  - Runtime behavior under Cloudflare
+  - Page routing correctness
+  - API paths work
+  - Rollout is correct
+
+FORBIDDEN CLAIMS at this level:
+  - "CI is green, so the deployment is ready"
+  - "CI is green, so Cloudflare routing is correct"
+
+────────────────────────────────────────────────────────────────────────
+LEVEL 6 — release-proof
+────────────────────────────────────────────────────────────────────────
+Commands (all of the following, in order):
+  1. pnpm clean:next-artifacts && pnpm build
+  2. pnpm build:cf  (CF_APPLY_GENERATED_PATCH=true while patch active)
+  3. pnpm test:coverage
+  4. pnpm quality-gate
+  5. CI gates pass (green)
+  6. pnpm proof:cf:preview-deployed  (page-level deployed proof)
+  7. pnpm smoke:cf:deploy -- --base-url <real-deploy-url>
+  8. Confirm ALLOW_MEMORY_RATE_LIMIT is absent
+  9. Confirm ALLOW_MEMORY_IDEMPOTENCY is absent
+  10. Confirm placeholder secrets are absent
+
+PROVES:
+  - All lower levels are satisfied
+  - Dual-platform build is stable
+  - Deployed page routing is correct
+  - Key-path runtime behavior is verified against real deployed URL
+  - Degraded-mode flags are absent from the release environment
+  - Release is safe to promote to production
+
+DOES NOT PROVE:
+  - Production environment is identical to preview environment
+  - All edge cases are covered
+  - Zero-downtime rollout is guaranteed
+
+FORBIDDEN CLAIMS at this level:
+  - "Release-proof means zero risk"
+  - "release-proof without deployed smoke = complete release-proof"
+
+════════════════════════════════════════════════════════════════════════
+PROOF COMMAND QUICK REFERENCE
+════════════════════════════════════════════════════════════════════════
+
+Command                                Level  What it checks
+─────────────────────────────────────  ─────  ─────────────────────────
+pnpm lint + type-check                  L1    Static analysis only
+pnpm exec vitest run                    L1    Unit logic only
+pnpm build                              L2    Next.js build chain
+pnpm build:cf                           L2    Cloudflare Webpack build
+pnpm test:coverage                      L2    Full test suite + coverage
+pnpm validate:translations              L3    4-file translation sync
+pnpm preflight:site-cutover             L3    Site identity + SEO defaults
+pnpm smoke:cf:preview                   L4a   Page routing signal (local CF)
+pnpm smoke:cf:preview:strict            L4a   + /api/health (may fail; known)
+pnpm proof:cf:preview-deployed          L4a   Canonical page-level proof
+pnpm deploy:cf:phase6:dry-run           L4b   Phase6 wrangler dry-run
+pnpm smoke:cf:deploy -- --base-url <u>  L4b   Deployed smoke (final proof)
+CI gates                                L5    Clean build + test
+Full release sequence (all above)       L6    Release-proof
+
+════════════════════════════════════════════════════════════════════════
+MINIMUM PROOF REQUIREMENTS BY CHANGE TYPE
+════════════════════════════════════════════════════════════════════════
+
+CHANGE TYPE                             MINIMUM PROOF LEVEL REQUIRED
+──────────────────────────────────────  ──────────────────────────────
+TypeScript / lint / formatting only      L1  fast-gate
+Unit test additions or changes           L1 + verify coverage threshold
+Translation key changes                  L3  (must run validate:translations
+                                            + update all 4 message files)
+Shared config / site identity changes   L3  (preflight:site-cutover)
+middleware.ts changes                   L2 + L4a
+  (locale redirect, security headers,
+   x-internal-client-ip derivation)
+Contact / inquiry / subscribe changes   L2 + L4a
+  (actions, form, integration tests)
+Generated artifact patch changes        L2 (build:cf + log blocker check)
+                                            + L4a (smoke:cf:preview)
+CF platform entry / config changes      L2 + L4a + L4b
+  (open-next.config.ts, wrangler config,
+   phase-topology-contract.mjs)
+Phase6 topology / worker naming         L2 + L4b (must have real deploy URL)
+API paths (/api/health, server-funcs)   L4b (deployed smoke only)
+Release to production                   L6  (all levels)
+
+════════════════════════════════════════════════════════════════════════
+PERMANENT STRUCTURAL CONSTRAINTS
+════════════════════════════════════════════════════════════════════════
+
+1. LOCAL PREVIEW ≠ PRODUCTION PROOF
+   Local Cloudflare preview (pnpm preview:cf) runs under Miniflare /
+   Wrangler dev. It does NOT faithfully reproduce:
+     - Cloudflare network edge behavior
+     - Service binding resolution for split workers
+     - Real secret injection
+     - CommonJS / fs compatibility at the actual Cloudflare runtime
+   This divergence is permanent and cannot be closed by code changes.
+
+2. STOCK PREVIEW ≠ PHASE6 SPLIT-WORKER PROOF
+   stock opennextjs-cloudflare preview primarily runs the default worker
+   path. It does NOT prove phase6 split-worker routing, gateway
+   behavior, or service-binding correctness.
+
+3. BUILD PASSING ≠ RUNTIME PROOF
+   pnpm build:cf producing a clean output does NOT prove that:
+     - Middleware manifest is loaded correctly at runtime
+     - getMiddlewareManifest() uses the patched loadManifest() path
+     - Page routes return 200 under Cloudflare
+   The patch (CF_APPLY_GENERATED_PATCH) addresses a generated artifact
+   issue. Build passing only means the artifact was produced; it does
+   not verify the artifact's runtime behavior.
+
+4. DEGRADED FLAGS MUST BE ABSENT IN RELEASE-PROOF
+   ALLOW_MEMORY_RATE_LIMIT and ALLOW_MEMORY_IDEMPOTENCY are permitted
+   in preview environments to allow testing without production
+   dependencies. They are FORBIDDEN in release-proof runs. If these
+   flags are present, the run does NOT qualify as release-proof.
+
+5. PARALLEL BUILD PROHIBITION
+   pnpm build and pnpm build:cf must never run in parallel.
+   Both write to .next. Parallel runs produce unreliable artifacts and
+   false failures. Always run sequentially with artifact cleanup between.
+
+6. PHASE6 PROOF REQUIRES REAL DEPLOY URL
+   The only valid proof of phase6 split-worker behavior is a deployed
+   smoke against a real Cloudflare preview URL obtained from the deploy
+   script output. Dry-run passes are a necessary but NOT sufficient
+   condition. Local Wrangler dev failures are NOT reliable phase6
+   indicators.
+
+════════════════════════════════════════════════════════════════════════
+PROOF ANTI-PATTERNS (EXPLICITLY FORBIDDEN)
+════════════════════════════════════════════════════════════════════════
+
+These claims are ALWAYS false. If you find yourself making one of them,
+stop and re-read this document.
+
+  ✗  "build:cf passes" → CF page routing is proven
+  ✗  "smoke:cf:preview passes" → API paths are proven
+  ✗  "smoke:cf:preview:strict fails" → deployed phase6 is broken
+  ✗  "phase6 dry-run passes" → phase6 runtime is proven
+  ✗  "local preview 500" → production is broken
+  ✗  "contact page 200" → API worker chain is healthy
+  ✗  "type-check passes" → build is stable under TypeScript 6
+  ✗  "test passes with ALLOW_MEMORY_*" → production rate-limiting works
+  ✗  "test passes with TEST_MODE" → production contract is met
+  ✗  "CI is green" → deployment is ready
+  ✗  "CI is green" → Cloudflare routing is correct
+  ✗  "unit tests pass" → runtime behavior is correct
+  ✗  "preview deploy smoke passes" → production deploy is ready
+
+════════════════════════════════════════════════════════════════════════
+END OF DOCUMENT
+════════════════════════════════════════════════════════════════════════

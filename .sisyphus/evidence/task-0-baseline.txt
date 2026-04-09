@@ -1,0 +1,74 @@
+## Task 0: Baseline State
+Date: Fri Apr 10 2026
+
+### Dependency Versions
+- next: 16.2.2
+- @opennextjs/cloudflare: ^1.18.0
+- wrangler: ^4.79.0
+
+### Build Commands
+- pnpm build:cf           — official Cloudflare build (CF_APPLY_GENERATED_PATCH=true required; plain invocation = dry-run exit 12)
+- pnpm build:cf:turbo     — Cloudflare comparison/debug build (not default path)
+- pnpm preview:cf         — local Cloudflare preview (page-level proof boundary)
+- pnpm deploy:cf          — Cloudflare production deploy
+- pnpm smoke:cf:preview   — local page/redirect/cookie/header smoke
+- pnpm smoke:cf:preview:strict — diagnostic strict smoke (includes /api/health)
+- pnpm smoke:cf:deploy -- --base-url <url> — final smoke against real deployed URL
+
+### Cloudflare Scripts Inventory (scripts/cloudflare/)
+- alias-shim-exception-contract.mjs
+- build-phase5-worker.mjs
+- build-phase6-workers.mjs
+- build-webpack.mjs
+- check-alias-shim-contract.mjs
+- check-generated-artifact-log.mjs
+- check-preview-degraded-contract.mjs
+- check-server-actions-secret-contract.mjs
+- deploy-phase6.mjs
+- deployed-preview-proof.sh
+- generated-artifact-exception-contract.mjs
+- patch-prefetch-hints-manifest.mjs   ← key patch: 5 patch points; contains hardcoded absolute path /Users/Data/Warehouse/Pipe/tianze-website/
+- phase-topology-contract.mjs
+- preview-degraded-contract.mjs
+- preview-preflight.sh
+- preview-proof.sh
+- preview-smoke.mjs
+- server-actions-secret-contract.mjs
+- shims/           (subdirectory)
+- stubs/           (subdirectory)
+- sync-server-actions-key.mjs
+
+### open-next.config.ts Key Facts
+- Default worker: minify = false
+- Split functions enabled: 3 API workers (apiLead, apiOps, apiWhatsapp)
+- All split workers: minify = false
+- Worker topology (phase6): 5 workers total
+  1. gateway        — routes requests to split workers
+  2. web            — main Next.js app (default OpenNext worker)
+  3. apiLead        — /api/contact, /api/inquiry, /api/subscribe, /api/verify-turnstile, /api/health
+  4. apiOps         — /api/cache/invalidate, /api/csp-report
+  5. apiWhatsapp    — /api/whatsapp/send, /api/whatsapp/webhook
+- incrementalCache: r2IncrementalCache
+- queue: doQueue
+- tagCache: d1NextTagCache
+
+### Existing Documentation (docs/guides/ — Cloudflare-related)
+- CLOUDFLARE-ISSUE-TAXONOMY.md
+- VINEXT_CLOUDFLARE_MIGRATION_BRIEF.md
+- CANONICAL-TRUTH-REGISTRY.md
+- RELEASE-PROOF-RUNBOOK.md
+- QUALITY-PROOF-LEVELS.md
+- RELEASE-SIGNOFF.md
+- quality-guardrail-gap-table.md
+
+### Known Deviations (pre-audit summary)
+1. patch-prefetch-hints-manifest.mjs — repo-local post-build patch; fixes getMiddlewareManifest() dynamic require
+   regression introduced in next@16.2.2 + @opennextjs/cloudflare@1.18.0; contains hardcoded absolute
+   path /Users/Data/Warehouse/Pipe/tianze-website/ (deviation from official CF build)
+2. build-webpack.mjs — wraps opennextjs-cloudflare with Webpack; official CF build now calls this
+   script, not the stock opennextjs-cloudflare CLI directly
+3. build-phase6-workers.mjs — custom phase6 topology build script; reads phase-topology-contract.mjs;
+   must stay in sync with contract (known drift risk per AGENTS.md §24)
+4. All workers: minify = false — intentional; no clean build+preview+deploy proof with minify=true
+   exists yet (per AGENTS.md §5 and open-next.config.ts comments)
+5. CF_APPLY_GENERATED_PATCH=true required for real build — plain pnpm build:cf exits 12 (dry-run)
