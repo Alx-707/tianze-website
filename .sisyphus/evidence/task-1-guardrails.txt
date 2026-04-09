@@ -1,0 +1,154 @@
+## Task 1: Guardrails — Explicit Scope Exclusions
+Date: Fri Apr 10 2026
+Plan: .sisyphus/plans/cloudflare-official-alignment.md
+Task: Wave 1 / Task 1
+
+---
+
+## 1. Purpose
+
+This file defines what is NOT in scope for the Cloudflare Official Alignment
+Series. It exists to prevent scope creep, proof overclaiming, and accidental
+breakage of stable systems while the alignment work proceeds.
+
+All tasks in this series MUST check against this file before making changes.
+
+---
+
+## 2. Hard Prohibitions (Do Not Touch — Ever In This Series)
+
+The following are explicitly out of scope and must not be modified, even if
+they appear to be obstacles to official alignment:
+
+### 2.1 phase6 / Split-Worker Topology
+- Do NOT rewrite the phase6 worker topology.
+- Do NOT regroup single/multi worker configurations.
+- Do NOT modify `scripts/cloudflare/build-phase6-workers.mjs` for alignment reasons.
+- Do NOT modify `scripts/cloudflare/deploy-phase6.mjs` for alignment reasons.
+- Do NOT modify `scripts/cloudflare/phase-topology-contract.mjs`.
+- Rationale: phase6 is a separate, fragile system with its own proof requirements
+  (AGENTS.md rules #22, #24). Alignment work targets the default worker path only.
+
+### 2.2 middleware → proxy Migration
+- Do NOT migrate `src/middleware.ts` to `src/proxy.ts`.
+- The current runtime entry is `src/middleware.ts` by design (AGENTS.md rule #4).
+- Rationale: `proxy.ts` blocks `pnpm build:cf`. This migration is a long-term
+  deferred item, not part of the alignment series.
+
+### 2.3 minify
+- Do NOT re-enable `minify: true` on any worker configuration in `open-next.config.ts`.
+- This applies to split functions and the default worker alike.
+- Rationale: AGENTS.md rule #5 requires a full rebuild + preview + deployed smoke
+  before minify can be re-enabled. This series does not include that verification scope.
+
+### 2.4 Major Version Upgrades
+- Do NOT upgrade Next.js, @opennextjs/cloudflare, or Wrangler as part of this series.
+- Rationale: Version upgrades carry independent regression risk and require their
+  own proof chains. The alignment series works within the current version baseline.
+
+### 2.5 Platform Switch
+- Do NOT switch deployment platforms or introduce new deployment targets.
+- Rationale: Out of scope by definition.
+
+### 2.6 Source File Modifications (Task 1 + Task 2)
+- Tasks 1 and 2 are read-only / documentation tasks.
+- Do NOT modify any source files, scripts, configs, or build artifacts in Tasks 1–2.
+- Rationale: Wave 1 is baseline + audit only; changes begin in Wave 2.
+
+---
+
+## 3. Soft Deferrals (Not Prohibited, But Not In This Series)
+
+The following are valid future work but out of scope for the alignment series:
+
+- TypeScript 6 upgrade (AGENTS.md rule #18 — wait for stable proof chain)
+- Re-enabling minify after verified smoke proof
+- phase6 preview-to-production hardening
+- Contact API worker path cleanup (AGENTS.md rule #25)
+- Multi-site structure (AGENTS.md rule #17)
+- Content asset cleanup (AGENTS.md rule #21)
+- LangUpdater / html[lang] refactor beyond what's already done (AGENTS.md rule #7)
+
+---
+
+## 4. Proof Overclaim Prevention Rules
+
+These rules apply to ALL tasks in this series. Violating them constitutes a
+false proof claim, which is worse than no proof claim.
+
+### Rule P1: Build Pass ≠ Page Routing Proven
+- `pnpm build:cf` passing does NOT prove that Cloudflare page routing works.
+- Do not write "CF is working" based on build output alone.
+- Minimum for page routing: LOCAL_PAGE_PROOF (`pnpm smoke:cf:preview`).
+
+### Rule P2: Local Preview Failure ≠ Production Regression
+- A failure in `pnpm smoke:cf:preview` or `pnpm smoke:cf:preview:strict` does
+  NOT automatically mean the deployed site is broken.
+- First classify the failure per AGENTS.md rule #20 (four-class taxonomy):
+  - Platform entry / local runtime problem
+  - Generated artifact compatibility problem
+  - Current site runtime regression
+  - Final deployed behavior problem
+- Only DEPLOYED_SMOKE_PROOF can prove or disprove deployed behavior.
+
+### Rule P3: /api/health Requires Deployed Smoke
+- `/api/health` 200 from local preview (`smoke:cf:preview:strict`) is a signal only.
+- Definitive `/api/health` proof requires `smoke:cf:deploy -- --base-url <url>`.
+- Do not claim API health is proven from local preview.
+
+### Rule P4: Patch-Active Build Is Weaker Proof
+- If `patch-prefetch-hints-manifest.mjs` or any equivalent patch script runs
+  during or after `build:cf`, the proof level is PATCHED_BUILD_PROOF, not BUILD_PROOF.
+- This must be stated explicitly in any proof claim.
+
+### Rule P5: No Silent Fail-Open
+- Do not mask build failures, patch failures, or smoke failures as warnings.
+- If a step fails, it fails. Report it as failure.
+- Do not introduce `|| true` or equivalent to make CI green while hiding real issues.
+
+### Rule P6: No Inferring Official Parity Without Evidence
+- Do not claim the project has reached a given alignment level (L0–L3) without
+  citing specific code or documentation evidence.
+- "It looks like it should work" is not evidence.
+- Evidence = file content, script output, smoke result, or upstream changelog.
+
+### Rule P7: Green Build Does Not Substitute for Smoke
+- A green `pnpm build:cf` does not substitute for `smoke:cf:preview`.
+- A green `smoke:cf:preview` does not substitute for `smoke:cf:deploy`.
+- Each proof level must be independently earned.
+
+### Rule P8: Do Not Collapse Proof Levels
+- Do not write "everything is proven" or "fully aligned" without specifying
+  which proof level was earned for which behavior.
+- Use the notation from task-1-rubric-proof.txt:
+  BUILD_PROOF / LOCAL_PAGE_PROOF / LOCAL_STRICT_PROOF / DEPLOYED_SMOKE_PROOF / PATCHED_BUILD_PROOF
+
+---
+
+## 5. Plan Integrity Rules
+
+These rules protect the plan file itself:
+
+- NEVER modify `.sisyphus/plans/cloudflare-official-alignment.md`.
+- ALWAYS APPEND to notepad files — never overwrite or use Edit on notepads.
+- Evidence files (this directory) may be created new or appended; do not edit
+  previously written evidence sections.
+- If a task produces a finding that contradicts a prior evidence file, write a
+  new evidence file (e.g. `task-2-gap-audit.txt`) rather than editing task-1 files.
+
+---
+
+## 6. Quick Reference: Prohibited Actions Checklist
+
+Before making any change in this series, verify:
+
+  [ ] Not touching phase6 topology, workers, or phase6 scripts
+  [ ] Not migrating middleware → proxy
+  [ ] Not re-enabling minify
+  [ ] Not upgrading Next.js / OpenNext / Wrangler
+  [ ] Not claiming BUILD_PROOF as page routing proof
+  [ ] Not claiming LOCAL_PAGE_PROOF as /api/health proof
+  [ ] Not claiming local preview failure as deployed regression
+  [ ] Not running builds in Wave 1 Tasks 1–2 (read-only tasks)
+  [ ] Not modifying the plan file
+  [ ] Not overwriting notepad files (append only)
