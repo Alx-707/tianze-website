@@ -105,15 +105,12 @@
   - 同步搜索并更新 4 个文件
   - 至少执行一次 `pnpm validate:translations`
 
-### 3.1 当前已经支持站点消息覆盖，不要把第二站专属文案继续塞进共享消息
-- 截至 2026-04-01，本仓库当前消息真相已经分成两层：
-  - 共享基础消息：`messages/{locale}/{critical,deferred}.json`
-  - 站点覆盖消息：`src/sites/<site-key>/messages/<locale>/{critical,deferred}.json`
-- 当前第二站试装键值是：`tianze-equipment`
+### 3.1 当前消息真相以共享 split bundles 为准
+- 截至当前收缩阶段，本仓库运行时消息真相以共享 split bundles 为准：
+  - `messages/{locale}/{critical,deferred}.json`
 - 默认动作：
-  - 所有站都要继承的文案，改共享基础消息
-  - 只有第二站或未来某个站点要改的文案，优先改对应 `src/sites/**/messages/**`
-  - 不要为了图省事，把第二站专属标题、SEO、联系页文案直接写回共享基础消息
+  - 所有当前生效文案先改共享基础消息
+  - 不要重新引入站点级运行时消息覆盖层
 
 ### 4. 当前双平台部署下，优先保留 `src/middleware.ts`
 - 截至 2026-03-19，本仓库为了兼容当前 Cloudflare 链路，运行时入口仍保留为 `src/middleware.ts`。
@@ -223,6 +220,7 @@
   - 在早先基线 `next@16.2.0` + `@opennextjs/cloudflare@1.17.3` 下，`pnpm build:cf` 和 `pnpm build:cf:turbo` 都能通过；
   - 但这不代表本地 Cloudflare 页面证明天然就没问题：Next 升到 `16.2.2` 后，即使 `pnpm build:cf` 仍然通过，生成产物里的 `getMiddlewareManifest()` 也可能退回动态 `require(this.middlewareManifestPath)`，从而让 stock preview 的页面路由重新 500；
   - 当前仓库已经把这个兼容修复收敛到 `scripts/cloudflare/patch-prefetch-hints-manifest.mjs`：`pnpm build:cf` 结束后会补丁默认 handler，把 middleware manifest 改为走 `_loadmanifestexternal.loadManifest(...)`；
+- 截至当前 official-alignment 收口后，只要剩余 generated-artifact compat patch 仍在，当前更可信的 Cloudflare build / preview 证明模式仍然是 `CF_APPLY_GENERATED_PATCH=true pnpm build:cf` 与 `CF_APPLY_GENERATED_PATCH=true pnpm preview:cf`；不要把 plain `pnpm build:cf` 当成当前正式 proof 命令。
   - 这层补丁已经在本地干净构建下重新验证过：`/en`、`/zh`、`/en/contact`、`/zh/contact` 页面恢复 200，`pnpm smoke:cf:preview` 恢复通过；
   - 改成 `wrangler dev --env preview --no-bundle` 后，本地又可能卡在 `cloudflare/images.js` 模块缺失。
 - 当前默认动作：
@@ -255,20 +253,15 @@
 ### 15. 多站点 base URL 真相必须按站点显式收口
 - 当前仓库已经确认：第二站不能默认继承全局 `NEXT_PUBLIC_BASE_URL`，否则 canonical、OG URL、sitemap、结构化数据、Turnstile host 校验都可能继续吐主站域名。
 - 默认动作：
-  - 站点对外 URL 先看 `src/sites/**` 的默认值；
+  - 站点对外 URL 先看 `src/config/single-site.ts` 的默认值；
   - 当前激活站点如需覆盖，优先用 `NEXT_PUBLIC_SITE_URL`；
   - 如果要给某个站点长期单独配置，使用该站点专属 env，而不是继续偷用全局主站 URL；
   - 任何改动后至少验证 metadata、sitemap/structured data 与联系页标题没有跨站串值。
 
-### 16. 当前已经存在非默认站点验证入口，不要只验证默认站
-- 截至 2026-04-01，本仓库当前已经有：
-  - `NEXT_PUBLIC_SITE_KEY=tianze-equipment`
-  - `pnpm build:site:equipment`
-  - `pnpm start:site:equipment`
-  - `pnpm build:cf:site:equipment`
+### 16. 当前默认验证入口以单站收缩预检为准
 - 默认动作：
-  - 如果改动涉及站点身份、SEO 默认值、消息覆盖、导航、页脚、产品目录或切站逻辑，至少补一次非默认站点验证
-  - 不要只看默认 Tianze 站通过，就宣布多站结构这条线没问题
+  - 如果改动涉及单站身份、SEO 默认值、共享消息、导航、页脚或产品目录，优先跑 `pnpm preflight:site-cutover` 或 `pnpm preflight:site-cutover:strict`
+  - 不要再把第二站试装当作主线结构 proof
 
 ### 17. 当前执行顺序：先吸收，再清理，再试装，最后才上多站结构
 - 当前仓库的默认推进顺序已经固定：
@@ -282,15 +275,14 @@
   - 不要跳过前面的非结构性吸收和单站清理，直接把仓库改成多站壳层
   - 如果有人要求“现在就上多站结构”，先核对当前阶段是否已经完成上面前五步
 
-### 18. 站点身份层当前真相已经进入 `src/sites/**`
-- 当前仓库已经建立站点定义层：
-  - `src/sites/index.ts`
-  - `src/sites/tianze.ts`
-  - `src/sites/tianze/product-catalog.ts`
-  - `src/sites/types.ts`
-- `src/config/paths/site-config.ts`、`src/config/site-facts.ts`、`src/constants/product-catalog.ts`、`src/config/footer-links.ts`、`src/lib/navigation.ts` 现在是兼容包装层，不再是第一真相源。
+### 18. 单站身份层当前真相已经收口到 `src/config/**`
+- 当前仓库的主真相层：
+  - `src/config/single-site.ts`
+  - `src/config/site-types.ts`
+  - `src/config/single-site-product-catalog.ts`
+- `src/config/paths/site-config.ts`、`src/config/site-facts.ts`、`src/constants/product-catalog.ts`、`src/config/footer-links.ts`、`src/lib/navigation.ts` 仍是消费包装层，不再是第一真相源。
 - 默认动作：
-  - 改品牌、联系信息、默认 SEO、导航、页脚、市场结构时，先改 `src/sites/**`
+  - 改品牌、联系信息、默认 SEO、导航、页脚、市场结构时，先改 `src/config/single-site.ts`
   - 不要在兼容包装层重新发明 Tianze 专属真相
 
 ### 19. `/about` 的当前运行时真相不是 MDX
@@ -310,8 +302,8 @@
 - 默认动作：
   - 先说清是哪一类，再说症状
   - 不要把 local preview 的失败直接写成生产事实
-  - 新增品牌、联系信息、社媒、基础 SEO、导航、页脚链接时，优先改 `src/sites/**`
-  - 不要绕过 `src/sites/**` 直接在多个兼容入口里重复写站点信息
+  - 新增品牌、联系信息、社媒、基础 SEO、导航、页脚链接时，优先改 `src/config/single-site.ts`
+  - 不要绕过 `src/config/single-site.ts` 直接在多个兼容入口里重复写站点信息
 
 ### 21. 模板残留默认必须持续清理，不允许重新回流到正式内容
 - `content/config/content.json`、`content/pages/**`、`content/posts/**` 已开始从模板默认值切回 Tianze 真实内容。
@@ -321,7 +313,7 @@
 
 ### 22. phase6 真实 preview 已有一条可运行主路，不要再回到会重复踩坑的旧写法
 - 截至 2026-04-01，本仓库已验证：
-  - `phase6` 真实 preview deploy 在 API token 认证下，`scripts/cloudflare/deploy-phase6.mjs` 必须强制带 `OPEN_NEXT_DEPLOY=true`，否则会掉回 OpenNext 自己的 deploy 包装路径，并卡在 remote R2 cache provisioning；
+  - `phase6` 真实 preview deploy 在 API token 认证下，`scripts/cloudflare/deploy-phase6.mjs` 在 release-proof.sh 中自动设置环境变量 `OPEN_NEXT_DEPLOY_ENV=true`；若手动运行该脚本需显式设置此环境变量，否则会掉回 OpenNext 自己的 deploy 包装路径，并卡在 remote R2 cache provisioning；
   - `phase6` 的 `gateway` 在 preview 环境里引用 `web/api-*` worker 时，必须直接指向带 `-preview` 后缀的真实 worker 名，不能再写成 `service + environment` 组合；
   - `web` / `api-*` 这些 phase6 worker 当前不要再生成 `WORKER_SELF_REFERENCE` service binding；这条绑定会把第一次 preview deploy 卡死在“自引用 worker 尚不存在”的发布时序问题上；
   - `phase6` 下的 `/api/health` 当前稳定做法是由 gateway 直接返回合同化 health 响应；继续穿过 `apiLead` 的完整 Next/OpenNext 运行时，会反复踩到 Cloudflare 侧的 CommonJS / fs 兼容边界。
@@ -339,6 +331,24 @@
   - route 相关测试 helper 优先放到 `src/testing/**` 这类共享测试目录；
   - 不要把“非测试文件”放进 `__tests__`
   - 如果 `truth:check` 报 route 目录孤儿文件，先检查是不是把测试工具放错了位置，不要先怀疑业务路由本身。
+
+### 24. phase6 生成脚本改了拓扑合同后，不要默认 `build-phase6-workers.mjs` 也已经同步
+- 截至 2026-04-09，本仓库已实际踩到两类“接口漂移”：
+  - 同文件还可能继续引用旧常量名 `WORKER_NAME_SUFFIX`，而真实共享真相已经切到 `PHASE_WORKER_NAME_SUFFIX`。
+- 这类问题的危险在于：
+  - 普通 `pnpm build:cf` 可能通过；
+  - 但一到 `pnpm build:cf:phase6` / `deploy-phase6` / 真实 preview proof 才会爆；
+  - 很容易被误判成 Cloudflare / Wrangler / OpenNext 平台问题，其实是 repo 内部脚本没跟上共享合同。
+- 默认动作：
+  - 只要改了 `phase-topology-contract.mjs`、alias/shim 合同、worker 命名规则、route binding 规则，就必须同步审查 `scripts/cloudflare/build-phase6-workers.mjs`；
+  - 至少执行一次 `node --check scripts/cloudflare/build-phase6-workers.mjs`；
+  - 更重要的是执行一次 `pnpm build:cf:phase6`，不要只看 `pnpm build:cf`；
+  - 如果 phase6 线失败，先检查是不是“生成脚本和共享合同漂移”，再去怀疑平台侧回归。
+
+### 25. contact 页面恢复 200，不代表 API 线闭环
+- 截至 2026-04-09，`pnpm proof:cf:preview-deployed` 已通过，`/en/contact` 与 `/zh/contact` 已恢复 200；这说明的是当前站 runtime 回归已修，不说明 API 线已经健康。
+- 这次故障本质上是 `Uncached data was accessed outside of <Suspense>` 加上 Cloudflare runtime 里 `setTimeout()` / Cache Components 的边界问题；有效修法是静态消息 metadata、`getContactCopy()` 去掉 `use cache` / `cacheLife`，以及 `ContactForm` 走 client-only dynamic import。
+- deeper API worker 仍可失败时，继续把它当 generated-artifact / runtime mismatch 技术债，不要把 contact 页恢复误报成 API 闭环。
 
 ### 17. 不要把 contact 这类关键页面的 `loading.tsx` 留成“空骨架”
 - 截至 2026-04-01，本仓库已验证：
