@@ -211,6 +211,11 @@ jobs:
     if: needs.build-and-deploy.outputs.deployment_url != ''
 
     steps:
+    - name: 检出代码
+      uses: actions/checkout@v4
+      with:
+        persist-credentials: false
+
       - name: 等待部署就绪
         run: |
           set -euo pipefail
@@ -242,5 +247,11 @@ jobs:
 
       - name: 健康检查
         run: |
+        set -euo pipefail
+        SMOKE_SCRIPT="./scripts/deploy/post-deploy-smoke.mjs"
+        if [ ! -f "$SMOKE_SCRIPT" ]; then
+          echo "❌ Smoke test script not found: $SMOKE_SCRIPT" >&2
+          exit 1
+        fi
           echo "Cloudflare deployed proof: running final post-deploy smoke against the deployed URL"
-          node scripts/deploy/post-deploy-smoke.mjs --base-url "${{ needs.build-and-deploy.outputs.deployment_url }}"
+                  node "$SMOKE_SCRIPT" --base-url "${{ needs.build-and-deploy.outputs.deployment_url }}"
