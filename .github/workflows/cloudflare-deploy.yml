@@ -39,7 +39,7 @@ jobs:
       deployment_url: ${{ steps.deploy.outputs.deployment-url }}
 
     steps:
-      - name: 检出代码
+      
         uses: actions/checkout@v4
         with:
           persist-credentials: false
@@ -211,10 +211,10 @@ jobs:
     if: needs.build-and-deploy.outputs.deployment_url != ''
 
     steps:
-    - name: 检出代码
-      uses: actions/checkout@v4
-      with:
-        persist-credentials: false
+      - name: 检出代码
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: 等待部署就绪
         run: |
