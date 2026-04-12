@@ -121,6 +121,7 @@
     "smoke:cf:deploy": "node scripts/deploy/post-deploy-smoke.mjs",
     "build:cf:phase5": "pnpm build:cf && node scripts/cloudflare/build-phase5-worker.mjs",
     "build:cf:phase6": "pnpm build:cf && node scripts/cloudflare/build-phase6-workers.mjs",
+    "preview:preflight:cf": "pnpm type-check && pnpm lint:check && pnpm validate:translations && pnpm validate:config",
     "preview:cf": "pnpm clean:next-artifacts && pnpm build:cf && pnpm exec opennextjs-cloudflare preview --env preview",
     "preview:cf:wrangler": "pnpm clean:next-artifacts && pnpm build:cf && pnpm exec wrangler dev --env preview",
     "deploy:cf": "pnpm clean:next-artifacts && pnpm build:cf && pnpm exec wrangler deploy --env production",
