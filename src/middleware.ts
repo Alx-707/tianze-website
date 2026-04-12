@@ -196,6 +196,10 @@ function tryHandleInvalidLocalePrefix(
 }
 
 export default function middleware(request: NextRequest) {
+  // /api/* short-circuit: bypass intl/security middleware for internal API routes
+  if (request.nextUrl.pathname.startsWith("/api/")) {
+    return NextResponse.next();
+  }
   const nonce = generateNonce();
   const trustedClientIP = getTrustedClientIPForInternalHeader(request);
 
