@@ -73,21 +73,38 @@ jobs:
       - name: 安装 Playwright Chromium
         run: pnpm exec playwright install --with-deps chromium
 
-      - name: 运行统一发布校验
-        run: pnpm release:verify
+      - name: Preview 预检（preview:preflight:cf）
+        if: inputs.environment == 'preview'
+        run: pnpm preview:preflight:cf
         env:
           CI: true
           NODE_ENV: production
           # Preview deployments: allow degraded mode for services not yet configured
-          ALLOW_MEMORY_RATE_LIMIT: ${{ inputs.environment == 'preview' && 'true' || '' }}
-          ALLOW_MEMORY_IDEMPOTENCY: ${{ inputs.environment == 'preview' && 'true' || '' }}
-          RATE_LIMIT_PEPPER: ${{ secrets.RATE_LIMIT_PEPPER || (inputs.environment == 'preview' && 'preview-placeholder-pepper-value-32ch' || '') }}
-          NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: ${{ secrets.NEXT_SERVER_ACTIONS_ENCRYPTION_KEY || (inputs.environment == 'preview' && 'preview-placeholder-key-0123456789ab' || '') }}
-          TURNSTILE_SECRET_KEY: ${{ secrets.TURNSTILE_SECRET_KEY || (inputs.environment == 'preview' && '1x0000000000000000000000000000000AA' || '') }}
-          NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${{ secrets.NEXT_PUBLIC_TURNSTILE_SITE_KEY || (inputs.environment == 'preview' && '1x00000000000000000000AA' || '') }}
-          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY || (inputs.environment == 'preview' && 're_preview_placeholder' || '') }}
-          AIRTABLE_API_KEY: ${{ secrets.AIRTABLE_API_KEY || (inputs.environment == 'preview' && 'pat_preview_placeholder' || '') }}
-          AIRTABLE_BASE_ID: ${{ secrets.AIRTABLE_BASE_ID || (inputs.environment == 'preview' && 'app_preview_placeholder' || '') }}
+          ALLOW_MEMORY_RATE_LIMIT: 'true'
+          ALLOW_MEMORY_IDEMPOTENCY: 'true'
+          RATE_LIMIT_PEPPER: ${{ secrets.RATE_LIMIT_PEPPER || 'preview-placeholder-pepper-value-32ch' }}
+          NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: ${{ secrets.NEXT_SERVER_ACTIONS_ENCRYPTION_KEY || 'preview-placeholder-key-0123456789ab' }}
+          TURNSTILE_SECRET_KEY: ${{ secrets.TURNSTILE_SECRET_KEY || '1x0000000000000000000000000000000AA' }}
+          NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${{ secrets.NEXT_PUBLIC_TURNSTILE_SITE_KEY || '1x00000000000000000000AA' }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY || 're_preview_placeholder' }}
+          AIRTABLE_API_KEY: ${{ secrets.AIRTABLE_API_KEY || 'pat_preview_placeholder' }}
+          AIRTABLE_BASE_ID: ${{ secrets.AIRTABLE_BASE_ID || 'app_preview_placeholder' }}
+          UPSTASH_REDIS_REST_URL: ${{ secrets.UPSTASH_REDIS_REST_URL }}
+          UPSTASH_REDIS_REST_TOKEN: ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}
+
+      - name: Production 发布校验（release:verify）
+        if: inputs.environment == 'production'
+        run: pnpm release:verify
+        env:
+          CI: true
+          NODE_ENV: production
+          RATE_LIMIT_PEPPER: ${{ secrets.RATE_LIMIT_PEPPER }}
+          NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: ${{ secrets.NEXT_SERVER_ACTIONS_ENCRYPTION_KEY }}
+          TURNSTILE_SECRET_KEY: ${{ secrets.TURNSTILE_SECRET_KEY }}
+          NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${{ secrets.NEXT_PUBLIC_TURNSTILE_SITE_KEY }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          AIRTABLE_API_KEY: ${{ secrets.AIRTABLE_API_KEY }}
+          AIRTABLE_BASE_ID: ${{ secrets.AIRTABLE_BASE_ID }}
           UPSTASH_REDIS_REST_URL: ${{ secrets.UPSTASH_REDIS_REST_URL }}
           UPSTASH_REDIS_REST_TOKEN: ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}
 
@@ -104,7 +121,7 @@ jobs:
         env:
           CI: true
           NODE_ENV: production
-          # Preview deployments: same degraded overrides as the verify step (prebuild re-runs validate:config)
+          # Preview deployments: same degraded overrides as the preflight step (prebuild re-runs validate:config)
           ALLOW_MEMORY_RATE_LIMIT: ${{ inputs.environment == 'preview' && 'true' || '' }}
           ALLOW_MEMORY_IDEMPOTENCY: ${{ inputs.environment == 'preview' && 'true' || '' }}
           RATE_LIMIT_PEPPER: ${{ secrets.RATE_LIMIT_PEPPER || (inputs.environment == 'preview' && 'preview-placeholder-pepper-value-32ch' || '') }}
