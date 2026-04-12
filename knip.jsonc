@@ -3,6 +3,8 @@
   // Disable git-hook plugins to keep knip working in git worktrees
   // where `.git` is a file (no `.git/hooks/*` directory).
   "lefthook": false,
+  // GitHub Actions YAML uses ${{ ... || ... }} expressions that knip cannot parse.
+  "github-actions": false,
   "husky": false,
   // 将 Next.js App Router 入口、配置与测试文件标记为入口，减少文件系统路由带来的误报。
   "entry": [
