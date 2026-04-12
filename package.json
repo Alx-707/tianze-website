@@ -255,7 +255,7 @@
       "serialize-javascript@<=7.0.2": ">=7.0.3",
       "webpack@>=5.49.0 <5.104.1": ">=5.104.1",
       "picomatch@>=4.0.0 <4.0.4": ">=4.0.4",
-        "next-intl@<4.9.1": ">=4.9.1"
+      "next-intl@<4.9.1": ">=4.9.1"
     },
     "onlyBuiltDependencies": [
       "@tailwindcss/oxide",
