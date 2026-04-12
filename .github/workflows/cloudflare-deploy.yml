@@ -88,8 +88,8 @@ jobs:
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY || (inputs.environment == 'preview' && 're_preview_placeholder' || '') }}
           AIRTABLE_API_KEY: ${{ secrets.AIRTABLE_API_KEY || (inputs.environment == 'preview' && 'pat_preview_placeholder' || '') }}
           AIRTABLE_BASE_ID: ${{ secrets.AIRTABLE_BASE_ID || (inputs.environment == 'preview' && 'app_preview_placeholder' || '') }}
-                  UPSTASH_REDIS_REST_URL: ${{ secrets.UPSTASH_REDIS_REST_URL }}
-                          UPSTASH_REDIS_REST_TOKEN: ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}
+          UPSTASH_REDIS_REST_URL: ${{ secrets.UPSTASH_REDIS_REST_URL }}
+          UPSTASH_REDIS_REST_TOKEN: ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}
 
       - name: 构建（Cloudflare Workers）
         id: build
@@ -114,8 +114,8 @@ jobs:
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY || (inputs.environment == 'preview' && 're_preview_placeholder' || '') }}
           AIRTABLE_API_KEY: ${{ secrets.AIRTABLE_API_KEY || (inputs.environment == 'preview' && 'pat_preview_placeholder' || '') }}
           AIRTABLE_BASE_ID: ${{ secrets.AIRTABLE_BASE_ID || (inputs.environment == 'preview' && 'app_preview_placeholder' || '') }}
-                  UPSTASH_REDIS_REST_URL: ${{ secrets.UPSTASH_REDIS_REST_URL }}
-                          UPSTASH_REDIS_REST_TOKEN: ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}
+          UPSTASH_REDIS_REST_URL: ${{ secrets.UPSTASH_REDIS_REST_URL }}
+            UPSTASH_REDIS_REST_TOKEN: ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}
 
       - name: 阻断：检测 next-intl MISSING_MESSAGE
         run: |
