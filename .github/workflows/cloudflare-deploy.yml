@@ -16,14 +16,6 @@ on:
         options:
           - preview
           - production
-      deployment_mode:
-        description: '部署模式'
-        required: true
-        default: 'single'
-        type: choice
-        options:
-          - single
-          - phase6
 
 concurrency:
   group: ${{ github.workflow }}-${{ inputs.environment }}
@@ -73,8 +65,14 @@ jobs:
       - name: 安装 Playwright Chromium
         run: pnpm exec playwright install --with-deps chromium
 
-      - name: 运行统一发布校验
-        run: pnpm release:verify
+      - name: 运行环境对应的证明链
+        run: |
+          set -euo pipefail
+          if [ "${{ inputs.environment }}" = "preview" ]; then
+            pnpm preview:preflight:cf
+          else
+            pnpm release:verify
+          fi
         env:
           CI: true
           NODE_ENV: production
@@ -93,11 +91,7 @@ jobs:
         id: build
         run: |
           set -euo pipefail
-          if [ "${{ inputs.deployment_mode }}" = "phase6" ]; then
-            pnpm build:cf:phase6 2>&1 | tee cf_build.log
-          else
-            pnpm build:cf 2>&1 | tee cf_build.log
-          fi
+          pnpm build:cf 2>&1 | tee cf_build.log
           echo "log-path=$(pwd)/cf_build.log" >> "$GITHUB_OUTPUT"
         env:
           CI: true
@@ -135,26 +129,13 @@ jobs:
         id: deploy
         run: |
           set -euo pipefail
-          if [ "${{ inputs.deployment_mode }}" = "phase6" ]; then
-            DEPLOY_OUTPUT=$(node scripts/cloudflare/deploy-phase6.mjs --env ${{ inputs.environment }} 2>&1) || {
-              echo "❌ Phase6 部署失败"
-              echo "$DEPLOY_OUTPUT"
-              exit 1
-            }
-          else
-            DEPLOY_OUTPUT=$(pnpm exec opennextjs-cloudflare deploy --env ${{ inputs.environment }} 2>&1) || {
-              echo "❌ 部署失败"
-              echo "$DEPLOY_OUTPUT"
-              exit 1
-            }
-          fi
+          DEPLOY_OUTPUT=$(pnpm exec opennextjs-cloudflare deploy --env ${{ inputs.environment }} 2>&1) || {
+            echo "❌ 部署失败"
+            echo "$DEPLOY_OUTPUT"
+            exit 1
+          }
           echo "$DEPLOY_OUTPUT"
-          # 提取部署 URL — phase6 取最后一个 workers.dev URL（= gateway），single 取第一个
-          if [ "${{ inputs.deployment_mode }}" = "phase6" ]; then
-            DEPLOY_URL=$(echo "$DEPLOY_OUTPUT" | grep -oP 'https://[^\s]+\.workers\.dev' | tail -1 || echo "")
-          else
-            DEPLOY_URL=$(echo "$DEPLOY_OUTPUT" | grep -oP 'https://[^\s]+\.workers\.dev' | head -1 || echo "")
-          fi
+          DEPLOY_URL=$(echo "$DEPLOY_OUTPUT" | grep -oP 'https://[^\s]+\.workers\.dev' | head -1 || echo "")
           if [ -z "$DEPLOY_URL" ]; then
             if [ "${{ inputs.environment }}" = "production" ]; then
               DEPLOY_URL="https://tianze-pipe.com"
@@ -190,6 +171,9 @@ jobs:
     if: needs.build-and-deploy.outputs.deployment_url != ''
 
     steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
       - name: 等待部署就绪
         run: |
           set -euo pipefail
@@ -221,5 +205,12 @@ jobs:
 
       - name: 健康检查
         run: |
+          set -euo pipefail
           echo "Cloudflare deployed proof: running final post-deploy smoke against the deployed URL"
-          node scripts/deploy/post-deploy-smoke.mjs --base-url "${{ needs.build-and-deploy.outputs.deployment_url }}"
+          if [ ! -f ./scripts/deploy/post-deploy-smoke.mjs ]; then
+            echo "❌ Missing ./scripts/deploy/post-deploy-smoke.mjs in workflow checkout" >&2
+            ls -la ./scripts || true
+            ls -la ./scripts/deploy || true
+            exit 1
+          fi
+          node ./scripts/deploy/post-deploy-smoke.mjs --base-url "${{ needs.build-and-deploy.outputs.deployment_url }}"
