@@ -16,10 +16,10 @@ export interface RateLimitStore {
   /**
    * Increment the counter for a key and return the new count
    * @param key - The rate limit key (e.g., IP address)
-   * @param ttlSeconds - Time-to-live in seconds
+   * @param windowMs - Window size in milliseconds
    * @returns The new count after increment
    */
-  increment(key: string, ttlSeconds: number): Promise<RateLimitEntry>;
+  increment(key: string, windowMs: number): Promise<RateLimitEntry>;
 
   /**
    * Get the current count for a key
@@ -44,10 +44,10 @@ class RedisRateLimitStore implements RateLimitStore {
     this.token = token;
   }
 
-  async increment(key: string, ttlSeconds: number): Promise<RateLimitEntry> {
+  async increment(key: string, windowMs: number): Promise<RateLimitEntry> {
     const pipeline = [
       ["INCR", key],
-      ["EXPIRE", key, ttlSeconds.toString()],
+      ["PTTL", key],
     ];
 
     const response = await fetch(`${this.url}/pipeline`, {
@@ -69,7 +69,15 @@ class RedisRateLimitStore implements RateLimitStore {
     }
 
     const data = await response.json();
-    const count = data.result?.[0];
+    const [countResult, ttlResult] = Array.isArray(data.result)
+      ? data.result
+      : [];
+    const count =
+      typeof countResult?.result === "number"
+        ? countResult.result
+        : countResult;
+    let ttlMs =
+      typeof ttlResult?.result === "number" ? ttlResult.result : ttlResult;
 
     if (typeof count !== "number") {
       throw new Error(
@@ -77,7 +85,29 @@ class RedisRateLimitStore implements RateLimitStore {
       );
     }
 
-    const expiresAt = Date.now() + ttlSeconds * 1000;
+    if (count === 1 || typeof ttlMs !== "number" || ttlMs < 0) {
+      const expireResponse = await fetch(`${this.url}/pipeline`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${this.token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify([["PEXPIRE", key, windowMs.toString()]]),
+      });
+
+      if (!expireResponse.ok) {
+        logger.error(
+          `[Rate Limit] Upstash PEXPIRE failed: ${expireResponse.statusText}`,
+        );
+        throw new Error(
+          `Upstash rate limit operation failed: ${expireResponse.status}`,
+        );
+      }
+
+      ttlMs = windowMs;
+    }
+
+    const expiresAt = Date.now() + ttlMs;
     return { count, expiresAt };
   }
 
@@ -100,7 +130,23 @@ class RedisRateLimitStore implements RateLimitStore {
 
     const data = await response.json();
     const count = parseInt(data.result || "0", 10);
-    const expiresAt = Date.now() + 60 * 1000; // Conservative: assume 60s TTL
+
+    const ttlResponse = await fetch(`${this.url}/pttl/${key}`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${this.token}`,
+      },
+    });
+
+    if (!ttlResponse.ok) {
+      throw new Error(
+        `[Rate Limit] Upstash pttl failed: ${ttlResponse.statusText}`,
+      );
+    }
+
+    const ttlData = await ttlResponse.json();
+    const ttlMs = Math.max(0, Number(ttlData.result) || 0);
+    const expiresAt = Date.now() + ttlMs;
     return { count, expiresAt };
   }
 
@@ -126,15 +172,17 @@ class RedisRateLimitStore implements RateLimitStore {
 class MemoryRateLimitStore implements RateLimitStore {
   private store = new Map<string, RateLimitEntry>();
 
-  increment(key: string, ttlSeconds: number): Promise<RateLimitEntry> {
+  increment(key: string, windowMs: number): Promise<RateLimitEntry> {
     const now = Date.now();
-    const expiresAt = now + ttlSeconds * 1000;
+    const expiresAt = now + windowMs;
 
     const entry = this.store.get(key);
     if (entry && entry.expiresAt > now) {
       entry.count += 1;
-      entry.expiresAt = expiresAt;
-      return Promise.resolve({ count: entry.count, expiresAt });
+      return Promise.resolve({
+        count: entry.count,
+        expiresAt: entry.expiresAt,
+      });
     }
 
     const newEntry = { count: 1, expiresAt };
@@ -156,7 +204,13 @@ class MemoryRateLimitStore implements RateLimitStore {
   }
 }
 
-export { MemoryRateLimitStore };
+let memoryStoreWarningLogged = false;
+
+export function resetRateLimitStoreWarnings(): void {
+  memoryStoreWarningLogged = false;
+}
+
+export { MemoryRateLimitStore, RedisRateLimitStore };
 
 /**
  * Factory function to create the appropriate rate limit store
@@ -193,6 +247,9 @@ export function createRateLimitStore(): RateLimitStore {
     );
   }
 
-  logger.info("[Rate Limit] Using in-memory store (development only)");
+  if (!memoryStoreWarningLogged) {
+    logger.warn("[Rate Limit] Using in-memory store (development only)");
+    memoryStoreWarningLogged = true;
+  }
   return new MemoryRateLimitStore();
 }

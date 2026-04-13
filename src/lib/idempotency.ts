@@ -158,11 +158,6 @@ interface ExistingEntryContext {
   store: IdempotencyStore;
 }
 
-interface ClaimContext {
-  ttlMs: number;
-  store: IdempotencyStore;
-}
-
 /**
  * Handle the case where an existing entry is found (stored or in-flight).
  *
@@ -180,10 +175,7 @@ function handleExistingEntry(
 ): NextResponse | Promise<NextResponse> | null {
   const { fingerprint, store } = context;
 
-  if (
-    existing.status !== "pending" &&
-    inFlightFingerprints.get(idempotencyKey) !== fingerprint
-  ) {
+  if (existing.status !== "pending" && existing.fingerprint !== fingerprint) {
     return NextResponse.json(
       {
         success: false,
@@ -220,25 +212,24 @@ function handleExistingEntry(
 async function claimIdempotencyKeyAtomic(
   idempotencyKey: string,
   fingerprint: string,
-  context: ClaimContext,
+  context: { store: IdempotencyStore; ttlMs: number },
 ): Promise<boolean> {
-  const { ttlMs, store } = context;
+  const { store, ttlMs } = context;
   const now = Date.now();
-  const existing = await store.get(idempotencyKey);
-  if (!existing) {
-    await store.set(
-      idempotencyKey,
-      {
-        status: "pending",
-        createdAt: now,
-        expiresAt: now + ttlMs,
-      },
-      Math.ceil(ttlMs / 1000),
-    );
+  const claimed = await store.setIfNotExists(
+    idempotencyKey,
+    {
+      status: "pending",
+      fingerprint,
+      createdAt: now,
+      expiresAt: now + ttlMs,
+    },
+    ttlMs,
+  );
+  if (claimed) {
     inFlightFingerprints.set(idempotencyKey, fingerprint);
-    return true;
   }
-  return false;
+  return claimed;
 }
 
 /**
@@ -274,8 +265,8 @@ async function handleWithIdempotencyKey<T>(
   // Attempt to claim the key (atomic SETNX)
   // FIXED: Call site 2 — KEEP `await`, PASS context object
   const claimed = await claimIdempotencyKeyAtomic(idempotencyKey, fingerprint, {
-    ttlMs,
     store,
+    ttlMs,
   });
 
   if (!claimed) {

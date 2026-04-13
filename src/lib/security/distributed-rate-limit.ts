@@ -23,6 +23,7 @@ import {
   type RateLimitStore,
   MemoryRateLimitStore,
   createRateLimitStore,
+  resetRateLimitStoreWarnings,
 } from "@/lib/security/stores/rate-limit-store";
 
 // Rate limit configuration per endpoint
@@ -293,4 +294,5 @@ export function cleanupRateLimitStore(): void {
 export function resetRateLimitStore(): void {
   rateLimitStore = null;
   rateLimitQueue.clear();
+  resetRateLimitStoreWarnings();
 }

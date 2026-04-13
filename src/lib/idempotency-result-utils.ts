@@ -6,9 +6,8 @@
  */
 
 import { logger } from "@/lib/logger";
-import { DEFAULT_TTL_MS } from "@/lib/idempotency-utils";
+import { DEFAULT_TTL_MS, type IdempotentResult } from "@/lib/idempotency-utils";
 import type { IdempotencyStore } from "@/lib/security/stores/idempotency-store";
-import type { IdempotentResult } from "@/lib/idempotency";
 
 /** Tracks the fingerprint associated with each in-flight key */
 const inFlightFingerprints = new Map<string, string>();
@@ -71,10 +70,7 @@ export async function getStoredIdempotentResult<T>(
     return null;
   }
 
-  if (
-    existing.status !== "pending" &&
-    inFlightFingerprints.get(idempotencyKey) !== fingerprint
-  ) {
+  if (existing.status !== "pending" && existing.fingerprint !== fingerprint) {
     return { ok: false, reason: "reused" };
   }
 
@@ -104,23 +100,23 @@ export function claimIdempotentResultKey(
 ): Promise<boolean> {
   const { fingerprint, ttlMs, store } = context;
   const now = Date.now();
-  return (async () => {
-    const existing = await store.get(idempotencyKey);
-    if (!existing) {
-      await store.set(
-        idempotencyKey,
-        {
-          status: "pending",
-          createdAt: now,
-          expiresAt: now + ttlMs,
-        },
-        Math.ceil(ttlMs / 1000),
-      );
-      inFlightFingerprints.set(idempotencyKey, fingerprint);
-      return true;
-    }
-    return false;
-  })();
+  return store
+    .setIfNotExists(
+      idempotencyKey,
+      {
+        status: "pending",
+        fingerprint,
+        createdAt: now,
+        expiresAt: now + ttlMs,
+      },
+      ttlMs,
+    )
+    .then((claimed) => {
+      if (claimed) {
+        inFlightFingerprints.set(idempotencyKey, fingerprint);
+      }
+      return claimed;
+    });
 }
 
 /**
@@ -131,10 +127,12 @@ export function completeIdempotentResultWork<T>(
   context: {
     fingerprint: string;
     handler: () => Promise<T>;
+    ttlMs?: number;
     store: IdempotencyStore;
   },
 ): Promise<T> {
   const { fingerprint, handler, store } = context;
+  const completedTtlMs = context.ttlMs ?? DEFAULT_TTL_MS;
   const work = (async (): Promise<T> => {
     let result: T;
     const now = Date.now();
@@ -162,11 +160,12 @@ export function completeIdempotentResultWork<T>(
         idempotencyKey,
         {
           status: "success",
+          fingerprint,
           response: result,
           createdAt: now,
-          expiresAt: now + DEFAULT_TTL_MS,
+          expiresAt: now + completedTtlMs,
         },
-        Math.ceil(DEFAULT_TTL_MS / 1000),
+        completedTtlMs,
       );
     } catch (completeError) {
       logger.error(
