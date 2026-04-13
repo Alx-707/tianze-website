@@ -1,0 +1,68 @@
+## Preview-degraded retirement prerequisites
+
+Date: 2026-04-11
+
+### Current conclusion
+
+After wave 8, the only clearly active non-stock operator boundary left in the main tree is the preview-degraded contract/checker pair:
+
+- `scripts/cloudflare/preview-degraded-contract.mjs`
+- `scripts/cloudflare/check-preview-degraded-contract.mjs`
+
+They cannot be honestly retired yet because the current preview workflow still injects degraded flags and placeholder secrets in the real preview publish path.
+
+### Exact active dependencies
+
+The preview workflow still sets:
+
+- `ALLOW_MEMORY_RATE_LIMIT=true`
+- `ALLOW_MEMORY_IDEMPOTENCY=true`
+- `RATE_LIMIT_PEPPER` fallback placeholder
+- `NEXT_SERVER_ACTIONS_ENCRYPTION_KEY` fallback placeholder
+- `TURNSTILE_SECRET_KEY` fallback placeholder
+- `NEXT_PUBLIC_TURNSTILE_SITE_KEY` fallback placeholder
+- `RESEND_API_KEY` fallback placeholder
+- `AIRTABLE_API_KEY` fallback placeholder
+- `AIRTABLE_BASE_ID` fallback placeholder
+
+These are injected in `.github/workflows/cloudflare-deploy.yml` for preview builds and verify/preflight steps.
+
+### What must exist before retirement
+
+To retire the preview-degraded layer honestly, preview environment must have real equivalents for:
+
+1. Non-degraded rate limiting storage (no `ALLOW_MEMORY_RATE_LIMIT`)
+2. Non-degraded idempotency storage (no `ALLOW_MEMORY_IDEMPOTENCY`)
+3. `RATE_LIMIT_PEPPER`
+4. `NEXT_SERVER_ACTIONS_ENCRYPTION_KEY`
+5. `TURNSTILE_SECRET_KEY`
+6. `NEXT_PUBLIC_TURNSTILE_SITE_KEY`
+7. `RESEND_API_KEY`
+8. `AIRTABLE_API_KEY`
+9. `AIRTABLE_BASE_ID`
+
+### Retirement seam
+
+Once preview has real secrets/stores, the retirement change-set must include all of:
+
+1. Remove preview-only degraded env injection from `.github/workflows/cloudflare-deploy.yml`
+2. Remove checker invocation from `scripts/cloudflare/preview-preflight.sh`
+3. Remove checker invocation from `scripts/release-proof.sh`
+4. Retire `scripts/cloudflare/preview-degraded-contract.mjs`
+5. Retire `scripts/cloudflare/check-preview-degraded-contract.mjs`
+6. Update docs/rules that currently mark CF-EXCEPT-003 as ACTIVE
+
+### Required proof after retirement
+
+The retirement is only valid if all of the following still pass without degraded preview flags/placeholders:
+
+- `pnpm preview:preflight:cf`
+- `pnpm build:cf`
+- `pnpm preview:cf`
+- `pnpm smoke:cf:preview`
+- `pnpm proof:cf:preview-deployed`
+- `pnpm release:verify`
+
+### Why this matters
+
+At this stage, deleting the preview-degraded layer without replacing the real preview dependencies would not make the repo more stock. It would only hide the last active exception instead of removing it.

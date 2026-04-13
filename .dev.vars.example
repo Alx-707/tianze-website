@@ -8,6 +8,10 @@ NEXT_PUBLIC_BASE_URL=http://localhost:8787
 NEXT_PUBLIC_DEPLOYMENT_PLATFORM=cloudflare
 DEPLOYMENT_PLATFORM=cloudflare
 
+# Upstash Redis (required for rate limiting & idempotency)
+# UPSTASH_REDIS_REST_URL=https://your-instance.upstash.io
+# UPSTASH_REDIS_REST_TOKEN=your_token
+
 # 以下敏感变量需从 .env.local 复制对应值
 # RESEND_API_KEY=
 # AIRTABLE_API_KEY=

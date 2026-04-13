@@ -21,6 +21,10 @@
 │  /superpowers:writing-plans ──▶ 1 scenario = 2 tasks (Red + Green)              │
 │         │                       生成 plan 目录 + task 文件                       │
 │         └──▶ 领域 Skill 注入（/next-best-practices, /frontend-design 等）        │
+│                                                                                  │
+│  /plan-review (Codex 对抗审查) ──▶ 必选，Claude 独立判断后决定是否采纳           │
+│         │    使用官方 codex-cc 插件 (codex@openai-codex)                         │
+│         └──▶ 多轮讨论，Claude 持有最终决定权，Codex 是挑战者不是审批者           │
 └─────────────────────────────────────────────────────────────────────────────────┘
                                       │
                                       ▼
@@ -122,9 +126,9 @@ task 文件引用 scenario
 完整开发:
   创建 feature 分支 → brainstorming → bdd-specs.md → writing-plans → task 文件
        ↓
-  executing-plans → BDD (Red-Green-Refactor) → commit
+  /plan-review (Codex 对抗审查, Claude 最终决定) → executing-plans → BDD (Red-Green-Refactor) → commit
        ↓
-  /review (Codex 语义审查) → /pr (提交流水线, base=main)
+  /review (Codex 语义审查, 必选) → /pr (提交流水线, base=main)
 ```
 
 ---
@@ -135,7 +139,7 @@ task 文件引用 scenario
 |------|------|------|
 | **分支** | `git checkout -b feature/*` | — |
 | **探索** | `brainstorming` | — |
-| **规划** | `writing-plans` | — |
+| **规划** | `writing-plans` → `/plan-review` (Codex 对抗审查, Claude 最终决定) | — |
 | **执行** | `behavior-driven-development` (自动) | `agent-team-driven-development` |
 | **调试** | — | `systematic-debugging` |
 | **审查** | `/review` (Codex 语义审查) | `review:hierarchical`, `review:quick`, `ui-visual-validator` |
@@ -170,12 +174,29 @@ task 文件引用 scenario
 | `cwf` | Command | 文案工作流 | 入口 |
 | `dwf` | Command | 设计工作流 | 入口 |
 
-### Codex 协作 (longranger2/claude-gpt-workflow)
-| Skill | 作用 | 阶段 |
-|-------|------|------|
-| `codex` | 委派编码任务给 Codex CLI | 执行 |
-| `plan-review` | Codex 对抗式审查计划，迭代到 APPROVED | 规划 |
-| `plan-execute` | Claude 指挥 + Codex 写码 + Claude 审查循环 | 执行 |
+### Codex 集成 (官方 codex-cc 插件: codex@openai-codex)
+
+所有 Codex 交互通过官方 codex-cc 插件统一调用。Codex 是对抗性审查员，不是审批官。Claude 独立评估每条建议，最终拍板。
+
+**必选集成点（每次必须执行）：**
+
+| 集成点 | 作用 | 阶段 | 决定权 |
+|--------|------|------|--------|
+| `/plan-review` | 计划对抗审查：多轮讨论，暴露风险与盲点 | 规划 | Claude |
+| `/review` | 代码语义审查：正确性 + 安全 + 规范 | 审查 | Claude |
+
+**可选参与点（Claude 自主判断是否启用）：**
+
+| 场景 | 启用条件 | 调用方式 |
+|------|---------|---------|
+| 编码委派 | 任务明确 + 批量/重复性强 + 不需要架构判断 | `codex` skill |
+| 卡住救援 | 同一问题尝试 2 次未解决，或需要不同诊断视角 | `codex:codex-rescue` agent |
+| 多轮实现讨论 | 实现方案有多种可行路径，需要 practitioner 视角对比 | `codex` skill `--read-only` |
+
+**Claude 自主判断准则：**
+- 不需要人工指示即可启用——Claude 根据任务特征自行决定
+- 启用时简要说明原因（如"这个重构涉及 12 个文件的同类修改，委派给 Codex 更高效"）
+- 不启用时不用解释——默认 Claude 自己做
 
 ### 领域 Skills
 | 类别 | Skills |
@@ -230,15 +251,15 @@ task 文件引用 scenario
 
 | 场景 | 推荐路径 |
 |------|----------|
-| 开始新功能 | 创建 feature 分支 → `brainstorming` → `writing-plans` → `executing-plans` |
+| 开始新功能 | 创建 feature 分支 → `brainstorming` → `writing-plans` → `/plan-review` (Codex 挑战, Claude 拍板) → `executing-plans` |
 | 写新页面/组件 | `brainstorming` → `frontend-design` → BDD 执行 |
 | 落地页 | `brainstorming` → `landing-page-designer` → BDD 执行 |
 | 调 bug | `systematic-debugging` (4 阶段) → 写失败测试 → 修复 → 绿色 |
 | 改 Next.js | `next-best-practices` → BDD 执行 |
 | 升级 Next.js | `next-upgrade` |
 | 样式问题 | `tailwind-v4-shadcn` |
-| 代码审查 | `/review` (Codex 语义审查) → 可选 `review:hierarchical` |
-| 提 PR | `/review` → `/pr` (审查完再提交) |
+| 代码审查 | `/review` (Codex 语义审查, 必选) → 可选 `review:hierarchical` |
+| 提 PR | `/review` (必须先过) → `/pr` (审查完再提交, 否则中止) |
 | 紧急修复 | 创建 hotfix 分支 → 修复 → `/pr` |
 | 复杂多人 | `agent-team-driven-development` |
 | 离开执行 | `/afk` |
@@ -267,17 +288,20 @@ Breaking: `feat(api)!: description`
 ```
 BDD 链 (brainstorming → specs → tests → implementation)
     ↓  确保每个功能都有对应测试
+/plan-review (Codex 对抗审查 — 计划正确性 + 架构合理性)
+    ↓  多轮讨论后 Claude 最终决定，使用官方 codex-cc 插件
 Pre-commit Hooks (format + type-check + quality + arch + i18n)
     ↓  确保代码质量门禁
 /review (Codex 语义审查 — 正确性 + 安全 + 规范)
-    ↓  独立于提交流程，TDD 后自动或手动触发
+    ↓  独立于提交流程，TDD 后必须运行，使用官方 codex-cc 插件
 /pr (preflight + push + PR + CI monitoring)
     ↓  纯机械流水线，不含代码审查
 Cloud Reviews (CodeRabbit / Gemini)
     ↓  外部视角补充
 ```
 
-BDD 链 + Codex 审查 + Git Hooks + Cloud Reviews 构成四层质量保障。审查与提交分离，各司其职。
+BDD 链 + Codex 对抗审查（计划 + 代码） + Git Hooks + Cloud Reviews 构成五层质量保障。
+Codex 是对抗性审查员，Claude 持有最终决定权。审查与提交分离，各司其职。
 
 ---
 

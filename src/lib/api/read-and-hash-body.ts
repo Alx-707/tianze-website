@@ -1,4 +1,3 @@
-import { createHash } from "node:crypto";
 import type { NextRequest } from "next/server";
 import { API_ERROR_CODES } from "@/constants/api-error-codes";
 import { HTTP_BAD_REQUEST, HTTP_PAYLOAD_TOO_LARGE } from "@/constants";
@@ -209,8 +208,12 @@ function stableStringify(value: unknown): string {
   return JSON.stringify(value);
 }
 
-function createBodyHash(value: unknown): string {
-  return createHash("sha256").update(stableStringify(value)).digest("hex");
+async function createBodyHash(value: unknown): Promise<string> {
+  const encoded = new TextEncoder().encode(stableStringify(value));
+  const hashBuffer = await crypto.subtle.digest("SHA-256", encoded);
+  return Array.from(new Uint8Array(hashBuffer))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
 }
 
 export async function readAndHashJsonBody<T>(
@@ -255,7 +258,7 @@ export async function readAndHashJsonBody<T>(
       ok: true,
       data: raw as T,
       rawBody,
-      bodyHash: createBodyHash(raw),
+      bodyHash: await createBodyHash(raw),
     };
   } catch (error) {
     logger.warn("Failed to parse JSON body", {

@@ -1,0 +1,44 @@
+NEXT-ROUND RETAIN RESULT: default-handler middleware manifest loader rewrite
+Date: 2026-04-10
+Repo: /Users/Data/Warehouse/Pipe/tianze-website
+Status: RETAIN (target-only retirement failed)
+
+What was attempted
+- Removed only the middleware manifest loader rewrite branch from scripts/cloudflare/patch-prefetch-hints-manifest.mjs.
+- Kept requirePage async, API route import rewrite, and split server-function cache/composable-cache rewrites active.
+
+Before-state evidence
+- .sisyphus/evidence/next-round-middleware-retire-before.txt
+  - dry-run reported middleware manifest loader already patched
+  - generated artifacts still required only API route requirePage async at the time of that baseline snapshot
+
+Corrected target-only after-state
+- .sisyphus/evidence/next-round-middleware-retire-after.txt
+  - dry-run no longer mentioned the middleware loader branch at all
+  - generated artifacts still required API route requirePage async plus the other retained patches
+
+Build/proof results
+- .sisyphus/evidence/next-round-middleware-retire-build-cf.txt
+  - retained-patch Cloudflare build completed
+  - patch step re-applied only:
+    - API route requirePage async
+    - API route require() -> import()
+    - split server-function cache/composable-cache rewrites
+  - it did not reapply the middleware manifest loader
+- .sisyphus/evidence/next-round-middleware-retire-preview-server.txt
+  - preview server reached Wrangler ready state on http://localhost:8787
+  - but repeated GET /en requests returned 500 Internal Server Error immediately after startup
+
+Conclusion
+- The middleware manifest loader rewrite is still required.
+- Even though the target-only dry-run and retained-patch build looked superficially viable, local preview regressed to repeated page-level 500s as soon as the middleware loader branch was removed.
+- This is the last and highest-risk default-handler patch, and current proof says it remains load-bearing.
+
+End-state recommendation
+- Keep the middleware manifest loader rewrite in the retained compat layer.
+- The remaining retained generated-artifact patch surface is now clearly established as:
+  1. middleware manifest loader
+  2. requirePage async
+  3. API route require() -> import()
+  4. split server-function cache/composable-cache path rewrites
+- Further progress should shift away from ad-hoc retirement attempts and toward upstream alignment opportunities or deeper runtime-specific evidence collection.

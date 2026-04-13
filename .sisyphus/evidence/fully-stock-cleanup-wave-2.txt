@@ -1,0 +1,48 @@
+## Fully-stock cleanup wave 2
+
+Date: 2026-04-11
+
+### Goal
+
+Shrink Route B legacy surface without weakening the active stock Cloudflare proof path.
+
+### Changes made
+
+1. Removed phase6-only `cf:sync:server-actions-key:*` script exposure from `package.json`
+2. Simplified `.github/workflows/cloudflare-deploy.yml`
+   - removed redundant `deployment_mode` workflow input
+   - removed unused `deployment_manifest_path` job output
+3. Reframed `docs/guides/STOCK-MVP-DEPLOYMENT-RUNBOOK.md`
+   - old server-actions-key sync steps are now explicitly marked as legacy phase6 context, not active Route B flow
+
+### Why this wave was safe
+
+- Route B canonical commands remain unchanged:
+  - `pnpm build:cf`
+  - `pnpm preview:cf`
+  - `pnpm deploy:cf:preview`
+  - `pnpm deploy:cf`
+- CI/workflow command truth already used stock deploy only
+- removed surfaces were phase6-only or dead workflow noise
+
+### Verification
+
+Passed:
+- `node -e 'JSON.parse(fs.readFileSync("package.json","utf8"))'`
+- YAML parse of `.github/workflows/cloudflare-deploy.yml`
+- grep check confirms no active `cf:sync:server-actions-key` or `deployment_mode` command truth remains outside legacy historical note
+- `pnpm build:cf`
+- `pnpm release:verify`
+
+### Remaining residue after wave 2
+
+Still present as diagnostic / historical surfaces:
+- `build:cf:turbo`
+- `preview:cf:wrangler`
+- generated-artifact patch/checker layer
+- alias/shim contract layer
+- phase6 generator/deployer scripts and related docs
+
+### Current conclusion
+
+The active Route B stock path still holds after this cleanup wave, and the repo is one layer closer to fully stock by removing phase6-only command exposure from the day-to-day surface.

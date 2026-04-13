@@ -1,0 +1,46 @@
+=== F3 WAVE: CF_APPLY_GENERATED_PATCH=true pnpm build:cf ===
+DATE: 2026-04-10
+COMMAND: CF_APPLY_GENERATED_PATCH=true pnpm build:cf
+RETAINED_PATCH_MODE: ACTIVE (CF_APPLY_GENERATED_PATCH=true)
+
+RESULT: PASS
+
+Exception contract block printed (expected):
+  [cf-webpack-build] exception contract active:
+  bucket: generated-artifact compatibility issue
+  status: temporary-compat-layer
+
+clean-next-build-artifacts: .next, .open-next, .wrangler/tmp cleaned.
+
+Next.js 16.2.2 (webpack) build:
+  - Compiled: SUCCESS (11.6s)
+  - TypeScript: PASS (4.5s)
+  - Static pages: 65/65 generated (3.5s)
+  - Build traces: collected
+
+OpenNext Cloudflare bundle:
+  @opennextjs/cloudflare@1.18.0
+  @opennextjs/aws@3.9.16
+  middleware, static assets, cache assets: bundled
+  server functions built: apiLead, apiOps, apiWhatsapp, default
+  code patches applied by OpenNext itself
+
+Post-build generated-artifact patch (CF_APPLY_GENERATED_PATCH=true):
+  [cf-prefetch-patch] patch targets identified:
+    - middleware manifest loader -> default handler
+    - API route requirePage async -> default handler
+    - API route require() -> import() -> default handler
+    - cache handler paths in apiLead, apiOps, apiWhatsapp index.mjs
+    - composable cache handler paths (same)
+  [cf-prefetch-patch] patched apiLead/index.mjs: SUCCESS
+  [cf-prefetch-patch] patched apiOps/index.mjs: SUCCESS
+  [cf-prefetch-patch] patched apiWhatsapp/index.mjs: SUCCESS
+  [cf-prefetch-patch] patched middleware manifest loader + API route requirePage async + require->import: SUCCESS
+
+⚠ Warning observed (non-blocking):
+  "middleware" file convention deprecated → use "proxy"
+  punycode module deprecated (Node internal)
+  Both expected per known retained-patch state.
+
+PATCH STATUS: All patch targets found and successfully applied.
+CONCLUSION: CF build PASSES in retained-patch compat mode. Artifacts ready for preview.

@@ -1,0 +1,60 @@
+## Task 4 — Generated-artifact compat frontier audit
+
+Date: 2026-04-10
+Plan: /Users/Data/Warehouse/Pipe/tianze-website/.sisyphus/plans/fully-stock-opennext.md
+
+### Verdict
+
+Current generated-artifact compat frontier is still active and evidence-backed. The repo has only retired the narrower manifest-guard branch; the remaining generated-artifact patch set is still load-bearing in the current canonical Cloudflare proof model.
+
+### Active retained compat points
+
+1. middleware manifest loader rewrite
+2. requirePage async promotion
+3. API route `require(...)` → `await import(...)` rewrite
+4. split server-function cache/composable-cache handler path rewrites for `apiLead`, `apiOps`, and `apiWhatsapp`
+
+### Successfully retired
+
+- manifest-guard branch only
+
+### Evidence
+
+- `/Users/Data/Warehouse/Pipe/tianze-website/.sisyphus/evidence/task-6-retire-patch.txt`
+  - explicitly says only the manifest-guard branch was retired and the remaining patch points stay retained
+- `/Users/Data/Warehouse/Pipe/tianze-website/.sisyphus/evidence/task-6-build-cf.txt`
+  - shows the generated-artifact patch still being required and lists the exact retained patch points
+- `/Users/Data/Warehouse/Pipe/tianze-website/.sisyphus/evidence/next-round-middleware-retain.txt`
+  - shows middleware-related retirement attempt remained blocked
+- `/Users/Data/Warehouse/Pipe/tianze-website/.sisyphus/evidence/next-round-requirepage-retire-after.txt`
+  - confirms requirePage async handling still matters in generated artifacts
+- `/Users/Data/Warehouse/Pipe/tianze-website/.sisyphus/evidence/next-round-api-import-retire-after.txt`
+  - confirms API import/cache-path related rewrites still remain
+- `/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/CLOUDFLARE-RETAINED-EXCEPTION-REGISTER.md`
+  - CF-EXCEPT-001 matches the retained patch set above
+- `/Users/Data/Warehouse/Pipe/tianze-website/scripts/cloudflare/generated-artifact-exception-contract.mjs`
+  - defines the same frontier through file/log markers and exit criteria
+- `/Users/Data/Warehouse/Pipe/tianze-website/scripts/cloudflare/patch-prefetch-hints-manifest.mjs`
+  - contains the concrete patch logic for the retained patch set
+- `/Users/Data/Warehouse/Pipe/tianze-website/scripts/cloudflare/check-generated-artifact-log.mjs`
+  - checker used to detect whether those compat points are still required
+
+### Contract truth
+
+- `patch-prefetch-hints-manifest.mjs --dry-run` is the canonical dry-run probe
+- `check-generated-artifact-log.mjs cf_build.log` is the canonical regression checker
+- `build-webpack.mjs` fails fast unless the compat frontier is already closed or `CF_APPLY_GENERATED_PATCH=true` is supplied to apply the patch explicitly
+
+### Contradictions check
+
+No substantive contradictions found between evidence files, checker scripts, patch script, and retained-exception docs.
+
+The only nuance is naming:
+- manifest-guard branch was retired
+- middleware manifest loader rewrite remains active
+
+These are different patch points and the repo truth is consistent about that distinction.
+
+### Implication for fully-stock plan
+
+Task 4 result: the compat frontier is still real. Any strict fully-stock claim remains blocked until these retained compat points are either upstream-eliminated or retired one-by-one with proof.

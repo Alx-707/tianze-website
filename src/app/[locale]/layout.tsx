@@ -12,6 +12,7 @@ import { pickClientMessages } from "@/lib/i18n/client-messages";
 import { generateJSONLD } from "@/lib/structured-data";
 import { AttributionBootstrap } from "@/components/attribution-bootstrap";
 import { LazyCookieConsentIsland } from "@/components/cookie/lazy-cookie-consent-island";
+import { MesurerLoader } from "@/components/dev-tools/MesurerLoader";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/layout/header";
 import { LazyTopLoader } from "@/components/lazy/lazy-top-loader";
@@ -211,6 +212,7 @@ export default async function LocaleLayout({
             )}
             {!disableDevTools && (
               <>
+                <MesurerLoader />
                 <Script
                   src="https://unpkg.com/react-grab@0.1.28/dist/index.global.js"
                   crossOrigin="anonymous"

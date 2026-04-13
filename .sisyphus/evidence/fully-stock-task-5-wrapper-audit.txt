@@ -1,0 +1,101 @@
+## Task 5 — Wrapper responsibility minimization audit
+
+Date: 2026-04-10
+Plan: /Users/Data/Warehouse/Pipe/tianze-website/.sisyphus/plans/fully-stock-opennext.md
+
+### Scope
+
+Primary wrapper audited:
+- `/Users/Data/Warehouse/Pipe/tianze-website/scripts/cloudflare/build-webpack.mjs`
+
+Companion scripts consulted:
+- `/Users/Data/Warehouse/Pipe/tianze-website/scripts/cloudflare/generated-artifact-exception-contract.mjs`
+- `/Users/Data/Warehouse/Pipe/tianze-website/scripts/cloudflare/patch-prefetch-hints-manifest.mjs`
+- `/Users/Data/Warehouse/Pipe/tianze-website/scripts/cloudflare/check-generated-artifact-log.mjs`
+- `/Users/Data/Warehouse/Pipe/tianze-website/scripts/clean-next-build-artifacts.mjs`
+- `/Users/Data/Warehouse/Pipe/tianze-website/scripts/cloudflare/phase-topology-contract.mjs`
+
+### Verdict
+
+The wrapper is not one thing. It contains:
+- one active must-stay compat/proof guard,
+- one must-stay-or-be-replaced repo prebuild duty,
+- several maybe-thinnable orchestration steps,
+- and some purely replaceable utility/logging code.
+
+### Responsibility map
+
+#### Must-stay (today)
+
+1. Generated-artifact dry-run guard and conditional patch application
+   - Why: this is the active compat frontier
+   - Implemented through:
+     - `patch-prefetch-hints-manifest.mjs --dry-run`
+     - optional apply when `CF_APPLY_GENERATED_PATCH=true`
+     - explicit exit/guidance flow in `build-webpack.mjs`
+   - Safe to remove only when generated-artifact contract exit criteria are met:
+     - dry-run exits 0
+     - build succeeds without compat env
+     - checker reports no regressions
+     - proof run passes without patch application
+
+2. Exit-code policy around compat-required state
+   - Why: CI/operator proof boundary depends on explicit fail-fast behavior rather than silently auto-fixing generated artifacts
+   - This can be removed only after the compat frontier is closed
+
+#### Must-stay or be replaced elsewhere
+
+3. `pnpm prebuild`
+   - Why: repo build invariants depend on generated content/translation/config outputs
+   - This does not have to stay in the wrapper specifically, but it must still happen in the canonical build path
+
+#### Maybe-thinnable
+
+4. cleanup of `.next`, `.open-next`, `.wrangler/tmp`
+   - Safety-oriented
+   - Can move out of wrapper if canonical stock path/CI guarantees clean state
+
+5. explicit `next build --webpack`
+   - Historical/operational choice, not automatically part of a fully-stock end state
+   - Direct stock `opennextjs-cloudflare build` already succeeded in Task 2 evidence
+
+6. standalone compatibility symlink creation
+   - Repo-local workaround tied to the explicit webpack-split build flow
+   - Candidate for removal if stock build path proves it unnecessary
+
+7. `opennextjs-cloudflare build --skipNextBuild`
+   - Strong thinning candidate
+   - Direct stock build already succeeded without the wrapper split flow
+
+8. CF env injection (`DEPLOY_TARGET`, `NEXT_PUBLIC_DEPLOYMENT_PLATFORM`)
+   - Candidate for removal if stock path still emits correct Cloudflare-targeted artifacts without wrapper-injected env
+
+9. exception-contract logging banner
+   - Informational only
+   - Can move elsewhere once compat truth is stable
+
+#### Removable / replaceable utility
+
+10. local `spawnSync` orchestration helper and generic catch/exit plumbing
+    - not part of the real Cloudflare proof boundary
+
+### Practical thinning order
+
+Safest order if Route A is attempted:
+1. keep compat guard intact
+2. prove direct stock build path as canonical candidate
+3. remove `next build --webpack` + `--skipNextBuild` split orchestration if proof stays green
+4. re-test whether standalone symlink is still needed
+5. move/trim cleanup and env injection if still redundant
+6. retire compat guard last, only after contract closure
+
+### Evidence
+
+- `/Users/Data/Warehouse/Pipe/tianze-website/.sisyphus/evidence/fully-stock-task-1-baseline.txt`
+  - shows current wrapper behavior and current compat-required failure mode when env is absent
+- `/Users/Data/Warehouse/Pipe/tianze-website/.sisyphus/evidence/fully-stock-task-2-stock-build.txt`
+  - shows direct stock `opennextjs-cloudflare build` already exits 0 and produces `.open-next`
+
+### Implication for fully-stock plan
+
+Task 5 result: wrapper thinning is partially possible, but not full removal today. The compat guard is the blocking core. The biggest thinning candidate is replacing the split `next build --webpack` + `opennext --skipNextBuild` flow with the direct stock build flow that already succeeded in evidence.

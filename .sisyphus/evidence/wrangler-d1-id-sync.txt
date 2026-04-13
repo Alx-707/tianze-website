@@ -1,0 +1,29 @@
+## Wrangler D1 ID sync
+
+Date: 2026-04-12
+
+### Goal
+
+Align `wrangler.jsonc` with the D1 databases Atlas created in the current Cloudflare account so preview/production deploy can proceed.
+
+### Changes made
+
+- Updated preview D1 `database_id`
+  - from: `0d902c4d-fa32-4376-ace0-0888d20e2a13`
+  - to: `a635ee5f-9cad-4de6-985d-2dc529c45e46`
+
+- Updated production D1 `database_id`
+  - from: `ab379023-ebc0-4033-978d-c782df2c3179`
+  - to: `6f7a3308-ecfd-4a4e-a592-5e42b3638928`
+
+### Verification
+
+- `wrangler.jsonc` re-read and confirmed new IDs are present
+- local parse check passed
+
+### Atlas handoff effect
+
+Atlas can now continue with:
+- entering real preview/production secrets and vars
+- verifying R2 / D1 / DO bindings against the updated config
+- running `wrangler deploy --env preview` without immediately failing on stale D1 IDs

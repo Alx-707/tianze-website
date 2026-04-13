@@ -1,0 +1,135 @@
+FINAL F1 EVIDENCE CHECK
+Date: 2026-04-10
+Plan: .sisyphus/plans/cloudflare-official-alignment.md
+Scope: Verify that each published retire / retain / defer conclusion is backed by evidence, not optimism.
+
+OVERALL VERDICT
+PASS
+
+Summary:
+- No major final claim was found to be unsupported.
+- The strongest evidence chain is the Wave 2 manifest-guard retirement.
+- Most later retain/defer conclusions are supported; some rely on document-audit evidence rather than freshly executed runtime proof, which matches the scope of those audit tasks.
+- The stale manifest-guard blocker string previously noted in the generated-artifact exception contract has now been removed, so the retired/retained boundary is aligned again.
+
+CLAIM-BY-CLAIM REVIEW
+
+1. RETIRE CLAIM — Manifest-guard branch was retired successfully
+Published in:
+- docs/guides/CLOUDFLARE-DEPLOYMENT-ASSESSMENT.md
+- docs/guides/CLOUDFLARE-OFFICIAL-ALIGNMENT-RUNBOOK.md
+Evidence backing it:
+- task-6-dry-run-before.txt: reports "upstream manifest handling already present; no manifest-guard patch needed".
+- task-6-dry-run-after.txt: remaining compatibility expectations still match after removing that branch.
+- task-6-build.txt: standard build passes.
+- task-6-build-cf.txt: compat-mode Cloudflare build passes while remaining patches still apply.
+- task-6-preview.txt: page/header preview smoke passes.
+- task-6-retire-patch.txt: records target-only retirement and preserved proof boundaries.
+- Current scripts/cloudflare/patch-prefetch-hints-manifest.mjs: no manifest-guard branch remains.
+Verdict: SUPPORTED
+
+2. RETAIN CLAIM — Remaining generated-artifact compatibility patches are still needed
+Published in:
+- Assessment remaining generated-artifact patch audit
+- Register CF-EXCEPT-001
+Evidence backing it:
+- task-6-build-cf.txt explicitly reports generated artifacts still require middleware manifest loader, API route requirePage async, API route require() -> import(), and cache/composable-cache handler rewrites.
+- Current patch script still contains these patch points.
+- task-6-retire-patch.txt explicitly says only manifest-guard retired; remaining compatibility patches stayed active.
+Verdict: SUPPORTED
+
+3. RETAIN CLAIM — Generated-artifact exception contract must stay active
+Published in:
+- Assessment generated-artifact contract section
+- Register CF-EXCEPT-001
+Evidence backing it:
+- task-6-build-cf.txt shows compat mode is still required.
+- scripts/cloudflare/build-webpack.mjs still requires CF_APPLY_GENERATED_PATCH=true when dry-run reports live patch points.
+- docs consistently instruct compat mode while retained patches remain.
+Verdict: SUPPORTED
+
+4. RETAIN CLAIM — Alias / shim contract remains active
+Published in:
+- Assessment alias / shim contract section
+- Register CF-EXCEPT-002
+Evidence backing it:
+- task-9-contract-audit.txt: PASS
+- task-9-proof-impact.txt: records checker coverage is incomplete
+- Register cites those task-9 files as evidence and states phase6 alias coverage is still partial.
+Verdict: SUPPORTED, BUT DOCUMENTARY
+
+5. RETAIN CLAIM — Preview degraded contract remains active
+Published in:
+- Assessment preview degraded contract section
+- Register CF-EXCEPT-003
+Evidence backing it:
+- task-9-contract-audit.txt: PASS
+- task-9-proof-impact.txt: records brittleness / proof-impact wording
+- Register cites the same files.
+Verdict: SUPPORTED, BUT DOCUMENTARY
+
+6. RETAIN CLAIM — Server-actions secret propagation contract remains active
+Published in:
+- Assessment server-actions secret contract section
+- Register CF-EXCEPT-004
+Evidence backing it:
+- task-9-contract-audit.txt: PASS
+- task-9-proof-impact.txt: records underpowered checker coverage
+- Register cites those files.
+Verdict: SUPPORTED, BUT DOCUMENTARY
+
+7. RETAIN CLAIM — Phase topology contract and generation layer remain active
+Published in:
+- Assessment phase topology contract section
+- Register CF-EXCEPT-005
+Evidence backing it:
+- task-9-contract-audit.txt: PASS
+- task-10-scope-check.txt: confirms topology rewrite/regrouping stayed out of active scope
+- Register cites both files.
+Verdict: SUPPORTED, BUT DOCUMENTARY
+
+8. DEFER CLAIM — Minify stays deferred / excluded
+Published in:
+- Assessment out-of-scope section
+- Register CF-EXCEPT-006
+- Future backlog future-only block
+Evidence backing it:
+- open-next.config.ts still contains minify: false entries and comments saying clean local/deployed proof with minify enabled is still missing.
+- task-10-scope-check.txt and task-13-scope-separation.txt both pass for re-enabling minify staying out of active scope.
+Verdict: SUPPORTED
+
+9. DEFER / FUTURE-ONLY CLAIM — Bigger architecture items stayed out of active work
+Published in:
+- Assessment out-of-scope section
+- Runbook non-negotiable boundaries
+- Future backlog future-only section
+Evidence backing it:
+- task-10-scope-check.txt: PASS for phase6 topology rewrite, worker regrouping, middleware -> proxy, minify, platform switch, large version gamble.
+- task-13-scope-separation.txt: same PASS set.
+Verdict: SUPPORTED
+
+10. RUNBOOK CLAIM — Current proof mode still requires compat mode while generated-artifact patches remain
+Published in:
+- Runbook proof mode and execution steps
+- Assessment proof boundaries and recommended sequence
+Evidence backing it:
+- package.json still uses build:cf -> scripts/cloudflare/build-webpack.mjs and preview:cf -> clean + build:cf + stock preview.
+- build-webpack.mjs still requires CF_APPLY_GENERATED_PATCH=true when dry-run reports live patch points.
+- task-6-build-cf.txt proves live patch points still exist.
+Verdict: SUPPORTED
+
+EVIDENCE QUALITY NOTES
+A. Strong evidence
+- Task 6 retirement chain is strong because it includes before/after dry-run, standard build, compat-mode Cloudflare build, preview startup, preview smoke, and current-code confirmation.
+
+B. Medium evidence
+- Remaining patch retention is also strong enough because task-6-build-cf.txt explicitly lists the still-live patch points.
+
+C. Thin-but-acceptable evidence
+- Task 8/9/10/12 evidence files are mostly checklist-style PASS notes, not full command transcripts.
+- For F1 this is acceptable because those tasks are primarily audit/consolidation tasks, so their support comes from document cross-checking more than fresh runtime proof.
+
+FINAL EVIDENCE CONCLUSION
+Every major published retire / retain / defer conclusion has at least one supporting evidence source, and the key Wave 2 retirement is backed by real command output instead of optimism.
+
+There is still evidence-quality asymmetry: Wave 2 has hard proof, while several later retained/deferred conclusions rely on document-audit PASS files plus doc citations rather than fresh execution. That is acceptable for the audit/consolidation tasks that produced them and should not be mistaken for stronger runtime proof than was actually earned.

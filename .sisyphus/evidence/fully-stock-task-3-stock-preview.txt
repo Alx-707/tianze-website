@@ -1,0 +1,21 @@
+## Stock preview spike started
+2026-04-10T11:05:18Z
+
+## Command
+pnpm exec opennextjs-cloudflare preview --env preview
+
+## Preview ready: 1
+
+> tianze-website@0.1.0 smoke:cf:preview /Users/Data/Warehouse/Pipe/tianze-website
+> node scripts/cloudflare/preview-smoke.mjs
+
+[cf-preview-smoke] Probing http://127.0.0.1:8787 (page/header mode)
+[cf-preview-smoke] Skipping /api/health (diagnostic-only in local preview).
+[cf-preview-smoke] Policy: local preview proves page/header/cookie behavior. API proof belongs to deployed smoke.
+[cf-preview-smoke] Reference: .claude/rules/architecture.md → Cloudflare Verification Policy
+[cf-preview-smoke] All checks passed
+
+## Classification
+- Stock preview is viable for current page/header/cookie local smoke when run directly as `pnpm exec opennextjs-cloudflare preview --env preview` from the stock-built artifacts.
+- This spike did not prove deployed truth or /api/health; the local preview policy still excludes API proof.
+- No wrapper command was needed for the preview command itself in this spike.

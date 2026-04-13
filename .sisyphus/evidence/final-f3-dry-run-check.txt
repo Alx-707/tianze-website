@@ -1,0 +1,23 @@
+FINAL WAVE F3 — DRY-RUN CHECK SUMMARY
+Date: 2026-04-10
+Mode: retained-patch (CF_APPLY_GENERATED_PATCH=true)
+
+Command: node scripts/cloudflare/patch-prefetch-hints-manifest.mjs --dry-run
+
+Patch targets checked (4 total):
+  1. middleware manifest loader         → already patched ✓
+  2. API route requirePage async        → already patched ✓
+  3. API route require() paths          → already patched ✓
+  4. cache handler paths (3 workers)    → already patched ✓
+     - .open-next/server-functions/apiLead/index.mjs
+     - .open-next/server-functions/apiOps/index.mjs
+     - .open-next/server-functions/apiWhatsapp/index.mjs
+
+Final verdict: "generated artifacts already match compatibility expectations"
+
+INTERPRETATION:
+  - No drift between build:cf output and expected retained-patch state.
+  - The CF_APPLY_GENERATED_PATCH=true build correctly applied all patches.
+  - Dry-run confirms patch idempotency: re-running would be a no-op.
+  - Retained-patch mode remains active; Wave 2 only retired manifest-guard branch.
+  - This state is consistent with the documented exception contract.

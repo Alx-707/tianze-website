@@ -1,0 +1,17 @@
+[cf-prefetch-patch] exception contract active:
+[cf-prefetch-patch] bucket: generated-artifact compatibility issue
+[cf-prefetch-patch] status: temporary-compat-layer
+[cf-prefetch-patch] patch: node scripts/cloudflare/patch-prefetch-hints-manifest.mjs
+[cf-prefetch-patch] blocker: node scripts/cloudflare/check-generated-artifact-log.mjs cf_build.log
+[cf-prefetch-patch] dry-run: node scripts/cloudflare/patch-prefetch-hints-manifest.mjs --dry-run
+[cf-prefetch-patch] apply env: CF_APPLY_GENERATED_PATCH=true
+[cf-prefetch-patch] preview proof: pnpm smoke:cf:preview
+[cf-prefetch-patch] stronger local proof: pnpm deploy:cf:phase6:dry-run
+[cf-prefetch-patch] formal proof: pnpm proof:cf:preview-deployed
+[cf-prefetch-patch] middleware manifest loader already patched
+[cf-prefetch-patch] API route requirePage async already patched
+[cf-prefetch-patch] API route require() paths already patched
+[cf-prefetch-patch] cache handler paths already patched in .open-next/server-functions/apiLead/index.mjs
+[cf-prefetch-patch] cache handler paths already patched in .open-next/server-functions/apiOps/index.mjs
+[cf-prefetch-patch] cache handler paths already patched in .open-next/server-functions/apiWhatsapp/index.mjs
+[cf-prefetch-patch] generated artifacts already match compatibility expectations

@@ -1,0 +1,35 @@
+## Post-deploy smoke path fix
+
+Date: 2026-04-12
+
+### Goal
+
+Fix the Cloudflare post-deploy verification job so it reliably finds and executes the deployed smoke script.
+
+### Root cause
+
+The script `scripts/deploy/post-deploy-smoke.mjs` exists in the repo and is tracked by git, but the workflow invoked it without an explicit `./` path and without any checkout guard. The failing CI run reported `MODULE_NOT_FOUND`, which is consistent with the remote branch checkout missing the file or the job not surfacing that absence clearly.
+
+### Change made
+
+Updated `.github/workflows/cloudflare-deploy.yml` post-deploy verification step to:
+
+1. enable strict shell mode
+2. assert that `./scripts/deploy/post-deploy-smoke.mjs` exists
+3. print `./scripts` and `./scripts/deploy` listings if it does not
+4. execute `node ./scripts/deploy/post-deploy-smoke.mjs ...` with an explicit path
+
+### Verification
+
+Passed:
+- workflow YAML parse
+- local script invocation works:
+  - `node ./scripts/deploy/post-deploy-smoke.mjs --base-url https://tianze-website-preview.kei-tang.workers.dev`
+
+Observed result:
+- the script now runs correctly
+- the current preview runtime still fails deployed smoke because `/api/health` returns 500
+
+### Conclusion
+
+The `MODULE_NOT_FOUND` issue is addressed at the workflow level. The next remaining blocker is no longer path resolution — it is preview runtime health (`/api/health` = 500) on the deployed preview URL.

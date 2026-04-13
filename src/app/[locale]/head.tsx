@@ -1,5 +1,3 @@
-import { existsSync } from "node:fs";
-import { join } from "node:path";
 import type { ReactElement } from "react";
 
 interface SubsetSource {
@@ -100,14 +98,10 @@ function buildSubsetStyle(sources: SubsetSource[]): string | null {
 
 export default function LocaleHead(): ReactElement {
   const enableSubset = process.env.NEXT_PUBLIC_ENABLE_CN_FONT_SUBSET === "true";
-  const publicDir = join(process.cwd(), "public");
 
-  const availableSubsetSources = enableSubset
-    ? SUBSET_SOURCES.filter((entry) =>
-        // eslint-disable-next-line security/detect-non-literal-fs-filename -- Safe: publicDir is process.cwd()/public, entry.href is from static SUBSET_SOURCES
-        existsSync(join(publicDir, entry.href.replace(/^\//, ""))),
-      )
-    : [];
+  // Cloudflare Workers has no filesystem; assume all SUBSET_SOURCES are deployed to /public.
+  // If a file is missing, the browser will simply 404 the preload request gracefully.
+  const availableSubsetSources = enableSubset ? SUBSET_SOURCES : [];
 
   const subsetStyle = buildSubsetStyle(availableSubsetSources);
 

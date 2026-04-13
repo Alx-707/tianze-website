@@ -17,11 +17,11 @@ git clone <repo> client-project-name
 cd client-project-name
 
 # 2. Update business data
-# Edit src/sites/<site-key>.ts as the primary site identity source
+# Edit src/config/single-site.ts as the primary site identity source
 
 # 3. Update translations
 # Edit shared messages in messages/* only when every site should inherit them
-# Edit src/sites/<site-key>/messages/* for site-specific copy
+# Edit messages/<locale>/{critical,deferred}.json for runtime copy
 
 # 4. Run development server
 pnpm install
@@ -30,7 +30,7 @@ pnpm dev
 
 ## Key Configuration Files
 
-### 1. Site Configuration (`src/sites/<site-key>.ts`)
+### 1. Site Configuration (`src/config/single-site.ts`)
 
 Primary source of truth for brand, SEO, contact, social links, and site-level facts:
 
@@ -87,7 +87,7 @@ export const siteFacts: SiteFacts = {
 };
 ```
 
-Prefer updating `src/sites/<site-key>.ts` first. Treat wrappers as consumption surfaces, not authoring surfaces.
+Prefer updating `src/config/single-site.ts` first. Treat wrappers as consumption surfaces, not authoring surfaces.
 
 ### 3. Translation Files (`messages/[locale]/`)
 
@@ -106,7 +106,7 @@ messages/
 For site-specific copy, use:
 
 ```
-src/sites/<site-key>/messages/
+messages/<locale>/
 ├── en/
 │   ├── critical.json
 │   └── deferred.json

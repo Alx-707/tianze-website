@@ -131,7 +131,7 @@
 
 最低验证建议：
 
-- `pnpm deploy:cf:phase6:dry-run`
+- `pnpm deploy:cf:preview`
 - `pnpm smoke:cf:deploy -- --base-url <deployment-url>`
 
 未来多站点时需要额外补的点：
@@ -163,7 +163,7 @@
 | --- | --- | --- | --- |
 | 共享底座改动 | type-check / lint / translations / locale-runtime / build | build:cf + smoke:cf:preview | 是 |
 | 站点身份改动 | translations + 关键页面渲染检查 + build | build:cf | 是 |
-| Cloudflare 链路改动 | build + build:cf | smoke:cf:preview + deploy:cf:phase6:dry-run + deployed smoke | 是 |
+| Cloudflare 链路改动 | build + build:cf | smoke:cf:preview + deploy:cf:preview + deployed smoke | 是 |
 | 内容或 SEO 默认值改动 | 相关内容校验 + build | build:cf，必要时页面 smoke | 是 |
 | Contact / inquiry / health 改动 | 相关合同测试 + build | deployed smoke | 是 |
 

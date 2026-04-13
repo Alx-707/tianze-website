@@ -1,0 +1,7 @@
+TASK 9 PROOF IMPACT CHECK
+
+preview / generated-artifact blocker: PASS
+checker coverage is incomplete: PASS
+checker is brittle: PASS
+checker is underpowered: PASS
+checker coverage is missing, not wrong: PASS

@@ -25,10 +25,10 @@ pnpm test:e2e          # Playwright E2E tests
 - Do not use wall-clock thresholds (`Date.now()`, `performance.now()`, "< 1000ms", etc.) in normal unit/integration gate tests.
 - If performance must be checked, use a dedicated benchmark/perf harness or an explicit opt-in test path.
 - Stateful UI tests must explicitly create the state they assert against; do not rely on implicit cooldowns, shared state leakage, or timing side effects.
-- If a change touches `src/sites/**` or site identity wrappers, tests must prove current-site behavior still matches the active site rather than only asserting object shape
-- For any site-aware change, add proof for “no cross-site leakage” instead of only asserting the new site renders
-- Multi-site pilot is already present. When `src/sites/**`, `src/sites/**/messages/**`, or site-switching env behavior changes, include non-default-site proof rather than leaving it as a future TODO
-- Preferred proof for site-aware changes: `pnpm build:site:equipment`; stronger platform proof: `pnpm build:cf:site:equipment`
+- If a change touches single-site truth or site identity wrappers, tests must prove runtime behavior still matches the active site rather than only asserting object shape
+- For any site-identity or cutover-sensitive change, add proof for “no truth-source drift” instead of only asserting config shape
+- The repo no longer relies on a multi-site pilot proof path. When `src/config/single-site.ts`, `src/config/site-types.ts`, `src/config/single-site-product-catalog.ts`, or wrapper consumers change, include the relevant current-site or cutover proof instead of inventing non-default-site checks.
+- Preferred proof for single-site/cutover changes: `pnpm preflight:site-cutover`; stricter proof: `pnpm preflight:site-cutover:strict`
 
 ## Test File Organization
 

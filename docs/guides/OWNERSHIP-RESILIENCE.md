@@ -15,7 +15,7 @@ It complements:
   - agentic maintainers (`Claude Code`, `Codex`)
 - Enforceable repository ownership still exists separately from that active maintenance pool.
 - The repository default is primary-only:
-  - primary: `@Alx-707`
+  - primary: `@rock-909`
 - Tier A paths have a backup review path:
   - `developer@flood-control.com`
 

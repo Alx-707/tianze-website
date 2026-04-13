@@ -47,7 +47,7 @@ describe("getContactCopy", () => {
   it("builds a structured copy model for the given locale", async () => {
     const locale: Locale = "en";
 
-    const copy = await getContactCopy(locale, "tianze");
+    const copy = await getContactCopy(locale);
 
     expect(mockCacheLife).toHaveBeenCalledWith("days");
 
@@ -75,7 +75,7 @@ describe("getContactCopy", () => {
       (key: string) => `missing.${key}`,
     );
 
-    const copy = await getContactCopy("en" as Locale, "tianze-equipment");
+    const copy = await getContactCopy("en" as Locale);
 
     expect(copy.header.title).toBe("missing.title");
     expect(copy.header.description).toBe("missing.description");

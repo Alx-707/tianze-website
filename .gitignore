@@ -27,6 +27,9 @@ public/messages/
 *.swp
 *.swo
 
+# Workflow markers (local signals between commands)
+.codex-review-done
+
 # AI Tools (personal config)
 .agent/
 .continue/
@@ -89,3 +92,5 @@ pnpm-debug.log*
 .claude/review-loop.log
 reviews/
 .ace-tool/
+.omx/
+.codex/

@@ -1,0 +1,53 @@
+## Task 9 — Phase6 decision package
+
+Date: 2026-04-10
+Plan: /Users/Data/Warehouse/Pipe/tianze-website/.sisyphus/plans/fully-stock-opennext.md
+
+### Decision framing
+
+phase6 cannot remain a vague “maybe”. Under this plan it must be treated as an explicit architecture decision.
+
+### Current status
+
+phase6 is:
+- active
+- repo-specific
+- topology-defining
+- locally/dry-run proven
+- not yet sufficient to support a strict fully-stock claim
+
+Evidence: `/Users/Data/Warehouse/Pipe/tianze-website/.sisyphus/evidence/fully-stock-task-6-phase6-audit.txt`
+
+### Credible options
+
+#### Option 1 — Keep intentionally
+- Credible only if the repo decides stock alignment is no longer the primary goal
+- This means explicitly keeping a stronger repo-specific deployment model
+
+#### Option 2 — Simplify/remove under Route B
+- Credible if the repo chooses stock alignment with proof downgrade
+- This is the most credible stock-oriented direction today
+
+#### Option 3 — Remove under Route A while preserving proof strength
+- Not credible with current evidence
+- Current proof model still leans on compat frontier + wrapper core + phase6 topology
+
+### Recommended package
+
+Current recommendation:
+- For a strict fully-stock direction, phase6 should be treated as a **remove/simplify candidate**, not a keep candidate.
+- For a proof-preserving direction, phase6 should **not** be removed yet because the replacement proof story is still missing.
+
+### Replacement topology requirement
+
+If phase6 is simplified/removed, the replacement must be:
+- explicit
+- stock-compatible
+- proof-validated at the chosen proof level
+
+### Conclusion
+
+Task 9 result:
+- phase6 should not remain ambiguous
+- under stock-oriented decision-making, `simplify/remove` is the credible branch
+- under proof-preserving decision-making, `keep for now` is the safer branch

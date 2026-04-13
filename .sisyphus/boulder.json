@@ -1,0 +1,10 @@
+{
+  "active_plan": "/Users/Data/Warehouse/Pipe/tianze-website/.sisyphus/plans/fully-stock-opennext.md",
+  "started_at": "2026-04-10T10:17:05.947Z",
+  "session_ids": ["ses_290674c38ffedmAqu26O0PAlJU"],
+  "session_origins": {
+    "ses_290674c38ffedmAqu26O0PAlJU": "direct"
+  },
+  "plan_name": "fully-stock-opennext",
+  "agent": "atlas"
+}

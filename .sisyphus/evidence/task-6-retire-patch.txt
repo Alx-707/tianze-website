@@ -1,0 +1,53 @@
+TASK 6 RETIRE PATCH RESULT: manifest-guard branch retirement
+Wave 2 — cloudflare-official-alignment plan
+Generated: 2026-04-10
+Repo: /Users/Data/Warehouse/Pipe/tianze-website
+Status: SUCCESS (target-only retirement)
+
+What changed
+- Retired only the manifest-guard branch from scripts/cloudflare/patch-prefetch-hints-manifest.mjs.
+- Kept the remaining compatibility patches active:
+  - middleware manifest loader patch
+  - API route requirePage async patch
+  - API route require() -> import() patch
+  - cache/composable-cache handler path patches for split server functions
+- Fixed the Task 6 prerequisite bug in the same script by removing the machine-specific absolute path from Fix A part 2 and narrowing the API route replacement to `return require("...app/api/...")` branches only.
+
+Why this qualifies as the planned retirement
+- task-6-dry-run-before.txt on the pre-retirement script already reported:
+  "upstream manifest handling already present; no manifest-guard patch needed"
+- After removing only the manifest-guard branch, task-6-dry-run-after.txt still reported generated artifacts already match compatibility expectations for the remaining patch set.
+- No other compatibility patch logic was retired in this task.
+
+Verification evidence
+1. Before dry-run:
+   .sisyphus/evidence/task-6-dry-run-before.txt
+   Key signal: upstream manifest handling already present; no manifest-guard patch needed.
+2. After dry-run:
+   .sisyphus/evidence/task-6-dry-run-after.txt
+   Key signal: generated artifacts already match compatibility expectations.
+3. Standard build:
+   .sisyphus/evidence/task-6-build.txt
+   Result: pass.
+4. Cloudflare build with retained compat mode:
+   .sisyphus/evidence/task-6-build-cf.txt
+   Result: pass.
+   Remaining compat patches still applied after dry-run exit 12.
+5. Generated-artifact blocker scan:
+   node scripts/cloudflare/check-generated-artifact-log.mjs .sisyphus/evidence/task-6-build-cf.txt
+   Result: no generated-artifact manifest regressions found.
+6. Preview server:
+   .sisyphus/evidence/task-6-preview-server.txt
+   Result: preview started on http://127.0.0.1:8787 after the narrowed API-route patch fix.
+7. Preview smoke:
+   .sisyphus/evidence/task-6-preview.txt
+   Result: all checks passed.
+
+Outcome
+- The manifest-guard patch branch was redundant on current generated artifacts and was retired successfully.
+- The broader generated-artifact compatibility layer remains required for other default-handler and split-function patch points.
+- Current proof boundaries were preserved: build proof stayed green, page/header preview proof stayed green, and no deployed-truth claims were made from local preview.
+
+Follow-up implications for later waves
+- Task 8 should audit the remaining generated-artifact patches individually.
+- Task 12 retained-exception freeze should keep the generated-artifact exception contract active for the non-retired patch points.

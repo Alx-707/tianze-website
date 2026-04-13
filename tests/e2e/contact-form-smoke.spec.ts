@@ -14,29 +14,7 @@ import { expect, test, type Page, type TestInfo } from "@playwright/test";
 test.describe.configure({ mode: "serial" });
 
 test.describe("Contact Form - Test-Mode Smoke", () => {
-  const resolveSiteMode = (url: string): "tianze" | "tianze-equipment" => {
-    const explicitSiteKey =
-      process.env.PLAYWRIGHT_SITE_KEY || process.env.NEXT_PUBLIC_SITE_KEY;
-
-    if (explicitSiteKey === "tianze-equipment") {
-      return "tianze-equipment";
-    }
-
-    return url.includes("equipment.") ? "tianze-equipment" : "tianze";
-  };
-
-  const getExpectedContactTitle = (
-    locale: "en" | "zh",
-    url: string,
-  ): RegExp => {
-    const siteMode = resolveSiteMode(url);
-
-    if (siteMode === "tianze-equipment") {
-      return locale === "zh"
-        ? /联系 Tianze Equipment|对接设备团队|联系设备团队/i
-        : /Contact Tianze Equipment|Talk to the Equipment Team/i;
-    }
-
+  const getExpectedContactTitle = (locale: "en" | "zh"): RegExp => {
     return locale === "zh"
       ? /联系我们.*Tianze Pipe|联系我们/i
       : /Contact Us.*Tianze Pipe|Get a Quote/i;

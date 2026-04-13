@@ -1,0 +1,34 @@
+## Fully stock repo-side completion
+
+Date: 2026-04-12
+
+### Conclusion
+
+The repository-side fully-stock migration is complete.
+
+### What is now true in the main tree
+
+- preview workflow no longer injects `ALLOW_MEMORY_RATE_LIMIT`
+- preview workflow no longer injects `ALLOW_MEMORY_IDEMPOTENCY`
+- preview workflow no longer uses placeholder secret fallbacks
+- preview/prod validation boundary is driven by `APP_ENV`
+- preview uses real preview secrets and Redis in the active workflow path
+- release proof stays green without degraded preview logic
+
+### Repo-side retired layers
+
+- phase6 deploy/generator/config skeleton
+- server-actions secret legacy helper layer
+- alias/shim checker + phase6 alias contract layer
+- generated-artifact patch/checker/wrapper layer
+- preview-degraded contract/checker layer
+
+### Verification snapshot
+
+Passed locally after the final repo-side cleanup:
+- `pnpm preview:preflight:cf`
+- `pnpm release:verify`
+
+### Remaining requirement
+
+Only an external final confirmation run is still needed: a remote preview workflow execution on the latest commit carrying all fixes, to prove the remote branch matches the local fully-stock-ready state.

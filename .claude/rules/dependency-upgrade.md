@@ -44,7 +44,7 @@ Do not run `pnpm build` and `pnpm build:cf` in parallel.
 - `eslint@10` is currently blocked by the active Next/React ESLint plugin chain
 - `typescript@6` is currently deferred on this repo; keep the branch on `typescript@5.9.3` until standard `next build` is stable again
 - keep `eslint` / `@eslint/js` on `9.x` until the current Next/React ESLint chain supports ESLint 10 cleanly
-- `@opennextjs/cloudflare@1.18.0` is the current project baseline on the active upgrade line
+- `@opennextjs/cloudflare@1.19.1` is the current project baseline on the active upgrade line
 - OpenNext `minify` remains disabled in `open-next.config.ts`; if an upgrade aims to re-enable it, treat that as a separate compatibility validation task
 
 ## Core Dependencies
@@ -62,8 +62,8 @@ These require full validation and careful batching:
 
 - Upgrade in small batches, not all at once
 - Keep low-risk patch/minor upgrades separate from higher-risk major upgrades
-- Treat Cloudflare deploy-path changes as incomplete until `pnpm build:cf` passes
-- If the upgrade touches the Cloudflare build chain itself, also run `pnpm build:cf:turbo` to keep the comparison path from silently rotting
+- Treat Cloudflare deploy-path changes as incomplete until the current proof-mode Cloudflare build passes (`pnpm build:cf` on the current stock Route B path).
+- If the upgrade touches the Cloudflare build chain itself, do not assume legacy helper paths still exist; use `pnpm release:verify` plus the current `pnpm smoke:cf:preview` proof lane
 - If the upgrade touches Next/OpenNext/Wrangler/Cloudflare proof scripts, do not stop at local build success; also run `pnpm release:verify`
 - When a Cloudflare-related upgrade fails, classify it first:
   - platform entry / local runtime issue

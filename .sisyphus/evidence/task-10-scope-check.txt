@@ -1,0 +1,8 @@
+TASK 10 SCOPE CHECK
+
+phase6 topology rewrite: PASS
+worker regrouping: PASS
+`middleware -> proxy` migration: PASS
+re-enabling minify: PASS
+platform switch: PASS
+large version gamble: PASS

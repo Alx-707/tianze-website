@@ -1,0 +1,45 @@
+NEXT-ROUND RETAIN RESULT: default-handler API route require() -> import() rewrite
+Date: 2026-04-10
+Repo: /Users/Data/Warehouse/Pipe/tianze-website
+Status: RETAIN (target-only retirement failed)
+
+What was attempted
+- Removed only the API route `return require(...)` -> `return await import(...)` rewrite branch from scripts/cloudflare/patch-prefetch-hints-manifest.mjs.
+- Kept middleware manifest loader, requirePage async, and split server-function cache/composable-cache rewrites active.
+
+Before-state evidence
+- .sisyphus/evidence/next-round-api-import-retire-before.txt
+  - dry-run reported:
+    - middleware manifest loader already patched
+    - API route requirePage async already patched
+    - API route require() paths already patched
+    - generated artifacts already match compatibility expectations
+
+Corrected target-only after-state
+- .sisyphus/evidence/next-round-api-import-retire-after.txt
+  - dry-run no longer mentioned API route require() path rewriting
+  - it still reported split server-function cache/composable-cache path rewrites as required
+
+Build/proof results
+- .sisyphus/evidence/next-round-api-import-retire-build-cf.txt
+  - retained-patch Cloudflare build still completed, but the patch step only re-applied:
+    - middleware manifest loader
+    - API route requirePage async
+    - split server-function cache/composable-cache paths
+  - the API route import rewrite was not re-applied during this attempt
+- Hardened generated-artifact checker result:
+  - `node scripts/cloudflare/check-generated-artifact-log.mjs .sisyphus/evidence/next-round-api-import-retire-build-cf.txt`
+  - reported:
+    - unpatched API route absolute require() [source=.open-next/server-functions/default/handler.mjs]
+
+Conclusion
+- This patch branch is still required.
+- Even though the target-only dry-run looked superficially clean, the hardened file-aware checker found that the generated default handler still contains the absolute API route `return require("...app/api/...")` form.
+- Retiring this branch now would weaken generated-artifact safety and likely break the Cloudflare runtime path for API routes.
+
+Follow-up recommendation
+- Keep the API route import rewrite in the retained compat layer.
+- The remaining retirement candidates should now be considered in this order:
+  1. API route requirePage async (if later evidence shows upstream emits it consistently)
+  2. middleware manifest loader (last / highest risk)
+- Do not treat this failed retirement attempt as evidence that default-handler patches can be batch-removed.

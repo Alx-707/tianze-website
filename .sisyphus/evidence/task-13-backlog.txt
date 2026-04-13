@@ -1,0 +1,5 @@
+TASK 13 BACKLOG CHECK
+
+## Future-wave candidates: PASS
+### 1. Harden generated-artifact patch detection: PASS
+### 6. Evaluate thinner build wrapper after more patch narrowing: PASS

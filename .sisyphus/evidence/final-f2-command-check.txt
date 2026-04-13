@@ -1,0 +1,114 @@
+FINAL WAVE F2 — COMMAND & FILE REFERENCE AUDIT
+Generated: 2026-04-10
+Scope: docs/guides/CLOUDFLARE-DEPLOYMENT-ASSESSMENT.md
+        docs/guides/CLOUDFLARE-OFFICIAL-ALIGNMENT-RUNBOOK.md
+        docs/guides/CLOUDFLARE-RETAINED-EXCEPTION-REGISTER.md
+        docs/guides/CLOUDFLARE-FUTURE-BACKLOG.md
+Cross-referenced against: package.json (scripts section), scripts/cloudflare/ directory listing
+
+VERDICT: ALL PASS — no stale command names, no missing script files found.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SECTION 1 — pnpm SCRIPT COMMANDS (verified against package.json)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Command in docs                               package.json key              Result
+─────────────────────────────────────────────────────────────────────────────
+pnpm build                                    "build"                       PASS
+pnpm build:cf                                 "build:cf"                    PASS
+  → resolves to: node scripts/cloudflare/build-webpack.mjs
+CF_APPLY_GENERATED_PATCH=true pnpm build:cf   same key + env var            PASS
+  (env var consumed inside build-webpack.mjs — documented correctly)
+pnpm build:cf:turbo                           "build:cf:turbo"              PASS
+  (docs consistently call this the contrast/diagnostic path only — correct)
+pnpm preview:cf                               "preview:cf"                  PASS
+  → resolves to: pnpm clean:next-artifacts && pnpm build:cf &&
+                 pnpm exec opennextjs-cloudflare preview --env preview
+CF_APPLY_GENERATED_PATCH=true pnpm preview:cf same key + env var            PASS
+pnpm smoke:cf:preview                         "smoke:cf:preview"            PASS
+  → resolves to: node scripts/cloudflare/preview-smoke.mjs
+pnpm smoke:cf:preview --base-url <url>        same key with CLI arg         PASS
+pnpm smoke:cf:deploy -- --base-url <url>      "smoke:cf:deploy"             PASS
+  → resolves to: node scripts/deploy/post-deploy-smoke.mjs
+pnpm clean:next-artifacts                     "clean:next-artifacts"        PASS
+  → resolves to: node scripts/clean-next-build-artifacts.mjs
+pnpm clean:next-artifacts && pnpm build       composite using above keys    PASS
+pnpm deploy:cf:phase6:dry-run                 "deploy:cf:phase6:dry-run"    PASS
+  → resolves to: pnpm clean:next-artifacts && pnpm build:cf:phase6 &&
+                 node scripts/cloudflare/deploy-phase6.mjs --env preview --dry-run
+pnpm proof:cf:preview-deployed                "proof:cf:preview-deployed"   PASS
+  → resolves to: bash scripts/cloudflare/deployed-preview-proof.sh
+pnpm exec opennextjs-cloudflare build         @opennextjs/cloudflare pkg    PASS
+pnpm exec opennextjs-cloudflare preview       same package                  PASS
+  --env preview
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SECTION 2 — RAW node/shell INVOCATIONS (not pnpm scripts)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Command in docs                                              Script present  Result
+─────────────────────────────────────────────────────────────────────────────
+node scripts/cloudflare/check-generated-artifact-log.mjs    YES             PASS
+  (Runbook Quick Command Checklist uses .sisyphus/evidence/task-6-build-cf.txt
+   as example path — this is an illustrative static example, not a stale ref)
+node scripts/cloudflare/patch-prefetch-hints-manifest.mjs   YES             PASS
+  --dry-run
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SECTION 3 — SCRIPT FILES IN scripts/cloudflare/ (21 entries confirmed)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+File                                          Referenced in docs            Present
+─────────────────────────────────────────────────────────────────────────────
+alias-shim-exception-contract.mjs            Exception Register §CF-EXCEPT  YES
+build-phase5-worker.mjs                      Assessment §phase5             YES
+build-phase6-workers.mjs                     Assessment, Runbook            YES
+build-webpack.mjs                            Assessment, Runbook (build:cf) YES
+check-alias-shim-contract.mjs                Runbook Step 3                 YES
+check-generated-artifact-log.mjs             Runbook Quick Checklist        YES
+check-preview-degraded-contract.mjs          Runbook Step 3                 YES
+check-server-actions-secret-contract.mjs     Runbook Step 3                 YES
+deploy-phase6.mjs                            Runbook phase6 section         YES
+deployed-preview-proof.sh                    proof:cf:preview-deployed      YES
+generated-artifact-exception-contract.mjs    Exception Register §CF-EXCEPT  YES
+patch-prefetch-hints-manifest.mjs            Assessment, Runbook            YES
+phase-topology-contract.mjs                  AGENTS.md rule 24 + Runbook    YES
+preview-degraded-contract.mjs                Runbook Step 3                 YES
+preview-preflight.sh                         Runbook Step 2                 YES
+preview-proof.sh                             Runbook Step 4                 YES
+preview-smoke.mjs                            smoke:cf:preview               YES
+server-actions-secret-contract.mjs           Runbook Step 3                 YES
+sync-server-actions-key.mjs                  Runbook Step 3                 YES
+shims/  (subdirectory)                       Assessment §alias-shims        YES
+stubs/  (subdirectory)                       Assessment §stubs              YES
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SECTION 4 — INFORMATIONAL NOTES (non-blocking)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+NOTE-1: Runbook Quick Command Checklist hardcodes the example path
+  .sisyphus/evidence/task-6-build-cf.txt as the argument to
+  check-generated-artifact-log.mjs. This is a static illustrative example,
+  not a prescriptive path. The script accepts any path argument. Not a bug.
+
+NOTE-2: build:cf:turbo in package.json uses DEPLOY_TARGET=cloudflare
+  NEXT_PUBLIC_DEPLOYMENT_PLATFORM=cloudflare opennextjs-cloudflare build
+  (no CF_APPLY_GENERATED_PATCH flag). Docs correctly document this as the
+  contrast/diagnostic chain, not the formal proof path. Consistent.
+
+NOTE-3: Runbook section header reads "Current repo truth after Wave 3" but
+  the runbook itself was published in Wave 4 Task 11. This is accurate
+  framing: the runbook documents the state after Wave 3 completed. Not stale.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SUMMARY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Total commands checked:   18
+PASS:                     18
+FAIL:                      0
+Stale command names:       0
+Missing script files:      0
+Non-blocking notes:        3
+
+OVERALL RESULT: PASS

@@ -1,0 +1,15 @@
+WRAPPER THINNING CONCLUSION (2026-04-10)
+Status: NOT SAFE YET
+
+Reason summary
+- The latest target-only retirement attempts established that the remaining generated-artifact compat patch set is still load-bearing:
+  - split-function cache/composable-cache rewrites -> retain
+  - API route import rewrite -> retain
+  - requirePage async -> retain
+  - middleware manifest loader -> retain
+- Because these patches still require explicit dry-run/apply gating, `scripts/cloudflare/build-webpack.mjs` remains part of the active proof boundary.
+- `preview:cf` also remains blocked from thinning because local preview still depends on the same retained compat-mode build path.
+
+Operational implication
+- Do not refactor `build-webpack.mjs` or switch the canonical proof path to a thinner stock build wrapper yet.
+- The next useful progress should come from upstream output changes, stronger deployed proof, or future evidence that changes one of the retained patch decisions.

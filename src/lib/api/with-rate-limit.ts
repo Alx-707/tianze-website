@@ -208,7 +208,7 @@ export function withRateLimit<T = unknown>(
     let result: Awaited<ReturnType<typeof checkDistributedRateLimit>>;
     try {
       clientIP = getTrustedClientIP(request);
-      rateLimitKey = keyStrategy(request);
+      rateLimitKey = await keyStrategy(request);
       result = await checkDistributedRateLimit(rateLimitKey, preset);
     } catch (error) {
       logger.error("Unexpected rate limit infrastructure failure", {

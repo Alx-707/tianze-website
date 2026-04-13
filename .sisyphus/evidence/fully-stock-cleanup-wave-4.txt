@@ -1,0 +1,42 @@
+## Fully-stock cleanup wave 4
+
+Date: 2026-04-11
+
+### Goal
+
+Remove one more non-canonical operational phase6 surface from the main tree without touching the active Route B stock proof path.
+
+### Changes made
+
+1. Removed `scripts/cloudflare/deploy-phase6.mjs` from the main tree.
+2. Updated active guidance/docs to reflect that phase6 no longer has a ready-to-run deploy helper in the main repo:
+   - `AGENTS.md`
+   - `docs/guides/PHASE6-PRODUCTION-READINESS.md`
+   - `docs/guides/CLOUDFLARE-RETAINED-EXCEPTION-REGISTER.md`
+   - `docs/guides/STOCK-MVP-DEPLOYMENT-RUNBOOK.md`
+
+### Why this wave was safe
+
+- `deploy-phase6.mjs` was not part of canonical Route B commands in `package.json`.
+- The active release gate does not invoke the removed helper.
+- Phase6 generator/config analysis surfaces remain in the repo for diagnostic or future legacy-only work.
+
+### Verification
+
+Passed:
+- `package.json` JSON parse
+- workflow YAML parse
+- grep confirmed `deploy-phase6.mjs` no longer exists in `scripts/cloudflare/`
+- `pnpm release:verify`
+
+### Remaining residue after wave 4
+
+Still present as legacy/diagnostic debt:
+- generated-artifact patch/checker layer
+- phase6 generator/config surface (`build-phase6-workers.mjs`, topology contract, related tests)
+- alias/shim and server-actions contract scripts
+- historical analysis docs that still reference removed phase6 deploy helper as past state
+
+### Current conclusion
+
+The repo no longer ships a live phase6 deploy CLI in the main tree. That makes the operator surface more honestly stock-first: Route B commands remain green, while any future phase6 revival now requires an explicit legacy-only reintroduction instead of accidental reuse of an old helper.

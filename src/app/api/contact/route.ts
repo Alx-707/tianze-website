@@ -25,13 +25,15 @@ import {
   type RateLimitContext,
 } from "@/lib/api/with-rate-limit";
 import { createRequestFingerprint, withIdempotency } from "@/lib/idempotency";
+import {
+  createCanonicalContactFingerprintFromUnknown,
+  submitCanonicalContactSubmission,
+} from "@/lib/contact/submit-canonical-contact";
 import { logger, sanitizeIP, sanitizeLogContext } from "@/lib/logger";
 import {
   getContactFormStats,
   validateAdminAccess,
-  validateFormData,
 } from "@/app/api/contact/contact-api-validation";
-import { processFormSubmission } from "@/lib/contact-form-processing";
 import { API_ERROR_CODES } from "@/constants/api-error-codes";
 import {
   HTTP_BAD_REQUEST,
@@ -64,31 +66,32 @@ const POST_RATE_LIMITED = withRateLimit(
         const startTime = Date.now();
 
         try {
-          const validation = await validateFormData(parsedBody.data, clientIP);
-          if (!validation.success || !validation.data) {
-            return {
-              success: false as const,
-              errorCode:
-                validation.errorCode ??
-                API_ERROR_CODES.CONTACT_VALIDATION_FAILED,
-              statusCode: validation.statusCode ?? HTTP_BAD_REQUEST,
-            };
-          }
-
-          const submissionResult = await processFormSubmission(
-            validation.data,
+          const submission = await submitCanonicalContactSubmission(
+            parsedBody.data,
             {
+              clientIP,
               requestId: observability.requestId,
             },
           );
+          if (!submission.success) {
+            return {
+              success: false as const,
+              errorCode:
+                submission.errorCode ??
+                API_ERROR_CODES.CONTACT_VALIDATION_FAILED,
+              statusCode: submission.statusCode ?? HTTP_BAD_REQUEST,
+            };
+          }
+
+          const { submissionResult } = submission;
           const processingTime = Date.now() - startTime;
 
           if (process.env.NODE_ENV !== "production") {
             logger.info(
               "Contact form submitted successfully",
               sanitizeLogContext({
-                email: validation.data.email,
-                company: validation.data.company,
+                email: submission.data.email,
+                company: submission.data.company,
                 ip: clientIP,
                 processingTime,
                 emailSent: submissionResult.emailSent,
@@ -122,7 +125,9 @@ const POST_RATE_LIMITED = withRateLimit(
       },
       {
         required: true,
-        fingerprint: createRequestFingerprint(request, parsedBody.bodyHash),
+        fingerprint:
+          createCanonicalContactFingerprintFromUnknown(parsedBody.data) ??
+          createRequestFingerprint(request, parsedBody.bodyHash),
       },
     );
   },

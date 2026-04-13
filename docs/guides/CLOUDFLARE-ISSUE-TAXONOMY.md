@@ -74,12 +74,18 @@ Do not describe this as:
 
 - “preview proof failed, so production must be broken”
 
+## Contact-page Recovery Boundary
+
+- As of 2026-04-09, `pnpm proof:cf:preview-deployed` passed and `/en/contact` + `/zh/contact` recovered to 200. Treat that as a current-site runtime regression fixed, not as proof that the API line is healthy.
+- The failure bucket was the current-site runtime regression side: `Uncached data was accessed outside of <Suspense>` and the Cloudflare runtime `setTimeout()` / Cache Components boundary.
+- If deeper API worker paths still fail in `server-functions/${target}/index.mjs`, `default/handler.mjs`, or static route-wrapper experiments, keep them in generated-artifact / runtime mismatch debt unless stronger deployed proof says otherwise.
+
 ## Proof Mapping
 
 | Bucket | Strongest first useful proof |
 |---|---|
 | Platform entry / local runtime issue | `pnpm preview:cf` plus local diagnostics |
-| Generated artifact compatibility issue | `pnpm build:cf`, `pnpm smoke:cf:preview`, and when needed `pnpm build:cf:turbo` |
+| Generated artifact compatibility issue | `pnpm build:cf` plus generated-artifact diagnostic blockers and `pnpm smoke:cf:preview` |
 | Current site runtime regression | page-level tests, `pnpm build`, `pnpm build:cf`, `pnpm smoke:cf:preview` |
 | Final deployed behavior issue | `pnpm smoke:cf:deploy -- --base-url <url>` |
 
@@ -93,8 +99,27 @@ When documenting or reporting a Cloudflare failure:
 
 Example:
 
+- “Generated artifact compatibility issue; build log blocker failed on `Unexpected loadManifest` before preview proof.”
 - “Generated artifact compatibility issue; local preview proof failed with a manifest load regression.”
 - “Final deployed behavior issue; deployed smoke failed on `/api/health`.”
+
+## Generated-Artifact Contract Hint
+
+- Current contract source: retired from the main tree in wave 8
+- If the blocker script fails, keep the diagnosis in bucket 2 unless stronger proof shows a current-site runtime bug.
+
+## Contact-page / API Debt Boundary
+
+The recovered contact page and the unresolved deeper API mismatch must stay in different buckets:
+
+- Bucket 3 is closed for the contact page when `pnpm proof:cf:preview-deployed` passes and `/en/contact` + `/zh/contact` return 200 again. That recovery was a current-site runtime regression, not API closure.
+- Bucket 2 remains open for deeper API-worker debt until deployed proof says otherwise. Keep failures here in generated-artifact / runtime mismatch territory.
+
+Confirmed API failure families that still belong to bucket 2:
+
+- `server-functions/${target}/index.mjs` paths that assume fs, `BUILD_ID`, or `.env` access in ways the current Cloudflare path does not support
+- `default/handler.mjs` paths that dynamically require generated API route modules
+- static route-wrapper experiments that depend on `__dirname` or `next/dist/server/node-environment*` internals
 
 ## Related Canonical Docs
 

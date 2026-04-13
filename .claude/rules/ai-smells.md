@@ -99,9 +99,9 @@ Use this file as the single source of truth for project-specific AI smell review
 - Exceptions: temporary compatibility wrappers that transparently proxy the canonical source.
 - New occurrences: block on critical identity surfaces.
 
-### 13. Site-Specific Copy Leaking Into Shared Base Bundles
+### 13. Site Truth Drifting Back Out Of Single-Site Sources
 
-- Definition: non-default-site homepage/contact/SEO copy is edited directly in `messages/**` even though `src/sites/**/messages/**` already exists.
-- Review check: should every site inherit this wording, or was the shared bundle just the fastest place to paste it?
-- Exceptions: intentionally global copy that all sites must share.
+- Definition: brand identity, contact facts, SEO defaults, navigation copy, or product-structure copy is edited in scattered wrappers or page-local strings instead of the current single-site truth sources (`src/config/single-site.ts`, `src/config/site-types.ts`, `src/config/single-site-product-catalog.ts`, and shared `messages/**` split bundles).
+- Review check: is this change preserving the current single-site truth model, or reintroducing scattered ownership because it was the fastest place to paste it?
+- Exceptions: transparent compatibility wrappers that only consume the canonical source without inventing new truth.
 - New occurrences on homepage, contact, products, SEO, or structured-data copy: strong review.

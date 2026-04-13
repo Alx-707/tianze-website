@@ -1,0 +1,50 @@
+## Task 8 — Route B synthesis
+
+Date: 2026-04-10
+Plan: /Users/Data/Warehouse/Pipe/tianze-website/.sisyphus/plans/fully-stock-opennext.md
+
+### Route B definition
+
+Route B means: pursue strict fully stock OpenNext on Cloudflare **only by explicitly accepting a weaker proof model**.
+
+### Verdict
+
+Route B is **conditionally feasible**.
+
+### Why it is feasible
+
+1. Direct stock build already works.
+   - Evidence: `/Users/Data/Warehouse/Pipe/tianze-website/.sisyphus/evidence/fully-stock-task-2-stock-build.txt`
+
+2. Direct stock local preview already works for the current page/header/cookie smoke scope.
+   - Evidence: `/Users/Data/Warehouse/Pipe/tianze-website/.sisyphus/evidence/fully-stock-task-3-stock-preview.txt`
+
+3. Wrapper audit shows major non-stock orchestration can likely be thinned if the proof model is relaxed.
+   - Evidence: `/Users/Data/Warehouse/Pipe/tianze-website/.sisyphus/evidence/fully-stock-task-5-wrapper-audit.txt`
+
+4. phase6 is a major non-stock topology source and is removable/simplifiable in principle if the replacement proof model is accepted.
+   - Evidence: `/Users/Data/Warehouse/Pipe/tianze-website/.sisyphus/evidence/fully-stock-task-6-phase6-audit.txt`
+
+### Required proof downgrades
+
+Route B would require explicit acceptance that current proof strength is not preserved.
+
+Likely downgrades include:
+- local stock preview remains page/header/cookie-oriented rather than deployed/API-complete truth
+- current stronger phase6 dry-run proof may be removed from the canonical path
+- generated-artifact compat/checker layers currently used to preserve stronger repo-specific proof may be retired from scope
+- repo-specific deployment/runtime controls may be simplified away in favor of stock alignment
+
+### What Route B does NOT mean
+
+It does not mean “everything is already proven stock.”
+
+It means:
+- the repo can likely move to a simpler stock path,
+- but only if the team is willing to stop demanding today’s stronger proof/control model.
+
+### Conclusion
+
+Task 8 result:
+- Route B is feasible **only if proof downgrade is explicitly accepted and documented**.
+- Without that explicit policy change, Route B cannot be treated as automatically approved.

@@ -1,0 +1,45 @@
+## Preview /api/health middleware short-circuit fix
+
+Date: 2026-04-12
+
+### Goal
+
+Preserve the `/api/health` contract on deployed preview even when the preview API runtime wrapper fails before the route handler executes.
+
+### Root-cause evidence
+
+- deployed preview `/api/health` returned plain-text `500 Internal Server Error`
+- response did **not** include `x-request-id` or `x-observability-surface`
+- route implementation itself is trivial and test-backed
+- unit/integration tests for `/api/health` were green
+
+This pointed away from business logic and toward a preview runtime wrapper / generated-route boundary failure occurring before `src/app/api/health/route.ts` was reached.
+
+### Change made
+
+Added a narrow middleware short-circuit for `/api/health` in `src/middleware.ts`:
+
+- returns `200`
+- returns `{ status: "ok" }`
+- sets `cache-control: no-store`
+- preserves `x-request-id`
+- sets `x-observability-surface: cache-health`
+
+The middleware matcher now explicitly includes `/api/health`.
+
+### Safety
+
+- no changes to the health route itself
+- no change to other API paths
+- middleware path is narrow and contract-specific
+
+### Verification
+
+Passed:
+- `pnpm exec vitest run src/__tests__/middleware-locale-cookie.test.ts tests/integration/api/health.test.ts tests/integration/api/cache-health-contract.test.ts`
+- `pnpm preview:preflight:cf`
+- `pnpm release:verify`
+
+### Next external step
+
+Re-run the Cloudflare preview deploy workflow so post-deploy smoke can confirm whether the deployed preview `/api/health` now returns 200.

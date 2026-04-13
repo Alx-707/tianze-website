@@ -19,11 +19,11 @@ This file is a reviewer-facing summary, not the final source of truth when canon
 
 ## Current Evolution Rule
 
-- The repository now has a landed site registry, site-specific message overlays, and a second-site pilot build path.
+- The repository is currently on a single-site truth model, with site identity and product-catalog truth anchored in `src/config/single-site.ts`, `src/config/site-types.ts`, and `src/config/single-site-product-catalog.ts`.
 - Quality review must still distinguish:
   - structure landed
   - behavior proven
-- Do not declare a site-aware change safe only because the registry compiles; pair it with at least one non-default-site proof run.
+- Do not declare a site-identity or cutover change safe only because the config compiles; pair it with the relevant single-site proof or cutover preflight.
 
 ## Complexity Limits
 
@@ -98,13 +98,13 @@ Flow: type-check → lint → format → test → security → build → lightho
   - Enforced by `scripts/release-proof.sh`
 - Preview-only degraded modes are not release proof
   - They may exist for preview/debug workflows, but must stay out of final proof claims
-- Do not declare multi-site readiness only because a site registry or site key exists
+- Do not declare site-identity or cutover readiness complete only because config structure exists
   - readiness requires behavior proof, not just structure scaffolding
-- Do not declare site-identity cleanup complete while product catalog or default market structure still bypass `src/sites/**`
-  - site registry, site facts, navigation, footer, and product catalog must all agree on the same active site truth
-- When a change touches `src/sites/**`, `src/sites/**/messages/**`, or `NEXT_PUBLIC_SITE_KEY` behavior, include at least one site-specific proof run
-  - preferred: `pnpm build:site:equipment`
-  - stronger platform proof: `pnpm build:cf:site:equipment`
+- Do not declare single-site cleanup complete while site identity, navigation, footer, default SEO, and product catalog disagree on the active truth source
+  - `src/config/single-site.ts`, `src/config/site-types.ts`, and `src/config/single-site-product-catalog.ts` must agree with their wrapper consumers
+- When a change touches single-site truth or former cutover surfaces, include the relevant current proof run
+  - preferred: `pnpm preflight:site-cutover`
+  - stricter cutover proof: `pnpm preflight:site-cutover:strict`
 
 ## Dependency Upgrade Gate
 

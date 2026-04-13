@@ -1,12 +1,15 @@
+import { readFile } from "node:fs/promises";
 import { URL } from "node:url";
 
 const DEFAULT_BASE_URL = process.env.DEPLOY_SMOKE_BASE_URL || "";
+const DEFAULT_MANIFEST_PATH = process.env.DEPLOY_MANIFEST_PATH || "";
 const REQUEST_TIMEOUT_MS = 30000;
 const REQUEST_RETRIES = 2;
 
 function parseArgs(argv) {
   const args = {
-    baseUrl: DEFAULT_BASE_URL,
+    baseUrl: "",
+    manifestPath: DEFAULT_MANIFEST_PATH,
     headerName: process.env.DEPLOY_SMOKE_HEADER_NAME || "",
     headerValue: process.env.DEPLOY_SMOKE_HEADER_VALUE || "",
   };
@@ -23,6 +26,11 @@ function parseArgs(argv) {
       continue;
     }
 
+    if (arg === "--manifest" && i + 1 < argv.length) {
+      args.manifestPath = argv[++i];
+      continue;
+    }
+
     if (arg === "--header-name" && i + 1 < argv.length) {
       args.headerName = argv[++i];
       continue;
@@ -36,10 +44,6 @@ function parseArgs(argv) {
     throw new Error(`Unknown argument: ${arg}`);
   }
 
-  if (!args.baseUrl) {
-    throw new Error("Missing required --base-url");
-  }
-
   if (Boolean(args.headerName) !== Boolean(args.headerValue)) {
     throw new Error(
       "Both --header-name and --header-value must be provided together",
@@ -47,6 +51,37 @@ function parseArgs(argv) {
   }
 
   return args;
+}
+
+async function resolveBaseUrl(baseUrl, manifestPath) {
+  if (baseUrl) {
+    return baseUrl;
+  }
+
+  if (manifestPath) {
+    const rawManifest = await readFile(manifestPath, "utf8");
+    const manifest = JSON.parse(rawManifest);
+    const manifestUrl = manifest.gatewayUrl || manifest.primaryUrl;
+
+    if (!manifestUrl) {
+      throw new Error(
+        `Deployment manifest does not contain gatewayUrl/primaryUrl: ${manifestPath}`,
+      );
+    }
+
+    console.log(
+      `[post-deploy-smoke] Using deployment manifest ${manifestPath}`,
+    );
+    return manifestUrl;
+  }
+
+  if (DEFAULT_BASE_URL) {
+    return DEFAULT_BASE_URL;
+  }
+
+  throw new Error(
+    "Missing required --base-url (or --manifest / DEPLOY_MANIFEST_PATH)",
+  );
 }
 
 function buildHeaders(headerName, headerValue) {
@@ -109,7 +144,13 @@ function assert(condition, message, failures) {
 }
 
 async function main() {
-  const { baseUrl, headerName, headerValue } = parseArgs(process.argv);
+  const {
+    baseUrl: rawBaseUrl,
+    manifestPath,
+    headerName,
+    headerValue,
+  } = parseArgs(process.argv);
+  const baseUrl = await resolveBaseUrl(rawBaseUrl, manifestPath);
   const headers = buildHeaders(headerName, headerValue);
   const failures = [];
 

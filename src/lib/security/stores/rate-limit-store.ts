@@ -1,317 +1,166 @@
-/**
- * Rate Limit Store — Interface and Implementations
- *
- * Extracted from distributed-rate-limit.ts for reuse across
- * rate limiting and other security modules.
- *
- * Storage backend selection (runtime, in priority order):
- * - Upstash Redis (if UPSTASH_REDIS_REST_URL configured)
- * - Vercel KV     (if KV_REST_API_URL configured)
- * - In-memory     (local development / fallback — not cross-instance safe)
- *
- * D1 adapter is planned (Task 025) but not yet implemented.
- */
-
 import { logger } from "@/lib/logger";
-import { ONE, ZERO } from "@/constants";
+import { HTTP_NOT_FOUND } from "@/constants/core";
 
-// ==================== Interface ====================
-
+/**
+ * Key-value pair interface representing rate limit data
+ */
 export interface RateLimitEntry {
   count: number;
-  resetTime: number;
+  expiresAt: number; // Unix timestamp in milliseconds
 }
 
+/**
+ * Interface for rate limit storage implementations
+ */
 export interface RateLimitStore {
+  /**
+   * Increment the counter for a key and return the new count
+   * @param key - The rate limit key (e.g., IP address)
+   * @param ttlSeconds - Time-to-live in seconds
+   * @returns The new count after increment
+   */
+  increment(key: string, ttlSeconds: number): Promise<RateLimitEntry>;
+
+  /**
+   * Get the current count for a key
+   */
   get(key: string): Promise<RateLimitEntry | null>;
-  set(key: string, entry: RateLimitEntry, ttlMs: number): Promise<void>;
-  increment(
-    key: string,
-    windowMs: number,
-  ): Promise<{ count: number; resetTime: number }>;
+
+  /**
+   * Delete a key
+   */
+  delete(key: string): Promise<void>;
 }
 
-// ==================== In-Memory Store ====================
-
-export class MemoryRateLimitStore implements RateLimitStore {
-  private store = new Map<
-    string,
-    { entry: RateLimitEntry; expiresAt: number }
-  >();
-  private warned = false;
-
-  constructor() {
-    this.warnAboutMemoryStore();
-  }
-
-  private warnAboutMemoryStore(): void {
-    if (!this.warned) {
-      logger.warn(
-        "[Rate Limit] Using in-memory store. Rate limits will not persist across serverless instances. " +
-          "Configure UPSTASH_REDIS_REST_URL or KV_REST_API_URL for distributed rate limiting.",
-      );
-      this.warned = true;
-    }
-  }
-
-  // eslint-disable-next-line require-await -- Interface requires async for distributed store compatibility
-  async get(key: string): Promise<RateLimitEntry | null> {
-    const stored = this.store.get(key);
-    if (!stored) return null;
-
-    const now = Date.now();
-    if (now > stored.expiresAt) {
-      this.store.delete(key);
-      return null;
-    }
-
-    return stored.entry;
-  }
-
-  // eslint-disable-next-line require-await -- Interface requires async for distributed store compatibility
-  async set(key: string, entry: RateLimitEntry, ttlMs: number): Promise<void> {
-    const expiresAt = Date.now() + ttlMs;
-    this.store.set(key, { entry, expiresAt });
-  }
-
-  async increment(
-    key: string,
-    windowMs: number,
-  ): Promise<{ count: number; resetTime: number }> {
-    const now = Date.now();
-    const stored = this.store.get(key);
-
-    if (!stored || now > stored.expiresAt) {
-      const newEntry: RateLimitEntry = {
-        count: ONE,
-        resetTime: now + windowMs,
-      };
-      await this.set(key, newEntry, windowMs);
-      return newEntry;
-    }
-
-    stored.entry.count += ONE;
-    return stored.entry;
-  }
-
-  cleanup(): void {
-    const now = Date.now();
-    for (const [key, stored] of this.store.entries()) {
-      if (now > stored.expiresAt) {
-        this.store.delete(key);
-      }
-    }
-  }
-}
-
-// ==================== Redis Store (Upstash) ====================
-
-export class RedisRateLimitStore implements RateLimitStore {
-  private baseUrl: string;
+/**
+ * Redis-backed rate limit store using Upstash REST API
+ */
+class RedisRateLimitStore implements RateLimitStore {
+  private url: string;
   private token: string;
-  private static readonly INCREMENT_SCRIPT = `
-local current = redis.call("INCR", KEYS[1])
-if current == 1 then
-  redis.call("PEXPIRE", KEYS[1], ARGV[1])
-end
-local ttl = redis.call("PTTL", KEYS[1])
-return {current, ttl}
-`.trim();
 
   constructor(url: string, token: string) {
-    this.baseUrl = url.replace(/\/$/, "");
+    this.url = url;
     this.token = token;
   }
 
-  private async redisCommand<T>(
-    commands: (string | number)[],
-  ): Promise<T | null> {
-    const response = await fetch(`${this.baseUrl}`, {
+  async increment(key: string, ttlSeconds: number): Promise<RateLimitEntry> {
+    const pipeline = [
+      ["INCR", key],
+      ["EXPIRE", key, ttlSeconds.toString()],
+    ];
+
+    const response = await fetch(`${this.url}/pipeline`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${this.token}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(commands),
+      body: JSON.stringify(pipeline),
     });
 
     if (!response.ok) {
+      logger.error(
+        `[Rate Limit] Upstash pipeline failed: ${response.statusText}`,
+      );
       throw new Error(
-        `[Rate Limit] Redis command failed with status ${response.status}`,
+        `Upstash rate limit operation failed: ${response.status}`,
       );
     }
 
-    const data = (await response.json()) as { result: T };
-    return data.result;
+    const data = await response.json();
+    const count = data.result?.[0];
+
+    if (typeof count !== "number") {
+      throw new Error(
+        "[Rate Limit] Invalid Upstash response: expected numeric count",
+      );
+    }
+
+    const expiresAt = Date.now() + ttlSeconds * 1000;
+    return { count, expiresAt };
   }
 
   async get(key: string): Promise<RateLimitEntry | null> {
-    const result = await this.redisCommand<string | null>(["GET", key]);
-    if (!result) return null;
-
-    const ttlMs = await this.redisCommand<number>(["PTTL", key]);
-    if (!ttlMs || ttlMs <= 0) {
-      return null;
-    }
-
-    try {
-      const count = Number.parseInt(result, 10);
-      if (!Number.isFinite(count)) {
-        throw new Error("Rate limit counter is not a number");
-      }
-
-      return {
-        count,
-        resetTime: Date.now() + ttlMs,
-      };
-    } catch (error) {
-      // Treat corrupted data as a storage error so the caller's failureMode
-      // logic handles it (fail-closed presets deny; fail-open presets degrade).
-      logger.error(
-        "[Rate Limit] Redis entry parse failure — treating as storage error",
-        {
-          keyPrefix: key.slice(0, 16),
-          valueLength: result.length,
-          error,
-        },
-      );
-      throw error;
-    }
-  }
-
-  async set(key: string, entry: RateLimitEntry, ttlMs: number): Promise<void> {
-    await this.redisCommand([
-      "SET",
-      key,
-      entry.count,
-      "PX",
-      Math.max(ttlMs, ONE),
-    ]);
-  }
-
-  async increment(
-    key: string,
-    windowMs: number,
-  ): Promise<{ count: number; resetTime: number }> {
-    const result = await this.redisCommand<[number, number]>([
-      "EVAL",
-      RedisRateLimitStore.INCREMENT_SCRIPT,
-      ONE,
-      key,
-      Math.max(windowMs, ONE),
-    ]);
-
-    if (!result || result.length < 2) {
-      throw new Error("[Rate Limit] Redis increment returned invalid response");
-    }
-
-    const [count, ttlMs] = result;
-    if (!Number.isFinite(count) || !Number.isFinite(ttlMs)) {
-      throw new Error(
-        "[Rate Limit] Redis increment returned non-numeric values",
-      );
-    }
-
-    return {
-      count,
-      resetTime: Date.now() + Math.max(ttlMs, ZERO),
-    };
-  }
-}
-
-// ==================== KV Store (Vercel KV) ====================
-
-export class KVRateLimitStore implements RateLimitStore {
-  private baseUrl: string;
-  private token: string;
-
-  constructor(url: string, token: string) {
-    this.baseUrl = url.replace(/\/$/, "");
-    this.token = token;
-  }
-
-  private async kvCommand<T>(
-    method: string,
-    path: string,
-    body?: unknown,
-  ): Promise<T | null> {
-    const response = await fetch(`${this.baseUrl}${path}`, {
-      method,
+    const response = await fetch(`${this.url}/get/${key}`, {
+      method: "GET",
       headers: {
         Authorization: `Bearer ${this.token}`,
-        "Content-Type": "application/json",
       },
-      ...(body ? { body: JSON.stringify(body) } : {}),
     });
 
     if (!response.ok) {
+      if (response.status === HTTP_NOT_FOUND) {
+        return null;
+      }
       throw new Error(
-        `[Rate Limit] KV command failed with status ${response.status}`,
+        `[Rate Limit] Upstash get failed: ${response.statusText}`,
       );
     }
 
-    return response.json() as Promise<T>;
+    const data = await response.json();
+    const count = parseInt(data.result || "0", 10);
+    const expiresAt = Date.now() + 60 * 1000; // Conservative: assume 60s TTL
+    return { count, expiresAt };
   }
 
-  async get(key: string): Promise<RateLimitEntry | null> {
-    const result = await this.kvCommand<{ result: string | null }>(
-      "GET",
-      `/get/${key}`,
-    );
-    if (!result?.result) return null;
-
-    try {
-      return JSON.parse(result.result) as RateLimitEntry;
-    } catch (error) {
-      // Treat corrupted data as a storage error so the caller's failureMode
-      // logic handles it (fail-closed presets deny; fail-open presets degrade).
-      logger.error(
-        "[Rate Limit] KV entry parse failure — treating as storage error",
-        {
-          keyPrefix: key.slice(0, 16),
-          valueLength: result.result.length,
-          error,
-        },
-      );
-      throw error;
-    }
-  }
-
-  async set(key: string, entry: RateLimitEntry, ttlMs: number): Promise<void> {
-    const ttlSeconds = Math.ceil(ttlMs / 1000);
-    await this.kvCommand("POST", `/set/${key}`, {
-      value: JSON.stringify(entry),
-      ex: ttlSeconds,
+  async delete(key: string): Promise<void> {
+    const response = await fetch(`${this.url}/del/${key}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${this.token}`,
+      },
     });
-  }
 
-  async increment(
-    key: string,
-    windowMs: number,
-  ): Promise<{ count: number; resetTime: number }> {
-    const now = Date.now();
-    const existing = await this.get(key);
-
-    if (!existing || now > existing.resetTime) {
-      const newEntry: RateLimitEntry = {
-        count: ONE,
-        resetTime: now + windowMs,
-      };
-      await this.set(key, newEntry, windowMs);
-      return newEntry;
+    if (!response.ok) {
+      logger.error(
+        `[Rate Limit] Failed to delete rate limit key: ${response.statusText}`,
+      );
     }
-
-    existing.count += ONE;
-    const remainingTtl = existing.resetTime - now;
-    await this.set(key, existing, remainingTtl);
-    return existing;
   }
 }
 
-// ==================== Store Factory ====================
+/**
+ * In-memory rate limit store (for development/testing only)
+ */
+class MemoryRateLimitStore implements RateLimitStore {
+  private store = new Map<string, RateLimitEntry>();
+
+  increment(key: string, ttlSeconds: number): Promise<RateLimitEntry> {
+    const now = Date.now();
+    const expiresAt = now + ttlSeconds * 1000;
+
+    const entry = this.store.get(key);
+    if (entry && entry.expiresAt > now) {
+      entry.count += 1;
+      entry.expiresAt = expiresAt;
+      return Promise.resolve({ count: entry.count, expiresAt });
+    }
+
+    const newEntry = { count: 1, expiresAt };
+    this.store.set(key, newEntry);
+    return Promise.resolve(newEntry);
+  }
+
+  get(key: string): Promise<RateLimitEntry | null> {
+    const entry = this.store.get(key);
+    if (!entry || entry.expiresAt < Date.now()) {
+      return Promise.resolve(null);
+    }
+    return Promise.resolve(entry);
+  }
+
+  delete(key: string): Promise<void> {
+    this.store.delete(key);
+    return Promise.resolve();
+  }
+}
+
+export { MemoryRateLimitStore };
 
 /**
- * Create the appropriate rate limit store based on available configuration
+ * Factory function to create the appropriate rate limit store
+ * Production requires Upstash Redis; development can use in-memory fallback
  */
 export function createRateLimitStore(): RateLimitStore {
   const upstashUrl = process.env.UPSTASH_REDIS_REST_URL;
@@ -324,32 +173,26 @@ export function createRateLimitStore(): RateLimitStore {
 
   const kvUrl = process.env.KV_REST_API_URL;
   const kvToken = process.env.KV_REST_API_TOKEN;
-  const allowMemoryFallback = process.env.ALLOW_MEMORY_RATE_LIMIT === "true";
   const isProduction = process.env.NODE_ENV === "production";
 
   if (isProduction) {
     if (kvUrl && kvToken) {
       throw new Error(
-        "[Rate Limit] KV-only rate limiting is not allowed in production. Configure Upstash Redis or explicitly opt into ALLOW_MEMORY_RATE_LIMIT=true.",
+        "[Rate Limit] KV-only rate limiting is not allowed in production. Configure Upstash Redis for distributed rate limiting.",
       );
     }
 
-    if (!allowMemoryFallback) {
-      throw new Error(
-        "[Rate Limit] Production requires Upstash Redis. Set ALLOW_MEMORY_RATE_LIMIT=true only for an explicit degraded override.",
-      );
-    }
-
-    logger.warn(
-      "[Rate Limit] Falling back to in-memory rate limiting in production due to ALLOW_MEMORY_RATE_LIMIT=true.",
+    throw new Error(
+      "[Rate Limit] Production requires Upstash Redis. Configure UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN.",
     );
-    return new MemoryRateLimitStore();
   }
 
   if (kvUrl && kvToken) {
-    logger.info("[Rate Limit] Using Vercel KV store");
-    return new KVRateLimitStore(kvUrl, kvToken);
+    logger.warn(
+      "[Rate Limit] KV store detected but Upstash Redis is preferred. Using in-memory fallback for development.",
+    );
   }
 
+  logger.info("[Rate Limit] Using in-memory store (development only)");
   return new MemoryRateLimitStore();
 }

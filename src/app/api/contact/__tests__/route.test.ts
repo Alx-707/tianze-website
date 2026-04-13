@@ -10,6 +10,7 @@ const {
   mockResendService,
   mockLogger,
   mockValidationHelpers,
+  mockSubmitCanonicalContactSubmission,
 } = vi.hoisted(() => ({
   mockAirtableService: {
     isReady: vi.fn(),
@@ -30,6 +31,7 @@ const {
     validateEmail: vi.fn(),
     sanitizeInput: vi.fn(),
   },
+  mockSubmitCanonicalContactSubmission: vi.fn(),
 }));
 
 // Mock dependencies
@@ -87,6 +89,11 @@ vi.mock("@/lib/contact-form-processing", () => ({
   }),
 }));
 
+vi.mock("@/lib/contact/submit-canonical-contact", () => ({
+  submitCanonicalContactSubmission: mockSubmitCanonicalContactSubmission,
+  createCanonicalContactFingerprintFromUnknown: vi.fn(() => "CONTACT:test"),
+}));
+
 // Mock process.env for Turnstile verification
 Object.defineProperty(process, "env", {
   value: {
@@ -116,6 +123,33 @@ describe("Contact API Route", () => {
       recordCreated: true,
       referenceId: "ref-123",
     } as any);
+
+    const { validateFormData } =
+      await import("@/app/api/contact/contact-api-validation");
+    mockSubmitCanonicalContactSubmission.mockImplementation(
+      async (
+        body: unknown,
+        options: { clientIP: string; requestId?: string },
+      ) => {
+        const validation = await vi.mocked(validateFormData)(
+          body,
+          options.clientIP,
+        );
+        if (!validation.success || !validation.data) {
+          return validation;
+        }
+        const submissionResult = await vi.mocked(
+          contactFormProcessing.processFormSubmission,
+        )(validation.data);
+        return {
+          success: true,
+          error: null,
+          details: null,
+          data: validation.data,
+          submissionResult,
+        };
+      },
+    );
   });
 
   describe("POST /api/contact", () => {

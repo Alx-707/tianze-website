@@ -1,0 +1,28 @@
+=== F3 WAVE: CF_APPLY_GENERATED_PATCH=true pnpm preview:cf (server startup) ===
+DATE: 2026-04-10
+COMMAND: CF_APPLY_GENERATED_PATCH=true pnpm preview:cf (tmux session: f3-preview)
+RETAINED_PATCH_MODE: ACTIVE (CF_APPLY_GENERATED_PATCH=true, applied via internal build:cf)
+
+RESULT: PASS — Server started and endpoint is reachable
+
+preview:cf sequence:
+  1. clean:next-artifacts → .next, .open-next, .wrangler/tmp removed
+  2. build:cf → exception contract printed, CF_APPLY_GENERATED_PATCH accepted
+     - OpenNext Cloudflare build complete
+     - cf-prefetch-patch applied to apiLead, apiOps, apiWhatsapp, default handler
+  3. opennextjs-cloudflare preview --env preview → started
+
+Wrangler startup:
+  ⛅️ wrangler 4.79.0
+  R2 local cache populated: 55 entries
+  D1 table created
+  Bindings: DO, D1, R2, WORKER_SELF_REFERENCE [not connected], ASSETS, env vars
+  ⎔ Starting local server...
+  [wrangler:info] Ready on http://localhost:8787
+
+Readiness probe (curl http://localhost:8787/):
+  10/10 polls → HTTP 307 Temporary Redirect (expected: locale redirect to /en or /zh)
+  Timing: 2-40ms response time
+
+ENDPOINT STATUS: REACHABLE and RESPONDING CORRECTLY
+NOTE: HTTP 307 is the expected locale-redirect behavior for root path.

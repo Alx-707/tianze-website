@@ -1,0 +1,48 @@
+## Fully-stock cleanup wave 5
+
+Date: 2026-04-11
+
+### Goal
+
+Retire the legacy server-actions secret sync/contract/checker surface that no longer has a live operational entrypoint after phase6 deploy removal.
+
+### Changes made
+
+1. Removed these files from the main tree:
+   - `scripts/cloudflare/sync-server-actions-key.mjs`
+   - `scripts/cloudflare/server-actions-secret-contract.mjs`
+   - `scripts/cloudflare/check-server-actions-secret-contract.mjs`
+2. Updated canonical/retained docs:
+   - `docs/guides/CLOUDFLARE-RETAINED-EXCEPTION-REGISTER.md`
+   - `docs/guides/CANONICAL-TRUTH-REGISTRY.md`
+   - `docs/guides/RELEASE-PROOF-RUNBOOK.md`
+   - `docs/guides/STOCK-MVP-DEPLOYMENT-RUNBOOK.md`
+
+### Why this wave was safe
+
+- The removed files were not part of canonical Route B commands in `package.json`.
+- They were legacy helpers for the old phase6 split-worker deploy surface.
+- The phase6 deploy helper had already been removed in wave 4, so this server-actions secret layer no longer had a live operational entrypoint.
+
+### Verification
+
+Passed:
+- grep confirms the three files no longer exist in `scripts/cloudflare/`
+- `pnpm build`
+- `pnpm release:verify`
+
+Residual references that remain are historical only:
+- docs analysis / archive / notes references
+- retained-exception register retirement note
+
+### Remaining residue after wave 5
+
+Still present as legacy/diagnostic debt:
+- generated-artifact patch/checker layer
+- phase6 generator/config surface (`build-phase6-workers.mjs`, topology contract, related tests)
+- alias/shim contract scripts
+- historical docs that still describe removed phase6/server-actions surfaces as past state
+
+### Current conclusion
+
+The old phase6 multi-worker server-actions key-sync layer is now gone from the main tree. The active operator surface is more honestly stock-first, and Route B release proof remains green.

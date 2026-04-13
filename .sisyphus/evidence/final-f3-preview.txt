@@ -1,0 +1,11 @@
+> tianze-website@0.1.0 smoke:cf:preview
+> node scripts/cloudflare/preview-smoke.mjs
+[cf-preview-smoke] Probing http://127.0.0.1:8787 (page/header mode)
+[cf-preview-smoke] Skipping /api/health (diagnostic-only in local preview).
+[cf-preview-smoke] Policy: local preview proves page/header/cookie behavior. API proof belongs to deployed smoke.
+[cf-preview-smoke] Reference: .claude/rules/architecture.md → Cloudflare Verification Policy
+[cf-preview-smoke] All checks passed
+
+RESULT: PASS
+DATE: 2026-04-10
+MODE: retained-patch (CF_APPLY_GENERATED_PATCH=true)

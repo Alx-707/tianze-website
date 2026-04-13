@@ -1,0 +1,1102 @@
+## Baseline started
+2026-04-10T10:27:59Z
+
+## Node
+v22.22.2
+## pnpm
+10.13.1
+
+## Current canonical commands
+pnpm build
+CF_APPLY_GENERATED_PATCH=true pnpm build:cf
+pnpm preview:cf + pnpm smoke:cf:preview
+pnpm deploy:cf:phase6:dry-run
+
+## Running pnpm build
+
+> tianze-website@0.1.0 prebuild /Users/Data/Warehouse/Pipe/tianze-website
+> node scripts/copy-translations.js && tsx scripts/generate-content-manifest.ts && pnpm content:slug-check && pnpm validate:config
+
+📦 Copying translation files to public directory...
+
+✅ Copied en/critical.json (55334 → 41138 bytes, saved 25.7%)
+✅ Copied en/deferred.json (38127 → 33012 bytes, saved 13.4%)
+✅ Copied zh/critical.json (51660 → 37464 bytes, saved 27.5%)
+✅ Copied zh/deferred.json (34580 → 29465 bytes, saved 14.8%)
+
+📊 Summary:
+   Total source size: 179701 bytes
+   Total output size: 141079 bytes
+   Total saved: 38622 bytes (21.5%)
+
+✅ All translation files copied successfully!
+Generating content manifest and import map...
+Generated manifest with 8 entries
+Output 1: /Users/Data/Warehouse/Pipe/tianze-website/reports/content-manifest.json
+Output 2: /Users/Data/Warehouse/Pipe/tianze-website/src/lib/mdx-importers.generated.ts
+Output 3: /Users/Data/Warehouse/Pipe/tianze-website/src/lib/content-manifest.generated.ts
+
+Summary:
+  posts/en: 1 files
+  posts/zh: 1 files
+  pages/en: 3 files
+  pages/zh: 3 files
+
+> tianze-website@0.1.0 content:slug-check /Users/Data/Warehouse/Pipe/tianze-website
+> node scripts/content-slug-sync.js
+
+
+🔍 MDX Slug Sync Validation
+==========================
+
+📁 Collections: posts, pages, products
+🌍 Locales: en, zh
+📄 Total files: 8
+🔗 Total pairs: 4
+
+✅ All slug validations passed!
+
+💡 All MDX content files have consistent slugs across locales.
+
+
+> tianze-website@0.1.0 validate:config /Users/Data/Warehouse/Pipe/tianze-website
+> tsx scripts/validate-production-config.ts
+
+Validating production configuration...
+
+Skipping strict runtime env contract because NODE_ENV is not production.
+
+Production config validation passed
+
+> tianze-website@0.1.0 build /Users/Data/Warehouse/Pipe/tianze-website
+> next build
+
+▲ Next.js 16.2.2 (Turbopack)
+- Cache Components enabled
+- Experiments (use with caution):
+  · optimizePackageImports
+
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+  Creating an optimized production build ...
+✓ Compiled successfully in 5.1s
+  Running TypeScript ...
+  Finished TypeScript in 5.3s ...
+  Collecting page data using 7 workers ...
+  Generating static pages using 7 workers (0/65) ...
+  Generating static pages using 7 workers (16/65) 
+  Generating static pages using 7 workers (32/65) 
+  Generating static pages using 7 workers (48/65) 
+✓ Generating static pages using 7 workers (65/65) in 1309ms
+  Finalizing page optimization ...
+
+Route (app)                                  Revalidate  Expire
+┌ ○ /_not-found
+├ ◐ /[locale]
+│ ├ /[locale]
+│ ├ /en
+│ └ /zh
+├ ◐ /[locale]/[...rest]
+│ ├ /[locale]/[...rest]
+│ ├ /en/[...rest]
+│ ├ /en/__not-found-placeholder
+│ └ [+2 more paths]
+├ ◐ /[locale]/about
+│ ├ /[locale]/about
+│ ├ /en/about
+│ └ /zh/about
+├ ◐ /[locale]/blog                                   1d      1w
+│ ├ /[locale]/blog                                   1d      1w
+│ ├ /en/blog                                         1d      1w
+│ └ /zh/blog                                         1d      1w
+├ ◐ /[locale]/blog/[slug]                            1d      1w
+│ ├ /[locale]/blog/[slug]                            1d      1w
+│ ├ /en/blog/[slug]
+│ ├ /en/blog/welcome                                 1d      1w
+│ └ [+2 more paths]
+├ ◐ /[locale]/capabilities/bending-machines
+│ ├ /[locale]/capabilities/bending-machines
+│ ├ /en/capabilities/bending-machines
+│ └ /zh/capabilities/bending-machines
+├ ◐ /[locale]/contact
+│ ├ /[locale]/contact
+│ ├ /en/contact
+│ └ /zh/contact
+├ ◐ /[locale]/oem-custom-manufacturing
+│ ├ /[locale]/oem-custom-manufacturing
+│ ├ /en/oem-custom-manufacturing
+│ └ /zh/oem-custom-manufacturing
+├ ◐ /[locale]/privacy
+│ ├ /[locale]/privacy
+│ ├ /en/privacy
+│ └ /zh/privacy
+├ ◐ /[locale]/products
+│ ├ /[locale]/products
+│ ├ /en/products
+│ └ /zh/products
+├ ◐ /[locale]/products/[market]
+│ ├ /[locale]/products/[market]
+│ ├ /en/products/[market]
+│ ├ /en/products/north-america
+│ └ [+10 more paths]
+├ ◐ /[locale]/terms
+│ ├ /[locale]/terms
+│ ├ /en/terms
+│ └ /zh/terms
+├ ƒ /api/cache/invalidate
+├ ƒ /api/contact
+├ ƒ /api/csp-report
+├ ƒ /api/health
+├ ƒ /api/inquiry
+├ ƒ /api/subscribe
+├ ƒ /api/verify-turnstile
+├ ƒ /api/whatsapp/send
+├ ƒ /api/whatsapp/webhook
+├ ○ /apple-icon.png
+├ ○ /robots.txt
+└ ƒ /sitemap.xml
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)             prerendered as static content
+◐  (Partial Prerender)  prerendered as static HTML with dynamic server-streamed content
+ƒ  (Dynamic)            server-rendered on demand
+
+
+## Running CF_APPLY_GENERATED_PATCH=true pnpm build:cf
+
+> tianze-website@0.1.0 build:cf /Users/Data/Warehouse/Pipe/tianze-website
+> node scripts/cloudflare/build-webpack.mjs
+
+[cf-webpack-build] exception contract active:
+[cf-webpack-build] bucket: generated-artifact compatibility issue
+[cf-webpack-build] status: temporary-compat-layer
+[cf-webpack-build] patch: node scripts/cloudflare/patch-prefetch-hints-manifest.mjs
+[cf-webpack-build] blocker: node scripts/cloudflare/check-generated-artifact-log.mjs cf_build.log
+[cf-webpack-build] dry-run: node scripts/cloudflare/patch-prefetch-hints-manifest.mjs --dry-run
+[cf-webpack-build] apply env: CF_APPLY_GENERATED_PATCH=true
+[cf-webpack-build] preview proof: pnpm smoke:cf:preview
+[cf-webpack-build] stronger local proof: pnpm deploy:cf:phase6:dry-run
+[cf-webpack-build] formal proof: pnpm proof:cf:preview-deployed
+[clean-next-build-artifacts] removed .next, .open-next, .wrangler/tmp from /Users/Data/Warehouse/Pipe/tianze-website
+
+> tianze-website@0.1.0 prebuild /Users/Data/Warehouse/Pipe/tianze-website
+> node scripts/copy-translations.js && tsx scripts/generate-content-manifest.ts && pnpm content:slug-check && pnpm validate:config
+
+📦 Copying translation files to public directory...
+
+✅ Copied en/critical.json (55334 → 41138 bytes, saved 25.7%)
+✅ Copied en/deferred.json (38127 → 33012 bytes, saved 13.4%)
+✅ Copied zh/critical.json (51660 → 37464 bytes, saved 27.5%)
+✅ Copied zh/deferred.json (34580 → 29465 bytes, saved 14.8%)
+
+📊 Summary:
+   Total source size: 179701 bytes
+   Total output size: 141079 bytes
+   Total saved: 38622 bytes (21.5%)
+
+✅ All translation files copied successfully!
+Generating content manifest and import map...
+Generated manifest with 8 entries
+Output 1: /Users/Data/Warehouse/Pipe/tianze-website/reports/content-manifest.json
+Output 2: /Users/Data/Warehouse/Pipe/tianze-website/src/lib/mdx-importers.generated.ts
+Output 3: /Users/Data/Warehouse/Pipe/tianze-website/src/lib/content-manifest.generated.ts
+
+Summary:
+  posts/en: 1 files
+  posts/zh: 1 files
+  pages/en: 3 files
+  pages/zh: 3 files
+
+> tianze-website@0.1.0 content:slug-check /Users/Data/Warehouse/Pipe/tianze-website
+> node scripts/content-slug-sync.js
+
+
+🔍 MDX Slug Sync Validation
+==========================
+
+📁 Collections: posts, pages, products
+🌍 Locales: en, zh
+📄 Total files: 8
+🔗 Total pairs: 4
+
+✅ All slug validations passed!
+
+💡 All MDX content files have consistent slugs across locales.
+
+
+> tianze-website@0.1.0 validate:config /Users/Data/Warehouse/Pipe/tianze-website
+> tsx scripts/validate-production-config.ts
+
+Validating production configuration...
+
+Skipping strict runtime env contract because NODE_ENV is not production.
+
+Production config validation passed
+▲ Next.js 16.2.2 (webpack)
+- Cache Components enabled
+- Experiments (use with caution):
+  · optimizePackageImports
+
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+  Creating an optimized production build ...
+✓ Compiled successfully in 11.7s
+  Running TypeScript ...
+  Finished TypeScript in 4.6s ...
+  Collecting page data using 7 workers ...
+  Generating static pages using 7 workers (0/65) ...
+  Generating static pages using 7 workers (16/65) 
+  Generating static pages using 7 workers (32/65) 
+  Generating static pages using 7 workers (48/65) 
+✓ Generating static pages using 7 workers (65/65) in 3.4s
+  Finalizing page optimization ...
+  Collecting build traces ...
+
+Route (app)                                  Revalidate  Expire
+┌ ○ /_not-found
+├ ◐ /[locale]
+│ ├ /[locale]
+│ ├ /en
+│ └ /zh
+├ ◐ /[locale]/[...rest]
+│ ├ /[locale]/[...rest]
+│ ├ /en/[...rest]
+│ ├ /en/__not-found-placeholder
+│ └ [+2 more paths]
+├ ◐ /[locale]/about
+│ ├ /[locale]/about
+│ ├ /en/about
+│ └ /zh/about
+├ ◐ /[locale]/blog                                   1d      1w
+│ ├ /[locale]/blog                                   1d      1w
+│ ├ /en/blog                                         1d      1w
+│ └ /zh/blog                                         1d      1w
+├ ◐ /[locale]/blog/[slug]                            1d      1w
+│ ├ /[locale]/blog/[slug]                            1d      1w
+│ ├ /en/blog/[slug]
+│ ├ /en/blog/welcome                                 1d      1w
+│ └ [+2 more paths]
+├ ◐ /[locale]/capabilities/bending-machines
+│ ├ /[locale]/capabilities/bending-machines
+│ ├ /en/capabilities/bending-machines
+│ └ /zh/capabilities/bending-machines
+├ ◐ /[locale]/contact
+│ ├ /[locale]/contact
+│ ├ /en/contact
+│ └ /zh/contact
+├ ◐ /[locale]/oem-custom-manufacturing
+│ ├ /[locale]/oem-custom-manufacturing
+│ ├ /en/oem-custom-manufacturing
+│ └ /zh/oem-custom-manufacturing
+├ ◐ /[locale]/privacy
+│ ├ /[locale]/privacy
+│ ├ /en/privacy
+│ └ /zh/privacy
+├ ◐ /[locale]/products
+│ ├ /[locale]/products
+│ ├ /en/products
+│ └ /zh/products
+├ ◐ /[locale]/products/[market]
+│ ├ /[locale]/products/[market]
+│ ├ /en/products/[market]
+│ ├ /en/products/north-america
+│ └ [+10 more paths]
+├ ◐ /[locale]/terms
+│ ├ /[locale]/terms
+│ ├ /en/terms
+│ └ /zh/terms
+├ ƒ /api/cache/invalidate
+├ ƒ /api/contact
+├ ƒ /api/csp-report
+├ ƒ /api/health
+├ ƒ /api/inquiry
+├ ƒ /api/subscribe
+├ ƒ /api/verify-turnstile
+├ ƒ /api/whatsapp/send
+├ ƒ /api/whatsapp/webhook
+├ ○ /apple-icon.png
+├ ○ /robots.txt
+└ ƒ /sitemap.xml
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)             prerendered as static content
+◐  (Partial Prerender)  prerendered as static HTML with dynamic server-streamed content
+ƒ  (Dynamic)            server-rendered on demand
+
+Proxy environment variables detected. We'll use your proxy for fetch requests.
+
+┌─────────────────────────────┐
+│ OpenNext — Cloudflare build │
+└─────────────────────────────┘
+
+App directory: /Users/Data/Warehouse/Pipe/tianze-website
+Next.js version : 16.2.2
+@opennextjs/cloudflare version: 1.18.0
+@opennextjs/aws version: 3.9.16
+WARN Skipping Next.js build
+
+┌──────────────────────────────┐
+│ OpenNext — Generating bundle │
+└──────────────────────────────┘
+
+(node:86736) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Bundling middleware function...
+Bundling static assets...
+Bundling cache assets...
+Building server function: apiLead...
+Building server function: apiOps...
+Building server function: apiWhatsapp...
+(node:86736) Warning: Label 'Applying code patches' already exists for console.time()
+Applying code patches: 171.793ms
+(node:86736) Warning: No such label 'Applying code patches' for console.timeEnd()
+Applying code patches: 146.596ms
+Building server function: default...
+Applying code patches: 173.349ms
+# copyPackageTemplateFiles
+[35m⚙️ Bundling the OpenNext server...
+[0m
+[35mWorker saved in `.open-next/worker.js` 🚀
+[0m
+OpenNext build complete.
+[cf-prefetch-patch] exception contract active:
+[cf-prefetch-patch] bucket: generated-artifact compatibility issue
+[cf-prefetch-patch] status: temporary-compat-layer
+[cf-prefetch-patch] patch: node scripts/cloudflare/patch-prefetch-hints-manifest.mjs
+[cf-prefetch-patch] blocker: node scripts/cloudflare/check-generated-artifact-log.mjs cf_build.log
+[cf-prefetch-patch] dry-run: node scripts/cloudflare/patch-prefetch-hints-manifest.mjs --dry-run
+[cf-prefetch-patch] apply env: CF_APPLY_GENERATED_PATCH=true
+[cf-prefetch-patch] preview proof: pnpm smoke:cf:preview
+[cf-prefetch-patch] stronger local proof: pnpm deploy:cf:phase6:dry-run
+[cf-prefetch-patch] formal proof: pnpm proof:cf:preview-deployed
+[cf-prefetch-patch] generated artifacts still require compatibility patching:
+- middleware manifest loader -> default handler
+- API route requirePage async -> default handler
+- API route require() -> import() -> default handler
+- cache handler path -> .open-next/server-functions/apiLead/index.mjs
+- composable cache handler path -> .open-next/server-functions/apiLead/index.mjs
+- cache handler path -> .open-next/server-functions/apiOps/index.mjs
+- composable cache handler path -> .open-next/server-functions/apiOps/index.mjs
+- cache handler path -> .open-next/server-functions/apiWhatsapp/index.mjs
+- composable cache handler path -> .open-next/server-functions/apiWhatsapp/index.mjs
+[cf-prefetch-patch] exception contract active:
+[cf-prefetch-patch] bucket: generated-artifact compatibility issue
+[cf-prefetch-patch] status: temporary-compat-layer
+[cf-prefetch-patch] patch: node scripts/cloudflare/patch-prefetch-hints-manifest.mjs
+[cf-prefetch-patch] blocker: node scripts/cloudflare/check-generated-artifact-log.mjs cf_build.log
+[cf-prefetch-patch] dry-run: node scripts/cloudflare/patch-prefetch-hints-manifest.mjs --dry-run
+[cf-prefetch-patch] apply env: CF_APPLY_GENERATED_PATCH=true
+[cf-prefetch-patch] preview proof: pnpm smoke:cf:preview
+[cf-prefetch-patch] stronger local proof: pnpm deploy:cf:phase6:dry-run
+[cf-prefetch-patch] formal proof: pnpm proof:cf:preview-deployed
+[cf-prefetch-patch] patched cache handler paths in .open-next/server-functions/apiLead/index.mjs
+[cf-prefetch-patch] patched cache handler paths in .open-next/server-functions/apiOps/index.mjs
+[cf-prefetch-patch] patched cache handler paths in .open-next/server-functions/apiWhatsapp/index.mjs
+[cf-prefetch-patch] patched middleware manifest loader + API route requirePage async + API route require() -> import()
+
+## Running pnpm deploy:cf:phase6:dry-run
+
+> tianze-website@0.1.0 deploy:cf:phase6:dry-run /Users/Data/Warehouse/Pipe/tianze-website
+> pnpm clean:next-artifacts && pnpm build:cf:phase6 && node scripts/cloudflare/deploy-phase6.mjs --env preview --dry-run
+
+
+> tianze-website@0.1.0 clean:next-artifacts /Users/Data/Warehouse/Pipe/tianze-website
+> node scripts/clean-next-build-artifacts.mjs
+
+[clean-next-build-artifacts] removed .next, .open-next, .wrangler/tmp from /Users/Data/Warehouse/Pipe/tianze-website
+
+> tianze-website@0.1.0 build:cf:phase6 /Users/Data/Warehouse/Pipe/tianze-website
+> pnpm build:cf && node scripts/cloudflare/build-phase6-workers.mjs
+
+
+> tianze-website@0.1.0 build:cf /Users/Data/Warehouse/Pipe/tianze-website
+> node scripts/cloudflare/build-webpack.mjs
+
+[cf-webpack-build] exception contract active:
+[cf-webpack-build] bucket: generated-artifact compatibility issue
+[cf-webpack-build] status: temporary-compat-layer
+[cf-webpack-build] patch: node scripts/cloudflare/patch-prefetch-hints-manifest.mjs
+[cf-webpack-build] blocker: node scripts/cloudflare/check-generated-artifact-log.mjs cf_build.log
+[cf-webpack-build] dry-run: node scripts/cloudflare/patch-prefetch-hints-manifest.mjs --dry-run
+[cf-webpack-build] apply env: CF_APPLY_GENERATED_PATCH=true
+[cf-webpack-build] preview proof: pnpm smoke:cf:preview
+[cf-webpack-build] stronger local proof: pnpm deploy:cf:phase6:dry-run
+[cf-webpack-build] formal proof: pnpm proof:cf:preview-deployed
+[clean-next-build-artifacts] removed .next, .open-next, .wrangler/tmp from /Users/Data/Warehouse/Pipe/tianze-website
+
+> tianze-website@0.1.0 prebuild /Users/Data/Warehouse/Pipe/tianze-website
+> node scripts/copy-translations.js && tsx scripts/generate-content-manifest.ts && pnpm content:slug-check && pnpm validate:config
+
+📦 Copying translation files to public directory...
+
+✅ Copied en/critical.json (55334 → 41138 bytes, saved 25.7%)
+✅ Copied en/deferred.json (38127 → 33012 bytes, saved 13.4%)
+✅ Copied zh/critical.json (51660 → 37464 bytes, saved 27.5%)
+✅ Copied zh/deferred.json (34580 → 29465 bytes, saved 14.8%)
+
+📊 Summary:
+   Total source size: 179701 bytes
+   Total output size: 141079 bytes
+   Total saved: 38622 bytes (21.5%)
+
+✅ All translation files copied successfully!
+Generating content manifest and import map...
+Generated manifest with 8 entries
+Output 1: /Users/Data/Warehouse/Pipe/tianze-website/reports/content-manifest.json
+Output 2: /Users/Data/Warehouse/Pipe/tianze-website/src/lib/mdx-importers.generated.ts
+Output 3: /Users/Data/Warehouse/Pipe/tianze-website/src/lib/content-manifest.generated.ts
+
+Summary:
+  posts/en: 1 files
+  posts/zh: 1 files
+  pages/en: 3 files
+  pages/zh: 3 files
+
+> tianze-website@0.1.0 content:slug-check /Users/Data/Warehouse/Pipe/tianze-website
+> node scripts/content-slug-sync.js
+
+
+🔍 MDX Slug Sync Validation
+==========================
+
+📁 Collections: posts, pages, products
+🌍 Locales: en, zh
+📄 Total files: 8
+🔗 Total pairs: 4
+
+✅ All slug validations passed!
+
+💡 All MDX content files have consistent slugs across locales.
+
+
+> tianze-website@0.1.0 validate:config /Users/Data/Warehouse/Pipe/tianze-website
+> tsx scripts/validate-production-config.ts
+
+Validating production configuration...
+
+Skipping strict runtime env contract because NODE_ENV is not production.
+
+Production config validation passed
+▲ Next.js 16.2.2 (webpack)
+- Cache Components enabled
+- Experiments (use with caution):
+  · optimizePackageImports
+
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+  Creating an optimized production build ...
+✓ Compiled successfully in 12.0s
+  Running TypeScript ...
+  Finished TypeScript in 6.2s ...
+  Collecting page data using 7 workers ...
+  Generating static pages using 7 workers (0/65) ...
+  Generating static pages using 7 workers (16/65) 
+  Generating static pages using 7 workers (32/65) 
+  Generating static pages using 7 workers (48/65) 
+✓ Generating static pages using 7 workers (65/65) in 3.6s
+  Finalizing page optimization ...
+  Collecting build traces ...
+
+Route (app)                                  Revalidate  Expire
+┌ ○ /_not-found
+├ ◐ /[locale]
+│ ├ /[locale]
+│ ├ /en
+│ └ /zh
+├ ◐ /[locale]/[...rest]
+│ ├ /[locale]/[...rest]
+│ ├ /en/[...rest]
+│ ├ /en/__not-found-placeholder
+│ └ [+2 more paths]
+├ ◐ /[locale]/about
+│ ├ /[locale]/about
+│ ├ /en/about
+│ └ /zh/about
+├ ◐ /[locale]/blog                                   1d      1w
+│ ├ /[locale]/blog                                   1d      1w
+│ ├ /en/blog                                         1d      1w
+│ └ /zh/blog                                         1d      1w
+├ ◐ /[locale]/blog/[slug]                            1d      1w
+│ ├ /[locale]/blog/[slug]                            1d      1w
+│ ├ /en/blog/[slug]
+│ ├ /en/blog/welcome                                 1d      1w
+│ └ [+2 more paths]
+├ ◐ /[locale]/capabilities/bending-machines
+│ ├ /[locale]/capabilities/bending-machines
+│ ├ /en/capabilities/bending-machines
+│ └ /zh/capabilities/bending-machines
+├ ◐ /[locale]/contact
+│ ├ /[locale]/contact
+│ ├ /en/contact
+│ └ /zh/contact
+├ ◐ /[locale]/oem-custom-manufacturing
+│ ├ /[locale]/oem-custom-manufacturing
+│ ├ /en/oem-custom-manufacturing
+│ └ /zh/oem-custom-manufacturing
+├ ◐ /[locale]/privacy
+│ ├ /[locale]/privacy
+│ ├ /en/privacy
+│ └ /zh/privacy
+├ ◐ /[locale]/products
+│ ├ /[locale]/products
+│ ├ /en/products
+│ └ /zh/products
+├ ◐ /[locale]/products/[market]
+│ ├ /[locale]/products/[market]
+│ ├ /en/products/[market]
+│ ├ /en/products/north-america
+│ └ [+10 more paths]
+├ ◐ /[locale]/terms
+│ ├ /[locale]/terms
+│ ├ /en/terms
+│ └ /zh/terms
+├ ƒ /api/cache/invalidate
+├ ƒ /api/contact
+├ ƒ /api/csp-report
+├ ƒ /api/health
+├ ƒ /api/inquiry
+├ ƒ /api/subscribe
+├ ƒ /api/verify-turnstile
+├ ƒ /api/whatsapp/send
+├ ƒ /api/whatsapp/webhook
+├ ○ /apple-icon.png
+├ ○ /robots.txt
+└ ƒ /sitemap.xml
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)             prerendered as static content
+◐  (Partial Prerender)  prerendered as static HTML with dynamic server-streamed content
+ƒ  (Dynamic)            server-rendered on demand
+
+Proxy environment variables detected. We'll use your proxy for fetch requests.
+
+┌─────────────────────────────┐
+│ OpenNext — Cloudflare build │
+└─────────────────────────────┘
+
+App directory: /Users/Data/Warehouse/Pipe/tianze-website
+Next.js version : 16.2.2
+@opennextjs/cloudflare version: 1.18.0
+@opennextjs/aws version: 3.9.16
+WARN Skipping Next.js build
+
+┌──────────────────────────────┐
+│ OpenNext — Generating bundle │
+└──────────────────────────────┘
+
+(node:87194) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Bundling middleware function...
+Bundling static assets...
+Bundling cache assets...
+Building server function: apiLead...
+Building server function: apiOps...
+Building server function: apiWhatsapp...
+(node:87194) Warning: Label 'Applying code patches' already exists for console.time()
+Applying code patches: 158.376ms
+(node:87194) Warning: No such label 'Applying code patches' for console.timeEnd()
+Applying code patches: 144.591ms
+Building server function: default...
+Applying code patches: 185.743ms
+# copyPackageTemplateFiles
+[35m⚙️ Bundling the OpenNext server...
+[0m
+[35mWorker saved in `.open-next/worker.js` 🚀
+[0m
+OpenNext build complete.
+[cf-prefetch-patch] exception contract active:
+[cf-prefetch-patch] bucket: generated-artifact compatibility issue
+[cf-prefetch-patch] status: temporary-compat-layer
+[cf-prefetch-patch] patch: node scripts/cloudflare/patch-prefetch-hints-manifest.mjs
+[cf-prefetch-patch] blocker: node scripts/cloudflare/check-generated-artifact-log.mjs cf_build.log
+[cf-prefetch-patch] dry-run: node scripts/cloudflare/patch-prefetch-hints-manifest.mjs --dry-run
+[cf-prefetch-patch] apply env: CF_APPLY_GENERATED_PATCH=true
+[cf-prefetch-patch] preview proof: pnpm smoke:cf:preview
+[cf-prefetch-patch] stronger local proof: pnpm deploy:cf:phase6:dry-run
+[cf-prefetch-patch] formal proof: pnpm proof:cf:preview-deployed
+[cf-prefetch-patch] generated artifacts still require compatibility patching:
+- middleware manifest loader -> default handler
+- API route requirePage async -> default handler
+- API route require() -> import() -> default handler
+- cache handler path -> .open-next/server-functions/apiLead/index.mjs
+- composable cache handler path -> .open-next/server-functions/apiLead/index.mjs
+- cache handler path -> .open-next/server-functions/apiOps/index.mjs
+- composable cache handler path -> .open-next/server-functions/apiOps/index.mjs
+- cache handler path -> .open-next/server-functions/apiWhatsapp/index.mjs
+- composable cache handler path -> .open-next/server-functions/apiWhatsapp/index.mjs
+[cf-webpack-build] generated artifacts require the temporary-compat-layer. Re-run with CF_APPLY_GENERATED_PATCH=true to apply the compatibility patch explicitly.
+ ELIFECYCLE  Command failed with exit code 12.
+ ELIFECYCLE  Command failed with exit code 12.
+ ELIFECYCLE  Command failed with exit code 12.
+
+## Running pnpm preview:cf + pnpm smoke:cf:preview
+
+> tianze-website@0.1.0 smoke:cf:preview /Users/Data/Warehouse/Pipe/tianze-website
+> node scripts/cloudflare/preview-smoke.mjs
+
+[cf-preview-smoke] Probing http://127.0.0.1:8787 (page/header mode)
+[cf-preview-smoke] Unexpected error: TypeError: fetch failed
+    at node:internal/deps/undici/undici:14976:13
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async request (file:///Users/Data/Warehouse/Pipe/tianze-website/scripts/cloudflare/preview-smoke.mjs:47:20)
+    at async main (file:///Users/Data/Warehouse/Pipe/tianze-website/scripts/cloudflare/preview-smoke.mjs:78:24) {
+  [cause]: Error: connect ECONNREFUSED 127.0.0.1:8787
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+    errno: -61,
+    code: 'ECONNREFUSED',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 8787
+  }
+}
+ ELIFECYCLE  Command failed with exit code 1.
+
+## Preview server log
+zsh:2: command not found: python
+
+## Rerun deploy dry-run with compat env explicitly enabled
+
+> tianze-website@0.1.0 deploy:cf:phase6:dry-run /Users/Data/Warehouse/Pipe/tianze-website
+> pnpm clean:next-artifacts && pnpm build:cf:phase6 && node scripts/cloudflare/deploy-phase6.mjs --env preview --dry-run
+
+
+> tianze-website@0.1.0 clean:next-artifacts /Users/Data/Warehouse/Pipe/tianze-website
+> node scripts/clean-next-build-artifacts.mjs
+
+[clean-next-build-artifacts] removed .next, .open-next, .wrangler/tmp from /Users/Data/Warehouse/Pipe/tianze-website
+
+> tianze-website@0.1.0 build:cf:phase6 /Users/Data/Warehouse/Pipe/tianze-website
+> pnpm build:cf && node scripts/cloudflare/build-phase6-workers.mjs
+
+
+> tianze-website@0.1.0 build:cf /Users/Data/Warehouse/Pipe/tianze-website
+> node scripts/cloudflare/build-webpack.mjs
+
+[cf-webpack-build] exception contract active:
+[cf-webpack-build] bucket: generated-artifact compatibility issue
+[cf-webpack-build] status: temporary-compat-layer
+[cf-webpack-build] patch: node scripts/cloudflare/patch-prefetch-hints-manifest.mjs
+[cf-webpack-build] blocker: node scripts/cloudflare/check-generated-artifact-log.mjs cf_build.log
+[cf-webpack-build] dry-run: node scripts/cloudflare/patch-prefetch-hints-manifest.mjs --dry-run
+[cf-webpack-build] apply env: CF_APPLY_GENERATED_PATCH=true
+[cf-webpack-build] preview proof: pnpm smoke:cf:preview
+[cf-webpack-build] stronger local proof: pnpm deploy:cf:phase6:dry-run
+[cf-webpack-build] formal proof: pnpm proof:cf:preview-deployed
+[clean-next-build-artifacts] removed .next, .open-next, .wrangler/tmp from /Users/Data/Warehouse/Pipe/tianze-website
+
+> tianze-website@0.1.0 prebuild /Users/Data/Warehouse/Pipe/tianze-website
+> node scripts/copy-translations.js && tsx scripts/generate-content-manifest.ts && pnpm content:slug-check && pnpm validate:config
+
+📦 Copying translation files to public directory...
+
+✅ Copied en/critical.json (55334 → 41138 bytes, saved 25.7%)
+✅ Copied en/deferred.json (38127 → 33012 bytes, saved 13.4%)
+✅ Copied zh/critical.json (51660 → 37464 bytes, saved 27.5%)
+✅ Copied zh/deferred.json (34580 → 29465 bytes, saved 14.8%)
+
+📊 Summary:
+   Total source size: 179701 bytes
+   Total output size: 141079 bytes
+   Total saved: 38622 bytes (21.5%)
+
+✅ All translation files copied successfully!
+Generating content manifest and import map...
+Generated manifest with 8 entries
+Output 1: /Users/Data/Warehouse/Pipe/tianze-website/reports/content-manifest.json
+Output 2: /Users/Data/Warehouse/Pipe/tianze-website/src/lib/mdx-importers.generated.ts
+Output 3: /Users/Data/Warehouse/Pipe/tianze-website/src/lib/content-manifest.generated.ts
+
+Summary:
+  posts/en: 1 files
+  posts/zh: 1 files
+  pages/en: 3 files
+  pages/zh: 3 files
+
+> tianze-website@0.1.0 content:slug-check /Users/Data/Warehouse/Pipe/tianze-website
+> node scripts/content-slug-sync.js
+
+
+🔍 MDX Slug Sync Validation
+==========================
+
+📁 Collections: posts, pages, products
+🌍 Locales: en, zh
+📄 Total files: 8
+🔗 Total pairs: 4
+
+✅ All slug validations passed!
+
+💡 All MDX content files have consistent slugs across locales.
+
+
+> tianze-website@0.1.0 validate:config /Users/Data/Warehouse/Pipe/tianze-website
+> tsx scripts/validate-production-config.ts
+
+Validating production configuration...
+
+Skipping strict runtime env contract because NODE_ENV is not production.
+
+Production config validation passed
+▲ Next.js 16.2.2 (webpack)
+- Cache Components enabled
+- Experiments (use with caution):
+  · optimizePackageImports
+
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+  Creating an optimized production build ...
+✓ Compiled successfully in 12.6s
+  Running TypeScript ...
+  Finished TypeScript in 5.2s ...
+  Collecting page data using 7 workers ...
+  Generating static pages using 7 workers (0/65) ...
+  Generating static pages using 7 workers (16/65) 
+  Generating static pages using 7 workers (32/65) 
+  Generating static pages using 7 workers (48/65) 
+✓ Generating static pages using 7 workers (65/65) in 3.6s
+  Finalizing page optimization ...
+  Collecting build traces ...
+
+Route (app)                                  Revalidate  Expire
+┌ ○ /_not-found
+├ ◐ /[locale]
+│ ├ /[locale]
+│ ├ /en
+│ └ /zh
+├ ◐ /[locale]/[...rest]
+│ ├ /[locale]/[...rest]
+│ ├ /en/[...rest]
+│ ├ /en/__not-found-placeholder
+│ └ [+2 more paths]
+├ ◐ /[locale]/about
+│ ├ /[locale]/about
+│ ├ /en/about
+│ └ /zh/about
+├ ◐ /[locale]/blog                                   1d      1w
+│ ├ /[locale]/blog                                   1d      1w
+│ ├ /en/blog                                         1d      1w
+│ └ /zh/blog                                         1d      1w
+├ ◐ /[locale]/blog/[slug]                            1d      1w
+│ ├ /[locale]/blog/[slug]                            1d      1w
+│ ├ /en/blog/[slug]
+│ ├ /en/blog/welcome                                 1d      1w
+│ └ [+2 more paths]
+├ ◐ /[locale]/capabilities/bending-machines
+│ ├ /[locale]/capabilities/bending-machines
+│ ├ /en/capabilities/bending-machines
+│ └ /zh/capabilities/bending-machines
+├ ◐ /[locale]/contact
+│ ├ /[locale]/contact
+│ ├ /en/contact
+│ └ /zh/contact
+├ ◐ /[locale]/oem-custom-manufacturing
+│ ├ /[locale]/oem-custom-manufacturing
+│ ├ /en/oem-custom-manufacturing
+│ └ /zh/oem-custom-manufacturing
+├ ◐ /[locale]/privacy
+│ ├ /[locale]/privacy
+│ ├ /en/privacy
+│ └ /zh/privacy
+├ ◐ /[locale]/products
+│ ├ /[locale]/products
+│ ├ /en/products
+│ └ /zh/products
+├ ◐ /[locale]/products/[market]
+│ ├ /[locale]/products/[market]
+│ ├ /en/products/[market]
+│ ├ /en/products/north-america
+│ └ [+10 more paths]
+├ ◐ /[locale]/terms
+│ ├ /[locale]/terms
+│ ├ /en/terms
+│ └ /zh/terms
+├ ƒ /api/cache/invalidate
+├ ƒ /api/contact
+├ ƒ /api/csp-report
+├ ƒ /api/health
+├ ƒ /api/inquiry
+├ ƒ /api/subscribe
+├ ƒ /api/verify-turnstile
+├ ƒ /api/whatsapp/send
+├ ƒ /api/whatsapp/webhook
+├ ○ /apple-icon.png
+├ ○ /robots.txt
+└ ƒ /sitemap.xml
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)             prerendered as static content
+◐  (Partial Prerender)  prerendered as static HTML with dynamic server-streamed content
+ƒ  (Dynamic)            server-rendered on demand
+
+Proxy environment variables detected. We'll use your proxy for fetch requests.
+
+┌─────────────────────────────┐
+│ OpenNext — Cloudflare build │
+└─────────────────────────────┘
+
+App directory: /Users/Data/Warehouse/Pipe/tianze-website
+Next.js version : 16.2.2
+@opennextjs/cloudflare version: 1.18.0
+@opennextjs/aws version: 3.9.16
+WARN Skipping Next.js build
+
+┌──────────────────────────────┐
+│ OpenNext — Generating bundle │
+└──────────────────────────────┘
+
+(node:88186) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Bundling middleware function...
+Bundling static assets...
+Bundling cache assets...
+Building server function: apiLead...
+Building server function: apiOps...
+Building server function: apiWhatsapp...
+(node:88186) Warning: Label 'Applying code patches' already exists for console.time()
+Applying code patches: 340.304ms
+(node:88186) Warning: No such label 'Applying code patches' for console.timeEnd()
+Applying code patches: 144.756ms
+Building server function: default...
+Applying code patches: 180.091ms
+# copyPackageTemplateFiles
+[35m⚙️ Bundling the OpenNext server...
+[0m
+[35mWorker saved in `.open-next/worker.js` 🚀
+[0m
+OpenNext build complete.
+[cf-prefetch-patch] exception contract active:
+[cf-prefetch-patch] bucket: generated-artifact compatibility issue
+[cf-prefetch-patch] status: temporary-compat-layer
+[cf-prefetch-patch] patch: node scripts/cloudflare/patch-prefetch-hints-manifest.mjs
+[cf-prefetch-patch] blocker: node scripts/cloudflare/check-generated-artifact-log.mjs cf_build.log
+[cf-prefetch-patch] dry-run: node scripts/cloudflare/patch-prefetch-hints-manifest.mjs --dry-run
+[cf-prefetch-patch] apply env: CF_APPLY_GENERATED_PATCH=true
+[cf-prefetch-patch] preview proof: pnpm smoke:cf:preview
+[cf-prefetch-patch] stronger local proof: pnpm deploy:cf:phase6:dry-run
+[cf-prefetch-patch] formal proof: pnpm proof:cf:preview-deployed
+[cf-prefetch-patch] generated artifacts still require compatibility patching:
+- middleware manifest loader -> default handler
+- API route requirePage async -> default handler
+- API route require() -> import() -> default handler
+- cache handler path -> .open-next/server-functions/apiLead/index.mjs
+- composable cache handler path -> .open-next/server-functions/apiLead/index.mjs
+- cache handler path -> .open-next/server-functions/apiOps/index.mjs
+- composable cache handler path -> .open-next/server-functions/apiOps/index.mjs
+- cache handler path -> .open-next/server-functions/apiWhatsapp/index.mjs
+- composable cache handler path -> .open-next/server-functions/apiWhatsapp/index.mjs
+[cf-prefetch-patch] exception contract active:
+[cf-prefetch-patch] bucket: generated-artifact compatibility issue
+[cf-prefetch-patch] status: temporary-compat-layer
+[cf-prefetch-patch] patch: node scripts/cloudflare/patch-prefetch-hints-manifest.mjs
+[cf-prefetch-patch] blocker: node scripts/cloudflare/check-generated-artifact-log.mjs cf_build.log
+[cf-prefetch-patch] dry-run: node scripts/cloudflare/patch-prefetch-hints-manifest.mjs --dry-run
+[cf-prefetch-patch] apply env: CF_APPLY_GENERATED_PATCH=true
+[cf-prefetch-patch] preview proof: pnpm smoke:cf:preview
+[cf-prefetch-patch] stronger local proof: pnpm deploy:cf:phase6:dry-run
+[cf-prefetch-patch] formal proof: pnpm proof:cf:preview-deployed
+[cf-prefetch-patch] patched cache handler paths in .open-next/server-functions/apiLead/index.mjs
+[cf-prefetch-patch] patched cache handler paths in .open-next/server-functions/apiOps/index.mjs
+[cf-prefetch-patch] patched cache handler paths in .open-next/server-functions/apiWhatsapp/index.mjs
+[cf-prefetch-patch] patched middleware manifest loader + API route requirePage async + API route require() -> import()
+[cf-phase6-build] exception contract active:
+[cf-phase6-build] single-worker aliases: 1
+[cf-phase6-build] phase6 aliases: 1
+[cf-phase6-build] stronger local proof: pnpm deploy:cf:phase6:dry-run
+[phase6] topology contract active:
+[phase6] phase6 worker keys: gateway, web, apiLead, apiOps, apiWhatsapp
+[phase6] deploy order: web, apiLead, apiOps, apiWhatsapp, gateway
+[phase6] API route targets: apiWhatsapp, apiOps, apiLead
+[phase6] generated workers and wrangler configs
+[phase6] workers: .open-next/workers
+[phase6] configs: .open-next/wrangler/phase6
+[phase6] gateway routes: workers.dev only (no --bind-domain)
+[phase6] topology contract active:
+[phase6] phase6 worker keys: gateway, web, apiLead, apiOps, apiWhatsapp
+[phase6] deploy order: web, apiLead, apiOps, apiWhatsapp, gateway
+[phase6] API route targets: apiWhatsapp, apiOps, apiLead
+[phase6] exception contract active:
+[phase6] key: NEXT_SERVER_ACTIONS_ENCRYPTION_KEY
+[phase6] envs: preview, production
+[phase6] phase6 workers: api-lead, api-ops, api-whatsapp, gateway, web
+[phase6] deploy env toggle: OPEN_NEXT_DEPLOY=true
+[phase6] wrangler version: 4.79.0
+[phase6] deploying 5 worker(s) to preview
+[phase6][dry-run] pnpm exec wrangler deploy --config .open-next/wrangler/phase6/web.jsonc --env preview --dry-run
+Proxy environment variables detected. We'll use your proxy for fetch requests.
+
+ ⛅️ wrangler 4.79.0 (update available 4.81.1)
+─────────────────────────────────────────────
+✨ Read 161 files from the assets directory /Users/Data/Warehouse/Pipe/tianze-website/.open-next/assets
+Total Upload: 11368.16 KiB / gzip: 2392.51 KiB
+Your Worker has access to the following bindings:
+Binding                                                                            Resource                  
+env.NEXT_CACHE_DO_QUEUE (DOQueueHandler)                                           Durable Object            
+env.NEXT_TAG_CACHE_D1 (tianze-website-tags-preview)                                D1 Database               
+env.NEXT_INC_CACHE_R2_BUCKET (tianze-website-cache-preview)                        R2 Bucket                 
+env.ASSETS                                                                         Assets                    
+env.RATE_LIMIT_PEPPER ("preview-placeholder-pepper-value-32ch")                    Environment Variable      
+env.TURNSTILE_SECRET_KEY ("1x0000000000000000000000000000000AA")                   Environment Variable      
+env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ("1x00000000000000000000AA")                    Environment Variable      
+env.RESEND_API_KEY ("re_preview_placeholder")                                      Environment Variable      
+env.AIRTABLE_API_KEY ("pat_preview_placeholder")                                   Environment Variable      
+env.AIRTABLE_BASE_ID ("app_preview_placeholder")                                   Environment Variable      
+env.ALLOW_MEMORY_RATE_LIMIT ("true")                                               Environment Variable      
+env.ALLOW_MEMORY_IDEMPOTENCY ("true")                                              Environment Variable      
+env.APP_ENV ("preview")                                                            Environment Variable      
+env.DEPLOYMENT_PLATFORM ("cloudflare")                                             Environment Variable      
+env.NEXT_PUBLIC_BASE_URL ("https://preview.tianze-pipe.com")                       Environment Variable      
+env.NEXT_PUBLIC_DEPLOYMENT_PLATFORM ("cloudflare")                                 Environment Variable      
+env.NEXT_BUILD_ID ("H778a31Nn1056Kzff9Dey")                                        Environment Variable      
+
+--dry-run: exiting now.
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mUsing direct eval with a bundler is not recommended and may cause problems[0m [direct-eval]
+
+    ../../server-functions/default/handler.mjs:373:8:
+[37m      373 │ }());`),[32meval[37m(str)||{}}catch(err){if(wrap!==!1&&/(unexpected|ident...
+          ╵         [32m~~~~[0m
+
+  You can read more about direct eval and bundling here: [4mhttps://esbuild.github.io/link/direct-eval[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mComparison with -0 using the "===" operator will also match 0[0m [equals-negative-zero]
+
+    ../../server-functions/default/handler.mjs:1819:52854:
+[37m      1819 │ ...<0)x3+=moduloVal;else if(x3===[32m-0[37m)return 0}return x3}}conversi...
+           ╵                                  [32m~~[0m
+
+  Floating-point equality is defined such that 0 and -0 are equal, so "x === -0" returns true for both 0 and -0. You need to use "Object.is(x, -0)" instead to test for -0.
+
+
+[phase6][dry-run] pnpm exec wrangler deploy --config .open-next/wrangler/phase6/api-lead.jsonc --env preview --dry-run
+Proxy environment variables detected. We'll use your proxy for fetch requests.
+
+ ⛅️ wrangler 4.79.0 (update available 4.81.1)
+─────────────────────────────────────────────
+Total Upload: 14258.10 KiB / gzip: 2769.45 KiB
+Your Worker has access to the following bindings:
+Binding                                                                            Resource                  
+env.NEXT_CACHE_DO_QUEUE (DOQueueHandler)                                           Durable Object            
+env.NEXT_TAG_CACHE_D1 (tianze-website-tags-preview)                                D1 Database               
+env.NEXT_INC_CACHE_R2_BUCKET (tianze-website-cache-preview)                        R2 Bucket                 
+env.RATE_LIMIT_PEPPER ("preview-placeholder-pepper-value-32ch")                    Environment Variable      
+env.TURNSTILE_SECRET_KEY ("1x0000000000000000000000000000000AA")                   Environment Variable      
+env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ("1x00000000000000000000AA")                    Environment Variable      
+env.RESEND_API_KEY ("re_preview_placeholder")                                      Environment Variable      
+env.AIRTABLE_API_KEY ("pat_preview_placeholder")                                   Environment Variable      
+env.AIRTABLE_BASE_ID ("app_preview_placeholder")                                   Environment Variable      
+env.ALLOW_MEMORY_RATE_LIMIT ("true")                                               Environment Variable      
+env.ALLOW_MEMORY_IDEMPOTENCY ("true")                                              Environment Variable      
+env.APP_ENV ("preview")                                                            Environment Variable      
+env.DEPLOYMENT_PLATFORM ("cloudflare")                                             Environment Variable      
+env.NEXT_PUBLIC_BASE_URL ("https://preview.tianze-pipe.com")                       Environment Variable      
+env.NEXT_PUBLIC_DEPLOYMENT_PLATFORM ("cloudflare")                                 Environment Variable      
+env.NEXT_BUILD_ID ("H778a31Nn1056Kzff9Dey")                                        Environment Variable      
+
+--dry-run: exiting now.
+[phase6][dry-run] pnpm exec wrangler deploy --config .open-next/wrangler/phase6/api-ops.jsonc --env preview --dry-run
+Proxy environment variables detected. We'll use your proxy for fetch requests.
+
+ ⛅️ wrangler 4.79.0 (update available 4.81.1)
+─────────────────────────────────────────────
+Total Upload: 14258.08 KiB / gzip: 2769.45 KiB
+Your Worker has access to the following bindings:
+Binding                                                                            Resource                  
+env.NEXT_CACHE_DO_QUEUE (DOQueueHandler)                                           Durable Object            
+env.NEXT_TAG_CACHE_D1 (tianze-website-tags-preview)                                D1 Database               
+env.NEXT_INC_CACHE_R2_BUCKET (tianze-website-cache-preview)                        R2 Bucket                 
+env.RATE_LIMIT_PEPPER ("preview-placeholder-pepper-value-32ch")                    Environment Variable      
+env.TURNSTILE_SECRET_KEY ("1x0000000000000000000000000000000AA")                   Environment Variable      
+env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ("1x00000000000000000000AA")                    Environment Variable      
+env.RESEND_API_KEY ("re_preview_placeholder")                                      Environment Variable      
+env.AIRTABLE_API_KEY ("pat_preview_placeholder")                                   Environment Variable      
+env.AIRTABLE_BASE_ID ("app_preview_placeholder")                                   Environment Variable      
+env.ALLOW_MEMORY_RATE_LIMIT ("true")                                               Environment Variable      
+env.ALLOW_MEMORY_IDEMPOTENCY ("true")                                              Environment Variable      
+env.APP_ENV ("preview")                                                            Environment Variable      
+env.DEPLOYMENT_PLATFORM ("cloudflare")                                             Environment Variable      
+env.NEXT_PUBLIC_BASE_URL ("https://preview.tianze-pipe.com")                       Environment Variable      
+env.NEXT_PUBLIC_DEPLOYMENT_PLATFORM ("cloudflare")                                 Environment Variable      
+env.NEXT_BUILD_ID ("H778a31Nn1056Kzff9Dey")                                        Environment Variable      
+
+--dry-run: exiting now.
+[phase6][dry-run] pnpm exec wrangler deploy --config .open-next/wrangler/phase6/api-whatsapp.jsonc --env preview --dry-run
+Proxy environment variables detected. We'll use your proxy for fetch requests.
+
+ ⛅️ wrangler 4.79.0 (update available 4.81.1)
+─────────────────────────────────────────────
+Total Upload: 14258.16 KiB / gzip: 2769.46 KiB
+Your Worker has access to the following bindings:
+Binding                                                                            Resource                  
+env.NEXT_CACHE_DO_QUEUE (DOQueueHandler)                                           Durable Object            
+env.NEXT_TAG_CACHE_D1 (tianze-website-tags-preview)                                D1 Database               
+env.NEXT_INC_CACHE_R2_BUCKET (tianze-website-cache-preview)                        R2 Bucket                 
+env.RATE_LIMIT_PEPPER ("preview-placeholder-pepper-value-32ch")                    Environment Variable      
+env.TURNSTILE_SECRET_KEY ("1x0000000000000000000000000000000AA")                   Environment Variable      
+env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ("1x00000000000000000000AA")                    Environment Variable      
+env.RESEND_API_KEY ("re_preview_placeholder")                                      Environment Variable      
+env.AIRTABLE_API_KEY ("pat_preview_placeholder")                                   Environment Variable      
+env.AIRTABLE_BASE_ID ("app_preview_placeholder")                                   Environment Variable      
+env.ALLOW_MEMORY_RATE_LIMIT ("true")                                               Environment Variable      
+env.ALLOW_MEMORY_IDEMPOTENCY ("true")                                              Environment Variable      
+env.APP_ENV ("preview")                                                            Environment Variable      
+env.DEPLOYMENT_PLATFORM ("cloudflare")                                             Environment Variable      
+env.NEXT_PUBLIC_BASE_URL ("https://preview.tianze-pipe.com")                       Environment Variable      
+env.NEXT_PUBLIC_DEPLOYMENT_PLATFORM ("cloudflare")                                 Environment Variable      
+env.NEXT_BUILD_ID ("H778a31Nn1056Kzff9Dey")                                        Environment Variable      
+
+--dry-run: exiting now.
+[phase6][dry-run] pnpm exec wrangler deploy --config .open-next/wrangler/phase6/gateway.jsonc --env preview --dry-run
+Proxy environment variables detected. We'll use your proxy for fetch requests.
+
+ ⛅️ wrangler 4.79.0 (update available 4.81.1)
+─────────────────────────────────────────────
+✨ Read 161 files from the assets directory /Users/Data/Warehouse/Pipe/tianze-website/.open-next/assets
+Total Upload: 562.28 KiB / gzip: 123.73 KiB
+Your Worker has access to the following bindings:
+Binding                                                                            Resource                  
+env.WORKER_WEB (tianze-website-web-preview)                                        Worker                    
+env.WORKER_API_WHATSAPP (tianze-website-api-whatsapp-preview)                      Worker                    
+env.WORKER_API_OPS (tianze-website-api-ops-preview)                                Worker                    
+env.WORKER_API_LEAD (tianze-website-api-lead-preview)                              Worker                    
+env.ASSETS                                                                         Assets                    
+env.RATE_LIMIT_PEPPER ("preview-placeholder-pepper-value-32ch")                    Environment Variable      
+env.TURNSTILE_SECRET_KEY ("1x0000000000000000000000000000000AA")                   Environment Variable      
+env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ("1x00000000000000000000AA")                    Environment Variable      
+env.RESEND_API_KEY ("re_preview_placeholder")                                      Environment Variable      
+env.AIRTABLE_API_KEY ("pat_preview_placeholder")                                   Environment Variable      
+env.AIRTABLE_BASE_ID ("app_preview_placeholder")                                   Environment Variable      
+env.ALLOW_MEMORY_RATE_LIMIT ("true")                                               Environment Variable      
+env.ALLOW_MEMORY_IDEMPOTENCY ("true")                                              Environment Variable      
+env.APP_ENV ("preview")                                                            Environment Variable      
+env.DEPLOYMENT_PLATFORM ("cloudflare")                                             Environment Variable      
+env.NEXT_PUBLIC_BASE_URL ("https://preview.tianze-pipe.com")                       Environment Variable      
+env.NEXT_PUBLIC_DEPLOYMENT_PLATFORM ("cloudflare")                                 Environment Variable      
+
+--dry-run: exiting now.
+[phase6] deployment manifest path: .open-next/deploy-manifest.json
+[phase6] dry-run complete
+
+## Rerun preview with compat env explicitly enabled
+Preview ready: 1
+
+> tianze-website@0.1.0 smoke:cf:preview /Users/Data/Warehouse/Pipe/tianze-website
+> node scripts/cloudflare/preview-smoke.mjs
+
+[cf-preview-smoke] Probing http://127.0.0.1:8787 (page/header mode)
+[cf-preview-smoke] Skipping /api/health (diagnostic-only in local preview).
+[cf-preview-smoke] Policy: local preview proves page/header/cookie behavior. API proof belongs to deployed smoke.
+[cf-preview-smoke] Reference: .claude/rules/architecture.md → Cloudflare Verification Policy
+[cf-preview-smoke] All checks passed
+
+## Frozen retained compat surface
+- Generated-artifact compatibility layer remains ACTIVE: middleware manifest loader rewrite, requirePage async promotion, API route require()->import(), split-function cache/composable-cache path rewrites.
+- Alias/shim contract remains ACTIVE and checker-backed.
+- Preview degraded contract remains ACTIVE; release-proof forbids degraded guard bypass flags.
+- Server-actions secret propagation contract remains ACTIVE for phase6 split-worker deploys.
+- Phase6 topology contract/generation layer remains ACTIVE repo-specific deployment glue.
+- open-next.config.ts minify remains DEFERRED, not re-enabled by default.
+- Canonical proof reality observed in baseline: plain pnpm deploy:cf:phase6:dry-run and plain pnpm preview:cf are not sufficient under current compat truth; the successful rerun required CF_APPLY_GENERATED_PATCH=true.

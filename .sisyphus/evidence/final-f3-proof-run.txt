@@ -1,0 +1,51 @@
+FINAL WAVE F3 — PROOF RUN SUMMARY
+Date: 2026-04-10
+Mode: retained-patch (CF_APPLY_GENERATED_PATCH=true)
+Repo: /Users/Data/Warehouse/Pipe/tianze-website
+
+═══════════════════════════════════════════════════════════
+STEP 1: pnpm clean:next-artifacts && pnpm build
+  Result: PASS
+  Details: Cleaned .next / .open-next / .wrangler/tmp artifacts.
+           Next.js 16.2.2 Turbopack build — 65/65 pages, TypeScript PASS.
+  Evidence: final-f3-build.txt
+═══════════════════════════════════════════════════════════
+STEP 2: CF_APPLY_GENERATED_PATCH=true pnpm build:cf
+  Result: PASS
+  Details: OpenNext Cloudflare webpack bundle built (65/65 pages).
+           Exception contract block printed (expected, not a failure).
+           cf-prefetch-patch applied to 4 targets:
+             - middleware manifest loader
+             - API route requirePage async
+             - API route require()→import()
+             - cache handler paths in apiLead / apiOps / apiWhatsapp
+  Evidence: final-f3-build-cf.txt
+═══════════════════════════════════════════════════════════
+STEP 3: CF_APPLY_GENERATED_PATCH=true pnpm preview:cf (tmux: f3-preview)
+  Result: PASS
+  Details: Wrangler 4.79.0 ready at http://localhost:8787.
+           R2 cache populated (55 entries), D1 table created.
+           Readiness probe: 10/10 polls returned HTTP 307 (locale redirect — correct).
+  Evidence: final-f3-preview-server.txt
+═══════════════════════════════════════════════════════════
+STEP 4: pnpm smoke:cf:preview
+  Result: PASS
+  Details: Probed http://127.0.0.1:8787 in page/header mode.
+           /api/health skipped (diagnostic-only in local preview per policy).
+           Output: [cf-preview-smoke] All checks passed
+  Evidence: final-f3-preview.txt
+═══════════════════════════════════════════════════════════
+STEP 5: node scripts/cloudflare/patch-prefetch-hints-manifest.mjs --dry-run
+  Result: PASS
+  Details: All 4 patch targets already applied, no drift detected.
+           "generated artifacts already match compatibility expectations"
+  Evidence: final-f3-dry-run.txt
+═══════════════════════════════════════════════════════════
+
+OVERALL: ALL STEPS PASS
+Runbook match: YES — observed behavior matches retained-patch runbook for Wave F3.
+
+SCOPE BOUNDARY (per policy):
+  - Local preview proves: page routing, headers, cookies, locale redirect behavior.
+  - /api/health and deployed API truth: requires pnpm smoke:cf:deploy against real deploy.
+  - This proof run does NOT constitute deployed truth.

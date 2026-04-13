@@ -3,7 +3,6 @@ paths:
   - "content/**/*.mdx"
   - "src/constants/product-specs/**"
   - "src/constants/product-catalog.ts"
-  - "src/sites/**"
 ---
 
 # Content System
@@ -13,7 +12,7 @@ The project uses two content strategies, chosen by content type:
 | Strategy | Used for | Why |
 |----------|----------|-----|
 | **MDX** (`content/`) | Narrative content: blog posts, FAQ, legal pages, supporting draft assets for routes like About | Free-form rich text, loose structure |
-| **Site-layer TypeScript data** (`src/sites/**` + compatibility wrappers) | Product catalog, site identity, site-specific copy overlays | Structured data needing type safety + site-aware ownership |
+| **Single-site TypeScript data** (`src/config/single-site*.ts` + compatibility wrappers) | Product catalog, site identity, shared structured content truth | Structured data needing type safety + centralized ownership |
 
 **Decision rule**: If content is tabular/structured and consumed by multiple components → TypeScript. If content is narrative/editorial → MDX.
 
@@ -81,20 +80,18 @@ Frontmatter validated at build time via `src/types/content.types.ts`.
 
 ---
 
-## TypeScript Product Catalog (`src/sites/**` + wrappers)
+## TypeScript Product Catalog (`src/config/single-site*.ts` + wrappers)
 
 ### Structure
 
 ```
-src/sites/
-├── index.ts                        # Site registry
-├── tianze.ts                       # Default site identity
-├── tianze-equipment.ts             # Second-site pilot identity
-└── tianze/
-    └── product-catalog.ts          # Markets + families — canonical product catalog truth today
+src/config/
+├── single-site.ts                  # Canonical site identity truth
+├── site-types.ts                   # Canonical site typing
+└── single-site-product-catalog.ts  # Canonical product catalog truth
 
 src/constants/
-├── product-catalog.ts              # Compatibility wrapper to active site catalog
+├── product-catalog.ts              # Compatibility wrapper to canonical catalog truth
 ├── product-standards.ts            # Certification standard IDs
 └── product-specs/
     ├── types.ts                    # MarketSpecs, FamilySpecs, SpecGroup interfaces
@@ -105,7 +102,7 @@ src/constants/
 ### Why not MDX for products
 
 - Spec data (pipe sizes, wall thickness, schedules) is **tabular** — consumed by `SpecTable`, `StickyFamilyNav`, `FamilySection` components
-- `src/sites/**` now owns active-site identity and catalog truth; `src/constants/product-catalog.ts` is a compatibility wrapper, not the place to invent new canonical market structure
+- `src/config/single-site.ts` and `src/config/single-site-product-catalog.ts` now own active site identity and catalog truth; `src/constants/product-catalog.ts` is a compatibility wrapper, not the place to invent new canonical market structure
 - `product-catalog.ts` is still queried by sitemap, breadcrumbs, static params, navigation — needs programmatic access
 - Type safety catches data errors at compile time (missing fields, wrong slugs)
 - Owner edits through Claude, so MDX's "non-technical-friendly" editing advantage doesn't apply

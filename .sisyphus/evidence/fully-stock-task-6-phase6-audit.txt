@@ -1,0 +1,92 @@
+## Task 6 — Phase6 value audit
+
+Date: 2026-04-10
+Plan: /Users/Data/Warehouse/Pipe/tianze-website/.sisyphus/plans/fully-stock-opennext.md
+
+### Scope
+
+Primary files audited:
+- `/Users/Data/Warehouse/Pipe/tianze-website/scripts/cloudflare/build-phase6-workers.mjs`
+- `/Users/Data/Warehouse/Pipe/tianze-website/scripts/cloudflare/deploy-phase6.mjs`
+- `/Users/Data/Warehouse/Pipe/tianze-website/scripts/cloudflare/phase-topology-contract.mjs`
+- `/Users/Data/Warehouse/Pipe/tianze-website/scripts/cloudflare/check-phase6-generated-configs.mjs`
+- `/Users/Data/Warehouse/Pipe/tianze-website/package.json`
+- `/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/PHASE6-PRODUCTION-READINESS.md`
+- `/Users/Data/Warehouse/Pipe/tianze-website/docs/archive/migration/2026-03-16-cloudflare-bundle-phases/cloudflare_bundle_phase6.md`
+
+### Verdict
+
+Phase6 is not just old cleanup residue. It is an active repo-specific deployment topology with real local/dry-run proof value, but it still lacks final production-grade proof. It buys isolation and topology control, but it also carries real complexity and ongoing maintenance cost.
+
+### Historical rationale
+
+Historical reason was mainly packaging/size/isolation:
+- split workers by responsibility
+- reduce per-worker size pressure
+- isolate API routes from page/runtime worker behavior
+
+This rationale is still documented in:
+- `PHASE6-PRODUCTION-READINESS.md`
+- archived phase6 migration docs
+
+### Current active value
+
+Phase6 currently provides:
+- explicit multi-worker topology (`gateway`, `web`, `apiLead`, `apiOps`, `apiWhatsapp`)
+- explicit deployment order and routing contract
+- generated per-worker Wrangler configs
+- gateway-level route and service-binding control
+- checker-backed generated-config validation
+- local/dry-run proof that the topology can still be generated and bundled
+
+Baseline evidence also confirms:
+- `CF_APPLY_GENERATED_PATCH=true pnpm deploy:cf:phase6:dry-run` succeeds
+- deploy manifest and generated worker/config outputs are produced
+
+### Current limitations / gaps
+
+Phase6 is still not fully proven as final production truth because:
+- production-grade deploy proof is still weaker than the local/dry-run path
+- rollback/canary/monitoring confidence is not yet equivalent to a simpler stock path
+- there is no demonstrated hard evidence here that phase6 gives enough runtime/perf/business value to justify its extra complexity under a strict fully-stock goal
+
+### Surface area that depends on phase6
+
+Code and scripts directly tied to phase6:
+- `scripts/cloudflare/build-phase6-workers.mjs`
+- `scripts/cloudflare/deploy-phase6.mjs`
+- `scripts/cloudflare/phase-topology-contract.mjs`
+- `scripts/cloudflare/check-phase6-generated-configs.mjs`
+- package scripts:
+  - `build:cf:phase6`
+  - `deploy:cf:phase6:preview`
+  - `deploy:cf:phase6:production`
+  - `deploy:cf:phase6:dry-run`
+
+Generated/runtime outputs tied to phase6:
+- `.open-next/workers/*`
+- `.open-next/wrangler/phase6/*.jsonc`
+- `.open-next/deploy-manifest.json`
+
+### Removal / simplification cost
+
+Removing or simplifying phase6 is not a one-line cleanup. It would require:
+- deleting or archiving generator/deployer/checker layers
+- changing package script surface and proof/runbook references
+- replacing gateway/service-binding topology with a simpler stock-compatible deployment shape
+- revalidating build/preview/deploy proof on the replacement topology
+- updating docs so the repo stops claiming phase6 as active truth
+
+### Decision-ready conclusion
+
+Task 6 result:
+- phase6 still has real current value as deployment topology and proof scaffolding
+- but under a strict fully-stock objective it is also a major source of non-stock truth
+- therefore phase6 should be treated as an explicit architectural decision point, not as harmless residue
+
+This means the later phase6 decision task must choose one of:
+- keep intentionally,
+- simplify with replacement topology,
+- or remove in favor of a stock-compatible shape,
+
+and that choice must be backed by proof, not inertia.

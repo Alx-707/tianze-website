@@ -1,0 +1,54 @@
+## Task 7 — Route A synthesis
+
+Date: 2026-04-10
+Plan: /Users/Data/Warehouse/Pipe/tianze-website/.sisyphus/plans/fully-stock-opennext.md
+
+### Route A definition
+
+Route A means: achieve strict fully stock OpenNext on Cloudflare **without materially weakening the current proof model**.
+
+### Verdict
+
+Route A is **not feasible with current evidence**.
+
+### Why
+
+1. Current canonical Cloudflare proof still depends on repo-local compat activation.
+   - Evidence: `/Users/Data/Warehouse/Pipe/tianze-website/.sisyphus/evidence/fully-stock-task-1-baseline.txt`
+   - Current canonical success path still requires `CF_APPLY_GENERATED_PATCH=true` for `build:cf`, `preview:cf`, and `deploy:cf:phase6:dry-run` proof.
+
+2. Generated-artifact compat frontier is still active and load-bearing.
+   - Evidence: `/Users/Data/Warehouse/Pipe/tianze-website/.sisyphus/evidence/fully-stock-task-4-frontier-audit.txt`
+   - Remaining active compat points are still:
+     - middleware manifest loader rewrite
+     - requirePage async promotion
+     - API route require→import rewrite
+     - split server-function cache/composable-cache path rewrites
+
+3. Wrapper core compat guard still must stay.
+   - Evidence: `/Users/Data/Warehouse/Pipe/tianze-website/.sisyphus/evidence/fully-stock-task-5-wrapper-audit.txt`
+   - The generated-artifact dry-run / conditional patch / explicit fail-fast policy is still the core proof boundary.
+
+4. phase6 remains an active repo-specific deployment topology.
+   - Evidence: `/Users/Data/Warehouse/Pipe/tianze-website/.sisyphus/evidence/fully-stock-task-6-phase6-audit.txt`
+   - It is not harmless residue; it is still part of current deploy/runtime truth.
+
+### Important nuance
+
+Direct stock `opennextjs-cloudflare build` and direct stock local preview page smoke both succeeded.
+
+That proves:
+- stock build viability exists
+- stock local page/header/cookie preview viability exists
+
+That does **not** prove:
+- deployed truth equivalence
+- API proof equivalence
+- removal of compat frontier
+- elimination of phase6 or wrapper guard without proof loss
+
+### Conclusion
+
+Task 7 result:
+- Route A is **not feasible right now** under the current proof requirements.
+- The repo is not yet in a state where it can truthfully claim strict fully stock while preserving current proof strength.

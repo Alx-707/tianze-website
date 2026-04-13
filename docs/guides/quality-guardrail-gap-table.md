@@ -33,7 +33,7 @@
 | 运行时合同与关键路径 | `pnpm test:locale-runtime`、`pnpm test:lead-family`、`pnpm test:cache-health`、`pnpm test:release-smoke` | locale、lead、cache、关键页面行为被改坏 | 可以沿用，但以后要加站点层 smoke | 还没定义每个站自己的最小页面集 | `Next-js-Boilerplate` |
 | 发布前综合证明 | `scripts/release-proof.sh`、`pnpm review:tier-a`、`pnpm review:clusters` | 关键变更没有拿到足够证明就合并或发版 | 可以沿用 | 还没按“共享底座 vs 站点身份”拆证明面 | `Next-js-Boilerplate` |
 | Cloudflare 页面级本地信号 | `pnpm build:cf`、`pnpm preview:cf`、`pnpm smoke:cf:preview`、`pnpm smoke:cf:preview:strict` | 页面级 500、redirect/cookie/header 回归、manifest 问题 | 可以沿用 | 还没写成“未来每个站都要过什么页面集” | `opennextjs-cloudflare` |
-| Cloudflare 最终部署证明 | `pnpm deploy:cf:phase6:dry-run`、`pnpm smoke:cf:deploy -- --base-url <url>` | 本地没问题但真实部署出问题 | 可以沿用 | 未来多站点时还缺“按站点逐个证明”的规则 | `opennextjs-cloudflare` |
+| Cloudflare 最终部署证明 | `pnpm deploy:cf:preview`、`pnpm smoke:cf:deploy -- --base-url <url>` | 本地没问题但真实部署出问题 | 可以沿用 | 未来多站点时还缺“按站点逐个证明”的规则 | `opennextjs-cloudflare` |
 | 安全与滥用防护 | `pnpm security:check`、`pnpm security:csp:check`、`pnpm lint:pii`、相关 API 测试 | 安全头、日志、滥用保护、敏感信息处理回归 | 大体可以沿用 | 未来不同站点的表单和入口差异还没单独纳管 | `Next-js-Boilerplate` |
 | 架构与仓库卫生 | `pnpm arch:metrics`、`pnpm arch:hotspots`、`pnpm arch:conformance`、`pnpm review:legacy-markers`、`pnpm review:archive-hygiene` | 结构慢慢变乱、旧实现误导维护者 | 可以沿用 | 还没把“站点特例膨胀”写成显式预警项 | `next-forge` |
 

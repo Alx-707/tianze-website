@@ -1,0 +1,57 @@
+## Task 11 — Strict-stock go / no-go decision
+
+Date: 2026-04-10
+Plan: /Users/Data/Warehouse/Pipe/tianze-website/.sisyphus/plans/fully-stock-opennext.md
+
+### Binding gate result
+
+**Decision: No-go under current requirements**
+
+### Status map
+
+- strict fully stock achieved: **No**
+- strict fully stock feasible but not yet migrated: **No current evidence**
+- strict fully stock only feasible with proof downgrade: **Yes (Route B)**
+- strict fully stock not feasible under current requirements: **Yes**
+
+### Why this is the correct gate result
+
+1. Route A is blocked.
+   - Current proof-preserving strict-stock path is not feasible.
+   - Evidence: Tasks 1, 4, 5, 6, and Task 7 synthesis.
+
+2. Route B is not automatically approved.
+   - It requires an explicit policy change accepting proof downgrade.
+   - Evidence: Task 8 synthesis.
+
+3. Therefore the correct current-state gate is not “go Route A” or “go Route B”.
+   - The only honest gate result under the current requirements is **No-go**.
+
+### What would change this decision
+
+This gate can be reopened if either:
+
+#### Reopen toward Route A
+- the compat frontier closes
+- wrapper core guard becomes removable
+- phase6/replacement topology gets proof-preserving resolution
+- canonical proof path no longer depends on repo-local compat env/patch behavior
+
+#### Reopen toward Route B
+- decision-makers explicitly accept a downgraded proof model
+- docs/rules are updated to reflect that acceptance
+- Route B becomes the new approved branch
+
+### Operational implication
+
+Do **not** proceed into Route A execution tasks 12–16.
+
+Do **not** proceed into Route B execution tasks 17–21 unless the proof downgrade is explicitly accepted first.
+
+### Conclusion
+
+Task 11 result:
+- Current gate outcome is a defensible **No-go under current requirements**.
+- The only credible way to proceed from here is to either:
+  - wait for stronger evidence that unlocks Route A, or
+  - explicitly change requirements and approve Route B.

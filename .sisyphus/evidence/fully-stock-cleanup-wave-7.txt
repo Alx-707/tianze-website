@@ -1,0 +1,64 @@
+## Fully-stock cleanup wave 7
+
+Date: 2026-04-11
+
+### Goal
+
+Retire the remaining phase6 generator/config skeleton from the main tree by extracting only the still-live split-server-function contract used by current diagnostics and tests.
+
+### Changes made
+
+1. Added a small active contract module:
+   - `scripts/cloudflare/split-server-function-contract.mjs`
+   - now owns:
+     - `SPLIT_SERVER_FUNCTION_KEYS`
+     - `mergeBuildIdRuntimeVar()`
+     - `mergePreviewRuntimeVars()`
+
+2. Repointed current live consumers to the new small contract:
+   - `scripts/cloudflare/check-generated-artifact-log.mjs`
+   - `scripts/cloudflare/patch-prefetch-hints-manifest.mjs`
+   - `tests/unit/scripts/split-server-function-contract.test.ts`
+
+3. Retired the old phase6 generator/config skeleton from the main tree:
+   - `scripts/cloudflare/build-phase6-workers.mjs`
+   - `scripts/cloudflare/phase-topology-contract.mjs`
+   - `scripts/cloudflare/alias-shim-exception-contract.mjs`
+   - `scripts/cloudflare/check-phase6-generated-configs.mjs`
+
+4. Updated core docs/rules to reflect the new state:
+   - `docs/guides/CLOUDFLARE-RETAINED-EXCEPTION-REGISTER.md`
+   - `docs/guides/RELEASE-PROOF-RUNBOOK.md`
+   - `docs/guides/CANONICAL-TRUTH-REGISTRY.md`
+   - `AGENTS.md`
+
+### Why this wave was safe
+
+- Route B canonical commands do not use the retired phase6 generator/config files.
+- The only still-live logic from that surface was:
+  - split server-function key enumeration for generated-artifact diagnostics
+  - preview/build-id helper behavior already covered by tests
+- Those pieces were extracted before retirement.
+
+### Verification
+
+Passed:
+- repo grep found no remaining non-doc imports of retired files
+- `pnpm exec vitest run tests/unit/scripts/split-server-function-contract.test.ts`
+- `pnpm build`
+- `pnpm preview:preflight:cf`
+- `pnpm release:verify`
+
+Note:
+- review helper output (`tier-a-impact`) still listed deleted paths because this branch diff still contains those file deletions. That is reporting on changed files, not active imports/runtime truth.
+
+### Remaining residue after wave 7
+
+Still present as legacy/diagnostic debt:
+- generated-artifact patch/checker layer
+- preview-degraded contract/checker
+- historical analysis/archive docs that still describe removed phase6/server-actions/alias surfaces as past state
+
+### Current conclusion
+
+The main-tree phase6 generator/config skeleton is now gone. The active Cloudflare operator surface is materially closer to fully stock: current behavior is carried by stock build/preview/deploy plus a much smaller retained compatibility/preview boundary.

@@ -1,0 +1,10 @@
+TASK 8 PATCH AUDIT
+Doc: docs/guides/CLOUDFLARE-DEPLOYMENT-ASSESSMENT.md
+
+Middleware manifest loader replacement: PASS
+`requirePage` async promotion: PASS
+API route `return require(...)` -> `return await import(...)`: PASS
+Cache handler path rewrite: PASS
+Composable cache handler path rewrite: PASS
+
+Statuses expected in this wave: retain / blocker typed / no batch retirement.

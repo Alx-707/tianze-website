@@ -1,0 +1,330 @@
+
+> tianze-website@0.1.0 preview:cf /Users/Data/Warehouse/Pipe/tianze-website
+> pnpm clean:next-artifacts && pnpm build:cf && pnpm exec opennextjs-cloudflare preview --env preview
+
+
+> tianze-website@0.1.0 clean:next-artifacts /Users/Data/Warehouse/Pipe/tianze-website
+> node scripts/clean-next-build-artifacts.mjs
+
+[clean-next-build-artifacts] removed .next, .open-next, .wrangler/tmp from /Users/Data/Warehouse/Pipe/tianze-website
+
+> tianze-website@0.1.0 build:cf /Users/Data/Warehouse/Pipe/tianze-website
+> node scripts/cloudflare/build-webpack.mjs
+
+[cf-webpack-build] exception contract active:
+[cf-webpack-build] bucket: generated-artifact compatibility issue
+[cf-webpack-build] status: temporary-compat-layer
+[cf-webpack-build] patch: node scripts/cloudflare/patch-prefetch-hints-manifest.mjs
+[cf-webpack-build] blocker: node scripts/cloudflare/check-generated-artifact-log.mjs cf_build.log
+[cf-webpack-build] dry-run: node scripts/cloudflare/patch-prefetch-hints-manifest.mjs --dry-run
+[cf-webpack-build] apply env: CF_APPLY_GENERATED_PATCH=true
+[cf-webpack-build] preview proof: pnpm smoke:cf:preview
+[cf-webpack-build] stronger local proof: pnpm deploy:cf:phase6:dry-run
+[cf-webpack-build] formal proof: pnpm proof:cf:preview-deployed
+[clean-next-build-artifacts] removed .next, .open-next, .wrangler/tmp from /Users/Data/Warehouse/Pipe/tianze-website
+
+> tianze-website@0.1.0 prebuild /Users/Data/Warehouse/Pipe/tianze-website
+> node scripts/copy-translations.js && tsx scripts/generate-content-manifest.ts && pnpm content:slug-check && pnpm validate:config
+
+📦 Copying translation files to public directory...
+
+✅ Copied en/critical.json (55334 → 41138 bytes, saved 25.7%)
+✅ Copied en/deferred.json (38127 → 33012 bytes, saved 13.4%)
+✅ Copied zh/critical.json (51660 → 37464 bytes, saved 27.5%)
+✅ Copied zh/deferred.json (34580 → 29465 bytes, saved 14.8%)
+
+📊 Summary:
+   Total source size: 179701 bytes
+   Total output size: 141079 bytes
+   Total saved: 38622 bytes (21.5%)
+
+✅ All translation files copied successfully!
+Generating content manifest and import map...
+Generated manifest with 8 entries
+Output 1: /Users/Data/Warehouse/Pipe/tianze-website/reports/content-manifest.json
+Output 2: /Users/Data/Warehouse/Pipe/tianze-website/src/lib/mdx-importers.generated.ts
+Output 3: /Users/Data/Warehouse/Pipe/tianze-website/src/lib/content-manifest.generated.ts
+
+Summary:
+  posts/en: 1 files
+  posts/zh: 1 files
+  pages/en: 3 files
+  pages/zh: 3 files
+
+> tianze-website@0.1.0 content:slug-check /Users/Data/Warehouse/Pipe/tianze-website
+> node scripts/content-slug-sync.js
+
+
+🔍 MDX Slug Sync Validation
+==========================
+
+📁 Collections: posts, pages, products
+🌍 Locales: en, zh
+📄 Total files: 8
+🔗 Total pairs: 4
+
+✅ All slug validations passed!
+
+💡 All MDX content files have consistent slugs across locales.
+
+
+> tianze-website@0.1.0 validate:config /Users/Data/Warehouse/Pipe/tianze-website
+> tsx scripts/validate-production-config.ts
+
+Validating production configuration...
+
+Skipping strict runtime env contract because NODE_ENV is not production.
+
+Production config validation passed
+▲ Next.js 16.2.2 (webpack)
+- Cache Components enabled
+- Experiments (use with caution):
+  · optimizePackageImports
+
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+  Creating an optimized production build ...
+✓ Compiled successfully in 11.3s
+  Running TypeScript ...
+  Finished TypeScript in 5.2s ...
+  Collecting page data using 7 workers ...
+  Generating static pages using 7 workers (0/65) ...
+  Generating static pages using 7 workers (16/65) 
+  Generating static pages using 7 workers (32/65) 
+  Generating static pages using 7 workers (48/65) 
+✓ Generating static pages using 7 workers (65/65) in 3.3s
+  Finalizing page optimization ...
+  Collecting build traces ...
+
+Route (app)                                  Revalidate  Expire
+┌ ○ /_not-found
+├ ◐ /[locale]
+│ ├ /[locale]
+│ ├ /en
+│ └ /zh
+├ ◐ /[locale]/[...rest]
+│ ├ /[locale]/[...rest]
+│ ├ /en/[...rest]
+│ ├ /en/__not-found-placeholder
+│ └ [+2 more paths]
+├ ◐ /[locale]/about
+│ ├ /[locale]/about
+│ ├ /en/about
+│ └ /zh/about
+├ ◐ /[locale]/blog                                   1d      1w
+│ ├ /[locale]/blog                                   1d      1w
+│ ├ /en/blog                                         1d      1w
+│ └ /zh/blog                                         1d      1w
+├ ◐ /[locale]/blog/[slug]                            1d      1w
+│ ├ /[locale]/blog/[slug]                            1d      1w
+│ ├ /en/blog/[slug]
+│ ├ /en/blog/welcome                                 1d      1w
+│ └ [+2 more paths]
+├ ◐ /[locale]/capabilities/bending-machines
+│ ├ /[locale]/capabilities/bending-machines
+│ ├ /en/capabilities/bending-machines
+│ └ /zh/capabilities/bending-machines
+├ ◐ /[locale]/contact
+│ ├ /[locale]/contact
+│ ├ /en/contact
+│ └ /zh/contact
+├ ◐ /[locale]/oem-custom-manufacturing
+│ ├ /[locale]/oem-custom-manufacturing
+│ ├ /en/oem-custom-manufacturing
+│ └ /zh/oem-custom-manufacturing
+├ ◐ /[locale]/privacy
+│ ├ /[locale]/privacy
+│ ├ /en/privacy
+│ └ /zh/privacy
+├ ◐ /[locale]/products
+│ ├ /[locale]/products
+│ ├ /en/products
+│ └ /zh/products
+├ ◐ /[locale]/products/[market]
+│ ├ /[locale]/products/[market]
+│ ├ /en/products/[market]
+│ ├ /en/products/north-america
+│ └ [+10 more paths]
+├ ◐ /[locale]/terms
+│ ├ /[locale]/terms
+│ ├ /en/terms
+│ └ /zh/terms
+├ ƒ /api/cache/invalidate
+├ ƒ /api/contact
+├ ƒ /api/csp-report
+├ ƒ /api/health
+├ ƒ /api/inquiry
+├ ƒ /api/subscribe
+├ ƒ /api/verify-turnstile
+├ ƒ /api/whatsapp/send
+├ ƒ /api/whatsapp/webhook
+├ ○ /apple-icon.png
+├ ○ /robots.txt
+└ ƒ /sitemap.xml
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)             prerendered as static content
+◐  (Partial Prerender)  prerendered as static HTML with dynamic server-streamed content
+ƒ  (Dynamic)            server-rendered on demand
+
+Proxy environment variables detected. We'll use your proxy for fetch requests.
+
+┌─────────────────────────────┐
+│ OpenNext — Cloudflare build │
+└─────────────────────────────┘
+
+App directory: /Users/Data/Warehouse/Pipe/tianze-website
+Next.js version : 16.2.2
+@opennextjs/cloudflare version: 1.18.0
+@opennextjs/aws version: 3.9.16
+WARN Skipping Next.js build
+
+┌──────────────────────────────┐
+│ OpenNext — Generating bundle │
+└──────────────────────────────┘
+
+(node:92067) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Bundling middleware function...
+Bundling static assets...
+Bundling cache assets...
+Building server function: apiLead...
+Building server function: apiOps...
+Building server function: apiWhatsapp...
+(node:92067) Warning: Label 'Applying code patches' already exists for console.time()
+Applying code patches: 309.045ms
+(node:92067) Warning: No such label 'Applying code patches' for console.timeEnd()
+Applying code patches: 141.063ms
+Building server function: default...
+Applying code patches: 176.448ms
+# copyPackageTemplateFiles
+[35m⚙️ Bundling the OpenNext server...
+[0m
+[35mWorker saved in `.open-next/worker.js` 🚀
+[0m
+OpenNext build complete.
+[cf-prefetch-patch] exception contract active:
+[cf-prefetch-patch] bucket: generated-artifact compatibility issue
+[cf-prefetch-patch] status: temporary-compat-layer
+[cf-prefetch-patch] patch: node scripts/cloudflare/patch-prefetch-hints-manifest.mjs
+[cf-prefetch-patch] blocker: node scripts/cloudflare/check-generated-artifact-log.mjs cf_build.log
+[cf-prefetch-patch] dry-run: node scripts/cloudflare/patch-prefetch-hints-manifest.mjs --dry-run
+[cf-prefetch-patch] apply env: CF_APPLY_GENERATED_PATCH=true
+[cf-prefetch-patch] preview proof: pnpm smoke:cf:preview
+[cf-prefetch-patch] stronger local proof: pnpm deploy:cf:phase6:dry-run
+[cf-prefetch-patch] formal proof: pnpm proof:cf:preview-deployed
+[cf-prefetch-patch] generated artifacts still require compatibility patching:
+- middleware manifest loader -> default handler
+- API route require() -> import() -> default handler
+- cache handler path -> .open-next/server-functions/apiLead/index.mjs
+- composable cache handler path -> .open-next/server-functions/apiLead/index.mjs
+- cache handler path -> .open-next/server-functions/apiOps/index.mjs
+- composable cache handler path -> .open-next/server-functions/apiOps/index.mjs
+- cache handler path -> .open-next/server-functions/apiWhatsapp/index.mjs
+- composable cache handler path -> .open-next/server-functions/apiWhatsapp/index.mjs
+[cf-prefetch-patch] exception contract active:
+[cf-prefetch-patch] bucket: generated-artifact compatibility issue
+[cf-prefetch-patch] status: temporary-compat-layer
+[cf-prefetch-patch] patch: node scripts/cloudflare/patch-prefetch-hints-manifest.mjs
+[cf-prefetch-patch] blocker: node scripts/cloudflare/check-generated-artifact-log.mjs cf_build.log
+[cf-prefetch-patch] dry-run: node scripts/cloudflare/patch-prefetch-hints-manifest.mjs --dry-run
+[cf-prefetch-patch] apply env: CF_APPLY_GENERATED_PATCH=true
+[cf-prefetch-patch] preview proof: pnpm smoke:cf:preview
+[cf-prefetch-patch] stronger local proof: pnpm deploy:cf:phase6:dry-run
+[cf-prefetch-patch] formal proof: pnpm proof:cf:preview-deployed
+[cf-prefetch-patch] patched cache handler paths in .open-next/server-functions/apiLead/index.mjs
+[cf-prefetch-patch] patched cache handler paths in .open-next/server-functions/apiOps/index.mjs
+[cf-prefetch-patch] patched cache handler paths in .open-next/server-functions/apiWhatsapp/index.mjs
+[cf-prefetch-patch] patched middleware manifest loader + API route require() -> import()
+Proxy environment variables detected. We'll use your proxy for fetch requests.
+
+┌───────────────────────────────┐
+│ OpenNext — Cloudflare preview │
+└───────────────────────────────┘
+
+Using secrets defined in .dev.vars
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1m				You have defined bindings to the following internal Durable Objects:[0m
+
+  				- {"name":"NEXT_CACHE_DO_QUEUE","class_name":"DOQueueHandler"}
+  				These will not work in local development, but they should work in production.
+  
+  				If you want to develop these locally, you can define your DO in a separate Worker, with a separate configuration file.
+  				For detailed instructions, refer to the Durable Objects section here: [4mhttps://developers.cloudflare.com/workers/wrangler/api#supported-bindings[0m
+
+
+(node:92115) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+workerd/server/server.c++:1948: warning: A DurableObjectNamespace in the config referenced the class "DOQueueHandler", but no such Durable Object class is exported from the worker. Please make sure the class name matches, it is exported, and the class extends 'DurableObject'. Attempts to call to this Durable Object class will fail at runtime, but historically this was not a startup-time error. Future versions of workerd may make this a startup-time error.
+
+Populating local R2 incremental cache...
+[0G  1%|                                             | 1/55 [00:00:<00:00:, 0.00it/s][0G  3%|█                                            | 2/55 [00:00:<00:01:, 30.30it/s][0G  5%|██                                           | 3/55 [00:00:<00:01:, 44.78it/s][0G  7%|███                                          | 4/55 [00:00:<00:00:, 55.56it/s][0G  9%|████                                         | 5/55 [00:00:<00:00:, 69.44it/s][0G 10%|████                                         | 6/55 [00:00:<00:00:, 81.08it/s][0G 12%|█████                                        | 7/55 [00:00:<00:00:, 93.33it/s][0G 14%|██████                                       | 8/55 [00:00:<00:00:, 97.56it/s][0G 16%|███████                                      | 9/55 [00:00:<00:00:, 109.76it/s][0G 18%|████████                                     | 10/55 [00:00:<00:00:, 114.94it/s][0G 20%|█████████                                    | 11/55 [00:00:<00:00:, 125.00it/s][0G 21%|█████████                                    | 12/55 [00:00:<00:00:, 136.36it/s][0G 23%|██████████                                   | 13/55 [00:00:<00:00:, 147.73it/s][0G 25%|███████████                                  | 14/55 [00:00:<00:00:, 157.30it/s][0G 27%|████████████                                 | 15/55 [00:00:<00:00:, 168.54it/s][0G 29%|█████████████                                | 16/55 [00:00:<00:00:, 179.78it/s][0G 30%|█████████████                                | 17/55 [00:00:<00:00:, 191.01it/s][0G 32%|██████████████                               | 18/55 [00:00:<00:00:, 193.55it/s][0G 34%|███████████████                              | 19/55 [00:00:<00:00:, 204.30it/s][0G 36%|████████████████                             | 20/55 [00:00:<00:00:, 204.08it/s][0G 38%|█████████████████                            | 21/55 [00:00:<00:00:, 214.29it/s][0G 40%|██████████████████                           | 22/55 [00:00:<00:00:, 203.70it/s][0G 41%|██████████████████                           | 23/55 [00:00:<00:00:, 212.96it/s][0G 43%|███████████████████                          | 24/55 [00:00:<00:00:, 220.18it/s][0G 45%|████████████████████                         | 25/55 [00:00:<00:00:, 229.36it/s][0G 47%|█████████████████████                        | 26/55 [00:00:<00:00:, 238.53it/s][0G 49%|██████████████████████                       | 27/55 [00:00:<00:00:, 247.71it/s][0G 50%|██████████████████████                       | 28/55 [00:00:<00:00:, 256.88it/s][0G 52%|███████████████████████                      | 29/55 [00:00:<00:00:, 266.06it/s][0G 54%|████████████████████████                     | 30/55 [00:00:<00:00:, 208.33it/s][0G 56%|█████████████████████████                    | 31/55 [00:00:<00:00:, 213.79it/s][0G 58%|██████████████████████████                   | 32/55 [00:00:<00:00:, 220.69it/s][0G 60%|███████████████████████████                  | 33/55 [00:00:<00:00:, 227.59it/s][0G 61%|███████████████████████████                  | 34/55 [00:00:<00:00:, 234.48it/s][0G 63%|████████████████████████████                 | 35/55 [00:00:<00:00:, 241.38it/s][0G 65%|█████████████████████████████                | 36/55 [00:00:<00:00:, 246.58it/s][0G 67%|██████████████████████████████               | 37/55 [00:00:<00:00:, 253.42it/s][0G 69%|███████████████████████████████              | 38/55 [00:00:<00:00:, 260.27it/s][0G 70%|███████████████████████████████              | 39/55 [00:00:<00:00:, 267.12it/s][0G 72%|████████████████████████████████             | 40/55 [00:00:<00:00:, 273.97it/s][0G 74%|█████████████████████████████████            | 41/55 [00:00:<00:00:, 280.82it/s][0G 76%|██████████████████████████████████           | 42/55 [00:00:<00:00:, 285.71it/s][0G 78%|███████████████████████████████████          | 43/55 [00:00:<00:00:, 292.52it/s][0G 80%|████████████████████████████████████         | 44/55 [00:00:<00:00:, 258.82it/s][0G 81%|████████████████████████████████████         | 45/55 [00:00:<00:00:, 264.71it/s][0G 83%|█████████████████████████████████████        | 46/55 [00:00:<00:00:, 269.01it/s][0G 85%|██████████████████████████████████████       | 47/55 [00:00:<00:00:, 274.85it/s][0G 87%|███████████████████████████████████████      | 48/55 [00:00:<00:00:, 280.70it/s][0G 89%|████████████████████████████████████████     | 49/55 [00:00:<00:00:, 286.55it/s][0G 90%|████████████████████████████████████████     | 50/55 [00:00:<00:00:, 292.40it/s][0G 92%|█████████████████████████████████████████    | 51/55 [00:00:<00:00:, 296.51it/s][0G 94%|██████████████████████████████████████████   | 52/55 [00:00:<00:00:, 302.33it/s][0G 96%|███████████████████████████████████████████  | 53/55 [00:00:<00:00:, 308.14it/s][0G 98%|████████████████████████████████████████████ | 54/55 [00:00:<00:00:, 312.14it/s][0G100%|█████████████████████████████████████████████| 55/55 [00:00:<00:00:, 292.55it/s]
+Successfully populated cache with 55 entries
+
+Creating D1 table if necessary...
+
+Successfully created D1 table
+Proxy environment variables detected. We'll use your proxy for fetch requests.
+
+ ⛅️ wrangler 4.79.0 (update available 4.81.1)
+─────────────────────────────────────────────
+Using secrets defined in .dev.vars
+Your Worker has access to the following bindings:
+Binding                                                                 Resource                  Mode
+env.NEXT_CACHE_DO_QUEUE (DOQueueHandler)                                Durable Object            local
+env.NEXT_TAG_CACHE_D1 (tianze-website-tags-preview)                     D1 Database               local
+env.NEXT_INC_CACHE_R2_BUCKET (tianze-website-cache-preview)             R2 Bucket                 local
+env.WORKER_SELF_REFERENCE (tianze-website)                              Worker                    local [not connected]
+env.ASSETS                                                              Assets                    local
+env.APP_ENV ("preview")                                                 Environment Variable      local
+env.DEPLOYMENT_PLATFORM ("cloudflare")                                  Environment Variable      local
+env.NEXT_PUBLIC_BASE_URL ("(hidden)")                                   Environment Variable      local
+env.NEXT_PUBLIC_DEPLOYMENT_PLATFORM ("(hidden)")                        Environment Variable      local
+env.NODE_ENV ("(hidden)")                                               Environment Variable      local
+env.NEXTJS_ENV ("(hidden)")                                             Environment Variable      local
+
+
+Service bindings, Durable Object bindings, and Tail consumers connect to other Wrangler or Vite dev processes running locally, with their connection status indicated by [connected] or [not connected]. For more details, refer to https://developers.cloudflare.com/workers/runtime-apis/bindings/service-bindings/#local-development
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mBuild failed with 1 error:[0m
+
+  [31m✘ [41;31m[[41;97mERROR[41;31m][0m [1m"await" can only be used inside an "async" function[0m
+  
+      .open-next/server-functions/default/handler.mjs:1887:55320:
+  [37m      1887 │ ...nvalidate/route.js"))return [32mawait[37m import(new URL(".next/serve...
+             ╵                                [32m~~~~~[0m
+  
+    Consider adding the "async" keyword here:
+  
+      .open-next/server-functions/default/handler.mjs:1887:54864:
+  [37m      1887 │ ...undError(page);return pagePath}[32m[37mfunction requirePage(page,dist...
+             │                                   [32m^[37m
+             ╵                                   [32masync[0m
+  
+  
+
+
+🪵  Logs were written to "/Users/Data/Library/Preferences/.wrangler/logs/wrangler-2026-04-10_05-56-03_672.log"
+ERROR Wrangler dev command failed:
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mBuild failed with 1 error:[0m
+
+  [31m✘ [41;31m[[41;97mERROR[41;31m][0m [1m"await" can only be used inside an "async" function[0m
+  
+      .open-next/server-functions/default/handler.mjs:1887:55320:
+  [37m      1887 │ ...nvalidate/route.js"))return [32mawait[37m import(new URL(".next/serve...
+             ╵                                [32m~~~~~[0m
+  
+    Consider adding the "async" keyword here:
+  
+      .open-next/server-functions/default/handler.mjs:1887:54864:
+  [37m      1887 │ ...undError(page);return pagePath}[32m[37mfunction requirePage(page,dist...
+             │                                   [32m^[37m
+             ╵                                   [32masync[0m
+  
+  
+
+
+🪵  Logs were written to "/Users/Data/Library/Preferences/.wrangler/logs/wrangler-2026-04-10_05-56-03_672.log"
+
+ ELIFECYCLE  Command failed with exit code 1.

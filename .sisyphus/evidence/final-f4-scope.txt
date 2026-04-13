@@ -1,0 +1,71 @@
+FINAL F4 SCOPE FIDELITY REVIEW
+Date: 2026-04-10
+Plan: .sisyphus/plans/cloudflare-official-alignment.md
+Reviewer: Sisyphus agent
+
+Conclusion
+- PASS: Final Wave F4 scope fidelity holds.
+- I found no repo-evidence showing forbidden-scope execution leaked into the active Waves 2-4 work.
+- The active series stayed focused on retirement/audit/runbook/register/backlog work, not on architectural expansion.
+
+Sources reviewed
+- Plan: .sisyphus/plans/cloudflare-official-alignment.md
+- Assessment evidence: .sisyphus/evidence/task-5-assessment-sections.txt, task-5-overclaim-check.txt
+- Runbook evidence: .sisyphus/evidence/task-11-runbook.txt
+- Retained register evidence: .sisyphus/evidence/task-12-retained-final.txt, task-12-consistency.txt
+- Backlog evidence: .sisyphus/evidence/task-13-backlog.txt, task-13-scope-separation.txt
+- Wave 2-4 execution evidence: task-6-retire-patch.txt, task-7-no-overpromise.txt, task-8-patch-audit.txt, task-8-proof-check.txt, task-9-contract-audit.txt, task-9-proof-impact.txt, task-10-scope-check.txt, task-10-convergence.txt
+- Published docs: docs/guides/CLOUDFLARE-DEPLOYMENT-ASSESSMENT.md, CLOUDFLARE-OFFICIAL-ALIGNMENT-RUNBOOK.md, CLOUDFLARE-RETAINED-EXCEPTION-REGISTER.md, CLOUDFLARE-FUTURE-BACKLOG.md
+
+Required exclusions checked
+1. phase6 topology rewrite
+   - Plan marks it forbidden.
+   - task-10-scope-check.txt: PASS
+   - task-13-scope-separation.txt: PASS
+   - Future backlog keeps it future-only, not active.
+
+2. worker regrouping
+   - Plan marks it forbidden.
+   - task-10-scope-check.txt: PASS
+   - task-13-scope-separation.txt: PASS
+   - No Wave 2-4 evidence claims regrouping progress.
+
+3. middleware -> proxy migration
+   - Plan and Task 1 guardrails exclude it.
+   - task-10-scope-check.txt: PASS
+   - task-13-scope-separation.txt: PASS
+   - Current docs still treat this as out of scope / deferred.
+
+4. minify reopening
+   - Plan excludes re-enabling minify.
+   - task-10-scope-check.txt: PASS
+   - task-13-scope-separation.txt: PASS
+   - docs/guides/CLOUDFLARE-RETAINED-EXCEPTION-REGISTER.md keeps this as CF-EXCEPT-006 DEFERRED.
+
+5. platform switch
+   - Plan excludes it.
+   - task-10-scope-check.txt: PASS
+   - task-13-scope-separation.txt: PASS
+   - No doc reframes official alignment as leaving OpenNext + Cloudflare.
+
+6. large version gamble
+   - Plan excludes large version gambles during patch-retirement waves.
+   - task-10-scope-check.txt: PASS
+   - task-13-scope-separation.txt: PASS
+   - No Wave 2-4 evidence claims progress by upgrading Next/OpenNext/Wrangler.
+
+What active execution actually did instead
+- Wave 2: retired one narrow manifest-guard branch only, with explicit target-only wording and preserved proof.
+- Wave 3: audited remaining patch points and exception contracts; statuses stayed retain / blocker-typed, not batch-remove.
+- Wave 4: consolidated findings into runbook, retained register, and future backlog.
+
+Anti-creep findings
+- task-6-retire-patch.txt records a target-only retirement, not broad patch deletion.
+- task-8-patch-audit.txt explicitly expects retain / blocker typed / no batch retirement.
+- task-10-convergence.txt frames convergence as thinner wrappers later, not topology or platform change now.
+- docs/guides/CLOUDFLARE-FUTURE-BACKLOG.md keeps the six forbidden items in future-only separation, not in the active wave.
+
+Bottom line
+- This wave did not smuggle in bigger architecture work.
+- Progress came from bounded retirement, explicit retention, and clearer documentation.
+- Scope stayed tight, so future work should inherit fewer surprises and less accidental overreach.

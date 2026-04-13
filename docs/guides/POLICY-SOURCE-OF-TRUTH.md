@@ -26,6 +26,9 @@ Use this file when multiple documents appear to describe the same rule.
 
 ### Cloudflare Interpretation
 - [`CLOUDFLARE-ISSUE-TAXONOMY.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/CLOUDFLARE-ISSUE-TAXONOMY.md)
+- [`CLOUDFLARE-DEPLOYMENT-ASSESSMENT.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/CLOUDFLARE-DEPLOYMENT-ASSESSMENT.md) - current Cloudflare alignment state, retained patch posture, and convergence boundary
+- [`CLOUDFLARE-OFFICIAL-ALIGNMENT-RUNBOOK.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/CLOUDFLARE-OFFICIAL-ALIGNMENT-RUNBOOK.md) - current execution order for Cloudflare official-alignment work
+- [`CLOUDFLARE-RETAINED-EXCEPTION-REGISTER.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/CLOUDFLARE-RETAINED-EXCEPTION-REGISTER.md) - current retained/deferred Cloudflare exception truth
 
 ### Archive and Supersession Hygiene
 - [`ARCHIVE-HYGIENE.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/ARCHIVE-HYGIENE.md)

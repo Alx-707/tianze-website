@@ -1,0 +1,5 @@
+TASK 11 ROLLBACK CHECK
+
+Rollback rule:: PASS
+If preview proof fails after build succeeds: PASS
+If a checker is too weak to support a conclusion: PASS

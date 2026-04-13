@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { SINGLE_SITE_CONFIG } from "@/config/single-site";
 import {
   getUnconfiguredPlaceholders,
   isBaseUrlConfigured,
@@ -34,6 +35,7 @@ describe("site-config", () => {
   describe("SITE_CONFIG", () => {
     it("should export SITE_CONFIG object", () => {
       expect(SITE_CONFIG).toBeDefined();
+      expect(SITE_CONFIG).toBe(SINGLE_SITE_CONFIG);
       expect(typeof SITE_CONFIG.baseUrl).toBe("string");
       expect(typeof SITE_CONFIG.name).toBe("string");
     });

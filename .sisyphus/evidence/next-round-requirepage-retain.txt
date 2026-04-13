@@ -1,0 +1,40 @@
+NEXT-ROUND RETAIN RESULT: default-handler requirePage async rewrite
+Date: 2026-04-10
+Repo: /Users/Data/Warehouse/Pipe/tianze-website
+Status: RETAIN (target-only retirement failed)
+
+What was attempted
+- Removed only the `requirePage async` rewrite branch from scripts/cloudflare/patch-prefetch-hints-manifest.mjs.
+- Kept middleware manifest loader, API route import rewrite, and split server-function cache/composable-cache rewrites active.
+
+Before-state evidence
+- .sisyphus/evidence/next-round-requirepage-retire-before.txt
+  - dry-run reported:
+    - middleware manifest loader already patched
+    - API route requirePage async already patched
+    - cache handler paths already patched in all three split server-function index files
+    - generated artifacts still require compatibility patching only for API route import rewrite
+
+Corrected target-only after-state
+- .sisyphus/evidence/next-round-requirepage-retire-after.txt
+  - dry-run no longer mentioned `requirePage async`
+  - it still required only the API route import rewrite plus split server-function cache/composable-cache rewrites
+
+Build/proof results
+- .sisyphus/evidence/next-round-requirepage-retire-build-cf.txt
+  - retained-patch Cloudflare build completed
+  - patch step re-applied middleware manifest loader, API route import rewrite, and split server-function cache/composable-cache rewrites
+  - it did not reapply `requirePage async`
+- .sisyphus/evidence/next-round-requirepage-retire-preview-server.txt
+  - preview failed during wrangler build of the generated default handler with:
+    - `"await" can only be used inside an "async" function`
+    - the failure points to `return await import(...)` inside `function requirePage(...)`
+
+Conclusion
+- `requirePage async` is still required.
+- Even though the target-only dry-run looked superficially viable, local preview proved that the generated default handler still needs `requirePage` to be async whenever the API route import rewrite remains active.
+- Retiring this branch now would leave an invalid default handler shape and break preview/runtime bundling.
+
+Follow-up recommendation
+- Keep `requirePage async` in the retained compat layer.
+- The only remaining default-handler retirement candidate worth trying later is the middleware manifest loader, and it should remain the final / highest-risk attempt.

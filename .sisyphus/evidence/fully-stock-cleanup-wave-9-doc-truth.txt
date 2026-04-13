@@ -1,0 +1,43 @@
+## Fully-stock cleanup wave 9 — doc truth convergence
+
+Date: 2026-04-11
+
+### Goal
+
+Bring the active documentation/rules layer in sync with the post-wave-8 operator reality: stock Route B is canonical; the only clearly active non-stock boundary left is preview-degraded handling.
+
+### Changes made
+
+Updated docs/rules so they no longer describe the retired generated-artifact and wrapper layers as active truth:
+
+- `docs/guides/CLOUDFLARE-ISSUE-TAXONOMY.md`
+- `docs/guides/tech-stack.md`
+- `docs/guides/CLOUDFLARE-OFFICIAL-ALIGNMENT-RUNBOOK.md`
+- `docs/guides/STOCK-MVP-DEPLOYMENT-RUNBOOK.md`
+- `docs/guides/CLOUDFLARE-DEPLOYMENT-ASSESSMENT.md`
+- `docs/guides/RELEASE-PROOF-RUNBOOK.md`
+- `docs/guides/CANONICAL-TRUTH-REGISTRY.md`
+- `AGENTS.md`
+
+### Current state after wave 9
+
+- stock `pnpm build:cf` / `pnpm preview:cf` / `pnpm deploy:cf:preview` / `pnpm deploy:cf` remain canonical
+- generated-artifact patch/checker layer is documented as retired from the main tree
+- phase6 deploy/generator/config skeleton is documented as retired from the main tree
+- preview-degraded contract/checker is documented as the last active non-stock operator boundary
+
+### Blocker to full stock
+
+Full stock is now blocked by external preview prerequisites, not by remaining repo-local phase6/generated-artifact code.
+
+The final retirement requires:
+- real preview secrets for Turnstile / Resend / Airtable / encryption key
+- non-degraded preview rate-limit and idempotency stores
+- workflow changes to remove preview-only degraded flags/placeholders
+
+See:
+- `.sisyphus/evidence/preview-degraded-retirement-prereqs.txt`
+
+### Conclusion
+
+After wave 9, the repo’s code and docs are largely aligned with the real operator surface. The path to “fully stock” is now primarily an environment/config migration task rather than a remaining code-surface cleanup task.

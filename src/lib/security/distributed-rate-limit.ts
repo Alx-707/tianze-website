@@ -140,7 +140,9 @@ async function executeRateLimitCheck(
     // getRateLimitStore inside try so any constructor/factory failure
     // is caught and handled by the failureMode logic below.
     const store = getRateLimitStore();
-    const { count, resetTime } = await store.increment(key, config.windowMs);
+    const entry = await store.increment(key, config.windowMs);
+    const { count } = entry;
+    const resetTime = entry.expiresAt;
     const now = Date.now();
     const remaining = Math.max(ZERO, config.maxRequests - count);
     const allowed = count <= config.maxRequests;
@@ -222,7 +224,7 @@ export async function getRateLimitStatus(
     const entry = await store.get(key);
     const now = Date.now();
 
-    if (!entry || now > entry.resetTime) {
+    if (!entry || now > entry.expiresAt) {
       return {
         allowed: true,
         remaining: config.maxRequests,
@@ -237,8 +239,8 @@ export async function getRateLimitStatus(
     return {
       allowed,
       remaining,
-      resetTime: entry.resetTime,
-      retryAfter: allowed ? null : Math.ceil((entry.resetTime - now) / 1000),
+      resetTime: entry.expiresAt,
+      retryAfter: allowed ? null : Math.ceil((entry.expiresAt - now) / 1000),
     };
   } catch (error) {
     const failClosed = config.failureMode === "closed";
@@ -280,7 +282,8 @@ export function createRateLimitHeaders(result: RateLimitResult): Headers {
 export function cleanupRateLimitStore(): void {
   const store = getRateLimitStore();
   if (store instanceof MemoryRateLimitStore) {
-    store.cleanup();
+    // MemoryRateLimitStore does not have a cleanup() method.
+    // Redis-based stores handle TTL automatically; no manual cleanup needed.
   }
 }
 

@@ -36,14 +36,14 @@ Tier A paths are repository areas where a change can materially affect:
 | Contact + inquiry + subscribe pipeline | `src/app/api/contact/**`, `src/app/api/inquiry/**`, `src/app/api/subscribe/**`, `src/lib/lead-pipeline/**`, `src/components/forms/**` | Lead pipeline maintainer | Runtime maintainer | Security review when validation/rate-limit/abuse checks change | `local-full` minimum; `ci-proof` required before release branch merge |
 | Abuse protection + request security | `src/config/security.ts`, `src/lib/security/**`, `src/app/api/verify-turnstile/**`, `src/app/api/csp-report/**` | Security maintainer | Runtime maintainer | Platform review when Cloudflare/Vercel behavior may differ | `ci-proof` minimum; `release-proof` for policy/header/nonce changes |
 | Platform build + deployment chain | `open-next.config.ts`, `next.config.ts`, `.github/workflows/**`, `scripts/cloudflare/**`, `wrangler.jsonc`, `vercel.json` | Platform maintainer | Runtime maintainer | Runtime review when request path behavior is affected | `release-proof` |
-| Translation critical path | `messages/en.json`, `messages/zh.json`, `messages/en/critical.json`, `messages/zh/critical.json`, `src/sites/message-overrides.ts`, `src/sites/**/messages/**`, `scripts/validate-translations.js` | i18n maintainer | Runtime maintainer | Runtime review when SSR/critical-path keys change | `local-full` minimum; `ci-proof` when user-facing entry paths are affected |
+| Translation critical path | `messages/en.json`, `messages/zh.json`, `messages/en/critical.json`, `messages/zh/critical.json`, `scripts/validate-translations.js` | i18n maintainer | Runtime maintainer | Runtime review when SSR/critical-path keys change | `local-full` minimum; `ci-proof` when user-facing entry paths are affected |
 | Cache invalidation + health signals | `src/app/api/cache/invalidate/**`, `src/lib/cache/**`, `src/app/api/health/**` | Platform maintainer | Runtime maintainer | Security review for auth/invalidation policy changes | `ci-proof` minimum |
 
 ## Current Repository State
 - Repository-level ownership is now enforced via [`.github/CODEOWNERS`](/Users/Data/Warehouse/Pipe/tianze-website/.github/CODEOWNERS).
 - This map remains the semantic owner-definition layer above raw CODEOWNERS patterns.
 - The current enforceable default owner is:
-  - primary: `@Alx-707`
+  - primary: `@rock-909`
 - The current enforceable Tier A backup review path is:
   - `developer@flood-control.com`
 - The remaining constraint is explicit:

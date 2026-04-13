@@ -1,0 +1,42 @@
+## Fully-stock cleanup wave 8
+
+Date: 2026-04-11
+
+### Goal
+
+Retire the repo-local generated-artifact compatibility layer from the main tree and verify that current stock Route B build/preview/release proof still stands on its own.
+
+### Changes made
+
+Removed from the main tree:
+- `scripts/cloudflare/patch-prefetch-hints-manifest.mjs`
+- `scripts/cloudflare/generated-artifact-exception-contract.mjs`
+- `scripts/cloudflare/check-generated-artifact-log.mjs`
+- `scripts/cloudflare/build-webpack.mjs`
+- `scripts/cloudflare/split-server-function-contract.mjs`
+- `tests/unit/scripts/split-server-function-contract.test.ts`
+
+Updated active docs/rules so the generated-artifact layer is no longer described as current truth.
+
+### Why this wave was accepted
+
+- `pnpm build:cf` is already stock `opennextjs-cloudflare build`
+- `pnpm preview:cf` and `pnpm release:verify` were already green on the stock Route B path
+- local verification showed the old patch dry-run no longer matched current generated output shape (`expected middleware manifest loader not found`), meaning the patch layer was no longer a trustworthy active boundary
+- the remaining checker still found old patterns in generated artifacts, but those patterns no longer blocked the stock Route B proof path
+
+### Verification
+
+Passed:
+- `pnpm build`
+- `pnpm build:cf`
+- `pnpm preview:preflight:cf`
+- `pnpm release:verify`
+
+Observed during pre-retirement validation:
+- `node scripts/cloudflare/patch-prefetch-hints-manifest.mjs --dry-run` failed because its old patch needle no longer existed in current generated output
+- `node scripts/cloudflare/check-generated-artifact-log.mjs cf_build.log` still flagged legacy pattern matches, but stock build and release proof stayed green
+
+### Current conclusion
+
+The repo-local generated-artifact patch/checker layer has been retired from the main tree. Current Cloudflare operator truth is now stock Route B plus the still-active preview-degraded contract/checker.

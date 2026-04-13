@@ -269,8 +269,8 @@ jobs:
         env:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
 
-  site-pilot-proof:
-    name: 站点试装验证
+  site-cutover-proof:
+    name: 单站收缩验证
     runs-on: ubuntu-latest
     needs: basic-checks
     timeout-minutes: 18
@@ -306,8 +306,8 @@ jobs:
       - name: 安装依赖
         run: pnpm install --frozen-lockfile
 
-      - name: 构建非默认站点
-        run: pnpm build:site:equipment
+      - name: 运行单站收缩严格预检
+        run: pnpm preflight:site-cutover:strict
 
   # 安全检查作业
   security:

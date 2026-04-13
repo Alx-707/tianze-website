@@ -1,0 +1,57 @@
+## Route B implementation summary
+
+Date: 2026-04-10
+
+### Command truth switched
+
+- `pnpm build:cf` now follows stock `opennextjs-cloudflare build`
+- `pnpm preview:cf` now follows stock `opennextjs-cloudflare preview --env preview`
+- `pnpm deploy:cf:preview` now exists as the canonical preview publish path
+- `pnpm deploy:cf` now follows stock `opennextjs-cloudflare deploy --env production`
+
+### Operating model changed
+
+- phase6 scripts were removed from active `package.json` command truth
+- release gate no longer treats generated-artifact checker flow or phase6 dry-run as canonical blockers
+- preview preflight keeps degraded-preview contract, but phase6-only alias/server-actions checks were removed from the active preflight/release path
+
+### Canonical docs/rules updated
+
+- `README.md`
+- `CLAUDE.md`
+- `.claude/rules/architecture.md`
+- `AGENTS.md`
+- `docs/guides/QUALITY-PROOF-LEVELS.md`
+- `docs/guides/RELEASE-PROOF-RUNBOOK.md`
+- `docs/guides/CANONICAL-TRUTH-REGISTRY.md`
+- `docs/guides/tech-stack.md`
+- `docs/guides/CLOUDFLARE-RETAINED-EXCEPTION-REGISTER.md`
+- `docs/guides/CLOUDFLARE-OFFICIAL-ALIGNMENT-RUNBOOK.md`
+- `docs/guides/PHASE6-PRODUCTION-READINESS.md`
+
+### Verification
+
+#### Passed
+- `node -e 'JSON.parse(fs.readFileSync("package.json","utf8"))'`
+- `bash -n scripts/release-proof.sh`
+- `bash -n scripts/cloudflare/preview-preflight.sh`
+- `bash -n scripts/cloudflare/deployed-preview-proof.sh`
+- `pnpm build:cf`
+- `pnpm preview:cf` + `pnpm smoke:cf:preview`
+- `pnpm exec prettier --check` on changed non-shell canonical docs/config files
+- YAML parse of `.github/workflows/cloudflare-deploy.yml`
+
+#### Failed
+- `pnpm release:verify`
+  - Route B command/path changes themselves got through type-check, lint, tests, build, stock Cloudflare build, and local preview smoke.
+  - Failure occurred at existing Playwright release smoke expectations around the contact form rendering on `/en/contact` and `/zh/contact`.
+  - This is recorded as a runtime/UI proof failure, not as a Route B command-truth/build-chain failure.
+
+### Current conclusion
+
+Route B has been executed at the command-truth / operating-model / doc-policy level.
+
+What is now true:
+- stock OpenNext Cloudflare commands are canonical
+- phase6 and generated-artifact compat tooling remain available only as diagnostic or legacy analysis surfaces
+- final Cloudflare API truth still belongs to deployed smoke, not local preview

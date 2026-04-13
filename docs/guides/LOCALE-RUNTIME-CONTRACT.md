@@ -27,7 +27,7 @@ They should be reviewed as one structural surface, not as isolated files.
 
 ### 1. Runtime Message Source
 - Server runtime must load from split message files under `messages/{locale}/`.
-- Server runtime may then merge site-specific overlays from `src/sites/**/messages/**`.
+- Server runtime now reads only the shared split bundles under `messages/**`.
 - Flat locale files may exist for compatibility/tooling, but runtime must not depend on them as a fallback truth source.
 - Site-specific copy must not be pasted straight into shared bundles when the overlay layer already exists.
 
@@ -54,4 +54,3 @@ pnpm review:locale-runtime
 - [`src/__tests__/middleware-locale-cookie.test.ts`](/Users/Data/Warehouse/Pipe/tianze-website/src/__tests__/middleware-locale-cookie.test.ts)
 - [`src/i18n/__tests__/request.test.ts`](/Users/Data/Warehouse/Pipe/tianze-website/src/i18n/__tests__/request.test.ts)
 - [`src/lib/__tests__/load-messages.fallback.test.ts`](/Users/Data/Warehouse/Pipe/tianze-website/src/lib/__tests__/load-messages.fallback.test.ts)
-- [`src/sites/__tests__/message-overrides.test.ts`](/Users/Data/Warehouse/Pipe/tianze-website/src/sites/__tests__/message-overrides.test.ts)

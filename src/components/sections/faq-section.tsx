@@ -1,4 +1,4 @@
-import { getTranslations } from "next-intl/server";
+import { getTranslationsCached } from "@/lib/i18n/server/getTranslationsCached";
 import { JsonLdScript } from "@/components/seo";
 import { FaqAccordion } from "@/components/sections/faq-accordion";
 import { SectionHead } from "@/components/ui/section-head";
@@ -26,7 +26,7 @@ export async function FaqSection({
   subtitle,
   locale,
 }: FaqSectionProps) {
-  const t = await getTranslations("faq");
+  const t = await getTranslationsCached({ locale, namespace: "faq" });
 
   const faqData = items.map((key) => ({
     key,

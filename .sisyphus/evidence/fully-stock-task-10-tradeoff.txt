@@ -1,0 +1,74 @@
+## Task 10 — Cost-of-stock trade-off memo
+
+Date: 2026-04-10
+Plan: /Users/Data/Warehouse/Pipe/tianze-website/.sisyphus/plans/fully-stock-opennext.md
+
+### One-line conclusion
+
+Becoming truly stock is no longer just cleanup. It now means giving up some repo-specific proof/control layers unless upstream or future evidence closes the remaining gap.
+
+### Cost categories
+
+#### 1. Architecture control cost
+
+To move toward stock, the repo likely gives up:
+- explicit phase6 topology control
+- gateway/service-binding deployment shaping
+- some repo-specific routing/deploy structure
+
+#### 2. Proof control cost
+
+To move toward stock today, the repo likely gives up:
+- stronger custom proof layers around generated artifacts
+- stronger local split-worker dry-run proof in the canonical path
+- some direct control over how preview/deploy proof is classified
+
+#### 3. Compat control cost
+
+To call the repo stock, repo-local compat intervention must disappear from the active path.
+
+Today that means giving up or retiring:
+- patch-driven generated-artifact rescue path
+- explicit compatibility dry-run/guard behavior
+
+But because that compat layer is still load-bearing, the real cost is either:
+- wait for upstream/generated artifact change, or
+- accept weaker proof and stop preserving the stronger compat-boundary model.
+
+#### 4. Deploy control cost
+
+To move toward stock, the repo likely simplifies:
+- custom phase6 deploy ordering
+- custom worker-shape generation
+- some current repo-owned deploy/runtime truth
+
+### Route comparison
+
+#### Route A
+- tries to preserve current proof strength
+- avoids giving up proof/control
+- but is not feasible with current evidence
+
+#### Route B
+- gives up part of today’s stronger proof/control story
+- but is the only currently credible path toward a stock operating model
+
+### Plain-language takeaway
+
+This is not a free cleanup win.
+
+Short-term benefit:
+- simpler stock-aligned commands and less custom deployment glue
+
+What it does not solve automatically:
+- deployed/API proof equivalence
+- stronger repo-specific assurance boundaries
+
+Long-term value:
+- less custom maintenance and fewer repo-specific moving parts
+
+### Conclusion
+
+Task 10 result:
+- the cost of stock is mainly a cost in proof/control, not just code deletion
+- Route B is the realistic stock path because it admits that trade-off openly

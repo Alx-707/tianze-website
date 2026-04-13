@@ -232,6 +232,74 @@ Current branch truth after re-validation:
     - `pnpm deploy:cf:phase6:dry-run` into the unified release gate
     - the contact/no-JS and mobile-navigation stabilization fixes
 
+## Verified Sync Round
+
+Date:
+- `2026-04-13`
+
+Scope:
+- sync the latest safe Next-related and low-risk tooling releases
+- keep the repo on the current known-safe hold lines for TypeScript, ESLint, Node policy, and OpenNext minify
+
+Completed upgrades in this round:
+- `next` `16.2.2 -> 16.2.3`
+- `@next/mdx` `16.2.2 -> 16.2.3`
+- `@next/bundle-analyzer` `16.2.2 -> 16.2.3`
+- `@next/eslint-plugin-next` `16.2.2 -> 16.2.3`
+- `eslint-config-next` `16.2.2 -> 16.2.3`
+- `react` `19.2.4 -> 19.2.5`
+- `react-dom` `19.2.4 -> 19.2.5`
+- `react-server-dom-webpack` `19.2.4 -> 19.2.5`
+- `react-server-dom-turbopack` `19.2.4 -> 19.2.5`
+- `@opennextjs/cloudflare` `1.18.0 -> 1.19.1`
+- `wrangler` `4.79.0 -> 4.81.1`
+- `next-intl` `4.8.4 -> 4.9.1`
+- `@types/node` `22.19.15 -> 22.19.17`
+- `lucide-react` `1.7.0 -> 1.8.0`
+- `vitest` `4.1.2 -> 4.1.4`
+- `@vitest/coverage-v8` `4.1.2 -> 4.1.4`
+- `playwright` `1.59.0 -> 1.59.1`
+- `@playwright/test` `1.59.0 -> 1.59.1`
+- `prettier` `3.8.1 -> 3.8.2`
+- `postcss` `8.5.8 -> 8.5.9`
+- `lefthook` `2.1.4 -> 2.1.5`
+- `dotenv` `17.3.1 -> 17.4.2`
+- `knip` `6.1.1 -> 6.4.1`
+- `jsdom` `29.0.1 -> 29.0.2`
+- `@react-email/components` `1.0.11 -> 1.0.12`
+- `@react-email/render` `2.0.5 -> 2.0.6`
+- `@stryker-mutator/core` `9.6.0 -> 9.6.1`
+- `@stryker-mutator/vitest-runner` `9.6.0 -> 9.6.1`
+- `typescript-eslint` `8.58.0 -> 8.58.1`
+
+Current stable integration line after this round:
+- `next` `16.2.3`
+- `@opennextjs/cloudflare` `1.19.1`
+- `wrangler` `4.81.1`
+- `react` / `react-dom` `19.2.5`
+- `next-intl` `4.9.1`
+- `typescript` `5.9.3` (intentional hold)
+- `eslint` `9.39.2` (intentional hold)
+
+Validation completed in this round:
+- `pnpm type-check`: pass
+- `pnpm lint:check`: pass
+- `pnpm build`: pass
+- `pnpm build:cf`: pass
+- `pnpm release:verify`: pass
+
+Current workspace observation:
+- `pnpm ci:local:quick` still fails in the current worktree
+- the red suites are concentrated in existing contact / i18n / idempotency / rate-limit / production-config test surfaces plus a few style assertions
+- because the standard build line, stock Cloudflare build line, local preview smoke, and release-proof lane all stayed green, do **not** treat this alone as proof that the dependency sync broke the deployable runtime; it needs its own focused follow-up on a clean or stabilized worktree
+
+Holds that remain intentionally unchanged after this round:
+- keep `typescript` on `5.9.3`
+- keep `eslint` / `@eslint/js` on `9.x`
+- keep OpenNext `minify` disabled by default
+- keep the Node merge-proof baseline at `20.19.0`
+- keep `@types/node` on the `22.x` line instead of following `npm latest` into `25.x`
+
 ## Current Constraints
 
 ### 1. Keep `@types/node` aligned with the declared runtime majors
@@ -246,7 +314,7 @@ Reason:
 - this repo has already re-checked that the safer `22.x` line remains green, so treat that as the current stable truth
 
 Current stable status:
-- `@types/node`: `22.19.15`
+- `@types/node`: `22.19.17`
 - local verification after realignment:
   - `pnpm type-check`: pass
   - `pnpm build`: pass
@@ -279,7 +347,7 @@ Current runtime truth:
 - local Node `22.x` remains allowed by policy, but it is not the final merge truth
 
 Current branch result:
-- `@types/node@22.19.15` now matches the declared runtime range
+- `@types/node@22.19.17` now matches the declared runtime range
 - the earlier `25.x` experiment is no longer the branch truth
 - treat runtime-aligned typings as the stable default going forward
 
@@ -407,7 +475,7 @@ Updated rule after the `2026-04-01` isolated re-check:
 - do not treat this flag as a casual performance tweak
 
 Current branch note:
-- this branch is now on `@opennextjs/cloudflare@1.18.0`
+- this branch is now on `@opennextjs/cloudflare@1.19.1`
 - the earlier `next@16.2.2` stock-preview regression now has a repo-local compatibility patch and a stronger deployed phase6 proof path
 - that does **not** change the minify decision
 - OpenNext minification still is **not** considered safe to re-enable by default in this repository

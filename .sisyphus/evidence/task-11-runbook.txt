@@ -1,0 +1,8 @@
+TASK 11 RUNBOOK CHECK
+
+## Ordered execution sequence: PASS
+### Step 1 — standard build proof first: PASS
+### Step 2 — Cloudflare build proof in the correct mode: PASS
+### Step 3 — patch retirement attempts must be target-only: PASS
+### Step 4 — local preview proof: PASS
+## Failure handling and rollback: PASS

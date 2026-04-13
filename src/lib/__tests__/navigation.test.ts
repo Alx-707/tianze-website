@@ -4,6 +4,7 @@ import {
   TEST_SCREEN_CONSTANTS,
   TEST_TIMEOUT_CONSTANTS,
 } from "@/constants/test-constants";
+import { SINGLE_SITE_NAVIGATION } from "@/config/single-site";
 import {
   getLocalizedHref,
   isActivePath,
@@ -49,6 +50,10 @@ describe("navigation", () => {
   });
 
   describe("mainNavigation", () => {
+    it("should use the single-site navigation during cutover", () => {
+      expect(mainNavigation).toBe(SINGLE_SITE_NAVIGATION);
+    });
+
     it("should have all required navigation items", () => {
       const expectedKeys = ["home", "about", "products", "blog"];
       const actualKeys = mainNavigation.map((item) => item.key);

@@ -81,6 +81,16 @@ If one route in this family changes:
 2. confirm the family contract still holds
 3. update this file if the family contract intentionally changes
 
+## Cloudflare Execution Boundary
+As of 2026-04-09, recovery of contact-page preview does not prove the deeper API worker path is healthy.
+
+This doc remains the behavior contract for the write-path family, but the current Cloudflare debt boundary still includes generated-artifact / runtime mismatch failures such as:
+- `server-functions/${target}/index.mjs` with fs / `BUILD_ID` / `.env*` assumptions
+- `default/handler.mjs` with dynamic require of generated API route modules
+- static route-wrapper experiments with `__dirname` / `next/dist/server/node-environment*` assumptions
+
+Until stronger deployed proof exists, keep those failures classified as generated-artifact/runtime mismatch debt, not business-contract drift.
+
 ## Regression Coverage
 - [`lead-family-contract.test.ts`](/Users/Data/Warehouse/Pipe/tianze-website/tests/integration/api/lead-family-contract.test.ts)
 - [`lead-family-protection.test.ts`](/Users/Data/Warehouse/Pipe/tianze-website/tests/integration/api/lead-family-protection.test.ts)

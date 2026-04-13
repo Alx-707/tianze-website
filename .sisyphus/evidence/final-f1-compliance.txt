@@ -1,0 +1,128 @@
+FINAL F1 COMPLIANCE AUDIT
+Date: 2026-04-10
+Plan: .sisyphus/plans/cloudflare-official-alignment.md
+Audit scope: Output-claim audit only. This review checks the plan, required docs, task evidence files, and current repo surfaces; it does not claim full git-history reconstruction.
+
+OVERALL VERDICT
+PASS
+
+Why:
+- The plan's promised deliverables exist.
+- The published outputs keep build / preview / deployed proof boundaries separate instead of collapsing them.
+- Wave 2's promised low-risk retirement (manifest-guard branch only) has a real evidence chain.
+- Forbidden-scope items are still documented as excluded or future-only, not claimed as completed.
+- The stale manifest-guard blocker text previously left in scripts/cloudflare/generated-artifact-exception-contract.mjs has now been removed, so the contract surface matches the retired patch state.
+
+SOURCES REVIEWED
+1. .sisyphus/plans/cloudflare-official-alignment.md
+2. docs/guides/CLOUDFLARE-DEPLOYMENT-ASSESSMENT.md
+3. docs/guides/CLOUDFLARE-OFFICIAL-ALIGNMENT-RUNBOOK.md
+4. docs/guides/CLOUDFLARE-RETAINED-EXCEPTION-REGISTER.md
+5. docs/guides/CLOUDFLARE-FUTURE-BACKLOG.md
+6. .sisyphus/evidence/task-0 through task-13 evidence files
+7. Current repo surfaces used for spot-checking: scripts/cloudflare/patch-prefetch-hints-manifest.mjs, scripts/cloudflare/generated-artifact-exception-contract.mjs, scripts/cloudflare/build-webpack.mjs, package.json, open-next.config.ts
+
+SECTION A — DELIVERABLES PROMISED BY THE PLAN
+Plan deliverables are stated at plan lines 52-57:
+- docs/guides/CLOUDFLARE-DEPLOYMENT-ASSESSMENT.md
+- docs/guides/CLOUDFLARE-OFFICIAL-ALIGNMENT-RUNBOOK.md
+- updated .sisyphus execution trail
+- reduced or narrowed repo-local Cloudflare patch surface where safely proven
+- documented retained exception list
+
+Finding A1 — Assessment doc exists: PASS
+Evidence:
+- docs/guides/CLOUDFLARE-DEPLOYMENT-ASSESSMENT.md exists.
+- task-5-assessment-sections.txt marks required sections PASS.
+- The doc contains ecosystem findings, deviation map, convergence path, proof boundaries, out-of-scope items, and Wave 2 result summary.
+
+Finding A2 — Runbook exists: PASS
+Evidence:
+- docs/guides/CLOUDFLARE-OFFICIAL-ALIGNMENT-RUNBOOK.md exists.
+- task-11-runbook.txt marks ordered execution sequence, proof mode, target-only retirement flow, local preview proof, and rollback handling PASS.
+
+Finding A3 — Retained-exception register exists: PASS
+Evidence:
+- docs/guides/CLOUDFLARE-RETAINED-EXCEPTION-REGISTER.md exists.
+- It freezes six retained/deferred entries: CF-EXCEPT-001 through CF-EXCEPT-006.
+- task-12-retained-final.txt records all six entries as present.
+
+Finding A4 — Future backlog exists: PASS
+Evidence:
+- docs/guides/CLOUDFLARE-FUTURE-BACKLOG.md exists.
+- It contains future-wave candidates with blocker/trigger framing and a future-only exclusion block.
+- task-13-backlog.txt and task-13-scope-separation.txt both pass.
+
+Finding A5 — Updated .sisyphus execution trail exists: PASS
+Evidence:
+- .sisyphus/evidence/task-0-workspace.txt through task-13-*.txt exist.
+- Task coverage is present for baseline, rubric, inventory, proof matrix, register template, Wave 2 retirement, Wave 3/4 doc checks, and final readiness inputs.
+
+SECTION B — PLAN DEFINITION-OF-DONE / REQUIRED OUTCOMES
+Finding B1 — Official-alignment criteria documented and referenced: PASS
+Evidence:
+- task-1-rubric-proof.txt defines alignment levels and proof vocabulary.
+- Assessment doc uses that framing in the current alignment level and proof boundary sections.
+- Runbook repeats the proof surfaces and compat-mode rule.
+
+Finding B2 — Repo-local Cloudflare patch/wrapper surfaces classified: PASS
+Evidence:
+- task-2-inventory.txt lists 17 deviation items with type/purpose/current role.
+- Assessment doc consolidates the final grouped view into generated-artifact, wrapper/orchestration, topology, and exception-contract classes.
+- Remaining patch points are enumerated explicitly in the assessment.
+
+Finding B3 — The obvious upstream-absorbed patch candidate was attempted: PASS
+Evidence:
+- Task 6 targeted the manifest-guard branch only.
+- task-6-retire-patch.txt records a target-only retirement with retained remaining patches.
+- task-6-dry-run-before.txt says "upstream manifest handling already present; no manifest-guard patch needed".
+- task-6-dry-run-after.txt no longer reports any manifest-guard need and still recognizes the remaining compatibility state.
+- task-6-build.txt, task-6-build-cf.txt, task-6-preview.txt show standard build, compat-mode CF build, and local page preview proof stayed green.
+- Current scripts/cloudflare/patch-prefetch-hints-manifest.mjs no longer contains a manifest-guard branch or string.
+
+Finding B4 — Proof boundaries remain explicit: PASS
+Evidence:
+- Assessment separates build proof, local page preview proof, and deployed smoke proof.
+- Runbook does the same.
+- task-5-overclaim-check.txt passes.
+- task-3-proof-boundary.txt and task-3-proof-matrix.txt repeatedly forbid treating build or local preview as deployed truth.
+
+Finding B5 — No forbidden-scope item is claimed as active work: PASS
+Evidence:
+- Plan exclusions are phase6 topology rewrite, worker regrouping, middleware -> proxy, minify reopening, platform switch, and large version gamble.
+- Assessment out-of-scope section keeps those items explicitly outside this wave.
+- Runbook non-negotiable boundaries repeats the same exclusions.
+- Future backlog lists the same items under future-only / not for the active wave.
+- task-10-scope-check.txt and task-13-scope-separation.txt both pass.
+
+SECTION C — RETIRE / RETAIN / DEFER COMPLIANCE
+Finding C1 — Retire conclusion is supported: PASS
+Evidence:
+- task-6-retire-patch.txt
+- task-6-dry-run-before.txt
+- task-6-dry-run-after.txt
+- task-6-build.txt
+- task-6-build-cf.txt
+- task-6-preview.txt
+- Current patch script no longer contains manifest-guard logic.
+
+Finding C2 — Remaining retain conclusions are documented: PASS
+Evidence:
+- Assessment retains five live generated-artifact patch points.
+- Register CF-EXCEPT-001 keeps remaining compat patches active and cites Task 6 proof files.
+- Register CF-EXCEPT-002 through CF-EXCEPT-005 capture retained contracts/topology items with evidence references to task-9/task-10 outputs.
+
+Finding C3 — Deferred conclusions are documented: PASS
+Evidence:
+- Register CF-EXCEPT-006 defers minify reopening and ties it to future build + preview + deploy proof.
+- Future backlog keeps larger excluded items separate from the active wave.
+
+SECTION D — FINAL CLEANUP STATUS
+Finding D1 — Residual stale manifest-guard blocker text: RESOLVED
+Evidence:
+- scripts/cloudflare/generated-artifact-exception-contract.mjs no longer includes a manifest-guard blocker entry.
+- grep across scripts/cloudflare/*.mjs finds no remaining manifest-guard blocker references.
+- node scripts/cloudflare/check-generated-artifact-log.mjs .sisyphus/evidence/task-6-build-cf.txt still passes after the cleanup.
+
+FINAL COMPLIANCE CONCLUSION
+The Final Wave F1 compliance target is met: the promised docs exist, the explicit exclusions were respected in published outputs, the key Wave 2 retirement was actually evidenced rather than merely narrated, and the previously noted stale contract tail has now been cleaned up.

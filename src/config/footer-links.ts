@@ -9,10 +9,10 @@ import {
   WHATSAPP_STYLE_TOKENS,
 } from "@/config/footer-style-tokens";
 import {
-  currentSite,
+  SINGLE_SITE_FOOTER_COLUMNS,
   type SiteFooterColumnConfig,
   type SiteFooterLinkItem,
-} from "@/sites";
+} from "@/config/single-site";
 
 export { FOOTER_STYLE_TOKENS, WHATSAPP_STYLE_TOKENS };
 export type { WhatsAppStyleTokens } from "@/config/footer-style-tokens";
@@ -96,6 +96,6 @@ export interface FooterStyleTokens {
   hover: FooterHoverTokens;
 }
 
-export const FOOTER_COLUMNS: FooterColumnConfig[] = currentSite.footerColumns;
+export const FOOTER_COLUMNS: FooterColumnConfig[] = SINGLE_SITE_FOOTER_COLUMNS;
 
 export type FooterTokens = typeof FOOTER_STYLE_TOKENS;

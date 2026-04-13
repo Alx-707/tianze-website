@@ -15,6 +15,10 @@ import { API_ERROR_CODES } from "@/constants/api-error-codes";
 import { getClientIPFromHeaders } from "@/lib/security/client-ip";
 import { hmacKey } from "@/lib/security/rate-limit-key-strategies";
 import {
+  createCanonicalContactFingerprint,
+  submitCanonicalContactSubmission,
+} from "@/lib/contact/submit-canonical-contact";
+import {
   createErrorResultWithLogging,
   createSuccessResultWithLogging,
   getFormDataBoolean,
@@ -24,10 +28,6 @@ import {
   type ServerActionResult,
 } from "@/lib/server-action-utils";
 import { withIdempotentResult } from "@/lib/idempotency";
-import {
-  processFormSubmission,
-  validateContactSubmission,
-} from "@/lib/contact-form-processing";
 
 /**
  * 联系表单提交结果类型
@@ -53,22 +53,6 @@ export interface ContactFormWithToken extends ContactFormData {
   idempotencyKey?: string;
 }
 
-/** MurmurHash2 mixing constant */
-const MURMUR2_MULTIPLIER = 0x5bd1e995;
-/** MurmurHash2 right-shift amount */
-const MURMUR2_SHIFT = 13;
-/** Radix for compact hash string encoding */
-const HASH_RADIX = 36;
-
-function createFormFingerprint(data: ContactFormWithToken): string {
-  const payload = `${data.email}:${data.message}:${data.submittedAt}`;
-  let hash = 0;
-  for (let i = 0; i < payload.length; i++) {
-    hash = Math.imul(hash ^ payload.charCodeAt(i), MURMUR2_MULTIPLIER);
-    hash ^= hash >>> MURMUR2_SHIFT;
-  }
-  return `SERVER_ACTION:contactForm:${(hash >>> 0).toString(HASH_RADIX)}`;
-}
 /**
  * Extract contact form data from FormData
  */
@@ -97,7 +81,7 @@ async function performSecurityChecks(
   formData: FormData,
   clientIP: string,
 ): Promise<ServerActionResult<ContactFormResult> | null> {
-  const rateLimitKey = `ip:${hmacKey(clientIP)}`;
+  const rateLimitKey = `ip:${await hmacKey(clientIP)}`;
   const rateLimitResult = await checkDistributedRateLimit(
     rateLimitKey,
     "contact",
@@ -145,19 +129,21 @@ async function executeContactSubmissionAttempt(
     );
   }
 
-  const validation = await validateContactSubmission(contactData, clientIP);
-  if (!validation.success || !validation.data) {
+  const submission = await submitCanonicalContactSubmission(contactData, {
+    clientIP,
+  });
+  if (!submission.success) {
     return createErrorResultWithLogging(
       {
-        code: validation.errorCode ?? API_ERROR_CODES.CONTACT_VALIDATION_FAILED,
-        message: validation.error || "Validation failed",
+        code: submission.errorCode ?? API_ERROR_CODES.CONTACT_VALIDATION_FAILED,
+        message: submission.error || "Validation failed",
       },
-      validation.details || undefined,
+      submission.details || undefined,
       logger,
     );
   }
 
-  const submissionResult = await processFormSubmission(validation.data);
+  const { submissionResult } = submission;
   const normalizedSubmissionResult: ContactFormResult = {
     emailSent: submissionResult.emailSent,
     recordCreated: submissionResult.recordCreated,
@@ -221,7 +207,7 @@ export const contactFormAction: ServerAction<FormData, ContactFormResult> =
         () => executeContactSubmissionAttempt(contactData, clientIP, startTime),
         {
           required: true,
-          fingerprint: createFormFingerprint(contactData),
+          fingerprint: createCanonicalContactFingerprint(contactData),
         },
       );
 

@@ -1,0 +1,49 @@
+## Fully-stock cleanup wave 3
+
+Date: 2026-04-11
+
+### Goal
+
+Reduce diagnostic-only command exposure and further demote non-canonical Cloudflare guidance while preserving the active Route B stock proof path.
+
+### Changes made
+
+1. Removed diagnostic-only command entrypoints from `package.json`
+   - removed `preview:cf:wrangler`
+   - removed `build:cf:turbo`
+2. Updated public docs and agent rules to stop presenting those commands as routine usage
+   - `README.md`
+   - `AGENTS.md`
+   - `docs/guides/CLOUDFLARE-ISSUE-TAXONOMY.md`
+   - `docs/guides/quality-guardrail-gap-table.md`
+   - `docs/guides/multi-site-proof-requirements-draft.md`
+
+### Why this wave was safe
+
+- The removed commands were already non-canonical and unused by Route B release proof.
+- Canonical command truth remains unchanged:
+  - `pnpm build:cf`
+  - `pnpm preview:cf`
+  - `pnpm deploy:cf:preview`
+  - `pnpm deploy:cf`
+- The cleanup only reduced accidental discovery of old diagnostic paths.
+
+### Verification
+
+Passed:
+- `node -e 'JSON.parse(fs.readFileSync("package.json","utf8"))'`
+- YAML parse of `.github/workflows/cloudflare-deploy.yml`
+- grep verification confirms `build:cf:turbo` and `preview:cf:wrangler` no longer exist in `package.json`
+- `pnpm release:verify`
+
+### Remaining residue after wave 3
+
+Still present as legacy/diagnostic debt:
+- generated-artifact patch/checker layer
+- phase6 generator / deployer scripts
+- alias/shim and server-actions contract scripts
+- several historical docs that still discuss phase6 as analysis or backlog material
+
+### Current conclusion
+
+The active Route B stock path remains green after removing the last day-to-day diagnostic command entrypoints. The repo is now closer to a true fully-stock operator surface, with most remaining divergence isolated to explicit legacy/diagnostic debt layers rather than default commands.

@@ -2,7 +2,6 @@
  * Lead Pipeline Utility Functions
  */
 
-import { randomBytes } from "crypto";
 import { ONE, ZERO } from "@/constants";
 
 /**
@@ -104,7 +103,10 @@ export function generateProductInquiryMessage(
  */
 export function generateLeadReferenceId(type: string): string {
   const timestamp = Date.now().toString(36);
-  const random = randomBytes(4).toString("hex");
+  const randomBytes = crypto.getRandomValues(new Uint8Array(4));
+  const random = Array.from(randomBytes, (value) =>
+    value.toString(16).padStart(2, "0"),
+  ).join("");
   const prefix = type.substring(ZERO, 3).toUpperCase();
   return `${prefix}-${timestamp}-${random}`;
 }

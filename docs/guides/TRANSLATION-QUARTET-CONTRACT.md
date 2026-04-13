@@ -5,7 +5,7 @@ This contract covers the runtime-facing translation quartet and its generated vi
 - Split canonical source: `messages/{locale}/critical.json` and `messages/{locale}/deferred.json`
 - Flat compatibility view: `messages/{locale}.json`
 - Runtime copy: `public/messages/{locale}/critical.json` and `public/messages/{locale}/deferred.json`
-- Site-specific runtime overlays: `src/sites/<site-key>/messages/{locale}/{critical,deferred}.json`
+- Runtime reads the shared split bundles under `messages/{locale}/{critical,deferred}.json`
 
 ## Purpose
 These files are the strongest logical-coupling cluster in the repository.

@@ -1,0 +1,52 @@
+FINAL F4 PROOF INTEGRITY REVIEW
+Date: 2026-04-10
+Plan: .sisyphus/plans/cloudflare-official-alignment.md
+Reviewer: Sisyphus agent
+
+Conclusion
+- PASS: I found no evidence that official-alignment progress was claimed by weakening proof.
+- Proof boundaries from Task 1 / Task 3 were preserved.
+- Reported progress came from real retirement or audit work, not from dropping proof surfaces or rebranding weaker signals as stronger truth.
+
+Core proof boundary checks
+1. Build vs preview vs deployed truth stayed separated
+   - task-5-overclaim-check.txt: PASS
+   - task-3-proof-boundary.txt keeps build proof, local page preview proof, and deployed smoke proof distinct.
+   - docs/guides/CLOUDFLARE-DEPLOYMENT-ASSESSMENT.md states local preview is not deployed truth and cleaner wrappers do not justify dropping proof surface.
+   - docs/guides/CLOUDFLARE-OFFICIAL-ALIGNMENT-RUNBOOK.md repeats the same proof vocabulary.
+
+2. Local preview was not reinterpreted as deployed API truth
+   - task-6-preview.txt explicitly says /api/health is skipped in local preview and belongs to deployed smoke.
+   - task-6-retire-patch.txt states no deployed-truth claims were made from local preview.
+   - task-3-proof-matrix.txt treats local/deployed divergence as a permanent proof-discipline constraint, not something to hand-wave away.
+
+3. Progress claims came from real evidence-backed work
+   - task-6-retire-patch.txt shows one real retirement: the manifest-guard branch was removed after before/after dry-run evidence plus standard build, compat-mode Cloudflare build, and preview smoke stayed green.
+   - task-8-proof-check.txt says remaining patch recommendations are based on successful Wave 2 target-only retirement plus preserved build/preview proof.
+   - task-9-proof-impact.txt keeps retained contracts tied to proof impact instead of pretending they are optional.
+
+4. Remaining exceptions were retained when proof would weaken
+   - docs/guides/CLOUDFLARE-RETAINED-EXCEPTION-REGISTER.md keeps generated-artifact compat, alias/shim, preview degraded, server-actions secret, and phase topology items active because removing them now would weaken proof or break current behavior.
+   - CF-EXCEPT-006 keeps minify deferred until a future dedicated build + preview + deployed proof run.
+
+5. No proof surface was silently dropped to make progress look cleaner
+   - Assessment and runbook still require compat-mode build/preview while generated-artifact patches remain active.
+   - task-8-patch-audit.txt confirms no batch retirement.
+   - task-7-no-overpromise.txt confirms wrapper convergence was not overstated.
+   - task-11-runbook.txt confirms ordered execution still includes standard build, Cloudflare build in correct mode, target-only retirement, and local preview proof.
+
+Anti-creep / anti-overclaim findings
+- No evidence file claims that build green equals runtime proof.
+- No evidence file claims that preview green equals deployed API proof.
+- No evidence file claims that scope got closer to official by deleting checks.
+- The retained register and future backlog both prefer deferral over fake closure.
+
+Why this matters
+- The repo got a little closer to official usage without lying about what is still fragile.
+- This is not flashy, but it is the right kind of progress: fewer unnecessary deviations, same proof honesty.
+- Short-term it does not magically make Cloudflare simpler; long-term it means later cleanup can happen with less self-deception and less proof drift.
+
+Bottom line
+- Official-alignment gains in Waves 2-4 came from one narrow proven retirement and several explicit audits/freezes.
+- I found no evidence that the series “won” by weakening standards.
+- The proof line stayed intact, so future waves can continue from a cleaner but still honest base.

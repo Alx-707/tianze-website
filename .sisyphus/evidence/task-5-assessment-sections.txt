@@ -1,0 +1,40 @@
+TASK 5 ASSESSMENT SECTION CHECK
+Doc: docs/guides/CLOUDFLARE-DEPLOYMENT-ASSESSMENT.md
+
+ecosystem findings: PASS
+tianze deviation map: PASS
+recommended sequence: PASS
+out-of-scope items: PASS
+
+Headings found:
+## One-line conclusion
+## Why this document exists
+## Ecosystem findings
+### What comparable projects usually do
+### What is different about Tianze
+### Why gradual alignment is preferred
+## Current Tianze deviation map
+### Current alignment level
+### Deviation classes
+#### 1. Generated-artifact compatibility
+#### 2. Wrapper and orchestration layer
+#### 3. Repo-specific topology and deployment rules
+#### 4. Retained exception and contract enforcement layer
+## Official entrypoints vs repo-specific wrappers
+### Official entrypoints the repo already uses
+### Repo-specific wrappers that still exist today
+#### `pnpm build:cf` → `scripts/cloudflare/build-webpack.mjs`
+#### `pnpm preview:cf`
+#### `scripts/cloudflare/build-phase6-workers.mjs`
+#### `scripts/cloudflare/deploy-phase6.mjs`
+### Current convergence objective
+## Proof boundaries that must stay explicit
+## Recommended sequence
+### Step 1 — keep current formal build/preview mode
+### Step 2 — retire generated-artifact patches one by one
+### Step 3 — audit retained exception contracts against current reality
+### Step 4 — evaluate wrapper convergence after patch narrowing
+### Step 5 — freeze retained exceptions and publish a runbook
+## Out-of-scope items for this series
+## What Wave 2 changed in practical terms
+## Bottom line

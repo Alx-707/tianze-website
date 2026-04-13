@@ -1,25 +1,63 @@
 这个文件的作用是描述 agent 在项目中可能遇到的常见错误和困惑。
 如果你遇到任何令你惊讶的事，请提醒开发者并建议更新 Agent.md。
 
-## 面向非开发者的汇报方式
+## 给项目提建议与汇报的默认原则
 
 ### 默认假设
 - 默认把提问者当作“聪明但不看代码的人”，不是默认当作开发者。
 - 最终汇报优先用容易理解的中文，先讲结论，再讲影响，再讲风险和下一步。
-- 重点回答“这对我有什么影响”，而不是“底层实现细节是什么”。
+- 重点回答“这对我有什么影响”“这件事值不值得做”，而不是“底层实现细节是什么”。
+- 默认目标不是把事情“解释清楚”就结束，而是帮助提问者更快判断：要不要做、现在做还是以后做。
+
+### 建议的默认立场
+- 建议必须先基于这个项目当前阶段、当前目标、当前约束和真实痛点来判断，不要先套通用“大厂最佳实践”。
+- 默认优先考虑：
+  - 现在最影响项目推进的问题是什么
+  - 这条建议能不能实际解决当前问题
+  - 它的成本、改动面、验证成本是否和收益匹配
+- 不要为了“更规范”“更完整”“更安全感”就默认追加一串当前项目并不需要的动作。
+- 不要把“长期也许有用”的建议伪装成“现在必须做”的阻塞项。
+- 如果某条建议更像锦上添花，而不是当前痛点修复，必须明确标成“可选优化”，不要讲成必做项。
+- 如果项目当前更需要快速收口、降低复杂度、先拿到可验证结果，优先支持更务实、更小步、可回退的方案，而不是过度设计。
+- 只有在存在明确证据时，才把某事上升为高风险或必须保守处理；不要因为抽象上的理论风险，就给出不匹配项目现状的重型建议。
 
 ### 推荐表达方式
-- 多用这种句式：
-  - “现在升级了，以后少挨打。”
-  - “这不是马上能看见的大变化，但能减少后面继续踩坑的概率。”
-  - “短期收益不大，长期维护更省事。”
-  - “这能改善开发时的稳定性，但不能解决你现在最头疼的部署问题。”
-  - “它更像补丁和兜底，不是翻盘级修复。”
-- 解释版本升级时，优先拆成四件事：
+- 默认先回答这些问题：
+  - 这件事现在要不要做
+  - 为什么
+  - 对当前项目最实际的收益是什么
+  - 成本和副作用大不大
+  - 是必做、建议做，还是可选优化
+- 如果某条建议主要是长期优化、规范化、风险兜底，而不是当前问题修复，要直接说清楚，不要伪装成当前阻塞项。
+- 如果项目当前更需要快速推进、降低复杂度、先拿到可验证结果，优先支持小步、可回退、低额外成本的方案。
+- 可以保留自然口语，但不要把固定句式当模板硬套；表达要贴合场景，不要像在背标准答案。
+- 解释版本升级、依赖调整、架构建议时，优先拆成：
   - 现在能直接得到什么好处
   - 现在解决不了什么问题
   - 以后能少踩什么坑
-  - 升级后还要验证什么
+  - 这件事值不值得现在做
+  - 如果要动手，下一步怎么验证
+
+### 决策导向要求
+- 如果存在多个方案，优先直接给出：
+  - 推荐方案
+  - 不推荐优先做的方案
+  - 为什么
+- 明确区分建议等级：
+  - 必须做
+  - 建议做
+  - 可选优化
+  - 当前大概率不用做
+- 提建议时，尽量明确区分三类：
+  - 现在该做的
+  - 可以以后再做的
+  - 这项目大概率不用做的
+- 如果结论依赖假设、证据不足或尚未验证，要明确说出来：
+  - 哪部分是事实
+  - 哪部分是判断
+  - 还缺什么证据
+- 不要用“更规范”“更优雅”“更完整”“行业最佳实践”作为主要理由，除非它们对当前项目目标有直接收益。
+- 不要因为抽象上的理论风险，就默认给出明显超出项目当前需求的保守建议。
 
 ### 术语翻译规则
 - 如果必须提术语，第一次出现时立刻翻成白话。
@@ -39,16 +77,17 @@
 ### 推荐结构
 - 对版本更新、依赖升级、架构判断，优先按这个顺序写：
   1. 一句话结论
-  2. 这件事现在的实际收益
-  3. 这件事解决不了的部分
-  4. 长期价值（例如“以后少挨打”）
-  5. 如果要动手，下一步怎么验证
+  2. 这件事值不值得现在做
+  3. 这件事现在的实际收益
+  4. 这件事解决不了的部分
+  5. 长期价值（例如“以后少挨打”）
+  6. 如果要动手，下一步怎么验证
 
 ### 示例对比
 - 不推荐：
   - “修复了 TypeScript v6 deprecations for baseUrl and moduleResolution。”
 - 推荐：
-  - “这不是眼前就会爆炸的问题，但现在跟上后，以后升级 TypeScript 时会少踩配置坑。简单说，就是现在花很小的成本，换以后少挨打。”
+  - “这不是眼前就会爆炸的问题，也不是现在最该优先处理的阻塞项；如果这次顺手一起改，收益是以后升级 TypeScript 时少踩配置坑。简单说，就是现在花很小的成本，换以后少挨打；如果当前主任务更紧，这件事也可以排后。”
 
 ## 项目经验补充
 
@@ -124,7 +163,7 @@
 - 截至 2026-04-01，本仓库最新隔离实测显示：
   - 在早先基线 `next@16.2.0` + `@opennextjs/cloudflare@1.17.3` 下，重新打开 `minify` 后，旧的 `pnpm build:cf` 构建报错这次**没有复现**；
   - 但继续往下做本地 Cloudflare 预览时，页面路由仍会触发 `middleware-manifest.json` 动态 require 相关 500；
-  - 当前升级分支已经来到 `next@16.2.2` + `@opennextjs/cloudflare@1.18.0`，而 repo-local 补丁和 phase6 deployed smoke 也已经打通；这依然**不等于**可以默认打开 `minify`；
+  - 当前升级分支已经来到 `next@16.2.3` + `@opennextjs/cloudflare@1.19.1`，而 repo-local 补丁和 phase6 deployed smoke 也已经打通；这依然**不等于**可以默认打开 `minify`；
   - 所以旧结论“只要打开就会构建炸掉”已经太绝对了，但“现在可以放心打开”也同样不成立。
 - 当前默认稳定做法仍然是：在 `open-next.config.ts` 中把 split functions 和 default worker 的 `minify` 关闭。
 - 默认动作：
@@ -134,14 +173,14 @@
 
 ### 6. 不要并行执行 `pnpm build` 和 `pnpm build:cf`
 - 截至 2026-04-01，本仓库已验证：
-  - `build:cf` 当前不再是“直接调用 `pnpm build`”那条旧实现，而是走 `scripts/cloudflare/build-webpack.mjs` 里的 Webpack 构建包装；
+  - `build:cf` 当前正式实现是 stock `opennextjs-cloudflare build`；
   - 但两条命令仍然都会写 `.next`，如果并行执行，仍然会互相污染，得到假的失败结果；
   - 另外，普通 `pnpm build` 在已有旧 `.next` 产物时，仍可能偶发落回 `Maximum call stack size exceeded`；
   - 当前仓库已把 `build:cf` 收敛成自清理脚本：它会先执行 `scripts/clean-next-build-artifacts.mjs` 再做 Cloudflare 构建。
 - 默认动作：
   - 需要验证双链路时，先跑 `pnpm clean:next-artifacts && pnpm build`，再串行跑 `pnpm build:cf`
-  - 涉及 `preview:cf` / `deploy:cf:*` / `deploy:cf:phase6:*` 时，优先走当前脚本里已经内置清理的版本；不要自己跳过 `.next` / `.open-next` / `.wrangler/tmp` 清理后再拿 `Maximum call stack size exceeded` 这类结果当新回归
-  - 当前默认本地 Cloudflare 预览入口应优先用 `preview:cf`（内部走 stock `opennextjs-cloudflare preview`）；`preview:cf:wrangler` 仅保留为诊断路径，不要把它的结果直接当成页面级 release proof
+  - 涉及 `preview:cf` / `deploy:cf:*` 时，优先走当前脚本里已经内置清理的版本；不要自己跳过 `.next` / `.open-next` / `.wrangler/tmp` 清理后再拿 `Maximum call stack size exceeded` 这类结果当新回归
+  - 当前默认本地 Cloudflare 预览入口应优先用 `preview:cf`（内部走 stock `opennextjs-cloudflare preview`）；不要把任何本地 Wrangler 诊断结果直接当成页面级 release proof
 
 ### 7. 不要再用客户端补丁修正 `html[lang]`
 - 本仓库已经验证过：`LangUpdater + document.documentElement.lang` 会把语言语义推迟到 hydration 后，SSR / 无 JS / 爬虫首包都是错的。
@@ -154,7 +193,7 @@
   - stock `opennextjs-cloudflare preview` 仍然主要走默认 worker 路径；
   - 在早先较稳的已验证基线 `next@16.2.0` + `@opennextjs/cloudflare@1.17.3` 下，页面级 `smoke:cf:preview` 可以通过，但 `smoke:cf:preview:strict` 仍可能卡在 `/api/health`；
   - 把 Next 升到 `16.2.2` 后，OpenNext / Wrangler 组合在本地页面预览里重新暴露了 `middleware-manifest.json` 动态 require 回归；
-  - 当前仓库已经补了一层 repo-local 兼容补丁：`scripts/cloudflare/patch-prefetch-hints-manifest.mjs` 会把生成产物里的 `getMiddlewareManifest()` 从动态 `require()` 改成 `loadManifest()`，这样页面级 `smoke:cf:preview` 又能恢复通过；
+  - 早先仓库曾补一层 repo-local generated-artifact 兼容补丁来修正 `getMiddlewareManifest()` 等旧形态；截至 2026-04-11，这层补丁已从主树退场，当前主线以 stock Route B 真相为准；
   - phase6 dry-run 之前卡住的重点不再是 worker 体积，而是 split worker 在 Wrangler bundling 时会继续拉入 Next 运行时代码；当前仓库通过两步把这条线重新打通：
     - 显式补上 `react-server-dom-webpack`、`react-server-dom-turbopack`、`critters`
     - 在 `scripts/cloudflare/build-phase6-workers.mjs` 生成的 phase6 wrangler 配置里，把 `@vercel/turbopack-ecmascript-runtime/browser/dev/hmr-client/hmr-client.ts` alias 到空 shim
@@ -213,27 +252,29 @@
     - stock preview 边界内的问题，
     - 还是必须由 deployed smoke 证明的问题。
 
-### 12. `build:cf` 现在走 Webpack 主链路，但“构建通过”不等于 Cloudflare 本地页面证明也通过
+### 12. `build:cf` 现在走 stock OpenNext Cloudflare 主链路，但“构建通过”不等于 Cloudflare 本地页面证明也通过
 - 截至 2026-04-01，本仓库已验证：
-  - `pnpm build:cf` 的正式实现现在是 `node scripts/cloudflare/build-webpack.mjs`；
-  - `pnpm build:cf:turbo` 仅保留为对照/排查链路，不再是默认 Cloudflare 构建入口；
-  - 在早先基线 `next@16.2.0` + `@opennextjs/cloudflare@1.17.3` 下，`pnpm build:cf` 和 `pnpm build:cf:turbo` 都能通过；
-  - 但这不代表本地 Cloudflare 页面证明天然就没问题：Next 升到 `16.2.2` 后，即使 `pnpm build:cf` 仍然通过，生成产物里的 `getMiddlewareManifest()` 也可能退回动态 `require(this.middlewareManifestPath)`，从而让 stock preview 的页面路由重新 500；
-  - 当前仓库已经把这个兼容修复收敛到 `scripts/cloudflare/patch-prefetch-hints-manifest.mjs`：`pnpm build:cf` 结束后会补丁默认 handler，把 middleware manifest 改为走 `_loadmanifestexternal.loadManifest(...)`；
-- 截至当前 official-alignment 收口后，只要剩余 generated-artifact compat patch 仍在，当前更可信的 Cloudflare build / preview 证明模式仍然是 `CF_APPLY_GENERATED_PATCH=true pnpm build:cf` 与 `CF_APPLY_GENERATED_PATCH=true pnpm preview:cf`；不要把 plain `pnpm build:cf` 当成当前正式 proof 命令。
-  - 这层补丁已经在本地干净构建下重新验证过：`/en`、`/zh`、`/en/contact`、`/zh/contact` 页面恢复 200，`pnpm smoke:cf:preview` 恢复通过；
+  - `pnpm build:cf` 的正式实现现在是 stock `opennextjs-cloudflare build`；
+  - 旧的 `build:cf:turbo` / `preview:cf:wrangler` 现在都应视为已退场命令真相；
+  - 在当前 Route B 下，`pnpm build:cf` 与 `pnpm preview:cf` 已重新通过正式 release-proof；
+  - 但这不代表本地 Cloudflare 页面证明天然就没问题：即使 `pnpm build:cf` 通过，本地 preview 仍然只是页面级信号，不是最终部署真相；
   - 改成 `wrangler dev --env preview --no-bundle` 后，本地又可能卡在 `cloudflare/images.js` 模块缺失。
-- 当前默认动作：
-  - 把 Webpack 视为当前正式 Cloudflare 构建链路；
+ - 当前默认动作：
+  - 把 stock OpenNext Cloudflare 视为当前正式 Cloudflare 构建链路；
   - 不要把本地 Wrangler preview 当成这条主链路的完整 release proof；
   - 也不要把“`build:cf` 通过了”误当成“Cloudflare 页面路由已经得到证明”；
-  - 如果遇到 `Maximum call stack size exceeded`，先区分是不是旧 `.next` / `.open-next` / `.wrangler/tmp` 产物残留；当前 `preview:cf` / `deploy:cf:*` / `deploy:cf:phase6:*` 已经内置清理，不要先把它误判成新的业务回归；
-  - 如果 local preview 页面 500 重新落回 `middleware-manifest.json` 动态 require 这类生成产物回归，优先检查 `scripts/cloudflare/patch-prefetch-hints-manifest.mjs` 有没有生效，不要先回滚业务改动；
-  - 如果 `preview:cf` 能通过页面 smoke、但 `preview:cf:wrangler` 仍在页面请求里报 `Cannot perform I/O on behalf of a different request` / request hang，这先归类为 Wrangler 本地运行时边界，不要把它误写成页面业务回归；
+  - 如果遇到 `Maximum call stack size exceeded`，先区分是不是旧 `.next` / `.open-next` / `.wrangler/tmp` 产物残留；当前 `preview:cf` / `deploy:cf:*` 已经内置清理，不要先把它误判成新的业务回归；
+  - 如果 local preview 页面 500 重新落回 `middleware-manifest.json` 动态 require 这类生成产物回归，优先检查 retained generated-artifact compat 层有没有被误删，不要先回滚业务改动；
+  - 如果 stock preview 能通过页面 smoke、但你用其他 Wrangler 本地诊断方式仍然看到 `Cannot perform I/O on behalf of a different request` / request hang，这先归类为 Wrangler 本地运行时边界，不要把它误写成页面业务回归；
   - 本地 Cloudflare 页面验证仍优先走既有的 `smoke:cf:preview` 分层策略；
   - 如果未来要把 Wrangler 本地 preview 提升为更强的正式证明面，必须先补一轮本地可运行证据。
 
 ### 13. 不要把 “Turbopack / OpenNext 会重复翻译” 当成已经坐实的仓库真相
+- 截至 2026-04-10，当前仓库已经明确接受 Route B（proof downgrade）作为 Cloudflare canonical truth：
+  - `pnpm build:cf` / `pnpm preview:cf` / `pnpm deploy:cf:preview` / `pnpm deploy:cf` 现在都优先按 stock `opennextjs-cloudflare` 路径理解；
+  - generated-artifact compat、alias/shim、server-actions secret、phase6 等脚本/合同继续保留为诊断或历史分析素材，但不再是当前 canonical release/build gate；
+  - 当前本地最重要的 Cloudflare 证明是 `pnpm smoke:cf:preview`，最终 API / deploy 真相仍然只看真实部署后的 `pnpm smoke:cf:deploy -- --base-url <url>`；
+  - 不要再把 `CF_APPLY_GENERATED_PATCH=true pnpm build:cf`、`deploy:cf:phase6:*`、`deploy:cf:phase6:dry-run` 当成当前主线命令真相，除非你是在做 legacy/diagnostic 追查。
 - 截至 2026-04-01，本仓库最新隔离实测里：
   - 在 `next@16.2.0` + `@opennextjs/cloudflare@1.17.3` 基线下，对比普通 `next start` 和 stock `opennextjs-cloudflare preview` 的 `/en`、`/en/contact` 页面可见文本，结果一致；
   - 这次没有复现“内容被重复翻译一遍”的现象。
@@ -313,14 +354,13 @@
 
 ### 22. phase6 真实 preview 已有一条可运行主路，不要再回到会重复踩坑的旧写法
 - 截至 2026-04-01，本仓库已验证：
-  - `phase6` 真实 preview deploy 在 API token 认证下，`scripts/cloudflare/deploy-phase6.mjs` 在 release-proof.sh 中自动设置环境变量 `OPEN_NEXT_DEPLOY_ENV=true`；若手动运行该脚本需显式设置此环境变量，否则会掉回 OpenNext 自己的 deploy 包装路径，并卡在 remote R2 cache provisioning；
+  - 旧的 `scripts/cloudflare/deploy-phase6.mjs`、`build-phase6-workers.mjs`、`phase-topology-contract.mjs`、`alias-shim-exception-contract.mjs` 已从主树退场；如果未来还要恢复 phase6 真实 preview deploy，必须先重新定义一条明确的 legacy-only 发布入口，而不是继续假设仓库里还有现成 helper；
   - `phase6` 的 `gateway` 在 preview 环境里引用 `web/api-*` worker 时，必须直接指向带 `-preview` 后缀的真实 worker 名，不能再写成 `service + environment` 组合；
   - `web` / `api-*` 这些 phase6 worker 当前不要再生成 `WORKER_SELF_REFERENCE` service binding；这条绑定会把第一次 preview deploy 卡死在“自引用 worker 尚不存在”的发布时序问题上；
   - `phase6` 下的 `/api/health` 当前稳定做法是由 gateway 直接返回合同化 health 响应；继续穿过 `apiLead` 的完整 Next/OpenNext 运行时，会反复踩到 Cloudflare 侧的 CommonJS / fs 兼容边界。
 - 默认动作：
-  - 要验证 `phase6`，优先用 `node scripts/cloudflare/build-phase6-workers.mjs` 生成 worker/config，再用 `node scripts/cloudflare/deploy-phase6.mjs --env preview` 做真实 preview deploy；
-  - 当前更可信的 phase6 proof 形态是“真实 preview deploy 输出的 gateway URL”，不要把某一次临时 preview 地址写死进规则；
-  - 最终以 `pnpm smoke:cf:deploy -- --base-url <preview-url>` 为准；运行前必须先从 deploy 输出里拿到你自己的 preview URL；
+  - 当前 phase6 已不再保留主树里的生成/部署 helper；
+  - 如果以后重新恢复 phase6 proof，先重新定义 deploy 入口，再谈 preview URL 和 deployed smoke；
   - 如果以后有人想把 `/api/health` 再改回 `apiLead` 运行链路，必须先重新拿到 deployed smoke 级别的 200 证据，不能只看 dry-run 或本地 preview。
 
 ### 23. 不要把 route 目录里的测试辅助文件随手丢进 `__tests__` 邻近位置
@@ -333,21 +373,12 @@
   - 如果 `truth:check` 报 route 目录孤儿文件，先检查是不是把测试工具放错了位置，不要先怀疑业务路由本身。
 
 ### 24. phase6 生成脚本改了拓扑合同后，不要默认 `build-phase6-workers.mjs` 也已经同步
-- 截至 2026-04-09，本仓库已实际踩到两类“接口漂移”：
-  - 同文件还可能继续引用旧常量名 `WORKER_NAME_SUFFIX`，而真实共享真相已经切到 `PHASE_WORKER_NAME_SUFFIX`。
-- 这类问题的危险在于：
-  - 普通 `pnpm build:cf` 可能通过；
-  - 但一到 `pnpm build:cf:phase6` / `deploy-phase6` / 真实 preview proof 才会爆；
-  - 很容易被误判成 Cloudflare / Wrangler / OpenNext 平台问题，其实是 repo 内部脚本没跟上共享合同。
-- 默认动作：
-  - 只要改了 `phase-topology-contract.mjs`、alias/shim 合同、worker 命名规则、route binding 规则，就必须同步审查 `scripts/cloudflare/build-phase6-workers.mjs`；
-  - 至少执行一次 `node --check scripts/cloudflare/build-phase6-workers.mjs`；
-  - 更重要的是执行一次 `pnpm build:cf:phase6`，不要只看 `pnpm build:cf`；
-  - 如果 phase6 线失败，先检查是不是“生成脚本和共享合同漂移”，再去怀疑平台侧回归。
+- 该提醒现在只保留为历史背景：截至 2026-04-11，`build-phase6-workers.mjs`、`phase-topology-contract.mjs`、`alias-shim-exception-contract.mjs` 都已从主树退场。
+- 如果未来有人重建 phase6 legacy 工具链，必须重新建立自己的同步与验证规则，不要把这段旧经验误当成当前主线要求。
 
 ### 25. contact 页面恢复 200，不代表 API 线闭环
 - 截至 2026-04-09，`pnpm proof:cf:preview-deployed` 已通过，`/en/contact` 与 `/zh/contact` 已恢复 200；这说明的是当前站 runtime 回归已修，不说明 API 线已经健康。
-- 这次故障本质上是 `Uncached data was accessed outside of <Suspense>` 加上 Cloudflare runtime 里 `setTimeout()` / Cache Components 的边界问题；有效修法是静态消息 metadata、`getContactCopy()` 去掉 `use cache` / `cacheLife`，以及 `ContactForm` 走 client-only dynamic import。
+- 这次故障本质上是 `Uncached data was accessed outside of <Suspense>` 加上 Cloudflare runtime 里 `setTimeout()` / Cache Components 的边界问题；有效修法是静态消息 metadata、`getContactCopy()` 去掉 `use cache` / `cacheLife`，并让 `ContactForm` 保持可被 SSR/no-JS 合同看见的直接渲染形态。
 - deeper API worker 仍可失败时，继续把它当 generated-artifact / runtime mismatch 技术债，不要把 contact 页恢复误报成 API 闭环。
 
 ### 17. 不要把 contact 这类关键页面的 `loading.tsx` 留成“空骨架”
@@ -373,3 +404,32 @@
     - `pnpm build`
     - `pnpm build:cf`
     - 一次真实的 pre-push `build:check`
+
+### 26. Cloudflare 预览降级合同：repo-local 非股票操作员边界
+- 截至 2026-04-12，旧的 preview-degraded contract/checker 已从主树退场；当前主线要求 preview 直接使用真实 secrets 与真实存储。
+- **背景**：
+  - 股票 OpenNext Cloudflare 完全通过 wrangler `environments` + namespace 绑定实现 preview/production 分离；没有内置降级或预留机制。
+  - 本仓库早期为了让 preview 链路先跑通，曾保留 degraded flags 与 placeholder fallback；截至当前主线，这层例外已经退场。
+- **当前状态**：
+  - preview workflow 已直接要求真实 Redis / secrets
+  - `ALLOW_MEMORY_*` 已从 active workflow 删除
+  - placeholder fallback 已从 active workflow 删除
+- **执行链路更新**：
+  - `scripts/validate-production-config.ts` 现在优先按 `APP_ENV` 区分 preview / production
+  - preview 通过真实 secrets 与真实存储完成 build/deploy 证明，不再依赖降级边界
+- **为什么可以退场**：
+  - preview deploy 已在真实 secrets / Upstash 条件下端到端通过
+  - preview `/api/health` 与 post-deploy smoke 已恢复正常
+  - 当前主线不再需要以 degraded 方式证明 Cloudflare 可用性
+- **默认动作**：
+  - 不要重新引入 degraded flags 或 placeholder fallback
+  - 如果 preview 再次需要降级，必须作为新的显式例外重新建档，而不是偷偷回滚
+
+### 27. 当前 Cloudflare 非股票操作员扩展清单
+- 截至 2026-04-12，当前主线 Cloudflare 链路已无活动中的 repo-local 非股票操作员扩展。
+- 已从主树退场的非股票操作员扩展（仅保留为诊断/历史素材）：
+  - `CF_APPLY_GENERATED_PATCH` generated-artifact compat layer
+  - phase6 多 worker 生成脚本 (`build-phase6-workers.mjs`, `phase-topology-contract.mjs`, `alias-shim-exception-contract.mjs`)
+  - preview degraded contract/checker
+  - OpenNext `minify` 和 Wrangler custom harness
+- **结论**：当前 Cloudflare 验证链路已完全以股票 `opennextjs-cloudflare` 为准；剩余风险点仅属于运行时/平台问题，不再是 repo-local 非股票例外。

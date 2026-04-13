@@ -13,8 +13,8 @@ Files:
 - `messages/zh.json`
 - `messages/en/critical.json`
 - `messages/zh/critical.json`
-- `src/sites/message-overrides.ts`
-- `src/sites/**/messages/**`
+- `src/config/single-site.ts`
+- `messages/**`
 
 Why it matters:
 - This is the strongest logical-coupling cluster in the repository.

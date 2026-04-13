@@ -1,6 +1,8 @@
 # Codex Semantic Review
 
-Independent code review via Codex. Run after TDD is complete and before `/pr`.
+**Mandatory** independent code review via Codex. Run after TDD is complete and before `/pr`.
+
+Uses the official codex-cc plugin (`codex@openai-codex`) via `~/.claude/skills/codex/scripts/ask_codex.sh`.
 
 Catches correctness bugs, security issues, and convention violations that tests alone miss. This is the "second pair of eyes" on the actual code written, separate from plan-level review (`/plan-review`).
 
@@ -8,7 +10,7 @@ Catches correctness bugs, security issues, and convention violations that tests 
 
 - **Automatically**: After all TDD tasks complete in `subagent-driven-development` or `/afk`
 - **Manually**: Any time you want a code review before submitting — `/review`
-- **Required before `/pr`**: The `/pr` command will remind you if `/review` hasn't been run
+- **Mandatory before `/pr`**: `/pr` will **abort** if `/review` hasn't been run. This is a hard gate.
 
 ## Execution
 
@@ -23,12 +25,13 @@ git diff main...HEAD --stat > /tmp/pr-review-files.txt
 
 ### Step 2: Call Codex
 
+Only pass the diff and file list via `--file` (generated content Codex can't read from workspace). Project convention/source files — let Codex read from workspace itself via branch-aware prompt instructions.
+
 ```bash
 ~/.claude/skills/codex/scripts/ask_codex.sh \
   "<review_prompt>" \
   --file /tmp/pr-review-diff.patch \
   --file /tmp/pr-review-files.txt \
-  --file CLAUDE.md \
   --read-only \
   --reasoning high
 ```
@@ -38,6 +41,8 @@ The `<review_prompt>`:
 ```
 You are a senior engineer performing an independent code review. Your job is NOT just to find bugs — it is to evaluate whether these changes make the project better or worse.
 
+You are reviewing changes on branch '<current-branch>'.
+
 Step 1: Understand context
 - Read CLAUDE.md and .claude/rules/*.md for project conventions
 - Understand this is a production Next.js 16 project (solo dev)
@@ -45,7 +50,7 @@ Step 1: Understand context
 Step 2: Understand changes
 - The diff is in /tmp/pr-review-diff.patch
 - The changed files list is in /tmp/pr-review-files.txt
-- Read all modified/added files in the workspace for full context
+- Read all modified/added files directly from the workspace for full context
 
 Step 3: Approach review (most important first)
 
@@ -101,17 +106,23 @@ If issues need fixing, end with: VERDICT: REVISE
 | Style / preference | **Accept only if** aligned with `.claude/rules/` |
 | Irrelevant to project | **Reject** |
 
+**Decision Authority: Claude holds final decision authority, not Codex.**
+
+Codex is an adversarial reviewer — its job is to surface risks and blind spots. Claude's job is to independently evaluate each finding against the actual codebase, project constraints, and business intent. "Codex said so" is never sufficient reason to accept or reject a finding.
+
 **For each finding, verify before deciding:**
 
-- Read the relevant source code to confirm the issue exists
+- Read the relevant source code to confirm the issue actually exists
 - Run commands if needed (trace data flow, check if function is called)
-- Cross-reference with `.claude/rules/`
+- Cross-reference with `.claude/rules/` and project conventions
+- If Codex's suggestion conflicts with project reality, reject with reasoning
 
 Decision criteria:
 - **Fix**: Issue objectively verified in code
-- **Reject**: Not reproducible or doesn't apply
+- **Reject**: Not reproducible, doesn't apply, or conflicts with project constraints — document why
 - **Defer**: Real but fix cost exceeds benefit (add `<!-- TODO -->` comment)
 - **Flag to user**: Business decisions only
+- **Discuss**: Disagreement with Codex on approach — use `--session` for multi-round follow-up
 
 ### Step 4: Fix and re-verify
 
@@ -124,6 +135,24 @@ Report a summary:
 - Which were fixed / rejected / deferred
 - VERDICT: APPROVED or REVISE
 
+### Review Completion Marker
+
+After review is complete (regardless of verdict), write a marker file so `/pr` can verify:
+
+```bash
+mkdir -p reports
+cat > .codex-review-done <<EOF
+branch=$(git branch --show-current)
+timestamp=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+verdict=<APPROVED|REVISE>
+findings_fixed=<n>
+findings_rejected=<n>
+findings_deferred=<n>
+EOF
+```
+
+This file is **gitignored** (not committed) — it's a local signal between `/review` and `/pr` within the same working tree. `/pr` checks for this file and verifies the branch matches.
+
 ## Relationship to Other Reviews
 
 | Review | What it checks | Strength | Blind spot |
@@ -133,4 +162,4 @@ Report a summary:
 | Cloud reviews (CodeRabbit) | Full-file semantic consistency | Catches cross-file contradictions (e.g. badge vs description) | Shallow — flags patterns, doesn't trace logic |
 | Cloud reviews (Gemini) | Type safety patterns | Good at spotting repeated type issues | Repetitive; low signal-to-noise on project conventions |
 
-Three layers complement each other. None is sufficient alone.
+Four review layers across two phases (plan + code). None is sufficient alone.

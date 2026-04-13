@@ -1,0 +1,26 @@
+=== F3 WAVE: pnpm clean:next-artifacts && pnpm build ===
+DATE: 2026-04-10
+COMMAND: pnpm clean:next-artifacts && pnpm build
+RETAINED_PATCH_MODE: CF_APPLY_GENERATED_PATCH not applicable to this step
+
+RESULT: PASS
+
+clean:next-artifacts: removed .next, .open-next, .wrangler/tmp
+
+prebuild steps passed:
+  - copy-translations.js: All 4 locales copied (en+zh critical+deferred)
+  - generate-content-manifest: 8 entries generated
+  - content:slug-check: All slug validations passed
+  - validate:config: Production config validation passed
+
+next build (Next.js 16.2.2 Turbopack):
+  - Compiled: SUCCESS (6.5s)
+  - TypeScript: PASS (5.0s)
+  - Static pages: 65/65 generated (1409ms)
+  - Routes: all app routes rendered correctly
+
+⚠ Warning observed (non-blocking):
+  "The 'middleware' file convention is deprecated. Please use 'proxy' instead."
+  → Expected per AGENTS.md §4: middleware.ts retained for Cloudflare compat.
+
+CONCLUSION: Standard build PASSES. Artifact state clean, ready for build:cf.

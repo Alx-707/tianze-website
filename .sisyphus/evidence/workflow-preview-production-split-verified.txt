@@ -1,0 +1,29 @@
+## Workflow preview / production split verification
+
+Date: 2026-04-12
+
+### Goal
+
+Confirm that the current branch has absorbed the preview-vs-production workflow split correctly and that the split does not break the Route B proof path.
+
+### Verified state
+
+- `.github/workflows/cloudflare-deploy.yml` now routes:
+  - preview → `pnpm preview:preflight:cf`
+  - production → `pnpm release:verify`
+- `package.json` contains `preview:preflight:cf`
+
+### Verification run
+
+Passed locally:
+- workflow YAML parse
+- shell syntax for `preview-preflight.sh` and `release-proof.sh`
+- `pnpm preview:preflight:cf`
+- `pnpm release:verify`
+
+### Conclusion
+
+The semantic split is now stable on the current working branch:
+- preview no longer collides with `release-proof.sh` degraded-flag rejection
+- production still keeps the strict release gate
+- remaining blockers are external preview environment readiness and real secrets/stores, not workflow semantics

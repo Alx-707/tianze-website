@@ -27,15 +27,35 @@ pnpm test:cache-health
 pnpm validate:translations
 pnpm clean:next-artifacts
 pnpm build
-pnpm build:site:equipment
 pnpm build:cf
-pnpm deploy:cf:phase6:dry-run
+pnpm preview:cf > /tmp/release-proof-preview.log 2>&1 &
+PREVIEW_PID=$!
+trap 'kill "$PREVIEW_PID" >/dev/null 2>&1 || true' EXIT
+
+READY=0
+for i in $(seq 1 80); do
+  if curl -fsS http://127.0.0.1:8787/ >/dev/null 2>&1; then
+    READY=1
+    break
+  fi
+  sleep 2
+done
+
+if [ "$READY" -ne 1 ]; then
+  echo "release-proof preview never became ready" >&2
+  cat /tmp/release-proof-preview.log >&2 || true
+  exit 1
+fi
+
+pnpm smoke:cf:preview
+kill "$PREVIEW_PID" >/dev/null 2>&1 || true
+wait "$PREVIEW_PID" || true
+trap - EXIT
 pnpm test:release-smoke
 
 echo "Cloudflare proof split:"
 echo "  - Local stock preview: pnpm smoke:cf:preview"
 echo "  - Strict local stock preview (includes /api/health): pnpm smoke:cf:preview:strict"
-echo "  - Stronger local split-worker proof: pnpm deploy:cf:phase6:dry-run"
-echo "  - Real preview publish path: pnpm deploy:cf:phase6:preview"
+echo "  - Real preview publish path: pnpm deploy:cf:preview"
 echo "  - Final deployed proof: pnpm smoke:cf:deploy -- --base-url <deployment-url>"
 echo "Release verification completed successfully."

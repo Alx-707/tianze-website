@@ -1,0 +1,40 @@
+## Fully-stock cleanup wave 6
+
+Date: 2026-04-11
+
+### Goal
+
+Retire the legacy alias/shim checker from the main tree while keeping the underlying alias/shim contract needed by the remaining phase6 generator/config surface.
+
+### Changes made
+
+1. Removed `scripts/cloudflare/check-alias-shim-contract.mjs` from the main tree.
+2. Updated docs to reflect that the checker is retired while the underlying alias/shim contract remains:
+   - `docs/guides/CLOUDFLARE-RETAINED-EXCEPTION-REGISTER.md`
+   - `docs/guides/RELEASE-PROOF-RUNBOOK.md`
+
+### Why this wave was safe
+
+- The removed file was a diagnostic checker only.
+- It was not part of canonical Route B commands or release proof.
+- The underlying `alias-shim-exception-contract.mjs` file remains because `build-phase6-workers.mjs` still imports it and unit tests still cover that generator surface.
+
+### Verification
+
+Passed:
+- grep confirms `check-alias-shim-contract.mjs` no longer exists in the main tree, except as historical/doc references
+- `pnpm exec vitest run tests/unit/scripts/build-phase6-workers.test.ts`
+- `pnpm preview:preflight:cf`
+- `pnpm release:verify`
+
+### Remaining residue after wave 6
+
+Still present as legacy/diagnostic debt:
+- generated-artifact patch/checker layer
+- phase6 generator/config surface (`build-phase6-workers.mjs`, topology contract, related tests)
+- alias/shim contract file itself (`alias-shim-exception-contract.mjs`) because the generator still imports it
+- historical analysis docs that still discuss removed phase6/alias/server-actions layers as past state
+
+### Current conclusion
+
+The alias/shim checker layer is now gone from the main tree, but the alias/shim contract itself remains because it is still part of the surviving phase6 generator surface. Route B proof remains green.

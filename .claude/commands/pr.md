@@ -2,7 +2,13 @@
 
 Submission pipeline: preflight → self-heal → commit → push → PR → CI monitoring → merge → cleanup.
 
-**Prerequisite**: `/review` (Codex Semantic Review) should be run before `/pr`. If not done, warn the user once and proceed.
+**Prerequisite**: `/review` (Codex Semantic Review) **must** be run before `/pr`.
+
+If `/review` has not been run (no `.codex-review-done` marker in current branch):
+1. **Stop** — do not proceed with `/pr`
+2. **Run `/review` first**, then return to `/pr`
+
+Claude holds final decision authority on review findings — Codex surfaces issues, Claude evaluates and decides. But the review step itself is non-negotiable (official codex-cc plugin).
 
 ## Execution Steps
 
@@ -113,4 +119,4 @@ echo '{"ts":"<ISO-8601>","command":"pr","branch":"<branch>","preflight_pass":<bo
 
 - GitHub Flow: all branches merge to `main` via PR
 - No auto-merge: all PRs require explicit merge after review
-- Codex code review is done separately via `/review` BEFORE running `/pr`
+- Codex code review (`/review`) is a **mandatory prerequisite** — `/pr` stops and runs `/review` first if not done

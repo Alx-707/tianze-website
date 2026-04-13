@@ -1,0 +1,133 @@
+FINAL WAVE F2 — PROOF LANGUAGE & SCOPE AUDIT
+Generated: 2026-04-10
+Scope: docs/guides/CLOUDFLARE-DEPLOYMENT-ASSESSMENT.md
+        docs/guides/CLOUDFLARE-OFFICIAL-ALIGNMENT-RUNBOOK.md
+        docs/guides/CLOUDFLARE-RETAINED-EXCEPTION-REGISTER.md
+        docs/guides/CLOUDFLARE-FUTURE-BACKLOG.md
+
+Three checks performed:
+  (A) Preview ≠ deployed truth — docs must not equate local preview with
+      deployed API truth or phase6 split-worker parity.
+  (B) Forbidden-scope — docs must not imply any out-of-scope item is done
+      or partially done.
+  (C) Overclaiming — docs must not assert repo state beyond what has been
+      proven at the correct proof surface.
+
+VERDICT: ALL PASS — no equivocation, no forbidden-scope claims, no overclaiming.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+CHECK A — PREVIEW ≠ DEPLOYED TRUTH
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+CLOUDFLARE-DEPLOYMENT-ASSESSMENT.md
+  § "What it does NOT prove":
+    Explicit list: "deployed API truth", "phase6 split-worker parity",
+    "/api/health in deployed environment" are all called out as unprovable
+    by local preview.
+  Proof vocabulary section: three proof surfaces named and kept separate:
+    (1) local build pass, (2) local preview smoke, (3) deployed smoke.
+  Result: PASS
+
+CLOUDFLARE-OFFICIAL-ALIGNMENT-RUNBOOK.md
+  Step 4 note: "Do not upgrade this into deployed API truth."
+  Proof vocabulary section: explicitly distinguishes preview-local from
+    deployed-remote; /api/health flagged as requiring deployed smoke only.
+  Result: PASS
+
+CLOUDFLARE-RETAINED-EXCEPTION-REGISTER.md
+  Each exception entry includes a "Proof impact" field.
+  CF-EXCEPT-001 (patch): impact scoped to "local preview pages only".
+  CF-EXCEPT-004 (phase6): impact explicitly says "deployed phase6 proof
+    requires real deploy smoke, not local preview".
+  No entry conflates local preview with deployed truth.
+  Result: PASS
+
+CLOUDFLARE-FUTURE-BACKLOG.md
+  Future items are framed as "not yet done" throughout.
+  No future item is described as proven or partially proven by local preview.
+  Result: PASS
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+CHECK B — FORBIDDEN-SCOPE ITEMS NOT CLAIMED AS DONE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Six forbidden-scope items tracked across all four docs:
+
+Item                              Assessment    Runbook       Register      Backlog
+─────────────────────────────────────────────────────────────────────────────────
+1. Remove patch mechanism         Out-of-scope  Non-neg.boundary  N/A       Future
+2. Re-enable minify               Out-of-scope  Non-neg.boundary  DEFERRED  Future
+3. Eliminate all shims/stubs      Out-of-scope  Non-neg.boundary  N/A       Future
+4. Phase6 deployed smoke proof    Out-of-scope  Non-neg.boundary  Partial   Future
+5. /api/health deployed proof     Out-of-scope  Non-neg.boundary  N/A       Future
+6. Stock OpenNext (no exceptions) Out-of-scope  Non-neg.boundary  N/A       Future
+
+All six items:
+  - Marked "out of scope" in Assessment
+  - Listed under "Non-negotiable boundaries" in Runbook
+  - Either absent from Register (not attempted) or marked DEFERRED
+  - Listed under "Explicitly future-only" in Backlog
+  - None described as done, started, or in-progress
+  - CF-EXCEPT-006 (minify): correctly marked DEFERRED with explicit note
+    "do not re-enable without full build + preview + deployed smoke re-proof"
+
+Result: PASS
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+CHECK C — NO OVERCLAIMING OF REPO TRUTH
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+CLOUDFLARE-DEPLOYMENT-ASSESSMENT.md
+  Bottom-line sentence: "This repo is closer to official OpenNext than it was
+    before these waves, but it is not yet 'stock.'"
+  Accurately calibrated — acknowledges progress without overclaiming
+    full stock-OpenNext parity.
+  Result: PASS
+
+CLOUDFLARE-OFFICIAL-ALIGNMENT-RUNBOOK.md
+  Uses hedged language throughout: "retained", "still load-bearing",
+    "still required", "partial", "not yet".
+  No section claims the repo is fully aligned or that all exceptions are
+    resolved.
+  Result: PASS
+
+CLOUDFLARE-RETAINED-EXCEPTION-REGISTER.md
+  All active exceptions carry status ACTIVE or DEFERRED — none RESOLVED.
+  Each entry's "Why retained" field explains the technical reason clearly.
+  No entry claims the exception is safe to remove without re-proof.
+  Result: PASS
+
+CLOUDFLARE-FUTURE-BACKLOG.md
+  Every item is explicitly framed as future work.
+  Introductory note: "None of the items below have been started in this wave."
+  No convergence item described as partially done or ready to land.
+  Result: PASS
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+INFORMATIONAL NOTES (non-blocking)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+NOTE-1: Runbook section header reads "Current repo truth after Wave 3."
+  The runbook was published in Wave 4 Task 11, but it documents the state
+  as it stands after Wave 3 completed. This framing is accurate and not
+  misleading — Wave 4 is the publication wave for this documentation set.
+
+NOTE-2: Assessment uses "stock preview" and "local preview" interchangeably
+  in a few places to mean opennextjs-cloudflare preview running locally.
+  Both terms are defined in the proof vocabulary section. Consistent.
+
+NOTE-3: Exception Register CF-EXCEPT-004 (phase6 split-worker) has proof
+  impact described as "requires real deploy smoke." This correctly matches
+  the deployed smoke boundary enforced everywhere else. Consistent.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SUMMARY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Check A (preview ≠ deployed truth):   PASS across all 4 docs
+Check B (forbidden-scope not claimed): PASS across all 4 docs
+Check C (no overclaiming):            PASS across all 4 docs
+Non-blocking notes:                   3
+Blocking findings:                    0
+
+OVERALL RESULT: PASS

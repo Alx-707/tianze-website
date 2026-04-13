@@ -1,0 +1,32 @@
+NEXT-ROUND RETIRE PATCH RESULT: split server-function cache handler path rewrites
+Date: 2026-04-10
+Repo: /Users/Data/Warehouse/Pipe/tianze-website
+Status: SUCCESS (target-only retirement)
+
+What changed
+- Retired only the split server-function cache/composable-cache path rewrite logic from scripts/cloudflare/patch-prefetch-hints-manifest.mjs.
+- Kept the remaining default-handler compat patches active:
+  - middleware manifest loader rewrite
+  - API route requirePage async promotion
+  - API route require() -> import()
+
+Why this qualified as a safe retirement candidate
+- Before-state dry-run already reported the split index files as "cache handler paths already patched" and still ended with "generated artifacts already match compatibility expectations".
+- After removing only the split index rewrite logic, dry-run still ended with "generated artifacts already match compatibility expectations" and no longer mentioned those split index files at all.
+- Retained-patch Cloudflare build continued to pass and now reports only the three default-handler patch points as still required.
+- Preview smoke continued to pass.
+
+Evidence
+- .sisyphus/evidence/next-round-cache-retire-before.txt
+- .sisyphus/evidence/next-round-cache-retire-after.txt
+- .sisyphus/evidence/next-round-cache-retire-build-cf.txt
+- .sisyphus/evidence/next-round-cache-retire-preview.txt
+
+Resulting remaining compat patch surface
+- middleware manifest loader -> default handler
+- API route requirePage async -> default handler
+- API route require() -> import() -> default handler
+
+Notes
+- This retirement narrows the generated-artifact compatibility layer further without changing the current proof boundary.
+- Plain build:cf is still not the formal proof mode because the remaining default-handler patches still require retained compat mode.

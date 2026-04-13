@@ -6,6 +6,8 @@ This is the single current rule for what different proof levels mean in this rep
 Use this document to distinguish:
 - `fast gate`
 - `local-full proof`
+- `preview-preflight`
+- `deployed-preview-proof`
 - `ci-proof`
 - `release-proof`
 
@@ -56,8 +58,7 @@ Add when relevant:
 - `pnpm build:cf` for platform/runtime/build-chain changes
 - `pnpm build:cf:turbo` when the change touches the Cloudflare build toolchain itself and you need to keep the comparison path healthy
 - `CI=1 pnpm test:e2e` for key-path UI/runtime changes
-- `pnpm build:site:equipment` when the change touches `src/sites/**`, site-specific message overlays, or site-switching behavior
-- `pnpm build:cf:site:equipment` when the same change must also be proven on the Cloudflare build path
+- `pnpm preflight:site-cutover:strict` when the change touches single-site truth, the former site skeleton, or cutover behavior
 
 What it proves:
 - the developer has run the heavier local checks intentionally
@@ -71,7 +72,42 @@ Use for:
 - Tier A merges
 - runtime/security/i18n/platform-sensitive changes
 
-### 3. `ci-proof`
+### 3. `preview-preflight`
+Purpose:
+- preview deploy preflight where degraded preview-mode exceptions are still allowed by explicit contract
+
+Source of truth:
+- `scripts/cloudflare/preview-preflight.sh`
+- `.github/workflows/cloudflare-deploy.yml` when `inputs.environment == preview`
+
+What it proves:
+- repository checks, preview degraded contract checks, and Cloudflare preview-specific pre-deploy preflight ran intentionally
+
+What it does **not** prove by itself:
+- real preview publish succeeded
+- deployed smoke passed
+- production integrations are fully live
+- release-grade non-degraded readiness
+
+### 4. `deployed-preview-proof`
+Purpose:
+- the repository’s canonical formal Cloudflare preview proof path
+
+Source of truth:
+- `scripts/cloudflare/deployed-preview-proof.sh`
+- `pnpm proof:cf:preview-deployed`
+- `.github/workflows/cloudflare-deploy.yml` deploy + post-deploy-smoke path when `inputs.environment == preview`
+
+What it proves:
+- real preview publish completed
+- deployment manifest was produced
+- deployed smoke passed against the published preview URL
+
+What it does **not** prove by itself:
+- production signoff
+- non-preview environment correctness beyond the published preview target
+
+### 5. `ci-proof`
 Purpose:
 - repository-controlled, independent proof from the main CI workflow
 
@@ -98,7 +134,7 @@ Use for:
 - merge confidence
 - baseline release candidate confidence
 
-### 4. `release-proof`
+### 6. `release-proof`
 Purpose:
 - highest proof level for changes that can affect production runtime semantics or deployment safety
 
@@ -128,6 +164,8 @@ What it proves:
 | Normal UI/component cleanup outside Tier A | `fast gate` |
 | Non-critical feature work with ordinary merge risk | `local-full proof` |
 | Tier A runtime/security/i18n/platform changes | `local-full proof` minimum |
+| Preview deploy preflight confidence | `preview-preflight` |
+| Formal Cloudflare preview proof | `deployed-preview-proof` |
 | Merge-ready repository confirmation | `ci-proof` |
 | Production-sensitive runtime/platform changes | `release-proof` |
 
@@ -138,9 +176,9 @@ What it proves:
 - Treating broad coverage totals as proof of key-path stability
 
 ## Repository-Specific Notes
-- `build:cf` now uses the repo-local Webpack wrapper and self-cleans before rebuilding, but it still shares the same `.next` family of artifacts with the standard build line. Keep the verification order serial.
+- `build:cf` under Route B now uses the stock `opennextjs-cloudflare build` path with the repo clean step embedded in the script. Keep the verification order serial.
 - For the strongest standard-build proof, prefer `pnpm clean:next-artifacts && pnpm build` before `pnpm build:cf`.
-- When the change touches Cloudflare / OpenNext / split-worker behavior, `pnpm deploy:cf:phase6:dry-run` is the stronger local proof than stock preview alone.
+- Under Route B, local stock preview is the canonical local Cloudflare proof lane for pages/headers/cookies; deployed smoke remains the only final API/deploy truth.
 - For current Cloudflare compatibility, `src/middleware.ts` remains the preferred runtime entrypoint over `proxy.ts`.
 - Translation proof for runtime-facing changes must include both full message bundles and critical bundles.
-- Site-aware proof is not only structure proof; at least one non-default-site build should be exercised when site identity or overlays change.
+- Cloudflare degraded preview still has an explicit contract/checker; use the release-proof flow instead of ad-hoc preview allowances or hidden workflow assumptions.

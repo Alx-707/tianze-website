@@ -44,14 +44,14 @@ const DEFAULT_TECH_DATA: TechItem[] = [
   {
     id: "nextjs",
     name: "Next.js",
-    version: "16.1.4",
+    version: "16.2.3",
     category: "core",
     url: "https://nextjs.org",
   },
   {
     id: "react",
     name: "React",
-    version: "19.2.3",
+    version: "19.2.5",
     category: "core",
     url: "https://react.dev",
   },
@@ -65,7 +65,7 @@ const DEFAULT_TECH_DATA: TechItem[] = [
   {
     id: "tailwindcss",
     name: "Tailwind CSS",
-    version: "4.1.18",
+    version: "4.2.2",
     category: "ui",
     url: "https://tailwindcss.com",
   },
@@ -86,7 +86,7 @@ const DEFAULT_TECH_DATA: TechItem[] = [
   {
     id: "next-intl",
     name: "next-intl",
-    version: "4.7.0",
+    version: "4.9.1",
     category: "i18n",
     url: "https://next-intl.dev",
   },
@@ -100,21 +100,21 @@ const DEFAULT_TECH_DATA: TechItem[] = [
   {
     id: "prettier",
     name: "Prettier",
-    version: "3.8.1",
+    version: "3.8.2",
     category: "tools",
     url: "https://prettier.io",
   },
   {
     id: "lefthook",
     name: "Lefthook",
-    version: "2.0.15",
+    version: "2.1.5",
     category: "tools",
     url: "https://lefthook.dev",
   },
   {
     id: "vitest",
     name: "Vitest",
-    version: "4.0.18",
+    version: "4.1.4",
     category: "testing",
     url: "https://vitest.dev",
   },
@@ -128,7 +128,7 @@ const DEFAULT_TECH_DATA: TechItem[] = [
   {
     id: "playwright",
     name: "Playwright",
-    version: "1.57.0",
+    version: "1.59.1",
     category: "testing",
     url: "https://playwright.dev",
   },

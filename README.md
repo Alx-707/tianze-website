@@ -1,15 +1,15 @@
 # Tianze Website
 
 [![Test Coverage](https://img.shields.io/badge/coverage-85%25-brightgreen)](./reports/coverage/)
-[![CI/CD](https://github.com/Alx-707/tianze-website/actions/workflows/ci.yml/badge.svg)](https://github.com/Alx-707/tianze-website/actions/workflows/ci.yml)
+[![CI/CD](https://github.com/rock-909/tianze-website/actions/workflows/ci.yml/badge.svg)](https://github.com/rock-909/tianze-website/actions/workflows/ci.yml)
 
 天泽管业海外站点仓库，采用 Next.js 16 + React 19 + TypeScript 5.9 + Tailwind CSS 4 技术栈，支持英中双语、Cloudflare 主部署链路、Contact 询盘主转化路径，以及当前仓库约定的发布门禁与部署验证流程。
 
-> 说明：`package.json` 中的包名仍为 `b2b-web-template`，这是历史遗留的内部包名，不代表当前项目身份。当前业务站点和文档默认都以 Tianze Website 为准。
+> 说明：`package.json` 当前包名已经与项目身份统一为 `tianze-website`；当前业务站点和文档默认都以 Tianze Website 为准。
 
 ## ✨ 特性
 
-- 🎯 **现代技术栈**: Next.js 16.2.0 + React 19.2.4 + TypeScript 5.9.3
+- 🎯 **现代技术栈**: Next.js 16.2.3 + React 19.2.5 + TypeScript 5.9.3
 - 🎨 **现代化UI**: Tailwind CSS 4.2.2 + 响应式设计
 - 📝 **内容管理**: MDX + Git-based 工作流
 - 🌍 **国际化支持**: 英中双语切换 + next-intl
@@ -64,7 +64,7 @@ pnpm validate:translations
 
 ## 🛠️ 环境要求
 
-- **Node.js**: 20.x（默认开发版本；项目声明支持 `>=20 <23`，已在 `.nvmrc` 固定为 20）
+- **Node.js**: 20.19.x（默认开发版本与 CI 基线；项目声明支持 `>=20.19 <23`）
 - **包管理器**: pnpm 10.13.1（已在 `.npmrc` 与 CI 固定）
 - **操作系统**: macOS, Linux, Windows
 
@@ -137,16 +137,19 @@ pnpm start
 
 ```bash
 pnpm build:cf
+pnpm preview:cf
+pnpm deploy:cf:preview
 pnpm release:verify
 pnpm smoke:cf:preview
 pnpm smoke:cf:deploy -- --base-url <deployed-url>
 ```
 
 说明：
-- `pnpm build:cf` 是当前正式 Cloudflare 构建路径
-- `pnpm build:cf:turbo` 只保留为对照/排查链路
-- 本地 `smoke:cf:preview` 主要验证页面、跳转、cookie 和 header
+- `pnpm build:cf` 是当前正式 Cloudflare 构建脚本；Route B 下默认走 stock `opennextjs-cloudflare build`
+- 旧的 `build:cf:turbo` 已降为仓库内部历史/诊断材料，不再作为日常可用脚本暴露
+- 当前本地 Cloudflare 页面预览证明模式是 `pnpm preview:cf` + `pnpm smoke:cf:preview`，主要验证页面、跳转、cookie 和 header
 - Cloudflare API 的最终证明依赖真实部署后的 `smoke:cf:deploy`
+- `pnpm deploy:cf:preview` 是当前 Route B 下的真实 preview 发布路径
 
 ## 📁 项目结构
 
@@ -196,10 +199,10 @@ pnpm build             # 构建生产版本（默认 Turbopack）
 pnpm build:webpack     # 使用 Webpack 构建（回退/对比）
 pnpm build:analyze     # 生成 Turbopack 构建分析
 pnpm start             # 启动生产服务器
-pnpm build:cf          # 当前正式 Cloudflare 构建链路（Webpack 包装器）
-pnpm build:cf:turbo    # Cloudflare 对照/排查构建链路
-pnpm preview:cf        # 本地 Cloudflare preview（有证明边界）
+pnpm build:cf          # 当前正式 Cloudflare 构建脚本（Route B：stock OpenNext Cloudflare build）
+ pnpm preview:cf        # 本地 Cloudflare preview 脚本（Route B stock preview）
 pnpm deploy:cf         # Cloudflare 正式部署
+pnpm deploy:cf:preview # Cloudflare preview 部署
 ```
 
 ### 代码质量
@@ -396,8 +399,8 @@ Page content in MDX format...
 
 ### 核心框架
 
-- **Next.js 16.2.0** - React全栈框架，App Router架构
-- **React 19.2.4** - 用户界面库，支持服务器组件
+- **Next.js 16.2.3** - React全栈框架，App Router架构
+- **React 19.2.5** - 用户界面库，支持服务器组件
 - **TypeScript 5.9.3** - 类型安全的JavaScript超集
 
 ### 样式和UI
