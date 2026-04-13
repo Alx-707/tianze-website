@@ -39,10 +39,10 @@ jobs:
       deployment_url: ${{ steps.deploy.outputs.deployment-url }}
 
     steps:
-    - name: 检出代码
-      uses: actions/checkout@v4
-      with:
-        persist-credentials: false
+    - name: 检出代码      
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: 检查 Cloudflare 凭据
         run: |
