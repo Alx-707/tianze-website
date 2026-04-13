@@ -40,9 +40,9 @@ jobs:
 
     steps:
     - name: 检出代码      
-        uses: actions/checkout@v4
-        with:
-          persist-credentials: false
+      uses: actions/checkout@v4
+      with:
+        persist-credentials: false
 
       - name: 检查 Cloudflare 凭据
         run: |
