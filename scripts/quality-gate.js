@@ -223,6 +223,12 @@ class QualityGate {
             "**/__tests__/**",
             "src/test/**",
             "src/testing/**",
+            // 开发工具：与 vitest coverage exclude 保持一致，不纳入 diff coverage
+            "src/components/dev-tools/**",
+            "src/app/**/dev-tools/**",
+            "src/app/**/diagnostics/**",
+            "src/lib/dev-tools-positioning.ts",
+            "src/lib/performance-monitoring-coordinator.ts",
             // 无逻辑代码：JSX 模板和数据声明被 Istanbul 计为可执行语句，
             // 但不含分支逻辑，测试价值极低
             // 注意：禁止再按整个目录豁免 src/components/ui/**。
