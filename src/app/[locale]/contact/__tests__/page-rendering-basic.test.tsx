@@ -112,7 +112,8 @@ vi.mock("@/lib/contact/getContactCopy", () => ({
     Promise.resolve({
       header: {
         title: "Contact Us",
-        description: "Get in touch with our team",
+        description:
+          "Get in touch with our team for inquiries, support, or partnership opportunities.",
       },
       panel: {
         contact: {
@@ -188,9 +189,9 @@ vi.mock("@/lib/seo-metadata", () => ({
   }),
 }));
 
-// Mock FaqSection
-vi.mock("@/components/sections/faq-section", () => ({
-  FaqSection: () => null,
+// Mock FaqAccordion
+vi.mock("@/components/sections/faq-accordion", () => ({
+  FaqAccordion: () => null,
 }));
 
 // Mock NextIntlClientProvider
@@ -210,7 +211,8 @@ describe("Contact Page Rendering - Advanced Tests", () => {
   // 默认Mock返回值
   const defaultTranslations = {
     title: "Contact Us",
-    description: "Get in touch with our team",
+    description:
+      "Get in touch with our team for inquiries, support, or partnership opportunities.",
     "panel.contactTitle": "Contact Methods",
     "panel.email": "Email",
     "panel.phone": "Phone",
@@ -308,7 +310,9 @@ describe("Contact Page Rendering - Advanced Tests", () => {
       await renderAsyncPage(ContactPageComponent);
 
       // 验证响应式文本
-      const descriptionElement = screen.getByText("Get in touch with our team");
+      const descriptionElement = screen.getByText(
+        "Get in touch with our team for inquiries, support, or partnership opportunities.",
+      );
       expect(descriptionElement).toHaveClass("text-xl");
     });
   });

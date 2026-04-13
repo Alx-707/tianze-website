@@ -111,7 +111,8 @@ vi.mock("@/lib/contact/getContactCopy", () => ({
     Promise.resolve({
       header: {
         title: "Contact Us",
-        description: "Get in touch with our team",
+        description:
+          "Get in touch with our team for inquiries, support, or partnership opportunities.",
       },
       panel: {
         contact: {
@@ -187,9 +188,9 @@ vi.mock("@/lib/seo-metadata", () => ({
   }),
 }));
 
-// Mock FaqSection
-vi.mock("@/components/sections/faq-section", () => ({
-  FaqSection: () => null,
+// Mock FaqAccordion
+vi.mock("@/components/sections/faq-accordion", () => ({
+  FaqAccordion: () => null,
 }));
 
 // Mock NextIntlClientProvider
@@ -209,7 +210,8 @@ describe("Contact Page Rendering - Core Basic Tests", () => {
   // 默认Mock返回值
   const defaultTranslations: Record<string, string> = {
     title: "Contact Us",
-    description: "Get in touch with our team",
+    description:
+      "Get in touch with our team for inquiries, support, or partnership opportunities.",
     email: "Email",
     phone: "Phone",
     address: "Address",
@@ -246,7 +248,9 @@ describe("Contact Page Rendering - Core Basic Tests", () => {
 
       expect(screen.getByText("Contact Us")).toBeInTheDocument();
       expect(
-        screen.getByText("Get in touch with our team"),
+        screen.getByText(
+          "Get in touch with our team for inquiries, support, or partnership opportunities.",
+        ),
       ).toBeInTheDocument();
     });
 

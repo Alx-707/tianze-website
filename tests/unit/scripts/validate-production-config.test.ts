@@ -23,6 +23,12 @@ function createValidProductionEnv(): NodeJS.ProcessEnv {
 describe("validate-production-config runtime contract", () => {
   it("enables strict runtime validation only in production mode", () => {
     expect(
+      shouldValidateProductionRuntimeContract({ APP_ENV: "preview" }),
+    ).toBe(false);
+    expect(
+      shouldValidateProductionRuntimeContract({ APP_ENV: "production" }),
+    ).toBe(true);
+    expect(
       shouldValidateProductionRuntimeContract({ NODE_ENV: "production" }),
     ).toBe(true);
     expect(
@@ -42,7 +48,7 @@ describe("validate-production-config runtime contract", () => {
     expect(result.warnings).toEqual([]);
   });
 
-  it("fails when production security stores are missing without explicit degraded overrides", () => {
+  it("fails when production security stores are missing", () => {
     const env = {
       ...createValidProductionEnv(),
       UPSTASH_REDIS_REST_URL: undefined,
@@ -54,16 +60,13 @@ describe("validate-production-config runtime contract", () => {
     expect(result.errors).toEqual(
       expect.arrayContaining([
         expect.stringContaining(
-          "Production rate limiting requires Upstash Redis",
-        ),
-        expect.stringContaining(
-          "Production idempotency requires Upstash Redis",
+          "Production rate limiting and idempotency require Upstash Redis or Vercel KV",
         ),
       ]),
     );
   });
 
-  it("warns when production explicitly opts into degraded in-memory stores", () => {
+  it("rejects degraded in-memory stores in production", () => {
     const env = {
       ...createValidProductionEnv(),
       UPSTASH_REDIS_REST_URL: undefined,
@@ -74,11 +77,11 @@ describe("validate-production-config runtime contract", () => {
 
     const result = validateProductionRuntimeContract(env);
 
-    expect(result.errors).toEqual([]);
-    expect(result.warnings).toEqual(
+    expect(result.errors).toEqual(
       expect.arrayContaining([
-        expect.stringContaining("ALLOW_MEMORY_RATE_LIMIT=true"),
-        expect.stringContaining("ALLOW_MEMORY_IDEMPOTENCY=true"),
+        expect.stringContaining(
+          "Degraded in-memory store flags (ALLOW_MEMORY_RATE_LIMIT, ALLOW_MEMORY_IDEMPOTENCY) cannot be used in production",
+        ),
       ]),
     );
   });
@@ -101,7 +104,7 @@ describe("validate-production-config runtime contract", () => {
     expect(partialUpstash.errors).toEqual(
       expect.arrayContaining([
         expect.stringContaining(
-          "Upstash Redis must be configured as a complete pair",
+          "Production rate limiting and idempotency require Upstash Redis or Vercel KV",
         ),
       ]),
     );
@@ -143,16 +146,16 @@ describe("validate-production-config runtime contract", () => {
 });
 
 describe("validateProductionConfig CI vs deploy gate", () => {
-  it("downgrades runtime errors to warnings when VALIDATE_CONFIG_SKIP_RUNTIME is true", () => {
+  it("skips runtime contract for preview when APP_ENV=preview", () => {
     const env: NodeJS.ProcessEnv = {
+      APP_ENV: "preview",
       NODE_ENV: "production",
-      VALIDATE_CONFIG_SKIP_RUNTIME: "true",
     };
 
     const result = validateProductionConfig(env);
 
     expect(result.errors).toEqual([]);
-    expect(result.warnings.length).toBeGreaterThan(0);
+    expect(result.runtimeContractChecked).toBe(false);
   });
 
   it("keeps runtime errors as hard failures when VALIDATE_CONFIG_SKIP_RUNTIME is absent", () => {

@@ -90,6 +90,7 @@ pre-commit:
           echo "✅ 相关测试检查通过 (无源码变更)"; exit 0;
         fi
         echo "🧪 运行相关测试..."
+        set -f
         pnpm vitest related $FILES --run --passWithNoTests --reporter=dot 2>/dev/null || {
           echo ""; echo "❌ 相关测试失败 - 可能原因:";
           echo "  1. 组件 DOM 结构变更，但测试中的 getByRole/getByText 未同步";

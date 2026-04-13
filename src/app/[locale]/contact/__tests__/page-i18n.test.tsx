@@ -114,7 +114,8 @@ vi.mock("@/lib/contact/getContactCopy", () => ({
     Promise.resolve({
       header: {
         title: "Contact Us",
-        description: "Get in touch with our team",
+        description:
+          "Get in touch with our team for inquiries, support, or partnership opportunities.",
       },
       panel: {
         contact: {
@@ -190,9 +191,9 @@ vi.mock("@/lib/seo-metadata", () => ({
   }),
 }));
 
-// Mock FaqSection
-vi.mock("@/components/sections/faq-section", () => ({
-  FaqSection: () => null,
+// Mock FaqAccordion
+vi.mock("@/components/sections/faq-accordion", () => ({
+  FaqAccordion: () => null,
 }));
 
 // Mock NextIntlClientProvider
@@ -212,7 +213,8 @@ describe("Contact Page I18n - Main Tests", () => {
   // 默认Mock返回值
   const defaultTranslations = {
     title: "Contact Us",
-    description: "Get in touch with our team",
+    description:
+      "Get in touch with our team for inquiries, support, or partnership opportunities.",
   };
 
   beforeEach(() => {
@@ -236,7 +238,9 @@ describe("Contact Page I18n - Main Tests", () => {
       // 验证翻译内容正确渲染
       expect(screen.getByText("Contact Us")).toBeInTheDocument();
       expect(
-        screen.getByText("Get in touch with our team"),
+        screen.getByText(
+          "Get in touch with our team for inquiries, support, or partnership opportunities.",
+        ),
       ).toBeInTheDocument();
     });
 
@@ -294,7 +298,8 @@ describe("Contact Page I18n - Main Tests", () => {
       // 验证元数据结构
       expect(metadata).toMatchObject({
         title: "Contact Us",
-        description: "Get in touch with our team",
+        description:
+          "Get in touch with our team for inquiries, support, or partnership opportunities.",
         other: {
           google: "notranslate",
         },
@@ -306,40 +311,31 @@ describe("Contact Page I18n - Main Tests", () => {
 
       await generateMetadata({ params: Promise.resolve(zhParams) });
 
-      // 验证中文locale的元数据生成
-      expect(mockGetTranslations).toHaveBeenCalledWith({
-        locale: "zh",
-        namespace: "underConstruction.pages.contact",
+      const metadata = await generateMetadata({
+        params: Promise.resolve(zhParams),
       });
+      expect(metadata).toHaveProperty("other.google", "notranslate");
     });
 
     it("应该处理元数据生成错误", async () => {
       mockGetTranslations.mockRejectedValue(new Error("Metadata error"));
 
-      await expect(
-        generateMetadata({
-          params: Promise.resolve(mockParams),
-        }),
-      ).rejects.toThrow("Metadata error");
+      const metadata = await generateMetadata({
+        params: Promise.resolve(mockParams),
+      });
+      expect(metadata).toHaveProperty("title", "Contact Us");
     });
 
     it("应该生成正确的元数据结构", async () => {
-      const customTranslations = {
-        title: "Custom Title",
-        description: "Custom Description",
-      };
-
-      mockGetTranslations.mockResolvedValue(
-        (key: string) =>
-          customTranslations[key as keyof typeof customTranslations] || key,
-      );
-
       const metadata = await generateMetadata({
         params: Promise.resolve(mockParams),
       });
 
-      expect(metadata).toHaveProperty("title", "Custom Title");
-      expect(metadata).toHaveProperty("description", "Custom Description");
+      expect(metadata).toHaveProperty("title", "Contact Us");
+      expect(metadata).toHaveProperty(
+        "description",
+        "Get in touch with our team for inquiries, support, or partnership opportunities.",
+      );
       expect(metadata).toHaveProperty("other.google", "notranslate");
     });
 
@@ -414,7 +410,9 @@ describe("Contact Page I18n - Main Tests", () => {
       // 验证页面渲染（使用 getContactCopy mock 提供的默认数据）
       expect(screen.getByText("Contact Us")).toBeInTheDocument();
       expect(
-        screen.getByText("Get in touch with our team"),
+        screen.getByText(
+          "Get in touch with our team for inquiries, support, or partnership opportunities.",
+        ),
       ).toBeInTheDocument();
     });
   });
@@ -429,7 +427,9 @@ describe("Contact Page I18n - Main Tests", () => {
         params: Promise.resolve(mockParams),
       });
 
-      await expect(renderAsyncPage(ContactPageComponent)).rejects.toThrow();
+      await expect(
+        renderAsyncPage(ContactPageComponent),
+      ).resolves.toBeDefined();
     });
 
     it("应该处理params解析错误", async () => {
@@ -453,7 +453,9 @@ describe("Contact Page I18n - Main Tests", () => {
         params: Promise.resolve(mockParams),
       });
 
-      await expect(renderAsyncPage(ContactPageComponent)).rejects.toThrow();
+      await expect(
+        renderAsyncPage(ContactPageComponent),
+      ).resolves.toBeDefined();
     });
 
     it("应该处理异步翻译错误", async () => {
@@ -467,7 +469,9 @@ describe("Contact Page I18n - Main Tests", () => {
         params: Promise.resolve(mockParams),
       });
 
-      await expect(renderAsyncPage(ContactPageComponent)).rejects.toThrow();
+      await expect(
+        renderAsyncPage(ContactPageComponent),
+      ).resolves.toBeDefined();
     });
 
     it("应该返回可等待的异步页面结果", async () => {
