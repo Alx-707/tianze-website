@@ -25,7 +25,7 @@ pnpm validate:translations
 pnpm clean:next-artifacts
 pnpm build
 pnpm build:cf
-pnpm deploy:cf:phase6:dry-run
+pnpm smoke:cf:preview
 CI=1 pnpm test:e2e
 ```
 
@@ -34,10 +34,29 @@ CI=1 pnpm test:e2e
 - Cluster scan next: know whether the change is part of a co-change family.
 - Translation validation before builds for faster failure on i18n drift.
 - `clean:next-artifacts` before `build` because stale `.next` state can still produce misleading stack-overflow build failures.
-- `build` before `build:cf` because both lines still share the same build-artifact family even though `build:cf` now uses the repo-local Webpack wrapper and self-cleans before rebuilding.
-- `deploy:cf:phase6:dry-run` after `build:cf` because it is the stronger local Cloudflare proof for the current split-worker line.
+- `build` before `build:cf` because both lines still share the same build-artifact family and stale `.next` state can still mislead verification.
+- `smoke:cf:preview` after `build:cf` because Route B treats stock local preview as the canonical local Cloudflare proof lane.
 - E2E last because it is the heaviest proof step.
-- If the change is site-aware, add `pnpm build:site:equipment` and, when relevant, `pnpm build:cf:site:equipment` before signoff.
+- If the change rewires single-site truth or cutover gates, run `pnpm preflight:site-cutover:strict` before signoff.
+- Preview deploy workflows must use `pnpm preview:preflight:cf` before deploy, while production deploys continue to use `pnpm release:verify`.
+
+## Site Cutover Preflight
+Before any change that touches single-site truth or verifies skeleton removal, run:
+
+```bash
+NODE_ENV=production VALIDATE_CONFIG_SKIP_RUNTIME=true pnpm validate:config
+pnpm truth:check
+pnpm validate:translations
+pnpm compat-import-audit
+pnpm build
+```
+
+Only use the strict variant (`pnpm preflight:site-cutover:strict`) when the branch is intentionally proving skeleton removal readiness. Deploy/release workflows must not rely on `VALIDATE_CONFIG_SKIP_RUNTIME=true` for final release proof.
+
+## Preview Degraded-Mode Exception Contract
+- Current contract source: retired from the main tree
+- Contract checker: retired from the main tree
+- Current status: historical only; active preview workflow now requires real preview secrets and no degraded flags.
 
 ## Important Constraints
 - Do not run `pnpm build` and `pnpm build:cf` in parallel.
