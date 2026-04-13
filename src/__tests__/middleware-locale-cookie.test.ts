@@ -49,6 +49,25 @@ describe("middleware locale cookie", () => {
     expect(intlMiddlewareMock).toHaveBeenCalledTimes(1);
   });
 
+  it("short-circuits /api/health with stable health payload and observability headers", async () => {
+    const request = new NextRequest("http://localhost/api/health", {
+      headers: {
+        "x-request-id": "health-from-middleware",
+      },
+    });
+
+    const response = middleware(request);
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("cache-control")).toBe("no-store");
+    expect(response.headers.get("x-request-id")).toBe("health-from-middleware");
+    expect(response.headers.get("x-observability-surface")).toBe(
+      "cache-health",
+    );
+    expect(await response.json()).toEqual({ status: "ok" });
+    expect(intlMiddlewareMock).not.toHaveBeenCalled();
+  });
+
   it("sets NEXT_LOCALE cookie with max-age (persisted preference)", () => {
     const request = new NextRequest("http://localhost/en/about", {
       headers: {
