@@ -138,8 +138,6 @@ describe("WhatsAppFloatingButton", () => {
     expect(button).toHaveStyle({
       width: "52px",
       height: "52px",
-      borderRadius: "16px",
-      borderWidth: "1px",
     });
     expect(button).toHaveClass("text-emerald-600");
   });

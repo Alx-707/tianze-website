@@ -305,11 +305,12 @@ async function handleWithIdempotencyKey<T>(
           idempotencyKey,
           {
             status: "success",
+            fingerprint,
             response: normalized.body,
             createdAt: now,
-            expiresAt: now + DEFAULT_TTL_MS,
+            expiresAt: now + ttlMs,
           },
-          Math.ceil(DEFAULT_TTL_MS / 1000),
+          ttlMs,
         );
       } catch (completeError) {
         logger.error(

@@ -223,15 +223,14 @@ describe("Badge Custom Props - Advanced Tests", () => {
       const badge = screen.getByText("Complex Style");
       // 分项断言，避免序列化差异导致的误报
       const cs = getComputedStyle(badge as HTMLElement);
+      const styleAttr = (badge as HTMLElement).getAttribute("style") || "";
       expect(cs.borderTopWidth).toBe("2px");
       expect(cs.borderTopStyle).toBe("solid");
-      expect(badge).toHaveStyle("border-radius: 8px");
-      expect(badge).toHaveStyle("padding: 10px");
-      expect(badge).toHaveStyle("margin: 5px");
+      expect(styleAttr).toContain("border-radius: 8px");
+      expect(styleAttr).toContain("padding: 10px");
+      expect(styleAttr).toContain("margin: 5px");
       // 对于 linear-gradient，断言 style 属性包含声明
-      expect((badge as HTMLElement).getAttribute("style") || "").toMatch(
-        /background-image:\s*linear-gradient/,
-      );
+      expect(styleAttr).toMatch(/background-image:\s*linear-gradient/);
     });
 
     it("supports CSS custom properties", () => {

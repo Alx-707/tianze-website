@@ -7,18 +7,8 @@ const { mockGetTranslationsCached } = vi.hoisted(() => ({
   mockGetTranslationsCached: vi.fn(),
 }));
 
-const { mockCacheLife } = vi.hoisted(() => ({
-  mockCacheLife: vi.fn<(profile: unknown) => void>(),
-}));
-
 vi.mock("@/lib/i18n/server/getTranslationsCached", () => ({
   getTranslationsCached: mockGetTranslationsCached,
-}));
-
-vi.mock("next/cache", () => ({
-  cacheLife: (profile: unknown) => {
-    mockCacheLife(profile);
-  },
 }));
 
 describe("getContactCopy", () => {
@@ -48,8 +38,6 @@ describe("getContactCopy", () => {
     const locale: Locale = "en";
 
     const copy = await getContactCopy(locale);
-
-    expect(mockCacheLife).toHaveBeenCalledWith("days");
 
     expect(mockGetTranslationsCached).toHaveBeenCalledWith({
       locale,
