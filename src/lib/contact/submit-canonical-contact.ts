@@ -1,4 +1,8 @@
-import type { ContactFormWithToken } from "@/lib/contact-form-processing";
+import {
+  processFormSubmission,
+  type ContactFormWithToken,
+  validateContactSubmission,
+} from "@/lib/contact-form-processing";
 
 export interface CanonicalContactSubmissionOptions {
   clientIP: string;
@@ -83,11 +87,7 @@ export async function submitCanonicalContactSubmission(
   body: unknown,
   options: CanonicalContactSubmissionOptions,
 ): Promise<CanonicalContactSubmissionResult> {
-  const processing = await import("@/lib/contact-form-processing");
-  const validation = await processing.validateContactSubmission(
-    body,
-    options.clientIP,
-  );
+  const validation = await validateContactSubmission(body, options.clientIP);
   if (!validation.success || !validation.data) {
     return {
       success: false,
@@ -99,12 +99,9 @@ export async function submitCanonicalContactSubmission(
     };
   }
 
-  const submissionResult = await processing.processFormSubmission(
-    validation.data,
-    {
-      ...(options.requestId ? { requestId: options.requestId } : {}),
-    },
-  );
+  const submissionResult = await processFormSubmission(validation.data, {
+    ...(options.requestId ? { requestId: options.requestId } : {}),
+  });
 
   return {
     success: true,

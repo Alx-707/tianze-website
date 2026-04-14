@@ -6,7 +6,11 @@
  */
 
 import { logger } from "@/lib/logger";
-import { DEFAULT_TTL_MS, type IdempotentResult } from "@/lib/idempotency-utils";
+import {
+  DEFAULT_TTL_MS,
+  type IdempotentResult,
+  waitForCompletionResult,
+} from "@/lib/idempotency-utils";
 import type { IdempotencyStore } from "@/lib/security/stores/idempotency-store";
 
 /** Tracks the fingerprint associated with each in-flight key */
@@ -82,8 +86,6 @@ export async function getStoredIdempotentResult<T>(
     return { ok: false, reason: "failed" };
   }
 
-  // Import waitForCompletionResult from idempotency-utils
-  const { waitForCompletionResult } = await import("@/lib/idempotency-utils");
   return waitForCompletionResult<T>(idempotencyKey, store);
 }
 
