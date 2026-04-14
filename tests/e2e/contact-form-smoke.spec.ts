@@ -123,7 +123,7 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
       throw new Error(`Contact form did not render: ${targetUrl}`);
     }
 
-    await expect(page).toHaveTitle(getExpectedContactTitle(locale, targetUrl));
+    await expect(page).toHaveTitle(getExpectedContactTitle(locale));
     await expectInteractiveContactForm(page);
   };
 
