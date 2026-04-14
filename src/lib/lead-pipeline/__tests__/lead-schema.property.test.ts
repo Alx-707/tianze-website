@@ -14,6 +14,8 @@ vi.unmock("zod");
 
 const SAFE_SUBMITTED_AT_MIN = new Date("2000-01-01T00:00:00.000Z");
 const SAFE_SUBMITTED_AT_MAX = new Date("2100-12-31T23:59:59.999Z");
+const SAFE_SUBMITTED_AT_MIN_MS = SAFE_SUBMITTED_AT_MIN.getTime();
+const SAFE_SUBMITTED_AT_MAX_MS = SAFE_SUBMITTED_AT_MAX.getTime();
 const contactLeadArb = fc
   .record({
     type: fc.constant(LEAD_TYPES.CONTACT),
@@ -33,11 +35,11 @@ const contactLeadArb = fc
         submittedAt: fc.option(
           fc.oneof(
             fc
-              .date({
-                min: SAFE_SUBMITTED_AT_MIN,
-                max: SAFE_SUBMITTED_AT_MAX,
+              .integer({
+                min: SAFE_SUBMITTED_AT_MIN_MS,
+                max: SAFE_SUBMITTED_AT_MAX_MS,
               })
-              .map((value) => value.toISOString()),
+              .map((value) => new Date(value).toISOString()),
             fc.string().filter((value) => value.length > 0),
           ),
           { nil: undefined },
