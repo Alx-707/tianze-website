@@ -140,6 +140,47 @@ describe("distributed-rate-limit", () => {
   // =========================================================================
   // 2. checkDistributedRateLimit Tests
   // =========================================================================
+  describe("preset selection coverage", () => {
+    it.each([
+      ["contact", RATE_LIMIT_PRESETS.contact.maxRequests],
+      ["inquiry", RATE_LIMIT_PRESETS.inquiry.maxRequests],
+      ["subscribe", RATE_LIMIT_PRESETS.subscribe.maxRequests],
+      ["whatsapp", RATE_LIMIT_PRESETS.whatsapp.maxRequests],
+      ["turnstile", RATE_LIMIT_PRESETS.turnstile.maxRequests],
+      ["cacheInvalidate", RATE_LIMIT_PRESETS.cacheInvalidate.maxRequests],
+      [
+        "cacheInvalidatePreAuth",
+        RATE_LIMIT_PRESETS.cacheInvalidatePreAuth.maxRequests,
+      ],
+    ] as const)("uses the %s preset", async (preset, maxRequests) => {
+      const result = await checkDistributedRateLimit(
+        `preset-${preset}`,
+        preset,
+      );
+
+      expect(result.allowed).toBe(true);
+      expect(result.remaining).toBe(maxRequests - ONE);
+    });
+
+    it("falls back safely when the store throws", async () => {
+      const mod = await import("@/lib/security/stores/rate-limit-store");
+      vi.spyOn(mod, "createRateLimitStore").mockReturnValue({
+        increment: vi.fn().mockRejectedValue(new Error("boom")),
+      } as unknown as ReturnType<typeof mod.createRateLimitStore>);
+
+      const result = await checkDistributedRateLimit(
+        "fallback-user",
+        "whatsapp",
+      );
+
+      expect(result.allowed).toBe(true);
+      expect(result.remaining).toBe(
+        RATE_LIMIT_PRESETS.whatsapp.maxRequests - ONE,
+      );
+      expect(mockLoggerError).toHaveBeenCalled();
+    });
+  });
+
   describe("checkDistributedRateLimit", () => {
     it("should allow requests under limit", async () => {
       // contact preset has maxRequests=5
