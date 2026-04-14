@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { INTERNAL_TRUSTED_CLIENT_IP_HEADER } from "@/lib/security/client-ip-headers";
 
+const { recordApiResponseSignalMock } = vi.hoisted(() => ({
+  recordApiResponseSignalMock: vi.fn().mockResolvedValue(undefined),
+}));
+
 const { intlMiddlewareMock } = vi.hoisted(() => ({
   intlMiddlewareMock: vi.fn(),
 }));
@@ -10,10 +14,15 @@ vi.mock("next-intl/middleware", () => ({
   default: () => intlMiddlewareMock,
 }));
 
+vi.mock("@/lib/observability/api-signals", () => ({
+  recordApiResponseSignal: recordApiResponseSignalMock,
+}));
+
 import middleware from "../middleware";
 
 beforeEach(() => {
   vi.clearAllMocks();
+  recordApiResponseSignalMock.mockResolvedValue(undefined);
   intlMiddlewareMock.mockImplementation(() => NextResponse.next());
 });
 
@@ -49,7 +58,7 @@ describe("middleware locale cookie", () => {
     expect(intlMiddlewareMock).toHaveBeenCalledTimes(1);
   });
 
-  it("short-circuits /api/health with stable health payload and observability headers", async () => {
+  it("short-circuits GET /api/health with stable health payload and observability headers", async () => {
     const request = new NextRequest("http://localhost/api/health", {
       headers: {
         "x-request-id": "health-from-middleware",
@@ -65,7 +74,31 @@ describe("middleware locale cookie", () => {
       "cache-health",
     );
     expect(await response.json()).toEqual({ status: "ok" });
+    expect(recordApiResponseSignalMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: "health.get",
+        route: "/api/health",
+        context: expect.objectContaining({
+          requestId: "health-from-middleware",
+          surface: "cache-health",
+        }),
+      }),
+    );
     expect(intlMiddlewareMock).not.toHaveBeenCalled();
+  });
+
+  it("does not short-circuit non-GET health methods", () => {
+    const request = new NextRequest("http://localhost/api/health", {
+      method: "POST",
+    });
+
+    const response = middleware(request);
+
+    expect(intlMiddlewareMock).toHaveBeenCalledTimes(1);
+    expect(recordApiResponseSignalMock).not.toHaveBeenCalled();
+    expect(response.headers.get("x-middleware-override-headers")).toContain(
+      "x-nonce",
+    );
   });
 
   it("sets NEXT_LOCALE cookie with max-age (persisted preference)", () => {
