@@ -32,10 +32,9 @@ If another document conflicts with this file, treat this file plus the linked ca
   - [`src/config/footer-links.ts`](../../src/config/footer-links.ts)
   - [`src/lib/navigation.ts`](../../src/lib/navigation.ts)
 - Rule:
-  - when site identity, contact facts, default SEO, navigation, footer, or market structure change, update `src/sites/**` first
-  - when only a non-default site’s copy or metadata changes, update `src/sites/**/messages/**` first
-  - treat wrapper modules as compatibility surfaces, not the place to invent new Tianze-only truth
-  - non-default sites must not silently inherit a global `NEXT_PUBLIC_BASE_URL`; prefer explicit per-site base URL truth in `src/sites/**`, `NEXT_PUBLIC_SITE_URL`, or a site-specific env key
+  - when site identity, contact facts, default SEO, navigation, footer, or market structure change, update `src/config/single-site.ts` first
+  - keep wrapper modules as compatibility surfaces, not the place to invent new Tianze-only truth
+  - the current cutover no longer relies on a multi-site registry or per-site message overlays
 
 ## Runtime Entrypoints
 
