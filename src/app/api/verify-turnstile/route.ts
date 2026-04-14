@@ -105,7 +105,7 @@ async function handlePost(request: NextRequest) {
     let rateLimitResult: Awaited<ReturnType<typeof checkDistributedRateLimit>>;
     try {
       // Rate limiting: security-sensitive endpoint uses fail-closed preset
-      const rateLimitKey = getIPKey(request);
+      const rateLimitKey = await getIPKey(request);
       rateLimitResult = await checkDistributedRateLimit(
         rateLimitKey,
         "turnstile",

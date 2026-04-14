@@ -87,7 +87,7 @@ function validateApiKey(request: NextRequest): NextResponse | null {
 async function checkPostAuthRateLimit(
   request: NextRequest,
 ): Promise<NextResponse | null> {
-  const rateLimitKey = getApiKeyPriorityKey(request);
+  const rateLimitKey = await getApiKeyPriorityKey(request);
   const result = await checkDistributedRateLimit(rateLimitKey, "whatsapp");
 
   if (result.allowed) return null;

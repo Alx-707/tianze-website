@@ -11,13 +11,13 @@
  * UserAgent is NOT used as primary shard (easily spoofed).
  */
 
-import { createHmac } from "crypto";
 import { NextRequest } from "next/server";
 import { logger } from "@/lib/logger";
+import { generateHMAC } from "@/lib/security-crypto";
 import { getClientIP } from "@/lib/security/client-ip";
 
 /** Key strategy function signature */
-export type KeyStrategy = (request: NextRequest) => string;
+export type KeyStrategy = (request: NextRequest) => Promise<string> | string;
 
 /** HMAC output length (64-bit = 16 hex chars) */
 const HMAC_OUTPUT_LENGTH = 16;
@@ -86,12 +86,10 @@ function getPepper(): string {
  * @param input - The value to hash (IP, session ID, API key, etc.)
  * @returns 16-character hex string (64-bit)
  */
-export function hmacKey(input: string): string {
+export async function hmacKey(input: string): Promise<string> {
   const pepper = getPepper();
-  return createHmac("sha256", pepper)
-    .update(input)
-    .digest("hex")
-    .slice(0, HMAC_OUTPUT_LENGTH);
+  const digest = await generateHMAC(input, pepper, "SHA-256");
+  return digest.slice(0, HMAC_OUTPUT_LENGTH);
 }
 
 /**
@@ -107,15 +105,13 @@ export function hmacKey(input: string): string {
  * @param input - The value to hash
  * @returns Array of possible keys (usually 1, up to 2 during rotation)
  */
-export function hmacKeyWithRotation(input: string): string[] {
-  const keys = [hmacKey(input)];
+export async function hmacKeyWithRotation(input: string): Promise<string[]> {
+  const keys = [await hmacKey(input)];
 
   const previousPepper = process.env.RATE_LIMIT_PEPPER_PREVIOUS;
   if (previousPepper) {
-    const previousKey = createHmac("sha256", previousPepper)
-      .update(input)
-      .digest("hex")
-      .slice(0, HMAC_OUTPUT_LENGTH);
+    const previousDigest = await generateHMAC(input, previousPepper, "SHA-256");
+    const previousKey = previousDigest.slice(0, HMAC_OUTPUT_LENGTH);
     keys.push(previousKey);
   }
 
@@ -131,9 +127,9 @@ export function hmacKeyWithRotation(input: string): string[] {
  * @param request - Next.js request object
  * @returns Rate limit key in format `ip:{hmacHash}`
  */
-export function getIPKey(request: NextRequest): string {
+export async function getIPKey(request: NextRequest): Promise<string> {
   const clientIP = getClientIP(request);
-  return `ip:${hmacKey(clientIP)}`;
+  return `ip:${await hmacKey(clientIP)}`;
 }
 
 /**
@@ -154,13 +150,15 @@ export function getIPKey(request: NextRequest): string {
  * @param request - Next.js request object
  * @returns Rate limit key in format `session:{hmacHash}` or `ip:{hmacHash}`
  */
-export function getSessionPriorityKey(request: NextRequest): string {
+export async function getSessionPriorityKey(
+  request: NextRequest,
+): Promise<string> {
   // Check for session cookie (should be server-issued and signed)
   const sessionCookie = request.cookies.get("session-id");
   const sessionValue = sessionCookie?.value;
 
   if (sessionValue && isValidSessionFormat(sessionValue)) {
-    return `session:${hmacKey(sessionValue)}`;
+    return `session:${await hmacKey(sessionValue)}`;
   }
 
   // Fallback to IP
@@ -188,14 +186,16 @@ export function getSessionPriorityKey(request: NextRequest): string {
  * @param request - Next.js request object
  * @returns Rate limit key in format `apikey:{hmacHash}` or `ip:{hmacHash}`
  */
-export function getApiKeyPriorityKey(request: NextRequest): string {
+export async function getApiKeyPriorityKey(
+  request: NextRequest,
+): Promise<string> {
   const authHeader = request.headers.get("Authorization");
 
   if (authHeader) {
     const bearerMatch = authHeader.match(/^Bearer\s+(.+)$/i);
     const apiKey = bearerMatch?.[1];
     if (apiKey) {
-      return `apikey:${hmacKey(apiKey)}`;
+      return `apikey:${await hmacKey(apiKey)}`;
     }
   }
 

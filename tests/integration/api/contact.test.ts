@@ -37,6 +37,22 @@ vi.mock("@/app/api/contact/contact-api-validation", () => ({
   getContactFormStats: vi.fn(async () => ({ total: 10 })),
 }));
 
+vi.mock("@/lib/contact/submit-canonical-contact", () => ({
+  createCanonicalContactFingerprintFromUnknown: vi.fn(() => "CONTACT:test"),
+  submitCanonicalContactSubmission: vi.fn(async (body: unknown) => ({
+    success: true,
+    error: null,
+    details: null,
+    data: body,
+    submissionResult: {
+      success: true,
+      emailSent: true,
+      recordCreated: true,
+      referenceId: "ref-1",
+    },
+  })),
+}));
+
 describe("api/contact", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -120,12 +136,16 @@ describe("api/contact", () => {
   });
 
   it("rejects invalid form data", async () => {
-    const validation = await import("@/app/api/contact/contact-api-validation");
+    const canonical = await import("@/lib/contact/submit-canonical-contact");
     (
-      validation.validateFormData as ReturnType<typeof vi.fn>
+      canonical.submitCanonicalContactSubmission as ReturnType<typeof vi.fn>
     ).mockResolvedValueOnce({
       success: false,
+      errorCode: "CONTACT_VALIDATION_FAILED",
       error: "invalid",
+      details: null,
+      data: null,
+      statusCode: 400,
     });
 
     const res = await contactRoute.POST(makeRequest({}));

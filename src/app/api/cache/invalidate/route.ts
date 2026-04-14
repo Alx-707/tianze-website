@@ -113,7 +113,7 @@ export async function POST(request: NextRequest) {
   const startTime = Date.now();
   const observability = getRequestObservability(request, "cache-health");
   const preAuthBlock = await checkCacheInvalidationRateLimit(
-    getPreAuthInvalidationKey(request),
+    await getPreAuthInvalidationKey(request),
     "cacheInvalidatePreAuth",
     "pre-auth",
   );
@@ -140,7 +140,7 @@ export async function POST(request: NextRequest) {
   }
 
   const postAuthBlock = await checkCacheInvalidationRateLimit(
-    getPostAuthInvalidationKey(request),
+    await getPostAuthInvalidationKey(request),
     "cacheInvalidate",
     "post-auth",
   );
