@@ -1,22 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createCacheHealthResponse } from "@/lib/api/cache-health-response";
 import createMiddleware from "next-intl/middleware";
 import { generateNonce, getSecurityHeaders } from "@/config/security";
 import { routing, type Locale } from "@/i18n/routing-config";
 import { INTERNAL_TRUSTED_CLIENT_IP_HEADER } from "@/lib/security/client-ip-headers";
 import { getTrustedClientIPForInternalHeader } from "@/lib/security/client-ip";
 import {
-  OBSERVABILITY_SURFACE_HEADER,
+  applyRequestObservability,
+  getRequestObservability,
   REQUEST_ID_HEADER,
 } from "@/lib/api/request-observability";
+import { recordApiResponseSignal } from "@/lib/observability/api-signals";
 
 const intlMiddleware = createMiddleware(routing);
 const SUPPORTED_LOCALES = new Set<string>(routing.locales);
 const NONCE_REQUEST_HEADER_KEY = "x-nonce";
-const HEALTH_RESPONSE_HEADERS = {
-  "cache-control": "no-store",
-  "content-type": "application/json",
-} as const;
-
 function getRequestIdForHealth(request: NextRequest): string {
   const fromRequest =
     request.headers.get(REQUEST_ID_HEADER)?.trim() ||
@@ -34,16 +32,26 @@ function tryHandleHealthRoute(request: NextRequest): NextResponse | null {
     return null;
   }
 
-  const response = NextResponse.json(
-    { status: "ok" },
-    {
-      status: 200,
-      headers: HEALTH_RESPONSE_HEADERS,
-    },
+  if (request.method !== "GET" && request.method !== "HEAD") {
+    return null;
+  }
+
+  const observability = {
+    ...getRequestObservability(request, "cache-health"),
+    requestId: getRequestIdForHealth(request),
+  };
+
+  const response = applyRequestObservability(
+    createCacheHealthResponse(),
+    observability,
   );
 
-  response.headers.set(REQUEST_ID_HEADER, getRequestIdForHealth(request));
-  response.headers.set(OBSERVABILITY_SURFACE_HEADER, "cache-health");
+  recordApiResponseSignal({
+    context: observability,
+    response,
+    name: "health.get",
+    route: "/api/health",
+  }).catch(() => undefined);
 
   return response;
 }
