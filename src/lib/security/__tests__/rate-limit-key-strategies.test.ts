@@ -84,37 +84,37 @@ describe("rate-limit-key-strategies", () => {
   }
 
   describe("hmacKey", () => {
-    it("should generate consistent hash for same input", () => {
+    it("should generate consistent hash for same input", async () => {
       setEnv("RATE_LIMIT_PEPPER", "a".repeat(32));
 
-      const key1 = hmacKey("192.168.1.1");
-      const key2 = hmacKey("192.168.1.1");
+      const key1 = await hmacKey("192.168.1.1");
+      const key2 = await hmacKey("192.168.1.1");
 
       expect(key1).toBe(key2);
     });
 
-    it("should generate different hash for different inputs", () => {
+    it("should generate different hash for different inputs", async () => {
       setEnv("RATE_LIMIT_PEPPER", "a".repeat(32));
 
-      const key1 = hmacKey("192.168.1.1");
-      const key2 = hmacKey("192.168.1.2");
+      const key1 = await hmacKey("192.168.1.1");
+      const key2 = await hmacKey("192.168.1.2");
 
       expect(key1).not.toBe(key2);
     });
 
-    it("should return 16 character hex string (64-bit)", () => {
+    it("should return 16 character hex string (64-bit)", async () => {
       setEnv("RATE_LIMIT_PEPPER", "a".repeat(32));
 
-      const key = hmacKey("test-input");
+      const key = await hmacKey("test-input");
 
       expect(key).toHaveLength(16);
       expect(key).toMatch(/^[0-9a-f]{16}$/);
     });
 
-    it("should use development fallback pepper when not configured", () => {
+    it("should use development fallback pepper when not configured", async () => {
       setEnv("NODE_ENV", "development");
 
-      const key = hmacKey("test-input");
+      const key = await hmacKey("test-input");
 
       expect(key).toHaveLength(16);
       expect(mockLoggerWarn).toHaveBeenCalledWith(
@@ -122,38 +122,38 @@ describe("rate-limit-key-strategies", () => {
       );
     });
 
-    it("should warn only once about missing pepper", () => {
+    it("should warn only once about missing pepper", async () => {
       setEnv("NODE_ENV", "development");
 
-      hmacKey("input1");
-      hmacKey("input2");
-      hmacKey("input3");
+      await hmacKey("input1");
+      await hmacKey("input2");
+      await hmacKey("input3");
 
       expect(mockLoggerWarn).toHaveBeenCalledTimes(1);
     });
 
-    it("should throw error in production without pepper", () => {
+    it("should throw error in production without pepper", async () => {
       setEnv("NODE_ENV", "production");
 
-      expect(() => hmacKey("test-input")).toThrow(
+      await expect(hmacKey("test-input")).rejects.toThrow(
         /RATE_LIMIT_PEPPER is required in production/,
       );
     });
 
-    it("should throw error in production with short pepper", () => {
+    it("should throw error in production with short pepper", async () => {
       setEnv("NODE_ENV", "production");
       setEnv("RATE_LIMIT_PEPPER", "tooshort");
 
-      expect(() => hmacKey("test-input")).toThrow(
+      await expect(hmacKey("test-input")).rejects.toThrow(
         /RATE_LIMIT_PEPPER is too short/,
       );
     });
 
-    it("should warn about weak pepper in development", () => {
+    it("should warn about weak pepper in development", async () => {
       setEnv("NODE_ENV", "development");
       setEnv("RATE_LIMIT_PEPPER", "short");
 
-      hmacKey("test-input");
+      await hmacKey("test-input");
 
       expect(mockLoggerWarn).toHaveBeenCalledWith(
         expect.stringContaining("RATE_LIMIT_PEPPER is weak"),
@@ -162,64 +162,64 @@ describe("rate-limit-key-strategies", () => {
   });
 
   describe("hmacKeyWithRotation", () => {
-    it("should return single key when no previous pepper", () => {
+    it("should return single key when no previous pepper", async () => {
       setEnv("RATE_LIMIT_PEPPER", "a".repeat(32));
 
-      const keys = hmacKeyWithRotation("test-input");
+      const keys = await hmacKeyWithRotation("test-input");
 
       expect(keys).toHaveLength(1);
     });
 
-    it("should return two keys during pepper rotation", () => {
+    it("should return two keys during pepper rotation", async () => {
       setEnv("RATE_LIMIT_PEPPER", "a".repeat(32));
       setEnv("RATE_LIMIT_PEPPER_PREVIOUS", "b".repeat(32));
 
-      const keys = hmacKeyWithRotation("test-input");
+      const keys = await hmacKeyWithRotation("test-input");
 
       expect(keys).toHaveLength(2);
       expect(keys[0]).not.toBe(keys[1]);
     });
 
-    it("should have current key as first element", () => {
+    it("should have current key as first element", async () => {
       setEnv("RATE_LIMIT_PEPPER", "a".repeat(32));
       setEnv("RATE_LIMIT_PEPPER_PREVIOUS", "b".repeat(32));
 
-      const currentKey = hmacKey("test-input");
-      const keys = hmacKeyWithRotation("test-input");
+      const currentKey = await hmacKey("test-input");
+      const keys = await hmacKeyWithRotation("test-input");
 
       expect(keys[0]).toBe(currentKey);
     });
   });
 
   describe("getIPKey", () => {
-    it("should return IP-based key with prefix", () => {
+    it("should return IP-based key with prefix", async () => {
       setEnv("RATE_LIMIT_PEPPER", "a".repeat(32));
       mockGetClientIP.mockReturnValue("192.168.1.100");
 
       const request = createMockRequest();
-      const key = getIPKey(request);
+      const key = await getIPKey(request);
 
       expect(key).toMatch(/^ip:[0-9a-f]{16}$/);
     });
 
-    it("should call getClientIP with request", () => {
+    it("should call getClientIP with request", async () => {
       setEnv("RATE_LIMIT_PEPPER", "a".repeat(32));
       mockGetClientIP.mockReturnValue("10.0.0.1");
 
       const request = createMockRequest();
-      getIPKey(request);
+      await getIPKey(request);
 
       expect(mockGetClientIP).toHaveBeenCalledWith(request);
     });
 
-    it("should produce different keys for different IPs", () => {
+    it("should produce different keys for different IPs", async () => {
       setEnv("RATE_LIMIT_PEPPER", "a".repeat(32));
 
       mockGetClientIP.mockReturnValue("192.168.1.1");
-      const key1 = getIPKey(createMockRequest());
+      const key1 = await getIPKey(createMockRequest());
 
       mockGetClientIP.mockReturnValue("192.168.1.2");
-      const key2 = getIPKey(createMockRequest());
+      const key2 = await getIPKey(createMockRequest());
 
       expect(key1).not.toBe(key2);
     });
@@ -231,37 +231,37 @@ describe("rate-limit-key-strategies", () => {
       mockGetClientIP.mockReturnValue("192.168.1.100");
     });
 
-    it("should return session-based key when valid session exists", () => {
+    it("should return session-based key when valid session exists", async () => {
       const request = createMockRequest({
         cookies: { "session-id": "valid-session-id-12345678" },
       });
 
-      const key = getSessionPriorityKey(request);
+      const key = await getSessionPriorityKey(request);
 
       expect(key).toMatch(/^session:[0-9a-f]{16}$/);
     });
 
-    it("should fallback to IP key when no session cookie", () => {
+    it("should fallback to IP key when no session cookie", async () => {
       const request = createMockRequest();
 
-      const ipKey = getIPKey(request);
-      const sessionKey = getSessionPriorityKey(request);
+      const ipKey = await getIPKey(request);
+      const sessionKey = await getSessionPriorityKey(request);
 
       expect(sessionKey).toBe(ipKey);
     });
 
-    it("should fallback to IP key for too short session ID", () => {
+    it("should fallback to IP key for too short session ID", async () => {
       const request = createMockRequest({
         cookies: { "session-id": "short" },
       });
 
-      const ipKey = getIPKey(request);
-      const sessionKey = getSessionPriorityKey(request);
+      const ipKey = await getIPKey(request);
+      const sessionKey = await getSessionPriorityKey(request);
 
       expect(sessionKey).toBe(ipKey);
     });
 
-    it("should reject invalid session values", () => {
+    it("should reject invalid session values", async () => {
       const invalidValues = ["undefined", "null", "[object Object]"];
 
       for (const invalidValue of invalidValues) {
@@ -269,8 +269,8 @@ describe("rate-limit-key-strategies", () => {
           cookies: { "session-id": invalidValue },
         });
 
-        const ipKey = getIPKey(request);
-        const sessionKey = getSessionPriorityKey(request);
+        const ipKey = await getIPKey(request);
+        const sessionKey = await getSessionPriorityKey(request);
 
         expect(sessionKey).toBe(ipKey);
       }
@@ -283,47 +283,47 @@ describe("rate-limit-key-strategies", () => {
       mockGetClientIP.mockReturnValue("192.168.1.100");
     });
 
-    it("should return API key-based key when Bearer token exists", () => {
+    it("should return API key-based key when Bearer token exists", async () => {
       const request = createMockRequest({
         headers: { Authorization: "Bearer sk-test-api-key-12345" },
       });
 
-      const key = getApiKeyPriorityKey(request);
+      const key = await getApiKeyPriorityKey(request);
 
       expect(key).toMatch(/^apikey:[0-9a-f]{16}$/);
     });
 
-    it("should fallback to IP key when no Authorization header", () => {
+    it("should fallback to IP key when no Authorization header", async () => {
       const request = createMockRequest();
 
-      const ipKey = getIPKey(request);
-      const apiKeyKey = getApiKeyPriorityKey(request);
+      const ipKey = await getIPKey(request);
+      const apiKeyKey = await getApiKeyPriorityKey(request);
 
       expect(apiKeyKey).toBe(ipKey);
     });
 
-    it("should fallback to IP key for non-Bearer authorization", () => {
+    it("should fallback to IP key for non-Bearer authorization", async () => {
       const request = createMockRequest({
         headers: { Authorization: "Basic dXNlcm5hbWU6cGFzc3dvcmQ=" },
       });
 
-      const ipKey = getIPKey(request);
-      const apiKeyKey = getApiKeyPriorityKey(request);
+      const ipKey = await getIPKey(request);
+      const apiKeyKey = await getApiKeyPriorityKey(request);
 
       expect(apiKeyKey).toBe(ipKey);
     });
 
-    it("should handle case-insensitive Bearer prefix", () => {
+    it("should handle case-insensitive Bearer prefix", async () => {
       const request = createMockRequest({
         headers: { Authorization: "bearer sk-test-key" },
       });
 
-      const key = getApiKeyPriorityKey(request);
+      const key = await getApiKeyPriorityKey(request);
 
       expect(key).toMatch(/^apikey:[0-9a-f]{16}$/);
     });
 
-    it("should produce different keys for different API keys", () => {
+    it("should produce different keys for different API keys", async () => {
       setEnv("RATE_LIMIT_PEPPER", "a".repeat(32));
 
       const request1 = createMockRequest({
@@ -333,22 +333,22 @@ describe("rate-limit-key-strategies", () => {
         headers: { Authorization: "Bearer api-key-2" },
       });
 
-      const key1 = getApiKeyPriorityKey(request1);
-      const key2 = getApiKeyPriorityKey(request2);
+      const key1 = await getApiKeyPriorityKey(request1);
+      const key2 = await getApiKeyPriorityKey(request2);
 
       expect(key1).not.toBe(key2);
     });
   });
 
   describe("resetPepperWarning", () => {
-    it("should allow warning to be logged again after reset", () => {
+    it("should allow warning to be logged again after reset", async () => {
       setEnv("NODE_ENV", "development");
 
-      hmacKey("input1");
+      await hmacKey("input1");
       expect(mockLoggerWarn).toHaveBeenCalledTimes(1);
 
       resetPepperWarning();
-      hmacKey("input2");
+      await hmacKey("input2");
       expect(mockLoggerWarn).toHaveBeenCalledTimes(2);
     });
   });

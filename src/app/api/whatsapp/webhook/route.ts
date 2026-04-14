@@ -67,7 +67,7 @@ function getUtf8ByteLength(text: string): number {
 // GET: Webhook verification
 export async function GET(request: NextRequest) {
   try {
-    const rateLimitKey = getIPKey(request);
+    const rateLimitKey = await getIPKey(request);
     const rateLimitResult = await checkDistributedRateLimit(
       rateLimitKey,
       "whatsapp",
@@ -137,7 +137,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 2. Rate limiting — consume quota before reading body to prevent exhaustion
-    const rateLimitKey = getIPKey(request);
+    const rateLimitKey = await getIPKey(request);
     const rateLimitResult = await checkDistributedRateLimit(
       rateLimitKey,
       "whatsapp",

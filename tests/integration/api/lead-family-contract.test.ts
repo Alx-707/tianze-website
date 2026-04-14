@@ -56,6 +56,36 @@ vi.mock("@/lib/contact-form-processing", () => ({
   })),
 }));
 
+vi.mock("@/lib/contact/submit-canonical-contact", async () => {
+  const validationModule =
+    await import("@/app/api/contact/contact-api-validation");
+  const processingModule = await import("@/lib/contact-form-processing");
+  return {
+    createCanonicalContactFingerprintFromUnknown: vi.fn(() => "CONTACT:test"),
+    submitCanonicalContactSubmission: vi.fn(
+      async (body: unknown, options: { clientIP: string }) => {
+        const validation = await vi.mocked(validationModule.validateFormData)(
+          body,
+          options.clientIP,
+        );
+        if (!validation.success || !validation.data) {
+          return validation;
+        }
+        const submissionResult = await vi.mocked(
+          processingModule.processFormSubmission,
+        )(validation.data);
+        return {
+          success: true,
+          error: null,
+          details: null,
+          data: validation.data,
+          submissionResult,
+        };
+      },
+    ),
+  };
+});
+
 vi.mock("@/lib/lead-pipeline", () => ({
   processLead: vi.fn(async () => ({
     success: true,
