@@ -105,7 +105,8 @@ vi.mock("@/lib/contact/getContactCopy", () => ({
     Promise.resolve({
       header: {
         title: "Contact Us",
-        description: "Get in touch with our team",
+        description:
+          "Get in touch with our team for inquiries, support, or partnership opportunities.",
       },
       panel: {
         contact: {
@@ -181,9 +182,9 @@ vi.mock("@/lib/seo-metadata", () => ({
   }),
 }));
 
-// Mock FaqSection
-vi.mock("@/components/sections/faq-section", () => ({
-  FaqSection: () => null,
+// Mock FaqAccordion
+vi.mock("@/components/sections/faq-accordion", () => ({
+  FaqAccordion: () => null,
 }));
 
 // Mock NextIntlClientProvider
@@ -201,7 +202,8 @@ describe("Contact Page - Main Rendering Tests", () => {
   // 默认Mock返回值
   const defaultTranslations = {
     title: "Contact Us",
-    description: "Get in touch with our team",
+    description:
+      "Get in touch with our team for inquiries, support, or partnership opportunities.",
     "panel.contactTitle": "Contact Methods",
     "panel.email": "Email",
     "panel.phone": "Phone",
@@ -235,7 +237,9 @@ describe("Contact Page - Main Rendering Tests", () => {
       // 验证基本元素存在
       expect(screen.getByText("Contact Us")).toBeInTheDocument();
       expect(
-        screen.getByText("Get in touch with our team"),
+        screen.getByText(
+          "Get in touch with our team for inquiries, support, or partnership opportunities.",
+        ),
       ).toBeInTheDocument();
     });
 
@@ -353,7 +357,9 @@ describe("Contact Page - Main Rendering Tests", () => {
       await renderAsyncPage(ContactPageComponent);
 
       // 验证描述样式
-      const descriptionElement = screen.getByText("Get in touch with our team");
+      const descriptionElement = screen.getByText(
+        "Get in touch with our team for inquiries, support, or partnership opportunities.",
+      );
       expect(descriptionElement).toHaveClass(
         "text-muted-foreground",
         "text-xl",

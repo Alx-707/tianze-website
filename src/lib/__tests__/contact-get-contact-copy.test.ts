@@ -7,18 +7,8 @@ const { mockGetTranslationsCached } = vi.hoisted(() => ({
   mockGetTranslationsCached: vi.fn(),
 }));
 
-const { mockCacheLife } = vi.hoisted(() => ({
-  mockCacheLife: vi.fn<(profile: unknown) => void>(),
-}));
-
 vi.mock("@/lib/i18n/server/getTranslationsCached", () => ({
   getTranslationsCached: mockGetTranslationsCached,
-}));
-
-vi.mock("next/cache", () => ({
-  cacheLife: (profile: unknown) => {
-    mockCacheLife(profile);
-  },
 }));
 
 describe("getContactCopy", () => {
@@ -47,9 +37,7 @@ describe("getContactCopy", () => {
   it("builds a structured copy model for the given locale", async () => {
     const locale: Locale = "en";
 
-    const copy = await getContactCopy(locale, "tianze");
-
-    expect(mockCacheLife).toHaveBeenCalledWith("days");
+    const copy = await getContactCopy(locale);
 
     expect(mockGetTranslationsCached).toHaveBeenCalledWith({
       locale,
@@ -75,7 +63,7 @@ describe("getContactCopy", () => {
       (key: string) => `missing.${key}`,
     );
 
-    const copy = await getContactCopy("en" as Locale, "tianze-equipment");
+    const copy = await getContactCopy("en" as Locale);
 
     expect(copy.header.title).toBe("missing.title");
     expect(copy.header.description).toBe("missing.description");

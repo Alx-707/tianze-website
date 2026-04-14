@@ -6,25 +6,9 @@
  * contact info, social links.
  *
  * Translatable content (marketing copy, descriptions) belongs in messages/*.json
- *
- * Usage in components:
- * ```tsx
- * import { siteFacts } from '@/config/site-facts';
- * import { useTranslations } from 'next-intl';
- *
- * function HeroSection() {
- *   const t = useTranslations('home.hero');
- *   return (
- *     <p>{t('subtitle', {
- *       year: siteFacts.company.established,
- *       countries: siteFacts.stats.exportCountries
- *     })}</p>
- *   );
- * }
- * ```
  */
 
-import { currentSite } from "@/sites";
+import { SINGLE_SITE_FACTS } from "@/config/single-site";
 
 export type {
   BusinessHours,
@@ -34,6 +18,6 @@ export type {
   ContactInfo,
   SiteFacts,
   SocialLinks,
-} from "@/sites";
+} from "@/config/single-site";
 
-export const siteFacts = currentSite.facts;
+export const siteFacts = SINGLE_SITE_FACTS;

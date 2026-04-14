@@ -2,11 +2,11 @@
  * 站点配置
  */
 
-import { currentSite, type SiteConfig } from "@/sites";
+import { SINGLE_SITE_CONFIG, type SiteConfig } from "@/config/single-site";
 
-export type { SiteConfig } from "@/sites";
+export type { SiteConfig } from "@/config/single-site";
 
-export const SITE_CONFIG = currentSite.config;
+export const SITE_CONFIG = SINGLE_SITE_CONFIG;
 
 /**
  * Default placeholder phone number used when no real number is configured.

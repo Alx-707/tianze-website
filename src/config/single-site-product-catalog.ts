@@ -2,7 +2,7 @@ import type {
   MarketDefinition,
   ProductCatalog,
   ProductFamilyDefinition,
-} from "@/sites/types";
+} from "@/config/site-types";
 
 const markets: readonly MarketDefinition[] = [
   {
@@ -160,7 +160,7 @@ const families: readonly ProductFamilyDefinition[] = [
   },
 ] as const;
 
-export const tianzeProductCatalog: ProductCatalog = {
+export const singleSiteProductCatalog: ProductCatalog = {
   markets,
   families,
 };
