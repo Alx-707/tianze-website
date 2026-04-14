@@ -1,5 +1,4 @@
 import { logger } from "@/lib/logger";
-import { HTTP_NOT_FOUND } from "@/constants/core";
 
 /**
  * Idempotency key metadata stored in Redis
@@ -114,17 +113,16 @@ class RedisIdempotencyStore implements IdempotencyStore {
   }
 
   async get(idempotencyKey: string): Promise<IdempotencyEntry | null> {
-    const response = await fetch(`${this.url}/get/${idempotencyKey}`, {
-      method: "GET",
+    const response = await fetch(this.url, {
+      method: "POST",
       headers: {
         Authorization: `Bearer ${this.token}`,
+        "Content-Type": "application/json",
       },
+      body: JSON.stringify(["GET", idempotencyKey]),
     });
 
     if (!response.ok) {
-      if (response.status === HTTP_NOT_FOUND) {
-        return null;
-      }
       throw new Error(
         `[Idempotency] Upstash get failed: ${response.statusText}`,
       );
@@ -139,11 +137,13 @@ class RedisIdempotencyStore implements IdempotencyStore {
   }
 
   async delete(idempotencyKey: string): Promise<void> {
-    const response = await fetch(`${this.url}/del/${idempotencyKey}`, {
-      method: "DELETE",
+    const response = await fetch(this.url, {
+      method: "POST",
       headers: {
         Authorization: `Bearer ${this.token}`,
+        "Content-Type": "application/json",
       },
+      body: JSON.stringify(["DEL", idempotencyKey]),
     });
 
     if (!response.ok) {

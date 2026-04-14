@@ -164,6 +164,19 @@ describe("validateProductionConfig CI vs deploy gate", () => {
     expect(result.runtimeContractChecked).toBe(false);
   });
 
+  it("enforces runtime contract for preview when explicitly requested", () => {
+    const env: NodeJS.ProcessEnv = {
+      APP_ENV: "preview",
+      NODE_ENV: "production",
+      ENFORCE_RUNTIME_CONTRACT: "true",
+    };
+
+    const result = validateProductionConfig(env);
+
+    expect(result.errors.length).toBeGreaterThan(0);
+    expect(result.runtimeContractChecked).toBe(true);
+  });
+
   it("keeps runtime errors as hard failures when VALIDATE_CONFIG_SKIP_RUNTIME is absent", () => {
     const env: NodeJS.ProcessEnv = {
       NODE_ENV: "production",

@@ -1,5 +1,4 @@
 import { logger } from "@/lib/logger";
-import { HTTP_NOT_FOUND } from "@/constants/core";
 
 /**
  * Key-value pair interface representing rate limit data
@@ -45,18 +44,17 @@ class RedisRateLimitStore implements RateLimitStore {
   }
 
   async increment(key: string, windowMs: number): Promise<RateLimitEntry> {
-    const pipeline = [
-      ["INCR", key],
-      ["PTTL", key],
-    ];
-
-    const response = await fetch(`${this.url}/pipeline`, {
+    const response = await fetch(`${this.url}/multi-exec`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${this.token}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(pipeline),
+      body: JSON.stringify([
+        ["INCR", key],
+        ["PEXPIRE", key, windowMs.toString(), "NX"],
+        ["PTTL", key],
+      ]),
     });
 
     if (!response.ok) {
@@ -69,14 +67,16 @@ class RedisRateLimitStore implements RateLimitStore {
     }
 
     const data = await response.json();
-    const [countResult, ttlResult] = Array.isArray(data.result)
-      ? data.result
-      : [];
+    const [countResult, _expireResult, ttlResult] = Array.isArray(data)
+      ? data
+      : Array.isArray(data.result)
+        ? data.result
+        : [];
     const count =
       typeof countResult?.result === "number"
         ? countResult.result
         : countResult;
-    let ttlMs =
+    const ttlMs =
       typeof ttlResult?.result === "number" ? ttlResult.result : ttlResult;
 
     if (typeof count !== "number") {
@@ -85,26 +85,9 @@ class RedisRateLimitStore implements RateLimitStore {
       );
     }
 
-    if (count === 1 || typeof ttlMs !== "number" || ttlMs < 0) {
-      const expireResponse = await fetch(`${this.url}/pipeline`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${this.token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify([["PEXPIRE", key, windowMs.toString()]]),
-      });
-
-      if (!expireResponse.ok) {
-        logger.error(
-          `[Rate Limit] Upstash PEXPIRE failed: ${expireResponse.statusText}`,
-        );
-        throw new Error(
-          `Upstash rate limit operation failed: ${expireResponse.status}`,
-        );
-      }
-
-      ttlMs = windowMs;
+    if (typeof ttlMs !== "number" || ttlMs < 0) {
+      logger.error("[Rate Limit] Upstash transaction returned invalid TTL");
+      throw new Error("Upstash rate limit operation returned invalid TTL");
     }
 
     const expiresAt = Date.now() + ttlMs;
@@ -112,50 +95,46 @@ class RedisRateLimitStore implements RateLimitStore {
   }
 
   async get(key: string): Promise<RateLimitEntry | null> {
-    const response = await fetch(`${this.url}/get/${key}`, {
-      method: "GET",
+    const response = await fetch(`${this.url}/pipeline`, {
+      method: "POST",
       headers: {
         Authorization: `Bearer ${this.token}`,
+        "Content-Type": "application/json",
       },
+      body: JSON.stringify([
+        ["GET", key],
+        ["PTTL", key],
+      ]),
     });
 
     if (!response.ok) {
-      if (response.status === HTTP_NOT_FOUND) {
-        return null;
-      }
       throw new Error(
         `[Rate Limit] Upstash get failed: ${response.statusText}`,
       );
     }
 
     const data = await response.json();
-    const count = parseInt(data.result || "0", 10);
-
-    const ttlResponse = await fetch(`${this.url}/pttl/${key}`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${this.token}`,
-      },
-    });
-
-    if (!ttlResponse.ok) {
-      throw new Error(
-        `[Rate Limit] Upstash pttl failed: ${ttlResponse.statusText}`,
-      );
+    const [countResult, ttlResult] = Array.isArray(data.result)
+      ? data.result
+      : [];
+    const rawCount = countResult?.result ?? countResult;
+    if (rawCount === null || rawCount === undefined) {
+      return null;
     }
-
-    const ttlData = await ttlResponse.json();
-    const ttlMs = Math.max(0, Number(ttlData.result) || 0);
+    const count = parseInt(rawCount, 10);
+    const ttlMs = Math.max(0, Number(ttlResult?.result ?? ttlResult) || 0);
     const expiresAt = Date.now() + ttlMs;
     return { count, expiresAt };
   }
 
   async delete(key: string): Promise<void> {
-    const response = await fetch(`${this.url}/del/${key}`, {
-      method: "DELETE",
+    const response = await fetch(this.url, {
+      method: "POST",
       headers: {
         Authorization: `Bearer ${this.token}`,
+        "Content-Type": "application/json",
       },
+      body: JSON.stringify(["DEL", key]),
     });
 
     if (!response.ok) {

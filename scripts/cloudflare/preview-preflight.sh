@@ -4,6 +4,7 @@ set -euo pipefail
 echo "== Cloudflare preview preflight =="
 pnpm type-check
 pnpm lint:check
+pnpm validate:config
 pnpm review:tier-a
 pnpm review:clusters
 pnpm test:locale-runtime

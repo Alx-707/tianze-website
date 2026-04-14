@@ -72,6 +72,10 @@ function validateMinLengthEnv(
 export function shouldValidateProductionRuntimeContract(env: EnvMap): boolean {
   const appEnv = readEnv(env, "APP_ENV")?.toLowerCase();
 
+  if (isTrue(env, "ENFORCE_RUNTIME_CONTRACT")) {
+    return true;
+  }
+
   if (appEnv === "preview") {
     return false;
   }

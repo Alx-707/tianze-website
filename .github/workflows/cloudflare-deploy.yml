@@ -77,6 +77,8 @@ jobs:
           CI: true
           NODE_ENV: production
           APP_ENV: ${{ inputs.environment }}
+          ENFORCE_RUNTIME_CONTRACT: 'true'
+          NEXT_PUBLIC_SITE_URL: ${{ inputs.environment == 'production' && 'https://tianze-pipe.com' || 'https://preview.tianze-pipe.com' }}
           RATE_LIMIT_PEPPER: ${{ secrets.RATE_LIMIT_PEPPER }}
           NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: ${{ secrets.NEXT_SERVER_ACTIONS_ENCRYPTION_KEY }}
           TURNSTILE_SECRET_KEY: ${{ secrets.TURNSTILE_SECRET_KEY }}
@@ -97,6 +99,8 @@ jobs:
           CI: true
           NODE_ENV: production
           APP_ENV: ${{ inputs.environment }}
+          ENFORCE_RUNTIME_CONTRACT: 'true'
+          NEXT_PUBLIC_SITE_URL: ${{ inputs.environment == 'production' && 'https://tianze-pipe.com' || 'https://preview.tianze-pipe.com' }}
           RATE_LIMIT_PEPPER: ${{ secrets.RATE_LIMIT_PEPPER }}
           NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: ${{ secrets.NEXT_SERVER_ACTIONS_ENCRYPTION_KEY }}
           TURNSTILE_SECRET_KEY: ${{ secrets.TURNSTILE_SECRET_KEY }}
