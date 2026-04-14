@@ -151,6 +151,7 @@ export default defineConfig({
             PLAYWRIGHT_TEST: "true",
             NEXT_PUBLIC_TEST_MODE: "true",
             NEXT_PUBLIC_BASE_URL: "http://localhost:3000",
+            NEXT_PUBLIC_SITE_URL: "https://tianze-pipe.com",
 
             // Turnstile test keys (always pass mode)
             // See: https://developers.cloudflare.com/turnstile/reference/testing/
@@ -166,7 +167,7 @@ export default defineConfig({
             NEXT_PUBLIC_SECURITY_MODE: "relaxed",
             SECURITY_HEADERS_ENABLED: "false",
             SKIP_ENV_VALIDATION: "true",
-            VALIDATE_CONFIG_SKIP_RUNTIME: "true",
+            APP_ENV: "preview",
           },
         },
       }),
