@@ -28,6 +28,7 @@ const {
   mockVerifyTurnstile,
   mockValidateFormData,
   mockProcessFormSubmission,
+  mockSubmitCanonicalContactSubmission,
 } = vi.hoisted(() => {
   const hoistedMockSafeParse = vi.fn().mockReturnValue({
     success: true,
@@ -71,6 +72,7 @@ const {
     })),
     mockCreateRateLimitHeaders: vi.fn(() => new Headers()),
     mockVerifyTurnstile: vi.fn(() => Promise.resolve(true)),
+    mockSubmitCanonicalContactSubmission: vi.fn(),
     mockValidateFormData: vi.fn(),
     mockProcessFormSubmission: vi.fn(),
   };
@@ -111,6 +113,11 @@ vi.mock("@/lib/turnstile", () => ({
 // Mock contact form processing (processFormSubmission moved to lib)
 vi.mock("@/lib/contact-form-processing", () => ({
   processFormSubmission: mockProcessFormSubmission,
+}));
+
+vi.mock("@/lib/contact/submit-canonical-contact", () => ({
+  submitCanonicalContactSubmission: mockSubmitCanonicalContactSubmission,
+  createCanonicalContactFingerprintFromUnknown: vi.fn(() => "CONTACT:test"),
 }));
 
 // Mock contact API validation
@@ -228,6 +235,28 @@ describe("Contact API Route - POST Tests", () => {
       recordCreated: true,
       referenceId: "test-reference-id",
     });
+
+    mockSubmitCanonicalContactSubmission.mockImplementation(
+      async (
+        body: unknown,
+        options: { clientIP: string; requestId?: string },
+      ) => {
+        const validation = await mockValidateFormData(body, options.clientIP);
+        if (!validation.success || !validation.data) {
+          return validation;
+        }
+        const submissionResult = await mockProcessFormSubmission(
+          validation.data,
+        );
+        return {
+          success: true,
+          error: null,
+          details: null,
+          data: validation.data,
+          submissionResult,
+        };
+      },
+    );
 
     // Mock fetch for Turnstile verification
     global.fetch = vi.fn().mockResolvedValue({

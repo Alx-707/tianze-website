@@ -19,18 +19,28 @@ import { logger } from "@/lib/logger";
 import { API_ERROR_CODES } from "@/constants/api-error-codes";
 import { createApiErrorResponse } from "@/lib/api/api-response";
 import {
-  HOURS_PER_DAY,
   HTTP_BAD_REQUEST,
   HTTP_OK,
   HTTP_SERVICE_UNAVAILABLE,
-  MILLISECONDS_PER_HOUR,
 } from "@/constants";
 import {
   type IdempotencyStore,
   createIdempotencyStore,
 } from "@/lib/security/stores/idempotency-store";
+import {
+  waitForCompletion,
+  normalizeHandlerResult,
+  waitForCompletionResult,
+  DEFAULT_TTL_MS,
+} from "@/lib/idempotency-utils";
+import {
+  getRequiredMissingResult,
+  getInFlightIdempotentResult,
+  getStoredIdempotentResult,
+  claimIdempotentResultKey,
+  completeIdempotentResultWork,
+} from "@/lib/idempotency-result-utils";
 
-const DEFAULT_TTL_MS = HOURS_PER_DAY * MILLISECONDS_PER_HOUR;
 const HTTP_CONFLICT = 409;
 
 /** Singleton store — persists across clearAllIdempotencyKeys() calls */
@@ -50,75 +60,11 @@ function getIdempotencyStore(): IdempotencyStore {
 const pendingRequests = new Map<string, Promise<NextResponse>>();
 const pendingResults = new Map<string, Promise<unknown>>();
 
-/**
- * Poll the store until the entry transitions from PENDING to COMPLETED.
- * Used by the "loser" of a concurrent SETNX race to wait for the winner.
- */
-async function waitForCompletion(
-  key: string,
-  store: IdempotencyStore,
-): Promise<NextResponse> {
-  const POLL_INTERVAL_MS = 50;
-  const TIMEOUT_MS = 10_000;
-  const start = Date.now();
-
-  while (Date.now() - start < TIMEOUT_MS) {
-    await new Promise<void>((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
-    const entry = await store.get(key);
-    if (!entry) {
-      // Key expired or deleted — handler failed, allow retry
-      return createApiErrorResponse(
-        API_ERROR_CODES.IDEMPOTENCY_REQUEST_FAILED,
-        HTTP_SERVICE_UNAVAILABLE,
-      );
-    }
-    if (entry.status === "COMPLETED") {
-      return NextResponse.json(entry.result, {
-        status: entry.statusCode ?? HTTP_OK,
-      });
-    }
-  }
-
-  return createApiErrorResponse(
-    API_ERROR_CODES.IDEMPOTENCY_REQUEST_TIMEOUT,
-    HTTP_SERVICE_UNAVAILABLE,
-  );
-}
-
 /** Maximum allowed length for an Idempotency-Key header (prevents memory abuse) */
 const MAX_IDEMPOTENCY_KEY_LENGTH = 256;
 
 /** Maximum in-flight entries across all Maps (prevents unbounded memory growth) */
 const MAX_IN_FLIGHT_ENTRIES = 1000;
-
-function normalizeHandlerResult(result: unknown): {
-  body: unknown;
-  statusCode: number;
-} {
-  if (typeof result !== "object" || result === null) {
-    return { body: result, statusCode: HTTP_OK };
-  }
-
-  if (Array.isArray(result)) {
-    return { body: result, statusCode: HTTP_OK };
-  }
-
-  const record = result as Record<string, unknown>;
-  if (!Object.prototype.hasOwnProperty.call(record, "statusCode")) {
-    return { body: result, statusCode: HTTP_OK };
-  }
-
-  const { statusCode } = record;
-  if (typeof statusCode !== "number") {
-    return { body: result, statusCode: HTTP_OK };
-  }
-
-  // Strip statusCode from the JSON payload; keep it on the stored entry.
-  // This mirrors `createApiErrorResponse()` which communicates status via HTTP,
-  // not via a redundant JSON field.
-  const { statusCode: _statusCode, ...rest } = record;
-  return { body: rest, statusCode };
-}
 
 /**
  * 从请求中提取幂等键
@@ -203,6 +149,92 @@ function checkInFlight(
   return inFlight;
 }
 
+/**
+ * CONTEXT INTERFACES: Consolidate parameters for helper functions
+ * Reduces parameter count from 4 to 3, enabling ESLint compliance
+ */
+interface ExistingEntryContext {
+  fingerprint: string;
+  store: IdempotencyStore;
+}
+
+/**
+ * Handle the case where an existing entry is found (stored or in-flight).
+ *
+ * FIXED: Changed from `async (4 params)` to `sync (3 params + context)`
+ * - Removed `async` keyword (no actual `await` in body — waitForCompletion is not awaited)
+ * - Consolidated `fingerprint` and `store` into `context` parameter
+ * - Return type: `NextResponse | Promise<NextResponse> | null` (can return Promise from waitForCompletion)
+ * - Null-check moved to caller; all accesses to `existing` here are type-safe
+ * - FIXED: Added NonNullable<> wrapper to parameter type to eliminate TypeScript null-narrowing error
+ */
+function handleExistingEntry(
+  idempotencyKey: string,
+  existing: NonNullable<Awaited<ReturnType<IdempotencyStore["get"]>>>,
+  context: ExistingEntryContext,
+): NextResponse | Promise<NextResponse> | null {
+  const { fingerprint, store } = context;
+
+  if (existing.status !== "pending" && existing.fingerprint !== fingerprint) {
+    return NextResponse.json(
+      {
+        success: false,
+        errorCode: API_ERROR_CODES.IDEMPOTENCY_KEY_REUSED,
+      },
+      { status: HTTP_CONFLICT },
+    );
+  }
+
+  if (existing.status === "success") {
+    return NextResponse.json(existing.response, {
+      status: HTTP_OK,
+    });
+  }
+
+  if (existing.status === "error") {
+    return createApiErrorResponse(
+      API_ERROR_CODES.IDEMPOTENCY_REQUEST_FAILED,
+      HTTP_SERVICE_UNAVAILABLE,
+    );
+  }
+
+  // Status is "pending" — wait for completion (this is a Promise, not awaited by caller)
+  return waitForCompletion(idempotencyKey, store);
+}
+
+/**
+ * Atomic claim: if no entry exists, create PENDING entry; otherwise return false.
+ *
+ * FIXED: Consolidate parameters from 4 to 3 via context object
+ * - Consolidated `ttlMs` and `store` into `context` parameter
+ * - Kept `async` keyword (contains actual `await` in body)
+ */
+async function claimIdempotencyKeyAtomic(
+  idempotencyKey: string,
+  fingerprint: string,
+  context: { store: IdempotencyStore; ttlMs: number },
+): Promise<boolean> {
+  const { store, ttlMs } = context;
+  const now = Date.now();
+  const claimed = await store.setIfNotExists(
+    idempotencyKey,
+    {
+      status: "pending",
+      fingerprint,
+      createdAt: now,
+      expiresAt: now + ttlMs,
+    },
+    ttlMs,
+  );
+  if (claimed) {
+    inFlightFingerprints.set(idempotencyKey, fingerprint);
+  }
+  return claimed;
+}
+
+/**
+ * Main handler: route requests with idempotency key through state machine
+ */
 async function handleWithIdempotencyKey<T>(
   idempotencyKey: string,
   handler: () => Promise<T>,
@@ -211,59 +243,39 @@ async function handleWithIdempotencyKey<T>(
   const { fingerprint, ttlMs } = context;
   const store = getIdempotencyStore();
 
-  // Fast path: if there's already a pending in-flight promise for this key
-  // (same process, same request racing), verify fingerprint before returning.
-  const inFlightResult = checkInFlight(idempotencyKey, fingerprint);
-  if (inFlightResult) return inFlightResult;
-
-  // Check existing entry in the persistent store
-  const existing = await store.get(idempotencyKey);
-
-  if (existing) {
-    // Reject if the same key is used for a different endpoint
-    if (existing.fingerprint && existing.fingerprint !== fingerprint) {
-      return NextResponse.json(
-        {
-          success: false,
-          errorCode: API_ERROR_CODES.IDEMPOTENCY_KEY_REUSED,
-        },
-        { status: HTTP_CONFLICT },
-      );
-    }
-
-    if (existing.status === "COMPLETED") {
-      logger.warn("Returning cached result for idempotency key", {
-        keyHash: idempotencyKey.slice(0, 8),
-        age: Date.now() - existing.createdAt,
-      });
-      return NextResponse.json(existing.result, {
-        status: existing.statusCode ?? HTTP_OK,
-      });
-    }
-
-    // PENDING — another concurrent request is processing it; wait for result
-    return waitForCompletion(idempotencyKey, store);
+  // Fast path: check in-flight cache
+  const inFlightResponse = checkInFlight(idempotencyKey, fingerprint);
+  if (inFlightResponse !== null) {
+    return inFlightResponse;
   }
 
-  // Atomically claim the key (SETNX)
-  const now = Date.now();
-  const claimed = await store.setIfNotExists(
-    idempotencyKey,
-    {
-      status: "PENDING",
+  // Check stored entry
+  const existing = await store.get(idempotencyKey);
+  if (existing !== null) {
+    // FIXED: Type safety issue — explicit null check for proper type narrowing
+    const existingResponse = handleExistingEntry(idempotencyKey, existing, {
       fingerprint,
-      createdAt: now,
-      expiresAt: now + ttlMs,
-    },
+      store,
+    });
+    if (existingResponse !== null) {
+      return existingResponse;
+    }
+  }
+
+  // Attempt to claim the key (atomic SETNX)
+  // FIXED: Call site 2 — KEEP `await`, PASS context object
+  const claimed = await claimIdempotencyKeyAtomic(idempotencyKey, fingerprint, {
+    store,
     ttlMs,
-  );
+  });
 
   if (!claimed) {
-    // Lost the SETNX race — another request claimed it concurrently
+    // Lost the race — wait for the winner's result
     return waitForCompletion(idempotencyKey, store);
   }
 
   // We own the key — run the handler
+  const now = Date.now();
   const work = (async (): Promise<NextResponse> => {
     try {
       const result = await handler();
@@ -289,10 +301,16 @@ async function handleWithIdempotencyKey<T>(
       // Important: never delete a claimed key after the handler has finished, even
       // if the store write fails — failing closed avoids duplicate-write risk.
       try {
-        await store.complete(
+        await store.set(
           idempotencyKey,
-          normalized.body,
-          normalized.statusCode,
+          {
+            status: "success",
+            fingerprint,
+            response: normalized.body,
+            createdAt: now,
+            expiresAt: now + ttlMs,
+          },
+          ttlMs,
         );
       } catch (completeError) {
         logger.error(
@@ -358,156 +376,8 @@ export type IdempotentResult<T> =
   | { ok: true; result: T; cached?: boolean }
   | { ok: false; reason: IdempotentResultReason };
 
-async function waitForCompletionResult<T>(
-  key: string,
-  store: IdempotencyStore,
-): Promise<IdempotentResult<T>> {
-  const POLL_INTERVAL_MS = 50;
-  const TIMEOUT_MS = 10_000;
-  const start = Date.now();
-
-  while (Date.now() - start < TIMEOUT_MS) {
-    await new Promise<void>((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
-    const entry = await store.get(key);
-    if (!entry) {
-      return { ok: false, reason: "failed" };
-    }
-    if (entry.status === "COMPLETED") {
-      return { ok: true, result: entry.result as T, cached: true };
-    }
-  }
-
-  return { ok: false, reason: "timeout" };
-}
-
 function resolveIdempotentResultTtl(ttl?: number): number {
   return typeof ttl === "number" && ttl > 0 ? ttl : DEFAULT_TTL_MS;
-}
-
-function getRequiredMissingResult<T>(
-  required: boolean,
-  idempotencyKey: string | null,
-): IdempotentResult<T> | null {
-  if (!required || idempotencyKey) {
-    return null;
-  }
-
-  logger.warn("Missing required idempotency key");
-  return { ok: false, reason: "missing" };
-}
-
-async function getInFlightIdempotentResult<T>(
-  idempotencyKey: string,
-  fingerprint: string,
-): Promise<IdempotentResult<T> | null> {
-  const inFlight = pendingResults.get(idempotencyKey);
-  if (!inFlight) {
-    return null;
-  }
-
-  const existingFingerprint = inFlightFingerprints.get(idempotencyKey);
-  if (existingFingerprint && existingFingerprint !== fingerprint) {
-    return { ok: false, reason: "reused" };
-  }
-
-  try {
-    return { ok: true, result: (await inFlight) as T, cached: true };
-  } catch {
-    return { ok: false, reason: "failed" };
-  }
-}
-
-async function getStoredIdempotentResult<T>(
-  idempotencyKey: string,
-  fingerprint: string,
-  store: IdempotencyStore,
-): Promise<IdempotentResult<T> | null> {
-  const existing = await store.get(idempotencyKey);
-  if (!existing) {
-    return null;
-  }
-
-  if (existing.fingerprint && existing.fingerprint !== fingerprint) {
-    return { ok: false, reason: "reused" };
-  }
-
-  if (existing.status === "COMPLETED") {
-    return { ok: true, result: existing.result as T, cached: true };
-  }
-
-  return waitForCompletionResult<T>(idempotencyKey, store);
-}
-
-function claimIdempotentResultKey(
-  idempotencyKey: string,
-  context: {
-    fingerprint: string;
-    ttlMs: number;
-    store: IdempotencyStore;
-  },
-): Promise<boolean> {
-  const { fingerprint, ttlMs, store } = context;
-  const now = Date.now();
-  return store.setIfNotExists(
-    idempotencyKey,
-    {
-      status: "PENDING",
-      fingerprint,
-      createdAt: now,
-      expiresAt: now + ttlMs,
-    },
-    ttlMs,
-  );
-}
-
-function completeIdempotentResultWork<T>(
-  idempotencyKey: string,
-  context: {
-    fingerprint: string;
-    handler: () => Promise<T>;
-    store: IdempotencyStore;
-  },
-): Promise<T> {
-  const { fingerprint, handler, store } = context;
-  const work = (async (): Promise<T> => {
-    let result: T;
-    try {
-      result = await handler();
-    } catch (error) {
-      try {
-        await store.delete(idempotencyKey);
-      } catch (deleteError) {
-        logger.error(
-          "Failed to delete PENDING idempotency key after result failure",
-          { deleteError, idempotencyKey },
-        );
-      }
-      throw error;
-    } finally {
-      pendingResults.delete(idempotencyKey);
-      inFlightFingerprints.delete(idempotencyKey);
-    }
-
-    // Handler finished. Fail closed: do not delete the claim after success, even
-    // if persisting the COMPLETED record fails.
-    try {
-      await store.complete(idempotencyKey, result, HTTP_OK);
-    } catch (completeError) {
-      logger.error(
-        "Failed to persist COMPLETED idempotency result — key remains PENDING until TTL expires",
-        { completeError, idempotencyKey },
-      );
-    }
-
-    return result;
-  })();
-
-  if (pendingResults.size < MAX_IN_FLIGHT_ENTRIES) {
-    pendingResults.set(idempotencyKey, work as Promise<unknown>);
-    inFlightFingerprints.set(idempotencyKey, fingerprint);
-  }
-
-  return work;
 }
 
 export async function withIdempotentResult<T>(

@@ -59,7 +59,7 @@ describe("idempotency-store", () => {
 
   describe("RedisIdempotencyStore", () => {
     const entry: IdempotencyEntry = {
-      status: "PENDING",
+      status: "pending",
       fingerprint: "POST:/api/contact",
       createdAt: 1_700_000_000_000,
       expiresAt: 1_700_000_100_000,
@@ -91,6 +91,53 @@ describe("idempotency-store", () => {
             60_000,
             "NX",
           ]),
+        }),
+      );
+    });
+
+    it("should get entries via POST command body instead of path-style REST", async () => {
+      const fetchMock = vi.fn(
+        async () =>
+          new Response(JSON.stringify({ result: JSON.stringify(entry) }), {
+            status: 200,
+          }),
+      );
+      vi.stubGlobal("fetch", fetchMock);
+
+      const store = new RedisIdempotencyStore(
+        "https://example.upstash.io",
+        "t",
+      );
+      const result = await store.get("unsafe/key?value=yes");
+
+      expect(result).toEqual(entry);
+      expect(fetchMock).toHaveBeenCalledWith(
+        "https://example.upstash.io",
+        expect.objectContaining({
+          method: "POST",
+          body: JSON.stringify(["GET", "unsafe/key?value=yes"]),
+        }),
+      );
+    });
+
+    it("should delete entries via DEL command body instead of HTTP DELETE path", async () => {
+      const fetchMock = vi.fn(
+        async () =>
+          new Response(JSON.stringify({ result: 1 }), { status: 200 }),
+      );
+      vi.stubGlobal("fetch", fetchMock);
+
+      const store = new RedisIdempotencyStore(
+        "https://example.upstash.io",
+        "t",
+      );
+      await store.delete("unsafe/key?value=yes");
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        "https://example.upstash.io",
+        expect.objectContaining({
+          method: "POST",
+          body: JSON.stringify(["DEL", "unsafe/key?value=yes"]),
         }),
       );
     });
