@@ -9,7 +9,7 @@
  * Usage: pnpm validate:config
  */
 import { pathToFileURL } from "node:url";
-import { CONTACT_FORM_CONFIG } from "../src/config/contact-form-config.ts";
+import { CONTACT_FORM_CONFIG } from "../src/config/contact-form-config";
 import { validateSiteConfig } from "../src/config/paths/site-config";
 
 const MIN_SECRET_LENGTH = 32;
@@ -192,7 +192,10 @@ export function validateProductionConfig(
   };
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (
+  process.argv[1] &&
+  import.meta.url === pathToFileURL(process.argv[1]).href
+) {
   const report = validateProductionConfig(process.env);
 
   if (report.warnings.length > 0) {

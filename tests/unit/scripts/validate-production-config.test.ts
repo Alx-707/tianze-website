@@ -23,10 +23,16 @@ function createValidProductionEnv(): NodeJS.ProcessEnv {
 describe("validate-production-config runtime contract", () => {
   it("enables strict runtime validation only in production mode", () => {
     expect(
-      shouldValidateProductionRuntimeContract({ APP_ENV: "preview" }),
+      shouldValidateProductionRuntimeContract({
+        APP_ENV: "preview",
+        NODE_ENV: "test",
+      }),
     ).toBe(false);
     expect(
-      shouldValidateProductionRuntimeContract({ APP_ENV: "production" }),
+      shouldValidateProductionRuntimeContract({
+        APP_ENV: "production",
+        NODE_ENV: "test",
+      }),
     ).toBe(true);
     expect(
       shouldValidateProductionRuntimeContract({ NODE_ENV: "production" }),
@@ -34,9 +40,9 @@ describe("validate-production-config runtime contract", () => {
     expect(
       shouldValidateProductionRuntimeContract({ NODE_ENV: "development" }),
     ).toBe(false);
-    expect(
-      shouldValidateProductionRuntimeContract({} as NodeJS.ProcessEnv),
-    ).toBe(false);
+    expect(shouldValidateProductionRuntimeContract({ NODE_ENV: "test" })).toBe(
+      false,
+    );
   });
 
   it("passes when the release-critical production contract is satisfied", () => {
