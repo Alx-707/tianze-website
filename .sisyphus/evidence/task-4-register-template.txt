@@ -1,0 +1,123 @@
+## Task 4: Retained Exception Registration Template
+Date: Fri Apr 10 2026
+Plan: cloudflare-official-alignment
+
+### Purpose
+
+This file provides the canonical template for registering a Cloudflare deviation that
+cannot be retired in the current wave. Wave 2+ tasks that fail to retire a deviation
+MUST register it here before closing their task.
+
+A retained exception is NOT a failure. It is a documented decision that this deviation
+is still load-bearing and cannot be safely removed with currently available proof.
+
+### Usage Instructions
+
+1. Copy the template block below (between the --- markers).
+2. Fill in every field. Do not leave any field blank.
+3. Assign a stable exception-id using the format: CF-EXCEPT-NNN (e.g., CF-EXCEPT-001).
+4. Reference this ID in any related build scripts, smoke scripts, or AGENTS.md entries.
+5. When the retirement criteria are eventually met, create a new failed-retirement or
+   successful-retirement record and update the status field to RETIRED with date.
+6. The exception register lives at:
+   docs/guides/CLOUDFLARE-RETAINED-EXCEPTION-REGISTER.md
+   (to be created by Task 12 using entries from this template)
+
+### Classification Guide
+
+Type options:
+  patch           - A monkey-patch applied to generated output after build
+  wrapper         - A script that wraps an official CLI command to add behavior
+  build-script    - A custom build script replacing or extending an official step
+  deploy-script   - A custom deploy script replacing or extending an official step
+  exception-contract - A checker/assertion script that gates build/deploy on a condition
+  checker         - A script that reads generated artifacts and asserts invariants
+  config          - An open-next.config.ts or wrangler config deviation from stock defaults
+
+Issue category (from CLOUDFLARE-ISSUE-TAXONOMY.md):
+  platform-entry        - Wrangler / Miniflare / preview startup / worker boot
+  generated-artifact    - Manifest load, dynamic require, preview-only 500s
+  runtime-regression    - Wrong redirects, cookies, headers, contact behavior
+  deployment-behavior   - Deployed environment fails after passing local proof
+
+Priority:
+  high    - Retiring this is a prerequisite for meaningful official-alignment progress
+  medium  - Retiring this would meaningfully reduce deviation surface but is not blocking
+  low     - Retiring this is a housekeeping improvement only
+
+Status:
+  ACTIVE    - Currently load-bearing; must not be removed
+  DEFERRED  - Retirement is planned but blocked on a specific external condition
+  RETIRED   - Successfully retired (record the date and proof used)
+
+---
+
+## RETAINED EXCEPTION: [exception-id]
+Date: [date — e.g., Fri Apr 10 2026]
+Registered by: [task-N — the wave task that attempted retirement or first classified this]
+Status: ACTIVE
+
+### Exception Description
+
+What is this deviation? (one paragraph, plain language)
+[Describe the patch, wrapper, or config deviation. What does it do? What official behavior
+does it replace or augment?]
+
+File path(s):
+[e.g., scripts/cloudflare/patch-prefetch-hints-manifest.mjs]
+[e.g., open-next.config.ts (minify: false)]
+
+### Why It Cannot Be Retired Now
+
+Technical reason:
+[Explain precisely why removing this deviation would break the current proof boundaries.
+Reference the specific upstream behavior that makes it necessary.]
+
+What would need to change upstream for retirement to become possible:
+[e.g., "OpenNext must absorb the getMiddlewareManifest() loadManifest() rewrite upstream"
+or "Next.js build output must stop using dynamic require() for this manifest"]
+
+### Proof Attempted
+
+What proofs were run to try to retire this:
+[List commands actually run, e.g.:
+  - node scripts/cloudflare/patch-prefetch-hints-manifest.mjs --dry-run
+  - pnpm build:cf (plain, without patch)
+  - pnpm smoke:cf:preview]
+
+Results:
+[What failed? Which proof level? e.g.:
+  - build:cf succeeded
+  - smoke:cf:preview failed: /en returned 500 with manifest load error
+  - Failure bucket: generated-artifact compatibility issue]
+
+### Future Retirement Criteria
+
+What exact conditions would allow retirement:
+[Be specific. e.g.:
+  - OpenNext >= X.Y.Z includes native loadManifest() for middleware manifest
+  - OR: Next.js >= X.Y.Z stops emitting dynamic require() in the prefetch hints handler]
+
+What proof would be required to confirm retirement is safe:
+[e.g.:
+  - pnpm build:cf (plain) completes without error
+  - pnpm smoke:cf:preview passes on /en, /zh, /en/contact, /zh/contact
+  - pnpm smoke:cf:deploy passes on deployed URL]
+
+### Classification
+
+- Type: [patch|wrapper|build-script|deploy-script|exception-contract|checker|config]
+- Issue category: [platform-entry|generated-artifact|runtime-regression|deployment-behavior]
+- Priority: [high|medium|low]
+- Reevaluation trigger: [e.g., "On next OpenNext minor version bump" or "When Next.js 17 lands"]
+
+---
+
+### Notes on AGENTS.md Integration
+
+After registering a new exception, check whether AGENTS.md already has a relevant entry
+for this deviation. If not, consider appending a new entry to prevent future agents from
+accidentally re-attempting an already-documented retirement without reading this register.
+
+Reference: docs/guides/CLOUDFLARE-ISSUE-TAXONOMY.md for bucket classification.
+Reference: docs/guides/CLOUDFLARE-RETAINED-EXCEPTION-REGISTER.md for the live register.

@@ -1,0 +1,465 @@
+TASK-2 INVENTORY: Repo-Local Cloudflare Deviations
+Wave 1 Task 2 — cloudflare-official-alignment plan
+Generated: Fri Apr 10 2026
+Repo: /Users/Data/Warehouse/Pipe/tianze-website
+Status: INVENTORY ONLY — no retirements, no source modifications
+
+================================================================================
+CLASSIFICATION KEY
+================================================================================
+
+  WORKAROUND         Patches or works around an upstream bug or known limitation
+                     in OpenNext, Next.js, or Cloudflare toolchain.
+
+  REPO-SPECIFIC-CONFIG  Site-specific worker topology, route routing rules,
+                     worker naming, deployment ordering — things that MUST
+                     exist in every project that uses phase6 split-workers
+                     but whose specific values are unique to tianze-website.
+
+  CONTRACT-ENFORCEMENT  Drift checker or contract validator. Reads config/workflow
+                     files and exits non-zero on mismatch. Guards against
+                     silent divergence between scattered config surfaces.
+
+  OPERATIONAL-GLUE   Deployment orchestration, Cloudflare API key sync,
+                     proof/smoke scripts, build-mode wrappers.
+
+  SHIM/STUB          Module replacement for an upstream asset that is
+                     incompatible with the Cloudflare Workers runtime
+                     (dynamic requires, Node built-ins, OG image generation, etc.).
+
+  EXCEPTION-CONTRACT Explicit named exception: has a rationale comment AND
+                     named exit criteria for when it can be retired.
+
+================================================================================
+DEVIATION TABLE
+================================================================================
+
+| # | File                                               | Type(s)                          | Purpose                                                                  | Official Equivalent?                    | Notes                                                       |
+|---|----------------------------------------------------|----------------------------------|--------------------------------------------------------------------------|-----------------------------------------|-------------------------------------------------------------|
+| 1 | scripts/cloudflare/patch-prefetch-hints-manifest.mjs | WORKAROUND + EXCEPTION-CONTRACT  | Rewrites getMiddlewareManifest() dynamic require in generated artifact   | None — upstream bug not fixed           | Hardcoded absolute path bug in Fix A part 2; CF_APPLY_GENERATED_PATCH=true opt-in |
+| 2 | scripts/cloudflare/build-webpack.mjs               | OPERATIONAL-GLUE + WORKAROUND    | Main CF build entry; runs opennextjs-cloudflare build, then patch script | opennextjs-cloudflare build (partial)   | Webpack mode only; calls patch-prefetch-hints-manifest after build |
+| 3 | scripts/cloudflare/build-phase5-worker.mjs         | REPO-SPECIFIC-CONFIG             | Legacy single-worker topology generator; writes wrangler config         | None — single-worker is official but this adds custom phase5 naming | Legacy/backup; not primary deploy path |
+| 4 | scripts/cloudflare/build-phase6-workers.mjs        | REPO-SPECIFIC-CONFIG + OPERATIONAL-GLUE | Generates per-worker wrangler.jsonc configs for 5-worker split topology | No official multi-worker generator     | Must stay in sync with phase-topology-contract.mjs; past drift incident documented in AGENTS.md §24 |
+| 5 | scripts/cloudflare/deploy-phase6.mjs               | OPERATIONAL-GLUE                 | Orchestrates wrangler deploy for all 5 phase6 workers in correct order  | No official multi-worker deployer       | Requires OPEN_NEXT_DEPLOY=true; uses preview-URL-based service bindings (not environment: combos) |
+| 6 | scripts/cloudflare/generated-artifact-exception-contract.mjs | EXCEPTION-CONTRACT     | Declares 4 exit criteria for retiring the patch script                  | None                                    | Machine of record for when patch can be removed             |
+| 7 | scripts/cloudflare/alias-shim-exception-contract.mjs | EXCEPTION-CONTRACT + SHIM/STUB  | Declares the 2 alias entries that must appear in wrangler.jsonc         | None                                    | SINGLE_WORKER_ALIAS = OG stub; PHASE6_ALIAS = HMR client shim |
+| 8 | scripts/cloudflare/preview-degraded-contract.mjs   | EXCEPTION-CONTRACT               | Declares degraded-mode flags and placeholder secrets                    | None                                    | Links cloudflare-deploy.yml flags to release-proof.sh keys  |
+| 9 | scripts/cloudflare/phase-topology-contract.mjs     | REPO-SPECIFIC-CONFIG + EXCEPTION-CONTRACT | Single source of truth: worker names, route rules, deployment order | No official equivalent                  | Exports utility fns used by build-phase6-workers.mjs and deploy-phase6.mjs |
+|10 | scripts/cloudflare/server-actions-secret-contract.mjs | EXCEPTION-CONTRACT + OPERATIONAL-GLUE | Declares SA key sync exception: key name, valid envs, valid scopes | No official equivalent                  | Used by sync-server-actions-key.mjs; OPEN_NEXT_DEPLOY_ENV name note below |
+|11 | scripts/cloudflare/check-alias-shim-contract.mjs   | CONTRACT-ENFORCEMENT             | Verifies wrangler.jsonc alias matches SINGLE_WORKER_ALIAS              | None                                    | Exits 1 on drift; must run from repo root |
+|12 | scripts/cloudflare/check-generated-artifact-log.mjs | CONTRACT-ENFORCEMENT            | Scans build log for GENERATED_ARTIFACT_LOG_BLOCKERS patterns           | None                                    | Default log file: cf_build.log or argv[2] |
+|13 | scripts/cloudflare/check-preview-degraded-contract.mjs | CONTRACT-ENFORCEMENT          | Verifies workflow + release-proof match PREVIEW_DEGRADED_FLAGS         | None                                    | Hardcodes paths to .github/workflows/cloudflare-deploy.yml and scripts/release-proof.sh |
+|14 | scripts/cloudflare/check-server-actions-secret-contract.mjs | CONTRACT-ENFORCEMENT   | Static self-check of server-actions-secret-contract.mjs invariants     | None                                    | Pure in-memory check; no file I/O |
+|15 | scripts/cloudflare/shims/empty-module.mjs          | SHIM/STUB                        | Empty ESM module replacing incompatible upstream modules at runtime     | None (runtime shim pattern is standard) | Used via PHASE6_ALIAS for HMR client shim |
+|16 | scripts/cloudflare/stubs/vercel-og-empty.mjs       | SHIM/STUB                        | Stubs out @vercel/og edge index to avoid CF Workers incompatibility     | None                                    | Referenced in wrangler.jsonc alias; verified to match SINGLE_WORKER_ALIAS |
+|17 | open-next.config.ts (minify: false)                | WORKAROUND + EXCEPTION-CONTRACT  | Disables minification globally and per split-worker                     | Official config supports minify flag    | Rationale: unresolved CF preview proof after re-enabling; wrangler.jsonc has minify:true — potential conflict |
+
+================================================================================
+DETAILED NOTES PER FILE
+================================================================================
+
+────────────────────────────────────────────────────────────────────────────────
+#1  scripts/cloudflare/patch-prefetch-hints-manifest.mjs
+────────────────────────────────────────────────────────────────────────────────
+Type: WORKAROUND + EXCEPTION-CONTRACT
+
+Purpose:
+  After opennextjs-cloudflare build, the generated default worker artifact
+  contains getMiddlewareManifest() implemented as a dynamic require().
+  Cloudflare Workers do not support dynamic require() at runtime, so this
+  script rewrites the generated artifact to use loadManifest() (static import
+  equivalent) instead.
+
+Five patch points (Fix A parts 1 & 2, Fix B part 1, Fix B part 2, Fix C):
+
+  Fix A part 1 — requireManifestExternal declaration:
+    Adds: const { loadManifest } = require("@opentelemetry/core")
+    Note: The actual loadManifest path is the real OpenNext manifest loader,
+          not opentelemetry — the comment in code uses a placeholder name;
+          the real target is the generated _loadmanifestexternal chunk.
+
+  Fix A part 2 — HARDCODED ABSOLUTE PATH BUG:
+    Regex: /require\("\/Users\/Data\/Warehouse\/Pipe\/tianze-website\/\.open-next\/server-functions\/default\/\.next\/server\/app\/api\/([^"]+)"\)/g
+    This regex contains the absolute filesystem path of the original developer's
+    machine. This will silently fail (no match, no patch) on any machine where
+    the repo is not located at exactly /Users/Data/Warehouse/Pipe/tianze-website/.
+    This is a known defect. The replacement should use a path relative to
+    process.cwd() or __dirname. Until fixed, CI and other developer machines
+    may silently skip this patch point.
+
+  Fix B part 1 — getMiddlewareManifest function body rewrite:
+    Replaces the dynamic require() implementation of getMiddlewareManifest()
+    with a call to loadManifest() using a relative path.
+
+  Fix B part 2 — manifest path constant:
+    Patches the string literal for middlewareManifestPath to use the correct
+    relative form rather than the absolute path that Next.js generates.
+
+  Fix C — prefetch hints route handler:
+    Patches a secondary code path in the prefetch hints route handler that
+    also calls getMiddlewareManifest() via dynamic require.
+
+Opt-in gate:
+  CF_APPLY_GENERATED_PATCH=true must be set to activate patching.
+  Without it, the script runs in dry-run mode and exits with sentinel
+  code 12 (DRY_RUN_REQUIRED_EXIT_CODE) if patching is needed.
+
+Exit criteria (from generated-artifact-exception-contract.mjs):
+  1. OpenNext generates the artifact without dynamic require() for middleware
+     manifest.
+  2. Cloudflare Workers natively support the require() call pattern used.
+  3. The route is moved to a different worker that supports the pattern.
+  4. The route is removed from the codebase entirely.
+
+Critical known defect: The absolute path in Fix A part 2 makes this script
+non-portable to other developer machines or CI environments that check out
+the repo at a different path.
+
+────────────────────────────────────────────────────────────────────────────────
+#2  scripts/cloudflare/build-webpack.mjs
+────────────────────────────────────────────────────────────────────────────────
+Type: OPERATIONAL-GLUE + WORKAROUND
+
+Purpose:
+  Primary Cloudflare build entry point (invoked as `pnpm build:cf`).
+  - Sets DEPLOY_TARGET=cloudflare and NEXT_PUBLIC_DEPLOYMENT_PLATFORM=cloudflare
+  - Runs opennextjs-cloudflare build (webpack mode, not turbopack)
+  - Immediately after build, runs patch-prefetch-hints-manifest.mjs with
+    CF_APPLY_GENERATED_PATCH=true
+
+Key facts:
+  - The `build:cf:turbo` script also runs patch-prefetch-hints-manifest.mjs
+    after its own build step (turbopack path), confirming the patch is needed
+    regardless of build mode.
+  - Both build paths (webpack + turbopack) call the patch, making it a
+    mandatory post-build step in all current CF build flows.
+  - Official equivalent: `opennextjs-cloudflare build` — but without the patch
+    step, the generated artifact is broken for CF Workers runtime.
+
+────────────────────────────────────────────────────────────────────────────────
+#3  scripts/cloudflare/build-phase5-worker.mjs
+────────────────────────────────────────────────────────────────────────────────
+Type: REPO-SPECIFIC-CONFIG
+
+Purpose:
+  Generates a wrangler config for the legacy "phase5" single-worker topology.
+  Exists as a backup/fallback deployment topology, not the primary path.
+
+Key facts:
+  - phase5 = one default worker with the full Next.js runtime
+  - phase6 = 5 split workers (gateway + web + apiLead + apiOps + apiWhatsapp)
+  - phase5 is invoked via `pnpm build:cf:phase5` → `pnpm build:cf && node scripts/cloudflare/build-phase5-worker.mjs`
+  - Not referenced in the primary deploy scripts; exists as a contingency
+  - No evidence of official equivalent for this custom naming/topology layer
+
+────────────────────────────────────────────────────────────────────────────────
+#4  scripts/cloudflare/build-phase6-workers.mjs
+────────────────────────────────────────────────────────────────────────────────
+Type: REPO-SPECIFIC-CONFIG + OPERATIONAL-GLUE
+
+Purpose:
+  Generates per-worker wrangler.jsonc configs for all 5 phase6 workers:
+  gateway, web, apiLead, apiOps, apiWhatsapp.
+  Reads from phase-topology-contract.mjs for worker names, route rules,
+  and deployment ordering.
+
+Key facts:
+  - Injects PHASE6_ALIAS (HMR client shim) into every generated worker config
+  - PHASE6_ALIAS is NOT in wrangler.jsonc (which only has SINGLE_WORKER_ALIAS)
+    — so HMR shim is only active in phase6 worker configs, not single-worker
+  - AGENTS.md §24 documents a past drift incident: when phase-topology-contract.mjs
+    changed from rule.match function to kind+values+createSerializedRoute*Source(),
+    this script was left reading old rule.match.toString() — caused silent failure
+    that only surfaced at deploy time
+  - Also susceptible to WORKER_NAME_SUFFIX vs PHASE_WORKER_NAME_SUFFIX rename
+    drift (§24)
+  - Must be kept in sync with phase-topology-contract.mjs manually
+
+────────────────────────────────────────────────────────────────────────────────
+#5  scripts/cloudflare/deploy-phase6.mjs
+────────────────────────────────────────────────────────────────────────────────
+Type: OPERATIONAL-GLUE
+
+Purpose:
+  Orchestrates wrangler deploy for all 5 phase6 workers in the correct order
+  defined by PHASE6_DEPLOYMENT_ORDER (= web, apiLead, apiOps, apiWhatsapp,
+  gateway — gateway last).
+
+Key facts:
+  - Requires OPEN_NEXT_DEPLOY=true env var; without it falls back to OpenNext's
+    own deploy wrapper which breaks on remote R2 cache provisioning
+  - Uses direct preview-URL-based service bindings (e.g. worker-preview suffix),
+    NOT the `service + environment` combination format — this is the correct
+    pattern for Cloudflare preview environments per AGENTS.md §22
+  - Does NOT generate WORKER_SELF_REFERENCE service bindings (correctly excluded
+    per AGENTS.md §22 — self-reference causes first-deploy timing failures)
+  - server-actions-secret-contract.mjs exports OPEN_NEXT_DEPLOY_ENV = "OPEN_NEXT_DEPLOY"
+    but deploy-phase6.mjs checks for OPEN_NEXT_DEPLOY (without _ENV suffix) —
+    minor naming discrepancy between contract and implementation worth monitoring
+
+────────────────────────────────────────────────────────────────────────────────
+#6  scripts/cloudflare/generated-artifact-exception-contract.mjs
+────────────────────────────────────────────────────────────────────────────────
+Type: EXCEPTION-CONTRACT
+
+Purpose:
+  Declares the 4 exit criteria under which the patch-prefetch-hints-manifest.mjs
+  script can be retired.
+
+Key facts:
+  - GENERATED_ARTIFACT_LOG_BLOCKERS: list of regex/string patterns that, if found
+    in a build log, indicate the patch is still required
+  - These patterns are consumed by check-generated-artifact-log.mjs
+  - The contract is the machine-readable record for "when can we delete the patch"
+  - No official equivalent exists
+
+────────────────────────────────────────────────────────────────────────────────
+#7  scripts/cloudflare/alias-shim-exception-contract.mjs
+────────────────────────────────────────────────────────────────────────────────
+Type: EXCEPTION-CONTRACT + SHIM/STUB
+
+Purpose:
+  Declares two alias entries that must be present:
+  - SINGLE_WORKER_ALIAS: { "next/dist/compiled/@vercel/og/index.edge.js":
+      "./scripts/cloudflare/stubs/vercel-og-empty.mjs" }
+    → stubs out @vercel/og to avoid CF Workers incompatibility
+  - PHASE6_ALIAS: { "@vercel/turbopack-ecmascript-runtime/browser/dev/hmr-client/hmr-client.ts":
+      "./scripts/cloudflare/shims/empty-module.mjs" }
+    → shims the HMR client out of split worker bundles
+
+Key facts:
+  - SINGLE_WORKER_ALIAS is verified to match wrangler.jsonc alias block exactly ✅
+  - PHASE6_ALIAS is injected only into generated phase6 worker configs by
+    build-phase6-workers.mjs — it is NOT present in the base wrangler.jsonc
+  - check-alias-shim-contract.mjs only checks SINGLE_WORKER_ALIAS against
+    wrangler.jsonc; PHASE6_ALIAS verification is embedded in the phase6 build
+    script output, not separately drift-checked
+
+────────────────────────────────────────────────────────────────────────────────
+#8  scripts/cloudflare/preview-degraded-contract.mjs
+────────────────────────────────────────────────────────────────────────────────
+Type: EXCEPTION-CONTRACT
+
+Purpose:
+  Declares which degraded-mode flags (e.g. SKIP_RATE_LIMIT_IN_PREVIEW,
+  SKIP_TURNSTILE_IN_PREVIEW, etc.) and placeholder secrets must be present
+  in .github/workflows/cloudflare-deploy.yml and scripts/release-proof.sh.
+
+Key facts:
+  - PREVIEW_DEGRADED_FLAGS: list of flags with exact line strings
+  - PREVIEW_PLACEHOLDER_SECRETS: list of placeholder Wrangler secret lines
+  - check-preview-degraded-contract.mjs reads both files and exits 1 if
+    any declared flag or secret is missing from either file
+  - Hardcodes paths to .github/workflows/cloudflare-deploy.yml and
+    scripts/release-proof.sh — will fail if either file is moved or renamed
+
+────────────────────────────────────────────────────────────────────────────────
+#9  scripts/cloudflare/phase-topology-contract.mjs
+────────────────────────────────────────────────────────────────────────────────
+Type: REPO-SPECIFIC-CONFIG + EXCEPTION-CONTRACT
+
+Purpose:
+  Single source of truth for all phase6 worker topology:
+  - Worker keys and name suffixes (gateway, web, apiLead, apiOps, apiWhatsapp)
+  - PHASE6_SERVER_FUNCTION_KEYS (apiLead, apiOps, apiWhatsapp — excludes gateway/web)
+  - PHASE6_DEPLOYMENT_ORDER (web → apiLead → apiOps → apiWhatsapp → gateway)
+  - API_ROUTE_BINDING_RULES (3 rules: prefix, exact, exact → 3 target workers)
+  - Utility functions: normalizePhaseWorkerNames(), resolveApiRouteTarget(),
+    createGatewayServiceBindings(), createSerializedRouteRulesSource(),
+    createSerializedRouteResolverSource()
+
+Key facts:
+  - Both build-phase6-workers.mjs and deploy-phase6.mjs import from this contract
+  - This file changed from function-style rule.match to kind+values+utility-fn
+    style — AGENTS.md §24 documents the resulting drift incident with
+    build-phase6-workers.mjs
+  - No official OpenNext equivalent — split-worker topology and route binding
+    are entirely repo-defined for this project
+
+────────────────────────────────────────────────────────────────────────────────
+#10  scripts/cloudflare/server-actions-secret-contract.mjs
+────────────────────────────────────────────────────────────────────────────────
+Type: EXCEPTION-CONTRACT + OPERATIONAL-GLUE
+
+Purpose:
+  Declares the operational exception for Server Actions encryption key sync:
+  - KEY_NAME = "NEXT_SERVER_ACTIONS_ENCRYPTION_KEY"
+  - VALID_PHASE_DEPLOY_ENVS = ["preview", "production"]
+  - VALID_KEY_SYNC_SCOPE = ["phase6"]
+  - PHASE6_WORKER_SUFFIXES: all 5 worker name suffixes
+  - Rationale: "Phase6 deploy still requires a stable Server Actions encryption
+    key to be present on every split worker before wrangler deploy."
+
+Key facts:
+  - exports OPEN_NEXT_DEPLOY_ENV = "OPEN_NEXT_DEPLOY" — note that this is the
+    env var NAME (string), not the value. deploy-phase6.mjs checks for the
+    env var OPEN_NEXT_DEPLOY (value = "true"). The export name OPEN_NEXT_DEPLOY_ENV
+    vs the env var OPEN_NEXT_DEPLOY is a minor naming discrepancy between the
+    contract and the deployer.
+  - getWorkerNamesForScope() only supports scope "phase6"
+  - Used by sync-server-actions-key.mjs (pnpm cf:sync:server-actions-key)
+
+────────────────────────────────────────────────────────────────────────────────
+#11  scripts/cloudflare/check-alias-shim-contract.mjs
+────────────────────────────────────────────────────────────────────────────────
+Type: CONTRACT-ENFORCEMENT
+
+Purpose:
+  Reads wrangler.jsonc, parses as JSONC, and compares config.alias against
+  SINGLE_WORKER_ALIAS from alias-shim-exception-contract.mjs.
+  Exits 1 if drift detected; exits 0 if matches.
+
+Key facts:
+  - Must be run from repo root (uses process.cwd())
+  - Only checks SINGLE_WORKER_ALIAS against wrangler.jsonc
+  - Does NOT check PHASE6_ALIAS (which lives in generated configs, not wrangler.jsonc)
+  - Current state: wrangler.jsonc alias verified to match SINGLE_WORKER_ALIAS ✅
+  - Uses TypeScript compiler API to parse JSONC (handles comments)
+
+────────────────────────────────────────────────────────────────────────────────
+#12  scripts/cloudflare/check-generated-artifact-log.mjs
+────────────────────────────────────────────────────────────────────────────────
+Type: CONTRACT-ENFORCEMENT
+
+Purpose:
+  Reads a build log file and scans for GENERATED_ARTIFACT_LOG_BLOCKERS patterns.
+  Exits 1 if any blocker pattern found; exits 0 if clean.
+
+Key facts:
+  - Default log: cf_build.log (or process.argv[2] for custom path)
+  - Blocker patterns come from generated-artifact-exception-contract.mjs
+  - On success, prints contract proof paths (intended for CI proof chain)
+  - Purely a log-scan tool; does not re-run builds
+
+────────────────────────────────────────────────────────────────────────────────
+#13  scripts/cloudflare/check-preview-degraded-contract.mjs
+────────────────────────────────────────────────────────────────────────────────
+Type: CONTRACT-ENFORCEMENT
+
+Purpose:
+  Verifies .github/workflows/cloudflare-deploy.yml and scripts/release-proof.sh
+  both declare every PREVIEW_DEGRADED_FLAGS entry and PREVIEW_PLACEHOLDER_SECRETS
+  entry from preview-degraded-contract.mjs.
+
+Key facts:
+  - Hardcodes two file paths:
+      .github/workflows/cloudflare-deploy.yml
+      scripts/release-proof.sh
+    These will break if either file is renamed or moved.
+  - Exits 1 on any mismatch; exits 0 if all match
+  - The check is an exact string-contains check (not JSONC/YAML parse)
+
+────────────────────────────────────────────────────────────────────────────────
+#14  scripts/cloudflare/check-server-actions-secret-contract.mjs
+────────────────────────────────────────────────────────────────────────────────
+Type: CONTRACT-ENFORCEMENT
+
+Purpose:
+  Static self-check of server-actions-secret-contract.mjs invariants.
+  No file I/O — purely in-memory assertions:
+  - SERVER_ACTIONS_SECRET_EXCEPTION_CONTRACT.envs.length ===
+    VALID_PHASE_DEPLOY_ENVS.length
+  - "phase6" in VALID_KEY_SYNC_SCOPE
+
+Key facts:
+  - Exits 0 on pass; throws (exits 1) on fail
+  - Simplest of the four checkers
+  - Useful to catch if contract arrays are accidentally truncated
+
+────────────────────────────────────────────────────────────────────────────────
+#15  scripts/cloudflare/shims/empty-module.mjs
+────────────────────────────────────────────────────────────────────────────────
+Type: SHIM/STUB
+
+Purpose:
+  An empty ESM module (`export {}`). Used as the replacement target for the
+  PHASE6_ALIAS shim of the HMR client:
+    "@vercel/turbopack-ecmascript-runtime/browser/dev/hmr-client/hmr-client.ts"
+    → "./scripts/cloudflare/shims/empty-module.mjs"
+
+Key facts:
+  - The HMR client is a browser-only dev asset that would otherwise be bundled
+    into split worker builds, causing CF Workers runtime failures
+  - This shim is aliased in every generated phase6 worker config by
+    build-phase6-workers.mjs
+  - Not aliased in the base wrangler.jsonc (which only has the OG stub)
+
+────────────────────────────────────────────────────────────────────────────────
+#16  scripts/cloudflare/stubs/vercel-og-empty.mjs
+────────────────────────────────────────────────────────────────────────────────
+Type: SHIM/STUB
+
+Purpose:
+  Stubs out @vercel/og edge runtime to a no-op for CF Workers.
+  Aliased as:
+    "next/dist/compiled/@vercel/og/index.edge.js"
+    → "./scripts/cloudflare/stubs/vercel-og-empty.mjs"
+
+Key facts:
+  - Declared in SINGLE_WORKER_ALIAS and verified present in wrangler.jsonc ✅
+  - Also injected into every generated phase6 worker config (via SINGLE_WORKER_ALIAS
+    which build-phase6-workers.mjs spreads into each config)
+  - @vercel/og uses Node.js APIs (canvas, etc.) incompatible with CF Workers edge
+    runtime; this stub prevents those APIs from being loaded
+
+────────────────────────────────────────────────────────────────────────────────
+#17  open-next.config.ts — minify: false
+────────────────────────────────────────────────────────────────────────────────
+Type: WORKAROUND + EXCEPTION-CONTRACT
+
+Purpose:
+  Disables minification for the default worker (cloudflareConfig.default.minify
+  = false) and for all 3 split-function workers (apiLead, apiOps, apiWhatsapp —
+  each has minify: false in its splitFunctions entry).
+
+Key facts:
+  - Rationale (from code comment): "2026-04-01 isolated re-check no longer
+    reproduced the old build-time ENOENT, but local Cloudflare preview still
+    did not produce a clean proof after re-enabling minification"
+  - AGENTS.md §5: "旧结论'只要打开就会构建炸掉'已经太绝对了，但'现在可以放心打开'也同样不成立"
+    (The old conclusion that opening minify always breaks the build is too absolute,
+    but "it's now safe to open" is equally unwarranted)
+  - AGENTS.md §5: requires pnpm build:cf + Cloudflare preview/deploy smoke before
+    re-enabling
+  - POTENTIAL CONFLICT: wrangler.jsonc top-level has `minify: true`. The
+    open-next.config.ts setting applies to the OpenNext config layer; whether
+    wrangler.jsonc `minify: true` overrides or is overridden by the OpenNext
+    layer is not documented in code and needs verification before any minify
+    changes are made.
+
+================================================================================
+ADDITIONAL CROSS-CUTTING OBSERVATIONS
+================================================================================
+
+A. OPEN_NEXT_DEPLOY_ENV naming discrepancy:
+   server-actions-secret-contract.mjs exports:
+     OPEN_NEXT_DEPLOY_ENV = "OPEN_NEXT_DEPLOY"
+   The export name is OPEN_NEXT_DEPLOY_ENV but the value (the env var name)
+   is OPEN_NEXT_DEPLOY. deploy-phase6.mjs checks process.env.OPEN_NEXT_DEPLOY
+   directly. These are consistent in behavior but the contract export name is
+   confusing (sounds like the env var name includes _ENV). Minor risk of future
+   misread.
+
+B. PHASE6_ALIAS not drift-checked:
+   check-alias-shim-contract.mjs only checks SINGLE_WORKER_ALIAS in wrangler.jsonc.
+   PHASE6_ALIAS drift is only caught if build-phase6-workers.mjs correctly injects
+   it — there is no separate contract checker for phase6-generated alias entries.
+
+C. build-phase6-workers.mjs / phase-topology-contract.mjs drift history:
+   AGENTS.md §24 documents a past incident where phase-topology-contract.mjs
+   changed its internal API and build-phase6-workers.mjs was left on the old API.
+   This class of drift is not protected by any current contract checker — it
+   requires manual sync review whenever phase-topology-contract.mjs changes.
+
+D. patch-prefetch-hints-manifest.mjs absolute path bug:
+   The machine-specific path in Fix A part 2 is the single highest-portability
+   risk in the entire deviation inventory. Silent skip (no error, just no patch)
+   on non-matching machines makes it dangerous on CI if CI checkout path differs.
+
+E. wrangler.jsonc minify: true vs open-next.config.ts minify: false:
+   The interaction between these two settings is undocumented and needs
+   clarification before any minification changes are attempted.
+
+================================================================================
+END OF INVENTORY
+================================================================================

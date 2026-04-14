@@ -48,12 +48,12 @@ function validateRequiredEnv(
   reason: string,
 ): void {
   if (!readEnv(env, key)) {
-    target.push(`${key} is required: ${reason}`);
+    target.push(`${key} is required (${reason}).`);
   }
 }
 
 function validateMinLengthEnv(
-  errors: string[],
+  target: string[],
   env: EnvMap,
   key: string,
   minLength: number,
@@ -61,58 +61,42 @@ function validateMinLengthEnv(
 ): void {
   const value = readEnv(env, key);
   if (!value) {
-    errors.push(`${key} is required: ${reason}`);
-    return;
-  }
-
-  if (value.length < minLength) {
-    errors.push(`${key} must be at least ${minLength} characters: ${reason}`);
-  }
-}
-
-function validatePairCompleteness(
-  errors: string[],
-  env: EnvMap,
-  firstKey: string,
-  secondKey: string,
-  label: string,
-): void {
-  const first = readEnv(env, firstKey);
-  const second = readEnv(env, secondKey);
-
-  if ((first && !second) || (!first && second)) {
-    errors.push(
-      `${label} must be configured as a complete pair (${firstKey} + ${secondKey}) or left unset.`,
+    target.push(`${key} is required (${reason}).`);
+  } else if (value.length < minLength) {
+    target.push(
+      `${key} must be at least ${minLength} characters long (${reason}). Current length: ${value.length}`,
     );
   }
 }
 
-export function shouldValidateProductionRuntimeContract(
-  env: EnvMap = process.env,
-): boolean {
-  return readEnv(env, "NODE_ENV") === "production";
+export function shouldValidateProductionRuntimeContract(env: EnvMap): boolean {
+  const appEnv = readEnv(env, "APP_ENV")?.toLowerCase();
+
+  if (appEnv === "preview") {
+    return false;
+  }
+
+  if (appEnv === "production") {
+    return true;
+  }
+
+  // Check if this is production environment
+  const nodeEnv = readEnv(env, "NODE_ENV")?.toLowerCase();
+  const isProduction = nodeEnv === "production";
+
+  // Check if running in Cloudflare Workers runtime (indicates production deployment)
+  const isCloudflareProduction =
+    isProduction &&
+    hasAny(env, "CLOUDFLARE_ACCOUNT_ID", "CLOUDFLARE_API_TOKEN");
+
+  return isProduction || isCloudflareProduction;
 }
 
 export function validateProductionRuntimeContract(
-  env: EnvMap = process.env,
+  env: EnvMap,
 ): ValidationReport {
   const warnings: string[] = [];
   const errors: string[] = [];
-
-  validatePairCompleteness(
-    errors,
-    env,
-    "UPSTASH_REDIS_REST_URL",
-    "UPSTASH_REDIS_REST_TOKEN",
-    "Upstash Redis",
-  );
-  validatePairCompleteness(
-    errors,
-    env,
-    "KV_REST_API_URL",
-    "KV_REST_API_TOKEN",
-    "Vercel KV",
-  );
 
   const hasUpstash = hasPair(
     env,
@@ -120,33 +104,16 @@ export function validateProductionRuntimeContract(
     "UPSTASH_REDIS_REST_TOKEN",
   );
   const hasKv = hasPair(env, "KV_REST_API_URL", "KV_REST_API_TOKEN");
-  const allowMemoryRateLimit = isTrue(env, "ALLOW_MEMORY_RATE_LIMIT");
-  const allowMemoryIdempotency = isTrue(env, "ALLOW_MEMORY_IDEMPOTENCY");
 
-  if (!hasUpstash) {
-    if (hasKv) {
-      errors.push(
-        "KV-only rate limiting is not allowed in production. Configure Upstash Redis for the shared security stores or remove the KV-only setup.",
-      );
-    } else if (!allowMemoryRateLimit) {
-      errors.push(
-        "Production rate limiting requires Upstash Redis or an explicit degraded override via ALLOW_MEMORY_RATE_LIMIT=true.",
-      );
-    } else {
-      warnings.push(
-        "ALLOW_MEMORY_RATE_LIMIT=true enables degraded in-memory rate limiting in production.",
-      );
-    }
-
-    if (!allowMemoryIdempotency) {
-      errors.push(
-        "Production idempotency requires Upstash Redis or an explicit degraded override via ALLOW_MEMORY_IDEMPOTENCY=true.",
-      );
-    } else {
-      warnings.push(
-        "ALLOW_MEMORY_IDEMPOTENCY=true enables degraded in-memory idempotency in production.",
-      );
-    }
+  // SIMPLIFIED: No intermediate allow branch. If no Redis/KV, error immediately.
+  if (!hasUpstash && !hasKv) {
+    errors.push(
+      "Production rate limiting and idempotency require Upstash Redis or Vercel KV. Configure at least one store.",
+    );
+  } else if (!hasUpstash && hasKv) {
+    errors.push(
+      "KV-only rate limiting is not allowed in production. Configure Upstash Redis for the shared security stores or remove the KV-only setup.",
+    );
   }
 
   validateMinLengthEnv(
@@ -198,9 +165,11 @@ export function validateProductionRuntimeContract(
     "the shipped lead pipeline persists lead records in Airtable",
   );
 
+  // ENFORCED: Degraded flags are never allowed in production.
   if (hasAny(env, "ALLOW_MEMORY_RATE_LIMIT", "ALLOW_MEMORY_IDEMPOTENCY")) {
-    warnings.push(
-      "Explicit degraded store overrides are configured. Keep them only if this release intentionally accepts reduced protection durability.",
+    errors.push(
+      "Degraded in-memory store flags (ALLOW_MEMORY_RATE_LIMIT, ALLOW_MEMORY_IDEMPOTENCY) cannot be used in production. " +
+        "Configure Upstash Redis or Vercel KV for production deployments.",
     );
   }
 
@@ -216,57 +185,32 @@ export function validateProductionConfig(
     ? validateProductionRuntimeContract(env)
     : { warnings: [], errors: [] };
 
-  // CI quality builds test code, not deployment readiness.
-  // VALIDATE_CONFIG_SKIP_RUNTIME downgrades runtime contract errors to warnings
-  // so CI builds can proceed without production secrets.
-  // Deploy workflows must NOT set this flag — they need hard enforcement.
-  const skipRuntime = isTrue(env, "VALIDATE_CONFIG_SKIP_RUNTIME");
-  const runtimeErrors = skipRuntime ? [] : runtimeContract.errors;
-  const runtimeWarnings = skipRuntime
-    ? [...runtimeContract.warnings, ...runtimeContract.errors]
-    : runtimeContract.warnings;
-
   return {
-    warnings: [...siteConfig.warnings, ...runtimeWarnings],
-    errors: [...siteConfig.errors, ...runtimeErrors],
+    warnings: [...siteConfig.warnings, ...runtimeContract.warnings],
+    errors: [...siteConfig.errors, ...runtimeContract.errors],
     runtimeContractChecked,
   };
 }
 
-async function main(): Promise<void> {
-  console.log("Validating production configuration...\n");
+if (
+  process.argv[1] &&
+  import.meta.url === pathToFileURL(process.argv[1]).href
+) {
+  const report = validateProductionConfig(process.env);
 
-  const result = validateProductionConfig();
-
-  if (!result.runtimeContractChecked) {
-    console.log(
-      "Skipping strict runtime env contract because NODE_ENV is not production.\n",
-    );
+  if (report.warnings.length > 0) {
+    console.warn("⚠️  Warnings:");
+    report.warnings.forEach((w) => console.warn(`  - ${w}`));
   }
 
-  if (result.warnings.length > 0) {
-    console.warn("Warnings:");
-    result.warnings.forEach((warning) => console.warn(`  - ${warning}`));
-    console.log();
-  }
-
-  if (result.errors.length > 0) {
-    console.error("Production config validation failed:");
-    result.errors.forEach((error) => console.error(`  - ${error}`));
+  if (report.errors.length > 0) {
+    console.error("❌ Errors:");
+    report.errors.forEach((e) => console.error(`  - ${e}`));
     process.exit(1);
   }
 
-  console.log("Production config validation passed");
-  process.exit(0);
-}
-
-const isDirectExecution =
-  process.argv[1] !== undefined &&
-  import.meta.url === pathToFileURL(process.argv[1]).href;
-
-if (isDirectExecution) {
-  main().catch((error: unknown) => {
-    console.error("Validation script failed:", error);
-    process.exit(1);
-  });
+  console.log("✅ Production configuration validated successfully.");
+  if (report.runtimeContractChecked) {
+    console.log("   Runtime contract enforced.");
+  }
 }

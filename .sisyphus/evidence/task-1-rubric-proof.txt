@@ -1,0 +1,150 @@
+## Task 1: Official Alignment Rubric + Proof Vocabulary
+Date: Fri Apr 10 2026
+Plan: .sisyphus/plans/cloudflare-official-alignment.md
+Task: Wave 1 / Task 1
+
+---
+
+## 1. What "Official Alignment" Means For This Project
+
+"Official alignment" means the degree to which this project uses the stock
+`@opennextjs/cloudflare` CLI and configuration flow — with no repo-local
+wrappers, generated-artifact patches, or custom build scripts — to produce
+a working Cloudflare deployment.
+
+The goal of the Cloudflare Official Alignment Series is to move the project
+as close to L3 (stock official) as is safe and practical, while retiring
+repo-local patches that exist only to compensate for now-fixed upstream gaps.
+
+---
+
+## 2. Alignment Rubric: L0 → L3
+
+### L0 — Fully Custom
+- All Cloudflare build/preview/deploy is handled by repo-local wrapper scripts.
+- Stock OpenNext CLI is not invoked or is bypassed entirely.
+- Generated artifacts require local patches to function at all.
+- Proof: only build passing; page behavior unverified without heavy local harness.
+
+### L1 — Mostly Custom
+- Repo uses OpenNext as a library (imports `defineCloudflareConfig`), but wraps
+  all entry points via custom scripts (e.g. `build-webpack.mjs`, `deploy-phase6.mjs`).
+- Custom patch layer is active and required for page routing to work
+  (e.g. `patch-prefetch-hints-manifest.mjs`).
+- Some OpenNext behaviors preserved but no clean CLI invocation path.
+- Proof: `pnpm build:cf` (webpack wrapper) passes; `smoke:cf:preview` page-level
+  proof available if patch runs. `/api/health` not provable from local preview.
+
+### L2 — Partially Aligned
+- Repo uses OpenNext CLI for most steps but retains narrowly scoped local patches
+  for specific documented gaps (e.g. manifest guard for middleware-manifest.json).
+- Patches are documented, minimal, and each patch has a named upstream issue/fix.
+- Stock `opennextjs-cloudflare build` can be invoked; patches run post-build.
+- Proof: `pnpm build:cf` with explicit patch step; `smoke:cf:preview` passes cleanly;
+  patch retirement is tracked and conditional.
+
+### L3 — Stock Official
+- Repo uses stock `opennextjs-cloudflare` CLI flow with no generated-artifact
+  patches required.
+- `open-next.config.ts` uses only officially documented config options.
+- No custom build wrappers beyond thin convenience scripts that invoke stock CLI.
+- All deviations from defaults are upstream-absorbed or intentionally empty.
+- Proof: `pnpm build:cf` invokes stock CLI; `smoke:cf:preview` passes; deployed
+  smoke (`smoke:cf:deploy`) passes including `/api/health`.
+
+---
+
+## 3. Proof Vocabulary
+
+All proof claims in this series MUST use the following vocabulary.
+Using looser language (e.g. "it works", "build is green") is not acceptable.
+
+### 3.1 Build Proof
+- Command: `pnpm build:cf`
+- What it proves: Generated `.open-next/` artifacts exist and webpack bundling succeeded.
+- What it does NOT prove: Page routing works; Cloudflare runtime compatibility; API health.
+- Notation: `BUILD_PROOF`
+
+### 3.2 Local Preview Proof (Page Level)
+- Command: `pnpm smoke:cf:preview`
+- What it proves: Pages `/`, `/en`, `/zh`, `/en/contact`, `/zh/contact` return 200;
+  locale redirect works; cookie flags correct; internal headers not leaked;
+  manifest crash not triggered.
+- What it does NOT prove: `/api/health` behavior; deployed routing; split-worker behavior.
+- Notation: `LOCAL_PAGE_PROOF`
+
+### 3.3 Local Preview Proof (Strict)
+- Command: `pnpm smoke:cf:preview:strict`
+- What it proves: All of LOCAL_PAGE_PROOF plus `/api/health` returns 200 from local preview.
+- Known gap: stock preview may not correctly represent split-worker API paths.
+  Failure here is a signal, not a definitive regression.
+- Notation: `LOCAL_STRICT_PROOF`
+
+### 3.4 Deployed Smoke Proof
+- Command: `pnpm smoke:cf:deploy -- --base-url <deployed-url>`
+- What it proves: Final deployed behavior including page routing, API health,
+  headers, cookies, locale redirects — against a real Cloudflare environment.
+- This is the only proof that counts as "Cloudflare truth" for API-level behavior.
+- Notation: `DEPLOYED_SMOKE_PROOF`
+
+### 3.5 Patch-Required Build Proof
+- Command: `CF_APPLY_GENERATED_PATCH=true pnpm build:cf` (or equivalent)
+- What it proves: Same as BUILD_PROOF, with explicit acknowledgment that a
+  repo-local patch was applied to generated artifacts.
+- Notation: `PATCHED_BUILD_PROOF`
+- A PATCHED_BUILD_PROOF is weaker than BUILD_PROOF and signals L1 or L2 alignment.
+
+---
+
+## 4. Proof Ladder (Weakest → Strongest)
+
+  PATCHED_BUILD_PROOF
+  < BUILD_PROOF
+  < LOCAL_PAGE_PROOF
+  < LOCAL_STRICT_PROOF
+  < DEPLOYED_SMOKE_PROOF
+
+No proof in this series may be presented at a higher level than it has earned.
+
+---
+
+## 5. Current Project Alignment Assessment (Pre-Audit, Wave 1)
+
+Based on reading `open-next.config.ts`, `scripts/cloudflare/build-webpack.mjs`,
+and AGENTS.md entries as of Fri Apr 10 2026:
+
+**Estimated Level: L1–L2 (Mostly Custom → Partially Aligned)**
+
+Evidence:
+- `open-next.config.ts` uses `defineCloudflareConfig` from `@opennextjs/cloudflare`
+  with stock-compatible overrides (r2IncrementalCache, doQueue, d1NextTagCache).
+  This is close to official usage. ✓
+- All split functions have `minify: false` — explicitly deferred per AGENTS.md rule #5.
+  Not a patch, but a deliberate deviation from defaults.
+- `pnpm build:cf` invokes `scripts/cloudflare/build-webpack.mjs` (webpack wrapper),
+  NOT stock `opennextjs-cloudflare build`. This is a custom wrapper = L1 signal.
+- `scripts/cloudflare/patch-prefetch-hints-manifest.mjs` is active and required
+  for page routing to work after `build:cf`. This is a PATCHED_BUILD_PROOF situation = L1.
+- AGENTS.md rule #12 confirms: "`build:cf` passes ≠ CF page routing proven" = patch still live.
+- phase6 / split-worker path has additional wrappers (`build-phase6-workers.mjs`,
+  `deploy-phase6.mjs`) — explicitly out of scope for this series (see guardrails).
+
+**Pre-audit conclusion:**
+The project sits at approximately L1 with some L2 characteristics in `open-next.config.ts`.
+The primary gap to L2 is the active manifest patch and webpack wrapper.
+The primary gap from L2 to L3 is the manifest patch itself — if it can be retired.
+
+This assessment will be refined by Task 2 (gap audit).
+
+---
+
+## 6. Usage Instructions For Later Tasks
+
+Tasks 2, 3, 5, 7, 11 MUST reference this file when making proof claims.
+
+When reporting alignment progress, use the format:
+  "This task advances alignment from L<N> to L<N+1> because: [evidence]"
+  "Proof earned: [PROOF_LEVEL_NOTATION]"
+  "Proof NOT earned: [PROOF_LEVEL_NOTATION] — reason: [reason]"
+
+Do not claim a higher proof level than the commands actually run support.
