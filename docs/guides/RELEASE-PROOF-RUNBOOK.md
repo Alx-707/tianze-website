@@ -44,10 +44,9 @@ CI=1 pnpm test:e2e
 Before any change that touches single-site truth or verifies skeleton removal, run:
 
 ```bash
-NODE_ENV=production VALIDATE_CONFIG_SKIP_RUNTIME=true pnpm validate:config
+APP_ENV=preview NEXT_PUBLIC_SITE_URL=https://preview.tianze-pipe.com NODE_ENV=production pnpm validate:config
 pnpm truth:check
 pnpm validate:translations
-pnpm compat-import-audit
 pnpm build
 ```
 
@@ -62,8 +61,9 @@ Only use the strict variant (`pnpm preflight:site-cutover:strict`) when the bran
 - Do not run `pnpm build` and `pnpm build:cf` in parallel.
 - Fast local gates are not release proof.
 - Release proof is stronger than CI proof because it is change-type aware and platform aware.
-- If the change touches the Cloudflare build chain itself, add `pnpm build:cf:turbo` as a comparison check before signoff.
-- For the final deployed Cloudflare proof, follow release-proof with a real preview publish plus `pnpm smoke:cf:deploy -- --base-url <deployment-url>`.
+- If the change touches the Cloudflare build chain itself, add one extra fresh `pnpm build:cf` rerun before signoff.
+- For the canonical final Cloudflare preview proof, use `pnpm proof:cf:preview-deployed`. After the contact-page fix, that proof means the current-site runtime regression is gone for `/en/contact` and `/zh/contact`, but it does not close the deeper API debt boundary.
+- If you need the lower-level primitive, follow release-proof with a real preview publish plus `pnpm smoke:cf:deploy -- --base-url <deployment-url>`.
 - When a Cloudflare-related step fails, record whether it is a platform-entry issue, generated-artifact issue, current-site runtime regression, or final deployed behavior issue.
 
 ## Minimal Accept/Reject Rule
