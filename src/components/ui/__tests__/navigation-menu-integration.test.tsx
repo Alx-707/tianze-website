@@ -2,7 +2,7 @@
  * @vitest-environment jsdom
  */
 
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
@@ -119,7 +119,11 @@ describe("NavigationMenu - Dropdown & State Management", () => {
 
       // Close dropdown with second click
       await user.click(trigger);
-      expect(screen.queryByTestId("dropdown-content")).not.toBeInTheDocument();
+      await waitFor(() => {
+        expect(
+          screen.queryByTestId("dropdown-content"),
+        ).not.toBeInTheDocument();
+      });
     });
 
     it("handles multiple dropdown menus independently", async () => {
