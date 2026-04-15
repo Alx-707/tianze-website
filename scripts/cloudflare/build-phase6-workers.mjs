@@ -1,6 +1,11 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import ts from "typescript";
+import {
+  PHASE6_WORKERS_BY_KEY,
+  getPhase6ConfigFileName,
+  getPhase6WorkerNames,
+} from "./phase6-topology-contract.mjs";
 
 const ROOT_DIR = process.cwd();
 const OPEN_NEXT_DIR = path.join(ROOT_DIR, ".open-next");
@@ -21,22 +26,11 @@ const DOMAIN_ROUTES = {
   production: [{ pattern: "tianze-pipe.com/*", zone_name: "tianze-pipe.com" }],
 };
 
-/**
- * Worker name suffixes for wrangler config naming.
- * "gateway" and "web" are always present; API worker entries are derived from API_ROUTE_BINDING_RULES.
- */
-const WORKER_NAME_SUFFIX = {
-  gateway: "gateway",
-  web: "web",
-  apiLead: "api-lead",
-  apiOps: "api-ops",
-};
-
 const API_ROUTE_BINDING_RULES = [
   {
     match: (pathname) =>
       pathname === "/api/cache/invalidate" || pathname === "/api/csp-report",
-    binding: "WORKER_API_OPS",
+    binding: PHASE6_WORKERS_BY_KEY.apiOps.binding,
     target: "apiOps",
   },
   {
@@ -46,7 +40,7 @@ const API_ROUTE_BINDING_RULES = [
       pathname === "/api/subscribe" ||
       pathname === "/api/verify-turnstile" ||
       pathname === "/api/health",
-    binding: "WORKER_API_LEAD",
+    binding: PHASE6_WORKERS_BY_KEY.apiLead.binding,
     target: "apiLead",
   },
 ];
@@ -62,12 +56,7 @@ function parseJsoncFile(filePath, content) {
 }
 
 function normalizeWorkerNames(baseName) {
-  return {
-    gateway: `${baseName}-${WORKER_NAME_SUFFIX.gateway}`,
-    web: `${baseName}-${WORKER_NAME_SUFFIX.web}`,
-    apiLead: `${baseName}-${WORKER_NAME_SUFFIX.apiLead}`,
-    apiOps: `${baseName}-${WORKER_NAME_SUFFIX.apiOps}`,
-  };
+  return getPhase6WorkerNames(baseName);
 }
 
 function cloneJSON(value) {
@@ -440,7 +429,7 @@ async function main() {
   ];
 
   for (const target of apiWorkerTargets) {
-    const suffix = WORKER_NAME_SUFFIX[target];
+    const configFileName = getPhase6ConfigFileName(target);
     const config = createServerWorkerConfig(
       baseConfig,
       workerNames,
@@ -448,7 +437,7 @@ async function main() {
       envNames,
     );
     configWriteOps.push(
-      writeJsonFile(path.join(WRANGLER_DIR, `${suffix}.jsonc`), config),
+      writeJsonFile(path.join(WRANGLER_DIR, configFileName), config),
     );
   }
 
