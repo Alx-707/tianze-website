@@ -33,7 +33,7 @@ This is the core content that both language versions need with equivalent meanin
 | Product specifications | Dimensions, tolerances, material grades, size tables | Technical data is universal |
 | Certifications & standards | ISO 9001, compliance status (AS/NZS, ASTM, UL, IEC, NOM) | Buyers verify the same certs regardless of language |
 | Factory capability data | Production capacity, equipment list, employee count | Trust signals apply to all buyers |
-| Contact information | Email, WhatsApp, address, business hours | Functional content |
+| Contact information | Email, phone, address, business hours | Functional content |
 | Legal pages | Privacy policy, terms of service | Legal compliance |
 | Trade information | MOQ, lead time, packaging, port of loading | Shared commercial terms |
 | CTA copy | "Get a Quote", "Request Samples" | Conversion-critical |

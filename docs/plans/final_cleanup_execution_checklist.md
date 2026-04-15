@@ -44,13 +44,6 @@ Tasks:
   - `EMAIL_REPLY_TO`
   - `CACHE_INVALIDATION_SECRET`
   - `ADMIN_API_TOKEN`
-  - `WHATSAPP_API_KEY`
-  - `WHATSAPP_ACCESS_TOKEN`
-  - `WHATSAPP_PHONE_NUMBER_ID`
-  - `WHATSAPP_BUSINESS_ACCOUNT_ID`
-  - `WHATSAPP_WEBHOOK_VERIFY_TOKEN`
-  - `WHATSAPP_APP_SECRET`
-  - `NEXT_PUBLIC_WHATSAPP_NUMBER`
   - `NEXT_PUBLIC_GA_MEASUREMENT_ID`
   - `NEXT_PUBLIC_VERCEL_ANALYTICS_ID`
   - `GOOGLE_SITE_VERIFICATION`
@@ -72,7 +65,6 @@ Tasks:
 - Review remaining app-owned layout-level script cost:
   - theme chain
   - cookie-consent chain
-  - WhatsApp chain
   - attribution chain
 - Write a lazy / idle / route-scoped loading policy for optional UI.
 - Add guardrails so later changes do not reintroduce unnecessary global client cost.
@@ -92,7 +84,6 @@ Tasks:
   - Contact form
   - language switcher
   - cookie preferences
-  - WhatsApp floating chat
   - mobile navigation
 - Keep Contact failure-state behavior explicit when third-party services are unavailable or degraded.
 - Verify focus return, Escape handling, and landmark semantics stay stable after future changes.
@@ -142,13 +133,6 @@ Current state:
 - `EMAIL_REPLY_TO`: reply-to address
 - `CACHE_INVALIDATION_SECRET`: cache invalidation API protection
 - `ADMIN_API_TOKEN`: admin-protected contact API access
-- `WHATSAPP_API_KEY`: protects the WhatsApp send API route
-- `WHATSAPP_ACCESS_TOKEN`: Meta WhatsApp API access
-- `WHATSAPP_PHONE_NUMBER_ID`: WhatsApp sending identity
-- `WHATSAPP_BUSINESS_ACCOUNT_ID`: WhatsApp business account linkage
-- `WHATSAPP_WEBHOOK_VERIFY_TOKEN`: WhatsApp webhook verification
-- `WHATSAPP_APP_SECRET`: webhook signature verification / app security
-- `NEXT_PUBLIC_WHATSAPP_NUMBER`: enables the public WhatsApp entry point
 
 ### Optional / Platform / Analytics
 - `NEXT_PUBLIC_GA_MEASUREMENT_ID`: GA4 measurement

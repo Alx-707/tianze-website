@@ -17,9 +17,8 @@
 | Submit inquiry form (quote request) | Contact page, product pages | # inquiries/month, inquiry-to-quote rate |
 | Submit sample request | Product pages, homepage CTA | # sample requests/month |
 | Book technical consultation | Equipment page, custom molds page | # bookings/month |
-| WhatsApp contact initiation | Floating button, contact page | # conversations started/month |
 
-**Preferred first-response channel: Email** (not WhatsApp). WhatsApp is secondary/supplementary.
+**Preferred first-response channel: Email.** 当前活跃联系路径是 inquiry form、email 和 phone。
 
 ### Secondary Conversions (indicate serious intent)
 
@@ -57,7 +56,7 @@
 
 | Metric | Target | Measurement |
 |--------|--------|------------|
-| Monthly inquiries (all channels) | Baseline: establish in first 3 months | GA4 form submission events + WhatsApp clicks |
+| Monthly inquiries (all channels) | Baseline: establish in first 3 months | GA4 inquiry / contact form submission events |
 | Inquiry quality rate | > 50% from target personas | Owner scores each inquiry: is this buyer someone we actually want to serve? (distributor/contractor/manufacturer = quality; trading company seeking lowest price = not quality) |
 | Inquiry-to-quote conversion | Baseline: establish | Owner tracks manually |
 | Avg. time to first inquiry response | < 24 hours | Owner tracks |

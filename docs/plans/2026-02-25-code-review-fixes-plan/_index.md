@@ -17,8 +17,8 @@
 ## Execution Plan
 
 ### Phase A: 安全修复（高优先级）
-- [Task 001: Webhook 签名验证 — 添加测试](./task-001-webhook-signature-tests.md)
-- [Task 002: Webhook 签名验证 — 修复实现](./task-002-webhook-signature-fix.md)
+- Task 001 / Task 002 已于 2026-04-14 因 WhatsApp 功能退场归档。
+
 
 ### Phase B: 代码清理（中优先级）
 - [Task 003: 清理 sanitizeForDatabase 死代码](./task-003-remove-sanitize-dead-code.md)
@@ -69,8 +69,7 @@ Task 间技术依赖仅存在于 Red→Green 配对内（001→002, 004→005, 0
 
 | 操作 | 文件 | 改动量 |
 |------|------|--------|
-| **修改** | `src/lib/whatsapp-service.ts` | ~15 行 |
-| **修改** | `src/lib/__tests__/whatsapp-service.test.ts` | +30 行 |
+| **归档** | WhatsApp webhook workstream | 2026-04-14 retired before launch |
 | **删除** | `src/lib/security-validation.ts` (sanitizeForDatabase 函数) | -15 行 |
 | **修改** | `src/lib/__tests__/security-validation.test.ts` | -40 行 |
 | **修改** | `src/lib/content-parser.ts` | ~40 行（sync → async） |

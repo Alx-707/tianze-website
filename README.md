@@ -86,7 +86,6 @@ TURNSTILE_SECRET_KEY=你的服务端私钥
 ## ⚙️ 配置驱动特性
 
 - **联系表单配置**：`src/config/contact-form-config.ts` 提供字段顺序、启用状态以及校验配置，并通过 `buildFormFieldsFromConfig` 与 `createContactFormSchemaFromConfig` 同步前后端字段定义。
-- **WhatsApp 支持**：`FEATURE_FLAGS.ENABLE_WHATSAPP_CHAT`（可通过 `ENABLE_WHATSAPP_CHAT` 环境变量关闭）配合 `SITE_CONFIG.contact.whatsappNumber`（可通过 `NEXT_PUBLIC_WHATSAPP_NUMBER` 覆盖）自动在右下角注入 `WhatsAppFloatingButton`。
 - **主题与变量**：`src/app/globals.css` 定义品牌色、布局与 CSS 变量，通过 Tailwind CSS 4 的 `@theme inline` 和 `:root/.dark` 实现明暗主题切换。
 
 ## 🔧 维护与扩展
@@ -223,7 +222,7 @@ pnpm quality:gate           # 类型+lint+质量关卡
 pnpm quality:quick:staged   # 暂存区快速质量检查
 pnpm release:verify         # 当前统一发布门禁
 pnpm smoke:cf:preview       # Cloudflare 本地页面/跳转/cookie/header smoke
-pnpm smoke:cf:preview:strict # 诊断用本地严格 smoke（含 /api/health）
+pnpm smoke:cf:preview:strict # 当前默认本地严格 smoke（含 /api/health），失败视为回归信号
 pnpm smoke:cf:deploy -- --base-url <url> # 真实部署后的最终 Cloudflare smoke
 pnpm arch:check             # 依赖与架构检查
 pnpm circular:check         # 循环依赖检测
@@ -275,7 +274,6 @@ AIRTABLE_BASE_ID=
 - `EMAIL_REPLY_TO`
 - `CACHE_INVALIDATION_SECRET`
 - `ADMIN_API_TOKEN`
-- `NEXT_PUBLIC_WHATSAPP_NUMBER`
 - `NEXT_PUBLIC_GA_MEASUREMENT_ID`
 - `NEXT_PUBLIC_VERCEL_ANALYTICS_ID`
 - `GOOGLE_SITE_VERIFICATION`

@@ -37,7 +37,7 @@ CI=1 pnpm test:e2e
 - `build` before `build:cf` because both lines still share the same build-artifact family and stale `.next` state can still mislead verification.
 - `smoke:cf:preview` after `build:cf` because Route B treats stock local preview as the canonical local Cloudflare proof lane.
 - E2E last because it is the heaviest proof step.
-- If the change rewires single-site truth or cutover gates, run `pnpm preflight:site-cutover:strict` before signoff.
+- If the change rewires single-site truth or cutover gates, run `pnpm truth:check`, `pnpm review:translation-quartet`, and `pnpm review:translate-compat` before signoff.
 - Preview deploy workflows must use `pnpm preview:preflight:cf` before deploy, while production deploys continue to use `pnpm release:verify`.
 
 ## Site Cutover Preflight
@@ -50,7 +50,7 @@ pnpm validate:translations
 pnpm build
 ```
 
-Only use the strict variant (`pnpm preflight:site-cutover:strict`) when the branch is intentionally proving skeleton removal readiness. Deploy/release workflows must not rely on `VALIDATE_CONFIG_SKIP_RUNTIME=true` for final release proof.
+For final signoff, treat `pnpm truth:check`, `pnpm review:translation-quartet`, and `pnpm review:translate-compat` as the baseline single-site truth proof. Deploy/release workflows must not rely on `VALIDATE_CONFIG_SKIP_RUNTIME=true` for final release proof.
 
 ## Preview Degraded-Mode Exception Contract
 - Current contract source: retired from the main tree

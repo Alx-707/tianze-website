@@ -200,12 +200,12 @@ describe("Badge Custom Props - Advanced Tests", () => {
       const { rerender } = render(<DynamicBadge color="red" />);
 
       let badge = screen.getByText("Dynamic Style");
-      expect(badge).toHaveStyle("color: rgb(255, 0, 0)");
+      expect((badge as HTMLElement).style.color).toBe("red");
 
       rerender(<DynamicBadge color="blue" />);
 
       badge = screen.getByText("Dynamic Style");
-      expect(badge).toHaveStyle("color: rgb(0, 0, 255)");
+      expect((badge as HTMLElement).style.color).toBe("blue");
     });
 
     it("supports complex style objects", () => {
@@ -222,12 +222,13 @@ describe("Badge Custom Props - Advanced Tests", () => {
 
       const badge = screen.getByText("Complex Style");
       // 分项断言，避免序列化差异导致的误报
-      const cs = getComputedStyle(badge as HTMLElement);
+      const element = badge as HTMLElement;
+      const cs = getComputedStyle(element);
       expect(cs.borderTopWidth).toBe("2px");
       expect(cs.borderTopStyle).toBe("solid");
-      expect(badge).toHaveStyle("border-radius: 8px");
-      expect(badge).toHaveStyle("padding: 10px");
-      expect(badge).toHaveStyle("margin: 5px");
+      expect(element.style.borderRadius).toBe("8px");
+      expect(element.style.padding).toBe("10px");
+      expect(element.style.margin).toBe("5px");
       // 对于 linear-gradient，断言 style 属性包含声明
       expect((badge as HTMLElement).getAttribute("style") || "").toMatch(
         /background-image:\s*linear-gradient/,
@@ -249,7 +250,9 @@ describe("Badge Custom Props - Advanced Tests", () => {
       );
 
       const badge = screen.getByText("CSS Variables");
-      expect(badge).toHaveStyle("--custom-color: purple");
+      expect(
+        (badge as HTMLElement).style.getPropertyValue("--custom-color"),
+      ).toBe("purple");
     });
 
     it("handles event propagation correctly", () => {

@@ -109,7 +109,7 @@ export default defineConfig({
         "instrumentation-client.ts",
         "sentry.*.config.ts",
         // 排除自动生成的文件
-
+        "**/*.generated.*",
         "content/config/**",
         "**/*.tsbuildinfo",
         // 排除报告和文档目录
@@ -135,8 +135,6 @@ export default defineConfig({
         "src/types/i18n.ts",
         "src/types/mdx.ts",
         "src/types/content.ts",
-        "src/types/whatsapp*/**",
-        "src/types/whatsapp*.ts",
         // 注意：src/types/index.ts, test-types.ts, react19.ts 包含运行时函数，不排除
       ],
       // 覆盖率阈值由 scripts/quality-gate.js 统一管理

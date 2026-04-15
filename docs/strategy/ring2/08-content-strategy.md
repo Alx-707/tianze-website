@@ -118,7 +118,7 @@ Buyer stage at arrival: **already have some understanding** (owner confirmed). C
 | Stage | Content | Priority |
 |-------|---------|----------|
 | Decision | Inquiry form (routed by business line) | P0 |
-| Decision | Email as primary channel, WhatsApp as secondary | P0 |
+| Decision | Inquiry form + email + phone as active channels | P0 |
 | Decision | Response time commitment (< 24 hours) | P1 |
 | Decision | Office location + factory address | P1 |
 

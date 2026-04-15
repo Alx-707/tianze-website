@@ -77,7 +77,7 @@ Homepage → Products/Custom → Custom Manufacturing
 | Element | Behavior | Purpose |
 |---------|----------|---------|
 | Header CTA button | "Contact" — always visible in nav | 1-click to inquiry from anywhere |
-| Floating WhatsApp | Bottom-right, persistent | Secondary channel for quick questions |
+| Footer contact details | Email + phone, always reachable from shared layout/footer surfaces | Secondary fallback for copy-paste or quick calls |
 | Email in footer | Always visible | Lowest-friction contact for copy-paste |
 
 ## 2-Click Rule Verification
