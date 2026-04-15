@@ -63,6 +63,41 @@ describe("rate-limit-store", () => {
       );
     });
 
+    it("throws when the atomic increment transaction returns an invalid ttl", async () => {
+      const fetchMock = vi.fn(
+        async () =>
+          new Response(
+            JSON.stringify([{ result: 1 }, { result: 1 }, { result: -1 }]),
+            {
+              status: 200,
+            },
+          ),
+      );
+      vi.stubGlobal("fetch", fetchMock);
+
+      const store = new RedisRateLimitStore("https://example.upstash.io", "t");
+
+      await expect(store.increment("idem:key", 60_000)).rejects.toThrow(
+        "invalid TTL",
+      );
+    });
+
+    it("returns null when GET returns no count", async () => {
+      const fetchMock = vi.fn(
+        async () =>
+          new Response(
+            JSON.stringify({ result: [{ result: null }, { result: 45_000 }] }),
+            {
+              status: 200,
+            },
+          ),
+      );
+      vi.stubGlobal("fetch", fetchMock);
+
+      const store = new RedisRateLimitStore("https://example.upstash.io", "t");
+
+      await expect(store.get("idem:key")).resolves.toBeNull();
+    });
     it("deletes via DEL command body instead of HTTP DELETE path", async () => {
       const fetchMock = vi.fn(
         async () =>

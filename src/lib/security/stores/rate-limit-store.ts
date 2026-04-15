@@ -117,11 +117,21 @@ class RedisRateLimitStore implements RateLimitStore {
     const [countResult, ttlResult] = Array.isArray(data.result)
       ? data.result
       : [];
-    const rawCount = countResult?.result ?? countResult;
+    const rawCount =
+      typeof countResult === "object" &&
+      countResult !== null &&
+      "result" in countResult
+        ? countResult.result
+        : countResult;
     if (rawCount === null || rawCount === undefined) {
       return null;
     }
-    const count = parseInt(rawCount, 10);
+    const count = parseInt(String(rawCount), 10);
+    if (Number.isNaN(count)) {
+      throw new Error(
+        "[Rate Limit] Invalid Upstash response: expected numeric count",
+      );
+    }
     const ttlMs = Math.max(0, Number(ttlResult?.result ?? ttlResult) || 0);
     const expiresAt = Date.now() + ttlMs;
     return { count, expiresAt };

@@ -120,6 +120,38 @@ describe("idempotency-store", () => {
       );
     });
 
+    it("returns null when Redis GET resolves to an empty result", async () => {
+      const fetchMock = vi.fn(
+        async () =>
+          new Response(JSON.stringify({ result: null }), { status: 200 }),
+      );
+      vi.stubGlobal("fetch", fetchMock);
+
+      const store = new RedisIdempotencyStore(
+        "https://example.upstash.io",
+        "t",
+      );
+
+      await expect(store.get("idem:key")).resolves.toBeNull();
+    });
+
+    it("throws when Redis GET returns a non-200 response", async () => {
+      const fetchMock = vi.fn(
+        async () =>
+          new Response(JSON.stringify({ error: "boom" }), {
+            status: 500,
+            statusText: "boom",
+          }),
+      );
+      vi.stubGlobal("fetch", fetchMock);
+
+      const store = new RedisIdempotencyStore(
+        "https://example.upstash.io",
+        "t",
+      );
+
+      await expect(store.get("idem:key")).rejects.toThrow("Upstash get failed");
+    });
     it("should delete entries via DEL command body instead of HTTP DELETE path", async () => {
       const fetchMock = vi.fn(
         async () =>
