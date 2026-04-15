@@ -562,31 +562,6 @@ test.describe("Navigation System", () => {
       await expect(manageButton).toBeFocused();
     });
 
-    test("should restore focus to the WhatsApp trigger after closing chat with Escape", async ({
-      page,
-    }) => {
-      const chatTrigger = page.locator(
-        'button[aria-controls="whatsapp-chat-dialog"]',
-      );
-
-      const isVisible = await chatTrigger.isVisible().catch(() => false);
-      test.skip(
-        !isVisible,
-        "WhatsApp trigger is not enabled in this environment",
-      );
-
-      await expect(chatTrigger).toHaveAttribute("aria-haspopup", "dialog");
-      await chatTrigger.focus();
-      await page.keyboard.press("Enter");
-
-      const chatDialog = page.locator("#whatsapp-chat-dialog");
-      await expect(chatDialog).toBeVisible();
-
-      await page.keyboard.press("Escape");
-      await expect(chatDialog).not.toBeVisible();
-      await expect(chatTrigger).toBeFocused();
-    });
-
     test("should work with high contrast mode", async ({ page }) => {
       // Emulate high contrast preference
       await page.emulateMedia({ forcedColors: "active" });

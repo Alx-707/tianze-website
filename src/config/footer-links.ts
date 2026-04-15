@@ -4,18 +4,14 @@
  * 目标：为后续 Footer 组件提供可复用的数据结构、主题配色/间距/字体 token 与 hover 方案。
  * 采样来源：docs/vercel-style-capture.md（视口 1512px，dark/light 双主题）。
  */
-import {
-  FOOTER_STYLE_TOKENS,
-  WHATSAPP_STYLE_TOKENS,
-} from "@/config/footer-style-tokens";
+import { FOOTER_STYLE_TOKENS } from "@/config/footer-style-tokens";
 import {
   SINGLE_SITE_FOOTER_COLUMNS,
   type SiteFooterColumnConfig,
   type SiteFooterLinkItem,
 } from "@/config/single-site";
 
-export { FOOTER_STYLE_TOKENS, WHATSAPP_STYLE_TOKENS };
-export type { WhatsAppStyleTokens } from "@/config/footer-style-tokens";
+export { FOOTER_STYLE_TOKENS };
 
 export type FooterLinkItem = SiteFooterLinkItem;
 export type FooterColumnConfig = SiteFooterColumnConfig;

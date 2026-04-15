@@ -28,7 +28,6 @@ describe("site-config", () => {
     contact: {
       phone: "+1-555-0123",
       email: "[CONTACT_EMAIL]",
-      whatsappNumber: "+1-555-0123",
     },
   } as const satisfies SiteConfig;
 

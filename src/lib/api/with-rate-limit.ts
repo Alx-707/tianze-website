@@ -14,7 +14,7 @@
  *
  * // With custom key strategy
  * export const POST = withRateLimit(
- *   'whatsapp',
+ *   'csp',
  *   async (req, { clientIP }) => { ... },
  *   getApiKeyPriorityKey
  * );

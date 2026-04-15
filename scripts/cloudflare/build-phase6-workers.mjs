@@ -30,15 +30,9 @@ const WORKER_NAME_SUFFIX = {
   web: "web",
   apiLead: "api-lead",
   apiOps: "api-ops",
-  apiWhatsapp: "api-whatsapp",
 };
 
 const API_ROUTE_BINDING_RULES = [
-  {
-    match: (pathname) => pathname.startsWith("/api/whatsapp/"),
-    binding: "WORKER_API_WHATSAPP",
-    target: "apiWhatsapp",
-  },
   {
     match: (pathname) =>
       pathname === "/api/cache/invalidate" || pathname === "/api/csp-report",
@@ -73,7 +67,6 @@ function normalizeWorkerNames(baseName) {
     web: `${baseName}-${WORKER_NAME_SUFFIX.web}`,
     apiLead: `${baseName}-${WORKER_NAME_SUFFIX.apiLead}`,
     apiOps: `${baseName}-${WORKER_NAME_SUFFIX.apiOps}`,
-    apiWhatsapp: `${baseName}-${WORKER_NAME_SUFFIX.apiWhatsapp}`,
   };
 }
 

@@ -49,11 +49,6 @@ export const RATE_LIMIT_PRESETS = {
     windowMs: MINUTE_MS,
     failureMode: "closed" as const,
   },
-  whatsapp: {
-    maxRequests: COUNT_FIVE,
-    windowMs: MINUTE_MS,
-    failureMode: "open" as const,
-  },
   csp: { maxRequests: 100, windowMs: MINUTE_MS, failureMode: "open" as const },
   // Security-sensitive: deny on storage failure to prevent brute-force bypass
   turnstile: {
@@ -115,8 +110,6 @@ function getRateLimitConfig(preset: RateLimitPreset): {
       return RATE_LIMIT_PRESETS.inquiry;
     case "subscribe":
       return RATE_LIMIT_PRESETS.subscribe;
-    case "whatsapp":
-      return RATE_LIMIT_PRESETS.whatsapp;
     case "csp":
       return RATE_LIMIT_PRESETS.csp;
     case "turnstile":

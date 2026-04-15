@@ -9,21 +9,6 @@ export type { SiteConfig } from "@/config/single-site";
 export const SITE_CONFIG = SINGLE_SITE_CONFIG;
 
 /**
- * Default placeholder phone number used when no real number is configured.
- * Shared across layout (floating button gate) and contact page (coming-soon state).
- */
-const WHATSAPP_PLACEHOLDER = "+86-518-0000-0000";
-
-/**
- * Check if the WhatsApp number is properly configured (not the default placeholder).
- */
-export function isWhatsAppConfigured(
-  number: string | undefined = SITE_CONFIG.contact.whatsappNumber,
-): boolean {
-  return number !== undefined && number !== WHATSAPP_PLACEHOLDER;
-}
-
-/**
  * Production placeholder pattern - matches [PLACEHOLDER_NAME] format
  * Used to detect unconfigured values that should be replaced before production
  */
@@ -61,12 +46,10 @@ export function getUnconfiguredPlaceholders(
 }> {
   const placeholders: Array<{ path: string; value: string }> = [];
 
-  // Check top-level string values
   if (isPlaceholder(config.name)) {
     placeholders.push({ path: "SITE_CONFIG.name", value: config.name });
   }
 
-  // Check SEO config
   if (isPlaceholder(config.seo.defaultTitle)) {
     placeholders.push({
       path: "SITE_CONFIG.seo.defaultTitle",
@@ -80,7 +63,6 @@ export function getUnconfiguredPlaceholders(
     });
   }
 
-  // Check social links
   if (isPlaceholder(config.social.twitter)) {
     placeholders.push({
       path: "SITE_CONFIG.social.twitter",
@@ -100,7 +82,6 @@ export function getUnconfiguredPlaceholders(
     });
   }
 
-  // Check contact info
   if (isPlaceholder(config.contact.email)) {
     placeholders.push({
       path: "SITE_CONFIG.contact.email",
@@ -123,7 +104,6 @@ export function validateSiteConfig(config: SiteConfig = SITE_CONFIG): {
   const warnings: string[] = [];
   const isProduction = process.env.NODE_ENV === "production";
 
-  // Check base URL
   if (!isBaseUrlConfigured(config.baseUrl)) {
     const msg = `SITE_CONFIG.baseUrl is not configured for production: ${config.baseUrl}`;
     if (isProduction) {
@@ -133,7 +113,6 @@ export function validateSiteConfig(config: SiteConfig = SITE_CONFIG): {
     }
   }
 
-  // Check placeholders
   const placeholders = getUnconfiguredPlaceholders(config);
   for (const { path, value } of placeholders) {
     const msg = `${path} contains placeholder value: ${value}`;

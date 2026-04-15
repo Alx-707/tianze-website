@@ -48,10 +48,6 @@ vi.mock("@t3-oss/env-nextjs", () => ({
     ADMIN_TOKEN: "test-admin-token",
     NEXT_PUBLIC_BASE_URL: "https://example.com",
     NEXT_PUBLIC_VERCEL_URL: "example.vercel.app",
-    WHATSAPP_ACCESS_TOKEN: "test-whatsapp-token",
-    WHATSAPP_PHONE_NUMBER_ID: "test-phone-id",
-    WHATSAPP_BUSINESS_ACCOUNT_ID: "test-business-id",
-    WHATSAPP_WEBHOOK_VERIFY_TOKEN: "test-webhook-token",
   })),
 }));
 
@@ -72,10 +68,6 @@ vi.mock("@/lib/env", () => {
     NEXT_PUBLIC_VERCEL_URL: "example.vercel.app",
     NEXT_PUBLIC_TURNSTILE_SITE_KEY: "test-site-key-12345",
     NEXT_PUBLIC_TEST_MODE: false,
-    WHATSAPP_ACCESS_TOKEN: "test-whatsapp-token",
-    WHATSAPP_PHONE_NUMBER_ID: "test-phone-id",
-    WHATSAPP_BUSINESS_ACCOUNT_ID: "test-business-id",
-    WHATSAPP_WEBHOOK_VERIFY_TOKEN: "test-webhook-token",
   } as Record<string, string | boolean | number | undefined>;
 
   return {
@@ -94,8 +86,6 @@ vi.mock("@/lib/env", () => {
       isDevelopment: () => false,
       isProduction: () => false,
       isTest: () => true,
-      getWhatsAppToken: () => "test-whatsapp-token",
-      getWhatsAppPhoneId: () => "test-phone-id",
       getTurnstileSecret: () => "test-secret-key",
       getTurnstileSiteKey: () => "test-site-key",
       getResendApiKey: () => "test-resend-key",

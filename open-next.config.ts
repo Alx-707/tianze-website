@@ -43,15 +43,6 @@ const splitFunctions: Record<string, SplittedFunctionOptions> = {
     routes: ["app/api/cache/invalidate/route", "app/api/csp-report/route"],
     patterns: ["/api/cache/invalidate", "/api/csp-report"],
   },
-  apiWhatsapp: {
-    runtime: "node",
-    placement: "regional",
-    // Keep aligned with the default worker minify policy until the repo has fresh
-    // build + preview + deploy proof with minification re-enabled.
-    minify: false,
-    routes: ["app/api/whatsapp/send/route", "app/api/whatsapp/webhook/route"],
-    patterns: ["/api/whatsapp/*"],
-  },
 };
 
 cloudflareConfig.functions = splitFunctions;

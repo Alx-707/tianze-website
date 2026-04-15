@@ -14,7 +14,7 @@ export interface CookieConsent {
   necessary: true;
   /** Analytics cookies (Vercel Analytics, Speed Insights) */
   analytics: boolean;
-  /** Marketing cookies (WhatsApp tracking, future ads) */
+  /** Marketing cookies (future ads and campaign attribution) */
   marketing: boolean;
 }
 

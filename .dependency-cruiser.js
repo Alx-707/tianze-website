@@ -185,7 +185,6 @@ module.exports = {
           "^src/lib/theme-analytics",
           "^src/lib/content(?:-query|-)",
           "^src/lib/resend",
-          "^src/lib/whatsapp",
           "^src/lib/airtable",
         ].join("|"),
         // 豁免类型定义和常量

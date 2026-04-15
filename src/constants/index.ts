@@ -5,7 +5,6 @@
  * 提供项目中所有常量的集中访问点
  *
  * 模块结构:
- * - ./whatsapp-errors.ts  - WhatsApp API 错误码 (语义化命名)
  * - ./validation-limits.ts - 验证限制和约束常量
  * - ./count.ts            - 基础计数和数值常量
  * - ./time.ts             - 时间相关常量
@@ -14,50 +13,9 @@
  */
 
 // ============================================================================
-// WhatsApp 错误码 (新增领域模块)
-// ============================================================================
-export {
-  // 语义化命名
-  WA_ERR_GENERIC_USER,
-  WA_ERR_TEMPORARY,
-  WA_ERR_LIMIT_REACHED,
-  WA_ERR_PERMISSION,
-  WA_ERR_AUTH,
-  WA_ERR_ACCESS_TOKEN,
-  WA_ERR_POLICY_BLOCK,
-  WA_ERR_RATE_LIMIT,
-  WA_ERR_API_TEMPORARY,
-  WA_ERR_API_RATE_LIMIT,
-  WA_ERR_API_MISSING_PARAM,
-  WA_ERR_API_INVALID_PARAM,
-  WA_ERR_API_TIMEOUT,
-  WA_ERR_API_UNAVAILABLE,
-  WA_ERR_API_INVALID_PHONE,
-  WA_ERR_API_UNDELIVERABLE,
-  WA_ERR_API_REENGAGEMENT,
-  WA_ERR_API_UNSUPPORTED_MSG,
-  WA_ERR_MEDIA_DOWNLOAD,
-  WA_ERR_MEDIA_UPLOAD,
-  // 错误码集合
-  RETRYABLE_WA_ERRORS,
-  AUTH_WA_ERRORS,
-  RATE_LIMIT_WA_ERRORS,
-} from "./whatsapp-errors";
-
-// ============================================================================
 // 验证限制常量 (新增领域模块)
 // ============================================================================
 export {
-  // 语义化命名
-  MAX_WA_MESSAGE_LENGTH,
-  MAX_WA_BUTTON_ID_LENGTH,
-  MAX_WA_BUTTON_TITLE_LENGTH,
-  MAX_WA_BUTTONS_COUNT,
-  MAX_WA_LIST_ROWS_COUNT,
-  MAX_WA_ROW_ID_LENGTH,
-  MAX_WA_ROW_TITLE_LENGTH,
-  MAX_WA_ROW_DESC_LENGTH,
-  MAX_WA_TEMPLATE_PARAM_LENGTH,
   // Lead pipeline
   MAX_LEAD_EMAIL_LENGTH,
   MAX_LEAD_COMPANY_LENGTH,
@@ -159,7 +117,6 @@ export {
   // 验证相关
   PHONE_MAX_DIGITS,
   DEFAULT_ICON_SIZE,
-  WA_ROW_DESC_MAX_LENGTH,
   // 监控阈值
   UPTIME_UNHEALTHY_THRESHOLD,
   UPTIME_DEGRADED_THRESHOLD,
