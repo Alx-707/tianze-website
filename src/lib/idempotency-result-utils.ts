@@ -13,18 +13,10 @@ import {
 } from "@/lib/idempotency-utils";
 import type { IdempotencyStore } from "@/lib/security/stores/idempotency-store";
 
-/** Tracks the fingerprint associated with each in-flight key */
 const inFlightFingerprints = new Map<string, string>();
-
-/** Track pending results */
 const pendingResults = new Map<string, Promise<unknown>>();
-
-/** Maximum in-flight entries across all Maps (prevents unbounded memory growth) */
 const MAX_IN_FLIGHT_ENTRIES = 1000;
 
-/**
- * Get required missing result validation for idempotent result calls
- */
 export function getRequiredMissingResult<T>(
   required: boolean,
   idempotencyKey: string | null,
@@ -37,9 +29,6 @@ export function getRequiredMissingResult<T>(
   return { ok: false, reason: "missing" };
 }
 
-/**
- * Get in-flight result from pending cache
- */
 export async function getInFlightIdempotentResult<T>(
   idempotencyKey: string,
   fingerprint: string,
@@ -61,9 +50,6 @@ export async function getInFlightIdempotentResult<T>(
   }
 }
 
-/**
- * Get stored result from IdempotencyStore
- */
 export async function getStoredIdempotentResult<T>(
   idempotencyKey: string,
   fingerprint: string,
@@ -89,9 +75,6 @@ export async function getStoredIdempotentResult<T>(
   return waitForCompletionResult<T>(idempotencyKey, store);
 }
 
-/**
- * Claim idempotent result key atomically (SETNX pattern)
- */
 export function claimIdempotentResultKey(
   idempotencyKey: string,
   context: {
@@ -121,9 +104,6 @@ export function claimIdempotentResultKey(
     });
 }
 
-/**
- * Complete idempotent result work (run handler, persist result, register in-flight)
- */
 export function completeIdempotentResultWork<T>(
   idempotencyKey: string,
   context: {
@@ -155,8 +135,6 @@ export function completeIdempotentResultWork<T>(
       inFlightFingerprints.delete(idempotencyKey);
     }
 
-    // Handler finished. Fail closed: do not delete the claim after success, even
-    // if persisting the COMPLETED record fails.
     try {
       await store.set(
         idempotencyKey,
@@ -187,18 +165,19 @@ export function completeIdempotentResultWork<T>(
   return work;
 }
 
-/**
- * Clear a single idempotent result key
- */
 export function clearIdempotentResultKey(key: string): void {
   pendingResults.delete(key);
   inFlightFingerprints.delete(key);
 }
 
-/**
- * Clear all idempotent result keys
- */
 export function clearAllIdempotentResultKeys(): void {
   pendingResults.clear();
   inFlightFingerprints.clear();
+}
+
+export function getIdempotentResultCacheStats() {
+  return {
+    size: pendingResults.size,
+    keys: Array.from(new Set(pendingResults.keys())),
+  };
 }

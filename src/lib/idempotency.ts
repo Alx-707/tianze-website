@@ -34,12 +34,23 @@ import {
   DEFAULT_TTL_MS,
 } from "@/lib/idempotency-utils";
 import {
-  getRequiredMissingResult,
-  getInFlightIdempotentResult,
-  getStoredIdempotentResult,
   claimIdempotentResultKey,
+  clearAllIdempotentResultKeys,
+  clearIdempotentResultKey,
   completeIdempotentResultWork,
+  getIdempotentResultCacheStats,
+  getInFlightIdempotentResult,
+  getRequiredMissingResult,
+  getStoredIdempotentResult,
 } from "@/lib/idempotency-result-utils";
+import {
+  checkInFlight,
+  clearAllRequestIdempotencyKeys,
+  clearRequestIdempotencyKey,
+  getRequestIdempotencyCacheStats,
+  registerInFlight,
+  setInFlightFingerprint,
+} from "@/lib/idempotency-runtime-cache";
 
 const HTTP_CONFLICT = 409;
 
@@ -53,18 +64,8 @@ function getIdempotencyStore(): IdempotencyStore {
   return idempotencyStore;
 }
 
-/**
- * Hot-cache Map tracks in-flight PENDING requests for fast duplicate detection.
- * Cleared by clearAllIdempotencyKeys() — does NOT affect the persistent store.
- */
-const pendingRequests = new Map<string, Promise<NextResponse>>();
-const pendingResults = new Map<string, Promise<unknown>>();
-
 /** Maximum allowed length for an Idempotency-Key header (prevents memory abuse) */
 const MAX_IDEMPOTENCY_KEY_LENGTH = 256;
-
-/** Maximum in-flight entries across all Maps (prevents unbounded memory growth) */
-const MAX_IN_FLIGHT_ENTRIES = 1000;
 
 /**
  * 从请求中提取幂等键
@@ -105,48 +106,6 @@ export function createRequestFingerprint(
 interface IdempotencyHandlerContext {
   fingerprint: string;
   ttlMs: number;
-}
-
-/** Track the fingerprint associated with each in-flight key */
-const inFlightFingerprints = new Map<string, string>();
-
-/**
- * Fast path: check if an in-flight promise exists for this key.
- * Returns the in-flight promise, a 409 conflict response, or null to continue.
- */
-/**
- * Register an in-flight promise for fast duplicate detection.
- * Guarded by MAX_IN_FLIGHT_ENTRIES to prevent unbounded memory growth.
- */
-function registerInFlight(
-  idempotencyKey: string,
-  fingerprint: string,
-  work: Promise<NextResponse>,
-): void {
-  if (pendingRequests.size < MAX_IN_FLIGHT_ENTRIES) {
-    pendingRequests.set(idempotencyKey, work);
-    inFlightFingerprints.set(idempotencyKey, fingerprint);
-  }
-}
-
-function checkInFlight(
-  idempotencyKey: string,
-  fingerprint: string,
-): NextResponse | Promise<NextResponse> | null {
-  const inFlight = pendingRequests.get(idempotencyKey);
-  if (!inFlight) return null;
-
-  const existingFingerprint = inFlightFingerprints.get(idempotencyKey);
-  if (existingFingerprint && existingFingerprint !== fingerprint) {
-    return NextResponse.json(
-      {
-        success: false,
-        errorCode: API_ERROR_CODES.IDEMPOTENCY_KEY_REUSED,
-      },
-      { status: HTTP_CONFLICT },
-    );
-  }
-  return inFlight;
 }
 
 /**
@@ -227,7 +186,7 @@ async function claimIdempotencyKeyAtomic(
     ttlMs,
   );
   if (claimed) {
-    inFlightFingerprints.set(idempotencyKey, fingerprint);
+    setInFlightFingerprint(idempotencyKey, fingerprint);
   }
   return claimed;
 }
@@ -339,8 +298,7 @@ async function handleWithIdempotencyKey<T>(
       }
       throw error;
     } finally {
-      pendingRequests.delete(idempotencyKey);
-      inFlightFingerprints.delete(idempotencyKey);
+      clearRequestIdempotencyKey(idempotencyKey);
     }
   })();
 
@@ -499,9 +457,8 @@ export { generateIdempotencyKey } from "@/lib/idempotency-key";
  * 清除指定幂等键（用于测试或手动清理）
  */
 export function clearIdempotencyKey(key: string): void {
-  pendingRequests.delete(key);
-  pendingResults.delete(key);
-  inFlightFingerprints.delete(key);
+  clearRequestIdempotencyKey(key);
+  clearIdempotentResultKey(key);
 }
 
 /**
@@ -510,9 +467,8 @@ export function clearIdempotencyKey(key: string): void {
  * cross-process/restart persistence.
  */
 export function clearAllIdempotencyKeys(): void {
-  pendingRequests.clear();
-  pendingResults.clear();
-  inFlightFingerprints.clear();
+  clearAllRequestIdempotencyKeys();
+  clearAllIdempotentResultKeys();
 }
 
 /**
@@ -527,10 +483,11 @@ export function resetIdempotencyState(): void {
  * 获取缓存统计信息
  */
 export function getIdempotencyCacheStats() {
+  const requestStats = getRequestIdempotencyCacheStats();
+  const resultStats = getIdempotentResultCacheStats();
+
   return {
-    size: pendingRequests.size + pendingResults.size,
-    keys: Array.from(
-      new Set([...pendingRequests.keys(), ...pendingResults.keys()]),
-    ),
+    size: requestStats.size + resultStats.size,
+    keys: Array.from(new Set([...requestStats.keys, ...resultStats.keys])),
   };
 }
