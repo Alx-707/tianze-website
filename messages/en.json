@@ -3,15 +3,6 @@
     "loading": "Loading...",
     "error": "An error occurred",
     "close": "Close",
-    "whatsapp": {
-      "greeting": "Need help?",
-      "responseTime": "Team typically replies within 5 minutes.",
-      "placeholder": "Type your message...",
-      "startChat": "Start WhatsApp Chat",
-      "defaultMessage": "Hi! I'm interested in your products.",
-      "buttonLabel": "Chat with us on WhatsApp",
-      "supportChat": "Support chat"
-    },
     "success": "Success",
     "cancel": "Cancel",
     "confirm": "Confirm",
@@ -769,14 +760,18 @@
           "contactTitle": "Contact Methods",
           "email": "Email",
           "phone": "Phone",
-          "whatsapp": "WhatsApp",
-          "chatNow": "Chat Now",
-          "comingSoon": "Coming Soon",
           "hoursTitle": "Business Hours",
           "weekdays": "Mon - Fri",
           "saturday": "Saturday",
           "sunday": "Sunday",
-          "closed": "Closed"
+          "closed": "Closed",
+          "responseTitle": "What to expect",
+          "responseTimeLabel": "Typical response",
+          "responseTimeValue": "Within 24 business hours",
+          "bestForLabel": "Best for",
+          "bestForValue": "RFQs, product specs, MOQ, samples, and lead-time questions",
+          "prepareLabel": "Helpful details",
+          "prepareValue": "Share product type, size/standard, quantity, destination market, and timeline"
         }
       }
     },

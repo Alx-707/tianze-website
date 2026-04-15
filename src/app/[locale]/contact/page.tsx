@@ -2,7 +2,6 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
-import { MessageCircle } from "lucide-react";
 import enCritical from "@messages/en/critical.json";
 import enDeferred from "@messages/en/deferred.json";
 import zhCritical from "@messages/zh/critical.json";
@@ -25,9 +24,9 @@ import {
   type Locale as SeoLocale,
 } from "@/lib/seo-metadata";
 import { mergeObjects } from "@/lib/merge-objects";
+import { getContactCopy } from "@/lib/contact/getContactCopy";
 import { generateFAQSchema } from "@/lib/structured-data";
 import { siteFacts } from "@/config/site-facts";
-import { isWhatsAppConfigured as checkWhatsApp } from "@/config/paths/site-config";
 import { COUNT_TWO } from "@/constants";
 
 type Messages = Record<string, unknown>;
@@ -74,12 +73,6 @@ function interpolateMessage(
   });
 }
 
-function buildWhatsAppUrl(whatsappNumber: string | undefined) {
-  return whatsappNumber
-    ? `https://wa.me/${whatsappNumber.replace(/[^0-9]/g, "")}`
-    : undefined;
-}
-
 function buildFaqItems(messages: Messages) {
   const faqValues = {
     established: siteFacts.company.established,
@@ -100,86 +93,6 @@ function buildFaqItems(messages: Messages) {
   }));
 }
 
-function getContactCopy(messages: Messages, locale: string) {
-  const fallbackCopy = getContactPageFallbackCopy(locale);
-
-  return {
-    header: {
-      title:
-        getNestedMessage(messages, "underConstruction.pages.contact.title") ??
-        fallbackCopy.title,
-      description:
-        getNestedMessage(
-          messages,
-          "underConstruction.pages.contact.description",
-        ) ?? fallbackCopy.description,
-    },
-    panel: {
-      contact: {
-        title:
-          getNestedMessage(
-            messages,
-            "underConstruction.pages.contact.panel.contactTitle",
-          ) ?? "Contact Methods",
-        emailLabel:
-          getNestedMessage(
-            messages,
-            "underConstruction.pages.contact.panel.email",
-          ) ?? "Email",
-        phoneLabel:
-          getNestedMessage(
-            messages,
-            "underConstruction.pages.contact.panel.phone",
-          ) ?? "Phone",
-      },
-      hours: {
-        title:
-          getNestedMessage(
-            messages,
-            "underConstruction.pages.contact.panel.hoursTitle",
-          ) ?? "Business Hours",
-        weekdaysLabel:
-          getNestedMessage(
-            messages,
-            "underConstruction.pages.contact.panel.weekdays",
-          ) ?? "Weekdays",
-        saturdayLabel:
-          getNestedMessage(
-            messages,
-            "underConstruction.pages.contact.panel.saturday",
-          ) ?? "Saturday",
-        sundayLabel:
-          getNestedMessage(
-            messages,
-            "underConstruction.pages.contact.panel.sunday",
-          ) ?? "Sunday",
-        closedLabel:
-          getNestedMessage(
-            messages,
-            "underConstruction.pages.contact.panel.closed",
-          ) ?? "Closed",
-      },
-      whatsapp: {
-        label:
-          getNestedMessage(
-            messages,
-            "underConstruction.pages.contact.panel.whatsapp",
-          ) ?? "WhatsApp",
-        chatNow:
-          getNestedMessage(
-            messages,
-            "underConstruction.pages.contact.panel.chatNow",
-          ) ?? "Chat now",
-        comingSoon:
-          getNestedMessage(
-            messages,
-            "underConstruction.pages.contact.panel.comingSoon",
-          ) ?? "Coming soon",
-      },
-    },
-  };
-}
-
 interface ContactPageProps {
   params: Promise<{
     locale: string;
@@ -194,21 +107,15 @@ export async function generateMetadata({
   params,
 }: ContactPageProps): Promise<Metadata> {
   const { locale } = await params;
-  const messages = getMessagesForLocale(locale);
-  const title =
-    getNestedMessage(messages, "underConstruction.pages.contact.title") ??
-    siteFacts.company.name;
-  const description =
-    getNestedMessage(messages, "underConstruction.pages.contact.description") ??
-    "Get in touch with our team for inquiries, support, or partnership opportunities.";
+  const copy = await getContactCopy(locale as Locale);
 
   const metadata = generateMetadataForPath({
     locale: locale as SeoLocale,
     pageType: "contact",
     path: "/contact",
     config: {
-      title,
-      description,
+      title: copy.header.title,
+      description: copy.header.description,
     },
   });
 
@@ -221,29 +128,11 @@ export async function generateMetadata({
   };
 }
 
-interface ContactMethodsCardProps {
-  copy: {
-    title: string;
-    emailLabel: string;
-    phoneLabel: string;
-  };
-  whatsappCopy: {
-    label: string;
-    chatNow: string;
-    comingSoon: string;
-  };
-  isWhatsAppConfigured: boolean;
-  whatsappNumber: string | undefined;
-  whatsAppUrl: string | undefined;
-}
-
 function ContactMethodsCard({
   copy,
-  whatsappCopy,
-  isWhatsAppConfigured,
-  whatsappNumber,
-  whatsAppUrl,
-}: ContactMethodsCardProps) {
+}: {
+  copy: Awaited<ReturnType<typeof getContactCopy>>["panel"]["contact"];
+}) {
   return (
     <Card className="p-6">
       <h3 className="mb-4 text-xl font-semibold">{copy.title}</h3>
@@ -291,27 +180,61 @@ function ContactMethodsCard({
             <p className="text-muted-foreground">{siteFacts.contact.phone}</p>
           </div>
         </div>
+      </div>
+    </Card>
+  );
+}
 
-        <div className="flex items-center space-x-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-            <MessageCircle className="h-5 w-5 text-primary" />
+function ResponseExpectationsCard({
+  responseCopy,
+  hoursCopy,
+}: {
+  responseCopy: Awaited<ReturnType<typeof getContactCopy>>["panel"]["response"];
+  hoursCopy: Awaited<ReturnType<typeof getContactCopy>>["panel"]["hours"];
+}) {
+  return (
+    <Card className="p-6">
+      <h3 className="mb-4 text-xl font-semibold">{responseCopy.title}</h3>
+      <dl className="space-y-4 text-sm">
+        <div className="space-y-1">
+          <dt className="font-medium">{responseCopy.responseTimeLabel}</dt>
+          <dd className="text-muted-foreground">
+            {responseCopy.responseTimeValue}
+          </dd>
+        </div>
+        <div className="space-y-1">
+          <dt className="font-medium">{responseCopy.bestForLabel}</dt>
+          <dd className="text-muted-foreground">{responseCopy.bestForValue}</dd>
+        </div>
+        <div className="space-y-1">
+          <dt className="font-medium">{responseCopy.prepareLabel}</dt>
+          <dd className="text-muted-foreground">{responseCopy.prepareValue}</dd>
+        </div>
+      </dl>
+
+      <div className="mt-6 border-t pt-6">
+        <h4 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+          {hoursCopy.title}
+        </h4>
+        <div className="space-y-2 text-sm">
+          <div className="flex justify-between gap-4">
+            <span>{hoursCopy.weekdaysLabel}</span>
+            <span className="text-muted-foreground">
+              {siteFacts.contact.businessHours?.weekdays}
+            </span>
           </div>
-          <div className="flex-1">
-            <p className="font-medium">{whatsappCopy.label}</p>
-            <p className="text-muted-foreground" translate="no">
-              {isWhatsAppConfigured ? whatsappNumber : whatsappCopy.comingSoon}
-            </p>
+          <div className="flex justify-between gap-4">
+            <span>{hoursCopy.saturdayLabel}</span>
+            <span className="text-muted-foreground">
+              {siteFacts.contact.businessHours?.saturday}
+            </span>
           </div>
-          {whatsAppUrl !== undefined && (
-            <a
-              href={whatsAppUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm font-medium text-primary hover:underline"
-            >
-              {whatsappCopy.chatNow} →
-            </a>
-          )}
+          <div className="flex justify-between gap-4">
+            <span>{hoursCopy.sundayLabel}</span>
+            <span className="text-muted-foreground">
+              {hoursCopy.closedLabel}
+            </span>
+          </div>
         </div>
       </div>
     </Card>
@@ -323,7 +246,7 @@ export default async function ContactPage({ params }: ContactPageProps) {
   setRequestLocale(locale);
 
   const messages = getMessagesForLocale(locale);
-  const copy = getContactCopy(messages, locale);
+  const copy = await getContactCopy(locale as Locale);
   const faqItems = buildFaqItems(messages);
   const faqTitle = getNestedMessage(messages, "faq.sectionTitle") ?? "FAQ";
   const faqSchema = generateFAQSchema(
@@ -335,11 +258,6 @@ export default async function ContactPage({ params }: ContactPageProps) {
     "apiErrors",
   ]);
   const fallbackCopy = getContactPageFallbackCopy(locale);
-  const whatsappNumber = siteFacts.contact.whatsapp;
-  const whatsappConfigured = checkWhatsApp(whatsappNumber);
-  const whatsAppUrl = whatsappConfigured
-    ? buildWhatsAppUrl(whatsappNumber)
-    : undefined;
 
   return (
     <div
@@ -372,39 +290,11 @@ export default async function ContactPage({ params }: ContactPageProps) {
           </Suspense>
 
           <div className="space-y-6">
-            <ContactMethodsCard
-              copy={copy.panel.contact}
-              whatsappCopy={copy.panel.whatsapp}
-              isWhatsAppConfigured={whatsappConfigured}
-              whatsappNumber={whatsappNumber}
-              whatsAppUrl={whatsAppUrl}
+            <ContactMethodsCard copy={copy.panel.contact} />
+            <ResponseExpectationsCard
+              responseCopy={copy.panel.response}
+              hoursCopy={copy.panel.hours}
             />
-
-            <Card className="p-6">
-              <h3 className="mb-4 text-xl font-semibold">
-                {copy.panel.hours.title}
-              </h3>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span>{copy.panel.hours.weekdaysLabel}</span>
-                  <span className="text-muted-foreground">
-                    {siteFacts.contact.businessHours?.weekdays}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span>{copy.panel.hours.saturdayLabel}</span>
-                  <span className="text-muted-foreground">
-                    {siteFacts.contact.businessHours?.saturday}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span>{copy.panel.hours.sundayLabel}</span>
-                  <span className="text-muted-foreground">
-                    {copy.panel.hours.closedLabel}
-                  </span>
-                </div>
-              </div>
-            </Card>
           </div>
         </div>
       </div>

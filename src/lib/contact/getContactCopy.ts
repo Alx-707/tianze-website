@@ -20,10 +20,14 @@ export interface ContactPanelHoursCopy {
   closedLabel: string;
 }
 
-export interface ContactPanelWhatsAppCopy {
-  label: string;
-  chatNow: string;
-  comingSoon: string;
+export interface ContactPanelResponseCopy {
+  title: string;
+  responseTimeLabel: string;
+  responseTimeValue: string;
+  bestForLabel: string;
+  bestForValue: string;
+  prepareLabel: string;
+  prepareValue: string;
 }
 
 export interface ContactCopyModel {
@@ -31,7 +35,7 @@ export interface ContactCopyModel {
   panel: {
     contact: ContactPanelContactCopy;
     hours: ContactPanelHoursCopy;
-    whatsapp: ContactPanelWhatsAppCopy;
+    response: ContactPanelResponseCopy;
   };
 }
 
@@ -67,10 +71,14 @@ export async function getContactCopy(
         sundayLabel: t("panel.sunday"),
         closedLabel: t("panel.closed"),
       },
-      whatsapp: {
-        label: t("panel.whatsapp"),
-        chatNow: t("panel.chatNow"),
-        comingSoon: t("panel.comingSoon"),
+      response: {
+        title: t("panel.responseTitle"),
+        responseTimeLabel: t("panel.responseTimeLabel"),
+        responseTimeValue: t("panel.responseTimeValue"),
+        bestForLabel: t("panel.bestForLabel"),
+        bestForValue: t("panel.bestForValue"),
+        prepareLabel: t("panel.prepareLabel"),
+        prepareValue: t("panel.prepareValue"),
       },
     },
   };
