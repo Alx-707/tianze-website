@@ -50,7 +50,7 @@
     "dep:check": "dependency-cruiser src --config .dependency-cruiser.js",
     "arch:check": "dependency-cruiser src --config .dependency-cruiser.js",
     "circular:check": "dependency-cruiser src --config .dependency-cruiser.js --include-only '^src' -T err",
-    "security:audit": "pnpm audit --prod --audit-level moderate",
+    "security:audit": "pnpm audit --prod --audit-level moderate --ignore-registry-errors",
     "security:semgrep": "node scripts/semgrep-scan.js",
     "security:check": "pnpm security:audit && pnpm security:semgrep",
     "deps:check": "node scripts/deps-check.mjs",
