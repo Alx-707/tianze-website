@@ -78,7 +78,6 @@ function getWorkerNames(baseWorkerName, scope) {
       `${baseWorkerName}-web`,
       `${baseWorkerName}-api-lead`,
       `${baseWorkerName}-api-ops`,
-      `${baseWorkerName}-api-whatsapp`,
     );
   }
   return [...new Set(workers)];

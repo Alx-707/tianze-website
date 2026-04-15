@@ -77,17 +77,6 @@ describe("env utilities", () => {
         expect(envUtils.isProduction()).toBe(false);
       });
     });
-
-    describe("WhatsApp utilities", () => {
-      it("should have getWhatsAppToken function", () => {
-        expect(typeof envUtils.getWhatsAppToken).toBe("function");
-      });
-
-      it("should have getWhatsAppPhoneId function", () => {
-        expect(typeof envUtils.getWhatsAppPhoneId).toBe("function");
-      });
-    });
-
     describe("Turnstile utilities", () => {
       it("should have getTurnstileSecret function", () => {
         expect(typeof envUtils.getTurnstileSecret).toBe("function");

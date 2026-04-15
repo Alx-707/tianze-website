@@ -89,3 +89,7 @@ pnpm-debug.log*
 .claude/review-loop.log
 reviews/
 .ace-tool/
+
+.codex/
+.omx/
+.eslintcache-audit

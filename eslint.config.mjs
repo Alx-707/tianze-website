@@ -36,6 +36,9 @@ export default [
       "coverage/**",
       "dist/**",
       "build/**",
+      ".codex/**",
+      ".omx/**",
+      ".eslintcache-audit",
       // Auto-generated files
       "src/lib/*.generated.ts",
     ],

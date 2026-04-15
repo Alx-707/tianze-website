@@ -145,7 +145,7 @@ describe("distributed-rate-limit", () => {
       ["contact", RATE_LIMIT_PRESETS.contact.maxRequests],
       ["inquiry", RATE_LIMIT_PRESETS.inquiry.maxRequests],
       ["subscribe", RATE_LIMIT_PRESETS.subscribe.maxRequests],
-      ["whatsapp", RATE_LIMIT_PRESETS.whatsapp.maxRequests],
+      ["csp", RATE_LIMIT_PRESETS.csp.maxRequests],
       ["turnstile", RATE_LIMIT_PRESETS.turnstile.maxRequests],
       ["cacheInvalidate", RATE_LIMIT_PRESETS.cacheInvalidate.maxRequests],
       [
@@ -168,15 +168,10 @@ describe("distributed-rate-limit", () => {
         increment: vi.fn().mockRejectedValue(new Error("boom")),
       } as unknown as ReturnType<typeof mod.createRateLimitStore>);
 
-      const result = await checkDistributedRateLimit(
-        "fallback-user",
-        "whatsapp",
-      );
+      const result = await checkDistributedRateLimit("fallback-user", "csp");
 
       expect(result.allowed).toBe(true);
-      expect(result.remaining).toBe(
-        RATE_LIMIT_PRESETS.whatsapp.maxRequests - ONE,
-      );
+      expect(result.remaining).toBe(RATE_LIMIT_PRESETS.csp.maxRequests - ONE);
       expect(mockLoggerError).toHaveBeenCalled();
     });
   });
@@ -493,9 +488,10 @@ describe("distributed-rate-limit", () => {
       expect(RATE_LIMIT_PRESETS.subscribe.failureMode).toBe("closed");
     });
 
-    it("should have expected values for whatsapp preset", () => {
-      expect(RATE_LIMIT_PRESETS.whatsapp.maxRequests).toBe(COUNT_FIVE);
-      expect(RATE_LIMIT_PRESETS.whatsapp.windowMs).toBe(MINUTE_MS);
+    it("should have expected values for csp preset", () => {
+      expect(RATE_LIMIT_PRESETS.csp.maxRequests).toBe(100);
+      expect(RATE_LIMIT_PRESETS.csp.windowMs).toBe(MINUTE_MS);
+      expect(RATE_LIMIT_PRESETS.csp.failureMode).toBe("open");
     });
 
     it("should have cacheInvalidatePreAuth with higher limit", () => {

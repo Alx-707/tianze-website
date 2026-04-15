@@ -220,14 +220,10 @@ content/
 - **静态 OG 图片** - 社交媒体分享图片（JPG 格式）
 - **结构化数据** - Schema.org JSON-LD 支持
 
-### 企业通信
-- **WhatsApp Business API（Cloud API）** - Meta 官方企业级接口（自研封装，已集成）
-  - Cloud API 集成，无需自建服务器
-  - 自动消息处理和回复系统
-  - Webhook 支持实时消息接收
-  - 模板消息和文本消息发送
-- **免费服务对话** - 客户主动发起的对话完全免费
-- **企业级功能** - 多媒体支持、交互式消息、CRM 集成
+### 联系通道
+- **Inquiry form** - 当前主线的首要转化入口
+- **Email / phone** - 当前保留的直接联系通道
+- **Chat API integration** - 历史上做过 WhatsApp/Cloud API 集成尝试，但已在正式上线前退场，不属于当前主线能力
 
 ## 9. 可选扩展
 

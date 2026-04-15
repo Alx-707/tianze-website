@@ -3,15 +3,6 @@
     "loading": "加载中…",
     "error": "发生错误",
     "close": "关闭",
-    "whatsapp": {
-      "greeting": "需要帮助？",
-      "responseTime": "团队通常在5分钟内回复。",
-      "placeholder": "输入您的消息...",
-      "startChat": "开始 WhatsApp 聊天",
-      "defaultMessage": "您好！我对贵公司的产品感兴趣。",
-      "buttonLabel": "通过 WhatsApp 联系我们",
-      "supportChat": "在线支持"
-    },
     "success": "成功",
     "cancel": "取消",
     "confirm": "确认",
@@ -769,14 +760,18 @@
           "contactTitle": "联系方式",
           "email": "邮箱",
           "phone": "电话",
-          "whatsapp": "WhatsApp",
-          "chatNow": "立即聊天",
-          "comingSoon": "即将开通",
           "hoursTitle": "营业时间",
           "weekdays": "周一 - 周五",
           "saturday": "周六",
           "sunday": "周日",
-          "closed": "休息"
+          "closed": "休息",
+          "responseTitle": "联系后会发生什么",
+          "responseTimeLabel": "通常回复时间",
+          "responseTimeValue": "工作日 24 小时内",
+          "bestForLabel": "适合咨询",
+          "bestForValue": "报价、规格、MOQ、样品和交期问题",
+          "prepareLabel": "建议提供",
+          "prepareValue": "产品类型、尺寸/标准、数量、目标市场和项目时间"
         }
       }
     },

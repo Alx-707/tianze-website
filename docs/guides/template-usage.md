@@ -53,7 +53,6 @@ export const SITE_CONFIG = {
   contact: {
     phone: '+86-xxx-xxxx-xxxx',
     email: 'sales@client.com',
-    whatsappNumber: '+86xxxxxxxxxx',
   },
 } as const;
 ```
@@ -72,7 +71,6 @@ export const siteFacts: SiteFacts = {
   contact: {
     phone: '+86-xxx-xxxx-xxxx',
     email: 'sales@client.com',
-    whatsapp: '+86xxxxxxxxxx',
   },
   certifications: [
     { name: 'ISO 9001', file: '/certs/iso9001.pdf' },

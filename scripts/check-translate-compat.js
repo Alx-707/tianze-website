@@ -45,10 +45,13 @@ const PROTECTED_SURFACE_RULES = [
   },
   {
     file: "src/components/forms/contact-form-container.tsx",
+    markers: ["contact-form-submit-label", 'translate="no"'],
+  },
+  {
+    file: "src/components/forms/contact-form-feedback.tsx",
     markers: [
       "contact-form-status-message",
       "contact-form-error-display",
-      "contact-form-submit-label",
       'translate="no"',
     ],
   },

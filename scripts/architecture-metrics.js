@@ -38,7 +38,6 @@ const METRICS_CONFIG = {
     "content",
     "accessibility",
     "resend",
-    "whatsapp",
     "performance-monitoring",
     "i18n",
     "locale-storage",

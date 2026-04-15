@@ -76,7 +76,6 @@ vi.mock("@/config/paths/site-config", () => ({
     contact: {
       phone: "+86-518-0000-0000",
       email: "contact@tianze-pipe.example",
-      whatsappNumber: "+86-518-0000-0000",
     },
   },
 }));

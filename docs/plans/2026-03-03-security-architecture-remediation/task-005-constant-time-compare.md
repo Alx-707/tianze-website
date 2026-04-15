@@ -16,7 +16,7 @@
 
 - `src/app/api/cache/invalidate/route.ts:92`：`return token === secret`
 - 项目已有 `constantTimeCompare`：`src/lib/security-crypto.ts:380`
-- 其他管理面路由已使用：`contact-api-validation.ts:245`、`whatsapp/send/route.ts:63`
+- 其他管理面路由已使用：`contact-api-validation.ts:245`、`src/app/api/contact/contact-api-validation.ts:123`
 
 ## BDD Scenarios
 

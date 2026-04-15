@@ -42,14 +42,6 @@ export const env = createEnv({
     GROQ_API_KEY: z.string().min(1).optional(),
     GOOGLE_API_KEY: z.string().min(1).optional(),
     MISTRAL_API_KEY: z.string().min(1).optional(),
-
-    // WhatsApp Business API
-    WHATSAPP_ACCESS_TOKEN: z.string().min(1).optional(),
-    WHATSAPP_PHONE_NUMBER_ID: z.string().min(1).optional(),
-    WHATSAPP_BUSINESS_ACCOUNT_ID: z.string().min(1).optional(),
-    WHATSAPP_WEBHOOK_VERIFY_TOKEN: z.string().min(1).optional(),
-    WHATSAPP_APP_SECRET: z.string().min(1).optional(),
-
     // Vercel
     VERCEL_URL: z.string().optional(),
     VERCEL_GIT_COMMIT_SHA: z.string().optional(),
@@ -144,10 +136,6 @@ export const env = createEnv({
       .string()
       .transform((val) => val === "true")
       .optional(),
-    ENABLE_WHATSAPP_CHAT: z
-      .string()
-      .transform((val) => val === "true")
-      .optional(),
   },
 
   /**
@@ -214,10 +202,6 @@ export const env = createEnv({
     NEXT_PUBLIC_SECURITY_MODE: z
       .enum(["strict", "moderate", "relaxed"])
       .default("strict"),
-
-    // Contact
-    NEXT_PUBLIC_WHATSAPP_NUMBER: z.string().optional(),
-
     // Deployment Platform
     NEXT_PUBLIC_DEPLOYMENT_PLATFORM: z
       .enum(["vercel", "cloudflare", "self-hosted"])
@@ -248,11 +232,6 @@ export const env = createEnv({
     GROQ_API_KEY: process.env.GROQ_API_KEY,
     GOOGLE_API_KEY: process.env.GOOGLE_API_KEY,
     MISTRAL_API_KEY: process.env.MISTRAL_API_KEY,
-    WHATSAPP_ACCESS_TOKEN: process.env.WHATSAPP_ACCESS_TOKEN,
-    WHATSAPP_PHONE_NUMBER_ID: process.env.WHATSAPP_PHONE_NUMBER_ID,
-    WHATSAPP_BUSINESS_ACCOUNT_ID: process.env.WHATSAPP_BUSINESS_ACCOUNT_ID,
-    WHATSAPP_WEBHOOK_VERIFY_TOKEN: process.env.WHATSAPP_WEBHOOK_VERIFY_TOKEN,
-    WHATSAPP_APP_SECRET: process.env.WHATSAPP_APP_SECRET,
     VERCEL_URL: process.env.VERCEL_URL,
     VERCEL_GIT_COMMIT_SHA: process.env.VERCEL_GIT_COMMIT_SHA,
     VERCEL_ENV: process.env.VERCEL_ENV,
@@ -326,7 +305,6 @@ export const env = createEnv({
     ENABLE_PERFORMANCE_MONITORING: process.env.ENABLE_PERFORMANCE_MONITORING,
     ENABLE_ERROR_TRACKING: process.env.ENABLE_ERROR_TRACKING,
     ENABLE_AB_TESTING: process.env.ENABLE_AB_TESTING,
-    ENABLE_WHATSAPP_CHAT: process.env.ENABLE_WHATSAPP_CHAT,
 
     // Client
     NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
@@ -355,7 +333,6 @@ export const env = createEnv({
     NEXT_PUBLIC_SUPPORTED_LOCALES: process.env.NEXT_PUBLIC_SUPPORTED_LOCALES,
     NEXT_PUBLIC_CSP_NONCE: process.env.NEXT_PUBLIC_CSP_NONCE,
     NEXT_PUBLIC_SECURITY_MODE: process.env.NEXT_PUBLIC_SECURITY_MODE,
-    NEXT_PUBLIC_WHATSAPP_NUMBER: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER,
     NEXT_PUBLIC_DEPLOYMENT_PLATFORM:
       process.env.NEXT_PUBLIC_DEPLOYMENT_PLATFORM,
   },
@@ -396,11 +373,6 @@ export const envUtils = {
   isDevelopment: () => env.NODE_ENV === "development",
   isProduction: () => env.NODE_ENV === "production",
   isTest: () => env.NODE_ENV === "test",
-
-  // WhatsApp相关
-  getWhatsAppToken: () => requireEnvVar("WHATSAPP_ACCESS_TOKEN"),
-  getWhatsAppPhoneId: () => requireEnvVar("WHATSAPP_PHONE_NUMBER_ID"),
-
   // Turnstile相关
   getTurnstileSecret: () => requireEnvVar("TURNSTILE_SECRET_KEY"),
   getTurnstileSiteKey: () => requireEnvVar("NEXT_PUBLIC_TURNSTILE_SITE_KEY"),

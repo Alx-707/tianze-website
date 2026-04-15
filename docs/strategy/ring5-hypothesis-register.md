@@ -19,7 +19,7 @@
 | H03 | Ring 1 | Tianze's equipment-manufacturer differentiation remains largely uncontested | Competitor sites still do not claim the same machine-to-product story | Quarterly manual competitor review | First quarterly review |
 | H04 | Ring 1 | Company-level value proposition works better than leading with line-specific value propositions | Homepage CTR into line pages and inquiry assists outperform alternative framing | GA4 homepage clicks + assisted conversions | 30 days |
 | H05 | Ring 1 | Persona segmentation matches actual inquiry mix | Actual inquiries cluster around the 5 planned buyer types | Form context + manual lead tagging | 60 days |
-| H06 | Ring 1 | Website form inquiries close better than WhatsApp-first contacts | Inquiry-to-quote / inquiry-to-order by entry channel | CRM/manual tracking | After 20 total inquiries |
+| H06 | Ring 1 | Website form inquiries close better than email/phone-first contacts | Inquiry-to-quote / inquiry-to-order by entry channel | CRM/manual tracking | After 20 total inquiries |
 | H07 | Ring 1 | Spec-sheet downloads indicate serious buying intent | Downloaders convert to inquiries/quotes above site average | GA4 download events + CRM/manual matching | 60 days after downloads exist |
 | H08 | Ring 1 | Planned decision chains match real browsing behavior | Common user paths broadly match awareness/comparison/decision assumptions | GA4 path exploration | 60 days |
 | H09 | Ring 2 | Pipe buyers usually inspect certification or standards content before pricing content | Certification/standards section views precede quote actions more often than price/trade-term views | GA4 events + path exploration | 60 days |

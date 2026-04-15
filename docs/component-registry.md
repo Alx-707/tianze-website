@@ -49,7 +49,6 @@
 | Certifications | `CertificationBadges` | `trust/certification-badges` |
 | Partner logos | `PartnerLogos` | `trust/partner-logos` |
 | **Infrastructure** | | |
-| WhatsApp chat | `LazyWhatsAppButton` | `whatsapp/` |
 | Cookie consent | `LazyCookieConsentIsland` | `cookie/` |
 | Contact form | `ContactForm` | `forms/contact-form` |
 | CAPTCHA | `LazyTurnstile` | `forms/lazy-turnstile` |
@@ -64,8 +63,6 @@
 | Keyboard navigation | `useKeyboardNavigation` | `hooks/use-keyboard-navigation` |
 | Prefer reduced motion | `useReducedMotion` | `hooks/use-reduced-motion` |
 | Form rate limiting | `useRateLimit` | `forms/use-rate-limit` |
-| WhatsApp drag position | `useWhatsAppPosition` | `hooks/use-whatsapp-position` |
-| Page-aware WhatsApp message | `useContextualMessage` | `hooks/use-contextual-message` |
 | Current time (interval) | `useCurrentTime` | `hooks/use-current-time` |
 | Accessibility utilities | `useAccessibility` | `lib/accessibility-hooks` |
 | **Utilities** | | |
@@ -206,15 +203,6 @@ All paths relative to `src/components/`. S = Server, C = Client.
 | `ContactFormContainer` | C | Form with validation | ContactForm |
 | `LazyTurnstile` | C | Lazy CAPTCHA widget | ContactForm, BlogNewsletter |
 
-### WhatsApp (`whatsapp/`)
-
-| Component | Type | Purpose | Common Pairing |
-|-----------|------|---------|----------------|
-| `LazyWhatsAppButton` | C | Lazy-loaded entry point | Root layout |
-| `WhatsAppFloatingButton` | C | Draggable chat widget | LazyWhatsAppButton |
-| `WhatsAppFabButton` | C | FAB toggle | WhatsAppFloatingButton |
-| `WhatsAppChatWindow` | C | Chat window UI | WhatsAppFloatingButton |
-
 ### Cookie (`cookie/`)
 
 | Component | Type | Purpose | Common Pairing |
@@ -250,8 +238,6 @@ All paths relative to `src/`. P = Production use, T = Test-only.
 | `useIdleRender` | P | Defer render until browser idle | `hooks/use-idle-render` |
 | `useViewportMatch` | P | Desktop/mobile detection (hydration-safe) | `hooks/use-viewport-match` |
 | `useRateLimit` | P | Form submission cooldown | `forms/use-rate-limit` |
-| `useWhatsAppPosition` | P | Drag position with localStorage persistence | `hooks/use-whatsapp-position` |
-| `useContextualMessage` | P | Page-aware WhatsApp default message | `hooks/use-contextual-message` |
 | `useCurrentTime` | P | Timestamp at interval (used by useRateLimit) | `hooks/use-current-time` |
 | `useBreakpoint` | T | Responsive breakpoint detection (superset of useViewportMatch) | `hooks/use-breakpoint` |
 | `useKeyboardNavigation` | T | Arrow key / Tab nav for accessible components | `hooks/use-keyboard-navigation` |

@@ -31,15 +31,15 @@
 
 ### Phase C: 原子化防滥用
 
-> **前置 Gate**: [Task 025: 存储后端决策](./task-025-storage-backend-gate.md) 必须先完成。Task 009（rate limit 实现）和 Task 011（幂等实现）依赖统一的存储选型和抽象层接口。Task 013（WhatsApp 限流重排）不依赖 Gate——它只是调整现有 `checkDistributedRateLimit` 的调用顺序，不涉及存储层改造。Red 测试（008/010/012）不依赖 Gate，可提前编写。
+> **前置 Gate**: [Task 025: 存储后端决策](./task-025-storage-backend-gate.md) 必须先完成。Task 009（rate limit 实现）和 Task 011（幂等实现）依赖统一的存储选型和抽象层接口。原 WhatsApp webhook 防护任务已于 2026-04-14 因功能退场归档，不再进入当前执行序列。
 
 - [Task 025: 存储后端决策 — Gate](./task-025-storage-backend-gate.md)
 - [Task 008: Rate limit 原子化 — 测试](./task-008-rate-limit-atomic-tests.md)
 - [Task 009: Rate limit 原子化 — 实现](./task-009-rate-limit-atomic-impl.md)
 - [Task 010: 幂等防护状态机 — 测试](./task-010-idempotency-state-machine-tests.md)
 - [Task 011: 幂等防护状态机 — 实现](./task-011-idempotency-state-machine-impl.md)
-- [Task 012: WhatsApp webhook 入口防护 — 测试](./task-012-whatsapp-webhook-hardening-tests.md)
-- [Task 013: WhatsApp webhook 入口防护 — 实现](./task-013-whatsapp-webhook-hardening-impl.md)
+- Task 012 / Task 013 已于 2026-04-14 因 WhatsApp 功能退场归档。
+
 
 ### Phase D: 边界重构 + 规则钉死
 
@@ -58,7 +58,7 @@
 
 - [Task 020: API 契约统一](./task-020-api-contract-unify.md)
 - [Task 021: 输入校验加固](./task-021-input-validation-hardening.md)
-- [Task 022: WhatsApp 日志脱敏 + 部署 preflight](./task-022-whatsapp-logging-deploy.md)
+- Task 022 已于 2026-04-14 因 WhatsApp 功能退场归档。
 - [Task 023: 性能修复](./task-023-performance-fixes.md)
 - [Task 024: 路径安全 + MDX + P2 清理](./task-024-path-security-cleanup.md)
 - [Task 027: 关键路径真实提交集成测试](./task-027-e2e-submit-integration.md)
@@ -81,8 +81,8 @@
 | Task 009 | Task 008, **Task 025** | | Red→Green + Gate |
 | Task 010 | — | ✓ | Red 测试不依赖 Gate |
 | Task 011 | Task 010, **Task 025** | | Red→Green + Gate |
-| Task 012 | — | ✓ | |
-| Task 013 | Task 012 | | Red→Green |
+| Task 012 | — | — | 已于 2026-04-14 因功能退场归档 |
+| Task 013 | Task 012 | — | 已于 2026-04-14 因功能退场归档 |
 | Task 014 | — | | 影响面大，建议独立窗口 |
 | Task 015 | Task 014 | | 依赖 014 的抽取结果 |
 | Task 016 | Task 015 | | 规则需要在重构完成后验证 |
@@ -92,7 +92,7 @@
 | Task 019 | — | ✓ | 可与 017/018 并行 |
 | Task 020 | — | ✓ | |
 | Task 021 | — | ✓ | |
-| Task 022 | — | ✓ | |
+| Task 022 | — | — | 已于 2026-04-14 因功能退场归档 |
 | Task 023 | Task 015 | | 依赖 emails 迁移（Buffer 路径变化） |
 | Task 024 | — | ✓ | |
 | **Task 027** | **—** | | **Phase F 末尾回归验证，建议最后执行** |
@@ -134,7 +134,7 @@ Phase F（契约/性能/清理）:
 
 **Task 006（DEPLOYMENT_PLATFORM 环境变量）必须先部署。**
 
-原因：Task 006 未部署前，Workers 环境中 `getDeploymentPlatform()` 返回 `null`，导致所有 IP 退化为 `0.0.0.0`。此时所有用户共享同一个 rate limit bucket。如果先部署 Task 004（Turnstile 加限流）或 Task 013（WhatsApp 入口限流），正常用户流量会被攻击者的限流配额一起限死。
+原因：Task 006 未部署前，Workers 环境中 `getDeploymentPlatform()` 返回 `null`，导致所有 IP 退化为 `0.0.0.0`。此时所有用户共享同一个 rate limit bucket。如果先部署 Task 004（Turnstile 加限流），正常用户流量会被攻击者的限流配额一起限死。
 
 | 部署批次 | 包含任务 | 前置条件 |
 |----------|---------|---------|

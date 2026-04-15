@@ -22,7 +22,6 @@ const serverFunctionLoaders = {
   default: () => import("./server-functions/default/handler.mjs"),
   apiLead: () => import("./server-functions/apiLead/index.mjs"),
   apiOps: () => import("./server-functions/apiOps/index.mjs"),
-  apiWhatsapp: () => import("./server-functions/apiWhatsapp/index.mjs"),
 };
 
 const serverFunctionHandlerCache = new Map();
@@ -47,10 +46,6 @@ async function getServerFunctionHandler(name) {
 }
 
 function resolveServerFunction(pathname) {
-  if (pathname.startsWith("/api/whatsapp/")) {
-    return "apiWhatsapp";
-  }
-
   if (pathname === "/api/cache/invalidate" || pathname === "/api/csp-report") {
     return "apiOps";
   }

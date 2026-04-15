@@ -12,13 +12,6 @@ const HANDLER_PATH = path.join(
 const SERVER_FUNCTION_INDEX_PATHS = [
   path.join(ROOT_DIR, ".open-next", "server-functions", "apiLead", "index.mjs"),
   path.join(ROOT_DIR, ".open-next", "server-functions", "apiOps", "index.mjs"),
-  path.join(
-    ROOT_DIR,
-    ".open-next",
-    "server-functions",
-    "apiWhatsapp",
-    "index.mjs",
-  ),
 ];
 
 const MANIFEST_GUARD_NEEDLE =

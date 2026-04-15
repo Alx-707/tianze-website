@@ -23,6 +23,15 @@ describe("getContactCopy", () => {
     "panel.saturday": "Saturday",
     "panel.sunday": "Sunday",
     "panel.closed": "Closed",
+    "panel.responseTitle": "What to expect",
+    "panel.responseTimeLabel": "Typical response",
+    "panel.responseTimeValue": "Within 24 business hours",
+    "panel.bestForLabel": "Best for",
+    "panel.bestForValue":
+      "RFQs, product specs, MOQ, samples, and lead-time questions",
+    "panel.prepareLabel": "Helpful details",
+    "panel.prepareValue":
+      "Share product type, size/standard, quantity, destination market, and timeline",
   } as const;
 
   beforeEach(() => {
@@ -56,6 +65,12 @@ describe("getContactCopy", () => {
     expect(copy.panel.hours.saturdayLabel).toBe("Saturday");
     expect(copy.panel.hours.sundayLabel).toBe("Sunday");
     expect(copy.panel.hours.closedLabel).toBe("Closed");
+    expect(copy.panel.response.title).toBe("What to expect");
+    expect(copy.panel.response.responseTimeValue).toBe(
+      "Within 24 business hours",
+    );
+    expect(copy.panel.response.bestForLabel).toBe("Best for");
+    expect(copy.panel.response.prepareLabel).toBe("Helpful details");
   });
 
   it("propagates missing translation keys as-is from the translation function", async () => {

@@ -17,10 +17,7 @@ import { Header } from "@/components/layout/header";
 import { LazyTopLoader } from "@/components/lazy/lazy-top-loader";
 import { ThemeProvider } from "@/components/theme-provider";
 import { LazyThemeSwitcher } from "@/components/ui/lazy-theme-switcher";
-import { LazyWhatsAppButton } from "@/components/whatsapp/lazy-whatsapp-button";
-import { getAppConfig } from "@/config/app";
 import { FOOTER_COLUMNS, FOOTER_STYLE_TOKENS } from "@/config/footer-links";
-import { SITE_CONFIG, isWhatsAppConfigured } from "@/config/paths/site-config";
 import { coerceLocale, isLocale } from "@/i18n/locale-utils";
 import { mainNavigation } from "@/lib/navigation";
 
@@ -42,11 +39,6 @@ async function AsyncLocaleLayoutContent({
   locale,
   children,
 }: AsyncLocaleLayoutContentProps) {
-  const appConfig = getAppConfig();
-  const showWhatsAppButton =
-    appConfig.features.ENABLE_WHATSAPP_CHAT &&
-    isWhatsAppConfigured(SITE_CONFIG.contact.whatsappNumber);
-
   // Note: Removed headers() call for CSP nonce to enable Cache Components static generation.
   // JSON-LD scripts are data-only and don't require nonce for CSP compliance.
   // For client-side scripts that need nonce, consider using a dynamic island component.
@@ -151,10 +143,6 @@ async function AsyncLocaleLayoutContent({
               <LazyThemeSwitcher data-testid="footer-theme-toggle" />
             }
           />
-
-          {showWhatsAppButton && (
-            <LazyWhatsAppButton number={SITE_CONFIG.contact.whatsappNumber} />
-          )}
 
           {/* P0-3 Fix: Cookie Consent Island - scoped provider for consent consumers only */}
           {/* TBT Optimization: Deferred until main thread is idle */}

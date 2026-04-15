@@ -50,8 +50,8 @@ Drive the repair program forward with dependency-aware execution, sub-agent coor
   - Resolution: update the assertion to the actual translated string and rerun the focused suite.
 - An experimental standalone `interaction-accessibility` Playwright spec duplicated checks already covered elsewhere and proved flaky against deferred surfaces like cookie consent and mobile navigation activation timing.
   - Resolution: remove the standalone spec and keep the stable assertions inside `tests/e2e/navigation.spec.ts`.
-- The WhatsApp floating launcher is not guaranteed to appear in every local verification environment because the placeholder phone number disables the feature at runtime.
-  - Resolution: keep strong unit coverage for WhatsApp accessibility behavior and make the browser-level check conditional on the feature being enabled in the active environment.
+- The historical WhatsApp floating launcher was never guaranteed to appear in every local verification environment because the placeholder phone number disabled the feature at runtime.
+  - Resolution: preserve the historical unit-level accessibility proof in archive context, but remove active browser-level expectations now that the launcher is retired before launch.
 - The existing `validate:config` hook runs during every `prebuild`, so making runtime env validation unconditional would have broken ordinary local builds that are not meant to carry release secrets.
   - Resolution: restrict the strict runtime contract to explicit production mode and update deploy workflows to set `NODE_ENV=production` on their build steps.
 - Cloudflare preview still fails even after a clean `build:cf` with a complete production-style env contract.

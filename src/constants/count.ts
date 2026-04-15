@@ -3,7 +3,6 @@
  *
  * 这个文件包含基础计数和通用数值常量。
  * 领域特定的常量应该放在各自的文件中：
- * - WhatsApp 错误码 → ./whatsapp-errors.ts
  * - 验证限制 → ./validation-limits.ts
  * - 时间常量 → ./time.ts
  */
@@ -55,8 +54,6 @@ export const SESSION_TOKEN_LENGTH = 64 as const;
 export const PHONE_MAX_DIGITS = 15 as const;
 /** 默认图标尺寸 (px) */
 export const DEFAULT_ICON_SIZE = 20 as const;
-/** WhatsApp 行描述长度限制 */
-export const WA_ROW_DESC_MAX_LENGTH = 72 as const;
 
 // -- 监控阈值 --
 /** 服务可用性：低于此值判定为 unhealthy (95%) */

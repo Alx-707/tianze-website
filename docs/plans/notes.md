@@ -16,7 +16,7 @@
   - Contact form client-side messages are scoped locally instead of forcing large page-only bundles into the global client message payload.
   - Root-level client translation scope has been reduced again to only the truly global interactive namespaces.
   - Cookie preferences panel now supports better button/panel relationship semantics, focus movement, and Escape closing.
-  - WhatsApp floating chat now exposes clearer dialog semantics, a named message input, and returns focus to its trigger after close.
+  - Optional chat widget semantics were improved in the historical layout audit; the current mainline no longer ships a global chat launcher.
   - Language toggle trigger now exposes clearer menu semantics.
 
 ### Source 3: Current measured performance state
@@ -38,7 +38,7 @@
     - mobile language section label now comes from translations instead of a hard-coded English string,
     - cookie preferences Escape/focus behavior is covered by focused unit tests and the stable navigation Playwright suite.
   - Targeted verification completed locally:
-    - `pnpm exec vitest run src/components/layout/__tests__/header.test.tsx src/components/cookie/__tests__/cookie-banner.test.tsx src/components/__tests__/language-toggle.test.tsx src/components/whatsapp/__tests__/whatsapp-floating-button.test.tsx src/components/forms/__tests__/contact-form-accessibility.test.tsx src/lib/i18n/__tests__/client-messages.test.ts`
+    - `pnpm exec vitest run src/components/layout/__tests__/header.test.tsx src/components/cookie/__tests__/cookie-banner.test.tsx src/components/__tests__/language-toggle.test.tsx src/components/forms/__tests__/contact-form-accessibility.test.tsx src/lib/i18n/__tests__/client-messages.test.ts`
     - result: `64/64` tests passed
     - `pnpm exec vitest run src/components/layout/__tests__/mobile-navigation.test.tsx`
     - result: `39/39` tests passed
@@ -50,7 +50,7 @@
     - result: `20 passed, 1 skipped`
   - Performance attribution sub-agent confirmed:
     - the largest remaining homepage bytes are mostly framework/runtime floor,
-    - the clearest app-owned reduction set is a mixed layout-island bundle covering attribution bootstrap, cookie consent, header client island, top loader, toaster, theme provider, and WhatsApp lazy button,
+    - the clearest app-owned reduction set is a mixed layout-island bundle covering attribution bootstrap, cookie consent, header client island, top loader, toaster, theme provider, 
     - `nextjs-toploader` remains one of the cleanest low-risk reduction targets.
   - Additional performance closure completed after attribution:
     - homepage top-loader loading is now delayed long enough that ordinary homepage visits do not pay that package up front,
@@ -162,7 +162,7 @@
       - the stock local preview path is still running API requests through the default worker rather than proving the split-function routing graph
   - Structural evidence from generated output:
     - `.open-next/worker.js` always routes requests into `./server-functions/default/handler.mjs` after middleware
-    - `scripts/cloudflare/build-phase6-workers.mjs` generates a gateway worker plus separate `web`, `apiLead`, `apiOps`, and `apiWhatsapp` workers with service-binding route rules
+    - `scripts/cloudflare/build-phase6-workers.mjs` generates a gateway worker plus separate `web`, `apiLead`, and `apiOps` workers with service-binding route rules
     - the generated phase6 gateway config expects companion local worker processes; running only the gateway leaves `WORKER_WEB` / `WORKER_API_*` in `local [not connected]` state
   - Practical planning implication:
     - `pnpm smoke:cf:preview` is still useful for catching obvious stock-preview breakage
@@ -403,7 +403,7 @@
 - Release gate and deploy gate are still governance work, not fully institutionalized.
 - Shared runtime chunk cost is still present; remaining performance work is now mostly structural and framework/runtime-oriented rather than easy application-layer waste.
 - Some edge interaction islands may still need focused accessibility review if they gain more behavior later.
-- Browser-level WhatsApp verification remains environment-dependent until a non-placeholder number is supplied in the verification target.
+- Browser-level optional chat verification is no longer part of the current mainline proof surface.
 - The production env contract is now substantially stronger, but the single unified release gate still remains open work because these checks are not yet gathered under one deploy-blocking command.
 - Cloudflare parity is now a cleaner problem statement:
   - build passes,
@@ -513,7 +513,7 @@
 ### Active Sub-Agent Streams
 - Browser regression worker output, now integrated:
   - stable Playwright coverage now lives inside `tests/e2e/navigation.spec.ts` for cookie preferences keyboard flow and mobile-navigation localization,
-  - WhatsApp browser verification was turned into a conditional check because the runtime feature gate suppresses the launcher when placeholder configuration is active.
+  - Optional chat launcher verification has been retired from the current mainline proof set.
 - Interaction-spec prototype:
   - a standalone `tests/e2e/interaction-accessibility.spec.ts` was attempted,
   - it was removed because it overlapped the stable navigation suite and stayed too timing-sensitive against deferred UI surfaces.

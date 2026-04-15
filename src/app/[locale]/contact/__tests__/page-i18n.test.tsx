@@ -130,10 +130,16 @@ vi.mock("@/lib/contact/getContactCopy", () => ({
           sundayLabel: "Sunday",
           closedLabel: "Closed",
         },
-        whatsapp: {
-          label: "WhatsApp",
-          chatNow: "Chat Now",
-          comingSoon: "Coming Soon",
+        response: {
+          title: "What to expect",
+          responseTimeLabel: "Typical response",
+          responseTimeValue: "Within 24 business hours",
+          bestForLabel: "Best for",
+          bestForValue:
+            "RFQs, product specs, MOQ, samples, and lead-time questions",
+          prepareLabel: "Helpful details",
+          prepareValue:
+            "Share product type, size/standard, quantity, destination market, and timeline",
         },
       },
     }),
@@ -162,7 +168,6 @@ vi.mock("@/config/site-facts", () => ({
     contact: {
       email: "hello@example.com",
       phone: "+1-555-0123",
-      whatsapp: undefined,
       businessHours: { weekdays: "9:00 - 18:00", saturday: "10:00 - 16:00" },
     },
     stats: { exportCountries: 100 },
@@ -171,7 +176,6 @@ vi.mock("@/config/site-facts", () => ({
 
 // Mock site-config
 vi.mock("@/config/paths/site-config", () => ({
-  isWhatsAppConfigured: () => false,
   SITE_CONFIG: {
     name: "Tianze",
     url: "https://tianze.com",

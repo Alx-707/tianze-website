@@ -20,7 +20,7 @@ vi.mock("@/lib/security/distributed-rate-limit", () => ({
   RATE_LIMIT_PRESETS: {
     contact: { failureMode: "closed", windowMs: 60000 },
     turnstile: { failureMode: "closed", windowMs: 60000 },
-    whatsapp: { failureMode: "open", windowMs: 60000 },
+    csp: { failureMode: "open", windowMs: 60000 },
   },
 }));
 
@@ -138,13 +138,13 @@ describe("withRateLimit", () => {
       });
 
       const mockHandler = createMockHandler({ success: true });
-      const wrappedHandler = withRateLimit("whatsapp", mockHandler);
+      const wrappedHandler = withRateLimit("csp", mockHandler);
 
       await wrappedHandler(createMockRequest());
 
       expect(mockCheckDistributedRateLimit).toHaveBeenCalledWith(
         TEST_RATE_LIMIT_KEY,
-        "whatsapp",
+        "csp",
       );
     });
   });

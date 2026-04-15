@@ -152,7 +152,7 @@
 ### 8. 不要把 stock `opennextjs-cloudflare preview` 当成 phase6 / split-worker 的完整真相
 - 截至 2026-04-01，本仓库已验证：
   - stock `opennextjs-cloudflare preview` 仍然主要走默认 worker 路径；
-  - 在早先较稳的已验证基线 `next@16.2.0` + `@opennextjs/cloudflare@1.17.3` 下，页面级 `smoke:cf:preview` 可以通过，但 `smoke:cf:preview:strict` 仍可能卡在 `/api/health`；
+  - 当前主线在 generated patch 条件下，页面级 `smoke:cf:preview` 与 `smoke:cf:preview:strict` 都已拿到通过证据；strict 失败应优先视为新的回归信号；
   - 把 Next 升到 `16.2.2` 后，OpenNext / Wrangler 组合在本地页面预览里重新暴露了 `middleware-manifest.json` 动态 require 回归；
   - 当前仓库已经补了一层 repo-local 兼容补丁：`scripts/cloudflare/patch-prefetch-hints-manifest.mjs` 会把生成产物里的 `getMiddlewareManifest()` 从动态 `require()` 改成 `loadManifest()`，这样页面级 `smoke:cf:preview` 又能恢复通过；
   - phase6 dry-run 之前卡住的重点不再是 worker 体积，而是 split worker 在 Wrangler bundling 时会继续拉入 Next 运行时代码；当前仓库通过两步把这条线重新打通：
@@ -201,13 +201,13 @@
     - 默认只验证 `/`、locale 页面、Contact 页面、invalid locale redirect、cookie flags、内部 header 泄漏、manifest crash
     - 当前升级线在 repo-local 补丁生效后，仍可作为页面级已验证信号
   - `pnpm smoke:cf:preview:strict`
-    - 额外把 `/api/health` 算进去；当前如果 stock preview 还不能正确代表 split-worker API 路径，这个命令可能失败
-    - 截至 2026-04-01 最新复测，这条 strict 失败目前表现为 generated `app/api/health/route.js` 动态 require 仍不被本地 preview 接受
+    - 当前默认把 `/api/health` 纳入本地 strict smoke；在 generated patch 条件下已拿到通过证据
+    - 如果 strict 失败，默认先当作需要排查的回归信号，而不是旧已知噪音
   - `pnpm smoke:cf:deploy -- --base-url <url>`
     - 对真实部署地址做最终 smoke，包括 `/api/health`
 - 默认动作：
   - 不要因为 `smoke:cf:preview` 通过就宣布 Cloudflare 完全闭环；
-  - 也不要因为 `smoke:cf:preview:strict` 失败，就直接判定 deployed phase6 一定有问题；
+  - 如果 `smoke:cf:preview:strict` 失败，先定位是 stock preview 边界问题还是新的当前主线回归，再决定是否继续下游 proof；
   - 如果 Next / OpenNext 版本升级后连 `smoke:cf:preview` 的页面级检查都开始报 500，这属于“升级安全性未拿到证明”，默认不要继续推进到主线；
   - 先看失败属于：
     - stock preview 边界内的问题，
@@ -260,7 +260,8 @@
 
 ### 16. 当前默认验证入口以单站收缩预检为准
 - 默认动作：
-  - 如果改动涉及单站身份、SEO 默认值、共享消息、导航、页脚或产品目录，优先跑 `pnpm preflight:site-cutover` 或 `pnpm preflight:site-cutover:strict`
+  - 如果改动涉及单站身份、SEO 默认值、共享消息、导航、页脚或产品目录，优先跑 `pnpm truth:check`、`pnpm review:translation-quartet`、`pnpm review:translate-compat`
+  - 如果改动同时触及运行时或 Cloudflare 链路，再串行补 `pnpm clean:next-artifacts && pnpm build` 与 `CF_APPLY_GENERATED_PATCH=true pnpm build:cf`
   - 不要再把第二站试装当作主线结构 proof
 
 ### 17. 当前执行顺序：先吸收，再清理，再试装，最后才上多站结构
@@ -380,3 +381,10 @@
   - 先验证评论里提到的脚本、命令、proof lane 或异常层，在当前主线是否真的还存在；
   - 如果相关脚本/命令已从主树退场，先把这条评论归类为“旧快照/旧审计线索”，不要直接继续修旧真相；
   - 如果文档或评论持续引用已删除的脚本/命令，请提醒开发者同步更新 AGENTS.md 或相关 runbook，避免后续 AI/审计重复浪费时间。
+
+
+### 29. 本地 agent 临时目录会污染 lint / quality gate
+- 截至 2026-04-15，本仓库已经确认：`.codex/.tmp`、`.omx`、`.eslintcache-audit` 这类本地 agent / tmp 目录会把 `eslint` 和 `quality:gate:fast` 污染成假红。
+- 默认动作：
+  - 同时在 `.gitignore` 和 `eslint.config.mjs` 的 global ignores 中挡掉这些目录；
+  - 不要把这类本地垃圾导致的红灯误判成主项目代码质量回归。

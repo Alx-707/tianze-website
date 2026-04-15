@@ -50,7 +50,6 @@ const social = {
 const contact = {
   phone: "+86-518-0000-0000",
   email: "sales@tianze-pipe.com",
-  whatsappNumber: env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "+86-518-0000-0000",
 } as const;
 
 const establishedYear = 2018;
@@ -102,7 +101,6 @@ export const SINGLE_SITE_DEFINITION: SiteDefinition = {
     contact: {
       phone: contact.phone,
       email: contact.email,
-      whatsapp: contact.whatsappNumber,
       businessHours: {
         weekdays: "8:00 - 17:30",
         saturday: "8:00 - 12:00",

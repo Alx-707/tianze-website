@@ -9,7 +9,6 @@ const deploymentOrder = [
   "web.jsonc",
   "api-lead.jsonc",
   "api-ops.jsonc",
-  "api-whatsapp.jsonc",
   "gateway.jsonc",
 ];
 

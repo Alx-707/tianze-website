@@ -159,7 +159,7 @@ Layout: Split — form left, info right
 Left: Inquiry form (detailed variant)
 Right:
   - Email address (prominent)
-  - WhatsApp number
+  - Phone number
   - Factory address with map
   - "Response within 24 hours" commitment
   - Office hours

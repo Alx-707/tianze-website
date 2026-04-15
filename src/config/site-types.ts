@@ -16,7 +16,6 @@ export interface SiteSocialConfig {
 export interface SiteContactConfig {
   phone: string;
   email: string;
-  whatsappNumber: string;
 }
 
 export interface SiteConfig {
@@ -50,7 +49,6 @@ export interface BusinessHours {
 export interface ContactInfo {
   phone: string;
   email: string;
-  whatsapp?: string;
   wechat?: string;
   businessHours?: BusinessHours;
 }

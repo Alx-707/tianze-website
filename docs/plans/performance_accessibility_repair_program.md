@@ -23,7 +23,7 @@ It is organized as a dependency-aware execution program, not a flat todo list.
 - Contact page initial HTML contains real content and a usable fallback form.
 - Global client translation payload is significantly reduced.
 - Contact-specific client translations are locally scoped.
-- WhatsApp floating chat has better dialog semantics and focus return.
+- The historical WhatsApp floating chat workstream improved dialog semantics and focus return before the feature was retired before launch.
 - Cookie preferences and language toggle expose clearer accessibility state.
 - Homepage top-loader loading is delayed far enough that normal homepage visits do not pay for that optional package immediately.
 - Attribution bootstrap now avoids loading the UTM client logic unless attribution-bearing URL params are present.
@@ -175,7 +175,7 @@ It is organized as a dependency-aware execution program, not a flat todo list.
 - Goal: Standardize dialog-like behavior across floating chat, cookie preferences, mobile menu, and similar surfaces.
 - Depends on: none
 - Status:
-  - WhatsApp: improved
+  - historical WhatsApp chat launcher: retired before launch
   - Cookie preferences: improved
   - mobile menu: already fairly covered, keep in verification
 - Deliverables:

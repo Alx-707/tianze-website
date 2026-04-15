@@ -207,8 +207,6 @@ class QualityGate {
             "src/types/react19.ts",
             "src/types/i18n.ts",
             // error.tsx 已被 diffCoverageExcludeGlobs 中 src/app/**/error.tsx 覆盖
-            "src/types/whatsapp-api-requests/api-types.ts",
-            "src/types/whatsapp-webhook-utils/functions.ts",
           ],
           // 增量覆盖率排除（glob）：生成文件/声明文件/无逻辑代码默认不纳入 diff-line coverage
           diffCoverageExcludeGlobs: [
@@ -216,8 +214,6 @@ class QualityGate {
             "**/*.d.ts",
             "**/*-types.ts", // 纯类型定义文件（如 theme-transition-types.ts）
             "**/*.types.ts", // 另一种类型文件命名约定
-            "src/types/whatsapp*/**", // WhatsApp 类型定义（与 vitest coverage exclude 一致）
-            "src/types/whatsapp*.ts", // WhatsApp 顶层类型文件
             "**/*.test.*",
             "**/*.spec.*",
             "**/__tests__/**",
