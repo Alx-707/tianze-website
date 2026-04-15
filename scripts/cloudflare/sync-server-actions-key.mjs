@@ -2,6 +2,7 @@ import { spawnSync } from "node:child_process";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import ts from "typescript";
+import { getPhase6ServerActionsKeyWorkerNames } from "./phase6-topology-contract.mjs";
 
 const ROOT_DIR = process.cwd();
 const WRANGLER_CONFIG_PATH = path.join(ROOT_DIR, "wrangler.jsonc");
@@ -73,12 +74,7 @@ function getWorkerNames(baseWorkerName, scope) {
     workers.push(baseWorkerName);
   }
   if (scope === "phase6" || scope === "all") {
-    workers.push(
-      `${baseWorkerName}-gateway`,
-      `${baseWorkerName}-web`,
-      `${baseWorkerName}-api-lead`,
-      `${baseWorkerName}-api-ops`,
-    );
+    workers.push(...getPhase6ServerActionsKeyWorkerNames(baseWorkerName));
   }
   return [...new Set(workers)];
 }
