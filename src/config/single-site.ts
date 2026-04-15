@@ -1,12 +1,45 @@
 import { env } from "@/lib/env";
-import { resolveSiteBaseUrl } from "@/sites/base-url";
-import { tianzeProductCatalog } from "@/sites/tianze/product-catalog";
-import type { SiteDefinition } from "@/sites/types";
+import { singleSiteProductCatalog } from "@/config/single-site-product-catalog";
+import type {
+  ProductCatalog,
+  SiteConfig,
+  SiteDefinition,
+  SiteFacts,
+  SiteFooterColumnConfig,
+  SiteNavigationItem,
+} from "@/config/site-types";
 
-const baseUrl = resolveSiteBaseUrl(
-  "tianze-equipment",
-  "https://equipment.tianze-pipe.com",
-);
+export type {
+  BusinessHours,
+  BusinessStats,
+  Certification,
+  CompanyInfo,
+  ContactInfo,
+  MarketDefinition,
+  ProductCatalog,
+  ProductFamilyDefinition,
+  SiteConfig,
+  SiteDefinition,
+  SiteFacts,
+  SiteFooterColumnConfig,
+  SiteFooterLinkItem,
+  SiteNavigationItem,
+  SiteSeoConfig,
+  SiteSocialConfig,
+  SocialLinks,
+} from "@/config/site-types";
+
+function resolveSingleSiteBaseUrl(fallback: string): string {
+  const explicitSiteUrl = env.NEXT_PUBLIC_SITE_URL?.trim();
+  if (explicitSiteUrl) return explicitSiteUrl;
+
+  const sharedBaseUrl = env.NEXT_PUBLIC_BASE_URL?.trim();
+  if (sharedBaseUrl) return sharedBaseUrl;
+
+  return fallback;
+}
+
+const baseUrl = resolveSingleSiteBaseUrl("https://tianze-pipe.com");
 
 const social = {
   twitter: "https://x.com/tianzepipe",
@@ -22,26 +55,33 @@ const contact = {
 
 const establishedYear = 2018;
 
-export const tianzeEquipmentSite: SiteDefinition = {
-  key: "tianze-equipment",
+/**
+ * Single-site canonical source for the current cutover phase.
+ */
+export const SINGLE_SITE_KEY = "tianze" as const;
+export const SINGLE_SITE_DEFINITION: SiteDefinition = {
+  key: SINGLE_SITE_KEY,
   config: {
     baseUrl,
-    name: "Tianze Equipment",
+    name: "Tianze Pipe",
     description:
-      "Pipe bending machines, tooling, and production support for conduit manufacturers.",
+      "Pipe Bending Experts - Equipment, Process & Fittings Integrated Solutions",
     seo: {
-      titleTemplate: "%s | Tianze Equipment - Pipe Bending Systems",
-      defaultTitle: "Tianze Equipment - Pipe Bending Systems",
+      titleTemplate: "%s | Tianze Pipe - Pipe Bending Experts",
+      defaultTitle: "Tianze Pipe - Pipe Bending Experts",
       defaultDescription:
-        "Pipe bending machines, tooling, and production support for conduit manufacturers.",
+        "Professional PVC pipe bending machinery and pipe fittings manufacturer. Equipment + Process + Fittings integrated solutions for global B2B customers.",
       keywords: [
         "pipe bending machine",
-        "pipe bending systems",
-        "conduit bending machine",
-        "pipe tooling",
-        "PVC conduit machinery",
-        "production line support",
-        "bending equipment manufacturer",
+        "PVC pipe bending",
+        "pipe bending equipment",
+        "PVC conduit",
+        "PETG pneumatic tube",
+        "pipe fittings",
+        "pipe manufacturer China",
+        "industrial pipes",
+        "Schedule 80 conduit",
+        "hospital pneumatic tube system",
       ],
     },
     social,
@@ -49,7 +89,7 @@ export const tianzeEquipmentSite: SiteDefinition = {
   },
   facts: {
     company: {
-      name: "Lianyungang Tianze Pipe Industry Co., Ltd. - Equipment Division",
+      name: "Lianyungang Tianze Pipe Industry Co., Ltd.",
       established: establishedYear,
       yearsInBusiness: new Date().getFullYear() - establishedYear,
       employees: 60,
@@ -79,7 +119,7 @@ export const tianzeEquipmentSite: SiteDefinition = {
     ],
     stats: {
       exportCountries: 20,
-      annualCapacity: "Pipe bending machines, tooling, and process programs",
+      annualCapacity: "Integrated pipe, fitting, and machine production",
       clientsServed: 60,
       factoryAreaAcres: 100,
       onTimeDeliveryRate: 98,
@@ -90,29 +130,17 @@ export const tianzeEquipmentSite: SiteDefinition = {
       github: social.github,
     },
   },
-  productCatalog: tianzeProductCatalog,
+  productCatalog: singleSiteProductCatalog,
   navigation: {
     main: [
-      {
-        key: "home",
-        href: "/",
-        translationKey: "navigation.home",
-      },
+      { key: "home", href: "/", translationKey: "navigation.home" },
       {
         key: "products",
         href: "/products",
         translationKey: "navigation.products",
       },
-      {
-        key: "blog",
-        href: "/blog",
-        translationKey: "navigation.blog",
-      },
-      {
-        key: "about",
-        href: "/about",
-        translationKey: "navigation.about",
-      },
+      { key: "blog", href: "/blog", translationKey: "navigation.blog" },
+      { key: "about", href: "/about", translationKey: "navigation.about" },
       {
         key: "privacy",
         href: "/privacy",
@@ -214,3 +242,12 @@ export const tianzeEquipmentSite: SiteDefinition = {
     },
   ],
 };
+
+export const SINGLE_SITE_CONFIG: SiteConfig = SINGLE_SITE_DEFINITION.config;
+export const SINGLE_SITE_FACTS: SiteFacts = SINGLE_SITE_DEFINITION.facts;
+export const SINGLE_SITE_PRODUCT_CATALOG: ProductCatalog =
+  SINGLE_SITE_DEFINITION.productCatalog;
+export const SINGLE_SITE_NAVIGATION: SiteNavigationItem[] =
+  SINGLE_SITE_DEFINITION.navigation.main;
+export const SINGLE_SITE_FOOTER_COLUMNS: SiteFooterColumnConfig[] =
+  SINGLE_SITE_DEFINITION.footerColumns;

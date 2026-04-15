@@ -1,4 +1,4 @@
-export type SiteKey = "tianze" | "tianze-equipment";
+export type SiteKey = "tianze";
 
 export interface SiteSeoConfig {
   titleTemplate: string;

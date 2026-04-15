@@ -5,14 +5,14 @@ import {
   getMarketBySlug,
   PRODUCT_CATALOG,
 } from "@/constants/product-catalog";
-import { currentSite } from "@/sites";
+import { SINGLE_SITE_PRODUCT_CATALOG } from "@/config/single-site";
 
 describe("product-catalog wrapper", () => {
-  it("uses the active site catalog as runtime truth", () => {
-    expect(PRODUCT_CATALOG).toBe(currentSite.productCatalog);
+  it("uses the single-site catalog as runtime truth during cutover", () => {
+    expect(PRODUCT_CATALOG).toBe(SINGLE_SITE_PRODUCT_CATALOG);
   });
 
-  it("keeps market lookups aligned with the current site catalog", () => {
+  it("keeps market lookups aligned with the single-site catalog", () => {
     expect(getMarketBySlug("north-america")?.standardLabel).toBe(
       "UL 651 / ASTM D1785",
     );

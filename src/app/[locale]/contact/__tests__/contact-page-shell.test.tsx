@@ -8,18 +8,18 @@ import { describe, expect, it } from "vitest";
 import { ContactPageFallback } from "@/app/[locale]/contact/contact-page-shell";
 
 describe("ContactPageFallback", () => {
-  it("renders default-site fallback copy for the main site", () => {
-    render(<ContactPageFallback locale="en" siteKey="tianze" />);
+  it("renders single-site fallback copy for english", () => {
+    render(<ContactPageFallback locale="en" />);
 
     expect(screen.getByText("Contact Us")).toBeInTheDocument();
     expect(screen.getByText("Send us a message")).toBeInTheDocument();
   });
 
-  it("renders site-aware fallback copy for the equipment site", () => {
-    render(<ContactPageFallback locale="en" siteKey="tianze-equipment" />);
+  it("renders single-site fallback copy for chinese", () => {
+    render(<ContactPageFallback locale="zh" />);
 
-    expect(screen.getByText("Contact Tianze Equipment")).toBeInTheDocument();
-    expect(screen.getByText("Talk to the Equipment Team")).toBeInTheDocument();
-    expect(screen.getByText("Send Equipment Request")).toBeInTheDocument();
+    expect(screen.getByText("联系我们")).toBeInTheDocument();
+    expect(screen.getByText("给我们留言")).toBeInTheDocument();
+    expect(screen.getByText("发送消息")).toBeInTheDocument();
   });
 });

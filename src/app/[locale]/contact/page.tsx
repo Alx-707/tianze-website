@@ -3,32 +3,34 @@ import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
 import { MessageCircle } from "lucide-react";
-import type { Locale } from "@/types/i18n";
-import { getContactCopy } from "@/lib/contact/getContactCopy";
-import { pickMessages } from "@/lib/i18n/client-messages";
-import { getTranslationsCached } from "@/lib/i18n/server/getTranslationsCached";
+import enCritical from "@messages/en/critical.json";
+import enDeferred from "@messages/en/deferred.json";
+import zhCritical from "@messages/zh/critical.json";
+import zhDeferred from "@messages/zh/deferred.json";
+import { JsonLdScript } from "@/components/seo";
+import { ContactForm } from "@/components/contact/contact-form";
+import { FaqAccordion } from "@/components/sections/faq-accordion";
+import { SectionHead } from "@/components/ui/section-head";
+import { Card } from "@/components/ui/card";
+import { generateLocaleStaticParams } from "@/app/[locale]/generate-static-params";
 import {
-  loadCriticalMessages,
-  loadDeferredMessages,
-} from "@/lib/load-messages";
+  ContactFormFallback,
+  ContactPageHeader,
+  getContactPageFallbackCopy,
+} from "@/app/[locale]/contact/contact-page-shell";
+import type { Locale } from "@/types/i18n";
+import { pickMessages } from "@/lib/i18n/client-messages";
 import {
   generateMetadataForPath,
   type Locale as SeoLocale,
 } from "@/lib/seo-metadata";
-import {
-  ContactFaqFallback,
-  ContactFormFallback,
-  ContactPageFallback,
-  ContactPageHeader,
-} from "@/app/[locale]/contact/contact-page-shell";
-import { ContactForm } from "@/components/contact/contact-form";
-import { FaqSection } from "@/components/sections/faq-section";
-import { Card } from "@/components/ui/card";
-import { generateLocaleStaticParams } from "@/app/[locale]/generate-static-params";
+import { mergeObjects } from "@/lib/merge-objects";
+import { generateFAQSchema } from "@/lib/structured-data";
 import { siteFacts } from "@/config/site-facts";
 import { isWhatsAppConfigured as checkWhatsApp } from "@/config/paths/site-config";
 import { COUNT_TWO } from "@/constants";
-import { currentSiteKey } from "@/sites";
+
+type Messages = Record<string, unknown>;
 
 const CONTACT_FAQ_ITEMS = [
   "moq",
@@ -38,28 +40,144 @@ const CONTACT_FAQ_ITEMS = [
   "oem",
 ] as const;
 
+const MERGED_MESSAGES = {
+  en: mergeObjects(enCritical as Messages, enDeferred as Messages),
+  zh: mergeObjects(zhCritical as Messages, zhDeferred as Messages),
+} as const;
+
+function getMessagesForLocale(locale: string): Messages {
+  return locale === "zh" ? MERGED_MESSAGES.zh : MERGED_MESSAGES.en;
+}
+
+function getNestedMessage(
+  messages: Messages,
+  path: string,
+): string | undefined {
+  const value = path.split(".").reduce<unknown>((current, segment) => {
+    if (typeof current !== "object" || current === null) {
+      return undefined;
+    }
+    return (current as Record<string, unknown>)[segment];
+  }, messages);
+
+  return typeof value === "string" ? value : undefined;
+}
+
+function interpolateMessage(
+  template: string | undefined,
+  values: Record<string, string | number>,
+): string {
+  if (!template) return "";
+  return template.replace(/\{(\w+)\}/g, (match, key: string) => {
+    const value = values[key];
+    return value === undefined ? match : String(value);
+  });
+}
+
 function buildWhatsAppUrl(whatsappNumber: string | undefined) {
   return whatsappNumber
     ? `https://wa.me/${whatsappNumber.replace(/[^0-9]/g, "")}`
     : undefined;
 }
 
-function buildFaqItems(
-  faqT: Awaited<ReturnType<typeof getTranslationsCached>>,
-) {
+function buildFaqItems(messages: Messages) {
+  const faqValues = {
+    established: siteFacts.company.established,
+    countries: siteFacts.stats.exportCountries,
+    employees: siteFacts.company.employees,
+  };
+
   return CONTACT_FAQ_ITEMS.map((key) => ({
     key,
-    question: faqT(`items.${key}.question`, {
-      established: siteFacts.company.established,
-      countries: siteFacts.stats.exportCountries,
-      employees: siteFacts.company.employees,
-    }),
-    answer: faqT(`items.${key}.answer`, {
-      established: siteFacts.company.established,
-      countries: siteFacts.stats.exportCountries,
-      employees: siteFacts.company.employees,
-    }),
+    question: interpolateMessage(
+      getNestedMessage(messages, `faq.items.${key}.question`),
+      faqValues,
+    ),
+    answer: interpolateMessage(
+      getNestedMessage(messages, `faq.items.${key}.answer`),
+      faqValues,
+    ),
   }));
+}
+
+function getContactCopy(messages: Messages, locale: string) {
+  const fallbackCopy = getContactPageFallbackCopy(locale);
+
+  return {
+    header: {
+      title:
+        getNestedMessage(messages, "underConstruction.pages.contact.title") ??
+        fallbackCopy.title,
+      description:
+        getNestedMessage(
+          messages,
+          "underConstruction.pages.contact.description",
+        ) ?? fallbackCopy.description,
+    },
+    panel: {
+      contact: {
+        title:
+          getNestedMessage(
+            messages,
+            "underConstruction.pages.contact.panel.contactTitle",
+          ) ?? "Contact Methods",
+        emailLabel:
+          getNestedMessage(
+            messages,
+            "underConstruction.pages.contact.panel.email",
+          ) ?? "Email",
+        phoneLabel:
+          getNestedMessage(
+            messages,
+            "underConstruction.pages.contact.panel.phone",
+          ) ?? "Phone",
+      },
+      hours: {
+        title:
+          getNestedMessage(
+            messages,
+            "underConstruction.pages.contact.panel.hoursTitle",
+          ) ?? "Business Hours",
+        weekdaysLabel:
+          getNestedMessage(
+            messages,
+            "underConstruction.pages.contact.panel.weekdays",
+          ) ?? "Weekdays",
+        saturdayLabel:
+          getNestedMessage(
+            messages,
+            "underConstruction.pages.contact.panel.saturday",
+          ) ?? "Saturday",
+        sundayLabel:
+          getNestedMessage(
+            messages,
+            "underConstruction.pages.contact.panel.sunday",
+          ) ?? "Sunday",
+        closedLabel:
+          getNestedMessage(
+            messages,
+            "underConstruction.pages.contact.panel.closed",
+          ) ?? "Closed",
+      },
+      whatsapp: {
+        label:
+          getNestedMessage(
+            messages,
+            "underConstruction.pages.contact.panel.whatsapp",
+          ) ?? "WhatsApp",
+        chatNow:
+          getNestedMessage(
+            messages,
+            "underConstruction.pages.contact.panel.chatNow",
+          ) ?? "Chat now",
+        comingSoon:
+          getNestedMessage(
+            messages,
+            "underConstruction.pages.contact.panel.comingSoon",
+          ) ?? "Coming soon",
+      },
+    },
+  };
 }
 
 interface ContactPageProps {
@@ -76,18 +194,21 @@ export async function generateMetadata({
   params,
 }: ContactPageProps): Promise<Metadata> {
   const { locale } = await params;
-  const t = await getTranslationsCached({
-    locale,
-    namespace: "underConstruction.pages.contact",
-  });
+  const messages = getMessagesForLocale(locale);
+  const title =
+    getNestedMessage(messages, "underConstruction.pages.contact.title") ??
+    siteFacts.company.name;
+  const description =
+    getNestedMessage(messages, "underConstruction.pages.contact.description") ??
+    "Get in touch with our team for inquiries, support, or partnership opportunities.";
 
   const metadata = generateMetadataForPath({
     locale: locale as SeoLocale,
     pageType: "contact",
     path: "/contact",
     config: {
-      title: t("title"),
-      description: t("description"),
+      title,
+      description,
     },
   });
 
@@ -197,36 +318,28 @@ function ContactMethodsCard({
   );
 }
 
-async function ContactContent({ locale }: { locale: string }) {
-  const [copy, formT, faqT, criticalMessages, deferredMessages] =
-    await Promise.all([
-      getContactCopy(locale as Locale, currentSiteKey),
-      getTranslationsCached({
-        locale,
-        namespace: "contact.form",
-      }),
-      getTranslationsCached({
-        locale,
-        namespace: "faq",
-      }),
-      loadCriticalMessages(locale as Locale),
-      loadDeferredMessages(locale as Locale),
-    ]);
-  const mergedMessages = {
-    ...criticalMessages,
-    ...deferredMessages,
-  };
+export default async function ContactPage({ params }: ContactPageProps) {
+  const { locale } = await params;
+  setRequestLocale(locale);
 
+  const messages = getMessagesForLocale(locale);
+  const copy = getContactCopy(messages, locale);
+  const faqItems = buildFaqItems(messages);
+  const faqTitle = getNestedMessage(messages, "faq.sectionTitle") ?? "FAQ";
+  const faqSchema = generateFAQSchema(
+    faqItems.map(({ question, answer }) => ({ question, answer })),
+    locale as Locale,
+  );
+  const contactClientMessages = pickMessages(messages, [
+    "contact",
+    "apiErrors",
+  ]);
+  const fallbackCopy = getContactPageFallbackCopy(locale);
   const whatsappNumber = siteFacts.contact.whatsapp;
   const whatsappConfigured = checkWhatsApp(whatsappNumber);
   const whatsAppUrl = whatsappConfigured
     ? buildWhatsAppUrl(whatsappNumber)
     : undefined;
-  const faqItems = buildFaqItems(faqT);
-  const contactClientMessages = pickMessages(mergedMessages, [
-    "contact",
-    "apiErrors",
-  ]);
 
   return (
     <div
@@ -244,18 +357,9 @@ async function ContactContent({ locale }: { locale: string }) {
           <Suspense
             fallback={
               <ContactFormFallback
-                title={formT("title")}
-                description={formT("description")}
-                labels={{
-                  firstName: formT("firstName"),
-                  lastName: formT("lastName"),
-                  email: formT("email"),
-                  company: formT("company"),
-                  subject: formT("subject"),
-                  message: formT("message"),
-                  acceptPrivacy: formT("acceptPrivacy"),
-                  submit: formT("submit"),
-                }}
+                title={fallbackCopy.formTitle}
+                description={fallbackCopy.formDescription}
+                labels={fallbackCopy.labels}
               />
             }
           >
@@ -267,7 +371,6 @@ async function ContactContent({ locale }: { locale: string }) {
             </NextIntlClientProvider>
           </Suspense>
 
-          {/* 联系信息 */}
           <div className="space-y-6">
             <ContactMethodsCard
               copy={copy.panel.contact}
@@ -306,24 +409,13 @@ async function ContactContent({ locale }: { locale: string }) {
         </div>
       </div>
 
-      <Suspense
-        fallback={
-          <ContactFaqFallback title={faqT("sectionTitle")} items={faqItems} />
-        }
-      >
-        <FaqSection items={[...CONTACT_FAQ_ITEMS]} locale={locale as Locale} />
-      </Suspense>
+      <section className="section-divider py-14 md:py-[72px]">
+        <div className="mx-auto max-w-[1080px] px-6">
+          <JsonLdScript data={faqSchema} />
+          <SectionHead title={faqTitle} />
+          <FaqAccordion items={faqItems} />
+        </div>
+      </section>
     </div>
-  );
-}
-
-export default async function ContactPage({ params }: ContactPageProps) {
-  const { locale } = await params;
-  setRequestLocale(locale);
-
-  return (
-    <Suspense fallback={<ContactPageFallback locale={locale} />}>
-      <ContactContent locale={locale} />
-    </Suspense>
   );
 }

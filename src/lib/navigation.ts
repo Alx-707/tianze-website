@@ -13,13 +13,16 @@ import {
   PERCENTAGE_FULL,
 } from "@/constants";
 import { COUNT_250 } from "@/constants/count";
-import { currentSite, type SiteNavigationItem } from "@/sites";
+import {
+  SINGLE_SITE_NAVIGATION,
+  type SiteNavigationItem,
+} from "@/config/single-site";
 
 export type NavigationItem = SiteNavigationItem;
 
 // Main navigation configuration
 // 导航顺序：首页、产品、博客、关于、隐私政策
-export const mainNavigation: NavigationItem[] = currentSite.navigation.main;
+export const mainNavigation: NavigationItem[] = SINGLE_SITE_NAVIGATION;
 
 // Mobile navigation configuration (can be different from main nav)
 export const mobileNavigation: NavigationItem[] = mainNavigation;

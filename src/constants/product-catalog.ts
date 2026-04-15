@@ -1,26 +1,25 @@
 /**
  * Product catalog compatibility wrapper.
  *
- * The canonical product catalog now lives under `src/sites/**` as part of the
- * active site definition. This module keeps the existing import path stable for
- * routes, sitemap generation, and tests while the repo moves toward formal
- * multi-site structure.
+ * During the single-site cutover, routes and sitemap generation should read the
+ * canonical Tianze catalog through the single-site source instead of the active
+ * site runtime selector.
  */
 
 import {
-  currentSite,
+  SINGLE_SITE_PRODUCT_CATALOG,
   type MarketDefinition,
   type ProductCatalog,
   type ProductFamilyDefinition,
-} from "@/sites";
+} from "@/config/single-site";
 
 export type {
   MarketDefinition,
   ProductCatalog,
   ProductFamilyDefinition,
-} from "@/sites";
+} from "@/config/single-site";
 
-export const PRODUCT_CATALOG: ProductCatalog = currentSite.productCatalog;
+export const PRODUCT_CATALOG: ProductCatalog = SINGLE_SITE_PRODUCT_CATALOG;
 
 /** Get a market definition by its URL slug */
 export function getMarketBySlug(slug: string): MarketDefinition | undefined {
