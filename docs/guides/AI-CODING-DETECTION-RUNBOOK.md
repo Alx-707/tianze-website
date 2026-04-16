@@ -374,6 +374,26 @@ pnpm test:mutation:lead
 
 来换取表面通过，等于又回到“门禁游戏化”。
 
+### 7.5 先分清楚是“代码红了”还是“proof 工具自己先摔了”
+
+这类问题最近已经实际踩到两次，都是很容易误导后续修复方向的假红。
+
+第一类是 **Semgrep baseline 计算失败**。
+
+在 PR 的 baseline 模式里，CI 需要先拿到 `HEAD` 和 `origin/$GITHUB_BASE_REF` 的共同祖先提交，再只比较新增问题。
+
+如果 base branch fetch 太浅，或者主线发生过 force update / 历史改写，`git merge-base` 就可能先失败。此时红灯看起来出在 Semgrep lane，但真实含义不是“扫出安全漏洞”，而是“扫描前置条件都没成立”。
+
+第二类是 **guardrail 脚本把 CLI 差异误当成仓库问题**。
+
+例如 `rg` 很快、应该优先用，但它不能是唯一真相入口。某些环境里没有 `rg`，或者 `rg` / `grep` 只是返回 `exit 1` 表示“没找到匹配”，都不该直接被抛成 guardrail failure。
+
+默认动作：
+
+- 如果 CI 红在 Semgrep lane，先看它是红在 baseline 计算，还是红在真正的 scan 结果
+- 如果脚本红在 `rg error`、`command not found`、工具不可用，先按“脚本可移植性问题”归类
+- 汇报时必须把“proof 工具层失败”和“仓库代码层失败”分开写，不要混成一句“CI 挂了”
+
 ## 8. 这套方案为什么是当前最优解
 
 它不是理论上最完美，而是当前项目条件下最合适。

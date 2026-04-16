@@ -562,3 +562,24 @@
   - 如果 CI 里 guardrails 报红，先看 job summary 里的分组结果，再决定要不要下钻到具体日志；
   - 如果以后继续扩 guardrails 汇总，优先复用 `reports/guardrails/*.json` 这层轻量产物，不要在 workflow 里重新手写一套解析逻辑；
   - 如果 summary 丢失，先检查 artifact 上传/下载和 `scripts/append-guardrail-summary.js`，不要先怀疑 guardrail 本身失效。
+
+### 41. PR 里的 Semgrep baseline 不要再用 shallow base fetch
+- 截至 2026-04-16，本仓库已实际踩到：如果在 `ci.yml` 的 PR Semgrep baseline 模式里只对 base branch 做 `--depth=1` shallow fetch，`git merge-base HEAD origin/$GITHUB_BASE_REF` 可能直接失效。
+- 这类报错的危险在于：
+  - Semgrep 还没真正开始扫，security lane 就会先假红；
+  - 特别是在 `main` 有 force update、历史改写或 PR 分支落后较多时，更容易把“基线提交拿不到”误看成“发现了新的安全问题”。
+- 默认动作：
+  - PR baseline 场景优先保证 `origin/$GITHUB_BASE_REF` 有可用于 `merge-base` 的真实历史，不要再把 `--depth=1` 当优化默认值；
+  - 如果 Semgrep 红在 baseline 计算阶段，先检查 `git fetch` 和 `merge-base`，再看规则本身；
+  - 汇报时要明确区分“扫描前基线计算失败”和“扫描后发现问题”，不要把两类红灯混写。
+
+### 42. guardrail 脚本不要硬绑单一 CLI；`rg` 缺失或退出码 `1` 不应被误报成脚本失败
+- 截至 2026-04-16，本仓库已验证：`scripts/legacy-marker-audit.js` 这类 guardrail 脚本如果把 `rg` 当唯一真相，CI 或不同开发机上就会因为工具可用性差异出现假红。
+- 当前更稳的做法是：
+  - `rg` 仍然优先，因为它快；
+  - 但 `rg` 不可用或异常退出时，要有 `grep` 或等价实现兜底；
+  - `rg` / `grep` 的退出码 `1` 表示“没找到”，不是脚本炸了。
+- 默认动作：
+  - 只要新增或改动 `scripts/**` 下的审查脚本，先问自己：如果本机没有这个 CLI，会是假红还是可降级；
+  - 如果脚本只是“零发现”，不要把它抛成异常；
+  - 如果 CI 报 `rg error`、`command not found` 或类似工具层异常，先按“guardrail 可移植性问题”归类，不要先怀疑业务代码回归。
