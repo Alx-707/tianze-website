@@ -10,7 +10,7 @@
 #   pnpm ci:local:fix       # 自动修复可修复的问题
 # 口径说明：
 #   - 远程 GitHub Actions 当前固定 Node 20.19.0
-#   - 本地脚本遵循 package.json engines（Node >=20.19 <23），并显式提示与远程 CI 的偏差
+#   - 本地脚本也按 Node 20.19.0 作为预检基线，不再把 Node 22 当作默认兼容真相
 # =============================================================================
 # CI 架构说明：
 #   - ci.yml: 主流水线，PR 必需检查（type-check, lint, test, security, etc.）
@@ -65,33 +65,19 @@ print_skip() {
     echo -e "${YELLOW}⏭️  $1${NC}"
 }
 
-# 检查 Node.js 版本（本地支持范围 + 远程 CI 提示）
+# 检查 Node.js 版本（与远程 CI 基线保持一致）
 check_node_version() {
     print_step "检查 Node.js 版本"
 
     CURRENT_VERSION=$(node --version | cut -d'v' -f2)
     CI_VERSION="20.19.0"
-    MIN_SUPPORTED_VERSION="20.19.0"
-    MAX_EXCLUSIVE_VERSION="23.0.0"
-
-    version_lt() {
-        [ "$(printf '%s\n' "$1" "$2" | sort -V | head -n1)" != "$2" ]
-    }
-
-    version_ge() {
-        [ "$(printf '%s\n' "$1" "$2" | sort -V | head -n1)" = "$2" ]
-    }
-
-    if version_lt "$CURRENT_VERSION" "$MIN_SUPPORTED_VERSION" || version_ge "$CURRENT_VERSION" "$MAX_EXCLUSIVE_VERSION"; then
-        print_error "Node.js 版本不受支持: v$CURRENT_VERSION (本地支持 >=v$MIN_SUPPORTED_VERSION 且 <v$MAX_EXCLUSIVE_VERSION，远程 CI 固定 v$CI_VERSION)"
-        echo "  建议: 使用 Node v$CI_VERSION 或其他 >=v$MIN_SUPPORTED_VERSION 且 <v$MAX_EXCLUSIVE_VERSION 的版本"
-        return 1
-    fi
 
     if [ "$CURRENT_VERSION" = "$CI_VERSION" ]; then
         print_success "Node.js 版本与远程 CI 一致: v$CURRENT_VERSION"
     else
-        print_success "Node.js 版本受支持: v$CURRENT_VERSION (远程 CI 固定 v$CI_VERSION，本地与 CI 仍可能存在差异)"
+        print_error "Node.js 版本不一致: v$CURRENT_VERSION (远程 CI 固定 v$CI_VERSION)"
+        echo "  建议: 先切到 Node v$CI_VERSION，再运行本地预检"
+        return 1
     fi
 }
 
