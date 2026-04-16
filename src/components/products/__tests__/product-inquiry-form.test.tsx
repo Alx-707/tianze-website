@@ -34,38 +34,18 @@ vi.mock("lucide-react", () => ({
   ),
 }));
 
-// Mock TurnstileWidget
-vi.mock("next/dynamic", () => ({
-  default: (
-    loader: () => Promise<{ TurnstileWidget: React.ComponentType }>,
-    _options: Record<string, unknown>,
-  ) => {
-    // Return a simple mock component
-    const MockTurnstile = ({
-      onSuccess,
-    }: {
-      onSuccess?: (token: string) => void;
-    }) => (
-      <div data-testid="turnstile-widget">
-        <button
-          type="button"
-          data-testid="turnstile-success-trigger"
-          onClick={() => onSuccess?.("mock-token-123")}
-        >
-          Simulate Turnstile Success
-        </button>
-      </div>
-    );
-    MockTurnstile.displayName = "MockTurnstile";
-    // Need to call loader to avoid warnings, but we return our mock
-    loader();
-    return MockTurnstile;
-  },
-}));
-
-// Mock @/components/security/turnstile
-vi.mock("@/components/security/turnstile", () => ({
-  TurnstileWidget: () => <div data-testid="turnstile-mock" />,
+vi.mock("@/components/forms/lazy-turnstile", () => ({
+  LazyTurnstile: ({ onSuccess }: { onSuccess?: (token: string) => void }) => (
+    <div data-testid="turnstile-widget">
+      <button
+        type="button"
+        data-testid="turnstile-success-trigger"
+        onClick={() => onSuccess?.("mock-token-123")}
+      >
+        Simulate Turnstile Success
+      </button>
+    </div>
+  ),
 }));
 
 // Translation mock helper

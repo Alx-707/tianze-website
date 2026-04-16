@@ -1,7 +1,6 @@
 "use client";
 
 import { useActionState, useCallback, useRef, useState } from "react";
-import dynamic from "next/dynamic";
 import { CheckCircle, Loader2, Mail, XCircle } from "lucide-react";
 import { useTranslations } from "next-intl";
 import {
@@ -11,6 +10,7 @@ import {
 import { cn } from "@/lib/utils";
 import { getAttributionAsObject } from "@/lib/utm";
 import { generateIdempotencyKey } from "@/lib/idempotency-key";
+import { LazyTurnstile } from "@/components/forms/lazy-turnstile";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -20,21 +20,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-
-// Lazy load Turnstile for performance
-const TurnstileWidget = dynamic(
-  () =>
-    import("@/components/security/turnstile").then((m) => m.TurnstileWidget),
-  {
-    ssr: false,
-    loading: () => (
-      <div
-        className="h-[65px] w-full animate-pulse rounded-md bg-muted"
-        aria-hidden="true"
-      />
-    ),
-  },
-);
 
 export interface BlogNewsletterProps {
   /** Custom class name */
@@ -168,7 +153,7 @@ function NewsletterForm({
           </span>
         </Button>
       </div>
-      <TurnstileWidget
+      <LazyTurnstile
         onSuccess={onTurnstileSuccess}
         onError={onTurnstileError}
         onExpire={onTurnstileExpire}
