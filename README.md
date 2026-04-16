@@ -64,11 +64,11 @@ pnpm validate:translations
 
 ## 🛠️ 环境要求
 
-- **Node.js**: 20.x（默认开发版本；项目声明支持 `>=20 <23`，已在 `.nvmrc` 固定为 20）
+- **Node.js**: 20.19.0（默认开发版本与 CI 基线；项目运行时策略收口为 Node 20，`package.json > engines.node` 当前为 `>=20.19 <21`）
 - **包管理器**: pnpm 10.13.1（已在 `.npmrc` 与 CI 固定）
 - **操作系统**: macOS, Linux, Windows
 
-> 提示：使用 nvm/fnm/asdf 进入仓库目录后自动切到 Node 20；若不生效，请执行 `nvm use`。
+> 提示：进入仓库前，请先确保当前 shell 已切到 Node 20.19.0；项目不会自动帮你切版本，`.nvmrc` / `.node-version` 仅作为版本真相提示。
 
 ### 🔐 Turnstile 配置
 
