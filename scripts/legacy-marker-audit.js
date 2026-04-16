@@ -11,19 +11,34 @@ function ensureDir(dir) {
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 }
 
+function runLegacySearch(command, args) {
+  return spawnSync(command, args, {
+    cwd: ROOT,
+    encoding: "utf8",
+  });
+}
+
 function main() {
   ensureDir(REPORT_DIR);
-  const run = spawnSync(
-    "rg",
-    [
-      "-n",
-      "@deprecated|Currently used by|legacy helper|legacy server-side|legacy/test-side|//.*legacy|/\\*.*legacy|\\*.*legacy",
+  const pattern =
+    "@deprecated|Currently used by|legacy helper|legacy server-side|legacy/test-side|//.*legacy|/\\*.*legacy|\\*.*legacy";
+  let run = runLegacySearch("rg", [
+    "-n",
+    pattern,
+    "src",
+    "--glob",
+    "!**/__tests__/**",
+  ]);
+
+  if (run.status !== 0 && run.status !== 1) {
+    run = runLegacySearch("grep", [
+      "-RInE",
+      pattern,
       "src",
-      "--glob",
-      "!**/__tests__/**",
-    ],
-    { cwd: ROOT, encoding: "utf8" },
-  );
+      "--exclude-dir=__tests__",
+    ]);
+  }
+
   // status 0 = matches found, 1 = no matches, anything else = real error
   if (run.status !== 0 && run.status !== 1) {
     throw new Error(run.stderr || "legacy marker audit failed (rg error)");
