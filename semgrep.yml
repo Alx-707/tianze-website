@@ -426,7 +426,9 @@ rules:
 
   - id: env-access-bypass-in-config
     patterns:
-      - pattern: process.env.$VAR
+      - pattern-either:
+          - pattern: process.env.$VAR
+          - pattern: process.env[$KEY]
       - pattern-not: process.env.NODE_ENV
     message: 'src/config 下避免直接读 process.env，优先通过 env.ts 统一访问'
     languages: [typescript, javascript]
@@ -439,6 +441,70 @@ rules:
         - "**/__tests__/**"
         - "**/*.test.*"
         - "**/*.spec.*"
+        # next.config.ts 直接导入此模块；这里保留 raw process.env 是有意的
+        # 框架边界例外，不应逼着它依赖 env.ts。
+        - "src/config/security.ts"
     metadata:
       category: maintainability
       technology: [nodejs]
+
+  - id: raw-proxy-header-read-outside-trusted-entry
+    pattern-either:
+      - pattern: headers().get("cf-connecting-ip")
+      - pattern: headers().get("x-forwarded-for")
+      - pattern: $REQ.headers.get("cf-connecting-ip")
+      - pattern: $REQ.headers.get("x-forwarded-for")
+      - pattern: $HEADERS.get("cf-connecting-ip")
+      - pattern: $HEADERS.get("x-forwarded-for")
+    message: '不要在业务代码直接信任原始代理头；Cloudflare/header-only 上下文请走 getClientIP()/getClientIPFromHeaders() 或 x-internal-client-ip'
+    languages: [typescript, javascript]
+    severity: WARNING
+    paths:
+      exclude:
+        - "**/__tests__/**"
+        - "**/*.test.*"
+        - "**/*.spec.*"
+        - "src/middleware.ts"
+        - "src/lib/security/client-ip.ts"
+    metadata:
+      category: security
+      technology: [nextjs, cloudflare]
+
+  - id: api-route-free-text-error-response
+    pattern-either:
+      - pattern: |
+          NextResponse.json({ ..., error: $VAL, ... }, ...)
+      - pattern: |
+          NextResponse.json({ ..., message: $VAL, ... }, ...)
+    message: '公开 API route 避免返回自由文本 error/message；优先用 createApiErrorResponse()/createApiSuccessResponse() 或统一 errorCode contract'
+    languages: [typescript, javascript]
+    severity: WARNING
+    paths:
+      include:
+        - "src/app/api/**/*.ts"
+        - "src/app/api/**/*.tsx"
+      exclude:
+        - "**/__tests__/**"
+        - "**/*.test.*"
+        - "**/*.spec.*"
+        - "src/app/api/csp-report/**"
+        - "src/app/api/cache/invalidate/**"
+    metadata:
+      category: correctness
+      technology: [nextjs]
+
+  - id: critical-lead-route-missing-idempotency
+    message: '关键公开写路径必须显式使用 withIdempotency(..., { required: true })'
+    languages: [generic]
+    severity: WARNING
+    patterns:
+      - pattern-regex: '(?s).+'
+      - pattern-not-regex: '(?s).*withIdempotency\s*\([\s\S]*required\s*:\s*true'
+    paths:
+      include:
+        - "src/app/api/contact/route.ts"
+        - "src/app/api/inquiry/route.ts"
+        - "src/app/api/subscribe/route.ts"
+    metadata:
+      category: correctness
+      technology: [nextjs]

@@ -55,6 +55,14 @@ export const env = createEnv({
     // CI/CD
     CI: z.string().optional(),
     GITHUB_TOKEN: z.string().optional(),
+    PLAYWRIGHT_TEST: z
+      .string()
+      .optional()
+      .transform((val) => val === "true"),
+    SKIP_ENV_VALIDATION: z
+      .string()
+      .optional()
+      .transform((val) => val === "true"),
 
     // Security
     SECURITY_HEADERS_ENABLED: z
@@ -62,6 +70,7 @@ export const env = createEnv({
       .default("true")
       .transform((val) => val === "true"),
     CSP_REPORT_URI: z.string().url().optional(),
+    CORS_ALLOWED_ORIGINS: z.string().optional(),
 
     // Network & API Configuration
     API_TIMEOUT: z.coerce.number().optional(),
@@ -238,8 +247,11 @@ export const env = createEnv({
     NODE_ENV: process.env.NODE_ENV,
     CI: process.env.CI,
     GITHUB_TOKEN: process.env.GITHUB_TOKEN,
+    PLAYWRIGHT_TEST: process.env.PLAYWRIGHT_TEST,
+    SKIP_ENV_VALIDATION: process.env.SKIP_ENV_VALIDATION,
     SECURITY_HEADERS_ENABLED: process.env.SECURITY_HEADERS_ENABLED,
     CSP_REPORT_URI: process.env.CSP_REPORT_URI,
+    CORS_ALLOWED_ORIGINS: process.env.CORS_ALLOWED_ORIGINS,
 
     // Network & API Configuration
     API_TIMEOUT: process.env.API_TIMEOUT,

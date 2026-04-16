@@ -17,7 +17,7 @@ import { getAllowedTurnstileHosts } from "@/lib/security/turnstile-config";
  * Returns empty array if not configured.
  */
 function parseCorsEnvOrigins(): string[] {
-  const origins = process.env.CORS_ALLOWED_ORIGINS;
+  const origins = env.CORS_ALLOWED_ORIGINS;
   if (!origins) return [];
 
   return origins
