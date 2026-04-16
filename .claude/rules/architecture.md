@@ -6,10 +6,10 @@
 ## Project Decisions
 
 - Node runtime truth:
-  - `package.json > engines.node`: `>=20.19 <23`
+  - `package.json > engines.node`: `>=20.19 <21`
   - `.nvmrc` / `.node-version`: `20.19.0`
   - GitHub Actions merge-proof baseline: `20.19.0`
-  - local `22.x` may still be allowed, but do not treat it as the final CI truth
+  - local validation should use the same `20.19.0` baseline unless an explicit experiment branch says otherwise
 - `cacheComponents: true` enabled in `next.config.ts` — Cache Components (`"use cache"`) are enabled
 - **PPR** (`experimental.ppr`): Not enabled — it still requires canary and remains commented out. Note: `dynamicIO` was an older Next.js 15 canary flag that has already been superseded by `cacheComponents`; they are not two separate features.
 - **Optional Cache APIs** (not yet used): `cacheTag()`, `revalidateTag()`, `updateTag()`

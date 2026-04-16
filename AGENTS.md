@@ -52,6 +52,19 @@
 
 ## 项目经验补充
 
+### 0. 性能治理先收口到 `docs/guides/PERFORMANCE-GOVERNANCE.md`
+- 遇到 “性能优化 / showcase 借鉴 / 该不该 lazy load / 该不该上 cache” 这类问题时，先看 `docs/guides/PERFORMANCE-GOVERNANCE.md`。
+- 当前默认立场：
+  - `nextjs-perf-showcase` 只能借思路，不能当 starter 或迁移模板
+  - 不要把 page-level `'use cache'` 扩散到 Contact / inquiry / subscribe / health / Server Action / Cloudflare 强耦合路径
+  - 性能 proof 先回 Node `20.19.x` 真相环境
+  - Cloudflare proof 仍按现有 proof 边界执行，不要把 cleanup 和 runtime/platform proof 混成一个 PR
+- 默认动作：
+  - 先用 `docs/guides/PERFORMANCE-GOVERNANCE.md` 判断“现在该不该动”
+  - 再用 `docs/guides/CANONICAL-TRUTH-REGISTRY.md` 判断“当前运行时真相在哪里”
+  - 如果是分阶段性能治理，顺序固定为：治理真相 -> architecture guardrails -> Turnstile 规范统一 -> dormant truth audit -> cleanup
+  - 如果用户给了“唯一执行真相源”路径，但本地文件不存在，先记录冲突，不要自行猜当前 workstream
+
 ### 1. 不要直接相信 `legacy` / `deprecated` / `Currently used by` 注释
 - 这个仓库里，注释和真实生产引用面可能已经脱节。
 - 遇到下面这些信号时，必须先用代码搜索确认真实引用面，再决定是否继续沿用、删除或迁移：
@@ -75,14 +88,13 @@
 
 ### 2.1 Node 版本真相要同时看 `engines`、`.nvmrc`、CI 和依赖最低门槛，不要只看“大版本 20”
 - 截至 2026-04-01，本仓库已经确认：
-  - `package.json > engines.node` 当前是 `>=20.19 <23`
+  - `package.json > engines.node` 当前是 `>=20.19 <21`
   - `.nvmrc` / `.node-version` 当前固定为 `20.19.0`
   - GitHub Actions 当前也固定在 `20.19.0`
-  - 但本地机器仍可能实际跑在 `22.x`
   - 同时，一批直接依赖已经把 Node 20 的最低线抬到了 `20.19.x`
 - 这意味着：
-  - “支持 Node 20”已经不够精确
-  - 本地 `22.x` 通过，不等于 CI 的 `20.19.0` 一定通过
+  - 当前主线就是 Node 20 策略，不要再把本地 `22.x` 当作默认兼容真相
+  - “支持 Node 20”也要精确到最低补丁线 `20.19.x`
   - 只看 `@types/node` 或只看 `engines`，都不足以代表完整真相
 - 默认动作：
   - 只要升级会影响运行时、构建链路、Lint/Test 基础设施，就同时核对：
@@ -94,7 +106,7 @@
   - 汇报时要明确区分：
     - 默认开发版本
     - CI 合并真相版本
-    - 本地允许版本范围
+    - 当前主线允许版本范围
 
 ### 3. 修改 `apiErrors` 时，必须同步 `messages/*.json` 和 `messages/*/critical.json`
 - 本仓库的翻译会同时从完整消息文件和 critical bundle 读取。
