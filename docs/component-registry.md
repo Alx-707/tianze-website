@@ -155,7 +155,7 @@ All paths relative to `src/components/`. S = Server, C = Client.
 
 | Component | Type | Purpose | Common Pairing |
 |-----------|------|---------|----------------|
-| `ProductMatrixBlock` | C | 4-category product hero grid | Homepage |
+| `ProductMatrixBlock` | C | Legacy 4-category product hero grid | Dormant / legacy homepage concept |
 | `SectionHeader` | S | Centered eyebrow + title | Homepage sections |
 | `ImageCarousel` | S | Scroll (mobile) / 3-col grid (desktop) | Homepage |
 | `StatBar` | S | Horizontal stats with separators | Homepage |
@@ -188,7 +188,7 @@ All paths relative to `src/components/`. S = Server, C = Client.
 
 | Component | Type | Purpose | Common Pairing |
 |-----------|------|---------|----------------|
-| `TrustStats` | S | Key business metrics | Homepage |
+| `TrustStats` | S | Key business metrics | Dormant / not in current homepage runtime |
 | `AnimatedStatItem` | C | Single animated stat | TrustStats |
 | `TestimonialsSection` | S | Testimonial grid | Homepage, About |
 | `TestimonialCard` | S | Single testimonial | TestimonialsSection |
