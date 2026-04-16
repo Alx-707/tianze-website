@@ -1,5 +1,12 @@
 import { COUNT_TWO, HEX_RADIX } from "../constants/count";
 import { ZERO } from "../constants/core";
+import {
+  getRuntimeEnvBoolean,
+  getRuntimeEnvString,
+  isRuntimeDevelopment,
+  isRuntimeProduction,
+  isRuntimeTest,
+} from "@/lib/env";
 
 export type SecurityHeader = {
   key: string;
@@ -47,9 +54,9 @@ export const CSP_INLINE_SCRIPT_SHA256_BASE64_ALLOWLIST_FOR_TESTS =
  * Content Security Policy configuration
  */
 export function generateCSP(nonce?: string): string {
-  const isDevelopment = process.env.NODE_ENV === "development";
-  const isProduction = process.env.NODE_ENV === "production";
-  const configuredReportUri = process.env.CSP_REPORT_URI?.trim();
+  const isDevelopment = isRuntimeDevelopment();
+  const isProduction = isRuntimeProduction();
+  const configuredReportUri = getRuntimeEnvString("CSP_REPORT_URI")?.trim();
   const reportUri =
     configuredReportUri && configuredReportUri.length > ZERO
       ? configuredReportUri
@@ -163,32 +170,22 @@ export function generateCSP(nonce?: string): string {
 /**
  * Security headers configuration
  */
-const SECURITY_HEADERS_DISABLED_FLAG = "false";
-
 export function isSecurityHeadersEnabled(testMode = false): boolean {
   if (testMode) {
-    return (
-      process.env.SECURITY_HEADERS_ENABLED !== SECURITY_HEADERS_DISABLED_FLAG
-    );
+    return getRuntimeEnvBoolean("SECURITY_HEADERS_ENABLED") !== false;
   }
 
-  if (process.env.NODE_ENV === "test") {
-    return (
-      process.env.SECURITY_HEADERS_ENABLED !== SECURITY_HEADERS_DISABLED_FLAG
-    );
+  if (isRuntimeTest()) {
+    return getRuntimeEnvBoolean("SECURITY_HEADERS_ENABLED") !== false;
   }
 
-  return (
-    process.env.SECURITY_HEADERS_ENABLED !== SECURITY_HEADERS_DISABLED_FLAG
-  );
+  return getRuntimeEnvBoolean("SECURITY_HEADERS_ENABLED") !== false;
 }
 
 export function getSecurityHeaders(
   nonce?: string,
   testMode = false,
 ): SecurityHeader[] {
-  // Use process.env here to keep this module safe for Next config evaluation.
-  // Runtime env validation lives in `@/lib/env`, but importing it here would break next.config load.
   if (!isSecurityHeadersEnabled(testMode)) {
     return [];
   }
@@ -318,12 +315,8 @@ export const SECURITY_MODES = {
 /**
  * Get security configuration based on mode
  */
-export function getSecurityConfig(testMode = false) {
-  // Use process.env directly in tests to avoid env validation issues
-  const rawMode =
-    (testMode || process.env.NODE_ENV === "test"
-      ? process.env.NEXT_PUBLIC_SECURITY_MODE
-      : process.env.NEXT_PUBLIC_SECURITY_MODE) || "strict";
+export function getSecurityConfig(_testMode = false) {
+  const rawMode = getRuntimeEnvString("NEXT_PUBLIC_SECURITY_MODE") || "strict";
 
   const mode =
     rawMode === "moderate" || rawMode === "relaxed" ? rawMode : "strict";

@@ -1,3 +1,4 @@
+import { getRuntimeEnvString } from "@/lib/env";
 import { logger } from "@/lib/logger";
 
 /**
@@ -233,15 +234,15 @@ export { MemoryIdempotencyStore, RedisIdempotencyStore };
  * Vercel KV support is pending; D1 adapter is planned (Task 025) but not yet implemented.
  */
 export function createIdempotencyStore(): IdempotencyStore {
-  const upstashUrl = process.env.UPSTASH_REDIS_REST_URL;
-  const upstashToken = process.env.UPSTASH_REDIS_REST_TOKEN;
+  const upstashUrl = getRuntimeEnvString("UPSTASH_REDIS_REST_URL");
+  const upstashToken = getRuntimeEnvString("UPSTASH_REDIS_REST_TOKEN");
 
   if (upstashUrl && upstashToken) {
     logger.info("[Idempotency] Using Upstash Redis store");
     return new RedisIdempotencyStore(upstashUrl, upstashToken);
   }
 
-  const isProduction = process.env.NODE_ENV === "production";
+  const isProduction = getRuntimeEnvString("NODE_ENV") === "production";
 
   if (isProduction) {
     throw new Error(

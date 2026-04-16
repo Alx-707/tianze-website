@@ -1,3 +1,4 @@
+import { getRuntimeEnvString } from "@/lib/env";
 import { logger } from "@/lib/logger";
 
 /**
@@ -206,17 +207,17 @@ export { MemoryRateLimitStore, RedisRateLimitStore };
  * Production requires Upstash Redis; development can use in-memory fallback
  */
 export function createRateLimitStore(): RateLimitStore {
-  const upstashUrl = process.env.UPSTASH_REDIS_REST_URL;
-  const upstashToken = process.env.UPSTASH_REDIS_REST_TOKEN;
+  const upstashUrl = getRuntimeEnvString("UPSTASH_REDIS_REST_URL");
+  const upstashToken = getRuntimeEnvString("UPSTASH_REDIS_REST_TOKEN");
 
   if (upstashUrl && upstashToken) {
     logger.info("[Rate Limit] Using Upstash Redis store");
     return new RedisRateLimitStore(upstashUrl, upstashToken);
   }
 
-  const kvUrl = process.env.KV_REST_API_URL;
-  const kvToken = process.env.KV_REST_API_TOKEN;
-  const isProduction = process.env.NODE_ENV === "production";
+  const kvUrl = getRuntimeEnvString("KV_REST_API_URL");
+  const kvToken = getRuntimeEnvString("KV_REST_API_TOKEN");
+  const isProduction = getRuntimeEnvString("NODE_ENV") === "production";
 
   if (isProduction) {
     if (kvUrl && kvToken) {

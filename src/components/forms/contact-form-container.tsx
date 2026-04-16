@@ -4,6 +4,7 @@ import { useRef, type FormEvent } from "react";
 import { useTranslations } from "next-intl";
 import { useFormStatus } from "react-dom";
 import { API_ERROR_NAMESPACE } from "@/lib/api/translate-error-code";
+import { isRuntimeTest } from "@/lib/env";
 import { LazyTurnstile } from "@/components/forms/lazy-turnstile";
 import { useContactForm } from "@/components/forms/use-contact-form";
 import {
@@ -60,7 +61,7 @@ export function ContactFormContainer() {
     }
   };
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    if (process.env.NODE_ENV === "test") {
+    if (isRuntimeTest()) {
       event.preventDefault();
     }
   };

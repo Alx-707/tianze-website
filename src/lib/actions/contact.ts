@@ -9,6 +9,7 @@
  */
 import { headers } from "next/headers";
 import { type ContactFormData } from "@/lib/form-schema/contact-form-schema";
+import { isRuntimeProduction } from "@/lib/env";
 import { logger } from "@/lib/logger";
 import { checkDistributedRateLimit } from "@/lib/security/distributed-rate-limit";
 import { API_ERROR_CODES } from "@/constants/api-error-codes";
@@ -151,7 +152,7 @@ async function executeContactSubmissionAttempt(
   };
 
   const processingTime = performance.now() - startTime;
-  if (process.env.NODE_ENV !== "production") {
+  if (!isRuntimeProduction()) {
     logger.info("Contact form submitted via Server Action", {
       processingTime,
       emailSent: normalizedSubmissionResult.emailSent,

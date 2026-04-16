@@ -3,6 +3,7 @@ import { createCacheHealthResponse } from "@/lib/api/cache-health-response";
 import createMiddleware from "next-intl/middleware";
 import { generateNonce, getSecurityHeaders } from "@/config/security";
 import { routing, type Locale } from "@/i18n/routing-config";
+import { isSecureAppEnv } from "@/lib/env";
 import { INTERNAL_TRUSTED_CLIENT_IP_HEADER } from "@/lib/security/client-ip-headers";
 import { getTrustedClientIPForInternalHeader } from "@/lib/security/client-ip";
 import {
@@ -114,8 +115,6 @@ function extractLocaleCandidate(pathname: string): Locale | undefined {
 
 function setLocaleCookie(resp: NextResponse, locale: Locale): void {
   try {
-    const appEnv = process.env.APP_ENV;
-    const isSecure = appEnv === "production" || appEnv === "preview";
     const { localeCookie } = routing;
     const maxAge =
       typeof localeCookie === "object" && localeCookie !== null
@@ -125,7 +124,7 @@ function setLocaleCookie(resp: NextResponse, locale: Locale): void {
       path: "/",
       httpOnly: true,
       sameSite: "lax",
-      secure: isSecure,
+      secure: isSecureAppEnv(),
       ...(typeof maxAge === "number" ? { maxAge } : {}),
     });
   } catch {

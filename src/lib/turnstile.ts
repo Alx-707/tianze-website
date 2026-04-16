@@ -6,7 +6,7 @@
  */
 
 import { FIVE_SECONDS_MS } from "@/constants/time";
-import { env } from "@/lib/env";
+import { env, getRuntimeEnvBoolean, getRuntimeEnvString } from "@/lib/env";
 import { logger, sanitizeIP } from "@/lib/logger";
 import {
   getAllowedTurnstileHosts,
@@ -104,8 +104,8 @@ function validateTurnstileActionResponse(
 }
 
 function shouldBypassTurnstile(ip: string): boolean {
-  const isDevelopment = env.NODE_ENV === "development";
-  const isBypassEnabled = process.env.TURNSTILE_BYPASS === "true";
+  const isDevelopment = getRuntimeEnvString("NODE_ENV") === "development";
+  const isBypassEnabled = getRuntimeEnvBoolean("TURNSTILE_BYPASS") === true;
 
   if (isDevelopment && isBypassEnabled) {
     logger.warn("[DEV] Turnstile verification bypassed", {

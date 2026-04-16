@@ -8,6 +8,7 @@ import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
 import yaml, { type LoadOptions } from "js-yaml";
+import { isRuntimeProduction } from "@/lib/env";
 import {
   ContentError,
   ContentValidationError,
@@ -55,7 +56,7 @@ export interface ParseContentOptions {
  */
 function getProductionValidationConfig(): ValidationConfig {
   const config = getValidationConfig();
-  const isProduction = process.env.NODE_ENV === "production";
+  const isProduction = isRuntimeProduction();
 
   const merged: ValidationConfig = {
     strictMode: isProduction || (config.strictMode ?? false),

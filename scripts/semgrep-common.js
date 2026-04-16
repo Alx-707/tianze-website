@@ -1,9 +1,10 @@
 const { spawnSync } = require("child_process");
 const fs = require("fs");
 const path = require("path");
+const { readEnvString } = require("./lib/runtime-env");
 
 function pickPython() {
-  const fromEnv = process.env.SEMGREP_PYTHON;
+  const fromEnv = readEnvString("SEMGREP_PYTHON");
   if (fromEnv && fs.existsSync(fromEnv)) return fromEnv;
 
   const candidates = [
@@ -27,10 +28,10 @@ function run(cmd, args, options = {}) {
 }
 
 function findSemgrep() {
-  const fromEnv = process.env.SEMGREP_BIN;
+  const fromEnv = readEnvString("SEMGREP_BIN");
   if (fromEnv && fs.existsSync(fromEnv)) return fromEnv;
 
-  const home = process.env.HOME || "";
+  const home = readEnvString("HOME") || "";
   const candidates = [
     path.join(home, ".local", "bin", "semgrep"),
     "/Library/Frameworks/Python.framework/Versions/3.12/bin/semgrep",

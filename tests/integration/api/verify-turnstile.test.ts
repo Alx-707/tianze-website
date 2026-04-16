@@ -6,6 +6,8 @@ vi.mock("@/lib/env", () => ({
   env: {
     TURNSTILE_SECRET_KEY: "secret-key",
   },
+  getRuntimeEnvString: (key: string) => process.env[key],
+  getRuntimeEnvBoolean: (key: string) => process.env[key] === "true",
 }));
 
 vi.mock("@/lib/security/turnstile-config", () => ({

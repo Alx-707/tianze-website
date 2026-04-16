@@ -363,6 +363,9 @@ jobs:
           python3 -m pip install --user "semgrep<2"
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
+      - name: Semgrep 规则夹具验证
+        run: pnpm security:semgrep:test-rules
+
       - name: Semgrep 安全扫描（PR baseline 模式）
         if: github.event_name == 'pull_request'
         run: |
@@ -501,11 +504,32 @@ jobs:
         env:
           QUALITY_DIFF_BASE: ${{ github.event.pull_request.base.sha || 'origin/main' }}
 
+      - name: Guardrails 总览
+        id: all-guardrails
+        continue-on-error: true
+        run: pnpm review:all-guardrails
+
+      - name: 上传 Guardrails 报告
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: guardrails-reports
+          path: reports/guardrails/
+          if-no-files-found: ignore
+
       - name: 依赖关系检查
         run: pnpm arch:check
 
       - name: 循环依赖检查
         run: pnpm circular:check
+
+      - name: Guardrails 失败则报红
+        if: always()
+        run: |
+          if [[ "${{ steps.all-guardrails.outcome }}" != "success" ]]; then
+            echo "❌ Guardrails 总览失败"
+            exit 1
+          fi
 
   # 汇总作业
   ci-summary:
@@ -525,8 +549,54 @@ jobs:
     timeout-minutes: 5
 
     steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+        with:
+          submodules: false
+          persist-credentials: false
+
+      - name: 下载 Guardrails 报告
+        if: always()
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          name: guardrails-reports
+          path: reports/guardrails/
+
+      - name: 写入 Guardrails Summary
+        if: always()
+        run: |
+          set -euo pipefail
+
+          if [[ -f reports/guardrails/latest-all-guardrails-summary.json && -f reports/guardrails/latest-scripts-env-summary.json ]]; then
+            node scripts/append-guardrail-summary.js \
+              reports/guardrails/latest-all-guardrails-summary.json \
+              reports/guardrails/latest-scripts-env-summary.json
+          else
+            {
+              echo "# Guardrails Summary"
+              echo
+              echo "- Guardrails reports: unavailable"
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
       - name: 检查所有作业状态
         run: |
+          {
+            echo "## CI Jobs"
+            echo
+            echo "| Job | Result |"
+            echo "| --- | --- |"
+            echo "| 基础检查 | ${{ needs.basic-checks.result }} |"
+            echo "| 单元测试 | ${{ needs.tests.result }} |"
+            echo "| E2E测试 | ${{ needs.e2e-tests.result }} |"
+            echo "| 性能检查 | ${{ needs.performance.result }} |"
+            echo "| 安全检查 | ${{ needs.security.result }} |"
+            echo "| 翻译质量 | ${{ needs.translation-quality.result }} |"
+            echo "| 架构检查 | ${{ needs.architecture.result }} |"
+            echo
+          } >> "$GITHUB_STEP_SUMMARY"
+
           echo "基础检查: ${{ needs.basic-checks.result }}"
           echo "单元测试: ${{ needs.tests.result }}"
           echo "E2E测试: ${{ needs.e2e-tests.result }}"

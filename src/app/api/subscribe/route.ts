@@ -14,6 +14,7 @@ import {
   getRequestObservability,
   withObservabilityContext,
 } from "@/lib/api/request-observability";
+import { isRuntimeProduction } from "@/lib/env";
 import { recordApiResponseSignal } from "@/lib/observability/api-signals";
 import { readAndHashJsonBody } from "@/lib/api/read-and-hash-body";
 import {
@@ -35,7 +36,7 @@ function createSuccessResponse(
   email: string,
   observability: ReturnType<typeof getRequestObservability>,
 ) {
-  if (process.env.NODE_ENV !== "production") {
+  if (!isRuntimeProduction()) {
     logger.info("Newsletter subscription successful", {
       referenceId: result.referenceId,
       email: sanitizeEmail(email),

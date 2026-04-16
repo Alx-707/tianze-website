@@ -1,6 +1,7 @@
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import type { ReactElement } from "react";
+import { env, getRuntimeEnvBoolean } from "@/lib/env";
 
 interface SubsetSource {
   href: string;
@@ -13,10 +14,10 @@ interface SubsetSource {
 // - 仅在生产环境且显式开启开关时使用 preconnect（更激进，可能占用早期连接）
 // - 默认使用 dns-prefetch（更保守，低成本）
 const ANALYTICS_ORIGIN = "https://vitals.vercel-insights.com" as const;
-const isProduction = process.env.NODE_ENV === "production";
+const isProduction = env.NODE_ENV === "production";
 const enableAnalyticsPreconnect =
   isProduction &&
-  process.env.NEXT_PUBLIC_ENABLE_ANALYTICS_PRECONNECT === "true";
+  getRuntimeEnvBoolean("NEXT_PUBLIC_ENABLE_ANALYTICS_PRECONNECT");
 
 const ANALYTICS_PRECONNECTS: Array<{
   href: string;
@@ -99,7 +100,9 @@ function buildSubsetStyle(sources: SubsetSource[]): string | null {
 }
 
 export default function LocaleHead(): ReactElement {
-  const enableSubset = process.env.NEXT_PUBLIC_ENABLE_CN_FONT_SUBSET === "true";
+  const enableSubset = getRuntimeEnvBoolean(
+    "NEXT_PUBLIC_ENABLE_CN_FONT_SUBSET",
+  );
   const publicDir = join(process.cwd(), "public");
 
   const availableSubsetSources = enableSubset

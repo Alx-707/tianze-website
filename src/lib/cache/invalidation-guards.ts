@@ -5,6 +5,7 @@ import {
   cacheInvalidationSchema,
   type InvalidationRequest,
 } from "@/lib/cache/invalidation-policy";
+import { getRuntimeEnvString } from "@/lib/env";
 import { logger } from "@/lib/logger";
 import { constantTimeCompare } from "@/lib/security-crypto";
 import {
@@ -31,7 +32,7 @@ type RateLimitPresetType = "cacheInvalidatePreAuth" | "cacheInvalidate";
 export function validateCacheInvalidationApiKey(
   request: NextRequest,
 ): ApiKeyValidationResult {
-  const secret = process.env.CACHE_INVALIDATION_SECRET;
+  const secret = getRuntimeEnvString("CACHE_INVALIDATION_SECRET");
 
   if (!secret) {
     logger.error("CACHE_INVALIDATION_SECRET not configured");

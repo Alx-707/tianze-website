@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { isRuntimeDevelopment } from "@/lib/env";
 import { logger } from "@/lib/logger";
 import { Button } from "@/components/ui/button";
 import { coerceLocale } from "@/i18n/locale-utils";
@@ -58,7 +59,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
               {t.title}
             </h1>
             <p className="mb-6 text-muted-foreground">{t.description}</p>
-            {process.env.NODE_ENV === "development" && (
+            {isRuntimeDevelopment() && (
               <details className="mb-6 text-left">
                 <summary className="cursor-pointer text-sm font-medium">
                   {t.devDetails}

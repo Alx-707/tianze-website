@@ -4,6 +4,7 @@
  * 服务端渲染的头部，交互部件以客户端小岛方式注入，减少首屏 JS 体积。
  */
 import { Link } from "@/i18n/routing";
+import { getRuntimeEnvString } from "@/lib/env";
 import { NAVIGATION_ARIA } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
 import {
@@ -49,9 +50,10 @@ function getHeaderState(
     isSticky: variant === "transparent" ? false : sticky,
     isMinimal: variant === "minimal",
     isTransparent: variant === "transparent",
-    isVercelNav: process.env.NEXT_PUBLIC_NAV_VARIANT !== "legacy",
+    isVercelNav: getRuntimeEnvString("NEXT_PUBLIC_NAV_VARIANT") !== "legacy",
     visibleMargin:
-      process.env.NEXT_PUBLIC_IDLE_ROOTMARGIN ?? "400px 0px 400px 0px",
+      getRuntimeEnvString("NEXT_PUBLIC_IDLE_ROOTMARGIN") ??
+      "400px 0px 400px 0px",
     showTestIds: !locale,
   };
 }

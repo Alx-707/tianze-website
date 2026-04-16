@@ -8,6 +8,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { getFontClassNames } from "@/app/[locale]/layout-fonts";
 import { loadCompleteMessages } from "@/lib/load-messages";
+import { env, getRuntimeEnvBoolean } from "@/lib/env";
 import { pickClientMessages } from "@/lib/i18n/client-messages";
 import { generateJSONLD } from "@/lib/structured-data";
 import { AttributionBootstrap } from "@/components/attribution-bootstrap";
@@ -167,11 +168,11 @@ export default async function LocaleLayout({
   const typedLocale = coerceLocale(locale);
   setRequestLocale(typedLocale);
   const disableDevTools =
-    process.env.PLAYWRIGHT_TEST === "true" ||
-    process.env.NEXT_PUBLIC_DISABLE_DEV_TOOLS === "true";
+    env.PLAYWRIGHT_TEST ||
+    getRuntimeEnvBoolean("NEXT_PUBLIC_DISABLE_DEV_TOOLS");
   const disableReactScan =
-    disableDevTools || process.env.NEXT_PUBLIC_DISABLE_REACT_SCAN === "true";
-  const shouldLoadDevScripts = process.env.NODE_ENV === "development";
+    disableDevTools || getRuntimeEnvBoolean("NEXT_PUBLIC_DISABLE_REACT_SCAN");
+  const shouldLoadDevScripts = env.NODE_ENV === "development";
   const skipToContentLabel =
     typedLocale === "zh" ? "跳转到主要内容" : "Skip to main content";
 

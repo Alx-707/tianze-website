@@ -361,6 +361,14 @@ run_architecture_checks() {
         return 0
     fi
 
+    print_step "Guardrails 总览"
+    if pnpm review:all-guardrails; then
+        print_success "Guardrails 总览通过"
+    else
+        print_error "Guardrails 总览失败"
+        return 1
+    fi
+
     # 依赖关系检查
     print_step "依赖关系检查"
     if pnpm arch:check; then

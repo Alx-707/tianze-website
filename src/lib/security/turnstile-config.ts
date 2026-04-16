@@ -1,4 +1,4 @@
-import { env } from "@/lib/env";
+import { env, getRuntimeEnvString } from "@/lib/env";
 import { SITE_CONFIG } from "@/config/paths/site-config";
 import { logger } from "@/lib/logger";
 
@@ -78,7 +78,7 @@ const DEFAULT_ALLOWED_ACTIONS = [
 ];
 
 const allowedActionsMemo = (() => {
-  const envActions = process.env.TURNSTILE_ALLOWED_ACTIONS;
+  const envActions = getRuntimeEnvString("TURNSTILE_ALLOWED_ACTIONS");
   if (envActions) {
     return envActions
       .split(",")

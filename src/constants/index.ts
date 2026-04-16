@@ -267,33 +267,6 @@ export type {
 } from "./app-constants";
 
 // ============================================================================
-// 测试相关常量
-// ============================================================================
-export {
-  TEST_TIME_CALCULATIONS,
-  TEST_DELAY_VALUES,
-  TEST_PERCENTAGE_VALUES,
-  TEST_PERFORMANCE_TIMESTAMPS,
-  TEST_APP_CONSTANTS,
-  TEST_BASE_NUMBERS,
-  TEST_TIMEOUT_CONSTANTS,
-  TEST_COUNT_CONSTANTS,
-  TEST_COUNTS,
-  TEST_PERCENTAGE_CONSTANTS,
-  TEST_TIMESTAMP_CONSTANTS,
-  TEST_OPACITY_CONSTANTS,
-  TEST_ANGLE_CONSTANTS,
-  TEST_CONTRAST_CONSTANTS,
-  TEST_EASING_CONSTANTS,
-  TEST_PERFORMANCE_MONITORING,
-  THEME_ANALYTICS_CONSTANTS,
-  TEST_CONTENT_LIMITS,
-  TEST_SAMPLE_CONSTANTS,
-  TEST_SCREEN_CONSTANTS,
-  TEST_SPECIAL_CONSTANTS,
-} from "./test-constants";
-
-// ============================================================================
 // 安全相关常量
 // ============================================================================
 export {
@@ -339,4 +312,3 @@ export type {
 export { APP_CONSTANTS } from "./app-constants";
 export { SECURITY_CONSTANTS } from "./security-constants";
 export { SEO_CONSTANTS } from "./seo-constants";
-export { TEST_CONSTANTS } from "./test-constants";

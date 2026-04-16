@@ -35,6 +35,37 @@ export const env = createEnv({
     TURNSTILE_SECRET_KEY: z.string().min(1).optional(),
     TURNSTILE_ALLOWED_HOSTS: z.string().optional(),
     TURNSTILE_EXPECTED_ACTION: z.string().optional(),
+    TURNSTILE_ALLOWED_ACTIONS: z.string().optional(),
+    TURNSTILE_BYPASS: z
+      .string()
+      .optional()
+      .transform((val) => val === "true"),
+
+    // Admin & automation secrets
+    ADMIN_API_TOKEN: z.string().min(1).optional(),
+    CACHE_INVALIDATION_SECRET: z.string().min(1).optional(),
+
+    // Runtime and platform configuration
+    LOG_LEVEL: z.enum(["error", "warn", "info", "debug"]).optional(),
+    CONTENT_ENABLE_DRAFTS: z
+      .string()
+      .optional()
+      .transform((val) => val === "true"),
+    DEPLOYMENT_PLATFORM: z
+      .enum(["vercel", "cloudflare", "development", "self-hosted"])
+      .optional(),
+    VERCEL: z.string().optional(),
+    CF_PAGES: z.string().optional(),
+    GOOGLE_SITE_VERIFICATION: z.string().min(1).optional(),
+    YANDEX_VERIFICATION: z.string().min(1).optional(),
+
+    // Distributed storage and rate limiting
+    RATE_LIMIT_PEPPER: z.string().min(1).optional(),
+    RATE_LIMIT_PEPPER_PREVIOUS: z.string().min(1).optional(),
+    UPSTASH_REDIS_REST_URL: z.string().url().optional(),
+    UPSTASH_REDIS_REST_TOKEN: z.string().min(1).optional(),
+    KV_REST_API_URL: z.string().url().optional(),
+    KV_REST_API_TOKEN: z.string().min(1).optional(),
 
     // AI Translation Service (Lingo.dev)
     LINGO_DEV_API_KEY: z.string().min(1).optional(),
@@ -51,6 +82,10 @@ export const env = createEnv({
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
+    APP_ENV: z
+      .enum(["local", "development", "test", "preview", "production"])
+      .optional(),
+    NEXT_PHASE: z.string().optional(),
 
     // CI/CD
     CI: z.string().optional(),
@@ -165,6 +200,10 @@ export const env = createEnv({
     // Analytics & Monitoring
     NEXT_PUBLIC_VERCEL_ANALYTICS_ID: z.string().optional(),
     NEXT_PUBLIC_GA_MEASUREMENT_ID: z.string().optional(),
+    NEXT_PUBLIC_ENABLE_ANALYTICS_PRECONNECT: z
+      .string()
+      .optional()
+      .transform((val) => val === "true"),
 
     // Bot Protection (Cloudflare Turnstile Public Key)
     NEXT_PUBLIC_TURNSTILE_SITE_KEY: z.string().optional(),
@@ -205,12 +244,22 @@ export const env = createEnv({
     // Internationalization
     NEXT_PUBLIC_DEFAULT_LOCALE: z.string().default("en"),
     NEXT_PUBLIC_SUPPORTED_LOCALES: z.string().default("en,zh"),
+    NEXT_PUBLIC_ENABLE_CN_FONT_SUBSET: z
+      .string()
+      .optional()
+      .transform((val) => val === "true"),
 
     // Security
     NEXT_PUBLIC_CSP_NONCE: z.string().optional(),
     NEXT_PUBLIC_SECURITY_MODE: z
       .enum(["strict", "moderate", "relaxed"])
       .default("strict"),
+
+    // UI tuning
+    NEXT_PUBLIC_NAV_VARIANT: z.string().optional(),
+    NEXT_PUBLIC_IDLE_ROOTMARGIN: z.string().optional(),
+    NEXT_PUBLIC_CONTACT_FORM_COOLDOWN_MS: z.coerce.number().optional(),
+
     // Deployment Platform
     NEXT_PUBLIC_DEPLOYMENT_PLATFORM: z
       .enum(["vercel", "cloudflare", "self-hosted"])
@@ -236,6 +285,23 @@ export const env = createEnv({
     TURNSTILE_SECRET_KEY: process.env.TURNSTILE_SECRET_KEY,
     TURNSTILE_ALLOWED_HOSTS: process.env.TURNSTILE_ALLOWED_HOSTS,
     TURNSTILE_EXPECTED_ACTION: process.env.TURNSTILE_EXPECTED_ACTION,
+    TURNSTILE_ALLOWED_ACTIONS: process.env.TURNSTILE_ALLOWED_ACTIONS,
+    TURNSTILE_BYPASS: process.env.TURNSTILE_BYPASS,
+    ADMIN_API_TOKEN: process.env.ADMIN_API_TOKEN,
+    CACHE_INVALIDATION_SECRET: process.env.CACHE_INVALIDATION_SECRET,
+    LOG_LEVEL: process.env.LOG_LEVEL,
+    CONTENT_ENABLE_DRAFTS: process.env.CONTENT_ENABLE_DRAFTS,
+    DEPLOYMENT_PLATFORM: process.env.DEPLOYMENT_PLATFORM,
+    VERCEL: process.env.VERCEL,
+    CF_PAGES: process.env.CF_PAGES,
+    GOOGLE_SITE_VERIFICATION: process.env.GOOGLE_SITE_VERIFICATION,
+    YANDEX_VERIFICATION: process.env.YANDEX_VERIFICATION,
+    RATE_LIMIT_PEPPER: process.env.RATE_LIMIT_PEPPER,
+    RATE_LIMIT_PEPPER_PREVIOUS: process.env.RATE_LIMIT_PEPPER_PREVIOUS,
+    UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL,
+    UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
+    KV_REST_API_URL: process.env.KV_REST_API_URL,
+    KV_REST_API_TOKEN: process.env.KV_REST_API_TOKEN,
     LINGO_DEV_API_KEY: process.env.LINGO_DEV_API_KEY,
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
     GROQ_API_KEY: process.env.GROQ_API_KEY,
@@ -245,6 +311,8 @@ export const env = createEnv({
     VERCEL_GIT_COMMIT_SHA: process.env.VERCEL_GIT_COMMIT_SHA,
     VERCEL_ENV: process.env.VERCEL_ENV,
     NODE_ENV: process.env.NODE_ENV,
+    APP_ENV: process.env.APP_ENV,
+    NEXT_PHASE: process.env.NEXT_PHASE,
     CI: process.env.CI,
     GITHUB_TOKEN: process.env.GITHUB_TOKEN,
     PLAYWRIGHT_TEST: process.env.PLAYWRIGHT_TEST,
@@ -330,6 +398,8 @@ export const env = createEnv({
     NEXT_PUBLIC_VERCEL_ANALYTICS_ID:
       process.env.NEXT_PUBLIC_VERCEL_ANALYTICS_ID,
     NEXT_PUBLIC_GA_MEASUREMENT_ID: process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID,
+    NEXT_PUBLIC_ENABLE_ANALYTICS_PRECONNECT:
+      process.env.NEXT_PUBLIC_ENABLE_ANALYTICS_PRECONNECT,
     NEXT_PUBLIC_TURNSTILE_SITE_KEY: process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY,
     NEXT_PUBLIC_TURNSTILE_ACTION: process.env.NEXT_PUBLIC_TURNSTILE_ACTION,
     NEXT_PUBLIC_TURNSTILE_BYPASS: process.env.NEXT_PUBLIC_TURNSTILE_BYPASS,
@@ -343,8 +413,14 @@ export const env = createEnv({
     NEXT_PUBLIC_TEST_MODE: process.env.NEXT_PUBLIC_TEST_MODE,
     NEXT_PUBLIC_DEFAULT_LOCALE: process.env.NEXT_PUBLIC_DEFAULT_LOCALE,
     NEXT_PUBLIC_SUPPORTED_LOCALES: process.env.NEXT_PUBLIC_SUPPORTED_LOCALES,
+    NEXT_PUBLIC_ENABLE_CN_FONT_SUBSET:
+      process.env.NEXT_PUBLIC_ENABLE_CN_FONT_SUBSET,
     NEXT_PUBLIC_CSP_NONCE: process.env.NEXT_PUBLIC_CSP_NONCE,
     NEXT_PUBLIC_SECURITY_MODE: process.env.NEXT_PUBLIC_SECURITY_MODE,
+    NEXT_PUBLIC_NAV_VARIANT: process.env.NEXT_PUBLIC_NAV_VARIANT,
+    NEXT_PUBLIC_IDLE_ROOTMARGIN: process.env.NEXT_PUBLIC_IDLE_ROOTMARGIN,
+    NEXT_PUBLIC_CONTACT_FORM_COOLDOWN_MS:
+      process.env.NEXT_PUBLIC_CONTACT_FORM_COOLDOWN_MS,
     NEXT_PUBLIC_DEPLOYMENT_PLATFORM:
       process.env.NEXT_PUBLIC_DEPLOYMENT_PLATFORM,
   },
@@ -367,6 +443,124 @@ export function getEnvVar(
   key: keyof typeof env,
 ): string | boolean | number | undefined {
   return env[key];
+}
+
+function readProcessEnvValue(key: keyof typeof env): string | undefined {
+  if (typeof process === "undefined") {
+    return undefined;
+  }
+
+  return process.env[key];
+}
+
+function readValidatedEnvValue(key: keyof typeof env) {
+  try {
+    return env[key];
+  } catch {
+    return undefined;
+  }
+}
+
+type RuntimeNodeEnv = "development" | "test" | "production";
+type RuntimeAppEnv =
+  | "local"
+  | "development"
+  | "test"
+  | "preview"
+  | "production";
+
+function coerceRuntimeNodeEnv(
+  value: string | undefined,
+): RuntimeNodeEnv | undefined {
+  if (value === "development" || value === "test" || value === "production") {
+    return value;
+  }
+  return undefined;
+}
+
+function coerceRuntimeAppEnv(
+  value: string | undefined,
+): RuntimeAppEnv | undefined {
+  if (
+    value === "local" ||
+    value === "development" ||
+    value === "test" ||
+    value === "preview" ||
+    value === "production"
+  ) {
+    return value;
+  }
+  return undefined;
+}
+
+export function getRuntimeEnvString(key: keyof typeof env): string | undefined {
+  const runtimeValue = readProcessEnvValue(key);
+  if (runtimeValue !== undefined) {
+    return runtimeValue;
+  }
+
+  const value = readValidatedEnvValue(key);
+  return typeof value === "string" ? value : undefined;
+}
+
+export function getRuntimeEnvBoolean(
+  key: keyof typeof env,
+): boolean | undefined {
+  const runtimeValue = readProcessEnvValue(key);
+  if (runtimeValue !== undefined) {
+    return runtimeValue === "true";
+  }
+
+  const value = readValidatedEnvValue(key);
+  return typeof value === "boolean" ? value : undefined;
+}
+
+export function getRuntimeEnvNumber(key: keyof typeof env): number | undefined {
+  const runtimeValue = readProcessEnvValue(key);
+  if (runtimeValue !== undefined) {
+    const parsed = Number(runtimeValue);
+    return Number.isFinite(parsed) ? parsed : undefined;
+  }
+
+  const value = readValidatedEnvValue(key);
+  return typeof value === "number" ? value : undefined;
+}
+
+export function getRuntimeNodeEnv(): RuntimeNodeEnv | undefined {
+  return coerceRuntimeNodeEnv(getRuntimeEnvString("NODE_ENV"));
+}
+
+export function getRuntimeAppEnv(): RuntimeAppEnv | undefined {
+  return coerceRuntimeAppEnv(getRuntimeEnvString("APP_ENV"));
+}
+
+export function isRuntimeDevelopment(): boolean {
+  return getRuntimeNodeEnv() === "development";
+}
+
+export function isRuntimeProduction(): boolean {
+  return getRuntimeNodeEnv() === "production";
+}
+
+export function isRuntimeTest(): boolean {
+  return getRuntimeNodeEnv() === "test";
+}
+
+export function isRuntimeCi(): boolean {
+  return getRuntimeEnvString("CI") === "true";
+}
+
+export function isRuntimePlaywright(): boolean {
+  return getRuntimeEnvBoolean("PLAYWRIGHT_TEST") === true;
+}
+
+export function isRuntimeProductionBuildPhase(): boolean {
+  return getRuntimeEnvString("NEXT_PHASE") === "phase-production-build";
+}
+
+export function isSecureAppEnv(): boolean {
+  const appEnv = getRuntimeAppEnv();
+  return appEnv === "production" || appEnv === "preview";
 }
 
 // 提供必需环境变量检查（仅用于字符串类型的环境变量）
