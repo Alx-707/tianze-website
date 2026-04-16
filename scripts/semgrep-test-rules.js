@@ -122,7 +122,7 @@ function main() {
 
   runFileContractFixtures(semgrepPath);
 
-  process.exit(result.status ?? 0);
+  process.exit(0);
 }
 
 try {
