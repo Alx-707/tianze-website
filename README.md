@@ -92,6 +92,7 @@ TURNSTILE_SECRET_KEY=你的服务端私钥
 
 当前仓库的活跃维护文档集中在 `docs/guides/`：
 
+- **[PERFORMANCE-GOVERNANCE.md](./docs/guides/PERFORMANCE-GOVERNANCE.md)** - 当前性能治理总规则：哪些值得借鉴、哪些先别动、哪些证明才算数
 - **[tech-stack.md](./docs/guides/tech-stack.md)** - 当前技术栈、构建链路和关键依赖
 - **[RELEASE-PROOF-RUNBOOK.md](./docs/guides/RELEASE-PROOF-RUNBOOK.md)** - 发布前验证与发布门禁执行顺序
 - **[QUALITY-PROOF-LEVELS.md](./docs/guides/QUALITY-PROOF-LEVELS.md)** - 不同级别检查各自证明什么
@@ -279,6 +280,7 @@ AIRTABLE_BASE_ID=
 - `GOOGLE_SITE_VERIFICATION`
 
 关于哪些文件才是真正的当前规则，请优先看：
+- [PERFORMANCE-GOVERNANCE.md](./docs/guides/PERFORMANCE-GOVERNANCE.md)
 - [POLICY-SOURCE-OF-TRUTH.md](./docs/guides/POLICY-SOURCE-OF-TRUTH.md)
 - [CANONICAL-TRUTH-REGISTRY.md](./docs/guides/CANONICAL-TRUTH-REGISTRY.md)
 
