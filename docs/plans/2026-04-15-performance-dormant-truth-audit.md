@@ -56,16 +56,16 @@ Reason:
 - Test evidence:
   - `src/components/trust/__tests__/trust-stats.test.tsx`
 - Documentation evidence:
-  - `docs/component-registry.md` still listed it as a Homepage component
+  - `docs/component-registry.md` had been presenting it as current Homepage truth before this workstream corrected the live registry
 - Indirect evidence:
   - no barrel / MDX / loader references found
 
-**Classification:** `needs-followup`
+**Classification:** `retire-to-trash`
 
 Reason:
 
 - current repo evidence says this is not in the active runtime
-- but `docs/component-registry.md` was still presenting it as current Homepage truth, which can mislead cleanup decisions
+- the only active-document ambiguity was the live registry, and this workstream corrects that surface
 
 ### 3. `TechTabsBlock`
 
@@ -118,18 +118,18 @@ Reason:
 - Test evidence:
   - `src/components/blocks/products/__tests__/product-matrix-block.test.tsx`
 - Documentation evidence:
-  - `docs/component-registry.md` still listed it as a Homepage component
+  - `docs/component-registry.md` had been presenting it as current Homepage truth before this workstream corrected the live registry
   - `docs/superpowers/specs/2026-03-23-product-pages-design.md` explicitly says it is a legacy component and is not consumed by the current homepage
   - historical plan references exist under `docs/plans/**`
 - Indirect evidence:
   - no barrel / MDX / loader references found
 
-**Classification:** `needs-followup`
+**Classification:** `retire-to-trash`
 
 Reason:
 
 - runtime evidence says it is dormant
-- active docs were conflicting: one live registry said Homepage, while another spec already described it as legacy and unused
+- the live registry conflict is resolved in this workstream, and the remaining spec evidence already describes it as legacy and unused
 
 ## Current Decision Boundary
 
@@ -137,17 +137,17 @@ The audit does **not** authorize broad cleanup yet.
 
 What it does authorize:
 
-- treat `HeroProofCounter` as the clearest `retire-to-trash` candidate
-- treat `TrustStats`, `TechTabsBlock`, `FeaturesGridBlock`, and `ProductMatrixBlock` as dormant in runtime, but not fully decision-clean until active-doc ambiguity is reduced
+- treat `HeroProofCounter`, `TrustStats`, and `ProductMatrixBlock` as current `retire-to-trash` candidates
+- treat `TechTabsBlock` and `FeaturesGridBlock` as dormant in runtime, but not fully decision-clean until active-doc ambiguity is reduced
 
 ## Minimal Doc Sync Performed In This Workstream
 
-- `docs/component-registry.md` has been updated where it was presenting `TrustStats` and `ProductMatrixBlock` as current Homepage truth
+- `docs/component-registry.md` has been updated where it was presenting `TrustStats`, `AnimatedStatItem`, `ProductMatrixBlock`, and the legacy homepage ProductCard entry as current or recommended Homepage truth
 
 ## Suggested Next Step
 
 If the cleanup lane is opened later:
 
 1. only start with objects already classified `retire-to-trash`
-2. resolve remaining active-doc ambiguity for the `needs-followup` group first
-3. move local files to `~/.Trash/` instead of permanent deletion
+2. resolve remaining active-doc ambiguity for `TechTabsBlock` and `FeaturesGridBlock` first
+3. keep the eventual cleanup lane reversible until it records the exact repo-removal mechanics

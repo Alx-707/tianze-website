@@ -28,7 +28,7 @@
 | Social icons | `SocialIcons` | `ui/social-icons` |
 | **Products** | | |
 | Product card (catalog) | `ProductCard` | `products/product-card` |
-| Product card (homepage) | `ProductCard` (blocks) | `blocks/shared/product-card` |
+| Product card (legacy homepage concept) | `ProductCard` (blocks) | `blocks/shared/product-card` |
 | Product images | `ProductGallery` | `products/product-gallery` |
 | Spec table | `SpecTable` | `products/spec-table` |
 | Product family section | `FamilySection` | `products/family-section` |
@@ -45,7 +45,7 @@
 | Render MDX | `MDXContent` | `mdx/mdx-content` |
 | **Trust** | | |
 | Testimonials | `TestimonialsSection` → `TestimonialCard` | `trust/` |
-| Trust stats | `TrustStats` → `AnimatedStatItem` | `trust/` |
+| Trust stats (legacy homepage block) | `TrustStats` → `AnimatedStatItem` | `trust/` |
 | Certifications | `CertificationBadges` | `trust/certification-badges` |
 | Partner logos | `PartnerLogos` | `trust/partner-logos` |
 | **Infrastructure** | | |
@@ -116,7 +116,7 @@ All paths relative to `src/components/`. S = Server, C = Client.
 | `Sheet` | C | Slide-out panel (Radix Dialog) | InquiryDrawer, MobileNav |
 | `NavigationMenu` | S | Navigation structure (Radix) | Header |
 | `ScrollReveal` | C | Animate-in on scroll with stagger | Homepage sections |
-| `AnimatedCounter` | C | Number counter on scroll trigger | TrustStats |
+| `AnimatedCounter` | C | Number counter on scroll trigger | TrustStats (legacy), other stat surfaces |
 | `ThemeSwitcher` | C | Light/dark/system toggle | Header |
 | `LazyThemeSwitcher` | C | Deferred theme switcher | Header (production) |
 | `Toaster` | C | Toast notifications (Sonner) | Form submissions |
@@ -159,7 +159,7 @@ All paths relative to `src/components/`. S = Server, C = Client.
 | `SectionHeader` | S | Centered eyebrow + title | Homepage sections |
 | `ImageCarousel` | S | Scroll (mobile) / 3-col grid (desktop) | Homepage |
 | `StatBar` | S | Horizontal stats with separators | Homepage |
-| `ProductCard` (shared) | S | Feature card with image, features, CTA | ProductMatrixBlock |
+| `ProductCard` (shared) | S | Feature card with image, features, CTA | Dormant / ProductMatrixBlock legacy concept |
 
 ### Layout (`layout/`)
 
@@ -189,7 +189,7 @@ All paths relative to `src/components/`. S = Server, C = Client.
 | Component | Type | Purpose | Common Pairing |
 |-----------|------|---------|----------------|
 | `TrustStats` | S | Key business metrics | Dormant / not in current homepage runtime |
-| `AnimatedStatItem` | C | Single animated stat | TrustStats |
+| `AnimatedStatItem` | C | Single animated stat | Dormant / paired with TrustStats |
 | `TestimonialsSection` | S | Testimonial grid | Homepage, About |
 | `TestimonialCard` | S | Single testimonial | TestimonialsSection |
 | `CertificationBadges` | S | Certification display | Homepage, About |
