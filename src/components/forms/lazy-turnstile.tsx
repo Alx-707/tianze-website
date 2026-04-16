@@ -1,8 +1,19 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { type CSSProperties, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
+import {
+  TURNSTILE_PLACEHOLDER_HEIGHT_CSS_VAR,
+  TURNSTILE_WIDGET_HEIGHT_PX,
+} from "@/constants/turnstile-constants";
 import { requestIdleCallback } from "@/lib/idle-callback";
+
+const TURNSTILE_PLACEHOLDER_CLASS_NAME =
+  "h-[var(--turnstile-placeholder-height)] w-full animate-pulse rounded-md bg-muted";
+
+type TurnstilePlaceholderStyle = CSSProperties & {
+  [TURNSTILE_PLACEHOLDER_HEIGHT_CSS_VAR]: string;
+};
 
 // 懒加载 Turnstile 组件（进入视口或空闲时）
 const DynamicTurnstile = dynamic(
@@ -11,10 +22,7 @@ const DynamicTurnstile = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div
-        className="h-12 w-full animate-pulse rounded-md bg-muted"
-        aria-hidden="true"
-      />
+      <div className={TURNSTILE_PLACEHOLDER_CLASS_NAME} aria-hidden="true" />
     ),
   },
 );
@@ -31,6 +39,14 @@ interface LazyTurnstileProps {
   id?: string;
   action?: string;
   cData?: string;
+}
+
+function createTurnstilePlaceholderStyle(
+  size: NonNullable<LazyTurnstileProps["size"]>,
+): TurnstilePlaceholderStyle {
+  return {
+    [TURNSTILE_PLACEHOLDER_HEIGHT_CSS_VAR]: `${TURNSTILE_WIDGET_HEIGHT_PX[size]}px`,
+  };
 }
 
 /**
@@ -99,15 +115,14 @@ export function LazyTurnstile({
   size = "normal",
   tabIndex,
   id,
-  action = "contact_form",
+  action,
   cData,
 }: LazyTurnstileProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const shouldRender = useLazyRender(containerRef);
-  const placeholderHeightClass = size === "compact" ? "h-[65px]" : "h-12";
+  const placeholderStyle = createTurnstilePlaceholderStyle(size);
   const turnstileProps = {
     className: className ?? "w-full",
-    action,
     theme,
     size,
     ...(onSuccess ? { onSuccess } : {}),
@@ -116,18 +131,16 @@ export function LazyTurnstile({
     ...(onLoad ? { onLoad } : {}),
     ...(tabIndex !== undefined ? { tabIndex } : {}),
     ...(id !== undefined ? { id } : {}),
+    ...(action !== undefined ? { action } : {}),
     ...(cData !== undefined ? { cData } : {}),
   };
 
   return (
-    <div className="space-y-2" ref={containerRef}>
+    <div className="space-y-2" ref={containerRef} style={placeholderStyle}>
       {shouldRender ? (
         <DynamicTurnstile {...turnstileProps} />
       ) : (
-        <div
-          className={`${placeholderHeightClass} w-full animate-pulse rounded-md bg-muted`}
-          aria-hidden="true"
-        />
+        <div className={TURNSTILE_PLACEHOLDER_CLASS_NAME} aria-hidden="true" />
       )}
     </div>
   );

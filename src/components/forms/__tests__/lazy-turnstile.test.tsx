@@ -1,5 +1,6 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { TURNSTILE_WIDGET_HEIGHT_PX } from "@/constants/turnstile-constants";
 import { LazyTurnstile } from "@/components/forms/lazy-turnstile";
 
 const { idleCallbacks, intersectionCallbacks, mockRequestIdleCallback } =
@@ -80,6 +81,22 @@ vi.mock("next/dynamic", () => ({
   },
 }));
 
+function getPlaceholderContainer() {
+  const placeholder = document.querySelector('[aria-hidden="true"]');
+
+  if (!(placeholder instanceof HTMLDivElement)) {
+    throw new Error("Expected LazyTurnstile placeholder to be rendered");
+  }
+
+  const container = placeholder.parentElement;
+
+  if (!(container instanceof HTMLDivElement)) {
+    throw new Error("Expected LazyTurnstile placeholder container");
+  }
+
+  return container;
+}
+
 describe("LazyTurnstile", () => {
   beforeEach(() => {
     idleCallbacks.length = 0;
@@ -118,8 +135,22 @@ describe("LazyTurnstile", () => {
     render(<LazyTurnstile onSuccess={vi.fn()} />);
 
     expect(screen.queryByTestId("turnstile-widget")).not.toBeInTheDocument();
-    expect(document.querySelector('[aria-hidden="true"]')).toBeTruthy();
+    expect(
+      getPlaceholderContainer().style.getPropertyValue(
+        "--turnstile-placeholder-height",
+      ),
+    ).toBe(`${TURNSTILE_WIDGET_HEIGHT_PX.normal}px`);
     expect(mockRequestIdleCallback).toHaveBeenCalledTimes(1);
+  });
+
+  it("uses the documented compact placeholder height", () => {
+    render(<LazyTurnstile onSuccess={vi.fn()} size="compact" />);
+
+    expect(
+      getPlaceholderContainer().style.getPropertyValue(
+        "--turnstile-placeholder-height",
+      ),
+    ).toBe(`${TURNSTILE_WIDGET_HEIGHT_PX.compact}px`);
   });
 
   it("renders on idle and forwards props and callbacks", () => {
@@ -160,6 +191,18 @@ describe("LazyTurnstile", () => {
     expect(onSuccess).toHaveBeenCalledWith("lazy-token");
     expect(onError).toHaveBeenCalledWith("lazy-error");
     expect(onExpire).toHaveBeenCalledTimes(1);
+  });
+
+  it("lets the shared widget decide the default action when none is provided", () => {
+    render(<LazyTurnstile onSuccess={vi.fn()} />);
+
+    act(() => {
+      idleCallbacks[0]?.();
+    });
+
+    expect(screen.getByTestId("turnstile-widget")).not.toHaveAttribute(
+      "data-action",
+    );
   });
 
   it("renders when the wrapper enters the viewport", () => {
