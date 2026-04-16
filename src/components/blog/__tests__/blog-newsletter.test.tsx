@@ -41,54 +41,40 @@ vi.mock("lucide-react", () => ({
   ),
 }));
 
-// Mock TurnstileWidget
-vi.mock("next/dynamic", () => ({
-  default: (
-    loader: () => Promise<{ TurnstileWidget: React.ComponentType }>,
-    _options: Record<string, unknown>,
-  ) => {
-    const MockTurnstile = ({
-      onSuccess,
-      onError,
-      onExpire,
-    }: {
-      onSuccess?: (token: string) => void;
-      onError?: () => void;
-      onExpire?: () => void;
-    }) => (
-      <div data-testid="turnstile-widget">
-        <button
-          type="button"
-          data-testid="turnstile-success-trigger"
-          onClick={() => onSuccess?.("mock-token-123")}
-        >
-          Simulate Success
-        </button>
-        <button
-          type="button"
-          data-testid="turnstile-error-trigger"
-          onClick={() => onError?.()}
-        >
-          Simulate Error
-        </button>
-        <button
-          type="button"
-          data-testid="turnstile-expire-trigger"
-          onClick={() => onExpire?.()}
-        >
-          Simulate Expire
-        </button>
-      </div>
-    );
-    MockTurnstile.displayName = "MockTurnstile";
-    loader();
-    return MockTurnstile;
-  },
-}));
-
-// Mock @/components/security/turnstile
-vi.mock("@/components/security/turnstile", () => ({
-  TurnstileWidget: () => <div data-testid="turnstile-mock" />,
+vi.mock("@/components/forms/lazy-turnstile", () => ({
+  LazyTurnstile: ({
+    onSuccess,
+    onError,
+    onExpire,
+  }: {
+    onSuccess?: (token: string) => void;
+    onError?: () => void;
+    onExpire?: () => void;
+  }) => (
+    <div data-testid="turnstile-widget">
+      <button
+        type="button"
+        data-testid="turnstile-success-trigger"
+        onClick={() => onSuccess?.("mock-token-123")}
+      >
+        Simulate Success
+      </button>
+      <button
+        type="button"
+        data-testid="turnstile-error-trigger"
+        onClick={() => onError?.()}
+      >
+        Simulate Error
+      </button>
+      <button
+        type="button"
+        data-testid="turnstile-expire-trigger"
+        onClick={() => onExpire?.()}
+      >
+        Simulate Expire
+      </button>
+    </div>
+  ),
 }));
 
 // Translation mock helper

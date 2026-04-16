@@ -64,11 +64,11 @@ pnpm validate:translations
 
 ## 🛠️ 环境要求
 
-- **Node.js**: 20.x（默认开发版本；项目声明支持 `>=20 <23`，已在 `.nvmrc` 固定为 20）
+- **Node.js**: 20.19.0（默认开发版本与 CI 基线；项目运行时策略收口为 Node 20，`package.json > engines.node` 当前为 `>=20.19 <21`）
 - **包管理器**: pnpm 10.13.1（已在 `.npmrc` 与 CI 固定）
 - **操作系统**: macOS, Linux, Windows
 
-> 提示：使用 nvm/fnm/asdf 进入仓库目录后自动切到 Node 20；若不生效，请执行 `nvm use`。
+> 提示：进入仓库前，请先确保当前 shell 已切到 Node 20.19.0；项目不会自动帮你切版本，`.nvmrc` / `.node-version` 仅作为版本真相提示。
 
 ### 🔐 Turnstile 配置
 
@@ -92,6 +92,7 @@ TURNSTILE_SECRET_KEY=你的服务端私钥
 
 当前仓库的活跃维护文档集中在 `docs/guides/`：
 
+- **[PERFORMANCE-GOVERNANCE.md](./docs/guides/PERFORMANCE-GOVERNANCE.md)** - 当前性能治理总规则：哪些值得借鉴、哪些先别动、哪些证明才算数
 - **[tech-stack.md](./docs/guides/tech-stack.md)** - 当前技术栈、构建链路和关键依赖
 - **[RELEASE-PROOF-RUNBOOK.md](./docs/guides/RELEASE-PROOF-RUNBOOK.md)** - 发布前验证与发布门禁执行顺序
 - **[QUALITY-PROOF-LEVELS.md](./docs/guides/QUALITY-PROOF-LEVELS.md)** - 不同级别检查各自证明什么
@@ -279,6 +280,7 @@ AIRTABLE_BASE_ID=
 - `GOOGLE_SITE_VERIFICATION`
 
 关于哪些文件才是真正的当前规则，请优先看：
+- [PERFORMANCE-GOVERNANCE.md](./docs/guides/PERFORMANCE-GOVERNANCE.md)
 - [POLICY-SOURCE-OF-TRUTH.md](./docs/guides/POLICY-SOURCE-OF-TRUTH.md)
 - [CANONICAL-TRUTH-REGISTRY.md](./docs/guides/CANONICAL-TRUTH-REGISTRY.md)
 

@@ -39,8 +39,8 @@ Do not run `pnpm build` and `pnpm build:cf` in parallel.
 ## Project Constraints
 
 - `@types/node` must align with `package.json > engines.node`, not npm `latest`
-- current Node runtime policy is `>=20.19 <23`, with `20.19.0` as the default local + CI baseline
-- local `22.x` may still be supported by policy, but it is not the canonical merge-proof environment
+- current Node runtime policy is `>=20.19 <21`, with `20.19.0` as both the default local and CI merge-proof baseline
+- do not treat local Node `22.x` as a supported baseline on the main branch
 - `eslint@10` is currently blocked by the active Next/React ESLint plugin chain
 - `typescript@6` is currently deferred on this repo; keep the branch on `typescript@5.9.3` until standard `next build` is stable again
 - keep `eslint` / `@eslint/js` on `9.x` until the current Next/React ESLint chain supports ESLint 10 cleanly

@@ -234,19 +234,19 @@ Current branch truth after re-validation:
 
 ## Current Constraints
 
-### 1. Keep `@types/node` aligned with the declared runtime majors
+### 1. Keep `@types/node` aligned with the declared Node 20 runtime policy
 
 Current stable rule:
-- keep `@types/node` on `22.x` while `engines.node` remains `>=20.19 <23`
+- keep `@types/node` on `20.19.x` while `engines.node` remains `>=20.19 <21`
 - do not follow `npm latest` into `25.x` just because local type-check still passes
 
 Reason:
 - newer Node typings can silently expose APIs that the declared runtime support window does not actually guarantee
-- several direct dev/build dependencies now already require the Node 20 line to be at least `20.19.x`, so the older broad `>=20 <23` wording was no longer precise enough
-- this repo has already re-checked that the safer `22.x` line remains green, so treat that as the current stable truth
+- this repo now intentionally treats Node 20 as both the default local baseline and the CI merge-proof baseline
+- several direct dev/build dependencies already require the Node 20 line to be at least `20.19.x`, so keep the runtime and typings pinned to that family together
 
 Current stable status:
-- `@types/node`: `22.19.15`
+- `@types/node`: `20.19.39`
 - local verification after realignment:
   - `pnpm type-check`: pass
   - `pnpm build`: pass
@@ -266,25 +266,23 @@ Project runtime support is defined by:
 - `package.json > engines.node`
 
 Current declared range:
-- `>=20.19 <23`
+`>=20.19 <21`
 
 That means the supported Node majors are:
 - `20`
-- `21`
-- `22`
 
 Current runtime truth:
 - default local baseline: `.nvmrc` / `.node-version` pin `20.19.0`
 - remote CI truth: GitHub Actions also pin `20.19.0`
-- local Node `22.x` remains allowed by policy, but it is not the final merge truth
+- local validation should follow the same Node `20.19.0` baseline unless an explicit experiment branch says otherwise
 
 Current branch result:
-- `@types/node@22.19.15` now matches the declared runtime range
-- the earlier `25.x` experiment is no longer the branch truth
+- `@types/node@20.19.39` now matches the declared runtime range
+- the earlier `22.x` / `25.x` experiments are no longer the branch truth
 - treat runtime-aligned typings as the stable default going forward
 
 Alignment note:
-- `@types/node@22.x` matches the declared runtime range
+- `@types/node@20.19.x` matches the declared runtime range
 - do not reintroduce `@types/node@25.x` without a conscious policy change
 - if the direct dependency floor moves again, update `package.json > engines.node`, `.nvmrc`, `.node-version`, and the workflow `setup-node` version together in one batch
 
