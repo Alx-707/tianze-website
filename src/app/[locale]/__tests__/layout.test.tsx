@@ -12,17 +12,17 @@ const {
   mockGeneratePageStructuredData,
   mockRuntimeEnv,
 } = vi.hoisted(() => ({
-    mockSetRequestLocale: vi.fn(),
-    mockNotFound: vi.fn(),
-    mockGenerateLocaleMetadata: vi.fn(),
-    mockGeneratePageStructuredData: vi.fn(),
-    mockRuntimeEnv: {
-      NODE_ENV: "development",
-      PLAYWRIGHT_TEST: false,
-      NEXT_PUBLIC_DISABLE_DEV_TOOLS: false,
-      NEXT_PUBLIC_DISABLE_REACT_SCAN: false,
-    },
-  }));
+  mockSetRequestLocale: vi.fn(),
+  mockNotFound: vi.fn(),
+  mockGenerateLocaleMetadata: vi.fn(),
+  mockGeneratePageStructuredData: vi.fn(),
+  mockRuntimeEnv: {
+    NODE_ENV: "development",
+    PLAYWRIGHT_TEST: false,
+    NEXT_PUBLIC_DISABLE_DEV_TOOLS: false,
+    NEXT_PUBLIC_DISABLE_REACT_SCAN: false,
+  },
+}));
 
 vi.mock("next-intl/server", () => ({
   getTranslations: vi.fn(async ({ namespace }: { namespace: string }) => {
@@ -116,7 +116,9 @@ vi.mock("@/components/lazy/lazy-top-loader", () => ({
 }));
 
 vi.mock("@/components/theme-provider", () => ({
-  ThemeProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  ThemeProvider: ({ children }: { children: React.ReactNode }) => (
+    <>{children}</>
+  ),
 }));
 
 vi.mock("@/components/ui/lazy-theme-switcher", () => ({
