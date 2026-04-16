@@ -34,13 +34,29 @@ vi.mock("@/lib/env", () => {
       EMAIL_REPLY_TO: "reply@example.com",
       NODE_ENV: "test",
     },
+    getRuntimeEnvString: (key: string) => {
+      const runtimeEnv = {
+        RESEND_API_KEY: "test-resend-key",
+        EMAIL_FROM: "test@example.com",
+        EMAIL_REPLY_TO: "reply@example.com",
+        NODE_ENV: "test",
+      } as const;
+      return runtimeEnv[key as keyof typeof runtimeEnv] ?? "";
+    },
+    getRuntimeEnvBoolean: () => false,
+    getRuntimeNodeEnv: () => "test",
+    isRuntimePlaywright: () => false,
   };
 });
 
-vi.mock("./logger", async () => {
+vi.mock("@/lib/logger", async () => {
   const mockLogger = await import("./mocks/logger");
   return mockLogger;
 });
+
+vi.mock("@react-email/render", () => ({
+  render: vi.fn(async () => "mock-rendered-email"),
+}));
 
 vi.mock("./validations", async () => {
   const mockValidations = await import("./mocks/validations");

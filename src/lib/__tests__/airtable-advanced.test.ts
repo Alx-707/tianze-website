@@ -48,7 +48,7 @@ vi.mock("@/lib/env", async () => {
   return mockEnv;
 });
 
-vi.mock("./logger", async () => {
+vi.mock("@/lib/logger", async () => {
   const mockLogger = await import("./mocks/logger");
   return mockLogger;
 });
