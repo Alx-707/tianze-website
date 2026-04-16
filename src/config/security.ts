@@ -6,7 +6,7 @@ import {
   isRuntimeDevelopment,
   isRuntimeProduction,
   isRuntimeTest,
-} from "@/lib/env";
+} from "../lib/env";
 
 export type SecurityHeader = {
   key: string;
