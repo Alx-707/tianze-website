@@ -52,6 +52,19 @@
 
 ## 项目经验补充
 
+### 0. 性能治理先收口到 `docs/guides/PERFORMANCE-GOVERNANCE.md`
+- 遇到 “性能优化 / showcase 借鉴 / 该不该 lazy load / 该不该上 cache” 这类问题时，先看 `docs/guides/PERFORMANCE-GOVERNANCE.md`。
+- 当前默认立场：
+  - `nextjs-perf-showcase` 只能借思路，不能当 starter 或迁移模板
+  - 不要把 page-level `'use cache'` 扩散到 Contact / inquiry / subscribe / health / Server Action / Cloudflare 强耦合路径
+  - 性能 proof 先回 Node `20.19.x` 真相环境
+  - Cloudflare proof 仍按现有 proof 边界执行，不要把 cleanup 和 runtime/platform proof 混成一个 PR
+- 默认动作：
+  - 先用 `docs/guides/PERFORMANCE-GOVERNANCE.md` 判断“现在该不该动”
+  - 再用 `docs/guides/CANONICAL-TRUTH-REGISTRY.md` 判断“当前运行时真相在哪里”
+  - 如果是分阶段性能治理，顺序固定为：治理真相 -> architecture guardrails -> Turnstile 规范统一 -> dormant truth audit -> cleanup
+  - 如果用户给了“唯一执行真相源”路径，但本地文件不存在，先记录冲突，不要自行猜当前 workstream
+
 ### 1. 不要直接相信 `legacy` / `deprecated` / `Currently used by` 注释
 - 这个仓库里，注释和真实生产引用面可能已经脱节。
 - 遇到下面这些信号时，必须先用代码搜索确认真实引用面，再决定是否继续沿用、删除或迁移：

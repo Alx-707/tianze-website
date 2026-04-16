@@ -196,6 +196,42 @@ module.exports = {
       },
     },
     {
+      name: "no-shipped-blog-routes-to-newsletter-island",
+      severity: "error",
+      comment:
+        "已上线 blog routes 不得重新依赖 BlogNewsletter client island（含可达依赖）",
+      from: {
+        path: [
+          "^src/app/\\[locale\\]/blog/page\\.tsx$",
+          "^src/app/\\[locale\\]/blog/\\[slug\\]/page\\.tsx$",
+        ].join("|"),
+      },
+      to: {
+        path: "^src/components/blog/blog-newsletter\\.tsx$",
+        reachable: true,
+      },
+    },
+    {
+      name: "no-shipped-product-routes-to-inquiry-islands",
+      severity: "error",
+      comment:
+        "已上线 product routes 不得重新依赖 ProductActions / InquiryDrawer / ProductInquiryForm（含可达依赖）",
+      from: {
+        path: [
+          "^src/app/\\[locale\\]/products/page\\.tsx$",
+          "^src/app/\\[locale\\]/products/\\[market\\]/page\\.tsx$",
+        ].join("|"),
+      },
+      to: {
+        path: [
+          "^src/components/products/product-actions\\.tsx$",
+          "^src/components/products/inquiry-drawer\\.tsx$",
+          "^src/components/products/product-inquiry-form\\.tsx$",
+        ].join("|"),
+        reachable: true,
+      },
+    },
+    {
       name: "web-vitals-no-ui-deps",
       severity: "error",
       comment:
