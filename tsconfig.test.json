@@ -67,6 +67,8 @@
     "tmp_reports",
     "analysis",
     "legacy",
-    "backups"
+    "backups",
+    "tests/semgrep/**/*.ts",
+    "tests/semgrep/**/*.tsx"
   ]
 }

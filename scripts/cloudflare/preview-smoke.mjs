@@ -1,7 +1,9 @@
 import { URL } from "node:url";
+import runtimeEnv from "../lib/runtime-env.js";
 
 const DEFAULT_BASE_URL =
-  process.env.CLOUDFLARE_PREVIEW_BASE_URL || "http://127.0.0.1:8787";
+  runtimeEnv.readEnvString("CLOUDFLARE_PREVIEW_BASE_URL") ||
+  "http://127.0.0.1:8787";
 
 function parseArgs(argv) {
   const args = {

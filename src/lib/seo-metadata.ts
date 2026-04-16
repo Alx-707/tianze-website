@@ -5,6 +5,7 @@ import { SITE_CONFIG, type Locale, type PageType } from "@/config/paths";
 import { siteFacts } from "@/config/site-facts";
 import { ONE } from "@/constants";
 import { routing } from "@/i18n/routing-config";
+import { getRuntimeEnvString } from "@/lib/env";
 import {
   generateCanonicalURL,
   generateLanguageAlternates,
@@ -295,8 +296,8 @@ export function generateLocalizedMetadata(
 
     // 验证标签
     verification: {
-      google: process.env["GOOGLE_SITE_VERIFICATION"],
-      yandex: process.env["YANDEX_VERIFICATION"],
+      google: getRuntimeEnvString("GOOGLE_SITE_VERIFICATION"),
+      yandex: getRuntimeEnvString("YANDEX_VERIFICATION"),
     },
   };
 

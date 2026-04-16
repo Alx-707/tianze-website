@@ -29,6 +29,23 @@ vi.mock("@/lib/env", () => ({
     NEXT_PUBLIC_BASE_URL: "http://localhost:3000",
     NEXT_PUBLIC_TURNSTILE_ACTION: "contact_form",
   },
+  getRuntimeEnvString: (key: string) => {
+    const runtimeValue = process.env[key];
+    if (runtimeValue !== undefined) {
+      return runtimeValue;
+    }
+
+    if (key === "TURNSTILE_ALLOWED_ACTIONS") {
+      return "contact_form";
+    }
+
+    if (key === "TURNSTILE_EXPECTED_ACTION") {
+      return "contact_form";
+    }
+
+    return undefined;
+  },
+  getRuntimeEnvBoolean: () => false,
 }));
 
 describe("Verify Turnstile API Route", () => {

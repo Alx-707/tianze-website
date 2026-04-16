@@ -400,3 +400,165 @@
 - 默认动作：
   - 同时在 `.gitignore` 和 `eslint.config.mjs` 的 global ignores 中挡掉这些目录；
   - 不要把这类本地垃圾导致的红灯误判成主项目代码质量回归。
+
+### 30. `pnpm security:audit` 的旧 `410` 结论已经过时，先跑当前主线再下判断
+- 截至 2026-04-15，本仓库本地复核已确认：`pnpm security:audit` 当前能正常返回结果，之前“audit endpoint 410 / 这条红灯默认是工具链过期”的说法，至少在当前主线和当前依赖组合下已经不成立。
+- 默认动作：
+  - 如果再遇到安全审计异常，先实际执行一次 `pnpm security:audit`，不要直接沿用旧快照结论；
+  - 只有在当前主线复现后，才把它归类为工具链问题；
+  - 文档、审计结论、review comment 里如果继续引用 `410` 旧说法，应视为待更新的陈旧上下文。
+
+### 31. 当前仓库已经有 `review:architecture-truth`，涉及真相源/边界改动时优先跑它
+- 截至 2026-04-15，本仓库已新增一条轻量收口入口：`pnpm review:architecture-truth`。
+- 当前包含：
+  - `pnpm config:check`
+  - `pnpm review:legacy-markers`
+  - `pnpm review:boundary-leaks`
+  - `pnpm review:contract-smells`
+  - `pnpm review:env-boundaries`
+  - `pnpm review:server-env-boundaries`
+  - `pnpm review:template-residue`
+  - `pnpm truth:check`
+- 默认动作：
+  - 只要改动涉及 barrel、测试/生产边界、模板资产、live placeholder、站点真相或路径配置，优先先跑这条；
+  - 不要只看 `build` / `lint` 绿灯就宣布结构没问题；
+  - 如果 `review:architecture-truth` 报红，先按“边界/真相回归”处理，不要先归咎于 CI 噪音。
+
+### 32. `Function.prototype as unknown as ...` 这类双重 cast 默认按弱 contract 处理
+- 截至 2026-04-15，本仓库已开始把这类“为了过类型检查先塞一个假的值”的写法纳入 `review:contract-smells`。
+- 当前默认阻止的低噪音模式包括：
+  - `Function.prototype as unknown as ...`
+  - `undefined as unknown as ...`
+  - `null as unknown as ...`
+- 默认动作：
+  - 如果组件在 `disabled` / `optional` / `nullable` 场景下不需要真实值，优先改 contract，而不是双重 cast 糊过去；
+  - 如果确实必须兼容旧接口，先给出明确的类型建模和注释，不要直接塞 fake callback / fake value。
+
+### 33. `src/app/**` 与 `src/components/**` 里的 `NEXT_PUBLIC_*` 优先走 `@/lib/env`
+- 截至 2026-04-15，本仓库已新增 `review:env-boundaries`，默认检查 app/component 层直接读取 `process.env.NEXT_PUBLIC_*` 的情况。
+- 默认动作：
+  - 页面层、layout、head、客户端组件、hooks 里如果要读公开环境变量，优先从 `@/lib/env` 取；
+  - 不要在 app/component 层继续手写 `process.env.NEXT_PUBLIC_* === ...`；
+  - `NODE_ENV` 这类运行时判断不在这条规则里，但公开配置值应尽量收口到 `env.ts`。
+
+### 34. `src/lib/**` / `src/app/**` / `src/components/**` / `src/config/**` / `src/middleware.ts` 里的低噪音 env 也开始收口到 `@/lib/env`
+- 截至 2026-04-15，本仓库已新增 `review:server-env-boundaries`，先只拦一批已经确认高价值、低噪音的 server-side 直接 `process.env` 读取。
+- 当前默认守门的 key 包括：
+  - `ADMIN_API_TOKEN`
+  - `CACHE_INVALIDATION_SECRET`
+  - `TURNSTILE_ALLOWED_ACTIONS`
+  - `TURNSTILE_BYPASS`
+  - `RATE_LIMIT_PEPPER`
+  - `RATE_LIMIT_PEPPER_PREVIOUS`
+  - `UPSTASH_REDIS_REST_URL`
+  - `UPSTASH_REDIS_REST_TOKEN`
+  - `KV_REST_API_URL`
+  - `KV_REST_API_TOKEN`
+  - `LOG_LEVEL`
+  - `CONTENT_ENABLE_DRAFTS`
+  - `DEPLOYMENT_PLATFORM`
+  - `VERCEL`
+  - `CF_PAGES`
+  - `GOOGLE_SITE_VERIFICATION`
+  - `YANDEX_VERIFICATION`
+  - `APP_ENV`
+  - `NODE_ENV`
+- 默认动作：
+  - `src/lib/**`、`src/app/**`、`src/components/**`、`src/config/**`、`src/middleware.ts` 里如果要读这批 runtime env，优先走 `@/lib/env` 的 runtime helper；
+  - `src/lib/env.ts` 自身仍不纳入这条规则；当前主线也已经开始把 `NODE_ENV` / `APP_ENV` 的分支判断收口到统一 helper，不要继续散写 `process.env.NODE_ENV` / `process.env.APP_ENV`；
+  - 如果以后要扩大规则范围，先拿到当前批次稳定通过的证据，再继续扩，不要一口气把所有 `process.env` 都打成回归。
+
+### 35. `scripts/**` 的 proof lane env 不要和应用主树混着管，先走单独的 `review:proof-env-boundaries`
+- 截至 2026-04-15，本仓库已新增 `pnpm review:proof-env-boundaries`，专门盯 proof / smoke / invalidation 这类高价值脚本里的 env 读取，不和应用主树的 `review:server-env-boundaries` 混在一起。
+- 当前默认先守这几支脚本：
+  - `scripts/invalidate-cache.js`
+  - `scripts/cloudflare/preview-smoke.mjs`
+  - `scripts/deploy/post-deploy-smoke.mjs`
+- 当前默认守门的 key 包括：
+  - `CACHE_INVALIDATION_STRICT`
+  - `NEXT_PHASE`
+  - `NODE_ENV`
+  - `NEXT_PUBLIC_BASE_URL`
+  - `CACHE_INVALIDATION_SECRET`
+  - `CLOUDFLARE_PREVIEW_BASE_URL`
+  - `DEPLOY_SMOKE_BASE_URL`
+  - `DEPLOY_SMOKE_HEADER_NAME`
+  - `DEPLOY_SMOKE_HEADER_VALUE`
+- 默认动作：
+  - 这批脚本优先走 `scripts/lib/runtime-env.js`，不要继续直接写 `process.env.*`；
+  - `quality-gate.js`、大批量脚本配置项这类高噪音区域，先不要硬塞进这条 lane；
+  - 只有当前 proof lane 连续稳定后，再扩到更多脚本，不要一上来把整个 `scripts/**` 都打红。
+
+### 36. `scripts/quality-gate.js` 这类 CI 真红真绿入口，单独走 `review:ci-env-boundaries`
+- 截至 2026-04-15，本仓库已新增 `pnpm review:ci-env-boundaries`，当前只盯 `scripts/quality-gate.js`，不要把它和 proof lane 或应用主树规则混在一起。
+- 当前默认守门的 key 包括：
+  - `QUALITY_ENABLE_COVERAGE`
+  - `QUALITY_DISABLE_COVERAGE`
+  - `QUALITY_ENABLE_PERFORMANCE`
+  - `QUALITY_DISABLE_PERFORMANCE`
+  - `QUALITY_DIFF_COVERAGE_THRESHOLD`
+  - `QUALITY_DIFF_COVERAGE_DROP_WARNING_THRESHOLD`
+  - `NODE_ENV`
+  - `CI`
+  - `GITHUB_REF_NAME`
+  - `QUALITY_DIFF_BASE`
+  - `QUALITY_COVERAGE_TIMEOUT_MS`
+  - `QUALITY_PERF_TEST_TIMEOUT_MS`
+  - `QUALITY_FORCE_SEMGREP`
+  - `GITHUB_ACTIONS`
+  - `GITHUB_OUTPUT`
+- 默认动作：
+  - `quality-gate.js` 这类 CI 核心脚本优先走 `scripts/lib/runtime-env.js`，不要继续直接写 `process.env.*`；
+  - 先只守“会影响 CI 真红真绿”的那批 env，不要顺手把所有可选配置都拉进来；
+  - 如果未来要继续扩脚本层 env 守门，优先按“proof lane / CI gate / analysis scripts”分 lane，而不是做一个巨大的 `scripts/**` 总规则。
+
+### 37. analysis scripts 先收 `structural-hotspots` / `semgrep-common`，走 `review:analysis-env-boundaries`
+- 截至 2026-04-15，本仓库已新增 `pnpm review:analysis-env-boundaries`，当前只盯 analysis lane 的两支高价值脚本：
+  - `scripts/structural-hotspots.js`
+  - `scripts/semgrep-common.js`
+- 当前默认守门的 key 包括：
+  - `STRUCTURAL_HOTSPOT_DAYS`
+  - `STRUCTURAL_HOTSPOT_TOP`
+  - `STRUCTURAL_COUPLING_TOP`
+  - `SEMGREP_PYTHON`
+  - `SEMGREP_BIN`
+  - `HOME`
+- 默认动作：
+  - analysis scripts 也优先走 `scripts/lib/runtime-env.js`，不要继续直接写 `process.env.*`；
+  - `scripts/csp/check-inline-scripts.ts` 这类验证脚本先不要和 analysis lane 混管，避免 proof/analysis 边界重新变脏；
+  - 如果未来继续扩 analysis lane，优先挑高频入口和共享 helper，不要按“文件越多越好”去做假全面覆盖。
+
+### 38. 日常入口优先用 `pnpm review:scripts-env`，内部仍按三条 lane 串行执行
+- 截至 2026-04-15，本仓库已新增聚合入口 `pnpm review:scripts-env`。
+- 它当前会按顺序串行执行：
+  - `pnpm review:proof-env-boundaries`
+  - `pnpm review:ci-env-boundaries`
+  - `pnpm review:analysis-env-boundaries`
+- 默认动作：
+  - 人工本地检查、`ci-local`、pre-push 优先记这一个入口；
+  - 但文档、排查和扩规则时，仍然按 proof / CI / analysis 三条 lane 分开思考，不要因为有了聚合入口就把边界重新混掉；
+  - CI 工作流如果需要更细的失败可见性，可以继续保留分 lane step，不要求强行合并成一个黑盒步骤。
+
+### 39. 想一次看完整体 guardrails，优先用 `pnpm review:all-guardrails`
+- 截至 2026-04-15，本仓库已新增总览入口 `pnpm review:all-guardrails`。
+- 它当前只聚合两大组：
+  - `pnpm review:architecture-truth`
+  - `pnpm review:scripts-env`
+- 当前运行后会额外写轻量 summary 到 `reports/guardrails/`：
+  - `latest-all-guardrails-summary.json`
+  - `latest-scripts-env-summary.json`
+- 默认动作：
+  - 本地人工巡检、`ci-local` 优先记这一个入口；
+  - 如果这条总入口报红，再回到具体组或具体 lane 里定位，不要把它当成排查终点；
+  - pre-push / CI 这种更看重失败定位的场景，可以继续保留更细的 step，不要求所有地方都强行统一成一个步骤。
+
+### 40. GitHub Actions 里的 guardrails 可见性优先用 job summary，不要只靠翻日志
+- 截至 2026-04-15，本仓库的 CI 已开始把 guardrails 结果写入 GitHub Actions 的 job summary。
+- 当前做法：
+  - `architecture` 作业里跑 `pnpm review:all-guardrails`
+  - 上传 `reports/guardrails/` 产物
+  - `ci-summary` 作业再读取 `latest-all-guardrails-summary.json` / `latest-scripts-env-summary.json`，把关键信息写进 `$GITHUB_STEP_SUMMARY`
+- 默认动作：
+  - 如果 CI 里 guardrails 报红，先看 job summary 里的分组结果，再决定要不要下钻到具体日志；
+  - 如果以后继续扩 guardrails 汇总，优先复用 `reports/guardrails/*.json` 这层轻量产物，不要在 workflow 里重新手写一套解析逻辑；
+  - 如果 summary 丢失，先检查 artifact 上传/下载和 `scripts/append-guardrail-summary.js`，不要先怀疑 guardrail 本身失效。

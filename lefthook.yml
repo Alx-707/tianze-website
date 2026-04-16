@@ -153,6 +153,24 @@ pre-push:
         fi
       fail_text: '变异测试报告过期 — 请运行 pnpm test:mutation'
 
+    architecture-truth:
+      run: |
+        if [ -n "$RUN_FAST_PUSH" ]; then
+          echo "⏭️  RUN_FAST_PUSH=1: 跳过架构/真相守门（仅用于紧急推送，CI/后续本地请补跑）";
+        else
+          pnpm review:architecture-truth
+        fi
+      fail_text: '架构/真相守门失败 - 发现边界泄漏、模板残留或真相漂移'
+
+    scripts-env-boundaries:
+      run: |
+        if [ -n "$RUN_FAST_PUSH" ]; then
+          echo "⏭️  RUN_FAST_PUSH=1: 跳过 Scripts env 守门（仅用于紧急推送，CI/后续本地请补跑）";
+        else
+          pnpm review:scripts-env
+        fi
+      fail_text: 'Scripts env 守门失败 - proof / ci / analysis lane 里有高价值脚本直接读取 process.env'
+
     # 架构检查（A+：全量巡航 + 循环依赖；使用 err 报告减少噪音；可用 RUN_FAST_PUSH=1 跳过应急推送）
     arch-check:
       run: |

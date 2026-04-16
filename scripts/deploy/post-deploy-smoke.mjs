@@ -1,14 +1,16 @@
 import { URL } from "node:url";
+import runtimeEnv from "../lib/runtime-env.js";
 
-const DEFAULT_BASE_URL = process.env.DEPLOY_SMOKE_BASE_URL || "";
+const DEFAULT_BASE_URL =
+  runtimeEnv.readEnvString("DEPLOY_SMOKE_BASE_URL") || "";
 const REQUEST_TIMEOUT_MS = 30000;
 const REQUEST_RETRIES = 2;
 
 function parseArgs(argv) {
   const args = {
     baseUrl: DEFAULT_BASE_URL,
-    headerName: process.env.DEPLOY_SMOKE_HEADER_NAME || "",
-    headerValue: process.env.DEPLOY_SMOKE_HEADER_VALUE || "",
+    headerName: runtimeEnv.readEnvString("DEPLOY_SMOKE_HEADER_NAME") || "",
+    headerValue: runtimeEnv.readEnvString("DEPLOY_SMOKE_HEADER_VALUE") || "",
   };
 
   for (let i = 2; i < argv.length; i++) {

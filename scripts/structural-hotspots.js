@@ -3,18 +3,13 @@
 const fs = require("fs");
 const path = require("path");
 const { execSync } = require("child_process");
+const { readEnvNumber, readEnvString } = require("./lib/runtime-env");
 
 const ROOT = process.cwd();
 const REPORT_DIR = path.join(ROOT, "reports", "architecture");
-const DAYS = Number.parseInt(process.env.STRUCTURAL_HOTSPOT_DAYS || "180", 10);
-const MAX_HOTSPOTS = Number.parseInt(
-  process.env.STRUCTURAL_HOTSPOT_TOP || "25",
-  10,
-);
-const MAX_COUPLINGS = Number.parseInt(
-  process.env.STRUCTURAL_COUPLING_TOP || "25",
-  10,
-);
+const DAYS = readEnvNumber("STRUCTURAL_HOTSPOT_DAYS") || 180;
+const MAX_HOTSPOTS = readEnvNumber("STRUCTURAL_HOTSPOT_TOP") || 25;
+const MAX_COUPLINGS = readEnvNumber("STRUCTURAL_COUPLING_TOP") || 25;
 
 const INCLUDED_PREFIXES = [
   "src/",

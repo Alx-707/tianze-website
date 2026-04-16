@@ -8,3 +8,19 @@ export const env = {
   AIRTABLE_TABLE_NAME: "Contacts",
   NODE_ENV: "test",
 };
+
+export function getRuntimeEnvString(key: keyof typeof env): string {
+  return env[key] ?? "";
+}
+
+export function getRuntimeEnvBoolean(key: keyof typeof env): boolean {
+  return getRuntimeEnvString(key) === "true";
+}
+
+export function getRuntimeNodeEnv(): string {
+  return env.NODE_ENV;
+}
+
+export function isRuntimePlaywright(): boolean {
+  return false;
+}

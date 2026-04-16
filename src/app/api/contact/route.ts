@@ -29,6 +29,7 @@ import {
   createCanonicalContactFingerprintFromUnknown,
   submitCanonicalContactSubmission,
 } from "@/lib/contact/submit-canonical-contact";
+import { isRuntimeProduction } from "@/lib/env";
 import { logger, sanitizeIP, sanitizeLogContext } from "@/lib/logger";
 import {
   getContactFormStats,
@@ -86,7 +87,7 @@ const POST_RATE_LIMITED = withRateLimit(
           const { submissionResult } = submission;
           const processingTime = Date.now() - startTime;
 
-          if (process.env.NODE_ENV !== "production") {
+          if (!isRuntimeProduction()) {
             logger.info(
               "Contact form submitted successfully",
               sanitizeLogContext({

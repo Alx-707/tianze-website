@@ -357,7 +357,6 @@ function PreferencesPanel({
           description={t("categories.necessaryDesc")}
           checked={true}
           disabled={true}
-          onChange={Function.prototype as unknown as (value: boolean) => void}
         />
 
         {/* Analytics */}
@@ -394,7 +393,7 @@ interface CategoryToggleProps {
   description: string;
   checked: boolean;
   disabled?: boolean;
-  onChange: (value: boolean) => void;
+  onChange?: (value: boolean) => void;
 }
 
 function CategoryToggle({
@@ -420,7 +419,7 @@ function CategoryToggle({
         type="checkbox"
         checked={checked}
         disabled={disabled}
-        onChange={(e) => onChange(e.target.checked)}
+        onChange={(e) => onChange?.(e.target.checked)}
         className="mt-0.5 h-4 w-4 rounded border-input accent-primary disabled:cursor-not-allowed disabled:opacity-50"
       />
       <div className="flex-1 space-y-0.5">

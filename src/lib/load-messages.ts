@@ -8,6 +8,12 @@
 
 import { unstable_cache } from "next/cache";
 import { i18nTags } from "@/lib/cache/cache-tags";
+import {
+  isRuntimeCi,
+  isRuntimeDevelopment,
+  isRuntimePlaywright,
+  isRuntimeProductionBuildPhase,
+} from "@/lib/env";
 import { mergeObjects } from "@/lib/merge-objects";
 import { MONITORING_INTERVALS } from "@/constants/performance-constants";
 import { type Locale } from "@/i18n/routing";
@@ -16,11 +22,9 @@ import { coerceLocale } from "@/i18n/locale-utils";
 type Messages = Record<string, unknown>;
 type MessageType = "critical" | "deferred";
 
-const isCiEnv =
-  process.env.CI === "true" || process.env.PLAYWRIGHT_TEST === "true";
-const isProductionBuild = () =>
-  process.env.NEXT_PHASE === "phase-production-build";
-const isDev = () => process.env.NODE_ENV === "development";
+const isCiEnv = isRuntimeCi() || isRuntimePlaywright();
+const isProductionBuild = () => isRuntimeProductionBuildPhase();
+const isDev = () => isRuntimeDevelopment();
 const revalidate = () => (isDev() ? 1 : MONITORING_INTERVALS.CACHE_CLEANUP);
 
 const MESSAGE_LOADERS: Record<

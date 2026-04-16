@@ -30,6 +30,12 @@ const fs = require("fs");
 const path = require("path");
 const glob = require("glob");
 const { execSync, spawnSync } = require("child_process");
+const {
+  isNodeEnv,
+  readEnvBoolean,
+  readEnvNumber,
+  readEnvString,
+} = require("./lib/runtime-env");
 
 // 解析命令行参数
 const args = process.argv.slice(2);
@@ -137,20 +143,22 @@ function matchesGlob(pattern, value) {
 class QualityGate {
   constructor() {
     const coverageEnabledByMode =
-      isFullMode || isCiMode || process.env.QUALITY_ENABLE_COVERAGE === "true";
+      isFullMode ||
+      isCiMode ||
+      readEnvBoolean("QUALITY_ENABLE_COVERAGE") === true;
     const coverageDisabledByEnv =
-      process.env.QUALITY_DISABLE_COVERAGE === "true";
+      readEnvBoolean("QUALITY_DISABLE_COVERAGE") === true;
     const performanceEnabledByMode =
-      (isFullMode || process.env.QUALITY_ENABLE_PERFORMANCE === "true") &&
+      (isFullMode || readEnvBoolean("QUALITY_ENABLE_PERFORMANCE") === true) &&
       !isCiMode;
     const performanceDisabledByEnv =
-      process.env.QUALITY_DISABLE_PERFORMANCE === "true";
+      readEnvBoolean("QUALITY_DISABLE_PERFORMANCE") === true;
 
-    const diffCoverageThreshold = Number(
-      process.env.QUALITY_DIFF_COVERAGE_THRESHOLD,
+    const diffCoverageThreshold = readEnvNumber(
+      "QUALITY_DIFF_COVERAGE_THRESHOLD",
     );
-    const diffWarningThreshold = Number(
-      process.env.QUALITY_DIFF_COVERAGE_DROP_WARNING_THRESHOLD,
+    const diffWarningThreshold = readEnvNumber(
+      "QUALITY_DIFF_COVERAGE_DROP_WARNING_THRESHOLD",
     );
 
     this.config = {
@@ -224,6 +232,8 @@ class QualityGate {
             // 注意：禁止再按整个目录豁免 src/components/ui/**。
             // 有行为/状态的 UI 组件必须继续接受 diff coverage 检查。
             "src/components/blocks/_templates/**", // 开发模板（无运行时逻辑）
+            "src/components/dev-tools/**", // 开发态调试组件，不进入生产主路径
+            "src/app/**/dev-tools/**", // App Router 下的开发态调试入口
             "src/templates/**", // React 19 / DX 模板文件（不参与生产运行时）
             "src/constants/**", // 纯数据声明（as const 对象）
             "src/config/**", // 静态配置对象（零条件分支）
@@ -261,9 +271,9 @@ class QualityGate {
         },
       },
       // 环境配置
-      environment: process.env.NODE_ENV || "development",
-      ciMode: process.env.CI === "true",
-      branch: process.env.GITHUB_REF_NAME || "unknown",
+      environment: readEnvString("NODE_ENV") || "development",
+      ciMode: readEnvBoolean("CI") === true,
+      branch: readEnvString("GITHUB_REF_NAME") || "unknown",
       pilotDomain: {
         prefix: "src/lib/web-vitals/",
         testGlobs: [
@@ -272,7 +282,7 @@ class QualityGate {
           "**/__tests__/**/*.{ts,tsx}",
         ],
       },
-      diffBaseRef: process.env.QUALITY_DIFF_BASE || "origin/main",
+      diffBaseRef: readEnvString("QUALITY_DIFF_BASE") || "origin/main",
     };
 
     this.results = {
@@ -957,7 +967,7 @@ class QualityGate {
         // 本地模式：运行覆盖率测试
         log("🧪 运行测试以生成覆盖率...");
         const coverageTimeout =
-          Number(process.env.QUALITY_COVERAGE_TIMEOUT_MS) || 480000; // 8min default
+          readEnvNumber("QUALITY_COVERAGE_TIMEOUT_MS") || 480000; // 8min default
         execSync("pnpm test:coverage --run --reporter=json", {
           stdio: "pipe",
           timeout: coverageTimeout,
@@ -1177,7 +1187,7 @@ class QualityGate {
       // 测试性能检查
       const testStart = Date.now();
       const perfTestTimeout =
-        Number(process.env.QUALITY_PERF_TEST_TIMEOUT_MS) || 360000; // 6min default
+        readEnvNumber("QUALITY_PERF_TEST_TIMEOUT_MS") || 360000; // 6min default
       execSync("pnpm test --run --reporter=json", {
         stdio: "pipe",
         timeout: perfTestTimeout,
@@ -1236,7 +1246,8 @@ class QualityGate {
 
       // Semgrep（本地门禁可见；CI 由 .github/workflows/ci.yml 的 security job 执行）
       const shouldRunSemgrep =
-        !this.config.ciGateMode || process.env.QUALITY_FORCE_SEMGREP === "true";
+        !this.config.ciGateMode ||
+        readEnvBoolean("QUALITY_FORCE_SEMGREP") === true;
 
       if (shouldRunSemgrep) {
         gate.checks.semgrep = await this.runSemgrepScan();
@@ -1818,7 +1829,7 @@ class QualityGate {
    */
   handleCIOutput() {
     // GitHub Actions 注解
-    if (process.env.GITHUB_ACTIONS) {
+    if (readEnvString("GITHUB_ACTIONS")) {
       Object.values(this.results.gates).forEach((gate) => {
         if (gate.status === "failed" && gate.blocking) {
           console.log(
@@ -1833,7 +1844,7 @@ class QualityGate {
     }
 
     // GitHub Actions outputs: use Environment Files (set-output is deprecated)
-    const outputPath = process.env.GITHUB_OUTPUT;
+    const outputPath = readEnvString("GITHUB_OUTPUT");
     if (outputPath) {
       try {
         fs.appendFileSync(

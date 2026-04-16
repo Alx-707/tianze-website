@@ -1,0 +1,70 @@
+import { afterEach, describe, expect, it, vi } from "vitest";
+
+afterEach(() => {
+  vi.resetModules();
+  vi.clearAllMocks();
+  vi.doUnmock("@/lib/env");
+  vi.doUnmock("next/cache");
+});
+
+describe("load-messages runtime gating", () => {
+  it("bypasses cache in CI mode", async () => {
+    const unstableCache = vi.fn((loader: () => Promise<unknown>) => loader);
+
+    vi.doMock("next/cache", () => ({
+      unstable_cache: unstableCache,
+    }));
+    vi.doMock("@/lib/env", () => ({
+      isRuntimeCi: () => true,
+      isRuntimeDevelopment: () => false,
+      isRuntimePlaywright: () => false,
+      isRuntimeProductionBuildPhase: () => false,
+    }));
+
+    const { loadCriticalMessages } = await import("@/lib/load-messages");
+
+    await loadCriticalMessages("en");
+
+    expect(unstableCache).not.toHaveBeenCalled();
+  });
+
+  it("bypasses cache during production build phase", async () => {
+    const unstableCache = vi.fn((loader: () => Promise<unknown>) => loader);
+
+    vi.doMock("next/cache", () => ({
+      unstable_cache: unstableCache,
+    }));
+    vi.doMock("@/lib/env", () => ({
+      isRuntimeCi: () => false,
+      isRuntimeDevelopment: () => false,
+      isRuntimePlaywright: () => false,
+      isRuntimeProductionBuildPhase: () => true,
+    }));
+
+    const { loadDeferredMessages } = await import("@/lib/load-messages");
+
+    await loadDeferredMessages("zh");
+
+    expect(unstableCache).not.toHaveBeenCalled();
+  });
+
+  it("uses cache outside CI and production build", async () => {
+    const unstableCache = vi.fn((loader: () => Promise<unknown>) => loader);
+
+    vi.doMock("next/cache", () => ({
+      unstable_cache: unstableCache,
+    }));
+    vi.doMock("@/lib/env", () => ({
+      isRuntimeCi: () => false,
+      isRuntimeDevelopment: () => true,
+      isRuntimePlaywright: () => false,
+      isRuntimeProductionBuildPhase: () => false,
+    }));
+
+    const { loadCriticalMessages } = await import("@/lib/load-messages");
+
+    await loadCriticalMessages("en");
+
+    expect(unstableCache).toHaveBeenCalledTimes(1);
+  });
+});

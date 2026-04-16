@@ -7,6 +7,7 @@
 
 import { z } from "zod";
 import { airtableService } from "@/lib/airtable";
+import { getRuntimeEnvString } from "@/lib/env";
 import { logger, sanitizeIP } from "@/lib/logger";
 import { constantTimeCompare } from "@/lib/security-crypto";
 import { ONE, ZERO } from "@/constants";
@@ -98,7 +99,7 @@ export async function getContactFormStats() {
  * Validate admin permissions
  */
 export function validateAdminAccess(authHeader: string | null): boolean {
-  const adminToken = process.env.ADMIN_API_TOKEN;
+  const adminToken = getRuntimeEnvString("ADMIN_API_TOKEN");
 
   if (!adminToken) {
     if (!hasLoggedMissingAdminToken) {

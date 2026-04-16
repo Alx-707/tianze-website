@@ -36,12 +36,6 @@ describe("Constants Index Module", () => {
       expect(SEO_CONSTANTS).toBeDefined();
       expect(typeof SEO_CONSTANTS).toBe("object");
     });
-
-    it("should re-export TEST_CONSTANTS", async () => {
-      const { TEST_CONSTANTS } = await import("../index");
-      expect(TEST_CONSTANTS).toBeDefined();
-      expect(typeof TEST_CONSTANTS).toBe("object");
-    });
   });
 
   describe("Module Structure", () => {
@@ -54,7 +48,6 @@ describe("Constants Index Module", () => {
       // 验证包含所有必要的导出 (使用命名导出而不是通配符导出)
       expect(content).toContain('} from "./i18n-constants"');
       expect(content).toContain('} from "./app-constants"');
-      expect(content).toContain('} from "./test-constants"');
       expect(content).toContain('} from "./security-constants"');
       expect(content).toContain('} from "./seo-constants"');
     });
@@ -68,7 +61,6 @@ describe("Constants Index Module", () => {
       expect(content).toContain("export { APP_CONSTANTS }");
       expect(content).toContain("export { SECURITY_CONSTANTS }");
       expect(content).toContain("export { SEO_CONSTANTS }");
-      expect(content).toContain("export { TEST_CONSTANTS }");
     });
   });
 
@@ -84,7 +76,6 @@ describe("Constants Index Module", () => {
       const modules = [
         "../i18n-constants",
         "../app-constants",
-        "../test-constants",
         "../security-constants",
         "../seo-constants",
       ];

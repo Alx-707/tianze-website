@@ -58,6 +58,18 @@ function getMarketSpecs(marketSlug: string): MarketSpecs | undefined {
   return SPECS_BY_MARKET[marketSlug];
 }
 
+function getRequiredMarketSpecs(marketSlug: string): MarketSpecs {
+  const marketSpecs = getMarketSpecs(marketSlug);
+
+  if (!marketSpecs) {
+    throw new Error(
+      `Missing product specs for market slug: ${marketSlug}. Keep catalog and specs sources aligned.`,
+    );
+  }
+
+  return marketSpecs;
+}
+
 // --- Static params ---
 
 export function generateStaticParams() {
@@ -265,14 +277,14 @@ export default async function MarketPage({ params }: MarketPageProps) {
 
   const market = getMarketBySlug(marketSlug)!;
   const families = getFamiliesForMarket(marketSlug);
-  const marketSpecs = getMarketSpecs(marketSlug);
+  const marketSpecs = getRequiredMarketSpecs(marketSlug);
   const t = await getTranslations({ locale, namespace: "catalog" });
   const marketLabel = t(`markets.${marketSlug}.label`);
   const marketDescription = t(`markets.${marketSlug}.description`);
 
   // Build family specs lookup for FamilySection rendering
   const familySpecsMap = new Map(
-    marketSpecs?.families.map((fs) => [fs.slug, fs]),
+    marketSpecs.families.map((fs) => [fs.slug, fs]),
   );
 
   return (
@@ -293,17 +305,15 @@ export default async function MarketPage({ params }: MarketPageProps) {
         </p>
       </header>
 
-      {marketSpecs && (
-        <StickyFamilyNav
-          families={families
-            .filter((f) => familySpecsMap.has(f.slug))
-            .map((f) => ({
-              slug: f.slug,
-              label: t(`families.${marketSlug}.${f.slug}.label`),
-            }))}
-          ariaLabel={t("market.familyNav.jumpTo")}
-        />
-      )}
+      <StickyFamilyNav
+        families={families
+          .filter((f) => familySpecsMap.has(f.slug))
+          .map((f) => ({
+            slug: f.slug,
+            label: t(`families.${marketSlug}.${f.slug}.label`),
+          }))}
+        ariaLabel={t("market.familyNav.jumpTo")}
+      />
 
       <div className="space-y-16">
         {families.map((family) => {
@@ -356,17 +366,9 @@ export default async function MarketPage({ params }: MarketPageProps) {
         })}
       </div>
 
-      {!marketSpecs && (
-        <section className="mb-12 rounded-lg border border-border bg-muted/30 p-8 text-center">
-          <p className="text-muted-foreground">{t("market.specsComingSoon")}</p>
-        </section>
-      )}
-
-      {marketSpecs && (
-        <TrustSignalsSection
-          {...buildTrustSignalsSectionProps(marketSpecs, marketSlug, t)}
-        />
-      )}
+      <TrustSignalsSection
+        {...buildTrustSignalsSectionProps(marketSpecs, marketSlug, t)}
+      />
 
       <FaqSection items={[...PRODUCT_FAQ_ITEMS]} locale={locale as Locale} />
 

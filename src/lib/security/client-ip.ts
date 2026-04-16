@@ -6,6 +6,7 @@
  */
 
 import { NextRequest } from "next/server";
+import { getRuntimeEnvString } from "@/lib/env";
 import { INTERNAL_TRUSTED_CLIENT_IP_HEADER } from "@/lib/security/client-ip-headers";
 import {
   getIPVersion,
@@ -60,16 +61,16 @@ const FALLBACK_IP = "0.0.0.0";
 const LOCALHOST_IP = "127.0.0.1";
 
 function getDeploymentPlatform(): string | null {
-  const platform = process.env.DEPLOYMENT_PLATFORM;
+  const platform = getRuntimeEnvString("DEPLOYMENT_PLATFORM");
 
   if (!platform) {
-    if (process.env.VERCEL) {
+    if (getRuntimeEnvString("VERCEL")) {
       return "vercel";
     }
-    if (process.env.CF_PAGES) {
+    if (getRuntimeEnvString("CF_PAGES")) {
       return "cloudflare";
     }
-    if (process.env.NODE_ENV === "development") {
+    if (getRuntimeEnvString("NODE_ENV") === "development") {
       return "development";
     }
     return null;

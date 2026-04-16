@@ -24,9 +24,16 @@
  * but cache tags are not actually invalidated since there's no persistent cache.
  */
 
+const {
+  isNodeEnv,
+  isProductionBuildPhase,
+  readEnvString,
+} = require("./lib/runtime-env");
+
 const args = process.argv.slice(2);
 const strict =
-  args.includes("--strict") || process.env.CACHE_INVALIDATION_STRICT === "1";
+  args.includes("--strict") ||
+  readEnvString("CACHE_INVALIDATION_STRICT") === "1";
 const filteredArgs = args.filter((arg) => arg !== "--strict");
 const [domain = "i18n", locale] = filteredArgs;
 
@@ -49,8 +56,8 @@ if (locale && !VALID_LOCALES.includes(locale)) {
 }
 
 // Check if we're in a build context where invalidation isn't meaningful
-const isBuildTime = process.env.NEXT_PHASE === "phase-production-build";
-const isDevelopment = process.env.NODE_ENV === "development";
+const isBuildTime = isProductionBuildPhase();
+const isDevelopment = isNodeEnv("development");
 
 if (isBuildTime) {
   console.log("ℹ️  Build-time context detected.");
@@ -65,10 +72,11 @@ if (isBuildTime) {
 }
 
 // Build request
-const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+const explicitBaseUrl = readEnvString("NEXT_PUBLIC_BASE_URL");
+const baseUrl = explicitBaseUrl || "http://localhost:3000";
 const apiUrl = `${baseUrl}/api/cache/invalidate`;
-const secret = process.env.CACHE_INVALIDATION_SECRET;
-const hasExplicitBaseUrl = Boolean(process.env.NEXT_PUBLIC_BASE_URL);
+const secret = readEnvString("CACHE_INVALIDATION_SECRET");
+const hasExplicitBaseUrl = Boolean(explicitBaseUrl);
 
 const requestBody = {
   domain,
@@ -94,7 +102,7 @@ if (!hasExplicitBaseUrl && !secret && !strict) {
 }
 
 // In development without a running server, log and exit
-if (isDevelopment && !process.env.NEXT_PUBLIC_BASE_URL) {
+if (isDevelopment && !explicitBaseUrl) {
   console.log("ℹ️  Development mode without NEXT_PUBLIC_BASE_URL.");
   console.log("   To test invalidation:");
   console.log("   1. Start the dev server: pnpm dev");

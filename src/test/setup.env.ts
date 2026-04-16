@@ -16,6 +16,7 @@ try {
 
 // Mock environment variables - 使用vi.stubEnv而不是直接修改process.env
 vi.stubEnv("NODE_ENV", "test");
+vi.stubEnv("APP_ENV", "local");
 vi.stubEnv("NEXT_PUBLIC_BASE_URL", "https://example.com");
 vi.stubEnv("NEXT_PUBLIC_VERCEL_URL", "example.vercel.app");
 
@@ -31,12 +32,15 @@ vi.stubEnv("AIRTABLE_TABLE_NAME", "test-table");
 vi.stubEnv("EMAIL_FROM", "test@example.com");
 vi.stubEnv("EMAIL_REPLY_TO", "reply@example.com");
 vi.stubEnv("CSP_REPORT_URI", "https://example.com/csp-report");
-vi.stubEnv("ADMIN_TOKEN", "test-admin-token");
+vi.stubEnv("ADMIN_API_TOKEN", "test-admin-token");
+vi.stubEnv("TURNSTILE_ALLOWED_ACTIONS", "contact_form");
+vi.stubEnv("TURNSTILE_BYPASS", "false");
 
 // Mock @t3-oss/env-nextjs to prevent server-side environment variable access errors
 vi.mock("@t3-oss/env-nextjs", () => ({
   createEnv: vi.fn(() => ({
     NODE_ENV: "test",
+    APP_ENV: "local",
     TURNSTILE_SECRET_KEY: "test-secret-key",
     RESEND_API_KEY: "test-resend-key",
     AIRTABLE_API_KEY: "test-airtable-key",
@@ -45,7 +49,9 @@ vi.mock("@t3-oss/env-nextjs", () => ({
     EMAIL_FROM: "test@example.com",
     EMAIL_REPLY_TO: "reply@example.com",
     CSP_REPORT_URI: "https://example.com/csp-report",
-    ADMIN_TOKEN: "test-admin-token",
+    ADMIN_API_TOKEN: "test-admin-token",
+    TURNSTILE_ALLOWED_ACTIONS: "contact_form",
+    TURNSTILE_BYPASS: false,
     NEXT_PUBLIC_BASE_URL: "https://example.com",
     NEXT_PUBLIC_VERCEL_URL: "example.vercel.app",
   })),
@@ -55,6 +61,7 @@ vi.mock("@t3-oss/env-nextjs", () => ({
 vi.mock("@/lib/env", () => {
   const mockEnv = {
     NODE_ENV: "test",
+    APP_ENV: "local",
     TURNSTILE_SECRET_KEY: "test-secret-key",
     RESEND_API_KEY: "test-resend-key",
     AIRTABLE_API_KEY: "test-airtable-key",
@@ -63,16 +70,81 @@ vi.mock("@/lib/env", () => {
     EMAIL_FROM: "test@example.com",
     EMAIL_REPLY_TO: "reply@example.com",
     CSP_REPORT_URI: "https://example.com/csp-report",
-    ADMIN_TOKEN: "test-admin-token",
+    ADMIN_API_TOKEN: "test-admin-token",
     NEXT_PUBLIC_BASE_URL: "https://example.com",
     NEXT_PUBLIC_VERCEL_URL: "example.vercel.app",
     NEXT_PUBLIC_TURNSTILE_SITE_KEY: "test-site-key-12345",
+    NEXT_PUBLIC_DEPLOYMENT_PLATFORM: "vercel",
     NEXT_PUBLIC_TEST_MODE: false,
   } as Record<string, string | boolean | number | undefined>;
+
+  const readProcessEnvValue = (key: string): string | undefined =>
+    process.env[key];
 
   return {
     env: mockEnv,
     getEnvVar: (key: string) => mockEnv[key],
+    getRuntimeEnvString: (key: string) => {
+      const runtimeValue = readProcessEnvValue(key);
+      if (runtimeValue !== undefined) {
+        return runtimeValue;
+      }
+
+      const value = mockEnv[key];
+      return typeof value === "string" ? value : undefined;
+    },
+    getRuntimeEnvBoolean: (key: string) => {
+      const runtimeValue = readProcessEnvValue(key);
+      if (runtimeValue !== undefined) {
+        return runtimeValue === "true";
+      }
+
+      const value = mockEnv[key];
+      return typeof value === "boolean" ? value : undefined;
+    },
+    getRuntimeEnvNumber: (key: string) => {
+      const runtimeValue = readProcessEnvValue(key);
+      if (runtimeValue !== undefined) {
+        const parsed = Number(runtimeValue);
+        return Number.isFinite(parsed) ? parsed : undefined;
+      }
+
+      const value = mockEnv[key];
+      return typeof value === "number" ? value : undefined;
+    },
+    getRuntimeNodeEnv: () => {
+      const value = readProcessEnvValue("NODE_ENV") ?? mockEnv.NODE_ENV;
+      return value === "development" ||
+        value === "test" ||
+        value === "production"
+        ? value
+        : undefined;
+    },
+    getRuntimeAppEnv: () => {
+      const value = readProcessEnvValue("APP_ENV") ?? mockEnv.APP_ENV;
+      return value === "local" ||
+        value === "development" ||
+        value === "test" ||
+        value === "preview" ||
+        value === "production"
+        ? value
+        : undefined;
+    },
+    isRuntimeDevelopment: () =>
+      (readProcessEnvValue("NODE_ENV") ?? mockEnv.NODE_ENV) === "development",
+    isRuntimeProduction: () =>
+      (readProcessEnvValue("NODE_ENV") ?? mockEnv.NODE_ENV) === "production",
+    isRuntimeTest: () =>
+      (readProcessEnvValue("NODE_ENV") ?? mockEnv.NODE_ENV) === "test",
+    isRuntimeCi: () => readProcessEnvValue("CI") === "true",
+    isRuntimePlaywright: () =>
+      readProcessEnvValue("PLAYWRIGHT_TEST") === "true",
+    isRuntimeProductionBuildPhase: () =>
+      readProcessEnvValue("NEXT_PHASE") === "phase-production-build",
+    isSecureAppEnv: () => {
+      const value = readProcessEnvValue("APP_ENV") ?? mockEnv.APP_ENV;
+      return value === "production" || value === "preview";
+    },
     requireEnvVar: (key: string) => {
       const value = mockEnv[key];
       if (!value || typeof value === "boolean" || typeof value === "number") {

@@ -18,22 +18,22 @@
 
   <!-- Company name -->
   <text x="600" y="280" font-family="system-ui, -apple-system, sans-serif" font-size="64" font-weight="bold" fill="#e94560" text-anchor="middle">
-    B2B Web Template
+    Tianze Pipe
   </text>
 
   <!-- Tagline -->
   <text x="600" y="350" font-family="system-ui, -apple-system, sans-serif" font-size="32" fill="#ffffff" text-anchor="middle">
-    Modern B2B Enterprise Web Platform
+    Pipe Bending Experts
   </text>
 
-  <!-- Tech stack -->
+  <!-- Value proposition -->
   <text x="600" y="410" font-family="system-ui, -apple-system, sans-serif" font-size="24" fill="#94a3b8" text-anchor="middle">
-    Next.js 16 • React 19 • TypeScript • Tailwind CSS
+    Equipment + Process + Fittings Integrated Solutions
   </text>
 
   <!-- Bottom bar -->
   <rect x="0" y="590" width="1200" height="40" fill="#e94560"/>
   <text x="600" y="618" font-family="system-ui, -apple-system, sans-serif" font-size="18" fill="#ffffff" text-anchor="middle">
-    https://b2b-web-template.vercel.app
+    https://tianze-pipe.com
   </text>
 </svg>

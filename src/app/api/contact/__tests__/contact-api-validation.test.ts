@@ -500,7 +500,7 @@ describe("contact-api-validation", () => {
     });
 
     it("should return false when ADMIN_API_TOKEN is not configured", () => {
-      delete process.env.ADMIN_API_TOKEN;
+      vi.stubEnv("ADMIN_API_TOKEN", "");
 
       const result = validateAdminAccess("Bearer test-admin-token");
 

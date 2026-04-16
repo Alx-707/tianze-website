@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Turnstile } from "@marsidev/react-turnstile";
-import { env } from "@/lib/env";
+import { env, isRuntimeDevelopment } from "@/lib/env";
 import { logger } from "@/lib/logger";
 
 /**
@@ -41,7 +41,7 @@ export function TurnstileWidget({
 }: TurnstileProps) {
   const siteKey = env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
   const isBypassMode =
-    process.env.NODE_ENV === "development" && env.NEXT_PUBLIC_TURNSTILE_BYPASS;
+    isRuntimeDevelopment() && env.NEXT_PUBLIC_TURNSTILE_BYPASS;
   const bypassTriggeredRef = useRef(false);
 
   // All hooks must be called before any conditional returns

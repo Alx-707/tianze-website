@@ -8,6 +8,7 @@ import fs from "fs";
 import path from "path";
 import { ContentError, type ContentConfig } from "@/types/content.types";
 import type { ValidationConfig } from "@/lib/content-validation";
+import { getRuntimeEnvBoolean, getRuntimeEnvString } from "@/lib/env";
 import { logger } from "@/lib/logger";
 import { COUNT_TEN } from "@/constants";
 import { COUNT_160 } from "@/constants/count";
@@ -33,12 +34,12 @@ export const ALLOWED_EXTENSIONS = [".md", ".mdx", ".json"];
  * In production builds, drafts are disabled by default unless explicitly enabled.
  */
 function resolveDraftsEnabled(configValue?: boolean): boolean {
-  const envOverride = process.env.CONTENT_ENABLE_DRAFTS;
+  const envOverride = getRuntimeEnvString("CONTENT_ENABLE_DRAFTS");
   if (envOverride !== undefined) {
-    return envOverride === "true";
+    return getRuntimeEnvBoolean("CONTENT_ENABLE_DRAFTS") === true;
   }
 
-  if (process.env.NODE_ENV === "development") {
+  if (getRuntimeEnvString("NODE_ENV") === "development") {
     return true;
   }
 
@@ -178,7 +179,7 @@ export function getContentConfig(): ContentConfig {
 export function warnIfDraftsInProduction(): void {
   const config = getContentConfig();
 
-  if (config.enableDrafts && process.env.NODE_ENV === "production") {
+  if (config.enableDrafts && getRuntimeEnvString("NODE_ENV") === "production") {
     logger.warn(
       "CONTENT_WARNING: Drafts are enabled in production build. " +
         "Draft content may be exposed to users. " +

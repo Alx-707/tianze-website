@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { SITE_CONFIG } from "@/config/paths";
 import { ONE } from "@/constants";
+import { getRuntimeEnvString } from "@/lib/env";
 
 /**
  * Locale layout metadata (base only).
@@ -40,8 +41,8 @@ export async function generateLocaleMetadata({
       },
     },
     verification: {
-      google: process.env["GOOGLE_SITE_VERIFICATION"],
-      yandex: process.env["YANDEX_VERIFICATION"],
+      google: getRuntimeEnvString("GOOGLE_SITE_VERIFICATION"),
+      yandex: getRuntimeEnvString("YANDEX_VERIFICATION"),
     },
   };
 }

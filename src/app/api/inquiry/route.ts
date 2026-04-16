@@ -22,6 +22,7 @@ import {
 } from "@/lib/api/request-observability";
 import { recordApiResponseSignal } from "@/lib/observability/api-signals";
 import { readAndHashJsonBody } from "@/lib/api/read-and-hash-body";
+import { isRuntimeProduction } from "@/lib/env";
 import {
   withRateLimit,
   type RateLimitContext,
@@ -48,7 +49,7 @@ function createSuccessPayload(
   context: InquiryResponseContext,
 ) {
   const { clientIP, processingTime, observability } = context;
-  if (process.env.NODE_ENV !== "production") {
+  if (!isRuntimeProduction()) {
     logger.info("Product inquiry submitted successfully", {
       referenceId: result.referenceId,
       ip: sanitizeIP(clientIP),
