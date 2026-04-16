@@ -3,7 +3,11 @@
  */
 
 import { SINGLE_SITE_CONFIG, type SiteConfig } from "@/config/single-site";
-import { env } from "@/lib/env";
+import {
+  getRuntimeEnvBoolean,
+  getRuntimeNodeEnv,
+  isRuntimePlaywright,
+} from "@/lib/env";
 
 export type { SiteConfig } from "@/config/single-site";
 
@@ -29,9 +33,9 @@ export function isPlaceholder(value: string): boolean {
 export function isBaseUrlConfigured(
   baseUrl: string = SITE_CONFIG.baseUrl,
 ): boolean {
-  if (env.NODE_ENV !== "production") return true;
-  if (env.PLAYWRIGHT_TEST) return true;
-  if (env.SKIP_ENV_VALIDATION) return true;
+  if (getRuntimeNodeEnv() !== "production") return true;
+  if (isRuntimePlaywright()) return true;
+  if (getRuntimeEnvBoolean("SKIP_ENV_VALIDATION")) return true;
   return !baseUrl.includes("example.com") && !baseUrl.includes("localhost");
 }
 
@@ -103,7 +107,7 @@ export function validateSiteConfig(config: SiteConfig = SITE_CONFIG): {
 } {
   const errors: string[] = [];
   const warnings: string[] = [];
-  const isProduction = env.NODE_ENV === "production";
+  const isProduction = getRuntimeNodeEnv() === "production";
 
   if (!isBaseUrlConfigured(config.baseUrl)) {
     const msg = `SITE_CONFIG.baseUrl is not configured for production: ${config.baseUrl}`;

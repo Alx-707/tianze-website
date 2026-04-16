@@ -9,7 +9,7 @@
  * 2. Falls back to Turnstile allowed hosts for consistency
  */
 
-import { env } from "@/lib/env";
+import { getRuntimeEnvString } from "@/lib/env";
 import { getAllowedTurnstileHosts } from "@/lib/security/turnstile-config";
 
 /**
@@ -17,7 +17,7 @@ import { getAllowedTurnstileHosts } from "@/lib/security/turnstile-config";
  * Returns empty array if not configured.
  */
 function parseCorsEnvOrigins(): string[] {
-  const origins = env.CORS_ALLOWED_ORIGINS;
+  const origins = getRuntimeEnvString("CORS_ALLOWED_ORIGINS");
   if (!origins) return [];
 
   return origins
@@ -49,7 +49,7 @@ function deriveOriginsFromTurnstileHosts(): string[] {
  * Get base URL origin from environment.
  */
 function getBaseUrlOrigin(): string | null {
-  const baseUrl = env.NEXT_PUBLIC_BASE_URL;
+  const baseUrl = getRuntimeEnvString("NEXT_PUBLIC_BASE_URL");
   if (!baseUrl) return null;
 
   try {

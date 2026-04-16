@@ -29,6 +29,13 @@ const mockCreateRateLimitHeaders = vi.hoisted(() =>
 vi.mock("@/lib/security/distributed-rate-limit", () => ({
   checkDistributedRateLimit: mockCheckDistributedRateLimit,
   createRateLimitHeaders: mockCreateRateLimitHeaders,
+  RATE_LIMIT_PRESETS: {
+    csp: {
+      maxRequests: 100,
+      windowMs: 60_000,
+      failureMode: "closed",
+    },
+  },
 }));
 
 vi.mock("@/lib/logger", () => ({
@@ -47,6 +54,13 @@ vi.mock("@/lib/env", () => ({
   env: {
     NODE_ENV: "production",
     CSP_REPORT_URI: "https://example.com/csp-report",
+  },
+  getRuntimeEnvString: (key: string) => {
+    if (key === "NODE_ENV") return "production";
+    if (key === "CSP_REPORT_URI") return "https://example.com/csp-report";
+    if (key === "RATE_LIMIT_PEPPER")
+      return "test-rate-limit-pepper-0123456789abcdef";
+    return process.env[key];
   },
 }));
 

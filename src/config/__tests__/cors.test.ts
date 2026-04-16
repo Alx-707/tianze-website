@@ -11,6 +11,17 @@ vi.mock("@/lib/env", () => ({
   env: {
     NEXT_PUBLIC_BASE_URL: "https://example.com",
   },
+  getRuntimeEnvString: (key: string) => {
+    if (key === "CORS_ALLOWED_ORIGINS") {
+      return process.env.CORS_ALLOWED_ORIGINS;
+    }
+
+    if (key === "NEXT_PUBLIC_BASE_URL") {
+      return process.env.NEXT_PUBLIC_BASE_URL ?? "https://example.com";
+    }
+
+    return process.env[key];
+  },
 }));
 
 describe("CORS Configuration", () => {

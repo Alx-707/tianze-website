@@ -26,15 +26,16 @@ async function loadTurnstileConfig({
       TURNSTILE_EXPECTED_ACTION: expectedAction,
       VERCEL_URL: vercelUrl,
     },
+    getRuntimeEnvString: (key: string) => {
+      if (key === "TURNSTILE_ALLOWED_ACTIONS") {
+        return allowedActions;
+      }
+      return undefined;
+    },
   }));
   vi.doMock("@/config/paths/site-config", () => ({
     SITE_CONFIG: { baseUrl },
   }));
-  if (allowedActions === undefined) {
-    delete process.env.TURNSTILE_ALLOWED_ACTIONS;
-  } else {
-    process.env.TURNSTILE_ALLOWED_ACTIONS = allowedActions;
-  }
   return import("@/lib/security/turnstile-config");
 }
 
