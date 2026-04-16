@@ -1,7 +1,6 @@
 "use client";
 
 import { useActionState, useCallback, useRef, useState } from "react";
-import dynamic from "next/dynamic";
 import { CheckCircle, Loader2, MessageSquare, XCircle } from "lucide-react";
 import { useTranslations } from "next-intl";
 import {
@@ -11,6 +10,7 @@ import {
 import { generateIdempotencyKey } from "@/lib/idempotency-key";
 import { cn } from "@/lib/utils";
 import { getAttributionAsObject } from "@/lib/utm";
+import { LazyTurnstile } from "@/components/forms/lazy-turnstile";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -22,21 +22,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-
-// Lazy load Turnstile for performance
-const TurnstileWidget = dynamic(
-  () =>
-    import("@/components/security/turnstile").then((m) => m.TurnstileWidget),
-  {
-    ssr: false,
-    loading: () => (
-      <div
-        className="h-[65px] w-full animate-pulse rounded-md bg-muted"
-        aria-hidden="true"
-      />
-    ),
-  },
-);
 
 export interface ProductInquiryFormProps {
   /** Product name to display in the form */
@@ -450,7 +435,7 @@ export function ProductInquiryForm({
             label={t("requirements")}
             placeholder={t("requirementsPlaceholder")}
           />
-          <TurnstileWidget
+          <LazyTurnstile
             onSuccess={handleTurnstileSuccess}
             onError={handleTurnstileReset}
             onExpire={handleTurnstileReset}

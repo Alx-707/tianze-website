@@ -20,10 +20,17 @@ const DynamicTurnstile = dynamic(
 );
 
 interface LazyTurnstileProps {
-  onSuccess: (token: string) => void;
-  onError: (reason?: string) => void;
-  onExpire: () => void;
-  onLoad: () => void;
+  onSuccess?: (token: string) => void;
+  onError?: (reason?: string) => void;
+  onExpire?: () => void;
+  onLoad?: () => void;
+  className?: string;
+  theme?: "light" | "dark" | "auto";
+  size?: "normal" | "compact";
+  tabIndex?: number;
+  id?: string;
+  action?: string;
+  cData?: string;
 }
 
 /**
@@ -87,26 +94,38 @@ export function LazyTurnstile({
   onError,
   onExpire,
   onLoad,
+  className,
+  theme = "auto",
+  size = "normal",
+  tabIndex,
+  id,
+  action = "contact_form",
+  cData,
 }: LazyTurnstileProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const shouldRender = useLazyRender(containerRef);
+  const placeholderHeightClass = size === "compact" ? "h-[65px]" : "h-12";
+  const turnstileProps = {
+    className: className ?? "w-full",
+    action,
+    theme,
+    size,
+    ...(onSuccess ? { onSuccess } : {}),
+    ...(onError ? { onError } : {}),
+    ...(onExpire ? { onExpire } : {}),
+    ...(onLoad ? { onLoad } : {}),
+    ...(tabIndex !== undefined ? { tabIndex } : {}),
+    ...(id !== undefined ? { id } : {}),
+    ...(cData !== undefined ? { cData } : {}),
+  };
 
   return (
     <div className="space-y-2" ref={containerRef}>
       {shouldRender ? (
-        <DynamicTurnstile
-          onSuccess={onSuccess}
-          onError={onError}
-          onExpire={onExpire}
-          onLoad={onLoad}
-          className="w-full"
-          action="contact_form"
-          theme="auto"
-          size="normal"
-        />
+        <DynamicTurnstile {...turnstileProps} />
       ) : (
         <div
-          className="h-12 w-full animate-pulse rounded-md bg-muted"
+          className={`${placeholderHeightClass} w-full animate-pulse rounded-md bg-muted`}
           aria-hidden="true"
         />
       )}
