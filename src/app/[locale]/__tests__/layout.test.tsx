@@ -1,24 +1,142 @@
+import type React from "react";
+import { screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { generateMetadata } from "../layout";
+import { renderAsyncPage } from "@/testing/render-async-page";
+import LocaleLayout, { generateMetadata } from "../layout";
 
 // Mock dependencies using vi.hoisted - must be before module imports
-const { mockSetRequestLocale, mockNotFound, mockGenerateLocaleMetadata } =
-  vi.hoisted(() => ({
+const {
+  mockSetRequestLocale,
+  mockNotFound,
+  mockGenerateLocaleMetadata,
+  mockGeneratePageStructuredData,
+  mockRuntimeEnv,
+} = vi.hoisted(() => ({
     mockSetRequestLocale: vi.fn(),
     mockNotFound: vi.fn(),
     mockGenerateLocaleMetadata: vi.fn(),
+    mockGeneratePageStructuredData: vi.fn(),
+    mockRuntimeEnv: {
+      NODE_ENV: "development",
+      PLAYWRIGHT_TEST: false,
+      NEXT_PUBLIC_DISABLE_DEV_TOOLS: false,
+      NEXT_PUBLIC_DISABLE_REACT_SCAN: false,
+    },
   }));
 
 vi.mock("next-intl/server", () => ({
+  getTranslations: vi.fn(async ({ namespace }: { namespace: string }) => {
+    const translations: Record<string, string> = {
+      systemStatus: "System online",
+      contactSales: "Contact sales",
+      openMenu: "Open menu",
+      closeMenu: "Close menu",
+      selectLanguage: "Select language",
+      home: namespace === "navigation" ? "Home" : namespace,
+    };
+
+    return (key: string) => translations[key] ?? key;
+  }),
   setRequestLocale: mockSetRequestLocale,
+}));
+
+vi.mock("next-intl", () => ({
+  NextIntlClientProvider: ({ children }: { children: React.ReactNode }) => (
+    <>{children}</>
+  ),
 }));
 
 vi.mock("next/navigation", () => ({
   notFound: mockNotFound,
 }));
 
+vi.mock("next/script", () => ({
+  default: ({ src }: { src: string }) => (
+    <script data-testid="next-script" data-src={src} />
+  ),
+}));
+
 vi.mock("@/app/[locale]/layout-metadata", () => ({
   generateLocaleMetadata: mockGenerateLocaleMetadata,
+}));
+
+vi.mock("@/app/[locale]/layout-structured-data", () => ({
+  generatePageStructuredData: mockGeneratePageStructuredData,
+}));
+
+vi.mock("@/app/[locale]/layout-fonts", () => ({
+  getFontClassNames: () => "font-class",
+}));
+
+vi.mock("@/lib/load-messages", () => ({
+  loadCompleteMessages: vi.fn(async () => ({ common: { ok: "OK" } })),
+}));
+
+vi.mock("@/lib/env", () => ({
+  env: mockRuntimeEnv,
+  getRuntimeEnvBoolean: (key: string) => {
+    if (key === "NEXT_PUBLIC_DISABLE_DEV_TOOLS") {
+      return mockRuntimeEnv.NEXT_PUBLIC_DISABLE_DEV_TOOLS;
+    }
+    if (key === "NEXT_PUBLIC_DISABLE_REACT_SCAN") {
+      return mockRuntimeEnv.NEXT_PUBLIC_DISABLE_REACT_SCAN;
+    }
+    return undefined;
+  },
+}));
+
+vi.mock("@/lib/i18n/client-messages", () => ({
+  pickClientMessages: (messages: Record<string, unknown>) => messages,
+}));
+
+vi.mock("@/lib/structured-data", () => ({
+  generateJSONLD: () => JSON.stringify({ ok: true }),
+}));
+
+vi.mock("@/components/attribution-bootstrap", () => ({
+  AttributionBootstrap: () => <div data-testid="attribution-bootstrap" />,
+}));
+
+vi.mock("@/components/cookie/lazy-cookie-consent-island", () => ({
+  LazyCookieConsentIsland: () => <div data-testid="cookie-consent" />,
+}));
+
+vi.mock("@/components/footer", () => ({
+  Footer: ({ statusSlot }: { statusSlot?: React.ReactNode }) => (
+    <footer data-testid="footer">{statusSlot}</footer>
+  ),
+}));
+
+vi.mock("@/components/layout/header", () => ({
+  Header: () => <header data-testid="header" />,
+}));
+
+vi.mock("@/components/lazy/lazy-top-loader", () => ({
+  LazyTopLoader: () => <div data-testid="top-loader" />,
+}));
+
+vi.mock("@/components/theme-provider", () => ({
+  ThemeProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
+
+vi.mock("@/components/ui/lazy-theme-switcher", () => ({
+  LazyThemeSwitcher: () => <button data-testid="theme-switcher" />,
+}));
+
+vi.mock("@/config/footer-links", () => ({
+  FOOTER_COLUMNS: [],
+  FOOTER_STYLE_TOKENS: {},
+}));
+
+vi.mock("@/i18n/locale-utils", () => ({
+  coerceLocale: (locale: string) => locale,
+  isLocale: (locale: string) => locale === "en" || locale === "zh",
+}));
+
+vi.mock("@/lib/navigation", () => ({
+  mainNavigation: [
+    { key: "home", href: "/", translationKey: "navigation.home" },
+  ],
 }));
 
 vi.mock("@/i18n/routing", () => ({
@@ -31,6 +149,14 @@ vi.mock("@/i18n/routing", () => ({
 describe("LocaleLayout", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockRuntimeEnv.NODE_ENV = "development";
+    mockRuntimeEnv.PLAYWRIGHT_TEST = false;
+    mockRuntimeEnv.NEXT_PUBLIC_DISABLE_DEV_TOOLS = false;
+    mockRuntimeEnv.NEXT_PUBLIC_DISABLE_REACT_SCAN = false;
+    mockGeneratePageStructuredData.mockResolvedValue({
+      organizationData: { "@type": "Organization" },
+      websiteData: { "@type": "WebSite" },
+    });
     mockNotFound.mockImplementation(() => {
       throw new Error("NEXT_NOT_FOUND");
     });
@@ -50,6 +176,34 @@ describe("LocaleLayout", () => {
       expect(routing.locales).toContain("en");
       expect(routing.locales).toContain("zh");
       expect(routing.defaultLocale).toBe("en");
+    });
+  });
+
+  describe("dev script gating", () => {
+    it("renders dev scripts in development when toggles are off", async () => {
+      const page = await LocaleLayout({
+        children: <div>Child</div>,
+        params: Promise.resolve({ locale: "en" }),
+      });
+
+      await renderAsyncPage(page);
+
+      expect(screen.getByText("Skip to main content")).toBeInTheDocument();
+      expect(screen.getAllByTestId("next-script")).toHaveLength(3);
+      expect(mockSetRequestLocale).toHaveBeenCalledWith("en");
+    });
+
+    it("disables all dev scripts when dev tools are disabled", async () => {
+      mockRuntimeEnv.NEXT_PUBLIC_DISABLE_DEV_TOOLS = true;
+
+      const page = await LocaleLayout({
+        children: <div>Child</div>,
+        params: Promise.resolve({ locale: "en" }),
+      });
+
+      await renderAsyncPage(page);
+
+      expect(screen.queryAllByTestId("next-script")).toHaveLength(0);
     });
   });
 });

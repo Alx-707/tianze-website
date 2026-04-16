@@ -232,6 +232,8 @@ class QualityGate {
             // 注意：禁止再按整个目录豁免 src/components/ui/**。
             // 有行为/状态的 UI 组件必须继续接受 diff coverage 检查。
             "src/components/blocks/_templates/**", // 开发模板（无运行时逻辑）
+            "src/components/dev-tools/**", // 开发态调试组件，不进入生产主路径
+            "src/app/**/dev-tools/**", // App Router 下的开发态调试入口
             "src/templates/**", // React 19 / DX 模板文件（不参与生产运行时）
             "src/constants/**", // 纯数据声明（as const 对象）
             "src/config/**", // 静态配置对象（零条件分支）
