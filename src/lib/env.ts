@@ -36,7 +36,6 @@ export const env = createEnv({
     TURNSTILE_ALLOWED_HOSTS: z.string().optional(),
     TURNSTILE_ALLOWED_ACTIONS: z.string().optional(),
     TURNSTILE_EXPECTED_ACTION: z.string().optional(),
-    TURNSTILE_ALLOWED_ACTIONS: z.string().optional(),
     TURNSTILE_BYPASS: z
       .string()
       .optional()
@@ -287,7 +286,6 @@ export const env = createEnv({
     TURNSTILE_ALLOWED_HOSTS: process.env.TURNSTILE_ALLOWED_HOSTS,
     TURNSTILE_ALLOWED_ACTIONS: process.env.TURNSTILE_ALLOWED_ACTIONS,
     TURNSTILE_EXPECTED_ACTION: process.env.TURNSTILE_EXPECTED_ACTION,
-    TURNSTILE_ALLOWED_ACTIONS: process.env.TURNSTILE_ALLOWED_ACTIONS,
     TURNSTILE_BYPASS: process.env.TURNSTILE_BYPASS,
     ADMIN_API_TOKEN: process.env.ADMIN_API_TOKEN,
     CACHE_INVALIDATION_SECRET: process.env.CACHE_INVALIDATION_SECRET,
