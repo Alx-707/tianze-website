@@ -1,4 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import type {
+  IdempotencyEntry,
+  IdempotencyStore,
+} from "@/lib/security/stores/idempotency-store";
 
 const mocks = vi.hoisted(() => ({
   mockDefaultTtlMs: 24 * 60 * 60 * 1000,
@@ -32,19 +36,57 @@ import {
   getStoredIdempotentResult,
 } from "../idempotency-result-utils";
 
-type MockStore = {
-  delete: ReturnType<typeof vi.fn>;
-  get: ReturnType<typeof vi.fn>;
-  set: ReturnType<typeof vi.fn>;
-  setIfNotExists: ReturnType<typeof vi.fn>;
+type MockStore = IdempotencyStore & {
+  delete: ReturnType<typeof vi.fn<(idempotencyKey: string) => Promise<void>>>;
+  get: ReturnType<
+    typeof vi.fn<(idempotencyKey: string) => Promise<IdempotencyEntry | null>>
+  >;
+  set: ReturnType<
+    typeof vi.fn<
+      (
+        idempotencyKey: string,
+        entry: IdempotencyEntry,
+        ttlMs: number,
+      ) => Promise<void>
+    >
+  >;
+  setIfNotExists: ReturnType<
+    typeof vi.fn<
+      (
+        idempotencyKey: string,
+        entry: IdempotencyEntry,
+        ttlMs: number,
+      ) => Promise<boolean>
+    >
+  >;
 };
 
 function createStore(): MockStore {
   return {
-    delete: vi.fn().mockResolvedValue(undefined),
-    get: vi.fn().mockResolvedValue(null),
-    set: vi.fn().mockResolvedValue(undefined),
-    setIfNotExists: vi.fn().mockResolvedValue(true),
+    delete: vi
+      .fn<(idempotencyKey: string) => Promise<void>>()
+      .mockResolvedValue(undefined),
+    get: vi
+      .fn<(idempotencyKey: string) => Promise<IdempotencyEntry | null>>()
+      .mockResolvedValue(null),
+    set: vi
+      .fn<
+        (
+          idempotencyKey: string,
+          entry: IdempotencyEntry,
+          ttlMs: number,
+        ) => Promise<void>
+      >()
+      .mockResolvedValue(undefined),
+    setIfNotExists: vi
+      .fn<
+        (
+          idempotencyKey: string,
+          entry: IdempotencyEntry,
+          ttlMs: number,
+        ) => Promise<boolean>
+      >()
+      .mockResolvedValue(true),
   };
 }
 

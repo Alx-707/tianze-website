@@ -26,7 +26,7 @@ describe("retryAsync", () => {
 
   it("retries with exponential backoff until a later attempt succeeds", async () => {
     const fn = vi
-      .fn<[], Promise<string>>()
+      .fn<() => Promise<string>>()
       .mockRejectedValueOnce(new Error("first"))
       .mockRejectedValueOnce(new Error("second"))
       .mockResolvedValueOnce("ok");
@@ -89,7 +89,7 @@ describe("retryAsync", () => {
   it("uses the default base delay when one is not provided", async () => {
     const setTimeoutSpy = vi.spyOn(globalThis, "setTimeout");
     const fn = vi
-      .fn<[], Promise<string>>()
+      .fn<() => Promise<string>>()
       .mockRejectedValueOnce(new Error("first"))
       .mockResolvedValueOnce("ok");
 

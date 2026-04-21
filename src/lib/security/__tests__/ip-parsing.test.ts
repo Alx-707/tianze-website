@@ -76,15 +76,17 @@ describe("ip-parsing", () => {
 
   describe("getNextJsIP", () => {
     it("normalizes valid request.ip values and rejects invalid ones", () => {
-      expect(getNextJsIP({ ip: " 203.0.113.5 " } as NextRequest)).toBe(
-        "203.0.113.5",
-      );
-      expect(getNextJsIP({ ip: " 203.0.113.5:3000 " } as NextRequest)).toBe(
-        "203.0.113.5",
-      );
-      expect(getNextJsIP({ ip: "bad-ip" } as NextRequest)).toBeNull();
-      expect(getNextJsIP({ ip: "   " } as NextRequest)).toBeNull();
-      expect(getNextJsIP({} as NextRequest)).toBeNull();
+      expect(
+        getNextJsIP({ ip: " 203.0.113.5 " } as unknown as NextRequest),
+      ).toBe("203.0.113.5");
+      expect(
+        getNextJsIP({ ip: " 203.0.113.5:3000 " } as unknown as NextRequest),
+      ).toBe("203.0.113.5");
+      expect(
+        getNextJsIP({ ip: "bad-ip" } as unknown as NextRequest),
+      ).toBeNull();
+      expect(getNextJsIP({ ip: "   " } as unknown as NextRequest)).toBeNull();
+      expect(getNextJsIP({} as unknown as NextRequest)).toBeNull();
     });
   });
 });

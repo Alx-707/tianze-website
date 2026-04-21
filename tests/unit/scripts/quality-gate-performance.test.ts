@@ -1,3 +1,4 @@
+import type { SpawnSyncReturns } from "node:child_process";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("fs", () => ({
@@ -13,6 +14,21 @@ vi.mock("glob", () => ({
 
 const { QualityGate } = await import("../../../scripts/quality-gate.js");
 
+function createBuildResult(
+  status: number,
+  stdout = "",
+  stderr = "",
+): SpawnSyncReturns<string> {
+  return {
+    output: [null, stdout, stderr] as [null, string, string],
+    pid: 1,
+    signal: null,
+    status,
+    stderr,
+    stdout,
+  };
+}
+
 describe("QualityGate performance gate", () => {
   let gate: InstanceType<typeof QualityGate>;
 
@@ -22,14 +38,12 @@ describe("QualityGate performance gate", () => {
   });
 
   it("marks build failures as failed and does not overwrite them to passed", async () => {
-    const buildSpy = vi.spyOn(gate, "runBuildCommand").mockReturnValue({
-      status: 1,
-      stdout: "",
-      stderr: "build boom",
-    });
+    const buildSpy = vi
+      .spyOn(gate, "runBuildCommand")
+      .mockReturnValue(createBuildResult(1, "", "build boom"));
     const perfSpy = vi
       .spyOn(gate, "runPerformanceTests")
-      .mockImplementation(() => "");
+      .mockImplementation(() => Buffer.from(""));
 
     const result = await gate.checkPerformance();
 
@@ -40,14 +54,12 @@ describe("QualityGate performance gate", () => {
   });
 
   it("fails when build logs contain MISSING_MESSAGE", async () => {
-    vi.spyOn(gate, "runBuildCommand").mockReturnValue({
-      status: 0,
-      stdout: "MISSING_MESSAGE: contact.form.submit",
-      stderr: "",
-    });
+    vi.spyOn(gate, "runBuildCommand").mockReturnValue(
+      createBuildResult(0, "MISSING_MESSAGE: contact.form.submit", ""),
+    );
     const perfSpy = vi
       .spyOn(gate, "runPerformanceTests")
-      .mockImplementation(() => "");
+      .mockImplementation(() => Buffer.from(""));
 
     const result = await gate.checkPerformance();
 
@@ -59,14 +71,10 @@ describe("QualityGate performance gate", () => {
   });
 
   it("passes when build and test timings stay under thresholds", async () => {
-    vi.spyOn(gate, "runBuildCommand").mockReturnValue({
-      status: 0,
-      stdout: "",
-      stderr: "",
-    });
+    vi.spyOn(gate, "runBuildCommand").mockReturnValue(createBuildResult(0));
     const perfSpy = vi
       .spyOn(gate, "runPerformanceTests")
-      .mockImplementation(() => "");
+      .mockImplementation(() => Buffer.from(""));
     const dateNowSpy = vi
       .spyOn(Date, "now")
       .mockReturnValueOnce(0)
@@ -75,22 +83,21 @@ describe("QualityGate performance gate", () => {
       .mockReturnValueOnce(2_000);
 
     const result = await gate.checkPerformance();
+    const checks = result.checks as { buildTime?: number; testTime?: number };
 
     expect(result.status).toBe("passed");
     expect(result.issues).toEqual([]);
-    expect(result.checks.buildTime).toBe(1_000);
-    expect(result.checks.testTime).toBe(1_000);
+    expect(checks.buildTime).toBe(1_000);
+    expect(checks.testTime).toBe(1_000);
     expect(perfSpy).toHaveBeenCalled();
     dateNowSpy.mockRestore();
   });
 
   it("keeps threshold overages as warning when execution succeeds", async () => {
-    vi.spyOn(gate, "runBuildCommand").mockReturnValue({
-      status: 0,
-      stdout: "",
-      stderr: "",
-    });
-    vi.spyOn(gate, "runPerformanceTests").mockImplementation(() => "");
+    vi.spyOn(gate, "runBuildCommand").mockReturnValue(createBuildResult(0));
+    vi.spyOn(gate, "runPerformanceTests").mockImplementation(() =>
+      Buffer.from(""),
+    );
     const dateNowSpy = vi
       .spyOn(Date, "now")
       .mockReturnValueOnce(0)

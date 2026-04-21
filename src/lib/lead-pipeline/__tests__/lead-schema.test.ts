@@ -237,8 +237,10 @@ describe("Lead Schema", () => {
       const result = leadSchema.safeParse(productLead);
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.data.type).toBe(LEAD_TYPES.PRODUCT);
-        expect(result.data.quantity).toBe("10 boxes");
+        expect(result.data).toMatchObject({
+          quantity: "10 boxes",
+          type: LEAD_TYPES.PRODUCT,
+        });
       }
     });
 

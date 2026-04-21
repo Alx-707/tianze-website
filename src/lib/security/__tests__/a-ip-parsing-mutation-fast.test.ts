@@ -12,7 +12,7 @@ describe("ip-parsing mutation fast path", () => {
   });
 
   it("trims request.ip before using it as the normalized Next.js IP", () => {
-    expect(getNextJsIP({ ip: " 203.0.113.5 " } as NextRequest)).toBe(
+    expect(getNextJsIP({ ip: " 203.0.113.5 " } as unknown as NextRequest)).toBe(
       "203.0.113.5",
     );
   });

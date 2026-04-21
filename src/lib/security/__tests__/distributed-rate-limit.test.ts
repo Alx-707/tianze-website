@@ -795,9 +795,10 @@ describe("distributed-rate-limit", () => {
     it("cleans up settled queue entries", async () => {
       const mod = await import("@/lib/security/stores/rate-limit-store");
 
-      let resolveIncrement:
-        | ((value: { count: number; expiresAt: number }) => void)
-        | null = null;
+      let resolveIncrement!: (value: {
+        count: number;
+        expiresAt: number;
+      }) => void;
       const incrementPromise = new Promise<{
         count: number;
         expiresAt: number;
@@ -818,7 +819,7 @@ describe("distributed-rate-limit", () => {
 
       expect(getPendingRateLimitQueueSize()).toBe(1);
 
-      resolveIncrement?.({ count: 1, expiresAt: Date.now() + MINUTE_MS });
+      resolveIncrement({ count: 1, expiresAt: Date.now() + MINUTE_MS });
       await pending;
       await vi.advanceTimersByTimeAsync(0);
 

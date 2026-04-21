@@ -10,6 +10,17 @@ const POLICY: ThirdPartyUrlPolicy = {
   allowHostSuffixes: ["fbcdn.net", "fbsbx.com"],
 };
 
+function stubFetch(...responses: Response[]) {
+  const fetchMock = vi.fn<typeof fetch>();
+
+  for (const response of responses) {
+    fetchMock.mockResolvedValueOnce(response);
+  }
+
+  vi.stubGlobal("fetch", fetchMock);
+  return fetchMock;
+}
+
 describe("safe-third-party-fetch", () => {
   describe("isAllowedThirdPartyUrl", () => {
     it("accepts exact allowlisted hosts case-insensitively", () => {
@@ -175,11 +186,7 @@ describe("safe-third-party-fetch", () => {
         headers: { location: "https://static.fbcdn.net/image.jpg" },
       });
       const finalResponse = new Response("image", { status: 200 });
-      const fetchMock = vi
-        .fn<Parameters<typeof fetch>, ReturnType<typeof fetch>>()
-        .mockResolvedValueOnce(redirect)
-        .mockResolvedValueOnce(finalResponse);
-      vi.stubGlobal("fetch", fetchMock);
+      const fetchMock = stubFetch(redirect, finalResponse);
 
       const result = await safeFetchThirdPartyUrl(
         "https://graph.facebook.com/avatar",
@@ -204,11 +211,7 @@ describe("safe-third-party-fetch", () => {
         status: 302,
         headers: { location: "https://static.fbcdn.net/step-2" },
       });
-      const fetchMock = vi
-        .fn<Parameters<typeof fetch>, ReturnType<typeof fetch>>()
-        .mockResolvedValueOnce(firstRedirect)
-        .mockResolvedValueOnce(secondRedirect);
-      vi.stubGlobal("fetch", fetchMock);
+      const fetchMock = stubFetch(firstRedirect, secondRedirect);
 
       const result = await safeFetchThirdPartyUrl(
         "https://graph.facebook.com/avatar",
@@ -226,11 +229,10 @@ describe("safe-third-party-fetch", () => {
         status: 301,
         headers: { location: "https://lookaside.fbsbx.com/file" },
       });
-      const fetchMock = vi
-        .fn<Parameters<typeof fetch>, ReturnType<typeof fetch>>()
-        .mockResolvedValueOnce(redirectWithoutLocation)
-        .mockResolvedValueOnce(redirectWithLocation);
-      vi.stubGlobal("fetch", fetchMock);
+      const fetchMock = stubFetch(
+        redirectWithoutLocation,
+        redirectWithLocation,
+      );
 
       await expect(
         safeFetchThirdPartyUrl(
@@ -250,6 +252,7 @@ describe("safe-third-party-fetch", () => {
           },
         ),
       ).resolves.toBe(redirectWithLocation);
+      expect(fetchMock).toHaveBeenCalledTimes(2);
     });
 
     it("does not follow real redirect statuses when maxRedirects is zero", async () => {
@@ -257,10 +260,7 @@ describe("safe-third-party-fetch", () => {
         status: 302,
         headers: { location: "https://lookaside.fbsbx.com/step-1" },
       });
-      const fetchMock = vi
-        .fn<Parameters<typeof fetch>, ReturnType<typeof fetch>>()
-        .mockResolvedValueOnce(redirect);
-      vi.stubGlobal("fetch", fetchMock);
+      const fetchMock = stubFetch(redirect);
 
       const result = await safeFetchThirdPartyUrl(
         "https://graph.facebook.com/avatar",
@@ -337,12 +337,7 @@ describe("safe-third-party-fetch", () => {
         headers: { location: "https://cdn.fbcdn.net/step-2" },
       });
       const finalResponse = new Response("done", { status: 200 });
-      const fetchMock = vi
-        .fn<Parameters<typeof fetch>, ReturnType<typeof fetch>>()
-        .mockResolvedValueOnce(redirect1)
-        .mockResolvedValueOnce(redirect2)
-        .mockResolvedValueOnce(finalResponse);
-      vi.stubGlobal("fetch", fetchMock);
+      const fetchMock = stubFetch(redirect1, redirect2, finalResponse);
 
       const result = await safeFetchThirdPartyUrl(
         "https://graph.facebook.com/avatar",
@@ -373,12 +368,7 @@ describe("safe-third-party-fetch", () => {
         status: 302,
         headers: { location: "https://cdn.fbcdn.net/step-3" },
       });
-      const fetchMock = vi
-        .fn<Parameters<typeof fetch>, ReturnType<typeof fetch>>()
-        .mockResolvedValueOnce(redirect1)
-        .mockResolvedValueOnce(redirect2)
-        .mockResolvedValueOnce(redirect3);
-      vi.stubGlobal("fetch", fetchMock);
+      const fetchMock = stubFetch(redirect1, redirect2, redirect3);
 
       const result = await safeFetchThirdPartyUrl(
         "https://graph.facebook.com/avatar",
