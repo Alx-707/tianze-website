@@ -1,3 +1,5 @@
+import { ipv4ToInteger } from "@/lib/security/ip-range";
+
 export type ThirdPartyUrlPolicy = {
   /**
    * Exact host allowlist (case-insensitive).
@@ -12,35 +14,21 @@ export type ThirdPartyUrlPolicy = {
 };
 
 const DEFAULT_MAX_REDIRECTS = 2;
-const HTTP_STATUS_REDIRECT_MIN = 300;
-const HTTP_STATUS_REDIRECT_MAX_EXCLUSIVE = 400;
-const HTTP_STATUS_NOT_MODIFIED = 304;
-const IPV4_OCTET_MAX = 255;
-
-function isDecimalNumberString(value: string): boolean {
-  if (value.length === 0) return false;
-  for (const char of value) {
-    if (char < "0" || char > "9") return false;
-  }
-  return true;
-}
-
-function isIPv4Literal(hostname: string): boolean {
-  const parts = hostname.split(".");
-  if (parts.length !== 4) return false;
-
-  for (const part of parts) {
-    if (!isDecimalNumberString(part)) return false;
-    const value = Number(part);
-    if (!Number.isFinite(value) || value < 0 || value > IPV4_OCTET_MAX)
-      return false;
-  }
-
-  return true;
-}
+const HTTP_MOVED_PERMANENTLY = 301;
+const HTTP_FOUND = 302;
+const HTTP_SEE_OTHER = 303;
+const HTTP_TEMPORARY_REDIRECT = 307;
+const HTTP_PERMANENT_REDIRECT = 308;
+const REDIRECT_STATUSES = new Set([
+  HTTP_MOVED_PERMANENTLY,
+  HTTP_FOUND,
+  HTTP_SEE_OTHER,
+  HTTP_TEMPORARY_REDIRECT,
+  HTTP_PERMANENT_REDIRECT,
+]);
 
 function isIpLiteral(hostname: string): boolean {
-  if (isIPv4Literal(hostname)) return true;
+  if (ipv4ToInteger(hostname) !== null) return true;
   // IPv6 literal (URL.hostname does not include brackets)
   return hostname.includes(":");
 }
@@ -76,9 +64,10 @@ export async function safeFetchThirdPartyUrl(
   init: RequestInit,
   config: { policy: ThirdPartyUrlPolicy; maxRedirects?: number },
 ): Promise<Response> {
+  const requestedRedirects = config.maxRedirects ?? DEFAULT_MAX_REDIRECTS;
   const maxRedirects =
-    typeof config.maxRedirects === "number" && config.maxRedirects >= 0
-      ? config.maxRedirects
+    Number.isInteger(requestedRedirects) && requestedRedirects >= 0
+      ? requestedRedirects
       : DEFAULT_MAX_REDIRECTS;
 
   const initialCheck = isAllowedThirdPartyUrl(rawUrl, config.policy);
@@ -87,23 +76,16 @@ export async function safeFetchThirdPartyUrl(
   }
 
   let currentUrl = initialCheck.url;
-  let redirectsLeft = maxRedirects;
+  let response = await fetchManualRedirect(currentUrl, init);
 
-  while (true) {
-    const response = await fetch(currentUrl.toString(), {
-      ...init,
-      redirect: "manual",
-    });
-
-    const isRedirect =
-      response.status >= HTTP_STATUS_REDIRECT_MIN &&
-      response.status < HTTP_STATUS_REDIRECT_MAX_EXCLUSIVE &&
-      response.status !== HTTP_STATUS_NOT_MODIFIED;
-
-    if (!isRedirect || redirectsLeft <= 0) {
-      return response;
+  for (
+    let redirectsLeft = maxRedirects;
+    redirectsLeft > 0;
+    redirectsLeft -= 1
+  ) {
+    if (!REDIRECT_STATUSES.has(response.status)) {
+      break;
     }
-
     const location = response.headers.get("location");
     if (!location) {
       return response;
@@ -116,16 +98,21 @@ export async function safeFetchThirdPartyUrl(
     }
 
     currentUrl = check.url;
-    redirectsLeft -= 1;
+    response = await fetchManualRedirect(currentUrl, init);
   }
+
+  return response;
+}
+
+function fetchManualRedirect(url: URL, init: RequestInit): Promise<Response> {
+  return fetch(url.toString(), {
+    ...init,
+    redirect: "manual",
+  });
 }
 
 function tryParseUrl(rawUrl: string): URL | null {
-  try {
-    return new URL(rawUrl);
-  } catch {
-    return null;
-  }
+  return URL.canParse(rawUrl) ? new URL(rawUrl) : null;
 }
 
 function validateBaseUrl(url: URL): string | null {
@@ -142,18 +129,29 @@ function isAllowedHostname(
   hostname: string,
   policy: ThirdPartyUrlPolicy,
 ): boolean {
-  const allowHosts = policy.allowHosts?.map((h) => h.toLowerCase()) ?? [];
-  if (allowHosts.includes(hostname)) return true;
+  if (policy.allowHosts !== undefined) {
+    for (const allowedHost of policy.allowHosts) {
+      if (allowedHost.toLowerCase() === hostname) {
+        return true;
+      }
+    }
+  }
 
-  const suffixes = policy.allowHostSuffixes ?? [];
-  return suffixes.some((suffix) => hostnameMatchesSuffix(hostname, suffix));
+  if (policy.allowHostSuffixes !== undefined) {
+    for (const suffix of policy.allowHostSuffixes) {
+      if (hostnameMatchesSuffix(hostname, suffix)) {
+        return true;
+      }
+    }
+  }
+
+  return false;
 }
 
 function validateHostname(
   hostname: string,
   policy: ThirdPartyUrlPolicy,
 ): string | null {
-  if (!hostname) return "Missing hostname";
   if (hostname === "localhost") return "localhost is not allowed";
   if (isIpLiteral(hostname)) return "IP literals are not allowed";
   if (!isAllowedHostname(hostname, policy)) {

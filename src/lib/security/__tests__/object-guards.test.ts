@@ -272,6 +272,21 @@ describe("object-guards", () => {
       const objWithNull = { level1: null };
       expect(safeDeepGet(objWithNull, "level1.level2")).toBeUndefined();
     });
+
+    it("should stop when an intermediate value is primitive", () => {
+      const objWithPrimitive = { level1: { value: "done" } };
+      expect(
+        safeDeepGet(objWithPrimitive, "level1.value.next"),
+      ).toBeUndefined();
+    });
+
+    it("should ignore inherited nested properties", () => {
+      const inherited = { secret: "hidden" };
+      const objWithInherited = {
+        level1: Object.create(inherited) as Record<string, unknown>,
+      };
+      expect(safeDeepGet(objWithInherited, "level1.secret")).toBeUndefined();
+    });
   });
 
   describe("validateObjectStructure", () => {
@@ -308,6 +323,20 @@ describe("object-guards", () => {
 
       expect(proxy.name).toBe("test");
       expect(proxy.secret).toBeUndefined();
+      expect("secret" in proxy).toBe(false);
+    });
+
+    it("should allow symbol keys when explicitly whitelisted", () => {
+      const visible = Symbol("visible");
+      const hidden = Symbol("hidden");
+      const obj = { [visible]: "shown", [hidden]: "secret" };
+      const proxy = createSafeProxy(obj, { allowedKeys: [visible] });
+
+      expect(proxy[visible]).toBe("shown");
+      expect(proxy[hidden]).toBeUndefined();
+      expect(visible in proxy).toBe(true);
+      expect(hidden in proxy).toBe(false);
+      expect(Object.keys(proxy)).toEqual([]);
     });
 
     it("should prevent writes when readOnly is true", () => {
@@ -337,6 +366,33 @@ describe("object-guards", () => {
       expect(obj.count).toBe(10); // Not changed due to validation failure
     });
 
+    it("should reject writes to non-whitelisted keys before validation", () => {
+      const validator = vi.fn(() => true);
+      const obj = { allowed: "ok", blocked: "nope" };
+      const proxy = createSafeProxy(obj, {
+        allowedKeys: ["allowed"],
+        validator,
+      });
+
+      expect(() => {
+        proxy.blocked = "changed";
+      }).toThrow(TypeError);
+      expect(validator).not.toHaveBeenCalled();
+      expect(obj.blocked).toBe("nope");
+    });
+
+    it("should reject writes to missing properties even when validator allows them", () => {
+      const validator = vi.fn(() => true);
+      const obj = { name: "test" };
+      const proxy = createSafeProxy(obj, { validator });
+
+      expect(
+        Reflect.set(proxy as Record<string, unknown>, "missing", 123),
+      ).toBe(false);
+      expect(validator).toHaveBeenCalledWith("missing", 123);
+      expect(Object.prototype.hasOwnProperty.call(obj, "missing")).toBe(false);
+    });
+
     it("should support has operation", () => {
       const obj = { name: "test" };
       const proxy = createSafeProxy(obj);
@@ -346,10 +402,15 @@ describe("object-guards", () => {
     });
 
     it("should support ownKeys operation", () => {
-      const obj = { a: 1, b: 2, c: 3 };
+      const obj = Object.defineProperty({ a: 1, b: 2, c: 3 }, "hidden", {
+        configurable: true,
+        enumerable: false,
+        value: 4,
+      });
       const proxy = createSafeProxy(obj, { allowedKeys: ["a", "b"] });
 
       expect(Object.keys(proxy)).toEqual(["a", "b"]);
+      expect(Reflect.ownKeys(proxy)).toEqual(["a", "b"]);
     });
   });
 
@@ -361,6 +422,16 @@ describe("object-guards", () => {
         expect(SafeAccess.config(config, "timeout")).toBe(5000);
         expect(SafeAccess.config(config, "nonExistent")).toBeUndefined();
       });
+
+      it("should ignore inherited config values", () => {
+        const config = Object.create({ inherited: "secret" }) as Record<
+          string,
+          unknown
+        >;
+        config.timeout = 5000;
+
+        expect(SafeAccess.config(config, "inherited")).toBeUndefined();
+      });
     });
 
     describe("array", () => {
@@ -371,6 +442,15 @@ describe("object-guards", () => {
         expect(SafeAccess.array(arr, 2)).toBe("c");
         expect(SafeAccess.array(arr, -1)).toBeUndefined();
         expect(SafeAccess.array(arr, 10)).toBeUndefined();
+        expect(SafeAccess.array(arr, arr.length)).toBeUndefined();
+        expect(SafeAccess.array(arr, 1.5)).toBeUndefined();
+      });
+
+      it("should return undefined for sparse array holes", () => {
+        const arr = ["a", "b", "c"];
+        delete arr[1];
+
+        expect(SafeAccess.array(arr, 1)).toBeUndefined();
       });
     });
 
@@ -393,6 +473,22 @@ describe("object-guards", () => {
       it("should handle null in path", () => {
         const obj = { level1: null };
         expect(SafeAccess.nested(obj, "level1", "level2")).toBeUndefined();
+      });
+
+      it("should stop when an intermediate value is primitive", () => {
+        const obj = { level1: { value: "done" } };
+        expect(
+          SafeAccess.nested(obj, "level1", "value", "next"),
+        ).toBeUndefined();
+      });
+
+      it("should ignore inherited nested properties", () => {
+        const inherited = { secret: "hidden" };
+        const obj = {
+          level1: Object.create(inherited) as Record<string, unknown>,
+        };
+
+        expect(SafeAccess.nested(obj, "level1", "secret")).toBeUndefined();
       });
     });
   });

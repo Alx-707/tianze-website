@@ -27,9 +27,9 @@ export async function waitForCompletion(
 ): Promise<NextResponse> {
   const POLL_INTERVAL_MS = 50;
   const TIMEOUT_MS = 10_000;
-  const start = Date.now();
+  const maxAttempts = TIMEOUT_MS / POLL_INTERVAL_MS;
 
-  while (Date.now() - start < TIMEOUT_MS) {
+  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
     await new Promise<void>((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
     const entry = await store.get(key);
     if (!entry) {
@@ -40,9 +40,7 @@ export async function waitForCompletion(
       );
     }
     if (entry.status === "success") {
-      return NextResponse.json(entry.response, {
-        status: HTTP_OK,
-      });
+      return NextResponse.json(entry.response);
     }
     if (entry.status === "error") {
       return createApiErrorResponse(
@@ -65,22 +63,27 @@ export function normalizeHandlerResult(result: unknown): {
   body: unknown;
   statusCode: number;
 } {
-  if (typeof result !== "object" || result === null) {
+  let objectLike: object | null = null;
+  if (typeof result === "object") {
+    objectLike = result;
+  }
+
+  if (objectLike === null) {
     return { body: result, statusCode: HTTP_OK };
   }
 
-  if (Array.isArray(result)) {
-    return { body: result, statusCode: HTTP_OK };
+  if (Array.isArray(objectLike)) {
+    return { body: [...objectLike], statusCode: HTTP_OK };
   }
 
-  const record = result as Record<string, unknown>;
-  if (!Object.prototype.hasOwnProperty.call(record, "statusCode")) {
-    return { body: result, statusCode: HTTP_OK };
+  const record = objectLike as Record<string, unknown>;
+  if (!Object.hasOwn(record, "statusCode")) {
+    return { body: { ...record }, statusCode: HTTP_OK };
   }
 
   const { statusCode } = record;
   if (typeof statusCode !== "number") {
-    return { body: result, statusCode: HTTP_OK };
+    return { body: { ...record }, statusCode: HTTP_OK };
   }
 
   // Strip statusCode from the JSON payload; keep it on the stored entry.
@@ -109,9 +112,9 @@ export async function waitForCompletionResult<T>(
 ): Promise<IdempotentResult<T>> {
   const POLL_INTERVAL_MS = 50;
   const TIMEOUT_MS = 10_000;
-  const start = Date.now();
+  const maxAttempts = TIMEOUT_MS / POLL_INTERVAL_MS;
 
-  while (Date.now() - start < TIMEOUT_MS) {
+  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
     await new Promise<void>((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
     const entry = await store.get(key);
     if (!entry) {

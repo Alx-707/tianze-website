@@ -38,19 +38,16 @@ export async function retryAsync<T>(
   options: RetryOptions,
 ): Promise<T> {
   const { maxRetries, baseDelayMs = DEFAULT_BASE_DELAY_MS } = options;
-  let lastError: Error | undefined;
+  let lastError!: Error;
 
-  const totalAttempts = maxRetries + 1;
-
-  for (let attempt = 0; attempt < totalAttempts; attempt++) {
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
       return await fn();
     } catch (error) {
       lastError = error instanceof Error ? error : new Error(String(error));
 
-      const isLastAttempt = attempt === totalAttempts - 1;
-      if (isLastAttempt) {
-        break;
+      if (attempt === maxRetries) {
+        throw lastError;
       }
 
       // Exponential backoff: baseDelay * 2^attempt

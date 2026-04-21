@@ -130,11 +130,16 @@ class RedisIdempotencyStore implements IdempotencyStore {
     }
 
     const data = await response.json();
-    if (!data.result) {
+    if (data.result === null) {
       return null;
     }
 
-    return JSON.parse(data.result);
+    const entry = JSON.parse(data.result) as IdempotencyEntry | null;
+    if (entry === null || typeof entry !== "object") {
+      throw new Error("[Idempotency] Upstash get returned invalid JSON entry");
+    }
+
+    return entry;
   }
 
   async delete(idempotencyKey: string): Promise<void> {
@@ -162,14 +167,21 @@ class MemoryIdempotencyStore implements IdempotencyStore {
   private store = new Map<string, IdempotencyEntry>();
   private timers = new Map<string, ReturnType<typeof setTimeout>>();
 
+  private clearTimer(idempotencyKey: string): void {
+    const timer = this.timers.get(idempotencyKey);
+    clearTimeout(timer);
+    this.timers.delete(idempotencyKey);
+  }
+
+  private deleteEntry(idempotencyKey: string): void {
+    this.store.delete(idempotencyKey);
+    this.clearTimer(idempotencyKey);
+  }
+
   private resetTimer(idempotencyKey: string, ttlMs: number): void {
-    const existingTimer = this.timers.get(idempotencyKey);
-    if (existingTimer) {
-      clearTimeout(existingTimer);
-    }
+    this.clearTimer(idempotencyKey);
     const timer = setTimeout(() => {
-      this.store.delete(idempotencyKey);
-      this.timers.delete(idempotencyKey);
+      this.deleteEntry(idempotencyKey);
     }, ttlMs);
     this.timers.set(idempotencyKey, timer);
   }
@@ -183,6 +195,7 @@ class MemoryIdempotencyStore implements IdempotencyStore {
     if (existing && existing.expiresAt > Date.now()) {
       return Promise.resolve(false);
     }
+
     this.store.set(idempotencyKey, entry);
     this.resetTimer(idempotencyKey, ttlMs);
     return Promise.resolve(true);
@@ -200,25 +213,16 @@ class MemoryIdempotencyStore implements IdempotencyStore {
 
   get(idempotencyKey: string): Promise<IdempotencyEntry | null> {
     const entry = this.store.get(idempotencyKey);
-    if (!entry || entry.expiresAt <= Date.now()) {
-      this.store.delete(idempotencyKey);
-      const timer = this.timers.get(idempotencyKey);
-      if (timer) {
-        clearTimeout(timer);
-        this.timers.delete(idempotencyKey);
-      }
-      return Promise.resolve(null);
+    if (entry && entry.expiresAt > Date.now()) {
+      return Promise.resolve(entry);
     }
-    return Promise.resolve(entry);
+
+    this.deleteEntry(idempotencyKey);
+    return Promise.resolve(null);
   }
 
   delete(idempotencyKey: string): Promise<void> {
-    this.store.delete(idempotencyKey);
-    const timer = this.timers.get(idempotencyKey);
-    if (timer) {
-      clearTimeout(timer);
-      this.timers.delete(idempotencyKey);
-    }
+    this.deleteEntry(idempotencyKey);
     return Promise.resolve();
   }
 }

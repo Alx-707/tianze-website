@@ -32,6 +32,45 @@ export interface RateLimitStore {
   delete(key: string): Promise<void>;
 }
 
+type UpstashResultEnvelope = { result: unknown };
+
+export function hasUpstashResultProperty(
+  value: unknown,
+): value is UpstashResultEnvelope {
+  return typeof value === "object" && value !== null && "result" in value;
+}
+
+export function unwrapUpstashResult(value: unknown): unknown {
+  return hasUpstashResultProperty(value) ? value.result : value;
+}
+
+export function getUpstashPipelineResults(payload: unknown): unknown[] {
+  if (Array.isArray(payload)) {
+    return payload;
+  }
+
+  if (hasUpstashResultProperty(payload) && Array.isArray(payload.result)) {
+    return payload.result;
+  }
+
+  return [];
+}
+
+export function parseStrictNumber(value: unknown, label: string): number {
+  const parsed = unwrapUpstashResult(value);
+  if (!Number.isFinite(parsed as number)) {
+    throw new Error(
+      `[Rate Limit] Invalid Upstash response: expected numeric ${label}`,
+    );
+  }
+  return parsed as number;
+}
+
+export function parseLenientTTL(value: unknown): number {
+  const parsed = Number(unwrapUpstashResult(value));
+  return Number.isFinite(parsed) ? Math.max(0, parsed) : 0;
+}
+
 /**
  * Redis-backed rate limit store using Upstash REST API
  */
@@ -68,25 +107,12 @@ class RedisRateLimitStore implements RateLimitStore {
     }
 
     const data = await response.json();
-    const [countResult, _expireResult, ttlResult] = Array.isArray(data)
-      ? data
-      : Array.isArray(data.result)
-        ? data.result
-        : [];
-    const count =
-      typeof countResult?.result === "number"
-        ? countResult.result
-        : countResult;
-    const ttlMs =
-      typeof ttlResult?.result === "number" ? ttlResult.result : ttlResult;
+    const [countResult, _expireResult, ttlResult] =
+      getUpstashPipelineResults(data);
+    const count = parseStrictNumber(countResult, "count");
+    const ttlMs = parseStrictNumber(ttlResult, "TTL");
 
-    if (typeof count !== "number") {
-      throw new Error(
-        "[Rate Limit] Invalid Upstash response: expected numeric count",
-      );
-    }
-
-    if (typeof ttlMs !== "number" || ttlMs < 0) {
+    if (ttlMs < 0) {
       logger.error("[Rate Limit] Upstash transaction returned invalid TTL");
       throw new Error("Upstash rate limit operation returned invalid TTL");
     }
@@ -115,15 +141,8 @@ class RedisRateLimitStore implements RateLimitStore {
     }
 
     const data = await response.json();
-    const [countResult, ttlResult] = Array.isArray(data.result)
-      ? data.result
-      : [];
-    const rawCount =
-      typeof countResult === "object" &&
-      countResult !== null &&
-      "result" in countResult
-        ? countResult.result
-        : countResult;
+    const [countResult, ttlResult] = getUpstashPipelineResults(data.result);
+    const rawCount = unwrapUpstashResult(countResult);
     if (rawCount === null || rawCount === undefined) {
       return null;
     }
@@ -133,7 +152,7 @@ class RedisRateLimitStore implements RateLimitStore {
         "[Rate Limit] Invalid Upstash response: expected numeric count",
       );
     }
-    const ttlMs = Math.max(0, Number(ttlResult?.result ?? ttlResult) || 0);
+    const ttlMs = parseLenientTTL(ttlResult);
     const expiresAt = Date.now() + ttlMs;
     return { count, expiresAt };
   }

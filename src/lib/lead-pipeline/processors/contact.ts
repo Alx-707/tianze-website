@@ -64,8 +64,11 @@ export async function processContactLead(
           maxRetries,
         });
       } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
+
         logger.error("Confirmation email failed after retries (non-blocking)", {
-          error: error instanceof Error ? error.message : "Unknown error",
+          error: errorMessage,
           email: sanitizeEmail(lead.email),
           retries: maxRetries,
         });

@@ -18,11 +18,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { logger } from "@/lib/logger";
 import { API_ERROR_CODES } from "@/constants/api-error-codes";
 import { createApiErrorResponse } from "@/lib/api/api-response";
-import {
-  HTTP_BAD_REQUEST,
-  HTTP_OK,
-  HTTP_SERVICE_UNAVAILABLE,
-} from "@/constants";
+import { HTTP_BAD_REQUEST, HTTP_SERVICE_UNAVAILABLE } from "@/constants";
 import {
   type IdempotencyStore,
   createIdempotencyStore,
@@ -131,7 +127,7 @@ function handleExistingEntry(
   idempotencyKey: string,
   existing: NonNullable<Awaited<ReturnType<IdempotencyStore["get"]>>>,
   context: ExistingEntryContext,
-): NextResponse | Promise<NextResponse> | null {
+): NextResponse | Promise<NextResponse> {
   const { fingerprint, store } = context;
 
   if (existing.status !== "pending" && existing.fingerprint !== fingerprint) {
@@ -145,9 +141,7 @@ function handleExistingEntry(
   }
 
   if (existing.status === "success") {
-    return NextResponse.json(existing.response, {
-      status: HTTP_OK,
-    });
+    return NextResponse.json(existing.response);
   }
 
   if (existing.status === "error") {
@@ -211,14 +205,10 @@ async function handleWithIdempotencyKey<T>(
   // Check stored entry
   const existing = await store.get(idempotencyKey);
   if (existing !== null) {
-    // FIXED: Type safety issue — explicit null check for proper type narrowing
-    const existingResponse = handleExistingEntry(idempotencyKey, existing, {
+    return handleExistingEntry(idempotencyKey, existing, {
       fingerprint,
       store,
     });
-    if (existingResponse !== null) {
-      return existingResponse;
-    }
   }
 
   // Attempt to claim the key (atomic SETNX)
@@ -424,10 +414,7 @@ export async function withIdempotency<T>(
 ): Promise<NextResponse> {
   const { required = false } = options;
   const idempotencyKey = getIdempotencyKey(request);
-  const ttlMs =
-    typeof options.ttl === "number" && options.ttl > 0
-      ? options.ttl
-      : DEFAULT_TTL_MS;
+  const ttlMs = resolveIdempotentResultTtl(options.ttl);
 
   if (required && !idempotencyKey) {
     logger.warn("Missing required Idempotency-Key header");
