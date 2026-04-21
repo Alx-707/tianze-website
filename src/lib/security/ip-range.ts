@@ -1,16 +1,58 @@
 const BIGINT_ZERO = 0n;
 const BIGINT_ONE = 1n;
-const INVALID_IP_VERSION = 0;
+const BIGINT_FOUR = 4n;
 const IPV4_VERSION = 4;
+const IPV6_VERSION = 6;
 const IPV4_BITS_PER_OCTET = 8;
 const IPV4_OCTET_COUNT = 4;
 const IPV4_MAX_OCTET = 255;
-const IPV4_FULL_MASK = 2 ** (IPV4_OCTET_COUNT * IPV4_BITS_PER_OCTET) - 1;
+const IPV4_MAX_PREFIX = 32;
 const IPV4_SEGMENT_MASK = 0xffff;
 const IPV6_BITS_PER_SEGMENT = 16;
 const IPV6_SEGMENT_COUNT = 8;
 const IPV6_MAX_BITS = 128;
-const MALFORMED_IPV6_TRIPLE_COLON = /:::/u;
+const CHAR_CODE_0 = 48;
+const CHAR_CODE_9 = 57;
+const CHAR_CODE_A = 97;
+const CHAR_CODE_F = 102;
+const HEX_ALPHA_OFFSET = 87;
+
+function parseIPv6Segment(segment: string): bigint | null {
+  if (segment.length < 1 || segment.length > 4) {
+    return null;
+  }
+
+  let value = BIGINT_ZERO;
+
+  for (const char of segment) {
+    const digit = parseHexDigit(char);
+    if (digit === null) {
+      return null;
+    }
+
+    value = (value << BIGINT_FOUR) + BigInt(digit);
+  }
+
+  return value;
+}
+
+function parseHexDigit(char: string): number | null {
+  const code = char.toLowerCase().charCodeAt(0);
+
+  if (code >= CHAR_CODE_0 && code <= CHAR_CODE_9) {
+    return code - CHAR_CODE_0;
+  }
+
+  if (code >= CHAR_CODE_A && code <= CHAR_CODE_F) {
+    return code - HEX_ALPHA_OFFSET;
+  }
+
+  return null;
+}
+
+function splitIPv6Side(side: string): string[] {
+  return side === "" ? [] : side.split(":");
+}
 
 export function ipv4ToInteger(ip: string): number | null {
   const segments = ip.split(".");
@@ -21,7 +63,7 @@ export function ipv4ToInteger(ip: string): number | null {
     if (!/^\d+$/u.test(segment)) return null;
 
     const octet = Number.parseInt(segment, 10);
-    if (!Number.isInteger(octet) || octet < 0 || octet > IPV4_MAX_OCTET) {
+    if (octet > IPV4_MAX_OCTET) {
       return null;
     }
 
@@ -37,8 +79,6 @@ export function ipv4ToBigInt(ip: string): bigint | null {
 }
 
 export function normalizeIPv6Segments(segments: string[]): string[] | null {
-  if (segments.length === 0) return [];
-
   const lastSegment = segments.at(-1);
   if (lastSegment?.includes(".")) {
     const ipv4Value = ipv4ToInteger(lastSegment);
@@ -55,31 +95,18 @@ export function normalizeIPv6Segments(segments: string[]): string[] | null {
   return segments;
 }
 
-function hasValidIPv6Structure(ip: string): boolean {
-  if (MALFORMED_IPV6_TRIPLE_COLON.test(ip)) return false;
-  if (ip.startsWith(":") && !ip.startsWith("::")) return false;
-  if (ip.endsWith(":") && !ip.endsWith("::")) return false;
-  return true;
-}
-
 export function ipv6ToBigInt(ip: string): bigint | null {
-  if (!ip.includes(":")) return null;
-  if (!hasValidIPv6Structure(ip)) return null;
+  const compressionIndex = ip.indexOf("::");
+  const hasCompression = compressionIndex !== -1;
 
-  const compressedParts = ip.split("::");
-  if (compressedParts.length > 2) return null;
+  const leftRaw = hasCompression ? ip.slice(0, compressionIndex) : ip;
+  const rightRaw = hasCompression ? ip.slice(compressionIndex + 2) : "";
 
-  const [leftRaw = "", rightRaw = ""] = compressedParts;
-  const leftSegments = normalizeIPv6Segments(
-    leftRaw ? leftRaw.split(":").filter(Boolean) : [],
-  );
-  const rightSegments = normalizeIPv6Segments(
-    rightRaw ? rightRaw.split(":").filter(Boolean) : [],
-  );
+  const leftSegments = normalizeIPv6Segments(splitIPv6Side(leftRaw));
+  const rightSegments = normalizeIPv6Segments(splitIPv6Side(rightRaw));
 
-  if (!leftSegments || !rightSegments) return null;
+  if (leftSegments === null || rightSegments === null) return null;
 
-  const hasCompression = compressedParts.length === 2;
   const totalProvided = leftSegments.length + rightSegments.length;
   const missingSegments = IPV6_SEGMENT_COUNT - totalProvided;
   const validCount = hasCompression
@@ -95,56 +122,47 @@ export function ipv6ToBigInt(ip: string): bigint | null {
       ]
     : leftSegments;
 
-  if (segments.length !== IPV6_SEGMENT_COUNT) return null;
-
   return segments.reduce<bigint | null>((accumulator, segment) => {
     if (accumulator === null) return null;
-    const value = Number.parseInt(segment, 16);
-    if (!Number.isFinite(value) || value < 0 || value > IPV4_SEGMENT_MASK) {
+
+    const value = parseIPv6Segment(segment);
+    if (value === null) {
       return null;
     }
-    return (accumulator << BigInt(IPV6_BITS_PER_SEGMENT)) + BigInt(value);
+
+    return (accumulator << BigInt(IPV6_BITS_PER_SEGMENT)) + value;
   }, BIGINT_ZERO);
 }
 
-function getIPVersion(ip: string): number {
-  if (ipv4ToInteger(ip) !== null) return IPV4_VERSION;
-  if (ipv6ToBigInt(ip) !== null) return 6;
-  return INVALID_IP_VERSION;
-}
+type ParsedIP = {
+  version: typeof IPV4_VERSION | typeof IPV6_VERSION;
+  value: bigint;
+};
 
-export function ipToBigInt(ip: string): bigint | null {
-  const version = getIPVersion(ip);
-  if (version === IPV4_VERSION) return ipv4ToBigInt(ip);
-  if (version === 6) return ipv6ToBigInt(ip);
+function parseIP(ip: string): ParsedIP | null {
+  const ipv4Value = ipv4ToBigInt(ip);
+  if (ipv4Value !== null) {
+    return { version: IPV4_VERSION, value: ipv4Value };
+  }
+
+  const ipv6Value = ipv6ToBigInt(ip);
+  if (ipv6Value !== null) {
+    return { version: IPV6_VERSION, value: ipv6Value };
+  }
+
   return null;
 }
 
-function isValidCIDRContext(
-  ipVersion: number,
-  networkVersion: number,
-  prefixLength: number,
-): boolean {
-  if (
-    ipVersion === INVALID_IP_VERSION ||
-    networkVersion === INVALID_IP_VERSION ||
-    ipVersion !== networkVersion ||
-    !Number.isFinite(prefixLength)
-  ) {
-    return false;
-  }
-
-  const maxBits = ipVersion === IPV4_VERSION ? 32 : IPV6_MAX_BITS;
-  return prefixLength >= 0 && prefixLength <= maxBits;
+export function ipToBigInt(ip: string): bigint | null {
+  const parsed = parseIP(ip);
+  return parsed === null ? null : parsed.value;
 }
 
 export function createIPv4Mask(prefixLength: number): bigint {
-  const hostBits = 32 - prefixLength;
-  if (hostBits === IPV4_OCTET_COUNT * IPV4_BITS_PER_OCTET) {
-    return BIGINT_ZERO;
-  }
-
-  return BigInt((IPV4_FULL_MASK << hostBits) >>> 0);
+  const hostBits = IPV4_MAX_PREFIX - prefixLength;
+  const fullMask =
+    (BIGINT_ONE << BigInt(IPV4_OCTET_COUNT * IPV4_BITS_PER_OCTET)) - BIGINT_ONE;
+  return (fullMask << BigInt(hostBits)) & fullMask;
 }
 
 export function createIPv6Mask(prefixLength: number): bigint | null {
@@ -156,27 +174,57 @@ export function createIPv6Mask(prefixLength: number): bigint | null {
   return (fullMask << BigInt(IPV6_MAX_BITS - prefixLength)) & fullMask;
 }
 
+type ParsedCidr = {
+  network: string;
+  prefixLength: number;
+};
+
+function parseCidr(cidr: string): ParsedCidr | null {
+  const cidrParts = cidr.split("/");
+  if (cidrParts.length !== 2) return null;
+
+  const network = cidrParts[0]!;
+  const prefixLengthValue = cidrParts[1]!;
+  if (!/^\d+$/u.test(prefixLengthValue)) return null;
+
+  return {
+    network,
+    prefixLength: Number.parseInt(prefixLengthValue, 10),
+  };
+}
+
+function isValidPrefixLength(
+  version: ParsedIP["version"],
+  prefixLength: number,
+): boolean {
+  return (
+    prefixLength <= (version === IPV4_VERSION ? IPV4_MAX_PREFIX : IPV6_MAX_BITS)
+  );
+}
+
 export function isIPInCIDRRange(ip: string, cidr: string): boolean {
-  const [network, prefixLengthValue] = cidr.split("/");
-  if (!network || !prefixLengthValue) return false;
+  const parsedCidr = parseCidr(cidr);
+  if (!parsedCidr) return false;
 
-  const ipVersion = getIPVersion(ip);
-  const networkVersion = getIPVersion(network);
-  const prefixLength = Number.parseInt(prefixLengthValue, 10);
+  const parsedIP = parseIP(ip);
+  const parsedNetwork = parseIP(parsedCidr.network);
 
-  if (!isValidCIDRContext(ipVersion, networkVersion, prefixLength)) {
+  if (!parsedIP || !parsedNetwork) {
     return false;
   }
 
-  const ipValue = ipToBigInt(ip);
-  const networkValue = ipToBigInt(network);
-  if (ipValue === null || networkValue === null) {
+  if (parsedIP.version !== parsedNetwork.version) {
     return false;
   }
 
-  if (ipVersion === IPV4_VERSION) {
+  const { prefixLength } = parsedCidr;
+  if (!isValidPrefixLength(parsedIP.version, prefixLength)) {
+    return false;
+  }
+
+  if (parsedIP.version === IPV4_VERSION) {
     const mask = createIPv4Mask(prefixLength);
-    return (ipValue & mask) === (networkValue & mask);
+    return (parsedIP.value & mask) === (parsedNetwork.value & mask);
   }
 
   const mask = createIPv6Mask(prefixLength);
@@ -184,7 +232,7 @@ export function isIPInCIDRRange(ip: string, cidr: string): boolean {
     return true;
   }
 
-  return (ipValue & mask) === (networkValue & mask);
+  return (parsedIP.value & mask) === (parsedNetwork.value & mask);
 }
 
 export function isTrustedCdnSource(

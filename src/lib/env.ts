@@ -34,6 +34,7 @@ export const env = createEnv({
     // Bot Protection (Cloudflare Turnstile)
     TURNSTILE_SECRET_KEY: z.string().min(1).optional(),
     TURNSTILE_ALLOWED_HOSTS: z.string().optional(),
+    TURNSTILE_ALLOWED_ACTIONS: z.string().optional(),
     TURNSTILE_EXPECTED_ACTION: z.string().optional(),
     TURNSTILE_ALLOWED_ACTIONS: z.string().optional(),
     TURNSTILE_BYPASS: z
@@ -284,6 +285,7 @@ export const env = createEnv({
     AIRTABLE_TABLE_NAME: process.env.AIRTABLE_TABLE_NAME,
     TURNSTILE_SECRET_KEY: process.env.TURNSTILE_SECRET_KEY,
     TURNSTILE_ALLOWED_HOSTS: process.env.TURNSTILE_ALLOWED_HOSTS,
+    TURNSTILE_ALLOWED_ACTIONS: process.env.TURNSTILE_ALLOWED_ACTIONS,
     TURNSTILE_EXPECTED_ACTION: process.env.TURNSTILE_EXPECTED_ACTION,
     TURNSTILE_ALLOWED_ACTIONS: process.env.TURNSTILE_ALLOWED_ACTIONS,
     TURNSTILE_BYPASS: process.env.TURNSTILE_BYPASS,

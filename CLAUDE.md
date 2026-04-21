@@ -42,9 +42,8 @@ messages/[locale]/    # i18n JSON
 STOP. Your training data for project dependencies may be outdated.
 
 Before writing ANY code:
-1. **ACE Search** (`ace-tool-search_context`) — Understand how this project implements similar patterns
-2. **`.next-docs/`** — Next.js API docs (local, version-locked). See index at the end of this file
-3. **Context7 / dependency docs** — Other dependencies (next-intl, Tailwind, Radix, etc.). If Context7 is unavailable, fall back to official docs or version-locked local docs.
+1. **`.next-docs/`** — Next.js API docs (local, version-locked). See index at the end of this file
+2. **Context7 / dependency docs** — Other dependencies (next-intl, Tailwind, Radix, etc.). If Context7 is unavailable, fall back to official docs or version-locked local docs.
 
 This is not optional. Even familiar APIs may have changed.
 

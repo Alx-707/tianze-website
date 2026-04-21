@@ -48,23 +48,14 @@ describe("pipeline-observability", () => {
 
       emitServiceMetrics(emailResult, crmResult, false);
 
-      // Should NOT record Resend metrics
-      expect(leadPipelineMetrics.recordSuccess).not.toHaveBeenCalledWith(
-        METRIC_SERVICES.RESEND,
-        expect.anything(),
-      );
-      expect(leadPipelineMetrics.recordFailure).not.toHaveBeenCalledWith(
-        METRIC_SERVICES.RESEND,
-        expect.anything(),
-        expect.anything(),
-      );
-
-      // Should still record Airtable metrics
+      // Should only record Airtable metrics.
+      expect(leadPipelineMetrics.recordSuccess).toHaveBeenCalledTimes(1);
       expect(leadPipelineMetrics.recordSuccess).toHaveBeenCalledWith(
         METRIC_SERVICES.AIRTABLE,
         200,
         undefined,
       );
+      expect(leadPipelineMetrics.recordFailure).not.toHaveBeenCalled();
     });
 
     it("should emit Resend success metrics when hasEmailOperation is true", async () => {
@@ -92,6 +83,30 @@ describe("pipeline-observability", () => {
         METRIC_SERVICES.RESEND,
         expect.anything(),
         expect.anything(),
+      );
+    });
+
+    it("should forward requestId to both services when provided", async () => {
+      const { emitServiceMetrics } = await import("../pipeline-observability");
+      const { leadPipelineMetrics, METRIC_SERVICES } =
+        await import("@/lib/lead-pipeline/metrics");
+
+      emitServiceMetrics(
+        { success: true, latencyMs: 120 },
+        { success: true, latencyMs: 180 },
+        true,
+        "req-123",
+      );
+
+      expect(leadPipelineMetrics.recordSuccess).toHaveBeenCalledWith(
+        METRIC_SERVICES.RESEND,
+        120,
+        "req-123",
+      );
+      expect(leadPipelineMetrics.recordSuccess).toHaveBeenCalledWith(
+        METRIC_SERVICES.AIRTABLE,
+        180,
+        "req-123",
       );
     });
 
@@ -295,6 +310,60 @@ describe("pipeline-observability", () => {
       expect(callArg.resend).not.toHaveProperty("errorType");
       expect(callArg.airtable).not.toHaveProperty("errorType");
       expect(callArg.overallSuccess).toBe(true);
+    });
+
+    it("should omit requestId when one was not provided", async () => {
+      const { logPipelineSummary } = await import("../pipeline-observability");
+      const { leadPipelineMetrics } =
+        await import("@/lib/lead-pipeline/metrics");
+
+      logPipelineSummary({
+        referenceId: "CON-101",
+        leadType: "contact",
+        emailResult: {
+          success: true,
+          latencyMs: 90,
+        },
+        crmResult: {
+          success: true,
+          latencyMs: 110,
+        },
+        totalLatencyMs: 200,
+        overallSuccess: true,
+      });
+
+      const callArg = vi.mocked(leadPipelineMetrics.logPipelineSummary).mock
+        .calls[0]![0];
+      expect(callArg).not.toHaveProperty("requestId");
+    });
+
+    it("should include requestId when provided", async () => {
+      const { logPipelineSummary } = await import("../pipeline-observability");
+      const { leadPipelineMetrics } =
+        await import("@/lib/lead-pipeline/metrics");
+
+      logPipelineSummary({
+        referenceId: "CON-999",
+        leadType: "contact",
+        requestId: "req-999",
+        emailResult: {
+          success: true,
+          latencyMs: 80,
+        },
+        crmResult: {
+          success: true,
+          latencyMs: 90,
+        },
+        totalLatencyMs: 170,
+        overallSuccess: true,
+      });
+
+      expect(leadPipelineMetrics.logPipelineSummary).toHaveBeenCalledWith(
+        expect.objectContaining({
+          leadId: "CON-999",
+          requestId: "req-999",
+        }),
+      );
     });
   });
 });

@@ -53,11 +53,13 @@ export function email({ field, config }: ContactFormFieldValidatorContext) {
 
   const whitelist = config.validation.emailDomainWhitelist;
   if (whitelist.length > 0) {
-    schema = schema.refine((value) => {
-      const domain = value.split("@").pop()?.toLowerCase();
-      if (!domain) return false;
-      return whitelist.some((allowed) => allowed.toLowerCase() === domain);
-    }, "Email domain is not allowed");
+    const allowedDomains = new Set(
+      whitelist.map((allowed) => allowed.toLowerCase()),
+    );
+    schema = schema.refine(
+      (value) => allowedDomains.has(value.slice(value.indexOf("@") + 1)),
+      "Email domain is not allowed",
+    );
   }
 
   return applyOptionality(schema, field);

@@ -96,12 +96,7 @@ export function claimIdempotentResultKey(
       },
       ttlMs,
     )
-    .then((claimed) => {
-      if (claimed) {
-        inFlightFingerprints.set(idempotencyKey, fingerprint);
-      }
-      return claimed;
-    });
+    .then((claimed) => claimed);
 }
 
 export function completeIdempotentResultWork<T>(

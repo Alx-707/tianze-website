@@ -86,6 +86,10 @@ let rateLimitStore: RateLimitStore | null = null;
 /** Per-key promise queue for single-process atomicity (prevents TOCTOU races) */
 const rateLimitQueue = new Map<string, Promise<unknown>>();
 
+export function getPendingRateLimitQueueSize(): number {
+  return rateLimitQueue.size;
+}
+
 function getRateLimitStore(): RateLimitStore {
   if (!rateLimitStore) {
     rateLimitStore = createRateLimitStore();
@@ -101,29 +105,7 @@ function getRateLimitConfig(preset: RateLimitPreset): {
   windowMs: number;
   failureMode: "open" | "closed";
 } {
-  switch (preset) {
-    case "contact":
-      return RATE_LIMIT_PRESETS.contact;
-    case "contactAdminStats":
-      return RATE_LIMIT_PRESETS.contactAdminStats;
-    case "inquiry":
-      return RATE_LIMIT_PRESETS.inquiry;
-    case "subscribe":
-      return RATE_LIMIT_PRESETS.subscribe;
-    case "csp":
-      return RATE_LIMIT_PRESETS.csp;
-    case "turnstile":
-      return RATE_LIMIT_PRESETS.turnstile;
-    case "cacheInvalidate":
-      return RATE_LIMIT_PRESETS.cacheInvalidate;
-    case "cacheInvalidatePreAuth":
-      return RATE_LIMIT_PRESETS.cacheInvalidatePreAuth;
-    default: {
-      // Exhaustive check - TypeScript will error if a case is missing
-      const exhaustiveCheck: never = preset;
-      return exhaustiveCheck;
-    }
-  }
+  return RATE_LIMIT_PRESETS[preset];
 }
 
 async function executeRateLimitCheck(
@@ -273,12 +255,9 @@ export function createRateLimitHeaders(result: RateLimitResult): Headers {
 /**
  * Cleanup expired entries (for memory store only)
  */
-export function cleanupRateLimitStore(): void {
+export function cleanupRateLimitStore(): boolean {
   const store = getRateLimitStore();
-  if (store instanceof MemoryRateLimitStore) {
-    // MemoryRateLimitStore does not have a cleanup() method.
-    // Redis-based stores handle TTL automatically; no manual cleanup needed.
-  }
+  return store instanceof MemoryRateLimitStore;
 }
 
 /**

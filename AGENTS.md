@@ -583,3 +583,22 @@
   - 只要新增或改动 `scripts/**` 下的审查脚本，先问自己：如果本机没有这个 CLI，会是假红还是可降级；
   - 如果脚本只是“零发现”，不要把它抛成异常；
   - 如果 CI 报 `rg error`、`command not found` 或类似工具层异常，先按“guardrail 可移植性问题”归类，不要先怀疑业务代码回归。
+
+### 43. attachment / mutation / 审计结论里的数字，先核当前主树与当前 artifact，再决定要不要继续追
+- 截至 2026-04-19，本仓库已经再次踩到这类漂移：
+  - `.context/attachments/*.md` 里的 handoff 结论，可能仍在引用旧 branch / 旧快照；
+  - mutation / review 文档里提到的 survivor 数、文件路径、脚本名，可能已经和当前主树不一致；
+  - 典型信号包括：报告里点名的文件当前主树已经不存在、路径已改名、或 `.context/mutation-targeted/*.json` 与当前源码树对不上。
+- 这类问题的危险在于：
+  - 很容易把“旧结论里的剩余问题数”误当成当前真相；
+  - 很容易继续修已经退场的路径，白花时间；
+  - 很容易把附件里的口头结论，当成 fresh proof。
+- 默认动作：
+  - 遇到 `.context/attachments/` 交接、mutation survivor 清理、审计续跑时，先核：
+    - 当前 branch / `git status`
+    - 当前主树文件是否还存在
+    - 当前 `.context/mutation-targeted/*.json` / report 时间戳是否真是最新
+  - 如果报告里提到的路径在当前主树已不存在，先把它归类为“旧快照线索”，不要直接按旧文件名开修；
+  - 如果 survivor 数字来自附件而不是当前可读 artifact，先说明它是“交接数字”，不是当前 live truth；
+  - 真要继续清 tail survivors，先把“当前仍有效的 survivor 列表”重新摊平，再决定改代码还是补测试；
+  - 如果这类漂移再次出现，请提醒开发者同步更新 AGENTS.md / backlog / handoff 文档，避免后续 agent 重复追旧真相。

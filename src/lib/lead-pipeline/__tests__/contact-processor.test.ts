@@ -16,13 +16,14 @@ import type { ServiceResult } from "@/lib/lead-pipeline/service-result";
 // Ensure real Zod is used
 vi.unmock("zod");
 
-// Mock next/server after() to immediately invoke callback in tests
+const pendingAfterCallbacks = vi.hoisted(
+  () => [] as Array<() => void | Promise<void>>,
+);
+
+// Mock next/server after() to collect callbacks so tests can explicitly drain them
 vi.mock("next/server", () => ({
   after: vi.fn((callback: () => void | Promise<void>) => {
-    const result = callback();
-    if (result instanceof Promise) {
-      result.catch(() => {});
-    }
+    pendingAfterCallbacks.push(callback);
   }),
 }));
 
@@ -33,6 +34,8 @@ const mockCreateLead = vi.hoisted(() => vi.fn());
 const mockLoggerWarn = vi.hoisted(() => vi.fn());
 const mockLoggerError = vi.hoisted(() => vi.fn());
 const mockLoggerInfo = vi.hoisted(() => vi.fn());
+const mockRetryAsync = vi.hoisted(() => vi.fn());
+const mockSettleService = vi.hoisted(() => vi.fn());
 
 // Mock external services with hoisted functions
 vi.mock("@/lib/resend", () => ({
@@ -71,37 +74,21 @@ vi.mock("@/config/contact-form-config", () => ({
   },
 }));
 
-// Mock settle-service to pass through for simplicity
-vi.mock("@/lib/lead-pipeline/settle-service", () => ({
-  settleService: vi.fn(
-    async (
-      promise: Promise<unknown>,
-      options: {
-        operationName: string;
-        mapId?: (result: unknown) => string | undefined;
-      },
-    ): Promise<ServiceResult> => {
-      try {
-        const result = await promise;
-        const id = options.mapId ? options.mapId(result) : undefined;
-        return { success: true, id, latencyMs: 100 };
-      } catch (error) {
-        return {
-          success: false,
-          error: error instanceof Error ? error : new Error(String(error)),
-          latencyMs: 100,
-        };
-      }
-    },
-  ),
+vi.mock("@/lib/lead-pipeline/retry-async", () => ({
+  retryAsync: mockRetryAsync,
 }));
 
-/**
- * Helper: flush all pending microtasks and timers to allow
- * fire-and-forget promises and retry delays to complete.
- */
-async function flushPromises(): Promise<void> {
-  await vi.runAllTimersAsync();
+vi.mock("@/lib/lead-pipeline/settle-service", () => ({
+  settleService: mockSettleService,
+}));
+
+async function flushScheduledConfirmationWork(): Promise<void> {
+  const callbacks = pendingAfterCallbacks.splice(0);
+  for (const callback of callbacks) {
+    await Promise.resolve()
+      .then(callback)
+      .catch(() => undefined);
+  }
 }
 
 const VALID_CONTACT_LEAD: ContactLeadInput = {
@@ -120,15 +107,47 @@ const REFERENCE_ID = "CON-test-ref-001";
 describe("processContactLead — confirmation email retry", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.useFakeTimers();
+    pendingAfterCallbacks.length = 0;
 
     // Default: main pipeline services succeed
     mockSendContactFormEmail.mockResolvedValue("email-id-123");
     mockCreateLead.mockResolvedValue({ id: "record-123" });
-  });
+    mockRetryAsync.mockImplementation(async (fn, { maxRetries }) => {
+      let lastError: Error | undefined;
 
-  afterEach(() => {
-    vi.useRealTimers();
+      for (let attempt = 0; attempt <= maxRetries; attempt += 1) {
+        try {
+          return await fn();
+        } catch (error) {
+          lastError = error instanceof Error ? error : new Error(String(error));
+        }
+      }
+
+      throw lastError ?? new Error("retryAsync exhausted without an error");
+    });
+    mockSettleService.mockImplementation(
+      async (
+        _promise: Promise<unknown>,
+        options: {
+          operationName: string;
+          mapId?: (result: unknown) => string | undefined;
+        },
+      ): Promise<ServiceResult> => {
+        if (options.operationName === "Email send") {
+          return {
+            success: true,
+            id: options.mapId?.("email-id-123"),
+            latencyMs: 100,
+          };
+        }
+
+        return {
+          success: true,
+          id: options.mapId?.({ id: "record-123" }),
+          latencyMs: 100,
+        };
+      },
+    );
   });
 
   describe("Scenario 1: Confirmation email succeeds on first attempt", () => {
@@ -138,7 +157,7 @@ describe("processContactLead — confirmation email retry", () => {
       const { processContactLead } =
         await import("@/lib/lead-pipeline/processors/contact");
       await processContactLead(VALID_CONTACT_LEAD, REFERENCE_ID);
-      await flushPromises();
+      await flushScheduledConfirmationWork();
 
       expect(mockSendConfirmationEmail).toHaveBeenCalledTimes(1);
     });
@@ -153,7 +172,7 @@ describe("processContactLead — confirmation email retry", () => {
       const { processContactLead } =
         await import("@/lib/lead-pipeline/processors/contact");
       await processContactLead(VALID_CONTACT_LEAD, REFERENCE_ID);
-      await flushPromises();
+      await flushScheduledConfirmationWork();
 
       // Should have been called twice: initial attempt + 1 retry
       expect(mockSendConfirmationEmail).toHaveBeenCalledTimes(2);
@@ -167,7 +186,7 @@ describe("processContactLead — confirmation email retry", () => {
       const { processContactLead } =
         await import("@/lib/lead-pipeline/processors/contact");
       await processContactLead(VALID_CONTACT_LEAD, REFERENCE_ID);
-      await flushPromises();
+      await flushScheduledConfirmationWork();
 
       // Should NOT log error-level when retry eventually succeeds
       expect(mockLoggerError).not.toHaveBeenCalledWith(
@@ -185,7 +204,7 @@ describe("processContactLead — confirmation email retry", () => {
       const { processContactLead } =
         await import("@/lib/lead-pipeline/processors/contact");
       await processContactLead(VALID_CONTACT_LEAD, REFERENCE_ID);
-      await flushPromises();
+      await flushScheduledConfirmationWork();
 
       // After all retries exhausted, should log at error level (not just warn)
       expect(mockLoggerError).toHaveBeenCalledWith(
@@ -204,7 +223,7 @@ describe("processContactLead — confirmation email retry", () => {
       const { processContactLead } =
         await import("@/lib/lead-pipeline/processors/contact");
       await processContactLead(VALID_CONTACT_LEAD, REFERENCE_ID);
-      await flushPromises();
+      await flushScheduledConfirmationWork();
 
       // Should attempt at least 3 times (1 initial + 2 retries)
       expect(
@@ -222,7 +241,7 @@ describe("processContactLead — confirmation email retry", () => {
       const { processContactLead } =
         await import("@/lib/lead-pipeline/processors/contact");
       const result = await processContactLead(VALID_CONTACT_LEAD, REFERENCE_ID);
-      await flushPromises();
+      await flushScheduledConfirmationWork();
 
       // Main pipeline email (to admin) should succeed
       expect(result.emailResult.success).toBe(true);
@@ -245,6 +264,106 @@ describe("processContactLead — confirmation email retry", () => {
         expect.objectContaining({
           emailResult: expect.objectContaining({ success: true }),
           crmResult: expect.objectContaining({ success: true }),
+        }),
+      );
+      await flushScheduledConfirmationWork();
+    });
+  });
+
+  describe("main pipeline contracts", () => {
+    it("builds email and CRM payloads with fallback company and generated submittedAt", async () => {
+      mockSendConfirmationEmail.mockResolvedValue("confirmation-id-001");
+
+      const { processContactLead } =
+        await import("@/lib/lead-pipeline/processors/contact");
+
+      await processContactLead(
+        {
+          ...VALID_CONTACT_LEAD,
+          company: undefined,
+          submittedAt: undefined,
+        },
+        REFERENCE_ID,
+      );
+      await flushScheduledConfirmationWork();
+
+      expect(mockSendContactFormEmail).toHaveBeenCalledWith(
+        expect.objectContaining({
+          firstName: "John",
+          lastName: "Doe",
+          email: "john@example.com",
+          company: "",
+          subject: CONTACT_SUBJECTS.PRODUCT_INQUIRY,
+          message: VALID_CONTACT_LEAD.message,
+          marketingConsent: true,
+          submittedAt: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/),
+        }),
+      );
+
+      expect(mockCreateLead).toHaveBeenCalledWith(
+        LEAD_TYPES.CONTACT,
+        expect.objectContaining({
+          firstName: "John",
+          lastName: "Doe",
+          email: "john@example.com",
+          company: undefined,
+          subject: CONTACT_SUBJECTS.PRODUCT_INQUIRY,
+          message: VALID_CONTACT_LEAD.message,
+          marketingConsent: true,
+          referenceId: REFERENCE_ID,
+        }),
+      );
+    });
+
+    it("passes settleService metadata that preserves service ids", async () => {
+      mockSendConfirmationEmail.mockResolvedValue("confirmation-id-001");
+
+      const { processContactLead } =
+        await import("@/lib/lead-pipeline/processors/contact");
+      const { settleService } =
+        await import("@/lib/lead-pipeline/settle-service");
+
+      await processContactLead(VALID_CONTACT_LEAD, REFERENCE_ID);
+      await flushScheduledConfirmationWork();
+
+      const settleCalls = vi.mocked(settleService).mock.calls;
+      expect(settleCalls).toHaveLength(2);
+
+      const [, emailOptions] = settleCalls[0]!;
+      const [, crmOptions] = settleCalls[1]!;
+
+      expect(emailOptions).toEqual(
+        expect.objectContaining({
+          operationName: "Email send",
+        }),
+      );
+      expect(emailOptions?.mapId?.("email-id-123")).toBe("email-id-123");
+
+      expect(crmOptions).toEqual(
+        expect.objectContaining({
+          operationName: "CRM record",
+        }),
+      );
+      expect(crmOptions?.mapId?.({ id: "record-123" })).toBe("record-123");
+      expect(
+        crmOptions?.mapId?.(undefined as unknown as { id?: string }),
+      ).toBeUndefined();
+      expect(crmOptions?.mapId?.({})).toBeUndefined();
+    });
+
+    it("logs the normalized rejection reason when confirmation retries reject with a non-Error value", async () => {
+      mockSendConfirmationEmail.mockRejectedValue("non-error rejection");
+
+      const { processContactLead } =
+        await import("@/lib/lead-pipeline/processors/contact");
+      await processContactLead(VALID_CONTACT_LEAD, REFERENCE_ID);
+      await flushScheduledConfirmationWork();
+
+      expect(mockLoggerError).toHaveBeenCalledWith(
+        expect.stringContaining("Confirmation email failed after retries"),
+        expect.objectContaining({
+          error: "non-error rejection",
+          retries: 2,
         }),
       );
     });

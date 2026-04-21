@@ -1,4 +1,4 @@
-import { env, getRuntimeEnvString } from "@/lib/env";
+import { env } from "@/lib/env";
 import { SITE_CONFIG } from "@/config/paths/site-config";
 import { logger } from "@/lib/logger";
 
@@ -6,7 +6,7 @@ import { logger } from "@/lib/logger";
  * Parse the configured Turnstile allowed hostnames.
  */
 function parseConfiguredHosts(): string[] {
-  const hosts = env.TURNSTILE_ALLOWED_HOSTS as string | undefined;
+  const hosts = env.TURNSTILE_ALLOWED_HOSTS;
   if (!hosts) return [];
 
   return hosts
@@ -20,9 +20,9 @@ function parseConfiguredHosts(): string[] {
  */
 function deriveFallbackHosts(): string[] {
   const hosts = new Set<string>();
-  const { baseUrl } = SITE_CONFIG;
+  const baseUrl = SITE_CONFIG.baseUrl?.trim() ?? "";
 
-  if (baseUrl) {
+  if (baseUrl !== "") {
     try {
       hosts.add(new URL(baseUrl).hostname.toLowerCase());
     } catch (error) {
@@ -45,16 +45,16 @@ function deriveFallbackHosts(): string[] {
   return Array.from(hosts);
 }
 
-const allowedHostsMemo = (() => {
+function getAllowedTurnstileHostsFromConfig(): string[] {
   const configured = parseConfiguredHosts();
   return configured.length > 0 ? configured : deriveFallbackHosts();
-})();
+}
 
 /**
  * Return the list of hostnames that are allowed to appear in Turnstile verification responses.
  */
 export function getAllowedTurnstileHosts(): string[] {
-  return allowedHostsMemo;
+  return getAllowedTurnstileHostsFromConfig();
 }
 
 /**
@@ -75,35 +75,38 @@ const DEFAULT_ALLOWED_ACTIONS = [
   "contact_form",
   "newsletter_subscribe",
   "product_inquiry",
-];
+] as const;
 
-const allowedActionsMemo = (() => {
-  const envActions = getRuntimeEnvString("TURNSTILE_ALLOWED_ACTIONS");
-  if (envActions) {
-    return envActions
-      .split(",")
-      .map((a: string) => a.trim())
-      .filter(Boolean);
+function parseConfiguredActions(): string[] {
+  const configuredActions = env.TURNSTILE_ALLOWED_ACTIONS;
+  if (!configuredActions) {
+    return [];
   }
-  return DEFAULT_ALLOWED_ACTIONS;
-})();
 
-const expectedActionMemo = (
-  (env.TURNSTILE_EXPECTED_ACTION as string | undefined) || "contact_form"
-).trim();
+  return configuredActions
+    .split(",")
+    .map((value) => value.trim())
+    .filter(Boolean);
+}
+
+function getAllowedTurnstileActionsFromConfig(): string[] {
+  const configured = parseConfiguredActions();
+  return configured.length > 0 ? configured : [...DEFAULT_ALLOWED_ACTIONS];
+}
 
 /**
  * Return the expected Turnstile action identifier (primary action).
  */
 export function getExpectedTurnstileAction(): string {
-  return expectedActionMemo;
+  const configured = env.TURNSTILE_EXPECTED_ACTION?.trim() ?? "";
+  return configured === "" ? "contact_form" : configured;
 }
 
 /**
  * Return all allowed Turnstile action identifiers.
  */
 export function getAllowedTurnstileActions(): string[] {
-  return allowedActionsMemo;
+  return getAllowedTurnstileActionsFromConfig();
 }
 
 /**
@@ -111,6 +114,9 @@ export function getAllowedTurnstileActions(): string[] {
  * Supports multiple allowed actions for different form types.
  */
 export function isAllowedTurnstileAction(action?: string | null): boolean {
-  if (!action) return false;
-  return getAllowedTurnstileActions().includes(action);
+  if (typeof action !== "string") {
+    return false;
+  }
+
+  return getAllowedTurnstileActions().includes(action.trim());
 }

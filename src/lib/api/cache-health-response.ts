@@ -1,7 +1,12 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { API_ERROR_CODES } from "@/constants/api-error-codes";
 import { HTTP_INTERNAL_ERROR, HTTP_OK } from "@/constants";
 import type { InvalidationResult } from "@/lib/cache/invalidation-policy";
+import {
+  applyRequestObservability,
+  getRequestObservability,
+} from "@/lib/api/request-observability";
+import { recordApiResponseSignal } from "@/lib/observability/api-signals";
 
 export interface CacheHealthResponse {
   status: "ok";
@@ -31,6 +36,33 @@ export function createCacheHealthResponse(): NextResponse<CacheHealthResponse> {
       headers: CACHE_HEALTH_HEADERS,
     },
   );
+}
+
+export interface ObservedCacheHealthResponseOptions {
+  requestId?: string;
+}
+
+export function createObservedCacheHealthResponse(
+  request: NextRequest,
+  options: ObservedCacheHealthResponseOptions = {},
+): NextResponse<CacheHealthResponse> {
+  const baseContext = getRequestObservability(request, "cache-health");
+  const context = options.requestId
+    ? { ...baseContext, requestId: options.requestId }
+    : baseContext;
+  const response = applyRequestObservability(
+    createCacheHealthResponse(),
+    context,
+  );
+
+  recordApiResponseSignal({
+    context,
+    response,
+    name: "health.get",
+    route: "/api/health",
+  }).catch(() => undefined);
+
+  return response;
 }
 
 export function createCacheHealthErrorResponse(

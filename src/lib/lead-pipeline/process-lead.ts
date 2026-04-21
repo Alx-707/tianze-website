@@ -5,7 +5,6 @@
 
 import {
   isContactLead,
-  isNewsletterLead,
   isProductLead,
   leadSchema,
   type LeadInput,
@@ -56,6 +55,12 @@ interface LeadLogContext {
   emailResult: ServiceResult;
   crmResult: ServiceResult;
   requestId?: string;
+}
+
+function withRequestId(
+  requestId?: string,
+): { requestId: string } | Record<string, never> {
+  return requestId ? { requestId } : {};
 }
 
 function createValidationFailureResult(): LeadResult {
@@ -109,8 +114,8 @@ function logServiceFailures(
     logger.error("Lead email send failed", {
       type: lead.type,
       referenceId,
-      error: emailResult.error?.message,
-      ...(requestId ? { requestId } : {}),
+      error: emailResult.error.message,
+      ...withRequestId(requestId),
     });
   }
 
@@ -118,8 +123,8 @@ function logServiceFailures(
     logger.error("Lead CRM record failed", {
       type: lead.type,
       referenceId,
-      error: crmResult.error?.message,
-      ...(requestId ? { requestId } : {}),
+      error: crmResult.error.message,
+      ...withRequestId(requestId),
     });
   }
 }
@@ -135,7 +140,7 @@ function logLeadOutcome(
       referenceId,
       emailSent: emailResult.success,
       recordCreated: crmResult.success,
-      ...(requestId ? { requestId } : {}),
+      ...withRequestId(requestId),
     });
     return;
   }
@@ -146,7 +151,7 @@ function logLeadOutcome(
       referenceId,
       emailSent: emailResult.success,
       recordCreated: crmResult.success,
-      ...(requestId ? { requestId } : {}),
+      ...withRequestId(requestId),
     });
     return;
   }
@@ -158,7 +163,7 @@ function logLeadOutcome(
       ? emailResult.error.message
       : undefined,
     crmError: isServiceFailure(crmResult) ? crmResult.error.message : undefined,
-    ...(requestId ? { requestId } : {}),
+    ...withRequestId(requestId),
   });
 }
 
@@ -173,12 +178,8 @@ async function dispatchLeadHandler(
   if (isProductLead(lead)) {
     return processProductLead(lead, referenceId);
   }
-  if (isNewsletterLead(lead)) {
-    return processNewsletterLead(lead, referenceId);
-  }
 
-  const exhaustiveCheck: never = lead;
-  return exhaustiveCheck;
+  return processNewsletterLead(lead, referenceId);
 }
 
 export interface LeadResult {
@@ -203,7 +204,7 @@ export async function processLead(
   if (!validationResult.success) {
     logger.warn("Lead validation failed", {
       errors: validationResult.error.issues,
-      ...(requestId ? { requestId } : {}),
+      ...withRequestId(requestId),
     });
     return createValidationFailureResult();
   }
@@ -215,7 +216,7 @@ export async function processLead(
     type: lead.type,
     email: sanitizeEmail(lead.email),
     referenceId,
-    ...(requestId ? { requestId } : {}),
+    ...withRequestId(requestId),
   });
 
   try {
@@ -232,7 +233,7 @@ export async function processLead(
       hasEmailOperation,
       emailResult,
       crmResult,
-      ...(requestId ? { requestId } : {}),
+      ...withRequestId(requestId),
     });
     const outcome = calculateLeadOutcome(
       hasEmailOperation,
@@ -247,7 +248,7 @@ export async function processLead(
       crmResult,
       totalLatencyMs,
       overallSuccess: outcome.success,
-      ...(requestId ? { requestId } : {}),
+      ...withRequestId(requestId),
     });
     logLeadOutcome({
       lead,
@@ -255,7 +256,7 @@ export async function processLead(
       emailResult,
       crmResult,
       outcome,
-      ...(requestId ? { requestId } : {}),
+      ...withRequestId(requestId),
     });
 
     return {
@@ -274,7 +275,7 @@ export async function processLead(
       referenceId,
       error: error instanceof Error ? error.message : "Unknown error",
       totalLatencyMs,
-      ...(requestId ? { requestId } : {}),
+      ...withRequestId(requestId),
     });
 
     return createProcessingFailureResult(referenceId);

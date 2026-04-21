@@ -60,6 +60,29 @@ describe("client-ip", () => {
     return request;
   }
 
+  const additionalCloudflareTrustedSources = [
+    ["103.21.244.0/22", "103.21.244.1"],
+    ["103.22.200.0/22", "103.22.200.1"],
+    ["103.31.4.0/22", "103.31.4.1"],
+    ["141.101.64.0/18", "141.101.64.1"],
+    ["108.162.192.0/18", "108.162.192.1"],
+    ["190.93.240.0/20", "190.93.240.1"],
+    ["188.114.96.0/20", "188.114.96.1"],
+    ["197.234.240.0/22", "197.234.240.1"],
+    ["198.41.128.0/17", "198.41.128.1"],
+    ["162.158.0.0/15", "162.158.0.1"],
+    ["104.16.0.0/13", "104.16.0.1"],
+    ["104.24.0.0/14", "104.24.0.1"],
+    ["172.64.0.0/13", "172.64.0.1"],
+    ["131.0.72.0/22", "131.0.72.1"],
+    ["2606:4700::/32", "2606:4700::1"],
+    ["2803:f800::/32", "2803:f800::1"],
+    ["2405:b500::/32", "2405:b500::1"],
+    ["2405:8100::/32", "2405:8100::1"],
+    ["2a06:98c0::/29", "2a06:98c0::1"],
+    ["2c0f:f248::/32", "2c0f:f248::1"],
+  ] as const;
+
   describe("getClientIP", () => {
     describe("no platform configured", () => {
       it("should fallback to request.ip when no platform", () => {
@@ -122,6 +145,11 @@ describe("client-ip", () => {
         const ip = getClientIP(request);
         expect(ip).toBe("10.0.0.99");
       });
+
+      it("should fail closed on Vercel when no trusted headers or request.ip exist", () => {
+        const request = createMockRequest();
+        expect(getClientIP(request)).toBe("0.0.0.0");
+      });
     });
 
     describe("Cloudflare platform", () => {
@@ -167,6 +195,33 @@ describe("client-ip", () => {
         const ip = getClientIP(request);
         expect(ip).toBe("192.0.2.100");
       });
+
+      it("should trust x-forwarded-for on Cloudflare when cf-connecting-ip is missing", () => {
+        const request = createMockRequest({
+          ip: "173.245.48.25",
+          headers: { "x-forwarded-for": "203.0.113.50, 10.0.0.1" },
+        });
+        const ip = getClientIP(request);
+        expect(ip).toBe("203.0.113.50");
+      });
+
+      it.each(additionalCloudflareTrustedSources)(
+        "should trust Cloudflare edge range %s",
+        (_cidr, sourceIP) => {
+          const request = createMockRequest({
+            ip: sourceIP,
+            headers: { "cf-connecting-ip": "192.0.2.100" },
+          });
+          expect(getClientIP(request)).toBe("192.0.2.100");
+        },
+      );
+
+      it("should fail closed when Cloudflare headers are present but request.ip is unavailable", () => {
+        const request = createMockRequest({
+          headers: { "cf-connecting-ip": "192.0.2.100" },
+        });
+        expect(getClientIP(request)).toBe("0.0.0.0");
+      });
     });
 
     describe("development platform", () => {
@@ -204,6 +259,27 @@ describe("client-ip", () => {
         const ip = getClientIP(request);
         // Should use Cloudflare config, not Vercel
         expect(ip).toBe("192.0.2.100");
+      });
+
+      it("should use development proxy headers when DEPLOYMENT_PLATFORM is explicitly set to development", () => {
+        setEnv("DEPLOYMENT_PLATFORM", "development");
+
+        const request = createMockRequest({
+          headers: { "x-real-ip": "198.51.100.10" },
+        });
+
+        expect(getClientIP(request)).toBe("198.51.100.10");
+      });
+
+      it("should not trust proxy headers for unknown explicit platforms", () => {
+        setEnv("DEPLOYMENT_PLATFORM", "custom-edge");
+
+        const request = createMockRequest({
+          headers: { "x-forwarded-for": "203.0.113.50" },
+          ip: "10.0.0.77",
+        });
+
+        expect(getClientIP(request)).toBe("10.0.0.77");
       });
     });
 
@@ -287,6 +363,14 @@ describe("client-ip", () => {
         expect(ip).toBe("203.0.113.50");
       });
 
+      it("should trim whitespace from a single forwarded IP without commas", () => {
+        const request = createMockRequest({
+          headers: { "x-forwarded-for": "  203.0.113.51  " },
+        });
+        const ip = getClientIP(request);
+        expect(ip).toBe("203.0.113.51");
+      });
+
       it("should strip port from first IP in chain", () => {
         const request = createMockRequest({
           headers: { "x-forwarded-for": "203.0.113.50:12345, 10.0.0.1" },
@@ -323,6 +407,42 @@ describe("client-ip", () => {
 
       expect(getTrustedClientIPForInternalHeader(request)).toBeNull();
     });
+
+    it("should fallback to x-forwarded-for when Cloudflare source is trusted but cf-connecting-ip is invalid", () => {
+      setEnv("CF_PAGES", "1");
+
+      const request = createMockRequest({
+        ip: "173.245.48.25",
+        headers: {
+          "cf-connecting-ip": "not-an-ip",
+          "x-forwarded-for": "203.0.113.50, 10.0.0.1",
+        },
+      });
+
+      expect(getTrustedClientIPForInternalHeader(request)).toBe("203.0.113.50");
+    });
+
+    it("should trust development x-real-ip when platform is explicit", () => {
+      setEnv("DEPLOYMENT_PLATFORM", "development");
+
+      const request = createMockRequest({
+        headers: { "x-real-ip": "198.51.100.10" },
+      });
+
+      expect(getTrustedClientIPForInternalHeader(request)).toBe(
+        "198.51.100.10",
+      );
+    });
+
+    it("should return null for unknown explicit platforms", () => {
+      setEnv("DEPLOYMENT_PLATFORM", "custom-edge");
+
+      const request = createMockRequest({
+        headers: { "x-forwarded-for": "203.0.113.50" },
+      });
+
+      expect(getTrustedClientIPForInternalHeader(request)).toBeNull();
+    });
   });
 
   describe("getClientIPFromHeaders", () => {
@@ -349,6 +469,12 @@ describe("client-ip", () => {
       expect(ip).toBe("203.0.113.50");
     });
 
+    it("should fail closed on Vercel when header extraction finds nothing", () => {
+      setEnv("VERCEL", "1");
+      const ip = getClientIPFromHeaders(new Headers());
+      expect(ip).toBe("0.0.0.0");
+    });
+
     it("should use middleware-derived internal header on Cloudflare", () => {
       setEnv("CF_PAGES", "1");
       const ip = getClientIPFromHeaders(
@@ -364,6 +490,39 @@ describe("client-ip", () => {
       setEnv("CF_PAGES", "1");
       const ip = getClientIPFromHeaders(
         new Headers({ "cf-connecting-ip": "192.0.2.100" }),
+      );
+      expect(ip).toBe("0.0.0.0");
+    });
+
+    it("should skip invalid x-real-ip and fallback to x-forwarded-for on Vercel", () => {
+      setEnv("VERCEL", "1");
+      const ip = getClientIPFromHeaders(
+        new Headers({
+          "x-real-ip": "not-an-ip",
+          "x-forwarded-for": "203.0.113.50, 10.0.0.1",
+        }),
+      );
+      expect(ip).toBe("203.0.113.50");
+    });
+
+    it("should use x-real-ip in explicit development mode", () => {
+      setEnv("DEPLOYMENT_PLATFORM", "development");
+      const ip = getClientIPFromHeaders(
+        new Headers({ "x-real-ip": "198.51.100.10" }),
+      );
+      expect(ip).toBe("198.51.100.10");
+    });
+
+    it("should return localhost for explicit development mode without headers", () => {
+      setEnv("DEPLOYMENT_PLATFORM", "development");
+      const ip = getClientIPFromHeaders(new Headers());
+      expect(ip).toBe("127.0.0.1");
+    });
+
+    it("should fail closed for unknown explicit platforms", () => {
+      setEnv("DEPLOYMENT_PLATFORM", "custom-edge");
+      const ip = getClientIPFromHeaders(
+        new Headers({ "x-real-ip": "203.0.113.50" }),
       );
       expect(ip).toBe("0.0.0.0");
     });
@@ -420,6 +579,19 @@ describe("client-ip", () => {
       expect(occurrences).toBe(1);
     });
 
+    it("should not prepend cf-connecting-ip when already present in x-forwarded-for", () => {
+      const request = createMockRequest({
+        headers: {
+          "cf-connecting-ip": "192.0.2.100",
+          "x-forwarded-for": "192.0.2.100, 203.0.113.1",
+        },
+      });
+      const chain = getIPChain(request);
+      const occurrences = chain.filter((ip) => ip === "192.0.2.100").length;
+      expect(occurrences).toBe(1);
+      expect(chain[0]).toBe("192.0.2.100");
+    });
+
     it("should include request.ip in chain", () => {
       const request = createMockRequest({
         headers: { "x-forwarded-for": "203.0.113.1" },
@@ -427,6 +599,16 @@ describe("client-ip", () => {
       });
       const chain = getIPChain(request);
       expect(chain).toContain("10.0.0.50");
+    });
+
+    it("should not append request.ip when it already exists in the forwarded chain", () => {
+      const request = createMockRequest({
+        headers: { "x-forwarded-for": "203.0.113.1, 10.0.0.50" },
+        ip: "10.0.0.50",
+      });
+      const chain = getIPChain(request);
+      const occurrences = chain.filter((ip) => ip === "10.0.0.50").length;
+      expect(occurrences).toBe(1);
     });
 
     it("should filter out invalid IPs", () => {
@@ -437,6 +619,26 @@ describe("client-ip", () => {
       expect(chain).toContain("203.0.113.1");
       expect(chain).not.toContain("invalid");
       expect(chain).not.toContain("unknown");
+    });
+
+    it("should exclude invalid x-real-ip values from the chain", () => {
+      const request = createMockRequest({
+        headers: {
+          "x-forwarded-for": "203.0.113.1",
+          "x-real-ip": "not-an-ip",
+        },
+      });
+      expect(getIPChain(request)).toEqual(["203.0.113.1"]);
+    });
+
+    it("should exclude invalid cf-connecting-ip values from the chain", () => {
+      const request = createMockRequest({
+        headers: {
+          "cf-connecting-ip": "not-an-ip",
+          "x-forwarded-for": "203.0.113.1",
+        },
+      });
+      expect(getIPChain(request)).toEqual(["203.0.113.1"]);
     });
   });
 
@@ -449,6 +651,13 @@ describe("client-ip", () => {
       });
       const ip = getClientIP(request);
       expect(ip).toBe("10.0.0.1");
+    });
+
+    it("should trim request.ip before using it as the fallback source", () => {
+      const request = createMockRequest({
+        ip: " 10.0.0.1 ",
+      });
+      expect(getClientIP(request)).toBe("10.0.0.1");
     });
 
     it("should handle whitespace-only IP", () => {

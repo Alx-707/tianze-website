@@ -1,17 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createCacheHealthResponse } from "@/lib/api/cache-health-response";
+import { createObservedCacheHealthResponse } from "@/lib/api/cache-health-response";
 import createMiddleware from "next-intl/middleware";
 import { generateNonce, getSecurityHeaders } from "@/config/security";
 import { routing, type Locale } from "@/i18n/routing-config";
 import { isSecureAppEnv } from "@/lib/env";
 import { INTERNAL_TRUSTED_CLIENT_IP_HEADER } from "@/lib/security/client-ip-headers";
 import { getTrustedClientIPForInternalHeader } from "@/lib/security/client-ip";
-import {
-  applyRequestObservability,
-  getRequestObservability,
-  REQUEST_ID_HEADER,
-} from "@/lib/api/request-observability";
-import { recordApiResponseSignal } from "@/lib/observability/api-signals";
+import { REQUEST_ID_HEADER } from "@/lib/api/request-observability";
 
 const intlMiddleware = createMiddleware(routing);
 const SUPPORTED_LOCALES = new Set<string>(routing.locales);
@@ -37,24 +32,9 @@ function tryHandleHealthRoute(request: NextRequest): NextResponse | null {
     return null;
   }
 
-  const observability = {
-    ...getRequestObservability(request, "cache-health"),
+  return createObservedCacheHealthResponse(request, {
     requestId: getRequestIdForHealth(request),
-  };
-
-  const response = applyRequestObservability(
-    createCacheHealthResponse(),
-    observability,
-  );
-
-  recordApiResponseSignal({
-    context: observability,
-    response,
-    name: "health.get",
-    route: "/api/health",
-  }).catch(() => undefined);
-
-  return response;
+  });
 }
 
 function applyCommonMiddlewareHeaders(

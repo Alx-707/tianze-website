@@ -6,6 +6,7 @@ const createMockZodString = () => {
     min: vi.fn(() => mockString),
     max: vi.fn(() => mockString),
     trim: vi.fn(() => mockString),
+    or: vi.fn(() => mockString),
     email: vi.fn(() => mockString),
     url: vi.fn(() => mockString),
     regex: vi.fn(() => mockString),

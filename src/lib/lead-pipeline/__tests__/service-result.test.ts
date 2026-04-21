@@ -72,6 +72,18 @@ describe("ServiceResult", () => {
     });
   });
 
+  describe("type guard runtime contracts", () => {
+    it("returns false when isServiceSuccess receives a failure result", () => {
+      expect(isServiceSuccess(createFailure(new Error("fail"), 10))).toBe(
+        false,
+      );
+    });
+
+    it("returns false when isServiceFailure receives a success result", () => {
+      expect(isServiceFailure(createSuccess("ok", 10))).toBe(false);
+    });
+  });
+
   describe("DEFAULT_LATENCY", () => {
     it("should export default latency constant", () => {
       expect(DEFAULT_LATENCY).toBe(0);

@@ -150,15 +150,20 @@ export const safeMerge = <T extends object, U extends object>(
 
   // nosemgrep: object-injection-sink-for-in-loop -- safeKeys 已限制为自有键集合
   for (const key of safeKeys(source)) {
-    if (hasOwn(source, key)) {
-      // nosemgrep: object-injection-sink-dynamic-property -- 数据来自 safeKeys+hasOwn
-      (result as Record<PropertyKey, unknown>)[key as PropertyKey] = (
-        source as Record<PropertyKey, unknown>
-      )[key as PropertyKey];
-    }
+    // nosemgrep: object-injection-sink-dynamic-property -- 数据来自 safeKeys 已过滤的自有键集合
+    (result as Record<PropertyKey, unknown>)[key as PropertyKey] = (
+      source as Record<PropertyKey, unknown>
+    )[key as PropertyKey];
   }
 
   return result;
+};
+
+const getOwnValueDescriptor = (
+  value: unknown,
+  key: PropertyKey,
+): PropertyDescriptor | undefined => {
+  return Object.getOwnPropertyDescriptor(Object(value), key);
 };
 
 /**
@@ -173,19 +178,12 @@ export const safeDeepGet = <T extends object>(
   let current: unknown = obj;
 
   for (const key of keys) {
-    if (current === null || current === undefined) {
+    const descriptor = getOwnValueDescriptor(current, key);
+    if (!descriptor) {
       return undefined;
     }
 
-    if (
-      typeof current === "object" &&
-      hasOwn(current as Record<PropertyKey, unknown>, key)
-    ) {
-      // nosemgrep: object-injection-sink-dynamic-property -- 路径逐段校验后访问
-      current = (current as Record<PropertyKey, unknown>)[key as PropertyKey];
-    } else {
-      return undefined;
-    }
+    current = descriptor.value;
   }
 
   return current;
@@ -216,58 +214,50 @@ export const createSafeProxy = <T extends object>(
 ): T => {
   const { allowedKeys, readOnly = false, validator } = options;
   const keySet = allowedKeys ? new Set(allowedKeys) : null;
+  const isAllowedKey = (prop: PropertyKey): boolean => {
+    return keySet ? keySet.has(prop as keyof T) : true;
+  };
 
   return new Proxy(obj, {
     get(target, prop) {
-      if (typeof prop === "string" || typeof prop === "symbol") {
-        if (keySet && !keySet.has(prop as keyof T)) {
-          return undefined;
-        }
-
-        if (hasOwn(target, prop)) {
-          // nosemgrep: object-injection-sink-dynamic-property -- Proxy 内白名单+hasOwn校验
-          return target[prop as keyof T];
-        }
+      if (!isAllowedKey(prop)) {
+        return undefined;
       }
-      return undefined;
+
+      const descriptor = Object.getOwnPropertyDescriptor(target, prop);
+      return descriptor?.value as T[keyof T] | undefined;
     },
 
     set(target, prop, value) {
-      if (readOnly) {
+      const key = prop as keyof T;
+
+      if (readOnly || !isAllowedKey(key)) {
         return false;
       }
 
-      if (typeof prop === "string" || typeof prop === "symbol") {
-        if (keySet && !keySet.has(prop as keyof T)) {
-          return false;
-        }
-
-        if (validator && !validator(prop as keyof T, value)) {
-          return false;
-        }
-
-        if (hasOwn(target, prop)) {
-          // nosemgrep: object-injection-sink-dynamic-property -- Proxy 内白名单+hasOwn校验
-          target[prop as keyof T] = value;
-          return true;
-        }
+      if (validator && !validator(key, value)) {
+        return false;
       }
 
-      return false;
+      if (!Object.getOwnPropertyDescriptor(target, prop)) {
+        return false;
+      }
+
+      // nosemgrep: object-injection-sink-dynamic-property -- Proxy 内白名单+hasOwn校验
+      target[key] = value;
+      return true;
     },
 
     has(target, prop) {
-      if (typeof prop === "string" || typeof prop === "symbol") {
-        if (keySet && !keySet.has(prop as keyof T)) {
-          return false;
-        }
-        return hasOwn(target, prop);
+      if (!isAllowedKey(prop)) {
+        return false;
       }
-      return false;
+
+      return hasOwn(target, prop);
     },
 
     ownKeys(target) {
-      const keys = Object.keys(target).filter((key) => hasOwn(target, key));
+      const keys = Object.keys(target);
       return keySet ? keys.filter((key) => keySet.has(key as keyof T)) : keys;
     },
   });
@@ -284,21 +274,16 @@ export const SafeAccess = {
     config: T,
     key: string,
   ): T[keyof T] | undefined => {
-    // nosemgrep: object-injection-sink-dynamic-property -- key 来源受控，访问前已通过hasOwn校验
-    if (!hasOwn(config, key)) {
-      return undefined;
-    }
-    const recordConfig = config as Record<string, unknown>;
-    // nosemgrep: object-injection-sink-dynamic-property -- 访问已通过 hasOwn 检查的受控配置键
-    return recordConfig[key] as T[keyof T];
+    const descriptor = Object.getOwnPropertyDescriptor(config, key);
+    return descriptor?.value as T[keyof T] | undefined;
   },
 
   /**
    * 安全访问数组元素
    */
   array: <T>(arr: T[], index: number): T | undefined => {
-    // nosemgrep: object-injection-sink-dynamic-property -- 已验证索引范围
-    return index >= 0 && index < arr.length ? arr[index] : undefined;
+    const descriptor = Object.getOwnPropertyDescriptor(arr, String(index));
+    return descriptor?.value as T | undefined;
   },
 
   /**
@@ -308,19 +293,12 @@ export const SafeAccess = {
     let current: unknown = obj;
 
     for (const key of keys) {
-      if (current === null || current === undefined) {
+      const descriptor = getOwnValueDescriptor(current, key);
+      if (!descriptor) {
         return undefined;
       }
 
-      if (
-        typeof current === "object" &&
-        hasOwn(current as Record<PropertyKey, unknown>, key)
-      ) {
-        // nosemgrep: object-injection-sink-dynamic-property -- 路径逐段校验后访问
-        current = (current as Record<PropertyKey, unknown>)[key as PropertyKey];
-      } else {
-        return undefined;
-      }
+      current = descriptor.value;
     }
 
     return current;

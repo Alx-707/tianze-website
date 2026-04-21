@@ -30,28 +30,15 @@ export interface SplitNameResult {
  * @returns Object containing firstName and lastName
  */
 export function splitName(fullName: string): SplitNameResult {
-  const trimmed = fullName.trim();
-
-  if (!trimmed) {
-    return { firstName: "", lastName: "" };
-  }
-
-  // Split by whitespace
-  const parts = trimmed.split(/\s+/);
+  const normalizedName = fullName.trim();
+  const parts = normalizedName.split(/\s+/);
 
   if (parts.length === ONE) {
-    // Single word name (common for Chinese names)
-    // nosemgrep: object-injection-sink-dynamic-property -- ZERO is a trusted constant (value: 0)
-    const firstPart = parts[ZERO];
-    return { firstName: firstPart ?? "", lastName: "" };
+    return { firstName: parts[ZERO]!, lastName: "" };
   }
 
-  // Multiple words: last word becomes lastName, rest becomes firstName
-  const lastIndex = parts.length - ONE;
-  const lastName = parts.at(lastIndex) ?? "";
-  const firstName = parts.slice(ZERO, -ONE).join(" ");
-
-  return { firstName, lastName };
+  const lastName = parts.pop()!;
+  return { firstName: parts.join(" "), lastName };
 }
 
 /**

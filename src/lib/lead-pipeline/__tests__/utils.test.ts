@@ -53,6 +53,11 @@ describe("Lead Pipeline Utils", () => {
       expect(result).toEqual({ firstName: "John", lastName: "Doe" });
     });
 
+    it("should collapse repeated whitespace between more than two words", () => {
+      const result = splitName("John   Van   Doe");
+      expect(result).toEqual({ firstName: "John Van", lastName: "Doe" });
+    });
+
     it("should handle Chinese full name with space", () => {
       const result = splitName("李 小明");
       expect(result).toEqual({ firstName: "李", lastName: "小明" });

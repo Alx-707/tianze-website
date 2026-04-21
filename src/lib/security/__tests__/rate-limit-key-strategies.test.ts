@@ -118,7 +118,7 @@ describe("rate-limit-key-strategies", () => {
 
       expect(key).toHaveLength(16);
       expect(mockLoggerWarn).toHaveBeenCalledWith(
-        expect.stringContaining("RATE_LIMIT_PEPPER not configured"),
+        "[Rate Limit] RATE_LIMIT_PEPPER not configured. Using default development pepper. This is insecure - set RATE_LIMIT_PEPPER for production.",
       );
     });
 
@@ -136,8 +136,18 @@ describe("rate-limit-key-strategies", () => {
       setEnv("NODE_ENV", "production");
 
       await expect(hmacKey("test-input")).rejects.toThrow(
-        /RATE_LIMIT_PEPPER is required in production/,
+        "[SECURITY] RATE_LIMIT_PEPPER is required in production. Generate with: node -e \"console.log(require('crypto').randomBytes(32).toString('hex'))\"",
       );
+    });
+
+    it("should accept a pepper at the minimum required length without warning", async () => {
+      setEnv("NODE_ENV", "development");
+      setEnv("RATE_LIMIT_PEPPER", "a".repeat(32));
+
+      const key = await hmacKey("test-input");
+
+      expect(key).toHaveLength(16);
+      expect(mockLoggerWarn).not.toHaveBeenCalled();
     });
 
     it("should throw error in production with short pepper", async () => {
@@ -145,7 +155,7 @@ describe("rate-limit-key-strategies", () => {
       setEnv("RATE_LIMIT_PEPPER", "tooshort");
 
       await expect(hmacKey("test-input")).rejects.toThrow(
-        /RATE_LIMIT_PEPPER is too short/,
+        "[SECURITY] RATE_LIMIT_PEPPER is too short (8 chars). Minimum 32 chars required. Generate with: node -e \"console.log(require('crypto').randomBytes(32).toString('hex'))\"",
       );
     });
 
@@ -156,8 +166,18 @@ describe("rate-limit-key-strategies", () => {
       await hmacKey("test-input");
 
       expect(mockLoggerWarn).toHaveBeenCalledWith(
-        expect.stringContaining("RATE_LIMIT_PEPPER is weak"),
+        "[Rate Limit] RATE_LIMIT_PEPPER is weak (5 chars). Recommend at least 32 chars for production.",
       );
+    });
+
+    it("should warn only once about weak pepper", async () => {
+      setEnv("NODE_ENV", "development");
+      setEnv("RATE_LIMIT_PEPPER", "short");
+
+      await hmacKey("input1");
+      await hmacKey("input2");
+
+      expect(mockLoggerWarn).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -188,6 +208,16 @@ describe("rate-limit-key-strategies", () => {
       const keys = await hmacKeyWithRotation("test-input");
 
       expect(keys[0]).toBe(currentKey);
+    });
+
+    it("should truncate the previous rotation key to the standard HMAC length", async () => {
+      setEnv("RATE_LIMIT_PEPPER", "a".repeat(32));
+      setEnv("RATE_LIMIT_PEPPER_PREVIOUS", "b".repeat(32));
+
+      const keys = await hmacKeyWithRotation("test-input");
+
+      expect(keys[1]).toHaveLength(16);
+      expect(keys[1]).toMatch(/^[0-9a-f]{16}$/);
     });
   });
 
@@ -250,9 +280,51 @@ describe("rate-limit-key-strategies", () => {
       expect(sessionKey).toBe(ipKey);
     });
 
+    it("should fallback to IP key for an empty session ID", async () => {
+      const request = createMockRequest({
+        cookies: { "session-id": "" },
+      });
+
+      const ipKey = await getIPKey(request);
+      const sessionKey = await getSessionPriorityKey(request);
+
+      expect(sessionKey).toBe(ipKey);
+    });
+
     it("should fallback to IP key for too short session ID", async () => {
       const request = createMockRequest({
         cookies: { "session-id": "short" },
+      });
+
+      const ipKey = await getIPKey(request);
+      const sessionKey = await getSessionPriorityKey(request);
+
+      expect(sessionKey).toBe(ipKey);
+    });
+
+    it("should accept session IDs with the minimum valid length", async () => {
+      const request = createMockRequest({
+        cookies: { "session-id": "12345678" },
+      });
+
+      const sessionKey = await getSessionPriorityKey(request);
+
+      expect(sessionKey).toMatch(/^session:[0-9a-f]{16}$/);
+    });
+
+    it("should accept session IDs at the maximum valid length", async () => {
+      const request = createMockRequest({
+        cookies: { "session-id": "a".repeat(256) },
+      });
+
+      const sessionKey = await getSessionPriorityKey(request);
+
+      expect(sessionKey).toMatch(/^session:[0-9a-f]{16}$/);
+    });
+
+    it("should reject session IDs that exceed the maximum valid length", async () => {
+      const request = createMockRequest({
+        cookies: { "session-id": "a".repeat(257) },
       });
 
       const ipKey = await getIPKey(request);
@@ -321,6 +393,52 @@ describe("rate-limit-key-strategies", () => {
       const key = await getApiKeyPriorityKey(request);
 
       expect(key).toMatch(/^apikey:[0-9a-f]{16}$/);
+    });
+
+    it("should fallback to IP key when Bearer token is only whitespace", async () => {
+      const request = createMockRequest({
+        headers: { Authorization: "Bearer    " },
+      });
+
+      const ipKey = await getIPKey(request);
+      const apiKeyKey = await getApiKeyPriorityKey(request);
+
+      expect(apiKeyKey).toBe(ipKey);
+    });
+
+    it("should fallback to IP key when authorization header is only whitespace", async () => {
+      const request = createMockRequest({
+        headers: { Authorization: "    " },
+      });
+
+      const ipKey = await getIPKey(request);
+      const apiKeyKey = await getApiKeyPriorityKey(request);
+
+      expect(apiKeyKey).toBe(ipKey);
+    });
+
+    it("should trim surrounding whitespace before parsing Bearer authorization", async () => {
+      const request = createMockRequest({
+        headers: { Authorization: "   Bearer sk-trimmed-key   " },
+      });
+
+      const key = await getApiKeyPriorityKey(request);
+
+      expect(key).toMatch(/^apikey:[0-9a-f]{16}$/);
+    });
+
+    it("should normalize repeated whitespace between Bearer scheme and token", async () => {
+      const compactRequest = createMockRequest({
+        headers: { Authorization: "Bearer spaced-token" },
+      });
+      const spacedRequest = createMockRequest({
+        headers: { Authorization: "Bearer    spaced-token" },
+      });
+
+      const compactKey = await getApiKeyPriorityKey(compactRequest);
+      const spacedKey = await getApiKeyPriorityKey(spacedRequest);
+
+      expect(spacedKey).toBe(compactKey);
     });
 
     it("should produce different keys for different API keys", async () => {

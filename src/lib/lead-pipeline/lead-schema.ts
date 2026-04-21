@@ -85,7 +85,7 @@ export const productLeadSchema = z.object({
   fullName: sanitizedString().min(ONE).max(MAX_LEAD_NAME_LENGTH),
   productSlug: z.string().trim().min(ONE),
   productName: sanitizedString().min(ONE).max(MAX_LEAD_PRODUCT_NAME_LENGTH),
-  quantity: z.union([z.string().trim().min(ONE), z.coerce.number().positive()]),
+  quantity: z.string().trim().min(ONE).or(z.coerce.number().positive()),
   requirements: sanitizedString().max(MAX_LEAD_REQUIREMENTS_LENGTH).optional(),
   ...baseLeadFields,
 });
@@ -103,11 +103,20 @@ export const newsletterLeadSchema = z.object({
  * Unified lead schema using discriminated union
  * Allows type-safe handling of different lead types
  */
-export const leadSchema = z.discriminatedUnion("type", [
-  contactLeadSchema,
-  productLeadSchema,
-  newsletterLeadSchema,
-]);
+const leadSchemaVariants = {
+  contact: contactLeadSchema,
+  product: productLeadSchema,
+  newsletter: newsletterLeadSchema,
+} as const;
+
+export const leadSchema = z.discriminatedUnion(
+  "type",
+  Object.values(leadSchemaVariants) as [
+    typeof contactLeadSchema,
+    typeof productLeadSchema,
+    typeof newsletterLeadSchema,
+  ],
+);
 
 /**
  * Type exports for external use

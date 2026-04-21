@@ -17,12 +17,13 @@ async function loadTurnstileConfig({
   expectedAction?: string;
   allowedActions?: string;
   vercelUrl?: string;
-  baseUrl?: string;
+  baseUrl?: string | null;
 } = {}) {
   vi.resetModules();
   vi.doMock("@/lib/env", () => ({
     env: {
       TURNSTILE_ALLOWED_HOSTS: allowedHosts,
+      TURNSTILE_ALLOWED_ACTIONS: allowedActions,
       TURNSTILE_EXPECTED_ACTION: expectedAction,
       VERCEL_URL: vercelUrl,
     },
@@ -85,7 +86,33 @@ describe("turnstile-config", () => {
     const mod = await loadTurnstileConfig({ baseUrl: "://bad-url" });
 
     expect(mod.getAllowedTurnstileHosts()).toEqual(["localhost"]);
-    expect(mockWarn).toHaveBeenCalled();
+    expect(mockWarn).toHaveBeenCalledWith(
+      "Failed to parse site base URL for Turnstile host validation",
+      expect.objectContaining({
+        baseUrl: "://bad-url",
+        error: expect.anything(),
+      }),
+    );
+  });
+
+  it("skips blank base urls without warning and still keeps vercel plus localhost", async () => {
+    const mod = await loadTurnstileConfig({
+      baseUrl: "   ",
+      vercelUrl: "preview.example.vercel.app",
+    });
+
+    expect(mod.getAllowedTurnstileHosts()).toEqual([
+      "preview.example.vercel.app",
+      "localhost",
+    ]);
+    expect(mockWarn).not.toHaveBeenCalled();
+  });
+
+  it("handles a missing base url by falling back to localhost without warning", async () => {
+    const mod = await loadTurnstileConfig({ baseUrl: null });
+
+    expect(mod.getAllowedTurnstileHosts()).toEqual(["localhost"]);
+    expect(mockWarn).not.toHaveBeenCalled();
   });
 
   it("uses configured allowed actions and expected action with trimming", async () => {
@@ -101,7 +128,34 @@ describe("turnstile-config", () => {
     ]);
     expect(mod.getExpectedTurnstileAction()).toBe("product_inquiry");
     expect(mod.isAllowedTurnstileAction("product_inquiry")).toBe(true);
+    expect(mod.isAllowedTurnstileAction(" product_inquiry ")).toBe(true);
     expect(mod.isAllowedTurnstileAction("newsletter_subscribe")).toBe(false);
     expect(mod.isAllowedTurnstileAction(null)).toBe(false);
+  });
+
+  it("falls back to default actions and expected action when configured values are blank", async () => {
+    const mod = await loadTurnstileConfig({
+      allowedActions: " , ",
+      expectedAction: "   ",
+    });
+
+    expect(mod.getAllowedTurnstileActions()).toEqual([
+      "contact_form",
+      "newsletter_subscribe",
+      "product_inquiry",
+    ]);
+    expect(mod.getExpectedTurnstileAction()).toBe("contact_form");
+    expect(mod.isAllowedTurnstileAction(undefined)).toBe(false);
+    expect(mod.isAllowedTurnstileAction("   ")).toBe(false);
+  });
+
+  it("rejects empty hostnames and actions", async () => {
+    const mod = await loadTurnstileConfig();
+
+    expect(mod.isAllowedTurnstileHostname(undefined)).toBe(false);
+    expect(mod.isAllowedTurnstileHostname(null)).toBe(false);
+    expect(mod.isAllowedTurnstileAction(undefined)).toBe(false);
+    expect(mod.isAllowedTurnstileAction(null)).toBe(false);
+    expect(mod.getExpectedTurnstileAction()).toBe("contact_form");
   });
 });

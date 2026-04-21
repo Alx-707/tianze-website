@@ -21,40 +21,40 @@ interface TrustedProxyConfig {
   cdnIpRanges?: string[];
 }
 
-const PROXY_CONFIGS: Record<string, TrustedProxyConfig> = {
-  vercel: {
-    trustedHeaders: ["x-real-ip", "x-forwarded-for"],
-  },
-  cloudflare: {
-    trustedHeaders: ["cf-connecting-ip", "x-forwarded-for"],
-    cdnIpRanges: [
-      "173.245.48.0/20",
-      "103.21.244.0/22",
-      "103.22.200.0/22",
-      "103.31.4.0/22",
-      "141.101.64.0/18",
-      "108.162.192.0/18",
-      "190.93.240.0/20",
-      "188.114.96.0/20",
-      "197.234.240.0/22",
-      "198.41.128.0/17",
-      "162.158.0.0/15",
-      "104.16.0.0/13",
-      "104.24.0.0/14",
-      "172.64.0.0/13",
-      "131.0.72.0/22",
-      "2400:cb00::/32",
-      "2606:4700::/32",
-      "2803:f800::/32",
-      "2405:b500::/32",
-      "2405:8100::/32",
-      "2a06:98c0::/29",
-      "2c0f:f248::/32",
-    ],
-  },
-  development: {
-    trustedHeaders: ["x-forwarded-for", "x-real-ip"],
-  },
+const VERCEL_PROXY_CONFIG: TrustedProxyConfig = {
+  trustedHeaders: ["x-real-ip", "x-forwarded-for"],
+};
+
+const CLOUDFLARE_PROXY_CONFIG: TrustedProxyConfig = {
+  trustedHeaders: ["cf-connecting-ip", "x-forwarded-for"],
+  cdnIpRanges: [
+    "173.245.48.0/20",
+    "103.21.244.0/22",
+    "103.22.200.0/22",
+    "103.31.4.0/22",
+    "141.101.64.0/18",
+    "108.162.192.0/18",
+    "190.93.240.0/20",
+    "188.114.96.0/20",
+    "197.234.240.0/22",
+    "198.41.128.0/17",
+    "162.158.0.0/15",
+    "104.16.0.0/13",
+    "104.24.0.0/14",
+    "172.64.0.0/13",
+    "131.0.72.0/22",
+    "2400:cb00::/32",
+    "2606:4700::/32",
+    "2803:f800::/32",
+    "2405:b500::/32",
+    "2405:8100::/32",
+    "2a06:98c0::/29",
+    "2c0f:f248::/32",
+  ],
+};
+
+const DEVELOPMENT_PROXY_CONFIG: TrustedProxyConfig = {
+  trustedHeaders: ["x-forwarded-for", "x-real-ip"],
 };
 
 const FALLBACK_IP = "0.0.0.0";
@@ -80,9 +80,9 @@ function getDeploymentPlatform(): string | null {
 }
 
 function getPlatformConfig(platform: string): TrustedProxyConfig | undefined {
-  if (platform === "vercel") return PROXY_CONFIGS.vercel;
-  if (platform === "cloudflare") return PROXY_CONFIGS.cloudflare;
-  if (platform === "development") return PROXY_CONFIGS.development;
+  if (platform === "vercel") return VERCEL_PROXY_CONFIG;
+  if (platform === "cloudflare") return CLOUDFLARE_PROXY_CONFIG;
+  if (platform === "development") return DEVELOPMENT_PROXY_CONFIG;
   return undefined;
 }
 
@@ -104,18 +104,17 @@ export function getTrustedClientIPForInternalHeader(
   request: NextRequest,
 ): string | null {
   const platform = getDeploymentPlatform();
-  if (!platform) {
-    return null;
-  }
-
-  const config = getPlatformConfig(platform);
+  const config = platform ? getPlatformConfig(platform) : undefined;
   if (!config) {
     return null;
   }
 
   if (
     platform === "cloudflare" &&
-    !isTrustedCdnSource(getNextJsIP(request), config.cdnIpRanges)
+    !isTrustedCdnSource(
+      getNextJsIP(request),
+      CLOUDFLARE_PROXY_CONFIG.cdnIpRanges,
+    )
   ) {
     return null;
   }
@@ -125,32 +124,25 @@ export function getTrustedClientIPForInternalHeader(
 
 export function getClientIP(request: NextRequest): string {
   const platform = getDeploymentPlatform();
-
-  if (!platform) {
-    return getNextJsIP(request) ?? FALLBACK_IP;
-  }
-
-  const config = getPlatformConfig(platform);
+  const nextIP = getNextJsIP(request);
+  const config = platform ? getPlatformConfig(platform) : undefined;
   if (!config) {
-    return getNextJsIP(request) ?? FALLBACK_IP;
+    return nextIP ?? FALLBACK_IP;
   }
 
   if (
     platform === "cloudflare" &&
-    !isTrustedCdnSource(getNextJsIP(request), config.cdnIpRanges)
+    !isTrustedCdnSource(nextIP, CLOUDFLARE_PROXY_CONFIG.cdnIpRanges)
   ) {
-    return getNextJsIP(request) ?? FALLBACK_IP;
+    return nextIP ?? FALLBACK_IP;
   }
 
   const headerIP = getIPFromTrustedHeaders(request, config);
   if (headerIP) return headerIP;
 
-  const nextIP = getNextJsIP(request);
   if (nextIP) return nextIP;
 
-  if (platform === "development") return LOCALHOST_IP;
-
-  return FALLBACK_IP;
+  return platform === "development" ? LOCALHOST_IP : FALLBACK_IP;
 }
 
 export function getIPChain(request: NextRequest): string[] {
@@ -198,12 +190,7 @@ function getIPFromTrustedHeadersLike(
 
 export function getClientIPFromHeaders(headers: HeadersLike): string {
   const platform = getDeploymentPlatform();
-
-  if (!platform) {
-    return FALLBACK_IP;
-  }
-
-  const config = getPlatformConfig(platform);
+  const config = platform ? getPlatformConfig(platform) : undefined;
   if (!config) {
     return FALLBACK_IP;
   }
@@ -222,9 +209,7 @@ export function getClientIPFromHeaders(headers: HeadersLike): string {
   const headerIP = getIPFromTrustedHeadersLike(headers, config);
   if (headerIP) return headerIP;
 
-  if (platform === "development") return LOCALHOST_IP;
-
-  return FALLBACK_IP;
+  return platform === "development" ? LOCALHOST_IP : FALLBACK_IP;
 }
 
 export { getIPVersion };

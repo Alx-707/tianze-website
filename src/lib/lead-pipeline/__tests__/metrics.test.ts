@@ -66,6 +66,18 @@ describe("categorizeError", () => {
     expect(categorizeError(error)).toBe(ERROR_TYPES.VALIDATION);
   });
 
+  it("should categorize messages that only mention validation", () => {
+    expect(
+      categorizeError(new Error("Validation rules rejected the payload")),
+    ).toBe(ERROR_TYPES.VALIDATION);
+  });
+
+  it("should categorize messages that only mention invalid", () => {
+    expect(categorizeError(new Error("Invalid email address"))).toBe(
+      ERROR_TYPES.VALIDATION,
+    );
+  });
+
   it("should return unknown for unrecognized errors", () => {
     const error = new Error("Something went wrong");
     expect(categorizeError(error)).toBe(ERROR_TYPES.UNKNOWN);
@@ -80,23 +92,28 @@ describe("categorizeError", () => {
 
 describe("createLatencyTimer", () => {
   it("should measure elapsed time", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2025-01-01T00:00:00.000Z"));
     const timer = createLatencyTimer();
     const delayMs = 50;
 
-    await new Promise((resolve) => setTimeout(resolve, delayMs));
+    await vi.advanceTimersByTimeAsync(delayMs);
 
     const elapsed = timer.stop();
     expect(elapsed).toBeGreaterThanOrEqual(delayMs - 10);
     expect(elapsed).toBeLessThan(delayMs + 50);
+    vi.useRealTimers();
   });
 
   it("should return consistent results on multiple calls", () => {
+    vi.useFakeTimers();
     const timer = createLatencyTimer();
     const first = timer.stop();
     const second = timer.stop();
 
     // Both calls should return similar values (within margin)
     expect(Math.abs(second - first)).toBeLessThan(10);
+    vi.useRealTimers();
   });
 });
 
@@ -134,6 +151,32 @@ describe("LeadPipelineMetrics", () => {
           lastRequestId: "metric-request-1",
         }),
       ]);
+
+      expect(getSystemObservabilitySnapshot().recentSignals).toEqual([
+        expect.objectContaining({
+          requestId: "metric-request-1",
+          meta: {
+            metricType: METRIC_TYPES.SUCCESS,
+            errorMessage: undefined,
+          },
+        }),
+      ]);
+      expect(
+        getSystemObservabilitySnapshot().recentSignals[0],
+      ).not.toHaveProperty("errorType");
+    });
+
+    it("should omit requestId when success metric has no request correlation", async () => {
+      const { logger } = await import("@/lib/logger");
+
+      metrics.recordSuccess(METRIC_SERVICES.RESEND, 75);
+
+      expect(vi.mocked(logger.info).mock.lastCall?.[1]).not.toHaveProperty(
+        "requestId",
+      );
+      expect(
+        getSystemObservabilitySnapshot().recentSignals[0],
+      ).not.toHaveProperty("requestId");
     });
 
     it("should reset failure count on success", async () => {
@@ -159,7 +202,12 @@ describe("LeadPipelineMetrics", () => {
       const { logger } = await import("@/lib/logger");
       const error = new Error("Connection timed out");
 
-      metrics.recordFailure(METRIC_SERVICES.AIRTABLE, 200, error);
+      metrics.recordFailure(
+        METRIC_SERVICES.AIRTABLE,
+        200,
+        error,
+        "metric-request-2",
+      );
 
       expect(logger.error).toHaveBeenCalledWith(
         "Lead pipeline metric",
@@ -168,10 +216,36 @@ describe("LeadPipelineMetrics", () => {
           service: METRIC_SERVICES.AIRTABLE,
           type: METRIC_TYPES.FAILURE,
           latencyMs: 200,
+          requestId: "metric-request-2",
           errorType: ERROR_TYPES.TIMEOUT,
           errorMessage: "Connection timed out",
         }),
       );
+
+      expect(getSystemObservabilitySnapshot().recentSignals).toEqual([
+        expect.objectContaining({
+          outcome: "failure",
+          requestId: "metric-request-2",
+          errorType: ERROR_TYPES.TIMEOUT,
+          meta: {
+            metricType: METRIC_TYPES.FAILURE,
+            errorMessage: "Connection timed out",
+          },
+        }),
+      ]);
+    });
+
+    it("should omit requestId when failure metric has no request correlation", async () => {
+      const { logger } = await import("@/lib/logger");
+
+      metrics.recordFailure(METRIC_SERVICES.AIRTABLE, 200, new Error("boom"));
+
+      expect(vi.mocked(logger.error).mock.lastCall?.[1]).not.toHaveProperty(
+        "requestId",
+      );
+      expect(
+        getSystemObservabilitySnapshot().recentSignals[0],
+      ).not.toHaveProperty("requestId");
     });
 
     it("should increment consecutive failure count", () => {
@@ -244,6 +318,8 @@ describe("LeadPipelineMetrics", () => {
 
     it("should respect cooldown period between alerts", async () => {
       const { logger } = await import("@/lib/logger");
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date("2025-01-01T00:00:00.000Z"));
       const alertConfig = {
         consecutiveFailureThreshold: 2,
         alertCooldownMs: 10000,
@@ -280,6 +356,73 @@ describe("LeadPipelineMetrics", () => {
           (call) => call[0] === "Lead pipeline alert: consecutive failures",
         );
       expect(alertCalls.length).toBe(1);
+
+      vi.advanceTimersByTime(9999);
+      alertMetrics.recordFailure(
+        METRIC_SERVICES.RESEND,
+        100,
+        new Error("timed out"),
+      );
+
+      expect(
+        vi
+          .mocked(logger.error)
+          .mock.calls.filter(
+            (call) => call[0] === "Lead pipeline alert: consecutive failures",
+          ),
+      ).toHaveLength(1);
+
+      vi.advanceTimersByTime(1);
+      alertMetrics.recordFailure(
+        METRIC_SERVICES.RESEND,
+        100,
+        new Error("timed out"),
+      );
+
+      const finalAlertCalls = vi
+        .mocked(logger.error)
+        .mock.calls.filter(
+          (call) => call[0] === "Lead pipeline alert: consecutive failures",
+        );
+      expect(finalAlertCalls).toHaveLength(2);
+      expect(finalAlertCalls[1]?.[1]).toEqual(
+        expect.objectContaining({
+          lastErrorType: ERROR_TYPES.TIMEOUT,
+          threshold: 2,
+        }),
+      );
+      vi.useRealTimers();
+    });
+
+    it("should honor the default alert threshold and cooldown settings", async () => {
+      const { logger } = await import("@/lib/logger");
+
+      for (let i = 0; i < 4; i++) {
+        metrics.recordFailure(METRIC_SERVICES.RESEND, 100, new Error("boom"));
+      }
+
+      expect(
+        vi
+          .mocked(logger.error)
+          .mock.calls.filter(
+            (call) => call[0] === "Lead pipeline alert: consecutive failures",
+          ),
+      ).toHaveLength(0);
+
+      metrics.recordFailure(METRIC_SERVICES.RESEND, 100, new Error("boom"));
+
+      const alertCalls = vi
+        .mocked(logger.error)
+        .mock.calls.filter(
+          (call) => call[0] === "Lead pipeline alert: consecutive failures",
+        );
+      expect(alertCalls).toHaveLength(1);
+      expect(alertCalls[0]?.[1]).toEqual(
+        expect.objectContaining({
+          threshold: 5,
+          lastErrorType: ERROR_TYPES.UNKNOWN,
+        }),
+      );
     });
 
     it("should track failures independently per service", () => {
@@ -352,6 +495,18 @@ describe("LeadPipelineMetrics", () => {
           lastRequestId: "summary-request-1",
         }),
       ]);
+
+      expect(getSystemObservabilitySnapshot().recentSignals).toEqual([
+        expect.objectContaining({
+          outcome: "success",
+          requestId: "summary-request-1",
+          meta: {
+            leadId: "CON-123",
+            resend: { success: true, latencyMs: 200 },
+            airtable: { success: true, latencyMs: 300 },
+          },
+        }),
+      ]);
     });
 
     it("should log failure summary with error level", async () => {
@@ -381,6 +536,36 @@ describe("LeadPipelineMetrics", () => {
           event: "lead_pipeline_summary",
           leadId: "CON-456",
           overallSuccess: false,
+        }),
+      );
+
+      expect(getSystemObservabilitySnapshot().aggregates).toEqual([
+        expect.objectContaining({
+          surface: "lead-pipeline",
+          kind: "pipeline_summary",
+          name: "contact",
+          failure: 1,
+        }),
+      ]);
+      expect(
+        getSystemObservabilitySnapshot().recentSignals[0],
+      ).not.toHaveProperty("requestId");
+      expect(getSystemObservabilitySnapshot().recentSignals[0]).toEqual(
+        expect.objectContaining({
+          outcome: "failure",
+          meta: {
+            leadId: "CON-456",
+            resend: {
+              success: false,
+              latencyMs: 200,
+              errorType: ERROR_TYPES.TIMEOUT,
+            },
+            airtable: {
+              success: false,
+              latencyMs: 300,
+              errorType: ERROR_TYPES.NETWORK,
+            },
+          },
         }),
       );
     });

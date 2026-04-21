@@ -1140,6 +1140,22 @@ class QualityGate {
     return gate;
   }
 
+  runBuildCommand() {
+    return spawnSync("pnpm", ["build"], {
+      encoding: "utf8",
+      shell: true,
+      maxBuffer: 50 * 1024 * 1024,
+    });
+  }
+
+  runPerformanceTests(timeoutMs) {
+    return execSync("pnpm test --run --reporter=json", {
+      stdio: "pipe",
+      timeout: timeoutMs,
+      maxBuffer: 50 * 1024 * 1024,
+    });
+  }
+
   /**
    * 性能门禁检查
    */
@@ -1155,14 +1171,10 @@ class QualityGate {
     };
 
     try {
+      let hasExecutionFailure = false;
       // 构建性能检查
       const buildStart = Date.now();
-      // 使用 spawnSync 捕获 stdout + stderr，确保能识别写入 stderr 的 i18n 报错
-      const buildRes = spawnSync("pnpm", ["build"], {
-        encoding: "utf8",
-        shell: true,
-        maxBuffer: 50 * 1024 * 1024,
-      });
+      const buildRes = this.runBuildCommand();
       const buildOutput = (buildRes.stdout || "") + (buildRes.stderr || "");
       const buildTime = Date.now() - buildStart;
 
@@ -1175,47 +1187,47 @@ class QualityGate {
         gate.issues.push(buildOutput.slice(0, 2000));
         gate.status = "failed";
         gate.blocking = true;
+        hasExecutionFailure = true;
       } else {
         // Zero-tolerance i18n smoke test: fail if next-intl reports missing messages（stdout 或 stderr 均可识别）
         if (/MISSING_MESSAGE/i.test(buildOutput)) {
           gate.issues.push("next-intl MISSING_MESSAGE detected in build logs");
           gate.status = "failed";
           gate.blocking = true; // enforce blocking when i18n is broken
+          hasExecutionFailure = true;
         }
       }
 
-      // 测试性能检查
-      const testStart = Date.now();
-      const perfTestTimeout =
-        readEnvNumber("QUALITY_PERF_TEST_TIMEOUT_MS") || 360000; // 6min default
-      execSync("pnpm test --run --reporter=json", {
-        stdio: "pipe",
-        timeout: perfTestTimeout,
-        maxBuffer: 50 * 1024 * 1024, // 50MB to handle long test output
-      });
-      const testTime = Date.now() - testStart;
+      if (!hasExecutionFailure) {
+        // 测试性能检查
+        const testStart = Date.now();
+        const perfTestTimeout =
+          readEnvNumber("QUALITY_PERF_TEST_TIMEOUT_MS") || 360000; // 6min default
+        this.runPerformanceTests(perfTestTimeout);
+        const testTime = Date.now() - testStart;
 
-      gate.checks.testTime = testTime;
+        gate.checks.testTime = testTime;
 
-      // 检查性能阈值
-      const issues = [];
-      if (buildTime > this.config.gates.performance.thresholds.buildTime) {
-        issues.push(
-          `构建时间 ${Math.round(buildTime / 1000)}s 超过阈值 ${Math.round(this.config.gates.performance.thresholds.buildTime / 1000)}s`,
-        );
-      }
+        // 检查性能阈值
+        const issues = [];
+        if (buildTime > this.config.gates.performance.thresholds.buildTime) {
+          issues.push(
+            `构建时间 ${Math.round(buildTime / 1000)}s 超过阈值 ${Math.round(this.config.gates.performance.thresholds.buildTime / 1000)}s`,
+          );
+        }
 
-      if (testTime > this.config.gates.performance.thresholds.testTime) {
-        issues.push(
-          `测试时间 ${Math.round(testTime / 1000)}s 超过阈值 ${Math.round(this.config.gates.performance.thresholds.testTime / 1000)}s`,
-        );
-      }
+        if (testTime > this.config.gates.performance.thresholds.testTime) {
+          issues.push(
+            `测试时间 ${Math.round(testTime / 1000)}s 超过阈值 ${Math.round(this.config.gates.performance.thresholds.testTime / 1000)}s`,
+          );
+        }
 
-      if (issues.length > 0) {
-        gate.status = gate.blocking ? "failed" : "warning";
-        gate.issues.push(...issues);
-      } else {
-        gate.status = "passed";
+        if (issues.length > 0) {
+          gate.status = gate.blocking ? "failed" : "warning";
+          gate.issues.push(...issues);
+        } else {
+          gate.status = "passed";
+        }
       }
     } catch (error) {
       gate.status = gate.blocking ? "error" : "warning";

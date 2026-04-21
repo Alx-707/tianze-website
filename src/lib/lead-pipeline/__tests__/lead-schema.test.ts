@@ -51,6 +51,9 @@ describe("Lead Schema", () => {
       };
       const result = contactLeadSchema.safeParse(minimalLead);
       expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.marketingConsent).toBe(false);
+      }
     });
 
     it("should reject contact lead with invalid email", () => {
@@ -112,6 +115,36 @@ describe("Lead Schema", () => {
       const leadWithNumericQty = { ...validProductLead, quantity: 100 };
       const result = productLeadSchema.safeParse(leadWithNumericQty);
       expect(result.success).toBe(true);
+    });
+
+    it("should trim productSlug", () => {
+      const leadWithSpaces = {
+        ...validProductLead,
+        productSlug: "  industrial-pump-x100  ",
+      };
+      const result = productLeadSchema.safeParse(leadWithSpaces);
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.productSlug).toBe("industrial-pump-x100");
+      }
+    });
+
+    it("should trim string quantity", () => {
+      const leadWithSpaces = {
+        ...validProductLead,
+        quantity: "  500 units  ",
+      };
+      const result = productLeadSchema.safeParse(leadWithSpaces);
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.quantity).toBe("500 units");
+      }
+    });
+
+    it("should reject product lead with zero numeric quantity", () => {
+      const invalidLead = { ...validProductLead, quantity: 0 };
+      const result = productLeadSchema.safeParse(invalidLead);
+      expect(result.success).toBe(false);
     });
 
     it("should reject product lead without productSlug", () => {
@@ -189,6 +222,23 @@ describe("Lead Schema", () => {
       expect(result.success).toBe(true);
       if (result.success) {
         expect(result.data.type).toBe(LEAD_TYPES.PRODUCT);
+      }
+    });
+
+    it("should discriminate product lead with string quantity", () => {
+      const productLead = {
+        type: LEAD_TYPES.PRODUCT,
+        fullName: "Test User",
+        email: "test@example.com",
+        productSlug: "test-product",
+        productName: "Test Product",
+        quantity: "10 boxes",
+      };
+      const result = leadSchema.safeParse(productLead);
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.type).toBe(LEAD_TYPES.PRODUCT);
+        expect(result.data.quantity).toBe("10 boxes");
       }
     });
 

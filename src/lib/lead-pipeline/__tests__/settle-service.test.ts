@@ -19,6 +19,23 @@ vi.mock("@/lib/lead-pipeline/with-timeout", () => ({
 
 describe("settleService", () => {
   const mockStop = vi.fn();
+  const setupSuccessPath = async (latencyMs: number) => {
+    const { createLatencyTimer } = await import("@/lib/lead-pipeline/metrics");
+    const { withTimeout } = await import("@/lib/lead-pipeline/with-timeout");
+    mockStop.mockReturnValue(latencyMs);
+    vi.mocked(createLatencyTimer).mockReturnValue({ stop: mockStop });
+    vi.mocked(withTimeout).mockImplementation((promise) => promise);
+    return { createLatencyTimer, withTimeout };
+  };
+
+  const setupFailurePath = async (latencyMs: number, error: unknown) => {
+    const { createLatencyTimer } = await import("@/lib/lead-pipeline/metrics");
+    const { withTimeout } = await import("@/lib/lead-pipeline/with-timeout");
+    mockStop.mockReturnValue(latencyMs);
+    vi.mocked(createLatencyTimer).mockReturnValue({ stop: mockStop });
+    vi.mocked(withTimeout).mockRejectedValue(error);
+    return { createLatencyTimer, withTimeout };
+  };
 
   beforeEach(async () => {
     vi.clearAllMocks();
@@ -180,40 +197,29 @@ describe("settleService", () => {
   });
 
   describe("latency measurement", () => {
-    it("should measure latency correctly for both success and failure", async () => {
-      const { createLatencyTimer } =
-        await import("@/lib/lead-pipeline/metrics");
-      const { withTimeout } = await import("@/lib/lead-pipeline/with-timeout");
-
-      // Test success case
-      const successLatency = 150;
-      mockStop.mockReturnValue(successLatency);
-      vi.mocked(withTimeout).mockImplementation((promise) => promise);
-
+    it("measures latency for successful operations", async () => {
+      const { createLatencyTimer } = await setupSuccessPath(150);
       const successResult = await settleService(Promise.resolve("success"), {
         operationName: "successOp",
       });
 
       expect(createLatencyTimer).toHaveBeenCalled();
       expect(mockStop).toHaveBeenCalled();
-      expect(successResult.latencyMs).toBe(successLatency);
+      expect(successResult.latencyMs).toBe(150);
+    });
 
-      // Reset mocks for failure case
-      vi.clearAllMocks();
-      vi.mocked(createLatencyTimer).mockReturnValue({ stop: mockStop });
-
-      // Test failure case
-      const failureLatency = 200;
-      mockStop.mockReturnValue(failureLatency);
-      vi.mocked(withTimeout).mockRejectedValue(new Error("fail"));
-
+    it("measures latency for failed operations", async () => {
+      const { createLatencyTimer } = await setupFailurePath(
+        200,
+        new Error("fail"),
+      );
       const failureResult = await settleService(Promise.resolve("test"), {
         operationName: "failOp",
       });
 
       expect(createLatencyTimer).toHaveBeenCalled();
       expect(mockStop).toHaveBeenCalled();
-      expect(failureResult.latencyMs).toBe(failureLatency);
+      expect(failureResult.latencyMs).toBe(200);
     });
   });
 });

@@ -157,10 +157,18 @@ export class LeadPipelineMetrics {
 
   constructor(config?: Partial<AlertConfig>) {
     this.alertConfig = { ...DEFAULT_ALERT_CONFIG, ...config };
-    this.failureState = new Map<MetricService, FailureState>([
-      [METRIC_SERVICES.RESEND, createInitialFailureState()],
-      [METRIC_SERVICES.AIRTABLE, createInitialFailureState()],
-    ]);
+    this.failureState = new Map<MetricService, FailureState>();
+  }
+
+  private getMutableFailureState(service: MetricService): FailureState {
+    const existing = this.failureState.get(service);
+    if (existing) {
+      return existing;
+    }
+
+    const created = createInitialFailureState();
+    this.failureState.set(service, created);
+    return created;
   }
 
   /**
@@ -246,7 +254,6 @@ export class LeadPipelineMetrics {
    * Log pipeline processing summary
    */
   logPipelineSummary(summary: PipelineSummary): void {
-    const level = summary.overallSuccess ? "info" : "error";
     const logData = {
       event: "lead_pipeline_summary",
       ...summary,
@@ -270,7 +277,7 @@ export class LeadPipelineMetrics {
       }),
     );
 
-    if (level === "info") {
+    if (summary.overallSuccess) {
       logger.info("Lead pipeline completed", logData);
     } else {
       logger.error("Lead pipeline completed", logData);
@@ -281,10 +288,7 @@ export class LeadPipelineMetrics {
    * Reset consecutive failure count for a service
    */
   private resetFailureCount(service: MetricService): void {
-    const state = this.failureState.get(service);
-    if (state) {
-      state.consecutiveFailures = 0;
-    }
+    this.getMutableFailureState(service).consecutiveFailures = 0;
   }
 
   /**
@@ -294,8 +298,7 @@ export class LeadPipelineMetrics {
     service: MetricService,
     errorType?: ErrorType,
   ): void {
-    const state = this.failureState.get(service);
-    if (!state) return;
+    const state = this.getMutableFailureState(service);
 
     state.consecutiveFailures += 1;
 
@@ -309,8 +312,7 @@ export class LeadPipelineMetrics {
    * Check if alert should be triggered
    */
   private shouldTriggerAlert(service: MetricService): boolean {
-    const state = this.failureState.get(service);
-    if (!state) return false;
+    const state = this.getMutableFailureState(service);
 
     const meetsThreshold =
       state.consecutiveFailures >= this.alertConfig.consecutiveFailureThreshold;
@@ -342,8 +344,7 @@ export class LeadPipelineMetrics {
    * Get current failure state (for testing/monitoring)
    */
   getFailureState(service: MetricService): FailureState {
-    const state = this.failureState.get(service);
-    return state ? { ...state } : createInitialFailureState();
+    return { ...this.getMutableFailureState(service) };
   }
 
   /**
