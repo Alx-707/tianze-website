@@ -8,7 +8,7 @@ describe("ProductCard", () => {
     title: "弯管设备",
     features: ["自主设计研发制造", "半自动/全自动弯管机", "服务国内一线品牌"],
     buttonText: "了解更多",
-    buttonHref: "/products/machines",
+    buttonHref: "/capabilities/bending-machines",
   };
 
   it("renders title and features", () => {
@@ -24,7 +24,7 @@ describe("ProductCard", () => {
     render(<ProductCard {...props} />);
 
     const button = screen.getByRole("link", { name: /了解更多/i });
-    expect(button).toHaveAttribute("href", "/products/machines");
+    expect(button).toHaveAttribute("href", "/capabilities/bending-machines");
   });
 
   it("renders primary button variant when isPrimary is true", () => {

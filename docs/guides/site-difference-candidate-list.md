@@ -28,6 +28,15 @@
 
 **真正先分开的，通常不是“代码能力”，而是“站点身份”。**
 
+## 当前执行锁定
+
+当前这份清单服务于：
+
+- 单站高标准基线治理
+- 未来类似项目的二次开发替换
+
+它现在不是多站点 runtime 施工清单。
+
 ## 判断规则
 
 这里把候选差异分成 3 档：
@@ -69,6 +78,14 @@
 
 - `weijunext/nextjs-starter`
 - `vercel/next-forge`
+
+## 对未来二次开发最直接的含义
+
+这份清单里的 A 档内容，应默认视为未来 derivative project 第一波替换面。
+
+配套执行顺序见：
+
+- [DERIVATIVE-PROJECT-REPLACEMENT-CHECKLIST.md](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/DERIVATIVE-PROJECT-REPLACEMENT-CHECKLIST.md)
 
 ## 2. 联系方式与社媒链接
 
@@ -122,6 +139,7 @@
 当前位置：
 
 - [site-config.ts](/Users/Data/Warehouse/Pipe/tianze-website/src/config/paths/site-config.ts)
+- [single-site-seo.ts](/Users/Data/Warehouse/Pipe/tianze-website/src/config/single-site-seo.ts)
 - [seo-metadata.ts](/Users/Data/Warehouse/Pipe/tianze-website/src/lib/seo-metadata.ts)
 - [content.json](/Users/Data/Warehouse/Pipe/tianze-website/content/config/content.json)
 
@@ -134,7 +152,8 @@
 
 - SEO 引擎可以共享
 - SEO 默认值、品牌词、关键词不能继续默认绑死
-- 还要顺手清掉模板残留，避免以后把旧模板文案误当成业务真相
+- sitemap / robots / public static page SEO 输入当前以 `src/config/single-site-seo.ts` 为 canonical authoring seam
+- 还要顺手清掉历史模板痕迹，避免以后把旧模板文案误当成业务真相
 
 主参考仓库：
 
@@ -197,6 +216,7 @@
 
 - [contact/page.tsx](/Users/Data/Warehouse/Pipe/tianze-website/src/app/[locale]/contact/page.tsx)
 - [contact-page-shell.tsx](/Users/Data/Warehouse/Pipe/tianze-website/src/app/[locale]/contact/contact-page-shell.tsx)
+- [single-site-page-expression.ts](/Users/Data/Warehouse/Pipe/tianze-website/src/config/single-site-page-expression.ts)
 - [deferred.json](/Users/Data/Warehouse/Pipe/tianze-website/messages/en/deferred.json)
 - [deferred.json](/Users/Data/Warehouse/Pipe/tianze-website/messages/zh/deferred.json)
 
@@ -209,6 +229,8 @@
 
 - 联系页要分开看“流程能力”和“业务语境”
 - 后续讨论多站点时，联系页不能只看成一个共享表单
+- 当前 contact fallback copy、FAQ 选择、部分 CTA 目标，以及 bending-machines 的展示映射，当前以 `src/config/single-site-page-expression.ts` 为 canonical authoring seam
+- 但 `MERGED_MESSAGES`、`SPECS_BY_MARKET`、heading parser / slugify / JSON-LD 这类实现细节，故意留在页面或 helper 层，不作为第一波替换面
 
 主参考仓库：
 

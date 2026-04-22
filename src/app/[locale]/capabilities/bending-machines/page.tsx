@@ -1,7 +1,9 @@
+import type { ComponentProps } from "react";
 import type { Metadata } from "next";
 import Image from "next/image";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { generateMetadataForPath, type Locale } from "@/lib/seo-metadata";
+import { SINGLE_SITE_BENDING_MACHINES_PAGE_EXPRESSION } from "@/config/single-site-page-expression";
 import { siteFacts } from "@/config/site-facts";
 import { FaqSection } from "@/components/sections/faq-section";
 import { Link } from "@/i18n/routing";
@@ -35,8 +37,6 @@ export async function generateMetadata({
     },
   });
 }
-
-const BENDING_FAQ_ITEMS = ["bendingRadius", "manufacturer"] as const;
 
 // --- Extracted sub-sections (keep main function under 120 lines) ---
 
@@ -130,6 +130,17 @@ interface StatItem {
   label: string;
 }
 
+function getCapabilityStatValue(
+  stat: (typeof SINGLE_SITE_BENDING_MACHINES_PAGE_EXPRESSION.stats)[number],
+  t: (key: string) => string,
+) {
+  if (stat.valueSource === "translation") {
+    return t(`${stat.translationKey}.value`);
+  }
+
+  return `${siteFacts.stats.exportCountries}${stat.suffix}`;
+}
+
 function ProductionCapabilitySection({
   title,
   stats,
@@ -158,17 +169,19 @@ function CtaSection({
   heading,
   description,
   buttonText,
+  href,
 }: {
   heading: string;
   description: string;
   buttonText: string;
+  href: ComponentProps<typeof Link>["href"];
 }) {
   return (
     <section className="mt-16 rounded-lg border border-primary/20 bg-primary/5 p-8 text-center">
       <h2 className="mb-2 text-xl font-semibold">{heading}</h2>
       <p className="mb-6 text-muted-foreground">{description}</p>
       <Link
-        href="/contact"
+        href={href}
         className="inline-flex items-center rounded-md bg-primary px-6 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
       >
         {buttonText}
@@ -185,28 +198,17 @@ export default async function BendingMachinesPage({ params }: PageProps) {
 
   const t = await getTranslations({ locale, namespace: "capabilities" });
 
-  const whyCards: WhyCardData[] = [
-    { title: t("why.card1.title"), desc: t("why.card1.desc") },
-    { title: t("why.card2.title"), desc: t("why.card2.desc") },
-    { title: t("why.card3.title"), desc: t("why.card3.desc") },
-  ];
+  const whyCards: WhyCardData[] =
+    SINGLE_SITE_BENDING_MACHINES_PAGE_EXPRESSION.whyCardKeys.map((cardKey) => ({
+      title: t(`why.${cardKey}.title`),
+      desc: t(`why.${cardKey}.desc`),
+    }));
 
-  const stats: StatItem[] = [
-    {
-      value: t("capability.monthlyCapacity.value"),
-      label: t("capability.monthlyCapacity.label"),
-    },
-    {
-      value: t("capability.countries.value", {
-        countries: siteFacts.stats.exportCountries,
-      }),
-      label: t("capability.countries.label"),
-    },
-    {
-      value: t("capability.experience.value"),
-      label: t("capability.experience.label"),
-    },
-  ];
+  const stats: StatItem[] =
+    SINGLE_SITE_BENDING_MACHINES_PAGE_EXPRESSION.stats.map((stat) => ({
+      value: getCapabilityStatValue(stat, t),
+      label: t(`${stat.translationKey}.label`),
+    }));
 
   return (
     <main className="mx-auto max-w-[1080px] px-6 py-8 md:py-12">
@@ -233,12 +235,16 @@ export default async function BendingMachinesPage({ params }: PageProps) {
         stats={stats}
       />
 
-      <FaqSection items={[...BENDING_FAQ_ITEMS]} locale={locale as Locale} />
+      <FaqSection
+        items={[...SINGLE_SITE_BENDING_MACHINES_PAGE_EXPRESSION.faqItems]}
+        locale={locale as Locale}
+      />
 
       <CtaSection
         heading={t("cta.heading")}
         description={t("cta.description")}
         buttonText={t("cta.button")}
+        href={SINGLE_SITE_BENDING_MACHINES_PAGE_EXPRESSION.ctaHref}
       />
     </main>
   );

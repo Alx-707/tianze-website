@@ -17,6 +17,9 @@ if [[ "${ALLOW_MEMORY_IDEMPOTENCY:-}" == "true" || "${ALLOW_MEMORY_IDEMPOTENCY:-
 fi
 
 echo "== Release verification flow =="
+pnpm review:docs-truth
+pnpm review:cf:official-compare
+pnpm review:derivative-readiness
 pnpm type-check
 pnpm lint:check
 pnpm review:tier-a

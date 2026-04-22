@@ -24,6 +24,7 @@ Recommended order:
 
 Validation checklist for each batch:
 - `pnpm install`
+- `pnpm review:cf:official-compare` for Next / OpenNext / Wrangler / Cloudflare-proof changes
 - `pnpm ci:local:quick` for validated patch/minor batches, Next/React/TypeScript changes, or security-sensitive changes
 - `pnpm type-check`
 - `pnpm lint:check`

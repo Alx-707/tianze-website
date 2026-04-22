@@ -222,6 +222,16 @@ describe("sitemap.ts", () => {
       expect(about?.changeFrequency).toBe("monthly");
     });
 
+    it("should keep terms page SEO defaults explicit", async () => {
+      const result = await sitemap();
+      const terms = result.find(
+        (entry) => entry.url === "https://example.com/en/terms",
+      );
+
+      expect(terms?.priority).toBe(0.7);
+      expect(terms?.changeFrequency).toBe("monthly");
+    });
+
     it("should not have duplicate entries", async () => {
       const result = await sitemap();
       const urls = result.map((entry) => entry.url);

@@ -19,21 +19,21 @@
   - current single-site cleanup second
   - second real site pilot next
   - formal multi-site structure last
-- Current site identity truth-source:
-  - `src/sites/index.ts`
-  - `src/sites/tianze.ts`
-  - `src/sites/tianze-equipment.ts`
-  - `src/sites/tianze/product-catalog.ts`
-  - `src/sites/message-overrides.ts`
-  - `src/sites/types.ts`
-- Compatibility wrappers remain in:
+- Current site identity truth-source (single-site phase — see commit `de53c9e`):
+  - `src/config/single-site.ts` — site identity, brand, runtime toggles
+  - `src/config/single-site-product-catalog.ts` — product catalog truth
+  - `src/config/single-site-page-expression.ts` — reusable page-expression inputs
+  - `src/config/single-site-seo.ts` — sitemap / robots / public static page SEO defaults
+  - `src/config/site-facts.ts` — static facts (contact info, addresses, locale list)
+  - `src/config/site-types.ts` — shared site type definitions
+- Compatibility wrappers (consumed by existing call sites; do not duplicate values here):
   - `src/config/paths/site-config.ts`
   - `src/config/site-facts.ts`
   - `src/constants/product-catalog.ts`
   - `src/config/footer-links.ts`
   - `src/lib/navigation.ts`
-  - New site identity work should prefer `src/sites/**`, not duplicate values in wrappers
-  - Site-specific copy work should prefer `src/sites/**/messages/**`, not direct edits to shared bundles unless the copy is intentionally global
+  - New site identity work should prefer the `src/config/single-site*.ts` surfaces, not duplicate values in wrappers
+  - Site-specific copy currently lives in shared `messages/{locale}/`; do not assume `src/sites/**/messages/**` exists in runtime today
 
 ### Page Props Convention
 
@@ -66,8 +66,10 @@ The project uses **dual content strategies** (details in `.claude/rules/content.
 ## Data Fetching
 
 **Blog/pages**: Content query system in `src/lib/content-query/`
-**Product catalog**: Current site truth in `src/sites/**`, consumed through `src/constants/product-catalog.ts` + `src/constants/product-specs/`
-**Site-specific copy**: shared messages in `messages/**`, optional per-site overlays in `src/sites/**/messages/**`
+**Product catalog**: Truth lives in `src/config/single-site-product-catalog.ts`, consumed through `src/constants/product-catalog.ts` + `src/constants/product-specs/`
+**Page expression**: Truth lives in `src/config/single-site-page-expression.ts` for reusable page inputs; page-local helpers stay in the route layer
+**Public static SEO**: Truth lives in `src/config/single-site-seo.ts` for sitemap / robots / public static page defaults
+**Site-specific copy**: all translations currently live in shared `messages/{locale}/`. Per-site overlays are a future extension, not a current layout.
 
 ## Project-Specific Pitfalls
 

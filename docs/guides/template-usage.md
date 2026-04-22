@@ -17,11 +17,13 @@ git clone <repo> client-project-name
 cd client-project-name
 
 # 2. Update business data
-# Edit src/sites/<site-key>.ts as the primary site identity source
+# Edit src/config/single-site.ts as the primary site identity source
+# Edit src/config/single-site-page-expression.ts for reusable page inputs
+# Edit src/config/single-site-seo.ts for sitemap / robots / public-page SEO defaults
 
 # 3. Update translations
-# Edit shared messages in messages/* only when every site should inherit them
-# Edit src/sites/<site-key>/messages/* for site-specific copy
+# Edit shared split bundles in messages/* for the derivative project's user-facing copy
+# Do not assume a src/sites/** overlay layer exists in the current template
 
 # 4. Run development server
 pnpm install
@@ -30,7 +32,7 @@ pnpm dev
 
 ## Key Configuration Files
 
-### 1. Site Configuration (`src/sites/<site-key>.ts`)
+### 1. Site Configuration (`src/config/single-site.ts`)
 
 Primary source of truth for brand, SEO, contact, social links, and site-level facts:
 
@@ -85,7 +87,28 @@ export const siteFacts: SiteFacts = {
 };
 ```
 
-Prefer updating `src/sites/<site-key>.ts` first. Treat wrappers as consumption surfaces, not authoring surfaces.
+Prefer updating `src/config/single-site.ts` first. Treat wrappers as consumption surfaces, not authoring surfaces.
+
+### 2.1 Page Expression (`src/config/single-site-page-expression.ts`)
+
+Reusable page inputs belong here:
+
+- FAQ item keys
+- CTA targets
+- section/card ordering
+- display mapping such as about stats or bending-machine stats
+- fallback copy that should survive derivative-project replacement
+
+Do **not** move implementation details here. `MERGED_MESSAGES`, `SPECS_BY_MARKET`, heading-prefix constants, slugify/parsers, and JSON-LD literals stay in the route/helper layer.
+
+### 2.2 Public Static SEO (`src/config/single-site-seo.ts`)
+
+This file is the canonical authoring seam for:
+
+- sitemap static-page lists
+- sitemap per-page defaults
+- robots disallow defaults
+- public static page SEO timing/priority inputs
 
 ### 3. Translation Files (`messages/[locale]/`)
 
@@ -101,17 +124,7 @@ messages/
     └── deferred.json
 ```
 
-For site-specific copy, use:
-
-```
-src/sites/<site-key>/messages/
-├── en/
-│   ├── critical.json
-│   └── deferred.json
-└── zh/
-    ├── critical.json
-    └── deferred.json
-```
+For the current template baseline, edit the shared split bundles directly. If a future derivative workflow ever introduces per-site overlays, that will need a separate structural change and proof update.
 
 ## Creating New Block Components
 

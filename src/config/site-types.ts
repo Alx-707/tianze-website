@@ -1,4 +1,10 @@
-export type SiteKey = "tianze";
+/**
+ * Site key is an authoring input, not a hardcoded repository-wide Tianze type.
+ * The current single-site baseline still exports `SINGLE_SITE_KEY = "tianze"`
+ * from `single-site.ts`, but future derivative projects should only need to
+ * replace that input instead of editing shared type definitions.
+ */
+export type SiteKey = string;
 
 export interface SiteSeoConfig {
   titleTemplate: string;

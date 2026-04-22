@@ -9,6 +9,7 @@ import {
   PRODUCT_CATALOG,
   getFamiliesForMarket,
 } from "@/constants/product-catalog";
+import { SINGLE_SITE_PRODUCTS_PAGE_EXPRESSION } from "@/config/single-site-page-expression";
 import { CatalogBreadcrumb } from "@/components/products/catalog-breadcrumb";
 import { MarketSeriesCard } from "@/components/products/market-series-card";
 import { Link } from "@/i18n/routing";
@@ -39,11 +40,14 @@ export default async function ProductsPage({ params }: ProductsPageProps) {
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: "catalog" });
 
-  const pvcMarkets = PRODUCT_CATALOG.markets.filter(
-    (m) => m.slug !== "pneumatic-tube-systems",
+  const pvcMarkets = PRODUCT_CATALOG.markets.filter((market) =>
+    SINGLE_SITE_PRODUCTS_PAGE_EXPRESSION.standardMarketSlugs.includes(
+      market.slug,
+    ),
   );
   const pneumaticMarket = PRODUCT_CATALOG.markets.find(
-    (m) => m.slug === "pneumatic-tube-systems",
+    (market) =>
+      market.slug === SINGLE_SITE_PRODUCTS_PAGE_EXPRESSION.specialtyMarketSlug,
   );
 
   return (
@@ -99,12 +103,14 @@ export default async function ProductsPage({ params }: ProductsPageProps) {
           )}
           {/* Bending Machines card — links to /capabilities/bending-machines */}
           <Link
-            href="/capabilities/bending-machines"
+            href={SINGLE_SITE_PRODUCTS_PAGE_EXPRESSION.equipmentCard.href}
             className="group block rounded-lg border border-border bg-card p-6 shadow-sm transition-shadow hover:shadow-md"
           >
             <div className="relative mb-4 aspect-[16/9] w-full overflow-hidden rounded-md bg-muted">
               <Image
-                src="/images/products/full-auto-bending-machine.svg"
+                src={
+                  SINGLE_SITE_PRODUCTS_PAGE_EXPRESSION.equipmentCard.imageSrc
+                }
                 alt={t("overview.equipmentTitle")}
                 fill
                 sizes="(max-width: 640px) 100vw, 50vw"

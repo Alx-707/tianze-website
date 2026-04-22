@@ -12,6 +12,7 @@ import {
   generateLocaleStaticParams,
   type LocaleParam,
 } from "@/app/[locale]/generate-static-params";
+import { SINGLE_SITE_PRIVACY_SECTION_KEYS } from "@/config/single-site-page-expression";
 
 export function generateStaticParams() {
   return generateLocaleStaticParams();
@@ -65,19 +66,6 @@ interface TocItem {
   label: string;
 }
 
-const PRIVACY_SECTION_KEYS = [
-  "introduction",
-  "informationCollected",
-  "howWeUse",
-  "sharing",
-  "security",
-  "retention",
-  "rights",
-  "children",
-  "changes",
-  "contact",
-] as const;
-
 function slugifyHeading(text: string): string {
   const trimmed = text.trim();
   if (trimmed === "") {
@@ -118,7 +106,7 @@ function buildTocItems(
 ): TocItem[] {
   const items: TocItem[] = [];
 
-  for (const sectionKey of PRIVACY_SECTION_KEYS) {
+  for (const sectionKey of SINGLE_SITE_PRIVACY_SECTION_KEYS) {
     const label = tSections(`sections.${sectionKey}`);
 
     const match = headings.find((heading) => {

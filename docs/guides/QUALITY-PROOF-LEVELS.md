@@ -56,7 +56,7 @@ Add when relevant:
 - `pnpm build:cf` for platform/runtime/build-chain changes
 - `pnpm build:cf:turbo` when the change touches the Cloudflare build toolchain itself and you need to keep the comparison path healthy
 - `CI=1 pnpm test:e2e` for key-path UI/runtime changes
-- `pnpm build:site:equipment` when the change touches `src/sites/**`, site-specific message overlays, or site-switching behavior
+- `pnpm build:site:equipment` when the change touches `src/config/single-site*.ts`, `NEXT_PUBLIC_SITE_KEY` behavior, or the future derivative-project identity seam
 - `pnpm build:cf:site:equipment` when the same change must also be proven on the Cloudflare build path
 
 What it proves:
@@ -70,6 +70,30 @@ What it still does **not** prove by itself:
 Use for:
 - Tier A merges
 - runtime/security/i18n/platform-sensitive changes
+
+### 2.1 `local-full proof` boundary when the branch is dirty
+If the current branch is a **dirty worktree** with unrelated changes, do not
+pretend one big green local run proves this governance line end-to-end.
+
+Required split:
+- **targeted proof** for the work you actually touched on the dirty worktree
+- **clean branch** or isolated-worktree proof for the full repository claim
+
+For this repository, targeted proof usually means:
+- `pnpm review:docs-truth`
+- `pnpm review:cf:official-compare`
+- `pnpm review:derivative-readiness`
+- change-scoped Vitest suites
+- serial build proof such as `pnpm clean:next-artifacts && pnpm build`
+- `pnpm build:cf` when Cloudflare-, metadata-, or truth-sensitive surfaces move
+
+What it proves:
+- the changed seam is locally defended with fresh evidence
+- if the change hits `src/config/single-site.ts`, `src/config/single-site-page-expression.ts`, or `src/config/single-site-seo.ts`, the current single-site three-layer truth has at least been checked with the correct narrow proof
+
+What it does **not** prove:
+- that unrelated dirty files would also pass the full repository lane
+- that `ci:local:quick` on a later clean branch is already satisfied
 
 ### 3. `ci-proof`
 Purpose:
@@ -144,3 +168,9 @@ What it proves:
 - For current Cloudflare compatibility, `src/middleware.ts` remains the preferred runtime entrypoint over `proxy.ts`.
 - Translation proof for runtime-facing changes must include both full message bundles and critical bundles.
 - Site-aware proof is not only structure proof; at least one non-default-site build should be exercised when site identity or overlays change.
+- Template-readiness changes should also run `pnpm review:docs-truth` when they modify current-truth docs or derivative-project authoring guidance.
+- When the branch is a dirty worktree, report targeted proof and clean branch proof separately instead of blending them into one completion claim.
+- For current single-site authoring truth, distinguish three layers explicitly:
+  - `src/config/single-site.ts`
+  - `src/config/single-site-page-expression.ts`
+  - `src/config/single-site-seo.ts`

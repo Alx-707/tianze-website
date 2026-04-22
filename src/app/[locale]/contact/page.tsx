@@ -27,17 +27,10 @@ import { mergeObjects } from "@/lib/merge-objects";
 import { getContactCopy } from "@/lib/contact/getContactCopy";
 import { generateFAQSchema } from "@/lib/structured-data";
 import { siteFacts } from "@/config/site-facts";
+import { SINGLE_SITE_CONTACT_FAQ_ITEMS } from "@/config/single-site-page-expression";
 import { COUNT_TWO } from "@/constants";
 
 type Messages = Record<string, unknown>;
-
-const CONTACT_FAQ_ITEMS = [
-  "moq",
-  "leadTime",
-  "payment",
-  "samples",
-  "oem",
-] as const;
 
 const MERGED_MESSAGES = {
   en: mergeObjects(enCritical as Messages, enDeferred as Messages),
@@ -80,7 +73,7 @@ function buildFaqItems(messages: Messages) {
     employees: siteFacts.company.employees,
   };
 
-  return CONTACT_FAQ_ITEMS.map((key) => ({
+  return SINGLE_SITE_CONTACT_FAQ_ITEMS.map((key) => ({
     key,
     question: interpolateMessage(
       getNestedMessage(messages, `faq.items.${key}.question`),

@@ -1,4 +1,4 @@
-import { Suspense } from "react";
+import { Suspense, type ComponentProps } from "react";
 import type { Metadata } from "next";
 import { Link } from "@/i18n/routing";
 import {
@@ -14,6 +14,12 @@ import { siteFacts } from "@/config/site-facts";
 import { FaqSection } from "@/components/sections/faq-section";
 import { Button } from "@/components/ui/button";
 import {
+  SINGLE_SITE_ABOUT_FAQ_ITEMS,
+  SINGLE_SITE_ABOUT_PAGE_EXPRESSION,
+  SINGLE_SITE_ABOUT_STATS_ITEMS,
+  SINGLE_SITE_ABOUT_VALUE_ITEM_KEYS,
+} from "@/config/single-site-page-expression";
+import {
   Card,
   CardContent,
   CardDescription,
@@ -25,14 +31,6 @@ import { generateLocaleStaticParams } from "@/app/[locale]/generate-static-param
 export function generateStaticParams() {
   return generateLocaleStaticParams();
 }
-
-const ABOUT_FAQ_ITEMS = [
-  "manufacturer",
-  "factoryVisit",
-  "exportExperience",
-  "certifications",
-  "verifyCerts",
-] as const;
 
 function AboutLoadingSkeleton() {
   return (
@@ -154,48 +152,21 @@ function ValueCard({ icon, title, description }: ValueCardProps) {
 // Values section component
 interface ValuesSectionProps {
   title: string;
-  values: {
-    quality: { title: string; description: string };
-    innovation: { title: string; description: string };
-    service: { title: string; description: string };
-    integrity: { title: string; description: string };
-  };
+  items: Array<{
+    key: string;
+    title: string;
+    description: string;
+    icon: React.ReactNode;
+  }>;
 }
 
-function ValuesSection({ title, values }: ValuesSectionProps) {
-  // nosemgrep: object-injection-sink-spread-operator
-  // Reason: values is derived from controlled translation/config objects
-  // and only used to render UI content (title/description/icons). It never
-  // flows into persistence, command execution, or other sensitive sinks.
-  const valueItems = [
-    {
-      key: "quality",
-      icon: <Crosshair className="h-6 w-6" />,
-      ...values.quality,
-    },
-    {
-      key: "innovation",
-      icon: <Wrench className="h-6 w-6" />,
-      ...values.innovation,
-    },
-    {
-      key: "service",
-      icon: <HeadphonesIcon className="h-6 w-6" />,
-      ...values.service,
-    },
-    {
-      key: "integrity",
-      icon: <BadgeCheck className="h-6 w-6" />,
-      ...values.integrity,
-    },
-  ];
-
+function ValuesSection({ title, items }: ValuesSectionProps) {
   return (
     <section className="bg-muted/30 py-12 md:py-16">
       <div className="container mx-auto px-4">
         <h2 className="mb-10 text-center text-2xl font-bold">{title}</h2>
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {valueItems.map((item) => (
+          {items.map((item) => (
             <ValueCard
               key={item.key}
               icon={item.icon}
@@ -219,29 +190,29 @@ interface StatsSectionProps {
   };
 }
 
+function resolveAboutStatValue(
+  source: (typeof SINGLE_SITE_ABOUT_STATS_ITEMS)[number]["valueSource"],
+): string {
+  switch (source) {
+    case "yearsInBusiness":
+      return `${siteFacts.company.yearsInBusiness}`;
+    case "exportCountries":
+      return `${siteFacts.stats.exportCountries}`;
+    case "employees":
+      return `${siteFacts.company.employees}`;
+    case "factoryAreaAcres":
+      return `${siteFacts.stats.factoryAreaAcres}`;
+    default:
+      return "";
+  }
+}
+
 function StatsSection({ stats }: StatsSectionProps) {
-  const statItems = [
-    {
-      key: "years",
-      value: `${siteFacts.company.yearsInBusiness}+`,
-      label: stats.yearsExperience,
-    },
-    {
-      key: "countries",
-      value: `${siteFacts.stats.exportCountries}+`,
-      label: stats.countriesServed,
-    },
-    {
-      key: "team",
-      value: `${siteFacts.company.employees}+`,
-      label: stats.happyClients,
-    },
-    {
-      key: "factory",
-      value: `${siteFacts.stats.factoryAreaAcres ?? 100}`,
-      label: stats.productsDelivered,
-    },
-  ];
+  const statItems = SINGLE_SITE_ABOUT_STATS_ITEMS.map((item) => ({
+    key: item.key,
+    value: `${resolveAboutStatValue(item.valueSource)}${item.suffix}`,
+    label: stats[item.labelKey],
+  }));
 
   return (
     <section className="py-12 md:py-16">
@@ -266,9 +237,10 @@ interface CTASectionProps {
   title: string;
   description: string;
   buttonText: string;
+  href: ComponentProps<typeof Link>["href"];
 }
 
-function CTASection({ title, description, buttonText }: CTASectionProps) {
+function CTASection({ title, description, buttonText, href }: CTASectionProps) {
   return (
     <section className="bg-primary py-12 md:py-16">
       <div className="container mx-auto px-4 text-center">
@@ -279,7 +251,7 @@ function CTASection({ title, description, buttonText }: CTASectionProps) {
           {description}
         </p>
         <Button asChild size="lg" variant="secondary">
-          <Link href="/contact">
+          <Link href={href}>
             {buttonText}
             <ArrowRight className="ml-2 h-4 w-4" />
           </Link>
@@ -310,24 +282,21 @@ async function AboutContent({ locale }: { locale: string }) {
 
   const valuesProps = {
     title: t("values.title"),
-    values: {
-      quality: {
-        title: t("values.quality.title"),
-        description: t("values.quality.description"),
-      },
-      innovation: {
-        title: t("values.innovation.title"),
-        description: t("values.innovation.description"),
-      },
-      service: {
-        title: t("values.service.title"),
-        description: t("values.service.description"),
-      },
-      integrity: {
-        title: t("values.integrity.title"),
-        description: t("values.integrity.description"),
-      },
-    },
+    items: SINGLE_SITE_ABOUT_VALUE_ITEM_KEYS.map((key) => ({
+      key,
+      title: t(`values.${key}.title`),
+      description: t(`values.${key}.description`),
+      icon:
+        key === "quality" ? (
+          <Crosshair className="h-6 w-6" />
+        ) : key === "innovation" ? (
+          <Wrench className="h-6 w-6" />
+        ) : key === "service" ? (
+          <HeadphonesIcon className="h-6 w-6" />
+        ) : (
+          <BadgeCheck className="h-6 w-6" />
+        ),
+    })),
   };
 
   const statsProps = {
@@ -343,6 +312,7 @@ async function AboutContent({ locale }: { locale: string }) {
     title: t("cta.title"),
     description: t("cta.description"),
     buttonText: t("cta.button"),
+    href: SINGLE_SITE_ABOUT_PAGE_EXPRESSION.ctaHref,
   };
 
   return (
@@ -351,7 +321,10 @@ async function AboutContent({ locale }: { locale: string }) {
       <MissionSection {...missionProps} />
       <ValuesSection {...valuesProps} />
       <StatsSection {...statsProps} />
-      <FaqSection items={[...ABOUT_FAQ_ITEMS]} locale={locale as Locale} />
+      <FaqSection
+        items={[...SINGLE_SITE_ABOUT_FAQ_ITEMS]}
+        locale={locale as Locale}
+      />
       <CTASection {...ctaProps} />
     </main>
   );

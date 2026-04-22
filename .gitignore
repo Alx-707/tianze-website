@@ -92,3 +92,4 @@ reviews/
 .codex/
 .omx/
 .eslintcache-audit
+.worktrees/

@@ -33,7 +33,7 @@ const PRODUCTS: readonly ProductConfig[] = [
       "machines.feature3",
     ],
     buttonKey: "machines.button",
-    href: "/products/machines",
+    href: "/capabilities/bending-machines",
   },
   {
     image: {
@@ -43,7 +43,7 @@ const PRODUCTS: readonly ProductConfig[] = [
     titleKey: "pvc.title",
     featureKeys: ["pvc.feature1", "pvc.feature2", "pvc.feature3"],
     buttonKey: "pvc.button",
-    href: "/products/pvc-conduits",
+    href: "/products",
   },
   {
     image: {
@@ -57,7 +57,7 @@ const PRODUCTS: readonly ProductConfig[] = [
       "pneumatic.feature3",
     ],
     buttonKey: "pneumatic.button",
-    href: "/products/pneumatic-tubes",
+    href: "/products/pneumatic-tube-systems",
   },
   {
     image: {

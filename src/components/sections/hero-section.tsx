@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { DesktopDecorationGate } from "@/components/grid/desktop-decoration-gate";
 import { HeroGuideOverlay } from "@/components/grid";
 import { Link } from "@/i18n/routing";
+import { SINGLE_SITE_HOME_HERO_PROOF_ITEMS } from "@/config/single-site-page-expression";
 import { siteFacts } from "@/config/site-facts";
 import { HOMEPAGE_SECTION_LINKS } from "@/components/sections/homepage-section-links";
 import { HomepageTrustStrip } from "@/components/sections/homepage-trust-strip";
@@ -31,6 +32,36 @@ function HeroVisual() {
 
 export async function HeroSection() {
   const t = await getTranslations("home");
+  const proofItems = SINGLE_SITE_HOME_HERO_PROOF_ITEMS.map((item) => {
+    switch (item) {
+      case "est":
+        return {
+          value: t("hero.proof.est", {
+            established: siteFacts.company.established,
+          }),
+          label: t("hero.proof.estLabel"),
+        };
+      case "countries":
+        return {
+          value: t("hero.proof.countries", {
+            countries: siteFacts.stats.exportCountries,
+          }),
+          label: t("hero.proof.countriesLabel"),
+        };
+      case "range":
+        return {
+          value: t("hero.proof.range"),
+          label: t("hero.proof.rangeLabel"),
+        };
+      case "production":
+        return {
+          value: t("hero.proof.production"),
+          label: t("hero.proof.productionLabel"),
+        };
+      default:
+        return null;
+    }
+  }).filter((item) => item !== null);
 
   return (
     <section
@@ -73,28 +104,7 @@ export async function HeroSection() {
           <HomepageTrustStrip
             ariaLabel="Homepage proof facts"
             className="hero-stagger-5 mt-7 border-t border-border-light pt-5 font-mono text-[13px] text-muted-foreground"
-            items={[
-              {
-                value: t("hero.proof.est", {
-                  established: siteFacts.company.established,
-                }),
-                label: t("hero.proof.estLabel"),
-              },
-              {
-                value: t("hero.proof.countries", {
-                  countries: siteFacts.stats.exportCountries,
-                }),
-                label: t("hero.proof.countriesLabel"),
-              },
-              {
-                value: t("hero.proof.range"),
-                label: t("hero.proof.rangeLabel"),
-              },
-              {
-                value: t("hero.proof.production"),
-                label: t("hero.proof.productionLabel"),
-              },
-            ]}
+            items={proofItems}
           />
         </div>
 

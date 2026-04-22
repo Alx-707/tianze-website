@@ -16,6 +16,7 @@ import {
   generateLocaleStaticParams,
   type LocaleParam,
 } from "@/app/[locale]/generate-static-params";
+import { SINGLE_SITE_TERMS_SECTION_KEYS } from "@/config/single-site-page-expression";
 
 export function generateStaticParams() {
   return generateLocaleStaticParams();
@@ -69,23 +70,6 @@ interface TocItem {
   label: string;
 }
 
-const TERMS_SECTION_KEYS = [
-  "introduction",
-  "acceptance",
-  "services",
-  "orders",
-  "payment",
-  "shipping",
-  "warranty",
-  "liability",
-  "ip",
-  "confidentiality",
-  "termination",
-  "governing",
-  "disputes",
-  "contact",
-] as const;
-
 const H2_PREFIX_LENGTH = 3;
 const H3_PREFIX_LENGTH = 4;
 
@@ -117,7 +101,7 @@ function buildTocItems(
 ): TocItem[] {
   const items: TocItem[] = [];
 
-  for (const sectionKey of TERMS_SECTION_KEYS) {
+  for (const sectionKey of SINGLE_SITE_TERMS_SECTION_KEYS) {
     const label = tSections(`sections.${sectionKey}`);
 
     const match = headings.find((heading) => {

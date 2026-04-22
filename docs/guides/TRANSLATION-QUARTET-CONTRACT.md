@@ -5,7 +5,6 @@ This contract covers the runtime-facing translation quartet and its generated vi
 - Split canonical source: `messages/{locale}/critical.json` and `messages/{locale}/deferred.json`
 - Flat compatibility view: `messages/{locale}.json`
 - Runtime copy: `public/messages/{locale}/critical.json` and `public/messages/{locale}/deferred.json`
-- Site-specific runtime overlays: `src/sites/<site-key>/messages/{locale}/{critical,deferred}.json`
 
 ## Purpose
 These files are the strongest logical-coupling cluster in the repository.
@@ -21,8 +20,7 @@ If only the flat file changes, regenerate it from split source rather than editi
 - Runtime critical paths depend on the split files under `messages/{locale}/`.
 - `messages/{locale}.json` is a generated compatibility view, not an input source.
 - `public/messages/{locale}/` is a copied runtime bundle that must match the split source.
-- Site-specific overlays are an additional runtime layer, not a replacement for the split canonical base.
-- If a copy change is only for a non-default site, reviewers must inspect the site overlay path as part of the quartet-adjacent review.
+- Per-site overlays are not part of the current runtime contract. If they are introduced in the future, they must be added by explicit policy change rather than assumed implicitly.
 
 ### 3. Expected Validation Path
 For quartet changes, run:
