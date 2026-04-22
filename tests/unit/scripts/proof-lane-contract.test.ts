@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 const REPO_ROOT = path.resolve(__dirname, "../../..");
 
 function readRepoFile(relativePath: string) {
-  // eslint-disable-next-line security/detect-non-literal-fs-filename -- repo contract test reads known files under the local repo root
+  // eslint-disable-next-line security/detect-non-literal-fs-filename -- test reads fixed repo fixture files by relative path
   return fs.readFileSync(path.join(REPO_ROOT, relativePath), "utf8");
 }
 

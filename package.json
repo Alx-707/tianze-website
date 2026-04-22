@@ -149,7 +149,8 @@
     "deploy:cf:preview": "pnpm clean:next-artifacts && pnpm build:cf && pnpm exec wrangler deploy --env preview",
     "deploy:cf:dry-run": "pnpm clean:next-artifacts && pnpm build:cf && pnpm exec wrangler deploy --dry-run --outdir /tmp/verify-cf --env preview",
     "test:mutation": "stryker run",
-    "test:mutation:lead": "stryker run --mutate 'src/lib/lead-pipeline/**/*.ts'"
+    "test:mutation:lead": "stryker run --mutate 'src/lib/lead-pipeline/**/*.ts'",
+    "proof:cf:preview-deployed": "node scripts/cloudflare/proof-preview-deployed.mjs"
   },
   "dependencies": {
     "@marsidev/react-turnstile": "^1.5.0",
