@@ -6,7 +6,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { ServiceResult } from "../service-result";
-import { LEAD_TYPES } from "../lead-schema";
+import { CONTACT_SUBJECTS, LEAD_TYPES } from "../lead-schema";
 
 const mockLoggerInfo = vi.hoisted(() => vi.fn());
 const mockLoggerWarn = vi.hoisted(() => vi.fn());
@@ -392,7 +392,8 @@ describe("pipeline-observability", () => {
           type: LEAD_TYPES.CONTACT,
           fullName: "Alice Doe",
           email: "alice@example.com",
-          subject: "PRODUCT_INQUIRY",
+          marketingConsent: false,
+          subject: CONTACT_SUBJECTS.PRODUCT_INQUIRY,
           message: "hello world with enough characters",
           turnstileToken: "token",
         },
@@ -447,7 +448,8 @@ describe("pipeline-observability", () => {
           type: LEAD_TYPES.CONTACT,
           fullName: "Alice Doe",
           email: "alice@example.com",
-          subject: "PRODUCT_INQUIRY",
+          marketingConsent: false,
+          subject: CONTACT_SUBJECTS.PRODUCT_INQUIRY,
           message: "hello world with enough characters",
           turnstileToken: "token",
         },
@@ -497,7 +499,8 @@ describe("pipeline-observability", () => {
           type: LEAD_TYPES.CONTACT,
           fullName: "Alice Doe",
           email: "alice@example.com",
-          subject: "PRODUCT_INQUIRY",
+          marketingConsent: false,
+          subject: CONTACT_SUBJECTS.PRODUCT_INQUIRY,
           message: "hello world with enough characters",
           turnstileToken: "token",
         },
@@ -554,7 +557,8 @@ describe("pipeline-observability", () => {
           type: LEAD_TYPES.CONTACT,
           fullName: "Alice Doe",
           email: "alice@example.com",
-          subject: "PRODUCT_INQUIRY",
+          marketingConsent: false,
+          subject: CONTACT_SUBJECTS.PRODUCT_INQUIRY,
           message: "hello world with enough characters",
           turnstileToken: "token",
         },

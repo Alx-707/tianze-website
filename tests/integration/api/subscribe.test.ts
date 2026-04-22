@@ -22,7 +22,6 @@ vi.mock("@/lib/turnstile", () => ({
 vi.mock("@/lib/lead-pipeline", () => ({
   processLead: vi.fn(async () => ({
     success: true,
-    outcome: "success",
     partialSuccess: false,
     referenceId: "ref-123",
     recordCreated: true,
@@ -199,7 +198,6 @@ describe("api/subscribe", () => {
     const leadPipeline = await import("@/lib/lead-pipeline");
     vi.mocked(leadPipeline.processLead).mockResolvedValueOnce({
       success: false,
-      outcome: "partial_success",
       partialSuccess: true,
       referenceId: "ref-partial-123",
       recordCreated: true,

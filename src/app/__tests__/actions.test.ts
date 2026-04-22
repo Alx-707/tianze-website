@@ -35,6 +35,7 @@ vi.mock("@/lib/security/distributed-rate-limit", () => ({
       allowed: true,
       remaining: 10,
       resetTime: Date.now() + 60000,
+      retryAfter: null,
     }),
   ),
 }));
@@ -201,6 +202,7 @@ describe("actions.ts", () => {
           allowed: true,
           remaining: 10,
           resetTime: Date.now() + 60_000,
+          retryAfter: null,
         })
         .mockResolvedValueOnce({
           allowed: false,
