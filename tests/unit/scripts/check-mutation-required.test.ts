@@ -60,7 +60,7 @@ describe("check-mutation-required", () => {
           isReportFreshEnoughFn,
         }),
       ).toThrow(
-        "变异测试报告早于本次受保护改动的最新变更，请重新运行 pnpm test:mutation",
+        "变异测试报告早于本次受保护改动的最新变更，请重新运行对应的局部变异测试命令",
       );
       expect(isReportFreshEnoughFn).toHaveBeenCalledWith(
         mutationCheck.REPORT_PATH,
@@ -115,12 +115,71 @@ describe("check-mutation-required", () => {
           "命中目录: src/lib/security/",
           "报告 mutate scope: src/lib/lead-pipeline/**/*.ts",
           "未覆盖目录: src/lib/security/",
-          "请运行 pnpm test:mutation 并更新 reports/mutation/mutation-report.json",
+          "请运行 pnpm test:mutation:security 并更新 reports/mutation/mutation-report.json",
         ].join("\n"),
       );
       expect(isReportFreshEnoughFn).toHaveBeenCalledWith(
         mutationCheck.REPORT_PATH,
         1_700_000_000_900,
+      );
+    });
+
+    it("suggests lead-scoped mutation when only lead-pipeline is touched", () => {
+      const isReportFreshEnoughFn = vi.fn(() => true);
+
+      expect(() =>
+        mutationCheck.main({
+          getChangedFilesFn: () => ["src/lib/lead-pipeline/process-lead.ts"],
+          getTouchedTargetDirectoriesFn:
+            mutationCheck.getTouchedTargetDirectories,
+          getMergeBaseTimestampMsFn: () => 1_700_000_000_000,
+          getLatestRelevantChangeTimestampMsFn: () => 1_700_000_000_900,
+          loadMutationReportFn: () => ({
+            config: {
+              mutate: ["src/lib/security/**/*.ts"],
+            },
+          }),
+          isReportFreshEnoughFn,
+        }),
+      ).toThrow(
+        [
+          "变异测试报告 scope 不覆盖本次改动。",
+          "命中目录: src/lib/lead-pipeline/",
+          "报告 mutate scope: src/lib/security/**/*.ts",
+          "未覆盖目录: src/lib/lead-pipeline/",
+          "请运行 pnpm test:mutation:lead 并更新 reports/mutation/mutation-report.json",
+        ].join("\n"),
+      );
+    });
+
+    it("suggests combined scoped mutation when both lead and security change", () => {
+      const isReportFreshEnoughFn = vi.fn(() => true);
+
+      expect(() =>
+        mutationCheck.main({
+          getChangedFilesFn: () => [
+            "src/lib/lead-pipeline/process-lead.ts",
+            "src/lib/security/distributed-rate-limit.ts",
+          ],
+          getTouchedTargetDirectoriesFn:
+            mutationCheck.getTouchedTargetDirectories,
+          getMergeBaseTimestampMsFn: () => 1_700_000_000_000,
+          getLatestRelevantChangeTimestampMsFn: () => 1_700_000_000_900,
+          loadMutationReportFn: () => ({
+            config: {
+              mutate: ["src/lib/security/**/*.ts"],
+            },
+          }),
+          isReportFreshEnoughFn,
+        }),
+      ).toThrow(
+        [
+          "变异测试报告 scope 不覆盖本次改动。",
+          "命中目录: src/lib/lead-pipeline/, src/lib/security/",
+          "报告 mutate scope: src/lib/security/**/*.ts",
+          "未覆盖目录: src/lib/lead-pipeline/",
+          "请运行 pnpm test:mutation:lead-security 并更新 reports/mutation/mutation-report.json",
+        ].join("\n"),
       );
     });
   });

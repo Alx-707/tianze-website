@@ -104,6 +104,30 @@ function isDirectoryCovered(directory, mutateScopes) {
   return mutateScopes.some((scope) => scope.startsWith(directory));
 }
 
+function getSuggestedMutationCommand(touchedDirectories) {
+  const touchesLead = touchedDirectories.includes("src/lib/lead-pipeline/");
+  const touchesSecurity = touchedDirectories.includes("src/lib/security/");
+  const touchesFormSchema = touchedDirectories.includes("src/lib/form-schema/");
+
+  if (touchesFormSchema) {
+    return "pnpm test:mutation";
+  }
+
+  if (touchesLead && touchesSecurity) {
+    return "pnpm test:mutation:lead-security";
+  }
+
+  if (touchesSecurity) {
+    return "pnpm test:mutation:security";
+  }
+
+  if (touchesLead) {
+    return "pnpm test:mutation:lead";
+  }
+
+  return "pnpm test:mutation";
+}
+
 function main({
   getChangedFilesFn = getChangedFiles,
   getTouchedTargetDirectoriesFn = getTouchedTargetDirectories,
@@ -132,7 +156,7 @@ function main({
 
   if (!isReportFreshEnoughFn(REPORT_PATH, freshnessBaselineMs)) {
     throw new Error(
-      "变异测试报告早于本次受保护改动的最新变更，请重新运行 pnpm test:mutation",
+      "变异测试报告早于本次受保护改动的最新变更，请重新运行对应的局部变异测试命令",
     );
   }
 
@@ -142,12 +166,7 @@ function main({
   );
 
   if (uncoveredDirectories.length > 0) {
-    const needsFullScope = uncoveredDirectories.some(
-      (d) => !d.startsWith("src/lib/lead-pipeline/"),
-    );
-    const command = needsFullScope
-      ? "pnpm test:mutation"
-      : "pnpm test:mutation:lead";
+    const command = getSuggestedMutationCommand(touchedDirectories);
     throw new Error(
       [
         "变异测试报告 scope 不覆盖本次改动。",
@@ -186,5 +205,6 @@ module.exports = {
   getLatestRelevantChangeTimestampMs,
   normalizeMutateScopes,
   isDirectoryCovered,
+  getSuggestedMutationCommand,
   main,
 };

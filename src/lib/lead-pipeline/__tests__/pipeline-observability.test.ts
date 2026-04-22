@@ -488,6 +488,129 @@ describe("pipeline-observability", () => {
       );
     });
 
+    it("returns partial success and logs the email failure when only CRM succeeds", async () => {
+      const { recordPipelineObservability } =
+        await import("../pipeline-observability");
+
+      const outcome = recordPipelineObservability({
+        lead: {
+          type: LEAD_TYPES.CONTACT,
+          fullName: "Alice Doe",
+          email: "alice@example.com",
+          subject: "PRODUCT_INQUIRY",
+          message: "hello world with enough characters",
+          turnstileToken: "token",
+        },
+        referenceId: "CON-789",
+        emailResult: {
+          success: false,
+          latencyMs: 80,
+          error: new Error("SMTP failed"),
+        },
+        crmResult: {
+          success: true,
+          latencyMs: 140,
+        },
+        hasEmailOperation: true,
+        totalLatencyMs: 220,
+        requestId: "req-email-failed",
+      });
+
+      expect(outcome).toEqual({ success: false, partialSuccess: true });
+      expect(mockLoggerError).toHaveBeenCalledWith(
+        "Lead email send failed",
+        expect.objectContaining({
+          type: LEAD_TYPES.CONTACT,
+          referenceId: "CON-789",
+          error: "SMTP failed",
+          requestId: "req-email-failed",
+        }),
+      );
+      expect(mockLoggerError).not.toHaveBeenCalledWith(
+        "Lead CRM record failed",
+        expect.anything(),
+      );
+      expect(mockLoggerError).not.toHaveBeenCalledWith(
+        "Lead processing failed completely",
+        expect.anything(),
+      );
+      expect(mockLoggerWarn).toHaveBeenCalledTimes(1);
+      expect(mockLoggerWarn).toHaveBeenCalledWith(
+        "Lead processed partially",
+        expect.objectContaining({
+          emailSent: false,
+          recordCreated: true,
+          requestId: "req-email-failed",
+        }),
+      );
+    });
+
+    it("logs the full failure path when both services fail", async () => {
+      const { recordPipelineObservability } =
+        await import("../pipeline-observability");
+
+      const outcome = recordPipelineObservability({
+        lead: {
+          type: LEAD_TYPES.CONTACT,
+          fullName: "Alice Doe",
+          email: "alice@example.com",
+          subject: "PRODUCT_INQUIRY",
+          message: "hello world with enough characters",
+          turnstileToken: "token",
+        },
+        referenceId: "CON-999",
+        emailResult: {
+          success: false,
+          latencyMs: 90,
+          error: new Error("Email gateway down"),
+        },
+        crmResult: {
+          success: false,
+          latencyMs: 120,
+          error: new Error("CRM unavailable"),
+        },
+        hasEmailOperation: true,
+        totalLatencyMs: 210,
+        requestId: "req-total-failure",
+      });
+
+      expect(outcome).toEqual({ success: false, partialSuccess: false });
+      expect(mockLoggerWarn).not.toHaveBeenCalledWith(
+        "Lead processed partially",
+        expect.anything(),
+      );
+      expect(mockLoggerInfo).not.toHaveBeenCalledWith(
+        "Lead processed successfully",
+        expect.anything(),
+      );
+      expect(mockLoggerError).toHaveBeenCalledWith(
+        "Lead email send failed",
+        expect.objectContaining({
+          referenceId: "CON-999",
+          error: "Email gateway down",
+          requestId: "req-total-failure",
+        }),
+      );
+      expect(mockLoggerError).toHaveBeenCalledWith(
+        "Lead CRM record failed",
+        expect.objectContaining({
+          referenceId: "CON-999",
+          error: "CRM unavailable",
+          requestId: "req-total-failure",
+        }),
+      );
+      expect(mockLoggerError).toHaveBeenCalledWith(
+        "Lead processing failed completely",
+        {
+          type: LEAD_TYPES.CONTACT,
+          referenceId: "CON-999",
+          emailError: "Email gateway down",
+          crmError: "CRM unavailable",
+          requestId: "req-total-failure",
+        },
+      );
+    });
+
     it("skips resend metrics and logs for newsletter leads with no email operation", async () => {
       const { recordPipelineObservability } =
         await import("../pipeline-observability");
