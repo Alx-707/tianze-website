@@ -73,5 +73,6 @@ describe("rate-limit-key-strategies mutation fast path", () => {
     expect(extractBearerToken("Basic  sk-test-key")).toBeNull();
     expect(extractBearerToken("Bearer:sk-test-key")).toBeNull();
     expect(extractBearerToken("Bearer \t\n")).toBeNull();
+    expect(extractBearerToken("Bearer alpha beta")).toBeNull();
   });
 });

@@ -216,6 +216,28 @@ describe("Lead Schema", () => {
       }
     });
 
+    it("should reject infinite numeric quantity strings", () => {
+      const infinityQuantity = productLeadSchema.safeParse({
+        ...validProductLead,
+        quantity: "Infinity",
+      });
+      const overflowQuantity = productLeadSchema.safeParse({
+        ...validProductLead,
+        quantity: "1e400",
+      });
+
+      expect(infinityQuantity.success).toBe(false);
+      expect(overflowQuantity.success).toBe(false);
+      if (!infinityQuantity.success && !overflowQuantity.success) {
+        expect(infinityQuantity.error.issues[0]?.message).toBe(
+          "Quantity must be positive when using a numeric string",
+        );
+        expect(overflowQuantity.error.issues[0]?.message).toBe(
+          "Quantity must be positive when using a numeric string",
+        );
+      }
+    });
+
     it("should reject non-string, non-number quantity values", () => {
       expect(
         productLeadSchema.safeParse({

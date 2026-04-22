@@ -378,6 +378,11 @@ describe("rate-limit-key-strategies", () => {
       expect(extractBearerToken("Bearer \t\n")).toBeNull();
     });
 
+    it("should reject Bearer tokens that still contain whitespace after extraction", () => {
+      expect(extractBearerToken("Bearer alpha beta")).toBeNull();
+      expect(extractBearerToken("Bearer alpha\tbeta")).toBeNull();
+    });
+
     it("should return API key-based key when Bearer token exists", async () => {
       const request = createMockRequest({
         headers: { Authorization: "Bearer sk-test-api-key-12345" },
@@ -473,6 +478,17 @@ describe("rate-limit-key-strategies", () => {
       const spacedKey = await getApiKeyPriorityKey(spacedRequest);
 
       expect(spacedKey).toBe(compactKey);
+    });
+
+    it("should fallback to IP key when the Bearer token contains embedded whitespace", async () => {
+      const request = createMockRequest({
+        headers: { Authorization: "Bearer alpha beta" },
+      });
+
+      const ipKey = await getIPKey(request);
+      const apiKeyKey = await getApiKeyPriorityKey(request);
+
+      expect(apiKeyKey).toBe(ipKey);
     });
 
     it("should produce different keys for different API keys", async () => {

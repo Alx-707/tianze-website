@@ -48,8 +48,12 @@ const sanitizedString = () => z.string().overwrite(sanitizePlainText);
 
 function isPositiveQuantityString(value: string): boolean {
   const parsedQuantity = Number(value);
-  if (!Number.isFinite(parsedQuantity)) {
+  if (Number.isNaN(parsedQuantity)) {
     return true;
+  }
+
+  if (!Number.isFinite(parsedQuantity)) {
+    return false;
   }
 
   return parsedQuantity > 0;
@@ -77,7 +81,7 @@ const baseLeadFields = {
 };
 
 const productQuantitySchema: z.ZodType<string | number> = z
-  .any()
+  .unknown()
   .transform((value) => (typeof value === "string" ? value.trim() : value))
   .refine(isValidProductQuantity, {
     message: "Quantity must be positive when using a numeric string",

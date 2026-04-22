@@ -219,7 +219,11 @@ export function extractBearerToken(authHeader: string | null): string | null {
   }
 
   const token = trimmedHeader.slice(bearerPrefixLength + 1).trim();
-  return token || null;
+  if (!token || /\s/.test(token)) {
+    return null;
+  }
+
+  return token;
 }
 
 /**
