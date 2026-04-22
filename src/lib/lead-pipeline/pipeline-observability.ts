@@ -132,7 +132,9 @@ function calculatePipelineOutcome(
 
   return {
     success,
-    partialSuccess: !success && (emailResult.success || crmResult.success),
+    partialSuccess: hasEmailOperation
+      ? !success && (emailResult.success || crmResult.success)
+      : false,
   };
 }
 

@@ -78,11 +78,9 @@ function extractContactFormData(formData: FormData): ContactFormWithToken {
 }
 
 /**
- * Perform security checks (rate limiting + honeypot)
- * Returns early result if blocked, null to continue processing
+ * Perform rate limit check before expensive processing.
  */
-async function performSecurityChecks(
-  formData: FormData,
+async function performRateLimitCheck(
   clientIP: string,
 ): Promise<ServerActionResult<ContactFormResult> | null> {
   const rateLimitKey = `ip:${await hmacKey(clientIP)}`;
@@ -101,6 +99,16 @@ async function performSecurityChecks(
     );
   }
 
+  return null;
+}
+
+/**
+ * Perform idempotent-safe checks (honeypot only).
+ * Returns early result if blocked, null to continue processing.
+ */
+function performHoneypotCheck(
+  formData: FormData,
+): ServerActionResult<ContactFormResult> | null {
   const honeypot = getFormDataString(formData, "website");
   if (honeypot) {
     return createSuccessResultWithLogging(
@@ -211,15 +219,24 @@ export const contactFormAction: ServerAction<FormData, ContactFormResult> =
 
       // 提取表单数据
       const contactData = extractContactFormData(formData);
+      if (!contactData.idempotencyKey) {
+        const rateLimitResult = await performRateLimitCheck(clientIP);
+        if (rateLimitResult) {
+          return rateLimitResult;
+        }
+      }
+
       const idempotentResult = await withIdempotentResult(
         contactData.idempotencyKey ?? null,
         async () => {
-          const securityResult = await performSecurityChecks(
-            formData,
-            clientIP,
-          );
-          if (securityResult) {
-            return securityResult;
+          const rateLimitResult = await performRateLimitCheck(clientIP);
+          if (rateLimitResult) {
+            return rateLimitResult;
+          }
+
+          const honeypotResult = performHoneypotCheck(formData);
+          if (honeypotResult) {
+            return honeypotResult;
           }
 
           return executeContactSubmissionAttempt(

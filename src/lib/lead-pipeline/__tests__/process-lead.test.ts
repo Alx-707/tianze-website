@@ -158,7 +158,8 @@ describe("processLead", () => {
       expect(result.partialSuccess).toBe(true);
       expect(result.emailSent).toBe(true);
       expect(result.recordCreated).toBe(false);
-      expect(result.error).toBe("PROCESSING_FAILED");
+      expect(result.referenceId?.startsWith("CON-")).toBe(true);
+      expect(result.error).toBeUndefined();
     });
 
     it("should mark contact lead as partial success when only CRM succeeds", async () => {
@@ -171,7 +172,8 @@ describe("processLead", () => {
       expect(result.partialSuccess).toBe(true);
       expect(result.emailSent).toBe(false);
       expect(result.recordCreated).toBe(true);
-      expect(result.error).toBe("PROCESSING_FAILED");
+      expect(result.referenceId?.startsWith("CON-")).toBe(true);
+      expect(result.error).toBeUndefined();
     });
 
     it("should fail when both services fail", async () => {
@@ -184,6 +186,7 @@ describe("processLead", () => {
       expect(result.partialSuccess).toBe(false);
       expect(result.emailSent).toBe(false);
       expect(result.recordCreated).toBe(false);
+      expect(result.referenceId).toBeUndefined();
       expect(result.error).toBe("PROCESSING_FAILED");
     });
 
@@ -359,6 +362,7 @@ describe("processLead", () => {
       expect(result.partialSuccess).toBe(false);
       expect(result.emailSent).toBe(false);
       expect(result.recordCreated).toBe(false);
+      expect(result.referenceId).toBeUndefined();
       expect(result.error).toBe("PROCESSING_FAILED");
     });
   });

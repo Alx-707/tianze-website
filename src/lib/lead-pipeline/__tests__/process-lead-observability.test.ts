@@ -161,8 +161,8 @@ describe("processLead observability contracts", () => {
       partialSuccess: true,
       emailSent: false,
       recordCreated: true,
-      referenceId: undefined,
-      error: "PROCESSING_FAILED",
+      referenceId: expect.stringMatching(/^CON-/),
+      error: undefined,
     });
     expect(mockRecordPipelineObservability).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -194,6 +194,7 @@ describe("processLead observability contracts", () => {
     });
 
     expect(result.success).toBe(false);
+    expect(result.partialSuccess).toBe(false);
     expect(mockRecordPipelineObservability).toHaveBeenCalledWith(
       expect.objectContaining({
         lead: expect.objectContaining({ type: LEAD_TYPES.NEWSLETTER }),

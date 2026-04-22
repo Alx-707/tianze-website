@@ -1,6 +1,7 @@
 ---
 paths:
   - "src/app/api/**/*"
+  - "src/lib/actions/**/*"
   - "src/lib/security/**/*"
   - "src/lib/validations.ts"
 ---
@@ -61,7 +62,7 @@ Rate limit utility: `src/lib/security/distributed-rate-limit.ts`
 |----------|---------------------|--------|
 | `/api/whatsapp/send` | API Key Auth + Rate Limit | ✅ |
 | `/api/whatsapp/webhook` | Signature Verify + Rate Limit | ✅ |
-| Contact page Server Action | Rate Limit + validation + idempotency on the canonical lead path | ✅ |
+| Contact page Server Action | Turnstile + Rate Limit + validation + idempotency on the canonical lead path | ✅ |
 | `/api/inquiry` | Turnstile + Rate Limit + Idempotency + JSON body size gate | ✅ |
 | `/api/subscribe` | Rate Limit + Idempotency + JSON body size gate | ✅ |
 | `/api/cache/invalidate` | Secret Auth + Pre/Post Rate Limit | ✅ |

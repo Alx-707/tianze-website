@@ -138,8 +138,12 @@ export async function processLead(
       partialSuccess: outcome.partialSuccess,
       emailSent: emailResult.success,
       recordCreated: crmResult.success,
-      referenceId: outcome.success ? referenceId : undefined,
-      error: outcome.success ? undefined : "PROCESSING_FAILED",
+      referenceId:
+        outcome.success || outcome.partialSuccess ? referenceId : undefined,
+      error:
+        outcome.success || outcome.partialSuccess
+          ? undefined
+          : "PROCESSING_FAILED",
     };
   } catch (error) {
     const totalLatencyMs = pipelineTimer.stop();

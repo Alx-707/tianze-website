@@ -654,5 +654,36 @@ describe("pipeline-observability", () => {
         expect.anything(),
       );
     });
+
+    it("does not report partial success when the email branch is skipped", async () => {
+      const { recordPipelineObservability } =
+        await import("../pipeline-observability");
+
+      const outcome = recordPipelineObservability({
+        lead: {
+          type: LEAD_TYPES.NEWSLETTER,
+          email: "subscriber@example.com",
+        },
+        referenceId: "NEW-456",
+        emailResult: {
+          success: true,
+          latencyMs: 0,
+        },
+        crmResult: {
+          success: false,
+          latencyMs: 30,
+          error: new Error("CRM failed"),
+        },
+        hasEmailOperation: false,
+        totalLatencyMs: 30,
+        requestId: "req-newsletter-no-email",
+      });
+
+      expect(outcome).toEqual({ success: false, partialSuccess: false });
+      expect(mockLoggerWarn).not.toHaveBeenCalledWith(
+        "Lead processed partially",
+        expect.anything(),
+      );
+    });
   });
 });

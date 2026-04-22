@@ -122,6 +122,7 @@ describe("actions.ts", () => {
 
       expect(result.success).toBe(false);
       expect(result.errorCode).toBe(API_ERROR_CODES.IDEMPOTENCY_KEY_REQUIRED);
+      expect(checkDistributedRateLimit).toHaveBeenCalledTimes(1);
     });
 
     it("should return error when turnstile token is missing", async () => {
