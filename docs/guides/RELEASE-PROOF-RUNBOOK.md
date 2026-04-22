@@ -28,10 +28,12 @@ pnpm review:docs-truth
 pnpm review:tier-a:staged
 pnpm review:clusters:staged
 pnpm validate:translations
+pnpm type-check:source
 pnpm clean:next-artifacts
 pnpm build
-pnpm build:cf
+CF_APPLY_GENERATED_PATCH=true pnpm build:cf
 pnpm smoke:cf:preview
+pnpm smoke:cf:preview:strict
 CI=1 pnpm test:e2e
 ```
 
@@ -40,8 +42,10 @@ CI=1 pnpm test:e2e
 - Tier A scan first: know whether you are in a critical review path.
 - Cluster scan next: know whether the change is part of a co-change family.
 - Translation validation before builds for faster failure on i18n drift.
+- `type-check:source` before builds because fast gates must distinguish source truth from stale generated artifacts.
 - `clean:next-artifacts` before `build` because stale `.next` state can still produce misleading stack-overflow build failures.
 - `build` before `build:cf` because both lines still share the same build-artifact family and stale `.next` state can still mislead verification.
+- `CF_APPLY_GENERATED_PATCH=true pnpm build:cf` is the current stronger local Cloudflare build proof lane; plain `pnpm build:cf` is not the authoritative preview-proof command.
 - `smoke:cf:preview` after `build:cf` because Route B treats stock local preview as the canonical local Cloudflare proof lane.
 - E2E last because it is the heaviest proof step.
 - If the change rewires single-site truth or cutover gates, run `pnpm truth:check`, `pnpm review:translation-quartet`, and `pnpm review:translate-compat` before signoff.
@@ -92,13 +96,14 @@ Rule:
 - report targeted proof and clean branch proof as separate verdicts
 
 ## Site Cutover Preflight
-Before any change that touches single-site truth or verifies skeleton removal, run:
+There is no longer a canonical `pnpm preflight:site-cutover` command in the main tree. For changes that touch single-site truth or verify skeleton removal, run the live baseline explicitly:
 
 ```bash
 APP_ENV=preview NEXT_PUBLIC_SITE_URL=https://preview.tianze-pipe.com NODE_ENV=production pnpm validate:config
 pnpm truth:check
-pnpm validate:translations
-pnpm build
+pnpm review:translation-quartet
+pnpm review:translate-compat
+pnpm clean:next-artifacts && pnpm build
 ```
 
 For final signoff, treat `pnpm truth:check`, `pnpm review:translation-quartet`, and `pnpm review:translate-compat` as the baseline single-site truth proof. Deploy/release workflows must not rely on `VALIDATE_CONFIG_SKIP_RUNTIME=true` for final release proof.

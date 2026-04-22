@@ -6,10 +6,10 @@
 ## Project Decisions
 
 - Node runtime truth:
-  - `package.json > engines.node`: `>=20.19 <21`
+  - `package.json > engines.node`: `>=20.19 <23`
   - `.nvmrc` / `.node-version`: `20.19.0`
   - GitHub Actions merge-proof baseline: `20.19.0`
-  - local validation should use the same `20.19.0` baseline unless an explicit experiment branch says otherwise
+  - local `22.x` may still be allowed, but do not treat it as the final CI truth
 - `cacheComponents: true` enabled in `next.config.ts` — Cache Components (`"use cache"`) are enabled
 - **PPR** (`experimental.ppr`): Not enabled — it still requires canary and remains commented out. Note: `dynamicIO` was an older Next.js 15 canary flag that has already been superseded by `cacheComponents`; they are not two separate features.
 - **Optional Cache APIs** (not yet used): `cacheTag()`, `revalidateTag()`, `updateTag()`
@@ -28,12 +28,10 @@
   - `src/config/site-types.ts` — shared site type definitions
 - Compatibility wrappers (consumed by existing call sites; do not duplicate values here):
   - `src/config/paths/site-config.ts`
-  - `src/config/site-facts.ts`
   - `src/constants/product-catalog.ts`
   - `src/config/footer-links.ts`
   - `src/lib/navigation.ts`
-  - New site identity work should prefer the `src/config/single-site*.ts` surfaces, not duplicate values in wrappers
-  - Site-specific copy currently lives in shared `messages/{locale}/`; do not assume `src/sites/**/messages/**` exists in runtime today
+- Site-specific copy is **not** yet split per site. All translations live in shared bundles under `messages/{locale}/`. A per-site overlay (e.g. `src/sites/**/messages/**`) is a planned future structure, not a current layout; do not write code that assumes it exists.
 
 ### Page Props Convention
 
@@ -58,8 +56,8 @@ The project uses **dual content strategies** (details in `.claude/rules/content.
 | Content type | Strategy | Location |
 |-------------|----------|----------|
 | Blog, FAQ, Legal | MDX | `content/{posts,pages}/{locale}/` |
-| About route runtime | Route component + translation bundles | `src/app/[locale]/about/page.tsx` + `messages/**` / `src/sites/**/messages/**` |
-| Product catalog (specs, markets, families) | Site-layer truth + compatibility wrapper | `src/sites/**` + `src/constants/product-{catalog,specs,standards}.ts` |
+| About route runtime | Route component + translation bundles | `src/app/[locale]/about/page.tsx` + `messages/{locale}/` |
+| Product catalog (specs, markets, families) | Site-config truth + compatibility wrapper | `src/config/single-site-product-catalog.ts` + `src/constants/product-{catalog,specs,standards}.ts` |
 
 **Decision rule**: Structured/tabular data consumed by multiple components → TypeScript. Narrative/editorial content → MDX, except when the active route runtime has already moved into `src/app/**` and MDX is only a supporting content asset.
 

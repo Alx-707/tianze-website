@@ -13,9 +13,9 @@ function createTempRepo(files: Record<string, string>) {
 
   for (const [relativePath, content] of Object.entries(files)) {
     const fullPath = path.join(tempDir, relativePath);
-    // eslint-disable-next-line security/detect-non-literal-fs-filename -- test fixture path is created inside the mkdtemp sandbox
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- temp fixture path is created inside the test-owned directory
     fs.mkdirSync(path.dirname(fullPath), { recursive: true });
-    // eslint-disable-next-line security/detect-non-literal-fs-filename -- test fixture path is created inside the mkdtemp sandbox
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- temp fixture path is created inside the test-owned directory
     fs.writeFileSync(fullPath, content);
   }
 
