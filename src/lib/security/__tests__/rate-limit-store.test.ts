@@ -128,6 +128,19 @@ describe("rate-limit-store", () => {
       );
     });
 
+    it("throws when increment returns a null payload", async () => {
+      const fetchMock = vi.fn(
+        async () => new Response(JSON.stringify(null), { status: 200 }),
+      );
+      vi.stubGlobal("fetch", fetchMock);
+
+      const store = new RedisRateLimitStore("https://example.upstash.io", "t");
+
+      await expect(store.increment("idem:key", 60_000)).rejects.toThrow(
+        "numeric count",
+      );
+    });
+
     it("logs and throws when increment receives a non-ok response", async () => {
       const fetchMock = vi.fn(
         async () =>
@@ -306,6 +319,17 @@ describe("rate-limit-store", () => {
           result: [undefined, { result: 45_000 }],
         }),
       }));
+      vi.stubGlobal("fetch", fetchMock);
+
+      const store = new RedisRateLimitStore("https://example.upstash.io", "t");
+
+      await expect(store.get("idem:key")).resolves.toBeNull();
+    });
+
+    it("returns null when GET returns a null payload", async () => {
+      const fetchMock = vi.fn(
+        async () => new Response(JSON.stringify(null), { status: 200 }),
+      );
       vi.stubGlobal("fetch", fetchMock);
 
       const store = new RedisRateLimitStore("https://example.upstash.io", "t");

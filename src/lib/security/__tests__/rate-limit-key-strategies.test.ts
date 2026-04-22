@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
+  extractBearerToken,
   getApiKeyPriorityKey,
   getIPKey,
   getSessionPriorityKey,
@@ -355,6 +356,28 @@ describe("rate-limit-key-strategies", () => {
       mockGetClientIP.mockReturnValue("192.168.1.100");
     });
 
+    it("should extract a normal Bearer token", () => {
+      expect(extractBearerToken("Bearer sk-test-key")).toBe("sk-test-key");
+    });
+
+    it("should reject non-Bearer schemes even when they include whitespace and a token", () => {
+      expect(extractBearerToken("Basic  sk-test-key")).toBeNull();
+    });
+
+    it("should reject Bearer values that do not use whitespace as the separator", () => {
+      expect(extractBearerToken("Bearer:sk-test-key")).toBeNull();
+    });
+
+    it("should allow leading whitespace before the Bearer prefix", () => {
+      expect(extractBearerToken("   Bearer sk-test-key   ")).toBe(
+        "sk-test-key",
+      );
+    });
+
+    it("should reject Bearer values whose token trims to empty text", () => {
+      expect(extractBearerToken("Bearer \t\n")).toBeNull();
+    });
+
     it("should return API key-based key when Bearer token exists", async () => {
       const request = createMockRequest({
         headers: { Authorization: "Bearer sk-test-api-key-12345" },
@@ -398,6 +421,17 @@ describe("rate-limit-key-strategies", () => {
     it("should fallback to IP key when Bearer token is only whitespace", async () => {
       const request = createMockRequest({
         headers: { Authorization: "Bearer    " },
+      });
+
+      const ipKey = await getIPKey(request);
+      const apiKeyKey = await getApiKeyPriorityKey(request);
+
+      expect(apiKeyKey).toBe(ipKey);
+    });
+
+    it("should fallback to IP key when the Bearer token is only tab/newline whitespace", async () => {
+      const request = createMockRequest({
+        headers: { Authorization: "Bearer \t\n" },
       });
 
       const ipKey = await getIPKey(request);

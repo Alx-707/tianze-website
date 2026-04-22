@@ -34,7 +34,6 @@ function warnPepperOnce(message: string): void {
   if (pepperWarningCount > 1) {
     return;
   }
-
   logger.warn(message);
 }
 
@@ -202,17 +201,24 @@ export async function getApiKeyPriorityKey(
   return getIPKey(request);
 }
 
-function extractBearerToken(authHeader: string | null): string | null {
+export function extractBearerToken(authHeader: string | null): string | null {
   if (!authHeader) {
     return null;
   }
 
-  const lowerHeader = authHeader.toLowerCase();
-  if (!lowerHeader.startsWith("bearer ")) {
+  const trimmedHeader = authHeader.trimStart();
+  const bearerPrefixLength = "Bearer".length;
+  const scheme = trimmedHeader.slice(0, bearerPrefixLength);
+  if (scheme.toLowerCase() !== "bearer") {
     return null;
   }
 
-  const token = authHeader.slice("bearer ".length).trim();
+  const separator = trimmedHeader[bearerPrefixLength];
+  if (!separator || !/\s/.test(separator)) {
+    return null;
+  }
+
+  const token = trimmedHeader.slice(bearerPrefixLength + 1).trim();
   return token || null;
 }
 
