@@ -7,6 +7,7 @@ import {
 import {
   createLeadFailureResponse,
   createLeadSuccessPayload,
+  requireLeadReferenceId,
   validateLeadTurnstileToken,
 } from "@/lib/api/lead-route-response";
 import {
@@ -44,10 +45,12 @@ function createSuccessResponse(
     });
   }
 
-  if (!result.referenceId) {
-    throw new Error("referenceId missing on successful lead result");
-  }
-  return createLeadSuccessPayload(result.referenceId);
+  return createLeadSuccessPayload(
+    requireLeadReferenceId(
+      result,
+      "referenceId missing on successful lead result",
+    ),
+  );
 }
 
 /**
@@ -57,14 +60,22 @@ function createErrorResponse(
   result: LeadResult,
   observability: ReturnType<typeof getRequestObservability>,
 ): NextResponse {
-  logger.warn("Newsletter subscription failed", {
-    error: result.error,
-    ...withObservabilityContext(observability),
-  });
+  logger.warn(
+    result.partialSuccess
+      ? "Newsletter subscription partially completed"
+      : "Newsletter subscription failed",
+    {
+      error: result.error,
+      partialSuccess: result.partialSuccess,
+      referenceId: result.referenceId,
+      ...withObservabilityContext(observability),
+    },
+  );
 
   return createLeadFailureResponse({
     result,
     validationErrorCode: API_ERROR_CODES.SUBSCRIBE_VALIDATION_EMAIL_INVALID,
+    partialSuccessErrorCode: API_ERROR_CODES.SUBSCRIBE_PARTIAL_SUCCESS,
     processingErrorCode: API_ERROR_CODES.SUBSCRIBE_PROCESSING_ERROR,
   });
 }

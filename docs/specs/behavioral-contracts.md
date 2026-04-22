@@ -106,13 +106,13 @@ On mobile viewports, tapping the hamburger opens a navigation sheet. Selecting a
 
 #### BC-007: Buyer can submit a contact inquiry
 
-The /contact page renders a form with fields: firstName, lastName, email, company, message, and a privacy policy checkbox. Filling all required fields and passing Turnstile verification enables the submit button. Submission POSTs to /api/contact and displays a success or error message.
+The /contact page renders a form with fields: firstName, lastName, email, company, message, and a privacy policy checkbox. Filling all required fields and passing Turnstile verification enables the submit button. Submission invokes the contact Server Action and displays a success or error message.
 
 | Field | Value |
 |-------|-------|
 | Priority | Critical |
 | Test Type | E2E + Integration |
-| Test File | `tests/e2e/contact-form-smoke.spec.ts`, `tests/e2e/smoke/post-deploy-form.spec.ts`, `src/app/__tests__/contact-integration.test.ts`, `src/app/api/contact/__tests__/contact-api-validation.test.ts` |
+| Test File | `tests/e2e/contact-form-smoke.spec.ts`, `tests/e2e/smoke/post-deploy-form.spec.ts`, `src/app/__tests__/actions.test.ts`, `src/app/__tests__/contact-integration.test.ts` |
 | Status | Partial |
 
 Notes: `tests/e2e/contact-form-smoke.spec.ts` is a test-mode smoke only; it proves local structure and interaction under Playwright test settings. The final production-like submission proof lives in `tests/e2e/smoke/post-deploy-form.spec.ts` against a deployed URL. The contact chain is therefore partially covered, not fully proven by local E2E alone.
@@ -127,7 +127,7 @@ Empty required fields (firstName, lastName, email, message, acceptPrivacy) preve
 |-------|-------|
 | Priority | Critical |
 | Test Type | E2E + Unit |
-| Test File | `tests/e2e/contact-form-smoke.spec.ts`, `src/app/api/contact/__tests__/contact-api-validation.test.ts` |
+| Test File | `tests/e2e/contact-form-smoke.spec.ts`, `src/components/forms/__tests__/contact-form-validation.test.tsx`, `src/app/__tests__/actions.test.ts` |
 | Status | Partial |
 
 Notes: Required attribute presence is verified. Client-side validation UX (error messages appearing inline) is not fully tested.
@@ -164,33 +164,33 @@ Notes: Locale-specific labels and field rendering are covered in local test-mode
 
 ---
 
-#### BC-011: API endpoints enforce rate limiting
+#### BC-011: Lead submission surfaces enforce rate limiting
 
-/api/contact, /api/inquiry, and /api/subscribe return HTTP 429 when the same client exceeds the configured request limit within the time window.
+The contact Server Action, /api/inquiry, and /api/subscribe reject repeated requests when the same client exceeds the configured request limit within the time window.
 
 | Field | Value |
 |-------|-------|
 | Priority | High |
 | Test Type | Integration |
-| Test File | `src/app/api/contact/__tests__/contact-api-validation.test.ts`, `tests/integration/api/lead-family-protection.test.ts` |
+| Test File | `src/app/__tests__/contact-integration.test.ts`, `tests/integration/api/lead-family-protection.test.ts` |
 | Status | Covered |
 
-Notes: `tests/integration/api/lead-family-protection.test.ts` verifies 429 behavior for contact, inquiry, and subscribe across the shared lead API family.
+Notes: `src/app/__tests__/contact-integration.test.ts` covers the Server Action rate-limit gate. `tests/integration/api/lead-family-protection.test.ts` covers inquiry and subscribe at the route layer.
 
 ---
 
-#### BC-012: API endpoints reject invalid Turnstile tokens
+#### BC-012: Lead submission surfaces reject invalid Turnstile tokens
 
-/api/contact and /api/inquiry reject requests with missing, empty, or invalid Turnstile tokens, returning an appropriate error response.
+The contact Server Action and /api/inquiry reject requests with missing, empty, or invalid Turnstile tokens, returning an appropriate error response.
 
 | Field | Value |
 |-------|-------|
 | Priority | High |
 | Test Type | Integration |
-| Test File | `src/app/api/contact/__tests__/contact-api-validation.test.ts` |
+| Test File | `src/app/__tests__/contact-integration.test.ts`, `tests/integration/api/lead-family-protection.test.ts` |
 | Status | Partial |
 
-Notes: Contact API Turnstile validation is tested. Inquiry API Turnstile validation coverage is less clear.
+Notes: Contact Server Action Turnstile validation is covered. Inquiry route protection is covered in the shared API protection suite. Full deployed bilingual proof is still partial.
 
 ---
 
@@ -353,18 +353,18 @@ Notes: `tests/integration/api/health.test.ts` covers the route in-suite. Deploye
 
 ---
 
-#### BC-024: API endpoints handle duplicate submissions idempotently
+#### BC-024: Lead submission surfaces handle duplicate submissions idempotently
 
-/api/contact, /api/inquiry, and /api/subscribe accept an Idempotency-Key header. Resubmitting the same request with the same key returns the cached response instead of creating a duplicate lead.
+The contact Server Action dedupes by `idempotencyKey` form field, while /api/inquiry and /api/subscribe require an `Idempotency-Key` header. Resubmitting the same payload with the same key returns the cached result instead of creating a duplicate lead.
 
 | Field | Value |
 |-------|-------|
 | Priority | High |
 | Test Type | Integration |
-| Test File | `src/app/api/contact/__tests__/contact-api-validation.test.ts`, `tests/integration/api/lead-family-protection.test.ts` |
+| Test File | `src/app/__tests__/actions.test.ts`, `src/app/__tests__/contact-integration.test.ts`, `tests/integration/api/lead-family-protection.test.ts` |
 | Status | Partial |
 
-Notes: All three write routes now prove `Idempotency-Key` is required via `tests/integration/api/lead-family-protection.test.ts`. Replay/cached-response behavior is still only explicitly tested for the contact API, so the full family contract remains partial.
+Notes: Contact Server Action replay behavior is covered in action/integration tests. Inquiry and subscribe currently prove key requirement at the route layer, but replay semantics are still not family-wide fully proven.
 
 ---
 

@@ -8,7 +8,13 @@ import {
   createSystemSignal,
   recordSystemSignal,
 } from "@/lib/observability/system-observability";
-import { COUNT_FIVE, TEN_SECONDS_MS } from "@/constants";
+import {
+  DEFAULT_ALERT_CONFIG,
+  createInitialFailureState,
+  shouldTriggerAlert,
+  type AlertConfig,
+  type FailureState,
+} from "@/lib/lead-pipeline/failure-alert-policy";
 
 /**
  * Service identifiers for metrics
@@ -73,27 +79,6 @@ export interface PipelineSummary {
 }
 
 /**
- * Alert configuration
- */
-export interface AlertConfig {
-  consecutiveFailureThreshold: number;
-  alertCooldownMs: number;
-}
-
-const DEFAULT_ALERT_CONFIG: AlertConfig = {
-  consecutiveFailureThreshold: COUNT_FIVE,
-  alertCooldownMs: TEN_SECONDS_MS,
-};
-
-/**
- * Failure tracker for consecutive failure detection
- */
-interface FailureState {
-  consecutiveFailures: number;
-  lastAlertTimestamp: number;
-}
-
-/**
  * Type-safe failure state storage using Map
  */
 type FailureStateMap = Map<MetricService, FailureState>;
@@ -138,13 +123,6 @@ export function categorizeError(error: Error | unknown): ErrorType {
   }
 
   return ERROR_TYPES.UNKNOWN;
-}
-
-/**
- * Create initial failure state
- */
-function createInitialFailureState(): FailureState {
-  return { consecutiveFailures: 0, lastAlertTimestamp: 0 };
 }
 
 /**
@@ -313,13 +291,7 @@ export class LeadPipelineMetrics {
    */
   private shouldTriggerAlert(service: MetricService): boolean {
     const state = this.getMutableFailureState(service);
-
-    const meetsThreshold =
-      state.consecutiveFailures >= this.alertConfig.consecutiveFailureThreshold;
-    const cooldownExpired =
-      Date.now() - state.lastAlertTimestamp >= this.alertConfig.alertCooldownMs;
-
-    return meetsThreshold && cooldownExpired;
+    return shouldTriggerAlert(state, this.alertConfig, Date.now());
   }
 
   /**
@@ -364,12 +336,8 @@ export class LeadPipelineMetrics {
  */
 export const leadPipelineMetrics = new LeadPipelineMetrics();
 
-/**
- * Timer utility for measuring operation latency
- */
-export function createLatencyTimer(): { stop: () => number } {
-  const startTime = Date.now();
-  return {
-    stop: () => Date.now() - startTime,
-  };
-}
+export type {
+  AlertConfig,
+  FailureState,
+} from "@/lib/lead-pipeline/failure-alert-policy";
+export { createLatencyTimer } from "@/lib/lead-pipeline/latency-timer";

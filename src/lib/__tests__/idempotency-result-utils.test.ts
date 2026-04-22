@@ -125,7 +125,7 @@ describe("idempotency-result-utils", () => {
 
   it("returns null when no in-flight result exists", async () => {
     await expect(
-      getInFlightIdempotentResult("missing-key", "POST:/api/contact"),
+      getInFlightIdempotentResult("missing-key", "POST:/api/inquiry"),
     ).resolves.toBeNull();
   });
 
@@ -134,7 +134,7 @@ describe("idempotency-result-utils", () => {
     const deferred = createDeferred<{ ok: true }>();
 
     const work = completeIdempotentResultWork("same-key", {
-      fingerprint: "POST:/api/contact",
+      fingerprint: "POST:/api/inquiry",
       handler: async () => deferred.promise,
       store,
       ttlMs: 321,
@@ -142,7 +142,7 @@ describe("idempotency-result-utils", () => {
 
     const inFlightPromise = getInFlightIdempotentResult<{ ok: true }>(
       "same-key",
-      "POST:/api/contact",
+      "POST:/api/inquiry",
     );
     deferred.resolve({ ok: true });
 
@@ -153,13 +153,13 @@ describe("idempotency-result-utils", () => {
     });
     await expect(work).resolves.toEqual({ ok: true });
     await expect(
-      getInFlightIdempotentResult("same-key", "POST:/api/contact"),
+      getInFlightIdempotentResult("same-key", "POST:/api/inquiry"),
     ).resolves.toBeNull();
     expect(getIdempotentResultCacheStats()).toEqual({ keys: [], size: 0 });
     expect(store.set).toHaveBeenCalledWith(
       "same-key",
       expect.objectContaining({
-        fingerprint: "POST:/api/contact",
+        fingerprint: "POST:/api/inquiry",
         response: { ok: true },
         status: "success",
       }),
@@ -171,7 +171,7 @@ describe("idempotency-result-utils", () => {
     const store = createStore();
     const deferred = createDeferred<never>();
     const failingWork = completeIdempotentResultWork("reused-key", {
-      fingerprint: "POST:/api/contact",
+      fingerprint: "POST:/api/inquiry",
       handler: async () => deferred.promise,
       store,
     });
@@ -181,7 +181,7 @@ describe("idempotency-result-utils", () => {
     ).resolves.toEqual({ ok: false, reason: "reused" });
     const failedResult = getInFlightIdempotentResult(
       "reused-key",
-      "POST:/api/contact",
+      "POST:/api/inquiry",
     );
     deferred.reject(new Error("work failed"));
     await expect(failedResult).resolves.toEqual({
@@ -190,7 +190,7 @@ describe("idempotency-result-utils", () => {
     });
     await expect(failingWork).rejects.toThrow("work failed");
     await expect(
-      getInFlightIdempotentResult("reused-key", "POST:/api/contact"),
+      getInFlightIdempotentResult("reused-key", "POST:/api/inquiry"),
     ).resolves.toBeNull();
     expect(getIdempotentResultCacheStats()).toEqual({ keys: [], size: 0 });
   });
@@ -199,7 +199,7 @@ describe("idempotency-result-utils", () => {
     const store = createStore();
     store.get.mockResolvedValueOnce(null);
     await expect(
-      getStoredIdempotentResult("missing-key", "POST:/api/contact", store),
+      getStoredIdempotentResult("missing-key", "POST:/api/inquiry", store),
     ).resolves.toBeNull();
 
     store.get.mockResolvedValueOnce({
@@ -210,18 +210,18 @@ describe("idempotency-result-utils", () => {
       status: "success",
     });
     await expect(
-      getStoredIdempotentResult("reused-key", "POST:/api/contact", store),
+      getStoredIdempotentResult("reused-key", "POST:/api/inquiry", store),
     ).resolves.toEqual({ ok: false, reason: "reused" });
 
     store.get.mockResolvedValueOnce({
       createdAt: 1,
       expiresAt: 2,
-      fingerprint: "POST:/api/contact",
+      fingerprint: "POST:/api/inquiry",
       response: { cached: true },
       status: "success",
     });
     await expect(
-      getStoredIdempotentResult("success-key", "POST:/api/contact", store),
+      getStoredIdempotentResult("success-key", "POST:/api/inquiry", store),
     ).resolves.toEqual({
       cached: true,
       ok: true,
@@ -232,11 +232,11 @@ describe("idempotency-result-utils", () => {
       createdAt: 1,
       error: "boom",
       expiresAt: 2,
-      fingerprint: "POST:/api/contact",
+      fingerprint: "POST:/api/inquiry",
       status: "error",
     });
     await expect(
-      getStoredIdempotentResult("error-key", "POST:/api/contact", store),
+      getStoredIdempotentResult("error-key", "POST:/api/inquiry", store),
     ).resolves.toEqual({ ok: false, reason: "failed" });
 
     store.get.mockResolvedValueOnce({
@@ -251,7 +251,7 @@ describe("idempotency-result-utils", () => {
       result: { waited: true },
     });
     await expect(
-      getStoredIdempotentResult("pending-key", "POST:/api/contact", store),
+      getStoredIdempotentResult("pending-key", "POST:/api/inquiry", store),
     ).resolves.toEqual({
       cached: true,
       ok: true,
@@ -269,7 +269,7 @@ describe("idempotency-result-utils", () => {
 
     await expect(
       claimIdempotentResultKey("claim-key", {
-        fingerprint: "POST:/api/contact",
+        fingerprint: "POST:/api/inquiry",
         store,
         ttlMs: 123,
       }),
@@ -279,7 +279,7 @@ describe("idempotency-result-utils", () => {
       {
         createdAt: 1_000,
         expiresAt: 1_123,
-        fingerprint: "POST:/api/contact",
+        fingerprint: "POST:/api/inquiry",
         status: "pending",
       },
       123,
@@ -288,7 +288,7 @@ describe("idempotency-result-utils", () => {
     store.setIfNotExists.mockResolvedValueOnce(false);
     await expect(
       claimIdempotentResultKey("claim-key-2", {
-        fingerprint: "POST:/api/contact",
+        fingerprint: "POST:/api/inquiry",
         store,
         ttlMs: 123,
       }),
@@ -301,7 +301,7 @@ describe("idempotency-result-utils", () => {
 
     await expect(
       completeIdempotentResultWork("delete-ok", {
-        fingerprint: "POST:/api/contact",
+        fingerprint: "POST:/api/inquiry",
         handler: async () => {
           throw handlerError;
         },
@@ -314,7 +314,7 @@ describe("idempotency-result-utils", () => {
     store.delete.mockRejectedValueOnce(deleteError);
     await expect(
       completeIdempotentResultWork("delete-fail", {
-        fingerprint: "POST:/api/contact",
+        fingerprint: "POST:/api/inquiry",
         handler: async () => {
           throw handlerError;
         },
@@ -338,7 +338,7 @@ describe("idempotency-result-utils", () => {
 
     await expect(
       completeIdempotentResultWork("default-ttl-key", {
-        fingerprint: "POST:/api/contact",
+        fingerprint: "POST:/api/inquiry",
         handler: async () => ({ ok: true }),
         store,
       }),
@@ -349,7 +349,7 @@ describe("idempotency-result-utils", () => {
       {
         createdAt: 5_000,
         expiresAt: 5_000 + mocks.mockDefaultTtlMs,
-        fingerprint: "POST:/api/contact",
+        fingerprint: "POST:/api/inquiry",
         response: { ok: true },
         status: "success",
       },
@@ -370,12 +370,12 @@ describe("idempotency-result-utils", () => {
     const deferredDrop = createDeferred<{ drop: true }>();
 
     completeIdempotentResultWork("keep-key", {
-      fingerprint: "POST:/api/contact",
+      fingerprint: "POST:/api/inquiry",
       handler: async () => deferredKeep.promise,
       store,
     });
     completeIdempotentResultWork("drop-key", {
-      fingerprint: "POST:/api/contact",
+      fingerprint: "POST:/api/inquiry",
       handler: async () => deferredDrop.promise,
       store,
     });
@@ -403,14 +403,14 @@ describe("idempotency-result-utils", () => {
 
     for (let index = 0; index < 1_000; index += 1) {
       completeIdempotentResultWork(`key-${index}`, {
-        fingerprint: "POST:/api/contact",
+        fingerprint: "POST:/api/inquiry",
         handler: async () => new Promise(() => undefined),
         store,
       });
     }
 
     completeIdempotentResultWork("overflow-key", {
-      fingerprint: "POST:/api/contact",
+      fingerprint: "POST:/api/inquiry",
       handler: async () => new Promise(() => undefined),
       store,
     });

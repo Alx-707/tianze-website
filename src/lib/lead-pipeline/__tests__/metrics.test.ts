@@ -12,6 +12,7 @@ import {
   METRIC_SERVICES,
   METRIC_TYPES,
 } from "../metrics";
+import { COUNT_FIVE, TEN_SECONDS_MS } from "@/constants";
 import {
   getSystemObservabilitySnapshot,
   resetSystemObservability,
@@ -262,6 +263,16 @@ describe("LeadPipelineMetrics", () => {
   });
 
   describe("alerting", () => {
+    it("should expose the shared default alert config values", async () => {
+      vi.resetModules();
+      const { DEFAULT_ALERT_CONFIG } = await import("../failure-alert-policy");
+
+      expect(DEFAULT_ALERT_CONFIG).toEqual({
+        consecutiveFailureThreshold: COUNT_FIVE,
+        alertCooldownMs: TEN_SECONDS_MS,
+      });
+    });
+
     it("should trigger alert after consecutive failures threshold", async () => {
       const { logger } = await import("@/lib/logger");
       const alertConfig = {

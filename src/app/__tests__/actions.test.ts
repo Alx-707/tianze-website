@@ -35,6 +35,7 @@ vi.mock("@/lib/security/distributed-rate-limit", () => ({
       allowed: true,
       remaining: 10,
       resetTime: Date.now() + 60000,
+      retryAfter: null,
     }),
   ),
 }));
@@ -87,6 +88,12 @@ describe("actions.ts", () => {
     return formData;
   }
 
+  async function settleDuplicateReplay<T>(work: Promise<T>): Promise<T> {
+    await Promise.resolve();
+    await vi.advanceTimersByTimeAsync(50);
+    return work;
+  }
+
   describe("contactFormAction", () => {
     const createValidFormData = (
       overrides: Partial<Record<string, string>> = {},
@@ -115,6 +122,7 @@ describe("actions.ts", () => {
 
       expect(result.success).toBe(false);
       expect(result.errorCode).toBe(API_ERROR_CODES.IDEMPOTENCY_KEY_REQUIRED);
+      expect(checkDistributedRateLimit).toHaveBeenCalledTimes(1);
     });
 
     it("should return error when turnstile token is missing", async () => {
@@ -179,12 +187,48 @@ describe("actions.ts", () => {
       const duplicateFormData = createFormData(freshData);
 
       const firstResult = await contactFormAction(null, formData);
-      const secondResult = await contactFormAction(null, duplicateFormData);
+      const secondResult = await settleDuplicateReplay(
+        contactFormAction(null, duplicateFormData),
+      );
 
       expect(firstResult.success).toBe(true);
       expect(secondResult.success).toBe(true);
       const processing = await import("@/lib/contact-form-processing");
       expect(processing.processFormSubmission).toHaveBeenCalledTimes(1);
+    });
+
+    it("should replay duplicate submissions before rate limiting runs again", async () => {
+      vi.mocked(checkDistributedRateLimit)
+        .mockResolvedValueOnce({
+          allowed: true,
+          remaining: 10,
+          resetTime: Date.now() + 60_000,
+          retryAfter: null,
+        })
+        .mockResolvedValueOnce({
+          allowed: false,
+          remaining: 0,
+          resetTime: Date.now() + 60_000,
+          retryAfter: 60,
+        });
+
+      const replayData = {
+        ...createValidFormData(),
+        submittedAt: new Date().toISOString(),
+        idempotencyKey: "contact-action-replay-key",
+      };
+
+      const firstResult = await contactFormAction(
+        null,
+        createFormData(replayData),
+      );
+      const replayResult = await settleDuplicateReplay(
+        contactFormAction(null, createFormData(replayData)),
+      );
+
+      expect(firstResult.success).toBe(true);
+      expect(replayResult).toEqual(firstResult);
+      expect(checkDistributedRateLimit).toHaveBeenCalledTimes(1);
     });
 
     it("should return error when submittedAt is not provided", async () => {
@@ -220,6 +264,31 @@ describe("actions.ts", () => {
 
       expect(result).toHaveProperty("success");
       expect(typeof result.success).toBe("boolean");
+    });
+
+    it("should surface partial success without pretending the contact flow fully failed", async () => {
+      const processing = await import("@/lib/contact-form-processing");
+      vi.mocked(processing.processFormSubmission).mockResolvedValueOnce({
+        success: false,
+        partialSuccess: true,
+        emailSent: true,
+        recordCreated: false,
+        referenceId: "ref-partial-123",
+        errorCode: API_ERROR_CODES.CONTACT_PARTIAL_SUCCESS,
+      });
+      const formData = createFormData(createValidFormData());
+
+      const result = await contactFormAction(null, formData);
+
+      expect(result.success).toBe(false);
+      expect(result.errorCode).toBe(API_ERROR_CODES.CONTACT_PARTIAL_SUCCESS);
+      expect(result.error).toBeUndefined();
+      expect(result.data).toEqual({
+        emailSent: true,
+        recordCreated: false,
+        referenceId: "ref-partial-123",
+        partialSuccess: true,
+      });
     });
 
     it("should handle empty form data", async () => {

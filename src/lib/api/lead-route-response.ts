@@ -16,6 +16,7 @@ import { logger, sanitizeIP } from "@/lib/logger";
 interface LeadFailureResponseOptions {
   result: LeadResult;
   validationErrorCode: ApiErrorCode;
+  partialSuccessErrorCode?: ApiErrorCode;
   processingErrorCode: ApiErrorCode;
 }
 
@@ -37,10 +38,43 @@ export function createLeadSuccessPayload(referenceId: string) {
   };
 }
 
+export function requireLeadReferenceId(
+  result: Pick<LeadResult, "referenceId">,
+  message: string,
+): string {
+  if (!result.referenceId) {
+    throw new Error(message);
+  }
+
+  return result.referenceId;
+}
+
 export function createLeadFailureResponse(
   options: LeadFailureResponseOptions,
 ): NextResponse {
-  const { result, validationErrorCode, processingErrorCode } = options;
+  const {
+    result,
+    validationErrorCode,
+    partialSuccessErrorCode,
+    processingErrorCode,
+  } = options;
+
+  if (result.partialSuccess && result.referenceId && partialSuccessErrorCode) {
+    return NextResponse.json(
+      {
+        success: false,
+        errorCode: partialSuccessErrorCode,
+        data: {
+          partialSuccess: true,
+          referenceId: result.referenceId,
+          emailSent: result.emailSent,
+          recordCreated: result.recordCreated,
+        },
+      },
+      { status: 200 },
+    );
+  }
+
   const isValidationError = result.error === "VALIDATION_ERROR";
   return createApiErrorResponse(
     isValidationError ? validationErrorCode : processingErrorCode,

@@ -66,6 +66,8 @@ function createTranslationMock() {
       success: "Inquiry sent successfully!",
       error: "Failed to send inquiry",
       turnstileRequired: "Please complete verification",
+      INQUIRY_PARTIAL_SUCCESS:
+        "We received your inquiry, but part of the follow-up failed. Please wait before retrying.",
     },
     "contact.form": {
       firstName: "Name",
@@ -74,6 +76,12 @@ function createTranslationMock() {
       emailPlaceholder: "your@email.com",
       company: "Company",
       companyPlaceholder: "Your company",
+    },
+    apiErrors: {
+      INQUIRY_PARTIAL_SUCCESS:
+        "We received your inquiry, but part of the follow-up failed. Please wait before retrying.",
+      INQUIRY_PROCESSING_ERROR: "Failed to send inquiry",
+      UNKNOWN_ERROR: "apiErrors.UNKNOWN_ERROR",
     },
   };
 
@@ -631,6 +639,53 @@ describe("ProductInquiryForm", () => {
           screen.getByTestId("product-inquiry-error-message"),
         ).toBeInTheDocument();
       });
+    });
+
+    it("shows partial-success message when the backend reports a recoverable partial result", async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          success: false,
+          errorCode: "INQUIRY_PARTIAL_SUCCESS",
+          data: {
+            partialSuccess: true,
+            referenceId: "ref-partial-123",
+          },
+        }),
+      });
+
+      render(
+        <ProductInquiryForm
+          productName="Test Product"
+          productSlug="test-product"
+        />,
+      );
+
+      fireEvent.click(screen.getByTestId("turnstile-success-trigger"));
+      fireEvent.change(screen.getByLabelText(/Name/i), {
+        target: { value: "John Doe" },
+      });
+      fireEvent.change(screen.getByLabelText(/Email/i), {
+        target: { value: "john@example.com" },
+      });
+      fireEvent.change(screen.getByLabelText(/Quantity/i), {
+        target: { value: "100 pcs" },
+      });
+
+      fireEvent.submit(
+        screen.getByTestId("product-inquiry-submit-button").closest("form")!,
+      );
+
+      await waitFor(() => {
+        expect(
+          screen.getByTestId("product-inquiry-partial-message"),
+        ).toBeInTheDocument();
+      });
+      expect(
+        screen.getByTestId("product-inquiry-partial-text"),
+      ).toHaveTextContent(
+        "We received your inquiry, but part of the follow-up failed. Please wait before retrying.",
+      );
     });
 
     it("includes optional fields in submission", async () => {

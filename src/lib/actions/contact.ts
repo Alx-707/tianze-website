@@ -21,6 +21,7 @@ import {
 } from "@/lib/contact/submit-canonical-contact";
 import {
   createErrorResultWithLogging,
+  createPartialResultWithLogging,
   createSuccessResultWithLogging,
   getFormDataBoolean,
   getFormDataString,
@@ -40,6 +41,8 @@ export interface ContactFormResult {
   recordCreated: boolean;
   /** 统一线索引用ID */
   referenceId?: string | null;
+  /** 是否为部分成功 */
+  partialSuccess?: boolean | undefined;
 }
 
 /**
@@ -75,11 +78,9 @@ function extractContactFormData(formData: FormData): ContactFormWithToken {
 }
 
 /**
- * Perform security checks (rate limiting + honeypot)
- * Returns early result if blocked, null to continue processing
+ * Perform rate limit check before expensive processing.
  */
-async function performSecurityChecks(
-  formData: FormData,
+async function performRateLimitCheck(
   clientIP: string,
 ): Promise<ServerActionResult<ContactFormResult> | null> {
   const rateLimitKey = `ip:${await hmacKey(clientIP)}`;
@@ -98,6 +99,16 @@ async function performSecurityChecks(
     );
   }
 
+  return null;
+}
+
+/**
+ * Perform idempotent-safe checks (honeypot only).
+ * Returns early result if blocked, null to continue processing.
+ */
+function performHoneypotCheck(
+  formData: FormData,
+): ServerActionResult<ContactFormResult> | null {
   const honeypot = getFormDataString(formData, "website");
   if (honeypot) {
     return createSuccessResultWithLogging(
@@ -149,7 +160,16 @@ async function executeContactSubmissionAttempt(
     emailSent: submissionResult.emailSent,
     recordCreated: submissionResult.recordCreated,
     referenceId: submissionResult.referenceId ?? null,
+    ...(submissionResult.partialSuccess ? { partialSuccess: true } : {}),
   };
+
+  if (submissionResult.partialSuccess) {
+    return createPartialResultWithLogging(
+      normalizedSubmissionResult,
+      submissionResult.errorCode ?? API_ERROR_CODES.CONTACT_PARTIAL_SUCCESS,
+      logger,
+    );
+  }
 
   const processingTime = performance.now() - startTime;
   if (!isRuntimeProduction()) {
@@ -197,15 +217,34 @@ export const contactFormAction: ServerAction<FormData, ContactFormResult> =
       const headersList = await headers();
       const clientIP = getClientIPFromHeaders(headersList);
 
-      // Perform security checks (rate limiting + honeypot)
-      const securityResult = await performSecurityChecks(formData, clientIP);
-      if (securityResult) return securityResult;
-
       // 提取表单数据
       const contactData = extractContactFormData(formData);
+      if (!contactData.idempotencyKey) {
+        const rateLimitResult = await performRateLimitCheck(clientIP);
+        if (rateLimitResult) {
+          return rateLimitResult;
+        }
+      }
+
       const idempotentResult = await withIdempotentResult(
         contactData.idempotencyKey ?? null,
-        () => executeContactSubmissionAttempt(contactData, clientIP, startTime),
+        async () => {
+          const rateLimitResult = await performRateLimitCheck(clientIP);
+          if (rateLimitResult) {
+            return rateLimitResult;
+          }
+
+          const honeypotResult = performHoneypotCheck(formData);
+          if (honeypotResult) {
+            return honeypotResult;
+          }
+
+          return executeContactSubmissionAttempt(
+            contactData,
+            clientIP,
+            startTime,
+          );
+        },
         {
           required: true,
           fingerprint: createCanonicalContactFingerprint(contactData),

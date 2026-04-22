@@ -5,7 +5,6 @@ import { describe, expect, it } from "vitest";
 const CRITICAL_CACHE_POLICY_FILES = [
   "src/app/[locale]/contact/page.tsx",
   "src/lib/actions/contact.ts",
-  "src/app/api/contact/route.ts",
   "src/app/api/inquiry/route.ts",
   "src/app/api/subscribe/route.ts",
   "src/app/api/health/route.ts",
@@ -22,8 +21,6 @@ const CRITICAL_CACHE_POLICY_SOURCE_READERS = {
     readFileSync("src/app/[locale]/contact/page.tsx", "utf8"),
   "src/lib/actions/contact.ts": () =>
     readFileSync("src/lib/actions/contact.ts", "utf8"),
-  "src/app/api/contact/route.ts": () =>
-    readFileSync("src/app/api/contact/route.ts", "utf8"),
   "src/app/api/inquiry/route.ts": () =>
     readFileSync("src/app/api/inquiry/route.ts", "utf8"),
   "src/app/api/subscribe/route.ts": () =>

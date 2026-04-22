@@ -13,6 +13,7 @@ import {
 import {
   createLeadFailureResponse,
   createLeadSuccessPayload,
+  requireLeadReferenceId,
   validateLeadTurnstileToken,
 } from "@/lib/api/lead-route-response";
 import {
@@ -60,10 +61,12 @@ function createSuccessPayload(
     });
   }
 
-  if (!result.referenceId) {
-    throw new Error("referenceId missing on successful lead result");
-  }
-  return createLeadSuccessPayload(result.referenceId);
+  return createLeadSuccessPayload(
+    requireLeadReferenceId(
+      result,
+      "referenceId missing on successful lead result",
+    ),
+  );
 }
 
 /**
@@ -74,16 +77,24 @@ function createErrorResponse(
   context: InquiryResponseContext,
 ): NextResponse {
   const { clientIP, processingTime, observability } = context;
-  logger.warn("Product inquiry submission failed", {
-    error: result.error,
-    ip: sanitizeIP(clientIP),
-    processingTime,
-    ...withObservabilityContext(observability),
-  });
+  logger.warn(
+    result.partialSuccess
+      ? "Product inquiry submission partially completed"
+      : "Product inquiry submission failed",
+    {
+      error: result.error,
+      ip: sanitizeIP(clientIP),
+      processingTime,
+      partialSuccess: result.partialSuccess,
+      referenceId: result.referenceId,
+      ...withObservabilityContext(observability),
+    },
+  );
 
   return createLeadFailureResponse({
     result,
     validationErrorCode: API_ERROR_CODES.INQUIRY_VALIDATION_FAILED,
+    partialSuccessErrorCode: API_ERROR_CODES.INQUIRY_PARTIAL_SUCCESS,
     processingErrorCode: API_ERROR_CODES.INQUIRY_PROCESSING_ERROR,
   });
 }

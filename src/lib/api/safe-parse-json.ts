@@ -91,7 +91,7 @@ async function readBodyWithinLimit(
 export async function safeParseJson<T>(
   req: NextRequest,
   options?: {
-    /** 日志上下文中的路由标识，如 `/api/contact` */
+    /** 日志上下文中的路由标识，如 `/api/inquiry` */
     route?: string;
     /** 请求体大小上限，默认 64KB */
     maxBytes?: number;

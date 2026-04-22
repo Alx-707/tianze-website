@@ -149,7 +149,9 @@
     "deploy:cf:preview": "pnpm clean:next-artifacts && pnpm build:cf && pnpm exec wrangler deploy --env preview",
     "deploy:cf:dry-run": "pnpm clean:next-artifacts && pnpm build:cf && pnpm exec wrangler deploy --dry-run --outdir /tmp/verify-cf --env preview",
     "test:mutation": "stryker run",
-    "test:mutation:lead": "stryker run --mutate 'src/lib/lead-pipeline/**/*.ts'"
+    "test:mutation:lead": "stryker run --mutate 'src/lib/lead-pipeline/**/*.ts,!src/lib/lead-pipeline/**/__tests__/**/*.ts,!src/lib/lead-pipeline/**/*.test.ts,!src/lib/lead-pipeline/**/*.spec.ts'",
+    "test:mutation:security": "stryker run --mutate 'src/lib/security/**/*.ts,!src/lib/security/**/__tests__/**/*.ts,!src/lib/security/**/*.test.ts,!src/lib/security/**/*.spec.ts'",
+    "test:mutation:lead-security": "stryker run --mutate 'src/lib/lead-pipeline/**/*.ts,!src/lib/lead-pipeline/**/__tests__/**/*.ts,!src/lib/lead-pipeline/**/*.test.ts,!src/lib/lead-pipeline/**/*.spec.ts,src/lib/security/**/*.ts,!src/lib/security/**/__tests__/**/*.ts,!src/lib/security/**/*.test.ts,!src/lib/security/**/*.spec.ts'"
   },
   "dependencies": {
     "@marsidev/react-turnstile": "^1.5.0",
