@@ -99,7 +99,7 @@ import {
 
 function createRequest(
   method = "POST",
-  path = "/api/contact",
+  path = "/api/inquiry",
   idempotencyKey?: string,
 ): NextRequest {
   const headers = new Headers();
@@ -182,10 +182,10 @@ describe("idempotency behavioral contracts", () => {
     const overlongKey = "k".repeat(257);
 
     expect(
-      getIdempotencyKey(createRequest("POST", "/api/contact", maxLengthKey)),
+      getIdempotencyKey(createRequest("POST", "/api/inquiry", maxLengthKey)),
     ).toBe(maxLengthKey);
     expect(
-      getIdempotencyKey(createRequest("POST", "/api/contact", overlongKey)),
+      getIdempotencyKey(createRequest("POST", "/api/inquiry", overlongKey)),
     ).toBeNull();
     expect(mocks.mockLoggerWarn).toHaveBeenCalledWith(
       "Idempotency-Key exceeds max length, treating as missing",
@@ -198,9 +198,9 @@ describe("idempotency behavioral contracts", () => {
     mocks.mockCheckInFlight.mockReturnValue(inFlightResponse);
 
     const response = await withIdempotency(
-      createRequest("POST", "/api/contact", "in-flight-key"),
+      createRequest("POST", "/api/inquiry", "in-flight-key"),
       async () => ({ shouldNotRun: true }),
-      { fingerprint: "POST:/api/contact" },
+      { fingerprint: "POST:/api/inquiry" },
     );
 
     expect(response).toBe(inFlightResponse);
@@ -217,9 +217,9 @@ describe("idempotency behavioral contracts", () => {
     });
 
     const response = await withIdempotency(
-      createRequest("POST", "/api/contact", "reused-key"),
+      createRequest("POST", "/api/inquiry", "reused-key"),
       async () => ({ shouldNotRun: true }),
-      { fingerprint: "POST:/api/contact" },
+      { fingerprint: "POST:/api/inquiry" },
     );
 
     expect(response.status).toBe(409);
@@ -234,15 +234,15 @@ describe("idempotency behavioral contracts", () => {
     mocks.mockStore.get.mockResolvedValue({
       createdAt: 1,
       expiresAt: 2,
-      fingerprint: "POST:/api/contact",
+      fingerprint: "POST:/api/inquiry",
       response: { cached: true, source: "store" },
       status: "success",
     });
 
     const response = await withIdempotency(
-      createRequest("POST", "/api/contact", "cached-key"),
+      createRequest("POST", "/api/inquiry", "cached-key"),
       async () => ({ shouldNotRun: true }),
-      { fingerprint: "POST:/api/contact" },
+      { fingerprint: "POST:/api/inquiry" },
     );
 
     expect(response.status).toBe(HTTP_OK);
@@ -254,14 +254,14 @@ describe("idempotency behavioral contracts", () => {
       createdAt: 1,
       error: "boom",
       expiresAt: 2,
-      fingerprint: "POST:/api/contact",
+      fingerprint: "POST:/api/inquiry",
       status: "error",
     });
 
     const response = await withIdempotency(
-      createRequest("POST", "/api/contact", "failed-key"),
+      createRequest("POST", "/api/inquiry", "failed-key"),
       async () => ({ shouldNotRun: true }),
-      { fingerprint: "POST:/api/contact" },
+      { fingerprint: "POST:/api/inquiry" },
     );
 
     expect(mocks.mockCreateApiErrorResponse).toHaveBeenCalledWith(
@@ -279,14 +279,14 @@ describe("idempotency behavioral contracts", () => {
     mocks.mockStore.get.mockResolvedValue({
       createdAt: 1,
       expiresAt: 2,
-      fingerprint: "POST:/api/contact",
+      fingerprint: "POST:/api/inquiry",
       status: "pending",
     });
 
     const response = await withIdempotency(
-      createRequest("POST", "/api/contact", "pending-key"),
+      createRequest("POST", "/api/inquiry", "pending-key"),
       async () => ({ shouldNotRun: true }),
-      { fingerprint: "POST:/api/contact" },
+      { fingerprint: "POST:/api/inquiry" },
     );
 
     expect(mocks.mockWaitForCompletion).toHaveBeenCalledWith(
@@ -305,9 +305,9 @@ describe("idempotency behavioral contracts", () => {
     });
 
     const response = await withIdempotency(
-      createRequest("POST", "/api/contact", "pending-mismatch-key"),
+      createRequest("POST", "/api/inquiry", "pending-mismatch-key"),
       async () => ({ shouldNotRun: true }),
-      { fingerprint: "POST:/api/contact" },
+      { fingerprint: "POST:/api/inquiry" },
     );
 
     expect(response.status).toBe(HTTP_OK);
@@ -326,10 +326,10 @@ describe("idempotency behavioral contracts", () => {
     });
 
     const response = await withIdempotency(
-      createRequest("POST", "/api/contact", "fresh-key"),
+      createRequest("POST", "/api/inquiry", "fresh-key"),
       async () => ({ ok: true, raw: true }),
       {
-        fingerprint: "POST:/api/contact",
+        fingerprint: "POST:/api/inquiry",
         ttl: 1_234,
       },
     );
@@ -339,18 +339,18 @@ describe("idempotency behavioral contracts", () => {
       {
         createdAt: 1_000,
         expiresAt: 2_234,
-        fingerprint: "POST:/api/contact",
+        fingerprint: "POST:/api/inquiry",
         status: "pending",
       },
       1_234,
     );
     expect(mocks.mockSetInFlightFingerprint).toHaveBeenCalledWith(
       "fresh-key",
-      "POST:/api/contact",
+      "POST:/api/inquiry",
     );
     expect(mocks.mockRegisterInFlight).toHaveBeenCalledWith(
       "fresh-key",
-      "POST:/api/contact",
+      "POST:/api/inquiry",
       expect.any(Promise),
     );
     expect(mocks.mockStore.set).toHaveBeenCalledWith(
@@ -358,7 +358,7 @@ describe("idempotency behavioral contracts", () => {
       {
         createdAt: 1_000,
         expiresAt: 2_234,
-        fingerprint: "POST:/api/contact",
+        fingerprint: "POST:/api/inquiry",
         response: { ok: true },
         status: "success",
       },
@@ -372,10 +372,10 @@ describe("idempotency behavioral contracts", () => {
     vi.spyOn(Date, "now").mockReturnValue(2_000);
 
     await withIdempotency(
-      createRequest("POST", "/api/contact", "ttl-fallback-key"),
+      createRequest("POST", "/api/inquiry", "ttl-fallback-key"),
       async () => ({ ok: true }),
       {
-        fingerprint: "POST:/api/contact",
+        fingerprint: "POST:/api/inquiry",
         ttl: 0,
       },
     );
@@ -395,9 +395,9 @@ describe("idempotency behavioral contracts", () => {
     const handler = vi.fn(async () => ({ shouldNotRun: true }));
 
     const response = await withIdempotency(
-      createRequest("POST", "/api/contact", "race-key"),
+      createRequest("POST", "/api/inquiry", "race-key"),
       handler,
-      { fingerprint: "POST:/api/contact" },
+      { fingerprint: "POST:/api/inquiry" },
     );
 
     expect(handler).not.toHaveBeenCalled();
@@ -415,9 +415,9 @@ describe("idempotency behavioral contracts", () => {
     mocks.mockStore.delete.mockRejectedValue(deleteError);
 
     const response = await withIdempotency(
-      createRequest("POST", "/api/contact", "direct-response-key"),
+      createRequest("POST", "/api/inquiry", "direct-response-key"),
       async () => directResponse,
-      { fingerprint: "POST:/api/contact" },
+      { fingerprint: "POST:/api/inquiry" },
     );
 
     expect(response).toBe(directResponse);
@@ -441,9 +441,9 @@ describe("idempotency behavioral contracts", () => {
     });
 
     const response = await withIdempotency(
-      createRequest("POST", "/api/contact", "persist-key"),
+      createRequest("POST", "/api/inquiry", "persist-key"),
       async () => ({ persisted: false }),
-      { fingerprint: "POST:/api/contact" },
+      { fingerprint: "POST:/api/inquiry" },
     );
 
     expect(response.status).toBe(202);
@@ -464,11 +464,11 @@ describe("idempotency behavioral contracts", () => {
 
     await expect(
       withIdempotency(
-        createRequest("POST", "/api/contact", "failure-key"),
+        createRequest("POST", "/api/inquiry", "failure-key"),
         async () => {
           throw handlerError;
         },
-        { fingerprint: "POST:/api/contact" },
+        { fingerprint: "POST:/api/inquiry" },
       ),
     ).rejects.toBe(handlerError);
 
@@ -498,7 +498,7 @@ describe("idempotency behavioral contracts", () => {
     const directResponse = NextResponse.json({ direct: true }, { status: 207 });
 
     const response = await withIdempotency(
-      createRequest("POST", "/api/contact"),
+      createRequest("POST", "/api/inquiry"),
       async () => directResponse,
     );
 
@@ -510,7 +510,7 @@ describe("idempotency behavioral contracts", () => {
     const handlerError = new Error("no-key failure");
 
     await expect(
-      withIdempotency(createRequest("POST", "/api/contact"), async () => {
+      withIdempotency(createRequest("POST", "/api/inquiry"), async () => {
         throw handlerError;
       }),
     ).rejects.toBe(handlerError);
@@ -524,7 +524,7 @@ describe("idempotency behavioral contracts", () => {
   it("treats required as false by default and executes the handler when the key is missing", async () => {
     const handler = vi.fn(async () => ({ ok: true }));
     const result = await withIdempotentResult(null, handler, {
-      fingerprint: "POST:/api/contact",
+      fingerprint: "POST:/api/inquiry",
     });
 
     expect(mocks.mockGetRequiredMissingResult).toHaveBeenCalledWith(
@@ -548,7 +548,7 @@ describe("idempotency behavioral contracts", () => {
       throw new Error("result failed");
     });
     const result = await withIdempotentResult(null, handler, {
-      fingerprint: "POST:/api/contact",
+      fingerprint: "POST:/api/inquiry",
       required: false,
     });
 
@@ -569,7 +569,7 @@ describe("idempotency behavioral contracts", () => {
     const result = await withIdempotentResult(
       "in-flight-result-key",
       async () => ({ shouldNotRun: true }),
-      { fingerprint: "POST:/api/contact" },
+      { fingerprint: "POST:/api/inquiry" },
     );
 
     expect(result).toEqual({
@@ -584,20 +584,20 @@ describe("idempotency behavioral contracts", () => {
     mocks.mockClaimIdempotentResultKey.mockResolvedValue(false);
 
     await withIdempotentResult("explicit-ttl-key", async () => ({ ok: true }), {
-      fingerprint: "POST:/api/contact",
+      fingerprint: "POST:/api/inquiry",
       ttl: 321,
     });
     expect(mocks.mockClaimIdempotentResultKey).toHaveBeenLastCalledWith(
       "explicit-ttl-key",
       expect.objectContaining({
-        fingerprint: "POST:/api/contact",
+        fingerprint: "POST:/api/inquiry",
         store: mocks.mockStore,
         ttlMs: 321,
       }),
     );
 
     await withIdempotentResult("fallback-ttl-key", async () => ({ ok: true }), {
-      fingerprint: "POST:/api/contact",
+      fingerprint: "POST:/api/inquiry",
       ttl: 0,
     });
     expect(mocks.mockClaimIdempotentResultKey).toHaveBeenLastCalledWith(
@@ -612,7 +612,7 @@ describe("idempotency behavioral contracts", () => {
     mocks.mockClaimIdempotentResultKey.mockResolvedValue(false);
 
     await withIdempotentResult("runtime-ttl-key", async () => ({ ok: true }), {
-      fingerprint: "POST:/api/contact",
+      fingerprint: "POST:/api/inquiry",
       ttl: "300" as unknown as number,
     });
 
@@ -634,7 +634,7 @@ describe("idempotency behavioral contracts", () => {
     const result = await withIdempotentResult(
       "lost-result-claim",
       async () => ({ shouldNotRun: true }),
-      { fingerprint: "POST:/api/contact" },
+      { fingerprint: "POST:/api/inquiry" },
     );
 
     expect(result).toEqual({ ok: false, reason: "timeout" });
@@ -652,7 +652,7 @@ describe("idempotency behavioral contracts", () => {
     const result = await withIdempotentResult(
       "completion-failure-key",
       async () => ({ ok: true }),
-      { fingerprint: "POST:/api/contact" },
+      { fingerprint: "POST:/api/inquiry" },
     );
 
     expect(result).toEqual({ ok: false, reason: "failed" });
@@ -660,7 +660,7 @@ describe("idempotency behavioral contracts", () => {
 
   it("rejects missing required request keys with a 400 response and warning", async () => {
     const response = await withIdempotency(
-      createRequest("POST", "/api/contact"),
+      createRequest("POST", "/api/inquiry"),
       async () => ({ ok: true }),
       { required: true },
     );

@@ -60,8 +60,8 @@ describe("idempotency security properties", () => {
       const executionCount = { value: 0 };
       const idempotencyKey = "concurrent-test-key-1";
 
-      const request1 = createRequest("POST", "/api/contact", idempotencyKey);
-      const request2 = createRequest("POST", "/api/contact", idempotencyKey);
+      const request1 = createRequest("POST", "/api/inquiry", idempotencyKey);
+      const request2 = createRequest("POST", "/api/inquiry", idempotencyKey);
 
       const handler = async () => {
         executionCount.value += 1;
@@ -95,8 +95,8 @@ describe("idempotency security properties", () => {
     it("should reject same idempotency key used for different method/path", async () => {
       const sharedKey = "semantic-binding-key-1";
 
-      // First: POST /api/contact with this key
-      const request1 = createRequest("POST", "/api/contact", sharedKey);
+      // First: POST /api/inquiry with this key
+      const request1 = createRequest("POST", "/api/inquiry", sharedKey);
       const response1 = await withIdempotency(request1, async () => ({
         action: "contact",
       }));
@@ -111,7 +111,7 @@ describe("idempotency security properties", () => {
       }));
 
       // The response should indicate a conflict (e.g., 409 or 422),
-      // not silently return the cached /api/contact result.
+      // not silently return the cached /api/inquiry result.
       const data = (await response2.json()) as Record<string, unknown>;
       expect(response2.status).not.toBe(HTTP_OK);
       expect(data).toHaveProperty("errorCode", "IDEMPOTENCY_KEY_REUSED");
@@ -120,7 +120,7 @@ describe("idempotency security properties", () => {
 
   describe("non-idempotent fallback semantics", () => {
     it("should preserve statusCode even when no idempotency key is provided", async () => {
-      const request = createRequest("POST", "/api/contact");
+      const request = createRequest("POST", "/api/inquiry");
       const response = await withIdempotency(request, async () => ({
         success: false,
         errorCode: "BOOM",
@@ -143,7 +143,7 @@ describe("idempotency security properties", () => {
       const key = "persistence-test-key-1";
 
       // First request succeeds and caches
-      const request1 = createRequest("POST", "/api/contact", key);
+      const request1 = createRequest("POST", "/api/inquiry", key);
       await withIdempotency(request1, async () => ({ success: true }));
 
       // Simulate a hot-cache clear (e.g., module-level Maps cleared in tests).
@@ -154,7 +154,7 @@ describe("idempotency security properties", () => {
       // Second request with same key should still return cached result
       // (from the IdempotencyStore), not re-execute business logic.
       const executionCount = { value: 0 };
-      const request2 = createRequest("POST", "/api/contact", key);
+      const request2 = createRequest("POST", "/api/inquiry", key);
       const response2 = await withIdempotency(request2, async () => {
         executionCount.value += 1;
         return { success: true, reExecuted: true };

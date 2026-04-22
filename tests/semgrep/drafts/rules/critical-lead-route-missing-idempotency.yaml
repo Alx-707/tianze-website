@@ -12,7 +12,6 @@ rules:
       - pattern-not-regex: '(?s).*withIdempotency\s*\([\s\S]*required\s*:\s*true'
     paths:
       include:
-        - "**/src/app/api/contact/route.ts"
         - "**/src/app/api/inquiry/route.ts"
         - "**/src/app/api/subscribe/route.ts"
     metadata:

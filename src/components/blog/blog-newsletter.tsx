@@ -7,6 +7,7 @@ import {
   API_ERROR_NAMESPACE,
   translateApiError,
 } from "@/lib/api/translate-error-code";
+import { isPartialSuccessErrorCode } from "@/constants/api-error-codes";
 import { cn } from "@/lib/utils";
 import { getAttributionAsObject } from "@/lib/utm";
 import { generateIdempotencyKey } from "@/lib/idempotency-key";
@@ -30,18 +31,35 @@ export interface BlogNewsletterProps {
 
 interface FormState {
   success: boolean;
+  partial?: boolean;
   error: string | undefined;
+  referenceId?: string | undefined;
 }
 
 interface SubscribeApiResponse {
   success?: boolean;
   errorCode?: string;
+  data?: {
+    partialSuccess?: boolean;
+    referenceId?: string;
+  };
 }
 
 const initialState: FormState = {
   success: false,
   error: undefined,
 };
+
+interface NewsletterCommonProps {
+  className: string | undefined;
+  title: string;
+  description: string;
+  success: boolean;
+  partial: boolean;
+  successMessage: string;
+  partialMessage: string | undefined;
+  formProps: Parameters<typeof NewsletterForm>[0];
+}
 
 /**
  * Success message component
@@ -83,6 +101,26 @@ function ErrorMessage({ error }: { error: string }) {
       <span data-testid="blog-newsletter-error-text" translate="no">
         {error}
       </span>
+    </div>
+  );
+}
+
+function PartialMessage({ message }: { message: string }) {
+  return (
+    <div
+      className="flex items-center gap-3 py-4 text-amber-700"
+      data-testid="blog-newsletter-partial-message"
+      role="status"
+      aria-live="polite"
+      translate="no"
+    >
+      <p
+        className="text-sm font-medium"
+        data-testid="blog-newsletter-partial-text"
+        translate="no"
+      >
+        {message}
+      </p>
     </div>
   );
 }
@@ -172,14 +210,18 @@ function CompactVariant({
   title,
   description,
   success,
+  partial,
   successMessage,
+  partialMessage,
   formProps,
 }: {
   className: string | undefined;
   title: string;
   description: string;
   success: boolean;
+  partial: boolean;
   successMessage: string;
+  partialMessage: string | undefined;
   formProps: Parameters<typeof NewsletterForm>[0];
 }) {
   return (
@@ -188,6 +230,8 @@ function CompactVariant({
       <p className="text-sm text-muted-foreground">{description}</p>
       {success ? (
         <SuccessMessage message={successMessage} />
+      ) : partial && partialMessage !== undefined ? (
+        <PartialMessage message={partialMessage} />
       ) : (
         <NewsletterForm {...formProps} />
       )}
@@ -201,14 +245,18 @@ function InlineVariant({
   title,
   description,
   success,
+  partial,
   successMessage,
+  partialMessage,
   formProps,
 }: {
   className: string | undefined;
   title: string;
   description: string;
   success: boolean;
+  partial: boolean;
   successMessage: string;
+  partialMessage: string | undefined;
   formProps: Parameters<typeof NewsletterForm>[0];
 }) {
   return (
@@ -221,12 +269,59 @@ function InlineVariant({
         <div className="sm:w-80">
           {success ? (
             <SuccessMessage message={successMessage} />
+          ) : partial && partialMessage !== undefined ? (
+            <PartialMessage message={partialMessage} />
           ) : (
             <NewsletterForm {...formProps} />
           )}
         </div>
       </div>
     </div>
+  );
+}
+
+function buildNewsletterCommonProps(args: {
+  className: string | undefined;
+  title: string;
+  description: string;
+  success: boolean;
+  partial: boolean;
+  successMessage: string;
+  partialMessage: string | undefined;
+  formProps: Parameters<typeof NewsletterForm>[0];
+}): NewsletterCommonProps {
+  return args;
+}
+
+function DefaultVariant({
+  className,
+  title,
+  description,
+  success,
+  partial,
+  successMessage,
+  partialMessage,
+  formProps,
+}: NewsletterCommonProps) {
+  return (
+    <Card className={cn("overflow-hidden", className)}>
+      <CardHeader className="bg-muted/50">
+        <CardTitle className="flex items-center gap-2 text-lg">
+          <Mail className="h-5 w-5" />
+          {title}
+        </CardTitle>
+        <CardDescription>{description}</CardDescription>
+      </CardHeader>
+      <CardContent className="pt-6">
+        {success ? (
+          <SuccessMessage message={successMessage} />
+        ) : partial && partialMessage !== undefined ? (
+          <PartialMessage message={partialMessage} />
+        ) : (
+          <NewsletterForm {...formProps} />
+        )}
+      </CardContent>
+    </Card>
   );
 }
 
@@ -290,6 +385,18 @@ export function BlogNewsletter({
         }),
       });
       const result = (await response.json()) as SubscribeApiResponse;
+      const isPartial =
+        result.errorCode !== undefined &&
+        isPartialSuccessErrorCode(result.errorCode) &&
+        result.data?.partialSuccess === true;
+      if (isPartial) {
+        return {
+          success: false,
+          partial: true,
+          error: translateApiError(tApi, result.errorCode),
+          referenceId: result.data?.referenceId,
+        };
+      }
       if (!response.ok || result.success !== true) {
         return {
           success: false,
@@ -321,34 +428,19 @@ export function BlogNewsletter({
     onTurnstileExpire: handleTurnstileExpire,
   };
 
-  const commonProps = {
+  const commonProps = buildNewsletterCommonProps({
     className,
     title: t("title"),
     description: t("description"),
     success: state.success,
+    partial: state.partial === true,
     successMessage: t("success"),
+    partialMessage: state.error,
     formProps,
-  };
+  });
 
   if (variant === "compact") return <CompactVariant {...commonProps} />;
   if (variant === "inline") return <InlineVariant {...commonProps} />;
 
-  return (
-    <Card className={cn("overflow-hidden", className)}>
-      <CardHeader className="bg-muted/50">
-        <CardTitle className="flex items-center gap-2 text-lg">
-          <Mail className="h-5 w-5" />
-          {t("title")}
-        </CardTitle>
-        <CardDescription>{t("description")}</CardDescription>
-      </CardHeader>
-      <CardContent className="pt-6">
-        {state.success ? (
-          <SuccessMessage message={t("success")} />
-        ) : (
-          <NewsletterForm {...formProps} />
-        )}
-      </CardContent>
-    </Card>
-  );
+  return <DefaultVariant {...commonProps} />;
 }

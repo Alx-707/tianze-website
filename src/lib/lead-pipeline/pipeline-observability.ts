@@ -4,10 +4,12 @@ import {
   METRIC_SERVICES,
   type PipelineSummary,
 } from "@/lib/lead-pipeline/metrics";
+import type { LeadInput } from "@/lib/lead-pipeline/lead-schema";
 import {
   isServiceFailure,
   type ServiceResult,
 } from "@/lib/lead-pipeline/service-result";
+import { logger } from "@/lib/logger";
 
 // eslint-disable-next-line max-params -- requestId is required to correlate route and pipeline signals
 export function emitServiceMetrics(
@@ -96,4 +98,149 @@ export function logPipelineSummary(params: LogPipelineSummaryParams): void {
   };
 
   leadPipelineMetrics.logPipelineSummary(summary);
+}
+
+export interface PipelineObservabilityOutcome {
+  success: boolean;
+  partialSuccess: boolean;
+}
+
+interface RecordPipelineObservabilityParams {
+  lead: LeadInput;
+  referenceId: string;
+  emailResult: ServiceResult;
+  crmResult: ServiceResult;
+  hasEmailOperation: boolean;
+  totalLatencyMs: number;
+  requestId?: string;
+}
+
+function withRequestId(
+  requestId?: string,
+): { requestId: string } | Record<string, never> {
+  return requestId ? { requestId } : {};
+}
+
+function calculatePipelineOutcome(
+  hasEmailOperation: boolean,
+  emailResult: ServiceResult,
+  crmResult: ServiceResult,
+): PipelineObservabilityOutcome {
+  const success = hasEmailOperation
+    ? emailResult.success && crmResult.success
+    : crmResult.success;
+
+  return {
+    success,
+    partialSuccess: !success && (emailResult.success || crmResult.success),
+  };
+}
+
+function logServiceFailures(params: RecordPipelineObservabilityParams): void {
+  const {
+    lead,
+    referenceId,
+    hasEmailOperation,
+    emailResult,
+    crmResult,
+    requestId,
+  } = params;
+
+  if (hasEmailOperation && !emailResult.success) {
+    logger.error("Lead email send failed", {
+      type: lead.type,
+      referenceId,
+      error: emailResult.error.message,
+      ...withRequestId(requestId),
+    });
+  }
+
+  if (!crmResult.success) {
+    logger.error("Lead CRM record failed", {
+      type: lead.type,
+      referenceId,
+      error: crmResult.error.message,
+      ...withRequestId(requestId),
+    });
+  }
+}
+
+function logLeadOutcome(
+  params: RecordPipelineObservabilityParams & {
+    outcome: PipelineObservabilityOutcome;
+  },
+): void {
+  const { lead, referenceId, emailResult, crmResult, outcome, requestId } =
+    params;
+
+  if (outcome.success) {
+    logger.info("Lead processed successfully", {
+      type: lead.type,
+      referenceId,
+      emailSent: emailResult.success,
+      recordCreated: crmResult.success,
+      ...withRequestId(requestId),
+    });
+    return;
+  }
+
+  if (outcome.partialSuccess) {
+    logger.warn("Lead processed partially", {
+      type: lead.type,
+      referenceId,
+      emailSent: emailResult.success,
+      recordCreated: crmResult.success,
+      ...withRequestId(requestId),
+    });
+    return;
+  }
+
+  logger.error("Lead processing failed completely", {
+    type: lead.type,
+    referenceId,
+    emailError: isServiceFailure(emailResult)
+      ? emailResult.error.message
+      : undefined,
+    crmError: isServiceFailure(crmResult) ? crmResult.error.message : undefined,
+    ...withRequestId(requestId),
+  });
+}
+
+export function recordPipelineObservability(
+  params: RecordPipelineObservabilityParams,
+): PipelineObservabilityOutcome {
+  const {
+    lead,
+    referenceId,
+    emailResult,
+    crmResult,
+    hasEmailOperation,
+    totalLatencyMs,
+    requestId,
+  } = params;
+
+  emitServiceMetrics(emailResult, crmResult, hasEmailOperation, requestId);
+  logServiceFailures(params);
+
+  const outcome = calculatePipelineOutcome(
+    hasEmailOperation,
+    emailResult,
+    crmResult,
+  );
+
+  logPipelineSummary({
+    referenceId,
+    leadType: lead.type,
+    emailResult,
+    crmResult,
+    totalLatencyMs,
+    overallSuccess: outcome.success,
+    ...withRequestId(requestId),
+  });
+  logLeadOutcome({
+    ...params,
+    outcome,
+  });
+
+  return outcome;
 }

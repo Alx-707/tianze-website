@@ -98,7 +98,7 @@ describe("idempotency-store", () => {
   describe("RedisIdempotencyStore", () => {
     const entry: IdempotencyEntry = {
       status: "pending",
-      fingerprint: "POST:/api/contact",
+      fingerprint: "POST:/api/inquiry",
       createdAt: 1_700_000_000_000,
       expiresAt: 1_700_000_100_000,
     };

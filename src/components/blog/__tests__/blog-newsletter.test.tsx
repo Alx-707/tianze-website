@@ -89,6 +89,8 @@ function createTranslationMock() {
     error: "Something went wrong",
     turnstileRequired: "Please complete verification",
     SUBSCRIBE_VALIDATION_EMAIL_INVALID: "Invalid email",
+    SUBSCRIBE_PARTIAL_SUCCESS:
+      "We received your subscription, but part of the follow-up failed. Please wait before retrying.",
     UNKNOWN_ERROR: "Something went wrong",
   };
 
@@ -413,6 +415,41 @@ describe("BlogNewsletter", () => {
       expect(
         screen.getByTestId("blog-newsletter-error-text"),
       ).toHaveTextContent("Invalid email");
+    });
+
+    it("shows partial-success message when the backend reports a recoverable partial result", async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          success: false,
+          errorCode: "SUBSCRIBE_PARTIAL_SUCCESS",
+          data: {
+            partialSuccess: true,
+            referenceId: "ref-partial-123",
+          },
+        }),
+      });
+
+      render(<BlogNewsletter />);
+
+      fireEvent.click(screen.getByTestId("turnstile-success-trigger"));
+
+      const emailInput = screen.getByPlaceholderText("Enter your email");
+      fireEvent.change(emailInput, { target: { value: "test@example.com" } });
+
+      const form = emailInput.closest("form");
+      fireEvent.submit(form!);
+
+      await waitFor(() => {
+        expect(
+          screen.getByTestId("blog-newsletter-partial-message"),
+        ).toBeInTheDocument();
+      });
+      expect(
+        screen.getByTestId("blog-newsletter-partial-text"),
+      ).toHaveTextContent(
+        "We received your subscription, but part of the follow-up failed. Please wait before retrying.",
+      );
     });
 
     it("handles network error gracefully", async () => {

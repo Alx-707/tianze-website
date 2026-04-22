@@ -92,6 +92,12 @@ function createFormData(data: Record<string, string>): FormData {
   return formData;
 }
 
+async function settleDuplicateReplay<T>(work: Promise<T>): Promise<T> {
+  await Promise.resolve();
+  await vi.advanceTimersByTimeAsync(50);
+  return work;
+}
+
 function validContactFields(): Record<string, string> {
   return {
     firstName: "Alice",
@@ -153,7 +159,9 @@ describe("Contact form — integration (happy path chain)", () => {
       const secondFormData = createFormData(validContactFields());
 
       const firstResult = await contactFormAction(null, firstFormData);
-      const secondResult = await contactFormAction(null, secondFormData);
+      const secondResult = await settleDuplicateReplay(
+        contactFormAction(null, secondFormData),
+      );
 
       expect(firstResult.success).toBe(true);
       expect(secondResult.success).toBe(true);

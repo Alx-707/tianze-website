@@ -10,7 +10,6 @@ import {
   getSystemObservabilitySnapshot,
   resetSystemObservability,
 } from "@/lib/observability/system-observability";
-import * as contactRoute from "@/app/api/contact/route";
 import * as inquiryRoute from "@/app/api/inquiry/route";
 import * as subscribeRoute from "@/app/api/subscribe/route";
 
@@ -35,56 +34,6 @@ vi.mock("@/lib/turnstile", () => ({
   verifyTurnstile: vi.fn(async () => true),
   verifyTurnstileDetailed: vi.fn(async () => ({ success: true })),
 }));
-
-vi.mock("@/app/api/contact/contact-api-validation", () => ({
-  validateFormData: vi.fn(async (body: unknown) => ({
-    success: true,
-    data: body as Record<string, unknown>,
-    error: null,
-    details: null,
-  })),
-  validateAdminAccess: vi.fn(() => false),
-  getContactFormStats: vi.fn(async () => ({ total: 10 })),
-}));
-
-vi.mock("@/lib/contact-form-processing", () => ({
-  processFormSubmission: vi.fn(async () => ({
-    success: true,
-    emailSent: true,
-    recordCreated: true,
-    referenceId: "contact-ref-001",
-  })),
-}));
-
-vi.mock("@/lib/contact/submit-canonical-contact", async () => {
-  const validationModule =
-    await import("@/app/api/contact/contact-api-validation");
-  const processingModule = await import("@/lib/contact-form-processing");
-  return {
-    createCanonicalContactFingerprintFromUnknown: vi.fn(() => "CONTACT:test"),
-    submitCanonicalContactSubmission: vi.fn(
-      async (body: unknown, options: { clientIP: string }) => {
-        const validation = await vi.mocked(validationModule.validateFormData)(
-          body,
-          options.clientIP,
-        );
-        if (!validation.success || !validation.data) {
-          return validation;
-        }
-        const submissionResult = await vi.mocked(
-          processingModule.processFormSubmission,
-        )(validation.data);
-        return {
-          success: true,
-          error: null,
-          details: null,
-          data: validation.data,
-          submissionResult,
-        };
-      },
-    ),
-  };
-});
 
 vi.mock("@/lib/lead-pipeline", () => ({
   processLead: vi.fn(async () => ({
@@ -156,28 +105,31 @@ describe("lead API family response contract (auxiliary)", () => {
     resetSystemObservability();
   });
 
-  it("contact success uses the family success contract", async () => {
-    const response = await contactRoute.POST(
+  it("inquiry success uses the family success contract", async () => {
+    const response = await inquiryRoute.POST(
       makeRequest(
-        "/api/contact",
+        "/api/inquiry",
         {
-          email: "contact@example.com",
-          company: "Acme",
-          firstName: "Ada",
+          turnstileToken: "valid-token",
+          email: "buyer@example.com",
+          fullName: "Buyer",
+          company: "Buyer Co",
+          productSlug: "north-america",
+          productName: "North America",
         },
         {
-          [REQUEST_ID_HEADER]: "lead-contact-request",
+          [REQUEST_ID_HEADER]: "lead-inquiry-request",
         },
       ),
     );
 
     expect(response.status).toBe(200);
-    expectLeadObservabilityHeaders(response, "lead-contact-request");
+    expectLeadObservabilityHeaders(response, "lead-inquiry-request");
     const body = await response.json();
     expect(body).toEqual({
       success: true,
       data: {
-        referenceId: "contact-ref-001",
+        referenceId: "lead-ref-001",
       },
     });
     expect(getSystemObservabilitySnapshot().aggregates).toEqual(
@@ -185,77 +137,48 @@ describe("lead API family response contract (auxiliary)", () => {
         expect.objectContaining({
           surface: "lead-family",
           kind: "api_request",
-          name: "contact.post",
+          name: "inquiry.post",
           success: 1,
-          lastRequestId: "lead-contact-request",
+          lastRequestId: "lead-inquiry-request",
         }),
       ]),
     );
   });
 
-  it("inquiry success uses the family success contract", async () => {
-    const response = await inquiryRoute.POST(
-      makeRequest("/api/inquiry", {
-        turnstileToken: "valid-token",
-        email: "buyer@example.com",
-        fullName: "Buyer",
-        company: "Buyer Co",
-        productSlug: "north-america",
-        productName: "North America",
-      }),
-    );
-
-    expect(response.status).toBe(200);
-    expectLeadObservabilityHeaders(response);
-    const body = await response.json();
-    expect(body).toEqual({
-      success: true,
-      data: {
-        referenceId: "lead-ref-001",
-      },
-    });
-  });
-
   it("subscribe success uses the family success contract", async () => {
     const response = await subscribeRoute.POST(
-      makeRequest("/api/subscribe", {
-        email: "newsletter@example.com",
-        turnstileToken: "valid-token",
-      }),
-    );
-
-    expect(response.status).toBe(200);
-    expectLeadObservabilityHeaders(response);
-    const body = await response.json();
-    expect(body).toEqual({
-      success: true,
-      data: {
-        referenceId: "lead-ref-001",
-      },
-    });
-  });
-
-  it("contact invalid JSON uses the family error contract", async () => {
-    const response = await contactRoute.POST(
-      new NextRequest(
-        new Request("http://localhost/api/contact", {
-          method: "POST",
-          body: "not-json",
-          headers: {
-            "Content-Type": "application/json",
-            "Idempotency-Key": "contact-invalid-json",
-          },
-        }),
+      makeRequest(
+        "/api/subscribe",
+        {
+          email: "newsletter@example.com",
+          turnstileToken: "valid-token",
+        },
+        {
+          [REQUEST_ID_HEADER]: "lead-subscribe-request",
+        },
       ),
     );
 
-    expect(response.status).toBe(400);
-    expectLeadObservabilityHeaders(response);
+    expect(response.status).toBe(200);
+    expectLeadObservabilityHeaders(response, "lead-subscribe-request");
     const body = await response.json();
     expect(body).toEqual({
-      success: false,
-      errorCode: API_ERROR_CODES.INVALID_JSON_BODY,
+      success: true,
+      data: {
+        referenceId: "lead-ref-001",
+      },
     });
+    expect(getSystemObservabilitySnapshot().aggregates).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          surface: "lead-family",
+          kind: "api_request",
+          name: "subscribe.post",
+          success: 1,
+          lastRequestId: "lead-subscribe-request",
+        }),
+      ]),
+    );
   });
 
   it("inquiry missing turnstile uses the family error contract", async () => {
@@ -291,6 +214,29 @@ describe("lead API family response contract (auxiliary)", () => {
     expect(body).toEqual({
       success: false,
       errorCode: API_ERROR_CODES.SUBSCRIBE_VALIDATION_EMAIL_REQUIRED,
+    });
+  });
+
+  it("inquiry invalid JSON uses the family error contract", async () => {
+    const response = await inquiryRoute.POST(
+      new NextRequest(
+        new Request("http://localhost/api/inquiry", {
+          method: "POST",
+          body: "not-json",
+          headers: {
+            "Content-Type": "application/json",
+            "Idempotency-Key": "inquiry-invalid-json",
+          },
+        }),
+      ),
+    );
+
+    expect(response.status).toBe(400);
+    expectLeadObservabilityHeaders(response);
+    const body = await response.json();
+    expect(body).toEqual({
+      success: false,
+      errorCode: API_ERROR_CODES.INVALID_JSON_BODY,
     });
   });
 });

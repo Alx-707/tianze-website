@@ -61,7 +61,7 @@ Rate limit utility: `src/lib/security/distributed-rate-limit.ts`
 |----------|---------------------|--------|
 | `/api/whatsapp/send` | API Key Auth + Rate Limit | ✅ |
 | `/api/whatsapp/webhook` | Signature Verify + Rate Limit | ✅ |
-| `/api/contact` | Rate Limit + JSON body size gate | ✅ |
+| Contact page Server Action | Rate Limit + validation + idempotency on the canonical lead path | ✅ |
 | `/api/inquiry` | Turnstile + Rate Limit + Idempotency + JSON body size gate | ✅ |
 | `/api/subscribe` | Rate Limit + Idempotency + JSON body size gate | ✅ |
 | `/api/cache/invalidate` | Secret Auth + Pre/Post Rate Limit | ✅ |

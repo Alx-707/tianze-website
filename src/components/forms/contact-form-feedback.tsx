@@ -1,5 +1,8 @@
 import { memo } from "react";
-import { API_ERROR_CODES } from "@/constants/api-error-codes";
+import {
+  API_ERROR_CODES,
+  isPartialSuccessErrorCode,
+} from "@/constants/api-error-codes";
 import { type FormSubmissionStatus } from "@/lib/forms/form-submission-status";
 import { translateApiError } from "@/lib/api/translate-error-code";
 import { type ServerActionResult } from "@/lib/server-action-utils";
@@ -70,14 +73,11 @@ interface ErrorDisplayProps {
   containerRef?: (_node: HTMLDivElement | null) => void;
 }
 
-export function ErrorDisplay({
-  state,
-  translateForm,
-  translateApi,
-  containerRef,
-}: ErrorDisplayProps) {
-  if (!state?.error && !state?.errorCode) return null;
-
+function getErrorDisplayState(
+  state: ServerActionResult<ContactFormResult>,
+  translateForm: (key: string) => string,
+  translateApi: (key: string) => string,
+) {
   const translatedDetails = state.details?.map((detail) =>
     detail.startsWith("errors.") ? translateForm(detail) : detail,
   );
@@ -86,30 +86,67 @@ export function ErrorDisplay({
     : undefined;
   const isValidationError =
     state.errorCode === API_ERROR_CODES.CONTACT_VALIDATION_FAILED;
+  const isPartialSuccess = isPartialSuccessErrorCode(state.errorCode);
   const translatedError = state.errorCode
     ? translateApiError(translateApi, state.errorCode)
     : undefined;
-  const shouldShowTranslatedMessage = translatedError && !isValidationError;
-  const shouldShowRawMessage =
-    state.error && !state.errorCode && !isValidationError;
+
+  return {
+    uniqueDetails,
+    isPartialSuccess,
+    translatedError,
+    shouldShowTranslatedMessage:
+      translatedError && !isValidationError && !isPartialSuccess,
+    shouldShowRawMessage:
+      state.error &&
+      !state.errorCode &&
+      !isValidationError &&
+      !isPartialSuccess,
+    containerClass: isPartialSuccess
+      ? "rounded-lg border border-amber-200 bg-amber-50 p-4 text-amber-800"
+      : "rounded-lg border border-red-200 bg-red-50 p-4 text-red-800",
+  };
+}
+
+export function ErrorDisplay({
+  state,
+  translateForm,
+  translateApi,
+  containerRef,
+}: ErrorDisplayProps) {
+  if (!state?.error && !state?.errorCode) return null;
+
+  const {
+    uniqueDetails,
+    isPartialSuccess,
+    translatedError,
+    shouldShowTranslatedMessage,
+    shouldShowRawMessage,
+    containerClass,
+  } = getErrorDisplayState(state, translateForm, translateApi);
 
   return (
     <div
       ref={containerRef}
-      className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-800"
+      className={containerClass}
       data-testid="contact-form-error-display"
-      role="alert"
-      aria-live="assertive"
+      role={isPartialSuccess ? "status" : "alert"}
+      aria-live={isPartialSuccess ? "polite" : "assertive"}
       tabIndex={-1}
       translate="no"
     >
-      <p
-        className="font-medium"
-        data-testid="contact-form-error-heading"
-        translate="no"
-      >
-        {translateForm("error")}
-      </p>
+      {!isPartialSuccess && (
+        <p
+          className="font-medium"
+          data-testid="contact-form-error-heading"
+          translate="no"
+        >
+          {translateForm("error")}
+        </p>
+      )}
+      {isPartialSuccess && translatedError && (
+        <p className="font-medium text-sm">{translatedError}</p>
+      )}
       {shouldShowTranslatedMessage && (
         <p className="text-sm">{translatedError}</p>
       )}

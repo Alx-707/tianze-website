@@ -7,6 +7,7 @@ import {
   API_ERROR_NAMESPACE,
   translateApiError,
 } from "@/lib/api/translate-error-code";
+import { isPartialSuccessErrorCode } from "@/constants/api-error-codes";
 import { generateIdempotencyKey } from "@/lib/idempotency-key";
 import { cn } from "@/lib/utils";
 import { getAttributionAsObject } from "@/lib/utm";
@@ -36,13 +37,26 @@ export interface ProductInquiryFormProps {
 
 interface FormState {
   success: boolean;
+  partial?: boolean;
   error: string | undefined;
+  referenceId?: string | undefined;
 }
 
 const initialState: FormState = {
   success: false,
   error: undefined,
 };
+
+interface InquiryRenderState {
+  className: string | undefined;
+  title: string;
+  description: string;
+  success: boolean;
+  partial: boolean;
+  successMessage: string;
+  partialMessage: string | undefined;
+  form: React.ReactNode;
+}
 
 // Success message component
 function SuccessMessage({ message }: { message: string }) {
@@ -97,6 +111,22 @@ function ErrorMessage({ error }: { error: string }) {
       <XCircle className="h-4 w-4" />
       <span data-testid="product-inquiry-error-text" translate="no">
         {error}
+      </span>
+    </div>
+  );
+}
+
+function PartialMessage({ message }: { message: string }) {
+  return (
+    <div
+      className="flex items-center gap-2 rounded-md bg-amber-50 p-3 text-sm text-amber-700"
+      data-testid="product-inquiry-partial-message"
+      role="status"
+      aria-live="polite"
+      translate="no"
+    >
+      <span data-testid="product-inquiry-partial-text" translate="no">
+        {message}
       </span>
     </div>
   );
@@ -269,6 +299,43 @@ function RequirementsField({
   );
 }
 
+function renderInquiryState({
+  className,
+  title,
+  description,
+  success,
+  partial,
+  successMessage,
+  partialMessage,
+  form,
+}: InquiryRenderState) {
+  if (success) {
+    return (
+      <Card className={cn("overflow-hidden", className)}>
+        <SuccessMessage message={successMessage} />
+      </Card>
+    );
+  }
+
+  if (partial && partialMessage !== undefined) {
+    return (
+      <Card className={cn("overflow-hidden", className)}>
+        <FormHeader title={title} description={description} />
+        <CardContent className="pt-6">
+          <PartialMessage message={partialMessage} />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className={cn("overflow-hidden", className)}>
+      <FormHeader title={title} description={description} />
+      <CardContent className="pt-6">{form}</CardContent>
+    </Card>
+  );
+}
+
 // Extract form data from FormData object
 function extractFormData(formData: FormData) {
   const fullName = String(formData.get("name") ?? "").trim();
@@ -296,6 +363,10 @@ interface SubmitInquiryParams {
 interface InquiryApiResponse {
   success?: boolean;
   errorCode?: string;
+  data?: {
+    partialSuccess?: boolean;
+    referenceId?: string;
+  };
 }
 
 async function submitInquiry({
@@ -304,7 +375,12 @@ async function submitInquiry({
   productName,
   token,
   idempotencyKey,
-}: SubmitInquiryParams): Promise<{ ok: boolean; errorCode?: string }> {
+}: SubmitInquiryParams): Promise<{
+  ok: boolean;
+  partial: boolean;
+  errorCode?: string;
+  referenceId?: string;
+}> {
   const attribution = getAttributionAsObject();
   const requestBody = {
     type: "product",
@@ -328,9 +404,17 @@ async function submitInquiry({
     body: JSON.stringify(requestBody),
   });
   const result = (await response.json()) as InquiryApiResponse;
+  const partial =
+    result.errorCode !== undefined &&
+    isPartialSuccessErrorCode(result.errorCode) &&
+    result.data?.partialSuccess === true;
   return {
     ok: response.ok && result.success === true,
+    partial,
     ...(result.errorCode !== undefined && { errorCode: result.errorCode }),
+    ...(result.data?.referenceId !== undefined
+      ? { referenceId: result.data.referenceId }
+      : {}),
   };
 }
 
@@ -381,6 +465,14 @@ export function ProductInquiryForm({
         token,
         idempotencyKey,
       });
+      if (result.partial) {
+        return {
+          success: false,
+          partial: true,
+          error: translateApiError(tApi, result.errorCode),
+          referenceId: result.referenceId,
+        };
+      }
       if (!result.ok)
         return {
           success: false,
@@ -399,59 +491,59 @@ export function ProductInquiryForm({
 
   const [state, formAction] = useActionState(handleSubmit, initialState);
 
-  if (state.success) {
-    return (
-      <Card className={cn("overflow-hidden", className)}>
-        <SuccessMessage message={t("success")} />
-      </Card>
-    );
-  }
-
-  return (
-    <Card className={cn("overflow-hidden", className)}>
-      <FormHeader title={t("title")} description={t("description")} />
-      <CardContent className="pt-6">
-        <form action={formAction} className="space-y-4">
-          <input type="hidden" name="productSlug" value={productSlug} />
-          <input type="hidden" name="productName" value={productName} />
-          <ProductDisplay label={t("productName")} productName={productName} />
-          <ContactFields
-            nameLabel={tContact("firstName")}
-            namePlaceholder={tContact("firstNamePlaceholder")}
-            emailLabel={tContact("email")}
-            emailPlaceholder={tContact("emailPlaceholder")}
-          />
-          <CompanyField
-            label={tContact("company")}
-            placeholder={tContact("companyPlaceholder")}
-          />
-          <QuantityPriceFields
-            quantityLabel={t("quantity")}
-            quantityPlaceholder={t("quantityPlaceholder")}
-            priceLabel={t("targetPrice")}
-            pricePlaceholder={t("targetPricePlaceholder")}
-          />
-          <RequirementsField
-            label={t("requirements")}
-            placeholder={t("requirementsPlaceholder")}
-          />
-          <LazyTurnstile
-            onSuccess={handleTurnstileSuccess}
-            onError={handleTurnstileReset}
-            onExpire={handleTurnstileReset}
-            action="product_inquiry"
-            size="compact"
-            theme="auto"
-          />
-          {state.error !== undefined && <ErrorMessage error={state.error} />}
-          <SubmitButton
-            isSubmitting={isSubmitting}
-            submitLabel={t("submit")}
-            submittingLabel={t("submitting")}
-            disabled={!turnstileToken}
-          />
-        </form>
-      </CardContent>
-    </Card>
+  const form = (
+    <form action={formAction} className="space-y-4">
+      <input type="hidden" name="productSlug" value={productSlug} />
+      <input type="hidden" name="productName" value={productName} />
+      <ProductDisplay label={t("productName")} productName={productName} />
+      <ContactFields
+        nameLabel={tContact("firstName")}
+        namePlaceholder={tContact("firstNamePlaceholder")}
+        emailLabel={tContact("email")}
+        emailPlaceholder={tContact("emailPlaceholder")}
+      />
+      <CompanyField
+        label={tContact("company")}
+        placeholder={tContact("companyPlaceholder")}
+      />
+      <QuantityPriceFields
+        quantityLabel={t("quantity")}
+        quantityPlaceholder={t("quantityPlaceholder")}
+        priceLabel={t("targetPrice")}
+        pricePlaceholder={t("targetPricePlaceholder")}
+      />
+      <RequirementsField
+        label={t("requirements")}
+        placeholder={t("requirementsPlaceholder")}
+      />
+      <LazyTurnstile
+        onSuccess={handleTurnstileSuccess}
+        onError={handleTurnstileReset}
+        onExpire={handleTurnstileReset}
+        action="product_inquiry"
+        size="compact"
+        theme="auto"
+      />
+      {state.error !== undefined && !state.partial && (
+        <ErrorMessage error={state.error} />
+      )}
+      <SubmitButton
+        isSubmitting={isSubmitting}
+        submitLabel={t("submit")}
+        submittingLabel={t("submitting")}
+        disabled={!turnstileToken}
+      />
+    </form>
   );
+
+  return renderInquiryState({
+    className,
+    title: t("title"),
+    description: t("description"),
+    success: state.success,
+    partial: state.partial === true,
+    successMessage: t("success"),
+    partialMessage: state.error,
+    form,
+  });
 }

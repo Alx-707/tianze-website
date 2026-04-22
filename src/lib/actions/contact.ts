@@ -9,7 +9,6 @@
  */
 import { headers } from "next/headers";
 import { type ContactFormData } from "@/lib/form-schema/contact-form-schema";
-import { isRuntimeProduction } from "@/lib/env";
 import { logger } from "@/lib/logger";
 import { checkDistributedRateLimit } from "@/lib/security/distributed-rate-limit";
 import { API_ERROR_CODES } from "@/constants/api-error-codes";
@@ -21,6 +20,7 @@ import {
 } from "@/lib/contact/submit-canonical-contact";
 import {
   createErrorResultWithLogging,
+  createPartialResultWithLogging,
   createSuccessResultWithLogging,
   getFormDataBoolean,
   getFormDataString,
@@ -40,6 +40,8 @@ export interface ContactFormResult {
   recordCreated: boolean;
   /** 统一线索引用ID */
   referenceId?: string | null;
+  /** 是否为部分成功 */
+  partialSuccess?: boolean | undefined;
 }
 
 /**
@@ -149,10 +151,19 @@ async function executeContactSubmissionAttempt(
     emailSent: submissionResult.emailSent,
     recordCreated: submissionResult.recordCreated,
     referenceId: submissionResult.referenceId ?? null,
+    ...(submissionResult.partialSuccess ? { partialSuccess: true } : {}),
   };
 
+  if (submissionResult.partialSuccess) {
+    return createPartialResultWithLogging(
+      normalizedSubmissionResult,
+      submissionResult.errorCode ?? API_ERROR_CODES.CONTACT_PARTIAL_SUCCESS,
+      logger,
+    );
+  }
+
   const processingTime = performance.now() - startTime;
-  if (!isRuntimeProduction()) {
+  if (process.env.NODE_ENV !== "production") {
     logger.info("Contact form submitted via Server Action", {
       processingTime,
       emailSent: normalizedSubmissionResult.emailSent,
@@ -197,15 +208,25 @@ export const contactFormAction: ServerAction<FormData, ContactFormResult> =
       const headersList = await headers();
       const clientIP = getClientIPFromHeaders(headersList);
 
-      // Perform security checks (rate limiting + honeypot)
-      const securityResult = await performSecurityChecks(formData, clientIP);
-      if (securityResult) return securityResult;
-
       // 提取表单数据
       const contactData = extractContactFormData(formData);
       const idempotentResult = await withIdempotentResult(
         contactData.idempotencyKey ?? null,
-        () => executeContactSubmissionAttempt(contactData, clientIP, startTime),
+        async () => {
+          const securityResult = await performSecurityChecks(
+            formData,
+            clientIP,
+          );
+          if (securityResult) {
+            return securityResult;
+          }
+
+          return executeContactSubmissionAttempt(
+            contactData,
+            clientIP,
+            startTime,
+          );
+        },
         {
           required: true,
           fingerprint: createCanonicalContactFingerprint(contactData),

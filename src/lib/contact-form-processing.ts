@@ -60,6 +60,15 @@ interface ProcessFormSubmissionOptions {
   requestId?: string;
 }
 
+export interface ProcessFormSubmissionResult {
+  success: boolean;
+  partialSuccess: boolean;
+  emailSent: boolean;
+  recordCreated: boolean;
+  referenceId?: string | null | undefined;
+  errorCode?: string | undefined;
+}
+
 function createExpiredSubmissionFailure(): ContactValidationFailure {
   return {
     success: false,
@@ -176,7 +185,7 @@ function mapSubjectToEnum(
 export async function processFormSubmission(
   formData: ContactFormWithToken,
   options: ProcessFormSubmissionOptions = {},
-) {
+): Promise<ProcessFormSubmissionResult> {
   const fullName = [formData.firstName, formData.lastName]
     .filter(Boolean)
     .join(" ")
@@ -201,9 +210,29 @@ export async function processFormSubmission(
   if (result.success) {
     return {
       success: true,
+      partialSuccess: false,
       emailSent: result.emailSent,
       recordCreated: result.recordCreated,
       referenceId: result.referenceId,
+    };
+  }
+
+  if (result.partialSuccess && result.referenceId) {
+    logger.warn("Contact form submission completed partially", {
+      email: sanitizeEmail(formData.email),
+      referenceId: result.referenceId,
+      emailSent: result.emailSent,
+      recordCreated: result.recordCreated,
+      ...(options.requestId ? { requestId: options.requestId } : {}),
+    });
+
+    return {
+      success: false,
+      partialSuccess: true,
+      emailSent: result.emailSent,
+      recordCreated: result.recordCreated,
+      referenceId: result.referenceId,
+      errorCode: API_ERROR_CODES.CONTACT_PARTIAL_SUCCESS,
     };
   }
 

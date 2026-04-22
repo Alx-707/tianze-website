@@ -22,6 +22,7 @@ vi.mock("@/lib/turnstile", () => ({
 vi.mock("@/lib/lead-pipeline", () => ({
   processLead: vi.fn(async () => ({
     success: true,
+    outcome: "success",
     partialSuccess: false,
     referenceId: "ref-123",
     recordCreated: true,
@@ -192,6 +193,37 @@ describe("api/subscribe", () => {
     const json = await res.json();
     expect(json.success).toBe(false);
     expect(json.errorCode).toBe(API_ERROR_CODES.SERVICE_UNAVAILABLE);
+  });
+
+  it("returns partial-success contract when only part of the lead pipeline succeeds", async () => {
+    const leadPipeline = await import("@/lib/lead-pipeline");
+    vi.mocked(leadPipeline.processLead).mockResolvedValueOnce({
+      success: false,
+      outcome: "partial_success",
+      partialSuccess: true,
+      referenceId: "ref-partial-123",
+      recordCreated: true,
+      emailSent: false,
+      error: "PROCESSING_FAILED",
+    });
+
+    const res = await route.POST(
+      makeReq(
+        { email: "test@example.com", turnstileToken: "valid-token" },
+        { "Idempotency-Key": "partial-success-key" },
+      ),
+    );
+    const json = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(json.success).toBe(false);
+    expect(json.errorCode).toBe(API_ERROR_CODES.SUBSCRIBE_PARTIAL_SUCCESS);
+    expect(json.data).toEqual({
+      partialSuccess: true,
+      referenceId: "ref-partial-123",
+      emailSent: false,
+      recordCreated: true,
+    });
   });
 
   it("returns 429 when rate limited", async () => {

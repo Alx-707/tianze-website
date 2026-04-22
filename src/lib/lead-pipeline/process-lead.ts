@@ -11,17 +11,11 @@ import {
   type LeadType,
 } from "@/lib/lead-pipeline/lead-schema";
 import { createLatencyTimer } from "@/lib/lead-pipeline/metrics";
-import {
-  emitServiceMetrics,
-  logPipelineSummary,
-} from "@/lib/lead-pipeline/pipeline-observability";
+import { recordPipelineObservability } from "@/lib/lead-pipeline/pipeline-observability";
 import { processContactLead } from "@/lib/lead-pipeline/processors/contact";
 import { processNewsletterLead } from "@/lib/lead-pipeline/processors/newsletter";
 import { processProductLead } from "@/lib/lead-pipeline/processors/product";
-import {
-  isServiceFailure,
-  type ServiceResult,
-} from "@/lib/lead-pipeline/service-result";
+import { type ServiceResult } from "@/lib/lead-pipeline/service-result";
 import { generateLeadReferenceId } from "@/lib/lead-pipeline/utils";
 import { logger, sanitizeEmail } from "@/lib/logger";
 
@@ -41,19 +35,6 @@ type LeadHandlerResult = {
 };
 
 interface ProcessLeadOptions {
-  requestId?: string;
-}
-
-interface LeadOutcome {
-  success: boolean;
-  partialSuccess: boolean;
-}
-
-interface LeadLogContext {
-  lead: LeadInput;
-  referenceId: string;
-  emailResult: ServiceResult;
-  crmResult: ServiceResult;
   requestId?: string;
 }
 
@@ -84,89 +65,6 @@ function createProcessingFailureResult(referenceId: string): LeadResult {
   };
 }
 
-function calculateLeadOutcome(
-  hasEmailOperation: boolean,
-  emailResult: ServiceResult,
-  crmResult: ServiceResult,
-): LeadOutcome {
-  const success = hasEmailOperation
-    ? emailResult.success && crmResult.success
-    : crmResult.success;
-
-  return {
-    success,
-    partialSuccess: !success && (emailResult.success || crmResult.success),
-  };
-}
-
-function logServiceFailures(
-  context: LeadLogContext & { hasEmailOperation: boolean },
-): void {
-  const {
-    lead,
-    referenceId,
-    hasEmailOperation,
-    emailResult,
-    crmResult,
-    requestId,
-  } = context;
-  if (hasEmailOperation && !emailResult.success) {
-    logger.error("Lead email send failed", {
-      type: lead.type,
-      referenceId,
-      error: emailResult.error.message,
-      ...withRequestId(requestId),
-    });
-  }
-
-  if (!crmResult.success) {
-    logger.error("Lead CRM record failed", {
-      type: lead.type,
-      referenceId,
-      error: crmResult.error.message,
-      ...withRequestId(requestId),
-    });
-  }
-}
-
-function logLeadOutcome(
-  context: LeadLogContext & { outcome: LeadOutcome },
-): void {
-  const { lead, referenceId, emailResult, crmResult, outcome, requestId } =
-    context;
-  if (outcome.success) {
-    logger.info("Lead processed successfully", {
-      type: lead.type,
-      referenceId,
-      emailSent: emailResult.success,
-      recordCreated: crmResult.success,
-      ...withRequestId(requestId),
-    });
-    return;
-  }
-
-  if (outcome.partialSuccess) {
-    logger.warn("Lead processed partially", {
-      type: lead.type,
-      referenceId,
-      emailSent: emailResult.success,
-      recordCreated: crmResult.success,
-      ...withRequestId(requestId),
-    });
-    return;
-  }
-
-  logger.error("Lead processing failed completely", {
-    type: lead.type,
-    referenceId,
-    emailError: isServiceFailure(emailResult)
-      ? emailResult.error.message
-      : undefined,
-    crmError: isServiceFailure(crmResult) ? crmResult.error.message : undefined,
-    ...withRequestId(requestId),
-  });
-}
-
 // eslint-disable-next-line require-await -- Handler functions are async; this wrapper provides exhaustive dispatch
 async function dispatchLeadHandler(
   lead: LeadInput,
@@ -191,7 +89,6 @@ export interface LeadResult {
   error?: "VALIDATION_ERROR" | "PROCESSING_FAILED" | string | undefined;
 }
 
-// eslint-disable-next-line max-statements -- orchestration logic intentionally coordinates validation, routing, metrics, and summaries in one place
 export async function processLead(
   rawInput: unknown,
   options: ProcessLeadOptions = {},
@@ -226,36 +123,13 @@ export async function processLead(
     const { emailResult, crmResult } = results;
     const totalLatencyMs = pipelineTimer.stop();
 
-    emitServiceMetrics(emailResult, crmResult, hasEmailOperation, requestId);
-    logServiceFailures({
+    const outcome = recordPipelineObservability({
       lead,
       referenceId,
+      emailResult,
+      crmResult,
       hasEmailOperation,
-      emailResult,
-      crmResult,
-      ...withRequestId(requestId),
-    });
-    const outcome = calculateLeadOutcome(
-      hasEmailOperation,
-      emailResult,
-      crmResult,
-    );
-
-    logPipelineSummary({
-      referenceId,
-      leadType: lead.type,
-      emailResult,
-      crmResult,
       totalLatencyMs,
-      overallSuccess: outcome.success,
-      ...withRequestId(requestId),
-    });
-    logLeadOutcome({
-      lead,
-      referenceId,
-      emailResult,
-      crmResult,
-      outcome,
       ...withRequestId(requestId),
     });
 

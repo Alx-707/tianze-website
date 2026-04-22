@@ -6,6 +6,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { ServiceResult } from "../service-result";
+import { LEAD_TYPES } from "../lead-schema";
+
+const mockLoggerInfo = vi.hoisted(() => vi.fn());
+const mockLoggerWarn = vi.hoisted(() => vi.fn());
+const mockLoggerError = vi.hoisted(() => vi.fn());
 
 // Mock leadPipelineMetrics before importing the module under test
 vi.mock("@/lib/lead-pipeline/metrics", () => ({
@@ -23,6 +28,14 @@ vi.mock("@/lib/lead-pipeline/metrics", () => ({
   METRIC_SERVICES: {
     RESEND: "resend",
     AIRTABLE: "airtable",
+  },
+}));
+
+vi.mock("@/lib/logger", () => ({
+  logger: {
+    info: mockLoggerInfo,
+    warn: mockLoggerWarn,
+    error: mockLoggerError,
   },
 }));
 
@@ -363,6 +376,155 @@ describe("pipeline-observability", () => {
           leadId: "CON-999",
           requestId: "req-999",
         }),
+      );
+    });
+  });
+
+  describe("recordPipelineObservability", () => {
+    it("returns success and logs only the success outcome when both services succeed", async () => {
+      const { recordPipelineObservability } =
+        await import("../pipeline-observability");
+      const { leadPipelineMetrics } =
+        await import("@/lib/lead-pipeline/metrics");
+
+      const outcome = recordPipelineObservability({
+        lead: {
+          type: LEAD_TYPES.CONTACT,
+          fullName: "Alice Doe",
+          email: "alice@example.com",
+          subject: "PRODUCT_INQUIRY",
+          message: "hello world with enough characters",
+          turnstileToken: "token",
+        },
+        referenceId: "CON-123",
+        emailResult: {
+          success: true,
+          latencyMs: 100,
+        },
+        crmResult: {
+          success: true,
+          latencyMs: 150,
+        },
+        hasEmailOperation: true,
+        totalLatencyMs: 250,
+        requestId: "req-success",
+      });
+
+      expect(outcome).toEqual({ success: true, partialSuccess: false });
+      expect(leadPipelineMetrics.recordSuccess).toHaveBeenCalledWith(
+        "resend",
+        100,
+        "req-success",
+      );
+      expect(leadPipelineMetrics.recordSuccess).toHaveBeenCalledWith(
+        "airtable",
+        150,
+        "req-success",
+      );
+      expect(mockLoggerError).not.toHaveBeenCalledWith(
+        "Lead email send failed",
+        expect.anything(),
+      );
+      expect(mockLoggerWarn).not.toHaveBeenCalledWith(
+        "Lead processed partially",
+        expect.anything(),
+      );
+      expect(mockLoggerInfo).toHaveBeenCalledWith(
+        "Lead processed successfully",
+        expect.objectContaining({
+          referenceId: "CON-123",
+          requestId: "req-success",
+        }),
+      );
+    });
+
+    it("returns partial success and avoids CRM failure logging when only email succeeds", async () => {
+      const { recordPipelineObservability } =
+        await import("../pipeline-observability");
+
+      const outcome = recordPipelineObservability({
+        lead: {
+          type: LEAD_TYPES.CONTACT,
+          fullName: "Alice Doe",
+          email: "alice@example.com",
+          subject: "PRODUCT_INQUIRY",
+          message: "hello world with enough characters",
+          turnstileToken: "token",
+        },
+        referenceId: "CON-456",
+        emailResult: {
+          success: true,
+          latencyMs: 100,
+        },
+        crmResult: {
+          success: false,
+          latencyMs: 150,
+          error: new Error("CRM failed"),
+        },
+        hasEmailOperation: true,
+        totalLatencyMs: 250,
+        requestId: "req-partial",
+      });
+
+      expect(outcome).toEqual({ success: false, partialSuccess: true });
+      expect(mockLoggerError).toHaveBeenCalledWith(
+        "Lead CRM record failed",
+        expect.objectContaining({
+          referenceId: "CON-456",
+          requestId: "req-partial",
+        }),
+      );
+      expect(mockLoggerError).not.toHaveBeenCalledWith(
+        "Lead email send failed",
+        expect.anything(),
+      );
+      expect(mockLoggerWarn).toHaveBeenCalledWith(
+        "Lead processed partially",
+        expect.objectContaining({
+          emailSent: true,
+          recordCreated: false,
+          requestId: "req-partial",
+        }),
+      );
+    });
+
+    it("skips resend metrics and logs for newsletter leads with no email operation", async () => {
+      const { recordPipelineObservability } =
+        await import("../pipeline-observability");
+      const { leadPipelineMetrics } =
+        await import("@/lib/lead-pipeline/metrics");
+
+      recordPipelineObservability({
+        lead: {
+          type: LEAD_TYPES.NEWSLETTER,
+          email: "subscriber@example.com",
+        },
+        referenceId: "NEW-123",
+        emailResult: {
+          success: false,
+          latencyMs: 0,
+          error: new Error("Not applicable"),
+        },
+        crmResult: {
+          success: false,
+          latencyMs: 50,
+          error: new Error("CRM failed"),
+        },
+        hasEmailOperation: false,
+        totalLatencyMs: 50,
+        requestId: "req-newsletter",
+      });
+
+      expect(leadPipelineMetrics.recordFailure).toHaveBeenCalledTimes(1);
+      expect(leadPipelineMetrics.recordFailure).toHaveBeenCalledWith(
+        "airtable",
+        50,
+        expect.any(Error),
+        "req-newsletter",
+      );
+      expect(mockLoggerError).not.toHaveBeenCalledWith(
+        "Lead email send failed",
+        expect.anything(),
       );
     });
   });

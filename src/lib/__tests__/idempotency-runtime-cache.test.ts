@@ -18,7 +18,7 @@ describe("idempotency-runtime-cache", () => {
   });
 
   it("returns null when no in-flight work exists", () => {
-    expect(checkInFlight("missing-key", "POST:/api/contact")).toBeNull();
+    expect(checkInFlight("missing-key", "POST:/api/inquiry")).toBeNull();
   });
 
   it("returns the registered in-flight promise for matching fingerprints", async () => {
@@ -26,9 +26,9 @@ describe("idempotency-runtime-cache", () => {
       NextResponse.json({ source: "in-flight" }),
     );
 
-    registerInFlight("same-key", "POST:/api/contact", responsePromise);
+    registerInFlight("same-key", "POST:/api/inquiry", responsePromise);
 
-    const inFlight = checkInFlight("same-key", "POST:/api/contact");
+    const inFlight = checkInFlight("same-key", "POST:/api/inquiry");
     expect(inFlight).toBe(responsePromise);
     await expect(inFlight).resolves.toBeInstanceOf(NextResponse);
     expect(getRequestIdempotencyCacheStats()).toEqual({
@@ -40,7 +40,7 @@ describe("idempotency-runtime-cache", () => {
   it("returns a 409 response when an in-flight key is reused across fingerprints", async () => {
     registerInFlight(
       "reused-key",
-      "POST:/api/contact",
+      "POST:/api/inquiry",
       Promise.resolve(NextResponse.json({ ok: true })),
     );
 
@@ -58,10 +58,10 @@ describe("idempotency-runtime-cache", () => {
       NextResponse.json({ source: "manual-fingerprint" }),
     );
 
-    registerInFlight("manual-key", "POST:/api/contact", responsePromise);
-    setInFlightFingerprint("manual-key", "POST:/api/contact");
+    registerInFlight("manual-key", "POST:/api/inquiry", responsePromise);
+    setInFlightFingerprint("manual-key", "POST:/api/inquiry");
 
-    const response = await checkInFlight("manual-key", "POST:/api/contact");
+    const response = await checkInFlight("manual-key", "POST:/api/inquiry");
     expect(response).toBeInstanceOf(NextResponse);
     await expect(response?.json()).resolves.toEqual({
       source: "manual-fingerprint",
@@ -71,12 +71,12 @@ describe("idempotency-runtime-cache", () => {
   it("updates the tracked fingerprint when setInFlightFingerprint overrides an existing key", async () => {
     registerInFlight(
       "override-key",
-      "POST:/api/contact",
+      "POST:/api/inquiry",
       Promise.resolve(NextResponse.json({ ok: true })),
     );
     setInFlightFingerprint("override-key", "POST:/api/subscribe");
 
-    const response = await checkInFlight("override-key", "POST:/api/contact");
+    const response = await checkInFlight("override-key", "POST:/api/inquiry");
     expect(response).toBeInstanceOf(NextResponse);
     expect(response?.status).toBe(409);
     await expect(response?.json()).resolves.toEqual({
@@ -88,12 +88,12 @@ describe("idempotency-runtime-cache", () => {
   it("clears individual keys and all pending state", () => {
     registerInFlight(
       "keep-key",
-      "POST:/api/contact",
+      "POST:/api/inquiry",
       Promise.resolve(NextResponse.json({ ok: true })),
     );
     registerInFlight(
       "drop-key",
-      "POST:/api/contact",
+      "POST:/api/inquiry",
       Promise.resolve(NextResponse.json({ ok: true })),
     );
 
@@ -111,20 +111,20 @@ describe("idempotency-runtime-cache", () => {
     for (let index = 0; index < 1_000; index += 1) {
       registerInFlight(
         `key-${index}`,
-        "POST:/api/contact",
+        "POST:/api/inquiry",
         Promise.resolve(NextResponse.json({ index })),
       );
     }
 
     registerInFlight(
       "overflow-key",
-      "POST:/api/contact",
+      "POST:/api/inquiry",
       Promise.resolve(NextResponse.json({ overflow: true })),
     );
 
     const stats = getRequestIdempotencyCacheStats();
     expect(stats.size).toBe(1_000);
     expect(stats.keys).not.toContain("overflow-key");
-    expect(checkInFlight("overflow-key", "POST:/api/contact")).toBeNull();
+    expect(checkInFlight("overflow-key", "POST:/api/inquiry")).toBeNull();
   });
 });

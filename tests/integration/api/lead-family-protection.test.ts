@@ -2,14 +2,12 @@ import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { API_ERROR_CODES } from "@/constants/api-error-codes";
 import { resetIdempotencyState } from "@/lib/idempotency";
-import * as contactRoute from "@/app/api/contact/route";
 import * as inquiryRoute from "@/app/api/inquiry/route";
 import * as subscribeRoute from "@/app/api/subscribe/route";
-import { validateFormData } from "@/app/api/contact/contact-api-validation";
 import { processLead } from "@/lib/lead-pipeline";
 
 /**
- * Protection contract checks for the lead API family.
+ * Protection contract checks for the remaining lead API family.
  *
  * This suite asserts shared idempotency, rate-limit, and Turnstile semantics,
  * but still uses mocks around the deeper processing pipeline. Treat it as an
@@ -29,56 +27,6 @@ vi.mock("@/lib/turnstile", () => ({
   verifyTurnstile: vi.fn(async () => true),
   verifyTurnstileDetailed: vi.fn(async () => ({ success: true })),
 }));
-
-vi.mock("@/app/api/contact/contact-api-validation", () => ({
-  validateFormData: vi.fn(async (body: unknown) => ({
-    success: true,
-    data: body as Record<string, unknown>,
-    error: null,
-    details: null,
-  })),
-  validateAdminAccess: vi.fn(() => false),
-  getContactFormStats: vi.fn(async () => ({ total: 10 })),
-}));
-
-vi.mock("@/lib/contact-form-processing", () => ({
-  processFormSubmission: vi.fn(async () => ({
-    success: true,
-    emailSent: true,
-    recordCreated: true,
-    referenceId: "contact-ref-001",
-  })),
-}));
-
-vi.mock("@/lib/contact/submit-canonical-contact", async () => {
-  const validationModule =
-    await import("@/app/api/contact/contact-api-validation");
-  const processingModule = await import("@/lib/contact-form-processing");
-  return {
-    createCanonicalContactFingerprintFromUnknown: vi.fn(() => "CONTACT:test"),
-    submitCanonicalContactSubmission: vi.fn(
-      async (body: unknown, options: { clientIP: string }) => {
-        const validation = await vi.mocked(validationModule.validateFormData)(
-          body,
-          options.clientIP,
-        );
-        if (!validation.success || !validation.data) {
-          return validation;
-        }
-        const submissionResult = await vi.mocked(
-          processingModule.processFormSubmission,
-        )(validation.data);
-        return {
-          success: true,
-          error: null,
-          details: null,
-          data: validation.data,
-          submissionResult,
-        };
-      },
-    ),
-  };
-});
 
 vi.mock("@/lib/lead-pipeline", () => ({
   processLead: vi.fn(async () => ({
@@ -136,15 +84,6 @@ describe("lead API family protection contract", () => {
   });
 
   it("all write-path family routes require Idempotency-Key", async () => {
-    const contact = await contactRoute.POST(
-      new NextRequest(
-        new Request("http://localhost/api/contact", {
-          method: "POST",
-          body: JSON.stringify({ email: "contact@example.com" }),
-          headers: { "Content-Type": "application/json" },
-        }),
-      ),
-    );
     const inquiry = await inquiryRoute.POST(
       new NextRequest(
         new Request("http://localhost/api/inquiry", {
@@ -174,9 +113,6 @@ describe("lead API family protection contract", () => {
       ),
     );
 
-    expect((await contact.json()).errorCode).toBe(
-      API_ERROR_CODES.IDEMPOTENCY_KEY_REQUIRED,
-    );
     expect((await inquiry.json()).errorCode).toBe(
       API_ERROR_CODES.IDEMPOTENCY_KEY_REQUIRED,
     );
@@ -194,13 +130,6 @@ describe("lead API family protection contract", () => {
       retryAfter: 60,
     });
 
-    const contact = await contactRoute.POST(
-      makeRequest("/api/contact", {
-        email: "contact@example.com",
-        company: "Acme",
-        firstName: "Ada",
-      }),
-    );
     const inquiry = await inquiryRoute.POST(
       makeRequest("/api/inquiry", {
         turnstileToken: "valid-token",
@@ -218,7 +147,6 @@ describe("lead API family protection contract", () => {
       }),
     );
 
-    expect(contact.status).toBe(429);
     expect(inquiry.status).toBe(429);
     expect(subscribe.status).toBe(429);
   });
@@ -246,28 +174,5 @@ describe("lead API family protection contract", () => {
       API_ERROR_CODES.SUBSCRIBE_SECURITY_REQUIRED,
     );
     expect(vi.mocked(processLead)).not.toHaveBeenCalled();
-  });
-
-  it("contact rejects invalid validation before submission processing", async () => {
-    vi.mocked(validateFormData).mockResolvedValueOnce({
-      success: false,
-      errorCode: API_ERROR_CODES.CONTACT_VALIDATION_FAILED,
-      error: "Validation failed",
-      details: null,
-      data: null,
-    });
-
-    const response = await contactRoute.POST(
-      makeRequest("/api/contact", {
-        email: "contact@example.com",
-        company: "Acme",
-        firstName: "Ada",
-      }),
-    );
-
-    expect(response.status).toBe(400);
-    expect((await response.json()).errorCode).toBe(
-      API_ERROR_CODES.CONTACT_VALIDATION_FAILED,
-    );
   });
 });

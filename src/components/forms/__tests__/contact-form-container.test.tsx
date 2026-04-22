@@ -49,6 +49,8 @@ const mockT = vi.fn((key: string) => {
     submitSuccess: "Form submitted successfully!",
     submitError: "Failed to submit form. Please try again.",
     rateLimitMessage: "Please wait before submitting again.",
+    CONTACT_PARTIAL_SUCCESS:
+      "We received your message, but part of the follow-up failed. Please wait before retrying.",
     CONTACT_SUBMISSION_EXPIRED:
       "This form expired. Please refresh the page and try again.",
     TURNSTILE_VERIFICATION_FAILED:
@@ -221,6 +223,37 @@ describe("ContactFormContainer - 剩余高级测试", () => {
       expect(
         screen.getByTestId("contact-form-status-message-text"),
       ).toHaveTextContent("Form submitted successfully!");
+    });
+
+    it("partial-success 状态应该显示琥珀色提示，不显示通用错误标题", () => {
+      mockUseActionState.mockReturnValue([
+        {
+          success: false,
+          errorCode: "CONTACT_PARTIAL_SUCCESS",
+          data: {
+            emailSent: true,
+            recordCreated: false,
+            referenceId: "ref-partial-123",
+            partialSuccess: true,
+          },
+        },
+        vi.fn(),
+        false,
+      ]);
+
+      render(<ContactFormContainer />);
+
+      expect(
+        screen.getByText(
+          "We received your message, but part of the follow-up failed. Please wait before retrying.",
+        ),
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByTestId("contact-form-error-heading"),
+      ).not.toBeInTheDocument();
+      expect(screen.getByTestId("contact-form-error-display")).toHaveClass(
+        "text-amber-800",
+      );
     });
 
     it("应该显示错误状态消息样式", async () => {
