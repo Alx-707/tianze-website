@@ -1,3 +1,4 @@
+import { type ComponentProps } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -7,6 +8,10 @@ import {
   getAllMarketSlugs,
   isValidMarketSlug,
 } from "@/constants/product-catalog";
+import {
+  SINGLE_SITE_MARKET_FAQ_ITEMS,
+  SINGLE_SITE_PRODUCTS_PAGE_EXPRESSION,
+} from "@/config/single-site-page-expression";
 import { NORTH_AMERICA_SPECS } from "@/constants/product-specs/north-america";
 import { AUSTRALIA_NZ_SPECS } from "@/constants/product-specs/australia-new-zealand";
 import { MEXICO_SPECS } from "@/constants/product-specs/mexico";
@@ -30,19 +35,6 @@ import {
 } from "@/components/products/product-specs";
 import { StickyFamilyNav } from "@/components/products/sticky-family-nav";
 import { Link, routing } from "@/i18n/routing";
-
-const PRODUCT_FAQ_ITEMS = [
-  "sch40vs80",
-  "conduitSize",
-  "bendingRadius",
-  "strengthGrades",
-  "lszh",
-  "standardsDifference",
-  "directBurial",
-  "indoorOutdoor",
-  "solarDataCenter",
-  "corrosion",
-] as const;
 
 // --- Spec data lookup ---
 
@@ -176,15 +168,21 @@ interface CtaSectionProps {
   heading: string;
   description: string;
   buttonText: string;
+  href: ComponentProps<typeof Link>["href"];
 }
 
-function CtaSection({ heading, description, buttonText }: CtaSectionProps) {
+function CtaSection({
+  heading,
+  description,
+  buttonText,
+  href,
+}: CtaSectionProps) {
   return (
     <section className="mt-16 rounded-lg border border-primary/20 bg-primary/5 p-8 text-center">
       <h2 className="mb-2 text-xl font-semibold">{heading}</h2>
       <p className="mb-6 text-muted-foreground">{description}</p>
       <Link
-        href="/contact"
+        href={href}
         className="inline-flex items-center rounded-md bg-primary px-6 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
       >
         {buttonText}
@@ -370,12 +368,16 @@ export default async function MarketPage({ params }: MarketPageProps) {
         {...buildTrustSignalsSectionProps(marketSpecs, marketSlug, t)}
       />
 
-      <FaqSection items={[...PRODUCT_FAQ_ITEMS]} locale={locale as Locale} />
+      <FaqSection
+        items={[...SINGLE_SITE_MARKET_FAQ_ITEMS]}
+        locale={locale as Locale}
+      />
 
       <CtaSection
         heading={t("market.cta.heading", { marketLabel })}
         description={t("market.cta.description")}
         buttonText={t("market.cta.button")}
+        href={SINGLE_SITE_PRODUCTS_PAGE_EXPRESSION.marketLanding.ctaHref}
       />
     </main>
   );

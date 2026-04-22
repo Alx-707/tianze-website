@@ -13,8 +13,6 @@ Files:
 - `messages/zh.json`
 - `messages/en/critical.json`
 - `messages/zh/critical.json`
-- `src/sites/message-overrides.ts`
-- `src/sites/**/messages/**`
 
 Why it matters:
 - This is the strongest logical-coupling cluster in the repository.
@@ -22,24 +20,23 @@ Why it matters:
 
 Review rule:
 - If one file in the quartet changes, reviewers should inspect the other three.
-- If the change touches a site overlay, reviewers should also inspect whether the shared base bundle still needs to change or should remain untouched.
 - If the change affects runtime-facing copy or error semantics, use at least `local-full proof`.
 - Run `pnpm review:translation-quartet` to execute the quartet validation path.
 
-## Cluster 2: Lead API Family
+## Cluster 2: Lead Submission Surfaces
 
 Files:
-- `src/app/api/contact/route.ts`
+- `src/lib/actions/contact.ts`
 - `src/app/api/inquiry/route.ts`
 - `src/app/api/subscribe/route.ts`
 - `src/lib/api/lead-route-response.ts`
 
 Why it matters:
-- These routes move together historically and form one operational family.
+- These submission surfaces move together historically and form one operational family.
 - Changes in error handling, validation, abuse protection, or response semantics should be assessed family-wide.
 
 Review rule:
-- If one route changes materially, reviewers should inspect the other family members for contract drift.
+- If one submission surface changes materially, reviewers should inspect the other family members for contract drift.
 - If validation, rate-limit, or abuse logic changes, require security-aware review.
 - Use [`LEAD-API-FAMILY-CONTRACT.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/LEAD-API-FAMILY-CONTRACT.md) as the explicit shared contract for this family.
 - Run `pnpm review:lead-family` to execute the family contract/protection regression suite.

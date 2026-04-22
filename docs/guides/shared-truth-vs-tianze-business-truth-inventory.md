@@ -21,6 +21,7 @@
 - 共享底座已经存在
 - 但业务真相还没有被压到少数入口
 - 其中最混杂的区域是：站点配置、站点事实、导航/页脚、SEO 默认文案、产品目录、消息文件
+- 当前更清楚的三层入口已经是：`src/config/single-site.ts`、`src/config/single-site-page-expression.ts`、`src/config/single-site-seo.ts`
 
 简单说：
 
@@ -256,18 +257,16 @@
 
 这意味着以后第二个站如果产品结构不同，这里一定会进入第一批变化区域。
 
-## 3. `content/config/content.json` 还保留着模板级默认值
+## 3. `content/config/content.json` 曾经保留过模板级默认值
 
 - [content.json](/Users/Data/Warehouse/Pipe/tianze-website/content/config/content.json)
 
-这里仍然写着：
+当前更需要记住的是：
 
-- `B2B Web Template`
-- 通用模板 SEO 标题和描述
-
-这类内容很容易误导后来的人，以为这是当前业务真相的一部分。
-
-这不是眼前就会爆炸的问题，但属于典型的“现在不整理，以后容易继续踩坑”的地方。
+- 这个文件只适合作为内容基础配置与 validation 配置入口
+- live SEO 默认值已经转回 `src/config/single-site.ts` / `src/config/single-site-seo.ts`
+- 页面表达输入则继续收口到 `src/config/single-site-page-expression.ts`
+- 不要再把它误当成当前品牌 / SEO 真相层
 
 ## E. 当前最值得先收口的 5 个区域
 

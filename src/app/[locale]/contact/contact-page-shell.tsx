@@ -1,46 +1,11 @@
 import { Card } from "@/components/ui/card";
-
-const CONTACT_PAGE_FALLBACK_SITE_KEY = "tianze" as const;
-
-const CONTACT_PAGE_FALLBACK_COPY = {
-  en: {
-    title: "Contact Us",
-    description:
-      "Get in touch with our team for inquiries, support, or partnership opportunities.",
-    formTitle: "Send us a message",
-    formDescription:
-      "Share your project details and our team will follow up with the right next step.",
-    labels: {
-      firstName: "First Name",
-      lastName: "Last Name",
-      email: "Email Address",
-      company: "Company Name",
-      subject: "Subject",
-      message: "Message",
-      acceptPrivacy: "I agree to the privacy policy and terms of service",
-      submit: "Send Message",
-    },
-  },
-  zh: {
-    title: "联系我们",
-    description: "欢迎联系天泽团队，咨询合作、产品支持或项目需求。",
-    formTitle: "给我们留言",
-    formDescription: "告诉我们您的项目需求，我们会尽快安排合适的同事跟进。",
-    labels: {
-      firstName: "名字",
-      lastName: "姓氏",
-      email: "邮箱",
-      company: "公司名称",
-      subject: "主题",
-      message: "留言内容",
-      acceptPrivacy: "我同意隐私政策和服务条款",
-      submit: "发送消息",
-    },
-  },
-} as const;
+import {
+  SINGLE_SITE_CONTACT_PAGE_FALLBACK,
+  getSingleSiteContactPageFallbackCopy,
+} from "@/config/single-site-page-expression";
 
 export function getContactPageFallbackCopy(locale: string) {
-  return CONTACT_PAGE_FALLBACK_COPY[locale === "zh" ? "zh" : "en"];
+  return getSingleSiteContactPageFallbackCopy(locale);
 }
 
 export function ContactFormFallback({
@@ -222,10 +187,10 @@ export function ContactPageHeader({
 
 export function ContactPageFallback({
   locale,
-  siteKey = CONTACT_PAGE_FALLBACK_SITE_KEY,
+  siteKey = SINGLE_SITE_CONTACT_PAGE_FALLBACK.siteKey,
 }: {
   locale: string;
-  siteKey?: typeof CONTACT_PAGE_FALLBACK_SITE_KEY;
+  siteKey?: typeof SINGLE_SITE_CONTACT_PAGE_FALLBACK.siteKey;
 }) {
   const fallbackCopy = getContactPageFallbackCopy(locale);
 

@@ -7,86 +7,30 @@ import {
   type StaticPageLastModConfig,
 } from "@/lib/sitemap-utils";
 import { SITE_CONFIG } from "@/config/paths";
+import {
+  getSingleSiteSitemapPageConfig,
+  SINGLE_SITE_PUBLIC_STATIC_PAGES,
+  SINGLE_SITE_STATIC_PAGE_LASTMOD,
+  type SingleSiteSitemapPageConfig,
+} from "@/config/single-site-seo";
 import { routing } from "@/i18n/routing";
 import { PRODUCT_CATALOG } from "@/constants/product-catalog";
 
 // Base URL for the site - uses centralized SITE_CONFIG for consistency
 const BASE_URL = SITE_CONFIG.baseUrl;
 
-// Static pages that exist in all locales
-const STATIC_PAGES = [
-  "",
-  "/about",
-  "/contact",
-  "/products",
-  "/blog",
-  "/privacy",
-  "/terms",
-  "/capabilities/bending-machines",
-  "/oem-custom-manufacturing",
-] as const;
+type PageConfig = SingleSiteSitemapPageConfig;
 
-// Change frequency mapping for different page types
-type ChangeFrequency =
-  | "always"
-  | "hourly"
-  | "daily"
-  | "weekly"
-  | "monthly"
-  | "yearly"
-  | "never";
-
-interface PageConfig {
-  changeFrequency: ChangeFrequency;
-  priority: number;
-}
-
-// Page config lookup using Map for security
-const PAGE_CONFIG_MAP = new Map<string, PageConfig>([
-  ["", { changeFrequency: "daily", priority: 1.0 }],
-  ["/about", { changeFrequency: "monthly", priority: 0.8 }],
-  ["/contact", { changeFrequency: "monthly", priority: 0.8 }],
-  ["/products", { changeFrequency: "weekly", priority: 0.9 }],
-  ["/blog", { changeFrequency: "weekly", priority: 0.7 }],
-  ["/privacy", { changeFrequency: "monthly", priority: 0.7 }],
-  [
-    "/capabilities/bending-machines",
-    { changeFrequency: "monthly", priority: 0.8 },
-  ],
-  ["/oem-custom-manufacturing", { changeFrequency: "monthly", priority: 0.8 }],
-  ["blogPost", { changeFrequency: "monthly", priority: 0.6 }],
-  ["productMarket", { changeFrequency: "weekly", priority: 0.8 }],
-]);
-
-const DEFAULT_CONFIG: PageConfig = {
-  changeFrequency: "weekly",
-  priority: 0.5,
-};
-
-// Static page last modified dates configuration
-// Update these dates when static page content changes significantly
-const STATIC_PAGE_LASTMOD: StaticPageLastModConfig = new Map([
-  // Homepage - updated frequently
-  ["", new Date("2024-12-01T00:00:00Z")],
-  // About page - rarely changes
-  ["/about", new Date("2024-06-01T00:00:00Z")],
-  // Contact page - rarely changes
-  ["/contact", new Date("2024-06-01T00:00:00Z")],
-  // Products listing - updated when products change
-  ["/products", new Date("2024-11-01T00:00:00Z")],
-  // Blog listing - updated when posts change
-  ["/blog", new Date("2024-11-01T00:00:00Z")],
-  // Legal pages - updated when terms change
-  ["/privacy", new Date("2024-06-01T00:00:00Z")],
-  ["/terms", new Date("2024-06-01T00:00:00Z")],
-  // Standalone pages
-  ["/capabilities/bending-machines", new Date("2026-03-23T00:00:00Z")],
-  ["/oem-custom-manufacturing", new Date("2026-03-23T00:00:00Z")],
-]);
+const STATIC_PAGE_LASTMOD: StaticPageLastModConfig = new Map(
+  Object.entries(SINGLE_SITE_STATIC_PAGE_LASTMOD).map(([route, isoDate]) => [
+    route,
+    new Date(isoDate),
+  ]),
+);
 
 // Helper to get page config
 function getPageConfig(path: string): PageConfig {
-  return PAGE_CONFIG_MAP.get(path) ?? DEFAULT_CONFIG;
+  return getSingleSiteSitemapPageConfig(path);
 }
 
 // Build alternate languages object for a URL path
@@ -127,7 +71,7 @@ function generateStaticPageEntries(): MetadataRoute.Sitemap {
   const entries: MetadataRoute.Sitemap = [];
 
   for (const locale of routing.locales) {
-    for (const page of STATIC_PAGES) {
+    for (const page of SINGLE_SITE_PUBLIC_STATIC_PAGES) {
       const config = getPageConfig(page);
       const url = `${BASE_URL}/${locale}${page}`;
       const alternates = buildAlternateLanguages(page);

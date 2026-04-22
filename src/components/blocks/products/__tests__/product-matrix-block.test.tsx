@@ -21,6 +21,21 @@ describe("ProductMatrixBlock", () => {
     expect(cards.length).toBeGreaterThanOrEqual(4);
   });
 
+  it("uses current live product destinations instead of stale template routes", () => {
+    render(<ProductMatrixBlock />);
+
+    const hrefs = screen
+      .getAllByRole("link")
+      .map((link) => link.getAttribute("href"));
+    expect(hrefs).toContain("/capabilities/bending-machines");
+    expect(hrefs).toContain("/products");
+    expect(hrefs).toContain("/products/pneumatic-tube-systems");
+    expect(hrefs).toContain("/contact");
+    expect(hrefs).not.toContain("/products/machines");
+    expect(hrefs).not.toContain("/products/pvc-conduits");
+    expect(hrefs).not.toContain("/products/pneumatic-tubes");
+  });
+
   it("has correct section id for scroll targeting", () => {
     const { container } = render(<ProductMatrixBlock />);
 

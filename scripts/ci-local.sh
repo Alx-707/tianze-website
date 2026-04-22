@@ -150,6 +150,30 @@ run_basic_checks() {
         return 1
     fi
 
+    print_step "当前真相文档检查 (Docs Truth)"
+    if pnpm review:docs-truth; then
+        print_success "当前真相文档检查通过"
+    else
+        print_error "当前真相文档检查失败"
+        return 1
+    fi
+
+    print_step "衍生项目基线检查 (Derivative Readiness)"
+    if pnpm review:derivative-readiness; then
+        print_success "衍生项目基线检查通过"
+    else
+        print_error "衍生项目基线检查失败"
+        return 1
+    fi
+
+    print_step "Cloudflare 官方对照检查"
+    if pnpm review:cf:official-compare; then
+        print_success "Cloudflare 官方对照检查通过"
+    else
+        print_error "Cloudflare 官方对照检查失败"
+        return 1
+    fi
+
     # 构建检查
     if [ "$QUICK_MODE" = "true" ]; then
         print_skip "构建检查（快速模式跳过，仅在完整模式运行）"

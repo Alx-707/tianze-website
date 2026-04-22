@@ -26,6 +26,18 @@
 
 **内容已经是资产了，只是还没有被完全按资产思路整理。**
 
+## 当前执行锁定
+
+当前不是在做多站点运行时治理，而是在做：
+
+- 高标准单站内容治理
+- 未来类似项目的二次开发准备
+
+因此本文中的“以后按站点分开”，当前应理解为：
+
+- 未来 derivative project 的优先替换面
+- 不是当前仓库已经存在的多站点 runtime 结构
+
 ## 分类方式
 
 这里把当前内容资产分成 6 类。
@@ -52,6 +64,7 @@
 - 已经结构化
 - 已经有拆分加载逻辑
 - 但内容里混着大量 Tianze 品牌和产品事实
+- `messages/en.json` 和 `messages/zh.json` 是 flat tooling artifact，不是 runtime truth
 
 以后多站点的意义：
 
@@ -77,7 +90,7 @@
 当前状态：
 
 - 形式上结构化
-- 但其中仍残留模板默认内容，例如 `B2B Web Template`
+- 当前更大的风险不是模板默认品牌残留，而是运行时页面真相和 MDX 资产容易被误当成同一层
 
 以后多站点的意义：
 
@@ -167,6 +180,8 @@
 当前位置：
 
 - [site-config.ts](/Users/Data/Warehouse/Pipe/tianze-website/src/config/paths/site-config.ts)
+- [single-site-seo.ts](/Users/Data/Warehouse/Pipe/tianze-website/src/config/single-site-seo.ts)
+- [single-site-page-expression.ts](/Users/Data/Warehouse/Pipe/tianze-website/src/config/single-site-page-expression.ts)
 - [seo-metadata.ts](/Users/Data/Warehouse/Pipe/tianze-website/src/lib/seo-metadata.ts)
 - [content.json](/Users/Data/Warehouse/Pipe/tianze-website/content/config/content.json)
 - [layout-metadata.ts](/Users/Data/Warehouse/Pipe/tianze-website/src/app/[locale]/layout-metadata.ts)
@@ -184,7 +199,12 @@
 
 - 已经有生成器
 - 但默认值仍分散在多处
-- 还混着模板遗留值和 Tianze 当前业务值
+- 主要风险已经不是 live 模板默认品牌残留，而是 SEO 输入分散在多处
+- 当前 authoring split 已经明确：
+  - `src/config/single-site.ts`：站点身份、品牌、联系信息、默认 SEO 基线
+  - `src/config/single-site-page-expression.ts`：页面表达输入
+  - `src/config/single-site-seo.ts`：sitemap / robots / public static page SEO 默认值
+- content / SEO 资产应该被当成资产层，而不是散落在页面和 helper 里的零碎文本
 
 以后多站点的意义：
 
@@ -197,14 +217,14 @@
 
 这意味着以后不能只把 `messages/*` 当翻译层看。
 
-## 2. 模板残留还留在正式内容资产里
+## 2. 历史模板痕迹仍然可能误导资产判断
 
 最明显的是：
 
 - [content.json](/Users/Data/Warehouse/Pipe/tianze-website/content/config/content.json)
-- [about.mdx](/Users/Data/Warehouse/Pipe/tianze-website/content/pages/en/about.mdx)
+- [sample-product.mdx](/Users/Data/Warehouse/Pipe/tianze-website/content/_archive/products/en/sample-product.mdx)
 
-这些内容如果不记下来，后面很容易误导判断。
+当前 live 内容里的模板默认品牌残留已经明显下降，但历史样板和 archive 仍会误导后续判断。
 
 ## 3. 研究资料和运行时内容还没有完全隔离
 
@@ -238,6 +258,12 @@
 - 模板残留值
 - 研究资料与运行时真相之间的边界
 
+补充说明：
+
+- `content/config/content.json` 现在只保留内容基础配置和 validation 真相
+- live SEO 默认值已经不再由这个文件承担
+- 页面里剩余的实现常量，不自动等于“还没收口”；只有未来类似项目最可能替换的输入，才应该继续往三层 authoring seam 里收
+
 ## 以后最容易按站点分开的内容
 
 从内容资产角度看，未来最可能先分开的顺序是：
@@ -245,6 +271,19 @@
 1. 品牌与公司事实内容
 2. 产品与市场内容
 3. SEO 默认值
+
+## 未来类似项目的默认替换顺序
+
+和内容资产最直接相关的默认替换顺序是：
+
+1. `messages/{locale}/{critical,deferred}.json`
+2. `content/pages/**`
+3. `content/posts/**`
+4. metadata / sitemap / JSON-LD 的默认输入
+
+配套执行清单见：
+
+- [DERIVATIVE-PROJECT-REPLACEMENT-CHECKLIST.md](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/DERIVATIVE-PROJECT-REPLACEMENT-CHECKLIST.md)
 4. 消息文件里的品牌表达
 5. 关于页、FAQ、资源页
 

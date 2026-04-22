@@ -14,11 +14,52 @@
 
 const fs = require("fs");
 const path = require("path");
+const {
+  collectCurrentTruthDocFindings,
+} = require("./check-current-truth-docs.js");
 
 const ROOT = path.resolve(__dirname, "..");
 const SRC = path.join(ROOT, "src");
 const APP_DIR = path.join(SRC, "app");
 const LOCALE_DIR = path.join(APP_DIR, "[locale]");
+const GITHUB_WORKFLOWS_DIR = path.join(ROOT, ".github", "workflows");
+const PNPM_BUILTIN_COMMANDS = new Set([
+  "add",
+  "audit",
+  "bin",
+  "cache",
+  "config",
+  "dedupe",
+  "deploy",
+  "dlx",
+  "doctor",
+  "env",
+  "exec",
+  "fetch",
+  "help",
+  "import",
+  "init",
+  "install",
+  "link",
+  "list",
+  "outdated",
+  "pack",
+  "patch",
+  "patch-commit",
+  "publish",
+  "rebuild",
+  "remove",
+  "root",
+  "run",
+  "setup",
+  "store",
+  "test",
+  "unlink",
+  "update",
+  "up",
+  "version",
+  "why",
+]);
 
 // ---------------------------------------------------------------------------
 // 1. Discover routes
@@ -64,6 +105,92 @@ function discoverApiRoutes() {
 
   walk(apiDir, "");
   return routes;
+}
+
+function readPackageScripts(rootDir = ROOT) {
+  const packageJsonPath = path.join(rootDir, "package.json");
+  if (!fs.existsSync(packageJsonPath)) {
+    return new Set();
+  }
+
+  const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
+  return new Set(Object.keys(packageJson.scripts ?? {}));
+}
+
+function getWorkflowFiles(rootDir = ROOT) {
+  if (!fs.existsSync(path.join(rootDir, ".github", "workflows"))) {
+    return [];
+  }
+
+  return fs
+    .readdirSync(path.join(rootDir, ".github", "workflows"), {
+      withFileTypes: true,
+    })
+    .filter(
+      (entry) =>
+        entry.isFile() &&
+        (entry.name.endsWith(".yml") || entry.name.endsWith(".yaml")),
+    )
+    .map((entry) => path.join(rootDir, ".github", "workflows", entry.name))
+    .sort();
+}
+
+function stripQuotedText(line) {
+  return line
+    .replace(/"[^"]*"/g, "")
+    .replace(/'[^']*'/g, "")
+    .replace(/`[^`]*`/g, "");
+}
+
+function extractWorkflowPnpmScriptRefs(source, workflowPath, rootDir = ROOT) {
+  const refs = [];
+  const lines = source.split("\n");
+  const commandPattern = /\bpnpm\s+(?:run\s+)?([A-Za-z0-9:_-]+)\b/g;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const trimmed = line.trim();
+    if (trimmed === "" || trimmed.startsWith("#")) continue;
+
+    const searchableLine = stripQuotedText(line);
+    let match;
+    while ((match = commandPattern.exec(searchableLine)) !== null) {
+      const script = match[1];
+      if (!script || script.startsWith("-")) continue;
+      if (!script || PNPM_BUILTIN_COMMANDS.has(script)) continue;
+
+      refs.push({
+        file: path.relative(rootDir, workflowPath),
+        line: i + 1,
+        script,
+        command: trimmed,
+      });
+    }
+  }
+
+  return refs;
+}
+
+function collectMissingWorkflowPnpmScripts(
+  rootDir = ROOT,
+  availableScripts = readPackageScripts(rootDir),
+) {
+  const findings = [];
+
+  for (const workflowFile of getWorkflowFiles(rootDir)) {
+    const source = fs.readFileSync(workflowFile, "utf8");
+    const refs = extractWorkflowPnpmScriptRefs(source, workflowFile, rootDir);
+    for (const ref of refs) {
+      if (!availableScripts.has(ref.script)) {
+        findings.push({
+          ...ref,
+          error: `Workflow references missing pnpm script "${ref.script}"`,
+        });
+      }
+    }
+  }
+
+  return findings;
 }
 
 // ---------------------------------------------------------------------------
@@ -331,12 +458,20 @@ function main() {
   // Discover routes
   const pageRoutes = discoverPageRoutes();
   const apiRoutes = discoverApiRoutes();
+  const packageScripts = readPackageScripts();
+  const workflowPnpmScriptErrors = collectMissingWorkflowPnpmScripts(
+    ROOT,
+    packageScripts,
+  );
+  const currentTruthDocErrors = collectCurrentTruthDocFindings(ROOT);
 
   if (!jsonMode) {
     console.log(`\nStatic Truth Check`);
     console.log(`${"=".repeat(50)}`);
     console.log(`Page routes found: ${pageRoutes.size}`);
     console.log(`API routes found:  ${apiRoutes.size}`);
+    console.log(`Workflow files:    ${getWorkflowFiles().length}`);
+    console.log(`Package scripts:   ${packageScripts.size}`);
   }
 
   // Scan source files
@@ -400,7 +535,13 @@ function main() {
           links_scanned: seenHrefs.size,
           broken_links: uniqueErrors,
           orphaned_files: orphans,
-          pass: uniqueErrors.length === 0 && orphans.length === 0,
+          workflow_pnpm_script_errors: workflowPnpmScriptErrors,
+          current_truth_doc_errors: currentTruthDocErrors,
+          pass:
+            uniqueErrors.length === 0 &&
+            orphans.length === 0 &&
+            workflowPnpmScriptErrors.length === 0 &&
+            currentTruthDocErrors.length === 0,
         },
         null,
         2,
@@ -426,16 +567,58 @@ function main() {
       console.log();
     }
 
-    if (uniqueErrors.length === 0 && orphans.length === 0) {
+    if (workflowPnpmScriptErrors.length > 0) {
+      console.log(
+        `WORKFLOW PNPM SCRIPT ERRORS (${workflowPnpmScriptErrors.length}):`,
+      );
+      for (const error of workflowPnpmScriptErrors) {
+        console.log(`  ${error.file}:${error.line} — ${error.error}`);
+      }
+      console.log();
+    }
+
+    if (currentTruthDocErrors.length > 0) {
+      console.log(
+        `CURRENT-TRUTH DOC/RULE ERRORS (${currentTruthDocErrors.length}):`,
+      );
+      for (const error of currentTruthDocErrors) {
+        console.log(`  ${error.file} — ${error.error}`);
+      }
+      console.log();
+    }
+
+    if (
+      uniqueErrors.length === 0 &&
+      orphans.length === 0 &&
+      workflowPnpmScriptErrors.length === 0 &&
+      currentTruthDocErrors.length === 0
+    ) {
       console.log("All links resolve. No orphaned files.");
     }
 
     console.log(`\nCompleted in ${elapsed}ms`);
   }
 
-  if (ciMode && (uniqueErrors.length > 0 || orphans.length > 0)) {
+  if (
+    ciMode &&
+    (uniqueErrors.length > 0 ||
+      orphans.length > 0 ||
+      workflowPnpmScriptErrors.length > 0 ||
+      currentTruthDocErrors.length > 0)
+  ) {
     process.exit(1);
   }
 }
 
-main();
+module.exports = {
+  PNPM_BUILTIN_COMMANDS,
+  collectMissingWorkflowPnpmScripts,
+  extractWorkflowPnpmScriptRefs,
+  getWorkflowFiles,
+  readPackageScripts,
+  stripQuotedText,
+};
+
+if (require.main === module) {
+  main();
+}

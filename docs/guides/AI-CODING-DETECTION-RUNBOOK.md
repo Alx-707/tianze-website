@@ -116,9 +116,9 @@ CodeQL 擅长跨文件数据流分析，这一点很有价值。
 
 补充说明：
 
-- 当前站点身份真相源已经进入 `src/sites/**`
+- 当前站点身份真相源是 `src/config/single-site.ts` 与 `src/config/single-site-product-catalog.ts`
 - `src/config/paths/site-config.ts`、`src/config/site-facts.ts`、`src/constants/product-catalog.ts`、`src/config/footer-links.ts`、`src/lib/navigation.ts` 现在应被视为兼容包装层
-- 如果 AI 把品牌、联系信息、默认 SEO、导航或页脚改进分散写回这些包装层，而不是先改 `src/sites/**`，这应该被记为真相源漂移
+- 如果 AI 把品牌、联系信息、默认 SEO、导航或页脚改进分散写回这些包装层，而不是先改 `src/config/single-site*.ts`，这应该被记为真相源漂移
 - 当前 `/about` 路由的运行时真相仍是 `src/app/[locale]/about/page.tsx` + `messages/*/deferred.json`，不是 MDX 直接渲染；如果 AI 只改 MDX 却宣称 about 页面已经变了，这也应被记为真相判断错误
 
 ## 5. Codex 检测顺序

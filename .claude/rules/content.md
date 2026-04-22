@@ -86,12 +86,13 @@ Frontmatter validated at build time via `src/types/content.types.ts`.
 ### Structure
 
 ```
-src/sites/
-├── index.ts                        # Site registry
-├── tianze.ts                       # Default site identity
-├── tianze-equipment.ts             # Second-site pilot identity
-└── tianze/
-    └── product-catalog.ts          # Markets + families — canonical product catalog truth today
+src/config/
+├── single-site.ts                  # Site identity: brand, runtime toggles, feature flags
+├── single-site-product-catalog.ts  # Markets + families — canonical product catalog truth
+├── single-site-page-expression.ts  # Reusable page-expression inputs
+├── single-site-seo.ts              # Sitemap / robots / public static page SEO defaults
+├── site-facts.ts                   # Contact info, addresses, locale list
+└── site-types.ts                   # Shared site type definitions
 
 src/constants/
 ├── product-catalog.ts              # Compatibility wrapper to active site catalog
@@ -105,7 +106,7 @@ src/constants/
 ### Why not MDX for products
 
 - Spec data (pipe sizes, wall thickness, schedules) is **tabular** — consumed by `SpecTable`, `StickyFamilyNav`, `FamilySection` components
-- `src/sites/**` now owns active-site identity and catalog truth; `src/constants/product-catalog.ts` is a compatibility wrapper, not the place to invent new canonical market structure
+- `src/config/single-site*.ts` now owns the active single-site identity and catalog truth; `src/constants/product-catalog.ts` is a compatibility wrapper, not the place to invent new canonical market structure
 - `product-catalog.ts` is still queried by sitemap, breadcrumbs, static params, navigation — needs programmatic access
 - Type safety catches data errors at compile time (missing fields, wrong slugs)
 - Owner edits through Claude, so MDX's "non-technical-friendly" editing advantage doesn't apply
@@ -115,6 +116,8 @@ src/constants/
 1. Create `src/constants/product-specs/{market-slug}.ts` following `north-america.ts` pattern
 2. Export a `satisfies MarketSpecs` object
 3. Register in `SPECS_BY_MARKET` in `src/app/[locale]/products/[market]/page.tsx`
+
+`SPECS_BY_MARKET` is an implementation detail in the route layer, not a canonical authoring surface like `src/config/single-site-page-expression.ts` or `src/config/single-site-seo.ts`.
 
 ### Key types
 

@@ -1,6 +1,8 @@
+import type { ComponentProps } from "react";
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { generateMetadataForPath, type Locale } from "@/lib/seo-metadata";
+import { SINGLE_SITE_OEM_PAGE_EXPRESSION } from "@/config/single-site-page-expression";
 import { FaqSection } from "@/components/sections/faq-section";
 import { Link } from "@/i18n/routing";
 import { generateLocaleStaticParams } from "@/app/[locale]/generate-static-params";
@@ -31,24 +33,6 @@ export async function generateMetadata({
 }
 
 // --- Constants ---
-
-const OEM_FAQ_ITEMS = ["oem", "samples"] as const;
-
-const SUPPORTED_STANDARDS = [
-  "UL 651 / ASTM D1785",
-  "AS/NZS 2053",
-  "NOM-001-SEDE",
-  "IEC 61386",
-];
-
-const SCOPE_KEYS = [
-  "customSizes",
-  "privateLabel",
-  "moldDevelopment",
-  "qualityAssurance",
-] as const;
-
-const PROCESS_STEP_COUNT = 5;
 
 // --- Extracted sub-sections (keep main function under 120 lines) ---
 
@@ -158,7 +142,7 @@ function StandardsSection({
       <h2 className="mb-4 text-2xl font-bold">{title}</h2>
       <p className="mb-6 text-muted-foreground">{desc}</p>
       <div className="flex flex-wrap gap-3">
-        {SUPPORTED_STANDARDS.map((std) => (
+        {SINGLE_SITE_OEM_PAGE_EXPRESSION.supportedStandards.map((std) => (
           <span
             key={std}
             className="rounded-full bg-primary/10 px-4 py-1.5 font-mono text-sm font-medium text-primary"
@@ -178,17 +162,19 @@ function CtaSection({
   heading,
   description,
   buttonText,
+  href,
 }: {
   heading: string;
   description: string;
   buttonText: string;
+  href: ComponentProps<typeof Link>["href"];
 }) {
   return (
     <section className="mt-16 rounded-lg border border-primary/20 bg-primary/5 p-8 text-center">
       <h2 className="mb-2 text-xl font-semibold">{heading}</h2>
       <p className="mb-6 text-muted-foreground">{description}</p>
       <Link
-        href="/contact"
+        href={href}
         className="inline-flex items-center rounded-md bg-primary px-6 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
       >
         {buttonText}
@@ -207,13 +193,14 @@ export default async function OemCustomManufacturingPage({
 
   const t = await getTranslations({ locale, namespace: "oem" });
 
-  const scopeCards: ScopeCardData[] = SCOPE_KEYS.map((key) => ({
-    title: t(`scope.${key}.title`),
-    desc: t(`scope.${key}.desc`),
-  }));
+  const scopeCards: ScopeCardData[] =
+    SINGLE_SITE_OEM_PAGE_EXPRESSION.scopeKeys.map((key) => ({
+      title: t(`scope.${key}.title`),
+      desc: t(`scope.${key}.desc`),
+    }));
 
   const processSteps: ProcessStepData[] = Array.from(
-    { length: PROCESS_STEP_COUNT },
+    { length: SINGLE_SITE_OEM_PAGE_EXPRESSION.processStepCount },
     (_, i) => {
       const key = `step${String(i + 1)}`;
       return {
@@ -244,12 +231,16 @@ export default async function OemCustomManufacturingPage({
         customLabel={t("standards.custom")}
       />
 
-      <FaqSection items={[...OEM_FAQ_ITEMS]} locale={locale as Locale} />
+      <FaqSection
+        items={[...SINGLE_SITE_OEM_PAGE_EXPRESSION.faqItems]}
+        locale={locale as Locale}
+      />
 
       <CtaSection
         heading={t("cta.heading")}
         description={t("cta.description")}
         buttonText={t("cta.button")}
+        href={SINGLE_SITE_OEM_PAGE_EXPRESSION.ctaHref}
       />
     </main>
   );

@@ -1,9 +1,9 @@
 import { ArrowUpRight, Cable, Factory, ShieldCheck } from "lucide-react";
 import { getTranslations } from "next-intl/server";
+import { SINGLE_SITE_HOME_SCENARIO_ITEMS } from "@/config/single-site-page-expression";
 import { siteFacts } from "@/config/site-facts";
 import { HomepageSectionShell } from "@/components/sections/homepage-section-shell";
 
-const SCENARIO_KEYS = ["item1", "item2", "item3"] as const;
 const SCENARIO_ICONS = [Cable, Factory, ShieldCheck] as const;
 
 export async function ScenariosSection() {
@@ -16,7 +16,7 @@ export async function ScenariosSection() {
       subtitle={t("subtitle", { countries: siteFacts.stats.exportCountries })}
     >
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        {SCENARIO_KEYS.map((key, index) => {
+        {SINGLE_SITE_HOME_SCENARIO_ITEMS.map((key, index) => {
           const Icon = SCENARIO_ICONS[index] ?? ShieldCheck;
 
           return (

@@ -1,0 +1,280 @@
+import { PRODUCT_CATALOG } from "@/constants/product-catalog";
+import { SINGLE_SITE_KEY } from "@/config/single-site";
+
+/**
+ * Canonical single-site page-expression inputs.
+ *
+ * Keep reusable page-expression inputs here:
+ * - FAQ item keys
+ * - section keys / card order / display mapping
+ * - CTA targets
+ * - supported standards / scope keys / process-step counts
+ * - fallback copy
+ *
+ * Keep implementation details out of here:
+ * - `contact/page.tsx` `MERGED_MESSAGES`
+ * - `products/[market]/page.tsx` `SPECS_BY_MARKET`
+ * - `privacy` / `terms` heading-prefix constants
+ * - `slugify`, heading parsers, JSON-LD object literals, and page-local helpers
+ */
+
+export const SINGLE_SITE_HOME_GRID_SECTION_ORDER = [
+  "hero",
+  "chain",
+  "products",
+  "resources",
+  "sampleCta",
+  "scenarios",
+  "quality",
+] as const;
+
+export const SINGLE_SITE_HOME_TRAILING_SECTION_ORDER = ["finalCta"] as const;
+
+export type SingleSiteHomeGridSectionId =
+  (typeof SINGLE_SITE_HOME_GRID_SECTION_ORDER)[number];
+export type SingleSiteHomeTrailingSectionId =
+  (typeof SINGLE_SITE_HOME_TRAILING_SECTION_ORDER)[number];
+
+export const SINGLE_SITE_HOME_LINK_TARGETS = {
+  contact: "/contact",
+  products: "/products",
+} as const;
+
+export const SINGLE_SITE_HOME_HERO_PROOF_ITEMS = [
+  "est",
+  "countries",
+  "range",
+  "production",
+] as const;
+
+export const SINGLE_SITE_HOME_FINAL_TRUST_ITEMS = ["countries"] as const;
+
+export const SINGLE_SITE_HOME_SCENARIO_ITEMS = [
+  "item1",
+  "item2",
+  "item3",
+] as const;
+
+export const SINGLE_SITE_CONTACT_FAQ_ITEMS = [
+  "moq",
+  "leadTime",
+  "payment",
+  "samples",
+  "oem",
+] as const;
+
+export const SINGLE_SITE_PRIVACY_SECTION_KEYS = [
+  "introduction",
+  "informationCollected",
+  "howWeUse",
+  "sharing",
+  "security",
+  "retention",
+  "rights",
+  "children",
+  "changes",
+  "contact",
+] as const;
+
+export const SINGLE_SITE_TERMS_SECTION_KEYS = [
+  "introduction",
+  "acceptance",
+  "services",
+  "orders",
+  "payment",
+  "shipping",
+  "warranty",
+  "liability",
+  "ip",
+  "confidentiality",
+  "termination",
+  "governing",
+  "disputes",
+  "contact",
+] as const;
+
+export const SINGLE_SITE_CONTACT_PAGE_FALLBACK = {
+  siteKey: SINGLE_SITE_KEY,
+  copy: {
+    en: {
+      title: "Contact Us",
+      description:
+        "Get in touch with our team for inquiries, support, or partnership opportunities.",
+      formTitle: "Send us a message",
+      formDescription:
+        "Share your project details and our team will follow up with the right next step.",
+      labels: {
+        firstName: "First Name",
+        lastName: "Last Name",
+        email: "Email Address",
+        company: "Company Name",
+        subject: "Subject",
+        message: "Message",
+        acceptPrivacy: "I agree to the privacy policy and terms of service",
+        submit: "Send Message",
+      },
+    },
+    zh: {
+      title: "联系我们",
+      description: "欢迎联系天泽团队，咨询合作、产品支持或项目需求。",
+      formTitle: "给我们留言",
+      formDescription: "告诉我们您的项目需求，我们会尽快安排合适的同事跟进。",
+      labels: {
+        firstName: "名字",
+        lastName: "姓氏",
+        email: "邮箱",
+        company: "公司名称",
+        subject: "主题",
+        message: "留言内容",
+        acceptPrivacy: "我同意隐私政策和服务条款",
+        submit: "发送消息",
+      },
+    },
+  },
+} as const;
+
+export const SINGLE_SITE_ABOUT_FAQ_ITEMS = [
+  "manufacturer",
+  "factoryVisit",
+  "exportExperience",
+  "certifications",
+  "verifyCerts",
+] as const;
+
+export const SINGLE_SITE_ABOUT_VALUE_ITEM_KEYS = [
+  "quality",
+  "innovation",
+  "service",
+  "integrity",
+] as const;
+
+export const SINGLE_SITE_ABOUT_STATS_ITEMS = [
+  {
+    key: "years",
+    valueSource: "yearsInBusiness",
+    labelKey: "yearsExperience",
+    suffix: "+",
+  },
+  {
+    key: "countries",
+    valueSource: "exportCountries",
+    labelKey: "countriesServed",
+    suffix: "+",
+  },
+  {
+    key: "team",
+    valueSource: "employees",
+    labelKey: "happyClients",
+    suffix: "+",
+  },
+  {
+    key: "factory",
+    valueSource: "factoryAreaAcres",
+    labelKey: "productsDelivered",
+    suffix: "",
+  },
+] as const;
+
+export const SINGLE_SITE_HOME_QUALITY_COMMITMENT_ITEMS = [
+  "commitment1",
+  "commitment2",
+  "commitment3",
+  "commitment4",
+  "commitment5",
+] as const;
+
+export const SINGLE_SITE_HOME_QUALITY_STANDARD_ITEMS = [
+  "astm",
+  "asnzs",
+  "iec",
+  "nom",
+] as const;
+
+export const SINGLE_SITE_HOME_QUALITY_PROOF_STRIP_ITEMS = [
+  "iso9001",
+  "standards",
+  "countries",
+] as const;
+
+export const SINGLE_SITE_ABOUT_PAGE_EXPRESSION = {
+  ctaHref: "/contact",
+} as const;
+
+export const SINGLE_SITE_MARKET_FAQ_ITEMS = [
+  "sch40vs80",
+  "conduitSize",
+  "bendingRadius",
+  "strengthGrades",
+  "lszh",
+  "standardsDifference",
+  "directBurial",
+  "indoorOutdoor",
+  "solarDataCenter",
+  "corrosion",
+] as const;
+
+const PNEUMATIC_MARKET_SLUG = "pneumatic-tube-systems" as const;
+
+const standardMarketSlugs = PRODUCT_CATALOG.markets
+  .map((market) => market.slug)
+  .filter((slug) => slug !== PNEUMATIC_MARKET_SLUG);
+
+export const SINGLE_SITE_PRODUCTS_PAGE_EXPRESSION = {
+  standardMarketSlugs,
+  specialtyMarketSlug: PNEUMATIC_MARKET_SLUG,
+  marketLanding: {
+    ctaHref: "/contact",
+  },
+  equipmentCard: {
+    href: "/capabilities/bending-machines",
+    imageSrc: "/images/products/full-auto-bending-machine.svg",
+  },
+} as const;
+
+export const SINGLE_SITE_BENDING_MACHINES_PAGE_EXPRESSION = {
+  faqItems: ["bendingRadius", "manufacturer"],
+  whyCardKeys: ["card1", "card2", "card3"],
+  stats: [
+    {
+      key: "monthlyCapacity",
+      valueSource: "translation",
+      translationKey: "capability.monthlyCapacity",
+      suffix: "",
+    },
+    {
+      key: "countries",
+      valueSource: "siteFacts.stats.exportCountries",
+      translationKey: "capability.countries",
+      suffix: "+",
+    },
+    {
+      key: "experience",
+      valueSource: "translation",
+      translationKey: "capability.experience",
+      suffix: "",
+    },
+  ],
+  ctaHref: "/contact",
+} as const;
+
+export const SINGLE_SITE_OEM_PAGE_EXPRESSION = {
+  faqItems: ["oem", "samples"],
+  supportedStandards: [
+    "UL 651 / ASTM D1785",
+    "AS/NZS 2053",
+    "NOM-001-SEDE",
+    "IEC 61386",
+  ],
+  scopeKeys: [
+    "customSizes",
+    "privateLabel",
+    "moldDevelopment",
+    "qualityAssurance",
+  ],
+  processStepCount: 5,
+  ctaHref: "/contact",
+} as const;
+
+export function getSingleSiteContactPageFallbackCopy(locale: string) {
+  return SINGLE_SITE_CONTACT_PAGE_FALLBACK.copy[locale === "zh" ? "zh" : "en"];
+}

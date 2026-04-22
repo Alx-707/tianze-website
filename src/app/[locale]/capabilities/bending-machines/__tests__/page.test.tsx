@@ -44,7 +44,17 @@ describe("Feature: Bending Machines Capability Page", () => {
   beforeEach(() => {
     vi.resetModules();
     mockGetTranslations.mockReset();
-    mockGetTranslations.mockResolvedValue((key: string) => key);
+    mockGetTranslations.mockResolvedValue((key: string) => {
+      const translationMap: Record<string, string> = {
+        "capability.monthlyCapacity.value": "50,000+",
+        "capability.monthlyCapacity.label": "Fittings per Month",
+        "capability.countries.label": "Countries Served",
+        "capability.experience.value": "10+",
+        "capability.experience.label": "Years of Experience",
+      };
+
+      return translationMap[key] ?? key;
+    });
   });
 
   async function renderPage(locale = "en") {
@@ -80,10 +90,9 @@ describe("Feature: Bending Machines Capability Page", () => {
 
   it("renders production capability numbers", async () => {
     await renderPage();
-    expect(
-      screen.getByText("capability.monthlyCapacity.value"),
-    ).toBeInTheDocument();
-    expect(screen.getByText("capability.countries.value")).toBeInTheDocument();
+    expect(screen.getByText("50,000+")).toBeInTheDocument();
+    expect(screen.getByText("20+")).toBeInTheDocument();
+    expect(screen.getByText("10+")).toBeInTheDocument();
   });
 
   it("CTA links to /contact", async () => {

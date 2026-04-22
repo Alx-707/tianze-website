@@ -15,16 +15,12 @@ If another document conflicts with this file, treat this file plus the linked ca
   - do not use the package name as proof of current product identity
 
 ## Site Identity Truth
-- Canonical site registry:
-  - [`src/sites/index.ts`](../../src/sites/index.ts)
-- Canonical site definitions:
-  - [`src/sites/tianze.ts`](../../src/sites/tianze.ts)
-  - [`src/sites/tianze-equipment.ts`](../../src/sites/tianze-equipment.ts)
-- Canonical current site product catalog:
-  - [`src/sites/tianze/product-catalog.ts`](../../src/sites/tianze/product-catalog.ts)
-- Canonical site-specific message overlays:
-  - [`src/sites/message-overrides.ts`](../../src/sites/message-overrides.ts)
-  - `src/sites/<site-key>/messages/<locale>/{critical,deferred}.json`
+- Canonical authoring sources:
+  - [`src/config/single-site.ts`](../../src/config/single-site.ts)
+  - [`src/config/single-site-product-catalog.ts`](../../src/config/single-site-product-catalog.ts)
+  - [`src/config/single-site-page-expression.ts`](../../src/config/single-site-page-expression.ts)
+  - [`src/config/single-site-seo.ts`](../../src/config/single-site-seo.ts)
+  - [`src/config/site-types.ts`](../../src/config/site-types.ts)
 - Compatibility wrappers that still point at the active site truth:
   - [`src/config/paths/site-config.ts`](../../src/config/paths/site-config.ts)
   - [`src/config/site-facts.ts`](../../src/config/site-facts.ts)
@@ -33,8 +29,12 @@ If another document conflicts with this file, treat this file plus the linked ca
   - [`src/lib/navigation.ts`](../../src/lib/navigation.ts)
 - Rule:
   - when site identity, contact facts, default SEO, navigation, footer, or market structure change, update `src/config/single-site.ts` first
+  - when homepage/contact/products/about/privacy/terms expression changes are intended as reusable baseline inputs, update `src/config/single-site-page-expression.ts`
+  - when sitemap/robots/public-page SEO defaults change, update `src/config/single-site-seo.ts`
+  - do not keep pulling implementation details into the page-expression layer; `MERGED_MESSAGES`, `SPECS_BY_MARKET`, heading-prefix constants, slugify/parsers, and JSON-LD object literals stay in the implementation layer
   - keep wrapper modules as compatibility surfaces, not the place to invent new Tianze-only truth
-  - the current cutover no longer relies on a multi-site registry or per-site message overlays
+  - the current repository does not use a runtime `src/sites/**` registry or per-site message overlays
+  - `NEXT_PUBLIC_SITE_KEY` and `build:site:equipment` are future derivative-project seams, not proof of an active multi-site runtime
 
 ## Runtime Entrypoints
 
@@ -57,19 +57,15 @@ If another document conflicts with this file, treat this file plus the linked ca
   - [`messages/en/deferred.json`](../../messages/en/deferred.json)
   - [`messages/zh/critical.json`](../../messages/zh/critical.json)
   - [`messages/zh/deferred.json`](../../messages/zh/deferred.json)
-- Canonical site-specific overlay sources:
-  - [`src/sites/message-overrides.ts`](../../src/sites/message-overrides.ts)
-  - `src/sites/<site-key>/messages/<locale>/{critical,deferred}.json`
 - Important non-truth sources:
   - `messages/en.json`
   - `messages/zh.json`
 - Rule:
   - the flat files are for tests and validation shape checks
   - runtime does not load them directly
-  - runtime message truth is now two-layered:
-    - shared base bundles under `messages/**`
-    - optional site-specific overlays under `src/sites/**/messages/**`
-  - do not put second-site-only copy straight into shared bundles unless it is intentionally shared by every site
+  - current runtime message truth is the shared split bundles under `messages/**`
+  - per-site overlays remain a future-only idea and must not be treated as active runtime structure
+  - do not put future derivative-project facts straight into shared bundles unless they are intentionally part of the single-site baseline
 
 ## About Page Runtime Truth
 - Canonical runtime route:
