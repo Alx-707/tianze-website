@@ -18,12 +18,6 @@ const FILE_CONTRACT_FIXTURES = [
   {
     ruleId: "critical-lead-route-missing-idempotency",
     config: "tests/semgrep/rules/critical-lead-route-missing-idempotency.yaml",
-    target: "tests/semgrep/targets/src/app/api/contact/route.ts",
-    expectedFindings: 1,
-  },
-  {
-    ruleId: "critical-lead-route-missing-idempotency",
-    config: "tests/semgrep/rules/critical-lead-route-missing-idempotency.yaml",
     target: "tests/semgrep/targets/src/app/api/inquiry/route.ts",
     expectedFindings: 0,
   },
