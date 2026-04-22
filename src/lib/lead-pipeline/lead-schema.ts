@@ -46,6 +46,31 @@ export type ContactSubject =
  */
 const sanitizedString = () => z.string().overwrite(sanitizePlainText);
 
+function isPositiveQuantityString(value: string): boolean {
+  const parsedQuantity = Number(value);
+  if (Number.isNaN(parsedQuantity)) {
+    return true;
+  }
+
+  if (!Number.isFinite(parsedQuantity)) {
+    return false;
+  }
+
+  return parsedQuantity > 0;
+}
+
+function isValidProductQuantity(value: unknown): value is string | number {
+  if (typeof value === "number") {
+    return Number.isFinite(value) && value > 0;
+  }
+
+  if (typeof value === "string") {
+    return isPositiveQuantityString(value);
+  }
+
+  return false;
+}
+
 /**
  * Base lead fields shared across all lead types
  */
@@ -54,6 +79,13 @@ const baseLeadFields = {
   company: sanitizedString().max(MAX_LEAD_COMPANY_LENGTH).optional(),
   marketingConsent: z.boolean().optional().default(false),
 };
+
+const productQuantitySchema: z.ZodType<string | number> = z
+  .unknown()
+  .transform((value) => (typeof value === "string" ? value.trim() : value))
+  .refine(isValidProductQuantity, {
+    message: "Quantity must be positive when using a numeric string",
+  });
 
 /**
  * Contact form lead schema
@@ -85,7 +117,7 @@ export const productLeadSchema = z.object({
   fullName: sanitizedString().min(ONE).max(MAX_LEAD_NAME_LENGTH),
   productSlug: z.string().trim().min(ONE),
   productName: sanitizedString().min(ONE).max(MAX_LEAD_PRODUCT_NAME_LENGTH),
-  quantity: z.string().trim().min(ONE).or(z.coerce.number().positive()),
+  quantity: productQuantitySchema,
   requirements: sanitizedString().max(MAX_LEAD_REQUIREMENTS_LENGTH).optional(),
   ...baseLeadFields,
 });

@@ -117,6 +117,23 @@ describe("Lead Schema", () => {
       expect(result.success).toBe(true);
     });
 
+    it("should reject non-positive or non-finite numeric quantities", () => {
+      expect(
+        productLeadSchema.safeParse({ ...validProductLead, quantity: 0 })
+          .success,
+      ).toBe(false);
+      expect(
+        productLeadSchema.safeParse({ ...validProductLead, quantity: -1 })
+          .success,
+      ).toBe(false);
+      expect(
+        productLeadSchema.safeParse({
+          ...validProductLead,
+          quantity: Number.POSITIVE_INFINITY,
+        }).success,
+      ).toBe(false);
+    });
+
     it("should trim productSlug", () => {
       const leadWithSpaces = {
         ...validProductLead,
@@ -145,6 +162,113 @@ describe("Lead Schema", () => {
       const invalidLead = { ...validProductLead, quantity: 0 };
       const result = productLeadSchema.safeParse(invalidLead);
       expect(result.success).toBe(false);
+    });
+
+    it("should reject numeric quantity strings that are zero or negative", () => {
+      const zeroQuantity = productLeadSchema.safeParse({
+        ...validProductLead,
+        quantity: "0",
+      });
+      const paddedZeroQuantity = productLeadSchema.safeParse({
+        ...validProductLead,
+        quantity: "00",
+      });
+      const decimalZeroQuantity = productLeadSchema.safeParse({
+        ...validProductLead,
+        quantity: "0.00",
+      });
+      const negativeQuantity = productLeadSchema.safeParse({
+        ...validProductLead,
+        quantity: "-1",
+      });
+      const negativeDecimalQuantity = productLeadSchema.safeParse({
+        ...validProductLead,
+        quantity: "-0.5",
+      });
+
+      expect(zeroQuantity.success).toBe(false);
+      expect(paddedZeroQuantity.success).toBe(false);
+      expect(decimalZeroQuantity.success).toBe(false);
+      expect(negativeQuantity.success).toBe(false);
+      expect(negativeDecimalQuantity.success).toBe(false);
+      if (
+        !zeroQuantity.success &&
+        !paddedZeroQuantity.success &&
+        !decimalZeroQuantity.success &&
+        !negativeQuantity.success &&
+        !negativeDecimalQuantity.success
+      ) {
+        expect(zeroQuantity.error.issues[0]?.message).toBe(
+          "Quantity must be positive when using a numeric string",
+        );
+        expect(paddedZeroQuantity.error.issues[0]?.message).toBe(
+          "Quantity must be positive when using a numeric string",
+        );
+        expect(decimalZeroQuantity.error.issues[0]?.message).toBe(
+          "Quantity must be positive when using a numeric string",
+        );
+        expect(negativeQuantity.error.issues[0]?.message).toBe(
+          "Quantity must be positive when using a numeric string",
+        );
+        expect(negativeDecimalQuantity.error.issues[0]?.message).toBe(
+          "Quantity must be positive when using a numeric string",
+        );
+      }
+    });
+
+    it("should reject infinite numeric quantity strings", () => {
+      const infinityQuantity = productLeadSchema.safeParse({
+        ...validProductLead,
+        quantity: "Infinity",
+      });
+      const overflowQuantity = productLeadSchema.safeParse({
+        ...validProductLead,
+        quantity: "1e400",
+      });
+
+      expect(infinityQuantity.success).toBe(false);
+      expect(overflowQuantity.success).toBe(false);
+      if (!infinityQuantity.success && !overflowQuantity.success) {
+        expect(infinityQuantity.error.issues[0]?.message).toBe(
+          "Quantity must be positive when using a numeric string",
+        );
+        expect(overflowQuantity.error.issues[0]?.message).toBe(
+          "Quantity must be positive when using a numeric string",
+        );
+      }
+    });
+
+    it("should reject non-string, non-number quantity values", () => {
+      expect(
+        productLeadSchema.safeParse({
+          ...validProductLead,
+          quantity: true,
+        }).success,
+      ).toBe(false);
+      expect(
+        productLeadSchema.safeParse({
+          ...validProductLead,
+          quantity: { value: 10 },
+        }).success,
+      ).toBe(false);
+    });
+
+    it("should keep descriptive strings even when they end with digits", () => {
+      const descriptiveQuantity = productLeadSchema.safeParse({
+        ...validProductLead,
+        quantity: "500 units per month",
+      });
+      const trailingNumericDescription = productLeadSchema.safeParse({
+        ...validProductLead,
+        quantity: "approx 500",
+      });
+
+      expect(descriptiveQuantity.success).toBe(true);
+      expect(trailingNumericDescription.success).toBe(true);
+      if (descriptiveQuantity.success && trailingNumericDescription.success) {
+        expect(descriptiveQuantity.data.quantity).toBe("500 units per month");
+        expect(trailingNumericDescription.data.quantity).toBe("approx 500");
+      }
     });
 
     it("should reject product lead without productSlug", () => {

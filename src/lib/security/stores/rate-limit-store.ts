@@ -141,7 +141,7 @@ class RedisRateLimitStore implements RateLimitStore {
     }
 
     const data = await response.json();
-    const [countResult, ttlResult] = getUpstashPipelineResults(data.result);
+    const [countResult, ttlResult] = getUpstashPipelineResults(data);
     const rawCount = unwrapUpstashResult(countResult);
     if (rawCount === null || rawCount === undefined) {
       return null;

@@ -43,6 +43,13 @@ describe("idempotency-utils", () => {
       });
     });
 
+    it("keeps boolean primitives as HTTP 200 payloads", () => {
+      expect(normalizeHandlerResult(false)).toEqual({
+        body: false,
+        statusCode: 200,
+      });
+    });
+
     it("keeps array results as HTTP 200 payloads", () => {
       const payload = [1, 2, 3];
       const normalized = normalizeHandlerResult(payload);
@@ -104,6 +111,18 @@ describe("idempotency-utils", () => {
         statusCode: 200,
       });
     });
+
+    it("keeps callable values with statusCode properties as HTTP 200 payloads", () => {
+      const callableResult = Object.assign(() => "ok", {
+        statusCode: 418,
+        label: "callable-result",
+      });
+
+      expect(normalizeHandlerResult(callableResult)).toEqual({
+        body: callableResult,
+        statusCode: 200,
+      });
+    });
   });
 
   describe("waitForCompletion", () => {
@@ -141,6 +160,24 @@ describe("idempotency-utils", () => {
       await vi.advanceTimersByTimeAsync(50);
 
       const response = await responsePromise;
+      expect(response.status).toBe(503);
+      await expect(response.json()).resolves.toEqual(
+        expect.objectContaining({
+          errorCode: API_ERROR_CODES.IDEMPOTENCY_REQUEST_FAILED,
+        }),
+      );
+    });
+
+    it("checks the store before timing out on the HTTP helper path", async () => {
+      const store = createStore(
+        vi.fn<IdempotencyStore["get"]>().mockResolvedValueOnce(null),
+      );
+
+      const responsePromise = waitForCompletion("idem-key", store);
+      await vi.advanceTimersByTimeAsync(50);
+
+      const response = await responsePromise;
+      expect(store.get).toHaveBeenCalledTimes(1);
       expect(response.status).toBe(503);
       await expect(response.json()).resolves.toEqual(
         expect.objectContaining({
@@ -205,6 +242,25 @@ describe("idempotency-utils", () => {
         }),
       );
     });
+
+    it("returns success as soon as the first polling attempt resolves successfully", async () => {
+      const store = createStore(
+        vi.fn<IdempotencyStore["get"]>().mockResolvedValueOnce({
+          status: "success",
+          response: { ok: true },
+          createdAt: 0,
+          expiresAt: 100,
+        }),
+      );
+
+      const responsePromise = waitForCompletion("idem-key", store);
+      await vi.advanceTimersByTimeAsync(50);
+
+      const response = await responsePromise;
+      expect(store.get).toHaveBeenCalledTimes(1);
+      expect(response.status).toBe(200);
+      await expect(response.json()).resolves.toEqual({ ok: true });
+    });
   });
 
   describe("waitForCompletionResult", () => {
@@ -250,6 +306,21 @@ describe("idempotency-utils", () => {
         ok: false,
         reason: "failed",
       });
+    });
+
+    it("checks the store before timing out on the typed helper path", async () => {
+      const store = createStore(
+        vi.fn<IdempotencyStore["get"]>().mockResolvedValueOnce(null),
+      );
+
+      const resultPromise = waitForCompletionResult("idem-key", store);
+      await vi.advanceTimersByTimeAsync(50);
+
+      await expect(resultPromise).resolves.toEqual({
+        ok: false,
+        reason: "failed",
+      });
+      expect(store.get).toHaveBeenCalledTimes(1);
     });
 
     it("returns failed when the pending entry settles to error", async () => {
