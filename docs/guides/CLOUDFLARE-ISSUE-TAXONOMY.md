@@ -1,100 +1,101 @@
-# Cloudflare Issue Taxonomy
+# Cloudflare 问题分类表
 
-## Purpose
+## 目的
 
-This file gives the repository one simple way to describe Cloudflare-related failures.
+这份文档给仓库一套统一说法，避免大家一看到 Cloudflare 报错就乱贴标签。
 
-Use it to avoid mixing:
+它的作用就是把问题分清：
 
-- platform/runtime boundary issues
-- generated artifact compatibility issues
-- current site page regressions
-- final deployed behavior
+- 是平台入口问题
+- 还是生成产物兼容问题
+- 还是当前站点运行时回归
+- 还是最终部署环境行为不对
 
 ## Four Buckets
 
 ### 1. Platform entry / local runtime issue
 
-Meaning:
+含义：
 
-- Wrangler / Miniflare / preview startup is unhealthy
-- a request may fail before current site business code really gets a fair run
+- Wrangler / Miniflare / preview 启动本身就不健康
+- 请求还没真正进入当前站点业务代码，就已经出事
 
-Typical signals:
+典型信号：
 
-- local preview never becomes stable
-- request hangs before page code meaningfully runs
-- inspector / local worker boot failures
+- local preview 一直起不稳
+- 请求在页面代码真正运行前就挂住
+- inspector / local worker boot failure
 
-Do not describe this as:
+不要把这类问题叫成：
 
-- “the page logic is broken”
+- 页面逻辑坏了
 
 ### 2. Generated artifact compatibility issue
 
-Meaning:
+含义：
 
-- the build succeeds, but generated output is not fully compatible with the current local Cloudflare path
+- build 看起来过了，但生成产物和当前本地 Cloudflare 路径不完全兼容
 
-Typical signals:
+典型信号：
 
-- manifest load problems
-- dynamic require regressions in generated handlers
-- preview-only 500s after framework / OpenNext upgrades
+- manifest load 问题
+- generated handler 的 dynamic require 回归
+- 框架 / OpenNext 升级后，preview-only 500
 
-Do not describe this as:
+不要把这类问题叫成：
 
-- “a content bug”
-- “a translation bug”
+- 内容 bug
+- 翻译 bug
 
 ### 3. Current site runtime regression
 
-Meaning:
+含义：
 
-- Tianze site behavior is wrong even if the platform boots
+- 平台能起来，但 Tianze 站点本身行为已经不对
 
-Typical signals:
+典型信号：
 
-- wrong redirects
-- wrong cookies or leaked internal headers
-- page content, SEO, or contact behavior regresses
+- redirect 错
+- cookie 错
+- 内部 header 泄漏
+- 页面内容、SEO、contact 行为回归
 
 ### 4. Final deployed behavior issue
 
-Meaning:
+含义：
 
-- the deployed Cloudflare environment still behaves incorrectly after local proof
+- 本地 proof 过了，但真实部署环境行为仍然不对
 
-Typical signals:
+典型信号：
 
-- deployed `/api/health` fails
-- deployed page/runtime behavior differs from verified local expectations
+- deployed `/api/health` 失败
+- deployed 页面 / runtime 行为和本地验证结果不一致
 
-Do not describe this as:
+不要把这类问题叫成：
 
-- “preview proof failed, so production must be broken”
+- preview proof 失败，所以 production 一定坏了
 
 ## Proof Mapping
 
-| Bucket | Strongest first useful proof |
+| Bucket | 最先有价值的强证据 |
 |---|---|
-| Platform entry / local runtime issue | `pnpm preview:cf` plus local diagnostics |
-| Generated artifact compatibility issue | `pnpm build:cf`, `pnpm smoke:cf:preview`, and when needed `pnpm build:cf:turbo` |
-| Current site runtime regression | page-level tests, `pnpm build`, `pnpm build:cf`, `pnpm smoke:cf:preview` |
+| Platform entry / local runtime issue | `pnpm preview:cf` 加本地诊断 |
+| Generated artifact compatibility issue | `pnpm build:cf`、`pnpm smoke:cf:preview`，必要时再加 `pnpm build:cf:turbo` |
+| Current site runtime regression | 页面级测试、`pnpm build`、`pnpm build:cf`、`pnpm smoke:cf:preview` |
 | Final deployed behavior issue | `pnpm smoke:cf:deploy -- --base-url <url>` |
 
-## Writing Rule
+## 写法规则
 
-When documenting or reporting a Cloudflare failure:
+记录或汇报 Cloudflare 问题时，顺序固定：
 
-1. Name the bucket first.
-2. Then name the failing proof level.
-3. Only then describe the symptom.
+1. 先说 bucket
+2. 再说失败的是哪一级 proof
+3. 最后再说具体现象
 
-Example:
+例子：
 
-- “Generated artifact compatibility issue; local preview proof failed with a manifest load regression.”
-- “Final deployed behavior issue; deployed smoke failed on `/api/health`.”
+- Generated artifact compatibility issue；local preview proof 因 manifest load regression 失败
+- Final deployed behavior issue；deployed smoke 在 `/api/health` 上失败
 
 ## Related Canonical Docs
 

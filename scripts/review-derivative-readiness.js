@@ -11,7 +11,7 @@ const REQUIRED_FILES = [
   "src/config/single-site-page-expression.ts",
   "src/config/single-site-seo.ts",
   "docs/guides/DERIVATIVE-PROJECT-REPLACEMENT-CHECKLIST.md",
-  "docs/guides/LONG-TERM-OPTIMIZATION-PROGRAM-2026-04.md",
+  ".claude/rules/content.md",
 ];
 
 const CONTENT_CHECKS = [

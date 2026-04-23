@@ -8,14 +8,14 @@ const REPORT_DIR = path.join(ROOT, "reports", "architecture");
 
 const CHECKS = [
   {
-    file: "docs/plans/current-repo-structural-audit-score.md",
-    pattern: "Superseded by",
-    label: "baseline score marked as superseded",
+    file: "docs/README.md",
+    pattern: "旧执行计划都优先移入 Trash 或改看 git 历史",
+    label: "docs overview reflects retired plan layer",
   },
   {
-    file: "docs/plans/2026-03-23-structural-governance-followup.md",
-    pattern: "Supplemental implementation record",
-    label: "governance follow-up marked as supplemental",
+    file: "docs/guides/POLICY-SOURCE-OF-TRUTH.md",
+    pattern: "已移走、只保留在 git 历史或 Trash 的旧计划、旧审计包、旧治理记录",
+    label: "policy index treats retired plan layer as supplemental only",
   },
   {
     file: "docs/guides/POLICY-SOURCE-OF-TRUTH.md",

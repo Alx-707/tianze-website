@@ -1,107 +1,86 @@
-# Competitive Analysis — Tianze Website
+# 竞争格局总结
 
-> Ring 1, Task 2 | Status: Confirmed by owner (2026-03-29)
-> Research sources: `02-competitive-analysis-research.md` + `02-equipment-competitive-research.md`
+> Ring 1 | 已确认（2026-03-29）
 
-## Competitive Landscape Summary
+## 一句话结论
 
-### PVC Conduit Market
+天泽在 PVC 管件市场里最大的差异化，不是“证书更多”，而是：
 
-8 Chinese manufacturers with independent English websites identified. Two-tier structure:
+> **多数竞争对手卖管件，但不做设备；天泽同时做弯管设备和管件。**
 
-**Tier 1** (strong websites + full certifications):
-- **Ledes** (ledestube.com) — "China's first CSA-certified factory", 60+ countries, modern website
-- **Ctube** (ctube-gr.com) — Dual-website SEO strategy, strongest content marketing, UL+CSA
+这条叙事位目前基本没人占。
 
-**Tier 2** (partial certifications, functional websites):
-- EVT, NBQXHY, Topele, Beisit, Tommur, GOODY
+## 当前竞争格局
 
-**Alibaba platform**: 4,298+ PVC conduit products, price-driven competition, certifications as key filter.
+### PVC 管件市场
 
-### Bending Machine Market
+可以分成两层：
 
-5-8 Chinese manufacturers of factory-grade PVC bending machines, concentrated in Jiangsu (Nantong/Zhangjiagang). Western brands (Greenlee, Pines, BLM) do metal pipe — different market entirely.
+- **第一梯队**：Ledes、Ctube  
+  网站更成熟、认证更完整、内容营销更强
+- **第二梯队**：EVT、NBQXHY、Topele、Beisit、Tommur、GOODY  
+  网站可用，但整体表达、结构和信任设计弱一些
 
-Key finding: **Bending machine manufacturers don't make pipe fittings. Pipe fitting manufacturers don't make bending machines.** Tianze sits at the intersection — unique position.
+Alibaba 平台卖家很多，但打法更偏：
 
-## Competitive Landscape Matrix
+- 价格竞争
+- 平台流量
+- 认证筛选
 
-| Dimension | Ledes/Ctube (Tier 1) | EVT/NBQXHY (Tier 2) | Alibaba sellers | Tianze |
-|-----------|---------------------|---------------------|-----------------|--------|
-| **Certifications** | UL, CSA, AS/NZS full suite | Partial (UL or AS/NZS) | Minimal | ISO 9001, AS/NZS in progress |
-| **Website quality** | Professional, SEO-optimized | Functional, some SEO | Template-based | Building (this project) |
-| **Content marketing** | Strong (blogs, guides) | Basic | None | None yet |
-| **Differentiator** | "First UL/CSA certified" | Regional focus + price | Low price | **Equipment manufacturer** |
-| **Trust signals** | Cert logos + factory scale | Certs + project cases | Alibaba ratings | Equipment + process + certs |
-| **Product range** | PVC conduit focused | Multi-product | Varied | PVC + PETG + Equipment + Custom |
-| **Conversion path** | 2-3 clicks to inquiry | 3-4 clicks | Platform-managed | Target: 2 clicks |
-| **"We make machines"** | No | No | No | **Yes — unclaimed narrative** |
+不适合作为 Tianze 独立站的直接模仿对象。
 
-## Key Finding: Unclaimed Narrative Space
+### 弯管设备市场
 
-**Across all 8 competitors with independent websites + Alibaba platform sellers, NONE positions themselves as an "upstream equipment manufacturer."**
+工厂级 PVC 弯管设备供应商非常少，且高度集中在江苏。  
+西方品牌大多做金属管设备，不是同一个赛道。
 
-This means:
-- The "we make the machines that make the pipes" story is entirely uncontested
-- Competitors prove quality via certification logos; Tianze can prove quality via manufacturing process visibility
-- This is not a marginal differentiator — it's a category-level narrative
+这意味着：
 
-## Differentiation Opportunities
+- “我们做弯管机” 不是普通自我介绍
+- 它是一个真实、稀缺、可验证的能力证明
 
-### 1. Equipment Manufacturer Identity (PRIMARY)
+## Tianze 当前最有价值的竞争位
 
-**Opportunity**: No competitor claims this. Tianze's bending machine capability is a concrete, visible proof of technical depth that certifications alone cannot provide.
+### 1. 设备制造商身份
 
-**How to use it**:
-- Homepage hero narrative: lead with manufacturing capability, not product catalog
-- "We make the machines" as brand tagline
-- Equipment photos and process videos as trust signals (Level 2 trust, compensating for Level 1 cert gaps)
+这是当前最重要的差异化来源：
 
-### 2. Cross-Intersection Value
+- 不是普通贸易商
+- 不是只会买设备来生产
+- 而是自己做设备、做模具、再做产品
 
-**Opportunity**: Bending machine makers (Bogda, SINOTECH) sell machines but don't make fittings. Fitting makers sell fittings but buy machines. Tianze does both.
+对买家来说，这个差异化最后要翻译成：
 
-**How to use it**:
-- "We test every product on our own machines" — quality narrative
-- Equipment page as both product line AND capability proof
-- Cost advantage story: hot-bending saves ~50% vs injection molding (validated by multiple sources)
+- 尺寸精度更可信
+- 非标响应更快
+- 制造过程更可验证
 
-### 3. Certification Transparency
+### 2. 设备和产品的交叉价值
 
-**Opportunity**: Ledes/Ctube locked up the "first UL/CSA" narrative. Tianze cannot win that race. But can build an alternative trust model.
+大多数设备厂不卖管件，大多数管件厂不做设备。  
+天泽同时覆盖两边，所以能讲出一条更完整的制造故事：
 
-**How to use it**:
-- "Technology meets standards. Certification is underway." — honest positioning
-- Standards comparison tables (show technical compliance even before formal certification)
-- Free sample + factory visit invitation as commitment mechanisms
+- 设备能力
+- 工艺能力
+- 模具能力
+- 成品能力
 
-### 4. Market Focus
+### 3. 信任模型不能和头部认证玩家硬碰硬
 
-| Market | Competition | Tianze opportunity |
-|--------|-----------|-------------------|
-| Australia/NZ | High (Ledes, Ctube) | AS/NZS certification in progress — can compete once certified |
-| North America | Very high (Ledes, Ctube dominant) | Hard to break in short-term without UL |
-| Southeast Asia | Medium | Lower certification barrier, good entry point |
-| Middle East/Africa | Low-medium (NBQXHY) | Lowest barrier, potential quick win |
+Ledes / Ctube 已经占了：
 
-## Competitive Weaknesses to Exploit
+- “第一家某认证工厂”
+- “认证覆盖最全”
 
-1. **All competitors use certification logos as primary trust signal** — Tianze can differentiate by showing process, not just papers
-2. **No competitor tells a manufacturing story** — all say "we make pipes", none says "we make the machines AND the pipes"
-3. **Most competitor websites have 3-4 click conversion paths** — Tianze can target 2 clicks
-4. **Competitor content is product-focused, not buyer-problem-focused** — Tianze can organize content around buyer questions (per Ring 2 strategy)
+天泽现阶段不适合在这条线上硬拼。  
+更合理的路径是：
 
-## Information Gaps
+- 用制造链可见性建立 trust
+- 用样品、测试、过程透明度补足认证差距
 
-- Competitor pricing not publicly available (all inquiry-based)
-- Alibaba internal ranking/transaction data not accessible
-- Ledes website had TLS errors during research — some data from secondary sources
-- Tianze's own bending machine specs not yet documented for comparison with SINOTECH PGW75
+## 当前竞争策略建议
 
----
-
-**Owner confirmed (2026-03-29):**
-1. Competitive landscape is accurate
-2. No missing competitors
-3. "Equipment manufacturer identity" — confirmed usable, owner is comfortable with this positioning
-4. Bending machine specs will be provided later; **owner prefers iterative product comparison (showing Tianze's own machine evolution across generations) rather than head-to-head competitor benchmarking** — this is a brand strategy decision: "we keep improving" > "we're better than X"
+- 首页先讲“为什么这家工厂更可信”，再讲产品
+- 产品页强调规格、精度、标准和样品
+- 设备页既是产品页，也是品牌能力证明页
+- 不学 Alibaba 风格，也不学泛 SaaS 模板

@@ -20,6 +20,18 @@ The project uses two content strategies, chosen by content type:
 
 **Current exception**: `/about` runtime truth is the route component in `src/app/[locale]/about/page.tsx`, not direct MDX rendering. Treat `content/pages/*/about.mdx` as supporting draft assets unless the route is explicitly migrated.
 
+## Support Inputs vs Runtime Truth
+
+The repo still keeps support inputs under `docs/cwf/**`, but they are not runtime truth by default.
+
+Use this split:
+
+- `docs/cwf/context/**` — business/content inputs for drafting and planning
+- `docs/cwf/faq/v1-final.md` and `docs/cwf/faq/v1-zh-final.md` — current FAQ content source docs
+- runtime truth — code, MDX, and config surfaces actually consumed by the app
+
+Do not treat support docs as runtime truth unless the route/component explicitly reads from them.
+
 ---
 
 ## MDX Content (`content/`)
@@ -105,6 +117,15 @@ src/constants/
 ```
 
 > A future multi-site layout (`src/sites/**`) is planned but not yet implemented. All site identity and catalog truth currently lives in `src/config/single-site*.ts`. Do not write code that assumes a `src/sites/**` directory exists.
+
+### Derivative-Project Boundary
+
+For future derivative-project work:
+
+- replace site identity in `src/config/single-site.ts`
+- replace reusable page inputs in `src/config/single-site-page-expression.ts`
+- replace public static SEO defaults in `src/config/single-site-seo.ts`
+- keep runtime, Cloudflare, i18n, security, and proof lanes fixed unless a real project-specific reason has been validated
 
 ### Why not MDX for products
 

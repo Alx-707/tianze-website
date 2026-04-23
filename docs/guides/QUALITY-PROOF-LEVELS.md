@@ -1,176 +1,208 @@
-# Quality Proof Levels
+# 质量证明等级说明
 
-## Purpose
-This is the single current rule for what different proof levels mean in this repository.
+## 目的
 
-Use this document to distinguish:
+这份文档统一定义仓库里的几种 proof level 到底分别证明什么：
+
 - `fast gate`
 - `local-full proof`
 - `ci-proof`
 - `release-proof`
 
-Do not treat these as interchangeable.
+它们不能混着叫，也不能互相冒充。
 
 ## Proof Levels
 
 ### 1. `fast gate`
-Purpose:
-- fast local feedback before push
-- useful for iteration
-- not sufficient evidence for release confidence
 
-Typical commands:
+用途：
+
+- 本地快速回路
+- 适合开发中途反复跑
+- 不足以支撑发布级信心
+
+典型命令：
+
 - `pnpm quality:gate:fast`
-- staged/pre-commit/pre-push checks from `lefthook.yml`
+- `lefthook` 的 staged / pre-commit / pre-push 检查
 
-What it proves:
-- local code-quality and security basics were checked
-- some architecture and translation checks may run
+它能证明：
 
-What it does **not** prove:
+- 基础代码质量和安全检查至少跑过一遍
+- 部分架构和翻译检查可能已执行
+
+它不能证明：
+
 - coverage gate
 - performance gate
-- full runtime behavior
-- dual-platform build correctness
+- 完整运行时行为
+- 双平台构建正确性
 - release readiness
 
-Use for:
-- normal local iteration
-- early PR preparation
+适用场景：
 
-Never use as sole proof for:
-- Tier A merges with runtime/platform impact
-- release decisions
+- 普通本地迭代
+- PR 早期准备
+
+绝不能单独拿它来证明：
+
+- 有运行时 / 平台影响的 Tier A 变更
+- 发布决策
 
 ### 2. `local-full proof`
-Purpose:
-- strong local evidence before asking CI or before merging higher-risk changes
 
-Minimum bundle:
+用途：
+
+- 在请求 CI 或合并高风险改动前，给出更强的本地证据
+
+最小组合：
+
 - `pnpm build`
 - `pnpm test:coverage`
-- `pnpm quality:gate -- --skip-test-run` or equivalent full local gate flow
-- `pnpm validate:translations` when i18n/messages/content changes are involved
+- `pnpm quality:gate -- --skip-test-run` 或等价完整本地门禁
+- 如果涉及 i18n / messages / content，再补 `pnpm validate:translations`
 
-Add when relevant:
-- `pnpm build:cf` for platform/runtime/build-chain changes
-- `pnpm build:cf:turbo` when the change touches the Cloudflare build toolchain itself and you need to keep the comparison path healthy
-- `CI=1 pnpm test:e2e` for key-path UI/runtime changes
-- `pnpm build:site:equipment` when the change touches `src/config/single-site*.ts`, `NEXT_PUBLIC_SITE_KEY` behavior, or the future derivative-project identity seam
-- `pnpm build:cf:site:equipment` when the same change must also be proven on the Cloudflare build path
+按需加跑：
 
-What it proves:
-- the developer has run the heavier local checks intentionally
-- the change is stronger than fast local evidence
+- `pnpm build:cf`：平台 / runtime / build-chain 改动
+- `pnpm build:cf:turbo`：Cloudflare 构建工具链本身改动，需要保住对照链时
+- `CI=1 pnpm test:e2e`：关键 UI / runtime 行为改动
+- `pnpm build:site:equipment`：改到 `src/config/single-site*.ts`、`NEXT_PUBLIC_SITE_KEY` 或 derivative seam
+- `pnpm build:cf:site:equipment`：同类改动还要证明 Cloudflare 构建链时
 
-What it still does **not** prove by itself:
-- independent CI environment validation
-- release-grade multi-job confirmation
+它能证明：
 
-Use for:
+- 开发者确实主动跑过重型本地检查
+- 证据强度已经明显高于 `fast gate`
+
+它仍然不能单独证明：
+
+- 独立 CI 环境也一定没问题
+- 已达到发布级多环节确认
+
+适用场景：
+
 - Tier A merges
-- runtime/security/i18n/platform-sensitive changes
+- runtime / security / i18n / platform 敏感改动
 
-### 2.1 `local-full proof` boundary when the branch is dirty
-If the current branch is a **dirty worktree** with unrelated changes, do not
-pretend one big green local run proves this governance line end-to-end.
+### 2.1 dirty worktree 场景下的 `local-full proof`
 
-Required split:
-- **targeted proof** for the work you actually touched on the dirty worktree
-- **clean branch** or isolated-worktree proof for the full repository claim
+如果当前分支是 **dirty worktree**，也就是夹着无关改动，不能把一次大绿灯硬说成整个仓库都被你证明过。
 
-For this repository, targeted proof usually means:
+必须拆成两层：
+
+- **targeted proof**：只证明你这次碰的那条线
+- **clean branch** proof：在隔离分支或独立 worktree 里再做全仓结论
+
+这个仓库里，常见 targeted proof 是：
+
 - `pnpm review:docs-truth`
 - `pnpm review:cf:official-compare`
 - `pnpm review:derivative-readiness`
-- change-scoped Vitest suites
-- serial build proof such as `pnpm clean:next-artifacts && pnpm build`
-- `pnpm build:cf` when Cloudflare-, metadata-, or truth-sensitive surfaces move
+- 变更范围对应的 Vitest 套件
+- 串行构建，如 `pnpm clean:next-artifacts && pnpm build`
+- 如果碰到 Cloudflare / metadata / truth surface，再补 `pnpm build:cf`
 
-What it proves:
-- the changed seam is locally defended with fresh evidence
-- if the change hits `src/config/single-site.ts`, `src/config/single-site-page-expression.ts`, or `src/config/single-site-seo.ts`, the current single-site three-layer truth has at least been checked with the correct narrow proof
+它能证明：
 
-What it does **not** prove:
-- that unrelated dirty files would also pass the full repository lane
-- that `ci:local:quick` on a later clean branch is already satisfied
+- 你实际改到的 seam 有 fresh evidence
+- 如果改到 `src/config/single-site.ts`、`src/config/single-site-page-expression.ts`、`src/config/single-site-seo.ts`，至少正确跑过针对这三层真相面的窄验证
+
+它不能证明：
+
+- 其他无关 dirty 文件也都通过全仓门禁
+- 稍后 clean branch 上的 `ci:local:quick` 已经自动成立
 
 ### 3. `ci-proof`
-Purpose:
-- repository-controlled, independent proof from the main CI workflow
 
-Source of truth:
+用途：
+
+- 用仓库控制的独立 CI 环境给出统一证据
+
+Source of truth：
+
 - `.github/workflows/ci.yml`
 
-Minimum expectation:
-- basic checks succeed
-- tests succeed
-- translation quality succeeds
-- architecture succeeds
-- security succeeds
-- performance succeeds
+最低预期：
 
-What it proves:
-- the repo's central gates passed in a clean CI environment
+- basic checks 通过
+- tests 通过
+- translation quality 通过
+- architecture 通过
+- security 通过
+- performance 通过
 
-What it does **not** prove by itself:
+它能证明：
+
+- 仓库核心门禁在干净 CI 环境里是绿的
+
+它不能单独证明：
+
 - release-specific deployment health
-- environment-specific rollout correctness
-- manual signoff on Tier A ownership if required
+- 特定环境的 rollout 正确性
+- Tier A 场景下的人类 signoff 已完成
 
-Use for:
+适用场景：
+
 - merge confidence
 - baseline release candidate confidence
 
 ### 4. `release-proof`
-Purpose:
-- highest proof level for changes that can affect production runtime semantics or deployment safety
 
-Required when:
-- `src/middleware.ts` changes
-- locale redirect / nonce / security headers change
-- `open-next.config.ts` or Cloudflare deployment chain changes
-- critical translation bundles or runtime locale semantics change
-- contact / inquiry / abuse-protection policy changes materially affect production behavior
+用途：
 
-Minimum expectation:
+- 这是最高 proof level，给 production-sensitive 改动用
+
+必须使用的场景：
+
+- `src/middleware.ts` 改动
+- locale redirect / nonce / security headers 改动
+- `open-next.config.ts` 或 Cloudflare 部署链改动
+- 关键翻译 bundle 或 runtime locale 语义改动
+- contact / inquiry / abuse-protection 对生产行为有实质影响的改动
+
+最低预期：
+
 - `local-full proof`
-- successful CI proof
-- explicit dual-platform validation when applicable:
+- 成功的 `ci-proof`
+- 适用时必须双平台验证：
   - `pnpm build`
   - `pnpm build:cf`
-- key-path runtime checks for affected paths
-- Tier A owner review expectations satisfied
+- 受影响关键路径的 runtime 检查
+- Tier A owner review 要求满足
 
-What it proves:
-- the change has enough evidence for production-facing confidence
+它能证明：
 
-## Mapping by Change Type
+- 这次改动已经有足够生产级技术证据
 
-| Change Type | Minimum Required Proof |
+## 按改动类型映射
+
+| 改动类型 | 最低 proof |
 |---|---|
-| Normal UI/component cleanup outside Tier A | `fast gate` |
-| Non-critical feature work with ordinary merge risk | `local-full proof` |
-| Tier A runtime/security/i18n/platform changes | `local-full proof` minimum |
-| Merge-ready repository confirmation | `ci-proof` |
-| Production-sensitive runtime/platform changes | `release-proof` |
+| Tier A 之外的普通 UI/组件清理 | `fast gate` |
+| 普通功能开发，但合并风险不低 | `local-full proof` |
+| Tier A 的 runtime / security / i18n / platform 改动 | `local-full proof` 起步 |
+| 准备合并前的仓库级确认 | `ci-proof` |
+| 生产敏感的 runtime / platform 改动 | `release-proof` |
 
-## Common Misuses to Avoid
-- Treating `fast gate` as equivalent to `ci-proof`
-- Treating a green local run as equivalent to `release-proof`
-- Treating `pnpm build` success as sufficient proof for Cloudflare-compatible paths
-- Treating broad coverage totals as proof of key-path stability
+## 常见误用
 
-## Repository-Specific Notes
-- `build:cf` now uses the repo-local Webpack wrapper and self-cleans before rebuilding, but it still shares the same `.next` family of artifacts with the standard build line. Keep the verification order serial.
-- For the strongest standard-build proof, prefer `pnpm clean:next-artifacts && pnpm build` before `pnpm build:cf`.
-- When the change touches Cloudflare / OpenNext / split-worker behavior, `pnpm deploy:cf:phase6:dry-run` is the stronger local proof than stock preview alone.
-- For current Cloudflare compatibility, `src/middleware.ts` remains the preferred runtime entrypoint over `proxy.ts`.
-- Translation proof for runtime-facing changes must include both full message bundles and critical bundles.
-- Site-aware proof is not only structure proof; at least one non-default-site build should be exercised when site identity or overlays change.
-- Template-readiness changes should also run `pnpm review:docs-truth` when they modify current-truth docs or derivative-project authoring guidance.
-- When the branch is a dirty worktree, report targeted proof and clean branch proof separately instead of blending them into one completion claim.
-- For current single-site authoring truth, distinguish three layers explicitly:
+- 把 `fast gate` 当成 `ci-proof`
+- 把一次本地全绿当成 `release-proof`
+- 把 `pnpm build` 通过当成 Cloudflare 也没问题
+- 把总体 coverage 当成关键路径稳定证明
+
+## 仓库级补充说明
+
+- `build:cf` 现在走 repo-local Webpack wrapper，而且会自清理后重建，但它和标准构建线仍共享 `.next` 这一类构建产物，所以必须串行跑
+- 想拿到更强的标准构建证据，先跑 `pnpm clean:next-artifacts && pnpm build`，再跑 `pnpm build:cf`
+- 如果碰到 Cloudflare / OpenNext / split-worker 行为，`pnpm deploy:cf:phase6:dry-run` 比 stock preview 更强
+- 当前 Cloudflare 兼容链里，`src/middleware.ts` 仍是优先入口，不是 `proxy.ts`
+- 翻译 proof 不能只看 flat 文件，要同时覆盖 full bundles 和 critical bundles
+- site-aware 改动不能只做结构 proof；只要改到站点身份或 overlay seam，至少跑一个 non-default-site build
+- 只要碰到 current-truth docs 或 derivative authoring guidance，补跑 `pnpm review:docs-truth`
+- 分支是 dirty worktree 时，必须把 targeted proof 和 clean branch proof 分开汇报
+- 当前单站 authoring truth 要明确分成三层：
   - `src/config/single-site.ts`
   - `src/config/single-site-page-expression.ts`
   - `src/config/single-site-seo.ts`

@@ -1,62 +1,62 @@
-# Policy Source of Truth
+# 当前规则真相源索引
 
-## Purpose
-This file defines which repository artifacts are canonical for current engineering policy.
+## 目的
 
-Use this file when multiple documents appear to describe the same rule.
+这份文档只回答一个问题：  
+**当多个文档都像在讲规则时，哪一份才算数。**
+
+如果不同文档说法冲突，以这里点名的 canonical source 为准。
 
 ## Canonical Current Sources
 
-### Proof Semantics
+### 证明口径
+
 - [`QUALITY-PROOF-LEVELS.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/QUALITY-PROOF-LEVELS.md)
 - [`RELEASE-PROOF-RUNBOOK.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/RELEASE-PROOF-RUNBOOK.md)
-- [`RELEASE-SIGNOFF.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/RELEASE-SIGNOFF.md)
 - [`CANONICAL-TRUTH-REGISTRY.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/CANONICAL-TRUTH-REGISTRY.md)
 
-### Structural Governance
-- [`TIER-A-OWNER-MAP.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/TIER-A-OWNER-MAP.md) - semantic owner model and Tier A review expectations
-- [`OWNERSHIP-RESILIENCE.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/OWNERSHIP-RESILIENCE.md) - ownership constraints and the current resilience ceiling
-- [`MAINTAINER-ACTIVATION-CHECKLIST.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/MAINTAINER-ACTIVATION-CHECKLIST.md) - activation steps when another maintainer is ready to be mapped into enforceable repository ownership
-- [`STRUCTURAL-CHANGE-CLUSTERS.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/STRUCTURAL-CHANGE-CLUSTERS.md) - structural cluster definitions and review boundaries
-- [`STRUCTURAL-GOVERNANCE-LEDGER.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/STRUCTURAL-GOVERNANCE-LEDGER.md) - lifecycle status ledger only, not policy
-- [`.github/CODEOWNERS`](/Users/Data/Warehouse/Pipe/tianze-website/.github/CODEOWNERS) - enforceable repository ownership mapping
+### 结构治理
 
-### System Observability
-- [`SYSTEM-OBSERVABILITY.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/SYSTEM-OBSERVABILITY.md) - current signal model, collector scope, and next-step boundary
+- [`TIER-A-OWNER-MAP.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/TIER-A-OWNER-MAP.md)：高风险路径、审查角色、最低 proof 要求
+- [`STRUCTURAL-CHANGE-CLUSTERS.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/STRUCTURAL-CHANGE-CLUSTERS.md)：哪些文件要按一组一起看
+- [`.github/CODEOWNERS`](/Users/Data/Warehouse/Pipe/tianze-website/.github/CODEOWNERS)：仓库级强制 owner 映射
 
-### Cloudflare Interpretation
+### Cloudflare 问题归类
+
 - [`CLOUDFLARE-ISSUE-TAXONOMY.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/CLOUDFLARE-ISSUE-TAXONOMY.md)
 
-### Archive and Supersession Hygiene
-- [`ARCHIVE-HYGIENE.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/ARCHIVE-HYGIENE.md)
+### 性能阈值
 
-### Performance Thresholds
 - [`lighthouserc.js`](/Users/Data/Warehouse/Pipe/tianze-website/lighthouserc.js)
 
-### Coverage and Quality Gate Thresholds
+### 覆盖率与质量门禁阈值
+
 - [`scripts/quality-gate.js`](/Users/Data/Warehouse/Pipe/tianze-website/scripts/quality-gate.js)
 
-### Architecture / Dependency Governance
-- [` .dependency-cruiser.js`](/Users/Data/Warehouse/Pipe/tianze-website/.dependency-cruiser.js)
+### 架构 / 依赖治理
+
+- [`.dependency-cruiser.js`](/Users/Data/Warehouse/Pipe/tianze-website/.dependency-cruiser.js)
 - [`scripts/architecture-metrics.js`](/Users/Data/Warehouse/Pipe/tianze-website/scripts/architecture-metrics.js)
 - [`scripts/dependency-conformance.js`](/Users/Data/Warehouse/Pipe/tianze-website/scripts/dependency-conformance.js)
 - [`scripts/structural-hotspots.js`](/Users/Data/Warehouse/Pipe/tianze-website/scripts/structural-hotspots.js)
 
 ## Supplemental, Not Canonical
+
+下面这些可以参考，但不能压过上面的 canonical source：
+
 - `.claude/rules/quality-gates.md`
 - `.claude/rules/review-checklist.md`
-- `docs/plans/current-repo-structural-audit-score.md`
-- `docs/plans/2026-03-23-structural-governance-followup.md`
-- `docs/plans/*` artifacts unless this file names them as canonical
-- any report or summary that says "current", "final", or "optimized" unless it is explicitly listed above
+- 已移走、只保留在 git 历史或 Trash 的旧计划、旧审计包、旧治理记录
+- 已经从 `docs/guides/` 挪走、只保留在 git 历史或 Trash 的 retired docs
+- 任何自称“current”“final”“optimized”的报告，只要这里没点名，就不是最终真相
 
-These may summarize or point to current rules, but they are not the final source of truth when conflicts appear.
+## 已被替换的结构审计材料
 
-## Superseded Structural Audit Artifacts
-- [`current-repo-structural-audit-score.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/plans/current-repo-structural-audit-score.md) — superseded by the final current structural audit report
-- [`2026-03-23-structural-governance-followup.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/plans/2026-03-23-structural-governance-followup.md) — governance follow-up record, not the final current-state report
+- 旧评分稿、旧治理补充记录、旧执行计划，均已退出主树
+- 需要追溯时，优先查 git 历史或 Trash 批次
 
-## Rule for Future Updates
-- If a policy changes, update the canonical source first.
-- Supplemental documents must reference the canonical source instead of redefining it.
-- If a non-canonical artifact is updated to reflect a policy change, it must be explicitly labeled as supplemental or superseded rather than implied current.
+## 后续更新规则
+
+- 规则变化时，先改 canonical source，再改说明文档
+- support doc 可以解释、索引、补充，但不要重新发明一套规则
+- 如果某份文档只是补充说明，必须明确写清楚自己不是最终真相源

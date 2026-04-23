@@ -1,27 +1,33 @@
-# Release Proof Runbook
+# 发布证明执行手册
 
-## Purpose
-This file defines the serial release-proof flow for Tier A and production-sensitive changes.
+## 目的
 
-Use this when changes affect:
+这份文档定义 Tier A 和 production-sensitive 改动的串行 release-proof 流程。
+
+适用范围：
+
 - `src/middleware.ts`
 - locale redirect / nonce / security headers
 - Cloudflare / OpenNext build chain
-- Tier A translation critical path
-- `src/config/single-site*.ts` or compatibility wrappers that forward site identity truth
-- contact / inquiry / abuse-protection runtime behavior
+- Tier A 翻译关键路径
+- `src/config/single-site*.ts` 及其兼容包装层
+- contact / inquiry / abuse-protection 的运行时行为
 
-Current single-site authoring split to keep in mind:
+当前单站 authoring split 要始终记住：
+
 - `src/config/single-site.ts`
 - `src/config/single-site-page-expression.ts`
 - `src/config/single-site-seo.ts`
 
-Before naming a Cloudflare failure, classify it with:
+在给 Cloudflare 故障命名前，先用：
+
 - [`CLOUDFLARE-ISSUE-TAXONOMY.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/CLOUDFLARE-ISSUE-TAXONOMY.md)
+
+做分类。
 
 ## Release-Proof Flow
 
-Run in this order:
+按这个顺序执行：
 
 ```bash
 pnpm review:docs-truth
@@ -37,30 +43,33 @@ pnpm smoke:cf:preview:strict
 CI=1 pnpm test:e2e
 ```
 
-## Why This Order
-- Docs-truth first: if the branch changes current-truth guidance, catch stale runtime claims before build proof makes them look legitimate.
-- Tier A scan first: know whether you are in a critical review path.
-- Cluster scan next: know whether the change is part of a co-change family.
-- Translation validation before builds for faster failure on i18n drift.
-- `type-check:source` before builds because fast gates must distinguish source truth from stale generated artifacts.
-- `clean:next-artifacts` before `build` because stale `.next` state can still produce misleading stack-overflow build failures.
-- `build` before `build:cf` because both lines still share the same build-artifact family and stale `.next` state can still mislead verification.
-- `CF_APPLY_GENERATED_PATCH=true pnpm build:cf` is the current stronger local Cloudflare build proof lane; plain `pnpm build:cf` is not the authoritative preview-proof command.
-- `smoke:cf:preview` after `build:cf` because Route B treats stock local preview as the canonical local Cloudflare proof lane.
-- E2E last because it is the heaviest proof step.
-- If the change rewires single-site truth or cutover gates, run `pnpm truth:check`, `pnpm review:translation-quartet`, and `pnpm review:translate-compat` before signoff.
-- Contact page proof should be read as **Contact page Server Action** proof, not as the old `/api/contact` path.
-- Preview deploy workflows now use `pnpm proof:cf:preview-deployed` as the canonical repo-side entrypoint for fresh preview deploy + deployed smoke. Production release proof continues to use `pnpm release:verify`.
-- The Cloudflare deploy workflow no longer calls the retired `preview:preflight:cf` lane.
-- The Cloudflare production workflow now deploys through `pnpm deploy:cf:phase6:production`, not a direct `opennextjs-cloudflare deploy` call.
-- In preview, the proof script is now the single source of deploy + smoke truth; the workflow reads `reports/deploy/cloudflare-preview-proof.json` to resolve the deployed preview URL.
+## 为什么要这个顺序
+
+- 先跑 docs-truth：先抓 stale 规则和假真相，别让后面的绿构建替它洗白
+- 再跑 Tier A scan：先确认是不是高风险面
+- 再跑 cluster scan：判断是不是共改簇
+- 先校验翻译，再进 build，失败更快
+- `type-check:source` 早于构建，因为要把源码真相和旧生成物分开看
+- `clean:next-artifacts` 早于 `build`，避免脏 `.next` 误导
+- `build` 早于 `build:cf`，因为两条线仍共享构建产物族
+- `CF_APPLY_GENERATED_PATCH=true pnpm build:cf` 才是当前更强的本地 Cloudflare build proof
+- `smoke:cf:preview` 跟在 `build:cf` 后面，作为当前 canonical local preview proof
+- E2E 最后跑，因为最重
+- 如果改动重接了单站真相层或 cutover gate，发布前还要补：
+  - `pnpm truth:check`
+  - `pnpm review:translation-quartet`
+  - `pnpm review:translate-compat`
+- Contact 页面 proof 现在要理解成 **Contact page Server Action**，不是旧的 `/api/contact`
+- preview deploy 当前统一入口是 `pnpm proof:cf:preview-deployed`
+- production deploy 当前统一走 `pnpm deploy:cf:phase6:production`
 
 ## Dirty Worktree vs Clean Branch Rule
-If the current branch is a **dirty worktree** with unrelated changes, split the
-completion evidence into two layers:
 
-### 1. Dirty worktree targeted proof
-Use this to prove the seam you actually changed:
+如果当前分支是 **dirty worktree**，也就是混着无关改动，完成证据必须拆两层。
+
+### 1. dirty worktree targeted proof
+
+先证明你这次改到的 seam：
 
 ```bash
 pnpm review:docs-truth
@@ -68,35 +77,39 @@ pnpm review:cf:official-compare
 pnpm review:derivative-readiness
 ```
 
-Then add the relevant change-scoped suites plus the serial build lane:
+再按需补 change-scoped suites 和串行构建：
 
 ```bash
 pnpm clean:next-artifacts && pnpm build
 CF_APPLY_GENERATED_PATCH=true pnpm build:cf
 ```
 
-This is **targeted proof**. It is enough to say the touched governance lane or
-page-expression lane is locally defended.
-- If the change is on `src/config/single-site-page-expression.ts` or `src/config/single-site-seo.ts`, say that explicitly instead of collapsing it into a vague “single-site config changed”.
+这叫 **targeted proof**。
 
-### 2. Clean branch full proof
-Use this only after unrelated dirty changes are isolated into a **clean branch**
-or separate worktree:
+它足以说明：你这次改的治理面、页面表达层或真相层已经有 fresh evidence。
+
+如果碰到 `src/config/single-site-page-expression.ts` 或 `src/config/single-site-seo.ts`，汇报时要直接点名，不要模糊说成“single-site config 改了”。
+
+### 2. clean branch full proof
+
+只有把无关改动隔离到 **clean branch** 或独立 worktree 后，才可以拿下面这条去做全仓结论：
 
 ```bash
 pnpm ci:local:quick
 ```
 
-If the change is release-facing or still touches Cloudflare/runtime-sensitive
-surfaces, continue with the heavier release-proof bundle after that.
+如果改动仍然是 release-facing，或者还碰到 Cloudflare / runtime-sensitive surface，再继续补完整 release-proof bundle。
 
-Rule:
-- do not claim full close from dirty-worktree targeted proof alone
-- do not blame unrelated dirty failures on the governance line you just changed
-- report targeted proof and clean branch proof as separate verdicts
+规则：
+
+- 不能只靠 dirty worktree targeted proof 就说“全关了”
+- 不能把 unrelated dirty failures 甩锅给你这次碰的治理线
+- targeted proof 和 clean branch proof 必须分开汇报
 
 ## Site Cutover Preflight
-There is no longer a canonical `pnpm preflight:site-cutover` command in the main tree. For changes that touch single-site truth or verify skeleton removal, run the live baseline explicitly:
+
+主树里已经没有 canonical `pnpm preflight:site-cutover` 命令了。  
+如果变更碰到 single-site truth 或 skeleton removal，直接跑 live baseline：
 
 ```bash
 APP_ENV=preview NEXT_PUBLIC_SITE_URL=https://preview.tianze-pipe.com NODE_ENV=production pnpm validate:config
@@ -106,32 +119,42 @@ pnpm review:translate-compat
 pnpm clean:next-artifacts && pnpm build
 ```
 
-For final signoff, treat `pnpm truth:check`, `pnpm review:translation-quartet`, and `pnpm review:translate-compat` as the baseline single-site truth proof. Deploy/release workflows must not rely on `VALIDATE_CONFIG_SKIP_RUNTIME=true` for final release proof.
+最终 signoff 前，把下面三条视为单站真相面的基线证明：
+
+- `pnpm truth:check`
+- `pnpm review:translation-quartet`
+- `pnpm review:translate-compat`
 
 ## Preview Degraded-Mode Exception Contract
-- Current contract source: retired from the main tree
-- Contract checker: retired from the main tree
-- Current status: historical only; active preview workflow now requires real preview secrets and no degraded flags.
 
-## Important Constraints
-- Do not run `pnpm build` and `pnpm build:cf` in parallel.
-- Fast local gates are not release proof.
-- Release proof is stronger than CI proof because it is change-type aware and platform aware.
-- If the change touches the Cloudflare build chain itself, add one extra fresh `pnpm build:cf` rerun before signoff.
-- For the canonical final Cloudflare preview proof, use `pnpm proof:cf:preview-deployed`. That script must emit `pass`, `blocked`, or `fail`; only `pass` closes the deployed preview proof. After the contact-page fix, that proof means the current-site runtime regression is gone for `/en/contact` and `/zh/contact`, but it does not close the deeper API debt boundary.
-- Preview proof already includes the deployed smoke phase, so the workflow should not run a second post-deploy verification job for preview.
-- If you need the lower-level primitive, follow release-proof with a real preview publish plus `pnpm smoke:cf:deploy -- --base-url <deployment-url>`.
-- When a Cloudflare-related step fails, record whether it is a platform-entry issue, generated-artifact issue, current-site runtime regression, or final deployed behavior issue.
+- Current contract source：主树里已经退场
+- Contract checker：主树里已经退场
+- 当前状态：只剩历史意义；现行 preview proof 需要真实 preview secrets，不能再靠 degraded flag 混过去
 
-## Minimal Accept/Reject Rule
-- If any step in the release-proof flow fails, do not treat the change as release-proven.
-- For Tier A changes, a green fast gate does not override a missing release-proof run.
+## 重要约束
+
+- `pnpm build` 和 `pnpm build:cf` 绝对不要并行跑
+- fast local gate 不是 release proof
+- release proof 比 CI proof 更强，因为它考虑改动类型和平台边界
+- 如果这次改动本身就碰了 Cloudflare build chain，signoff 前额外再补一次 fresh `pnpm build:cf`
+- canonical final Cloudflare preview proof 是 `pnpm proof:cf:preview-deployed`
+- preview proof 已经包含 deployed smoke，所以 preview workflow 不要再补第二套 post-deploy 校验
+- 如果需要更底层的原语，再手动跑真实 preview 发布加：
+  - `pnpm smoke:cf:deploy -- --base-url <deployment-url>`
+- Cloudflare 相关步骤失败时，必须记清楚它属于：
+  - platform-entry issue
+  - generated-artifact issue
+  - current-site runtime regression
+  - final deployed behavior issue
+
+## 最低接受 / 拒绝规则
+
+- release-proof 流程里只要有一步失败，就不能叫 release-proven
+- 对 Tier A 改动来说，fast gate 变绿也不能覆盖缺失的 release-proof
 
 ## After Release-Proof
-After a change becomes release-proven, use:
-- [`RELEASE-SIGNOFF.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/RELEASE-SIGNOFF.md)
 
-to determine whether the release is actually approved.
+当改动拿到 release-proof 后，下一步就是进入人类 release decision。
 
-Release-proof ends the technical evidence stage.
-Release signoff starts the release decision stage.
+release-proof 只结束技术证据阶段。  
+它本身不自动授权发布。

@@ -1,112 +1,108 @@
-# Derivative Project Replacement Checklist
+# 衍生项目替换清单
 
-## Purpose
+## 目的
 
-This file defines the default replacement order when this repository is used as
-the baseline for a future similar project.
+这份文档定义：当这个仓库被拿去做未来类似项目 baseline 时，**默认应该先替换什么，后替换什么**。
 
-It is not a multi-site runtime document.
-It is a **single-site derivative-project checklist**.
+它不是多站运行时文档。  
+它是一个 **single-site derivative-project checklist**。
 
-Use it to answer:
+它主要回答三件事：
 
-- what should be replaced first
-- what should stay fixed initially
-- which proof commands must remain green after replacement
+- 先替换哪一层
+- 哪些底层先别动
+- 替换后最少要保住哪些 proof
 
 ## One-line rule
 
-Future derivative projects should replace **site identity inputs and page
-expression inputs first**, while keeping the current runtime, Cloudflare, i18n,
-security, and proof baseline intact.
+未来的 derivative project，应该先替换**站点身份输入层**和**页面表达输入层**，同时尽量保持当前 runtime、Cloudflare、i18n、安全和 proof baseline 不动。
 
 ## Replace first
 
-These are the intended first-wave replacement surfaces:
+下面这些是第一波应该替换的面。
 
-### 1. Site identity inputs
+### 1. 站点身份输入层
 
-Replace in:
+优先替换：
 
 - `src/config/single-site.ts`
 - `src/config/single-site-product-catalog.ts`
 - `src/config/single-site-seo.ts`
 
-Includes:
+通常包括：
 
 - brand name
 - company facts
 - contact details
 - social links
-- default SEO values
+- 默认 SEO 值
 - product catalog / market structure
-- navigation / footer inputs
-- public sitemap / robots defaults
+- navigation / footer 输入
+- public sitemap / robots 默认值
 
-### 2. Page expression inputs
+### 2. 页面表达输入层
 
-Replace in:
+优先替换：
 
 - `src/config/single-site-page-expression.ts`
 
-Includes:
+通常包括：
 
-- homepage section ordering and grouping
-- homepage CTA targets
-- homepage proof/trust item ordering
-- contact FAQ item selection
+- 首页 section 顺序与分组
+- 首页 CTA targets
+- 首页 proof / trust 项顺序
+- contact FAQ 选项
 - contact fallback copy
-- about FAQ item selection
-- about stats item ordering
-- product hub grouping / specialty market split
-- default equipment-card expression inputs
-- capability/OEM CTA targets
+- about FAQ 选项
+- about stats 顺序
+- product hub 分组 / specialty market 切分
+- 默认 equipment-card 表达输入
+- capability / OEM CTA targets
 
-Stop line:
+Stop line：
 
-- do not move `MERGED_MESSAGES` into the replacement layer
-- do not treat `SPECS_BY_MARKET` as a first-wave authoring seam
-- do not keep pulling heading-prefix constants, slugify/parsers, or JSON-LD literals into `src/config/single-site-page-expression.ts`
+- 不要把 `MERGED_MESSAGES` 搬进替换层
+- 不要把 `SPECS_BY_MARKET` 当成第一波 authoring seam
+- 不要继续把 heading-prefix 常量、slugify/parser、JSON-LD literals 塞进 `src/config/single-site-page-expression.ts`
 
-### 3. Content and message assets
+### 3. 内容和消息资产
 
-Replace in:
+替换位置：
 
 - `messages/{locale}/{critical,deferred}.json`
 - `content/pages/**`
 - `content/posts/**`
 
-Use this for:
+这层主要负责：
 
 - site-specific prose
 - CTAs
 - FAQ wording
-- legal/about copy
-- content-driven SEO wording
+- legal / about copy
+- 内容驱动的 SEO wording
 
-### 4. Static public assets
+### 4. 静态公共资产
 
-Replace in:
+替换位置：
 
 - `public/**`
 
-Use this for:
+主要包括：
 
 - logos
 - social images
-- product illustrations/photos
-- brand-specific downloadables
+- product illustrations / photos
+- brand-specific 下载物
 
 ## Do not replace first
 
-These areas are part of the baseline and should stay fixed unless there is a
-validated project-specific reason:
+下面这些是 baseline，不到有明确证据时先别碰：
 
 - `src/middleware.ts`
 - `src/lib/load-messages.ts`
 - `src/i18n/**` runtime semantics
 - contact / inquiry / subscribe protection chain
-- page-local implementation constants such as `MERGED_MESSAGES` and `SPECS_BY_MARKET`
+- 页面实现层常量，比如 `MERGED_MESSAGES`、`SPECS_BY_MARKET`
 - Turnstile / rate limit / idempotency
 - `open-next.config.ts`
 - `wrangler.jsonc`
@@ -114,20 +110,19 @@ validated project-specific reason:
 - `scripts/release-proof.sh`
 - quality-gate / truth-check / translation validation scripts
 
-## Before changing baseline logic
+## 在动 baseline logic 之前
 
-Only move beyond the replacement surfaces above if the derivative project has a
-clear validated need for one of these:
+只有当 derivative project 有真实、已验证的需求时，才往替换面之外继续深入，比如：
 
-- different runtime/platform constraints
-- different abuse-protection requirements
-- different form processing contract
-- different deployment proof requirements
-- genuinely different information architecture, not just different branding
+- runtime / platform 约束真的不同
+- abuse-protection 要求真的不同
+- form processing contract 真的不同
+- deployment proof 要求真的不同
+- information architecture 真的不同，而不只是换品牌
 
 ## Minimum proof after replacement
 
-For a normal derivative-project first pass, keep these green:
+正常第一轮 derivative replacement，至少保住这些命令是绿的：
 
 ```bash
 pnpm review:docs-truth
@@ -140,8 +135,7 @@ pnpm clean:next-artifacts
 pnpm build
 ```
 
-If the replacement touches metadata, site identity, runtime-facing content, or
-Cloudflare-sensitive paths, also run:
+如果替换碰到 metadata、站点身份、runtime-facing content 或 Cloudflare-sensitive path，再补：
 
 ```bash
 pnpm build:cf
@@ -149,12 +143,10 @@ pnpm build:cf
 
 ## Anti-patterns
 
-Do not do these during first-wave derivative work:
+第一波 derivative work 里，别做这些事：
 
-- scatter brand/contact/SEO defaults across pages
-- invent a second truth layer in wrappers
-- introduce `src/sites/**` or per-site runtime overlays without an explicit
-  structural decision
-- weaken proof because the new project is "just a template fork"
-- change security/platform behavior before identity and expression replacement is
-  exhausted
+- 把品牌 / 联系方式 / SEO 默认值重新打散回页面里
+- 在 wrapper 层再发明第二套真相层
+- 没有明确结构决策就重新引入 `src/sites/**` 或 per-site runtime overlays
+- 因为“这只是模板分叉”就放松 proof
+- 在身份层和页面表达层还没替够之前，先去改 security / platform 行为

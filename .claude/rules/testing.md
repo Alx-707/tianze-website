@@ -20,6 +20,21 @@ pnpm test:coverage     # With coverage report
 pnpm test:e2e          # Playwright E2E tests
 ```
 
+## Behavior Contract Source
+
+The repo-level user-facing behavior anchor is:
+
+- `docs/specs/behavioral-contracts.md`
+
+Use it as the plain-language contract layer above tests. Historical batch BDD files do not override it.
+
+## Working From Behavioral Contracts
+
+- If a change affects user-facing behavior, read `docs/specs/behavioral-contracts.md` before editing tests or claiming behavior is preserved.
+- This especially applies to routing, navigation, locale switching, 404 handling, contact/inquiry/subscribe flows, product discovery, and critical CTA paths.
+- If behavior changes, update the contract and the proving tests in the same branch. Do not leave behavior drift undocumented.
+- If a contract remains `Partial` or `Untested` after behavior-changing work, document the current proof boundary explicitly instead of implying full coverage.
+
 ## Reliability Rules
 
 - Do not use wall-clock thresholds (`Date.now()`, `performance.now()`, "< 1000ms", etc.) in normal unit/integration gate tests.

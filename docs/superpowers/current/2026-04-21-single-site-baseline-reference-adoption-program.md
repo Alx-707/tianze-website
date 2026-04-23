@@ -28,15 +28,13 @@ This is a **program plan**, not a fake one-shot implementation plan for the whol
 
 **Files:**
 - Modify: `docs/guides/CANONICAL-TRUTH-REGISTRY.md`
-- Modify: `docs/guides/LOCALE-RUNTIME-CONTRACT.md`
 - Modify: `docs/guides/QUALITY-PROOF-LEVELS.md`
 - Modify: `docs/guides/RELEASE-PROOF-RUNBOOK.md`
 - Modify: `docs/guides/TIER-A-OWNER-MAP.md`
-- Modify: `docs/guides/TRANSLATION-QUARTET-CONTRACT.md`
-- Modify: `docs/guides/frontend-llm-workflow.md`
-- Modify: `docs/guides/AI-CODING-DETECTION-RUNBOOK.md`
-- Modify: `docs/guides/template-usage.md`
 - Modify: `docs/guides/STRUCTURAL-CHANGE-CLUSTERS.md`
+- Modify: `.claude/rules/i18n.md`
+- Modify: `.claude/rules/content.md`
+- Modify: `.claude/rules/testing.md`
 - Modify: matching `.claude/rules/*.md` files that still describe `src/sites/**` as current
 
 - [ ] **Step 1: Audit every “current truth” claim that still references `src/sites/**`**
@@ -58,13 +56,13 @@ Expected:
 
 Required edits:
 - `CANONICAL-TRUTH-REGISTRY.md` must describe `src/config/single-site.ts` and `src/config/single-site-product-catalog.ts` as the active canonical authoring layer.
-- `LOCALE-RUNTIME-CONTRACT.md`, `TRANSLATION-QUARTET-CONTRACT.md`, and `TIER-A-OWNER-MAP.md` must stop implying that runtime overlays under `src/sites/**` currently exist.
+- `.claude/rules/i18n.md` and `TIER-A-OWNER-MAP.md` must stop implying that runtime overlays under `src/sites/**` currently exist.
 - `RELEASE-PROOF-RUNBOOK.md` and `QUALITY-PROOF-LEVELS.md` must continue to mention `build:site:equipment` only as a future/template seam or secondary proof lane, not as evidence of a current multi-site runtime.
 
 - [ ] **Step 3: Rewrite non-canonical guides so they point back to canonical docs instead of redefining truth**
 
 Required edits:
-- `frontend-llm-workflow.md`, `AI-CODING-DETECTION-RUNBOOK.md`, `template-usage.md`, and `STRUCTURAL-CHANGE-CLUSTERS.md` must align with current code reality.
+- `STRUCTURAL-CHANGE-CLUSTERS.md` plus the relevant `.claude/rules/*` files must align with current code reality.
 - Future multi-site or overlay ideas may remain, but must be labeled as planned/future-only.
 
 - [ ] **Step 4: Add a repeatable drift check for “fake current structure” claims**
@@ -227,8 +225,7 @@ pnpm review:homepage-sections
 ### Task 4: Content / message / SEO asset governance
 
 **Files:**
-- Modify: `docs/guides/content-asset-inventory.md`
-- Modify: `docs/guides/LONG-TERM-OPTIMIZATION-PROGRAM-2026-04.md`
+- Modify: `.claude/rules/content.md`
 - Modify: `messages/{en,zh}/{critical,deferred}.json` only where asset boundaries need cleanup
 - Modify: content pages or metadata helpers only when boundary cleanup requires it
 - Test: translation and metadata-related suites already in repo
@@ -287,7 +284,6 @@ Expected:
 - Modify: `docs/guides/QUALITY-PROOF-LEVELS.md`
 - Modify: `docs/guides/RELEASE-PROOF-RUNBOOK.md`
 - Modify: `docs/guides/TIER-A-OWNER-MAP.md`
-- Modify: `docs/guides/LONG-TERM-OPTIMIZATION-PROGRAM-2026-04.md`
 - Modify or add: one lightweight governance/proof helper if needed
 
 - [ ] **Step 1: Define “template-ready” as an extra proof dimension, not a weaker mode**

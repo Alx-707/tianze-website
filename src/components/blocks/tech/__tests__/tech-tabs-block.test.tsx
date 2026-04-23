@@ -41,4 +41,42 @@ describe("TechTabsBlock", () => {
       "no",
     );
   });
+
+  it("renders package versions that match the current repo baseline", () => {
+    let view = render(<TechTabsBlock />);
+
+    expect(screen.getByTestId("tech-card-version-nextjs")).toHaveTextContent(
+      "16.2.3",
+    );
+    expect(screen.getByTestId("tech-card-version-react")).toHaveTextContent(
+      "19.2.4",
+    );
+
+    view.unmount();
+    view = render(<TechTabsBlock defaultCategory="ui" />);
+    expect(
+      screen.getByTestId("tech-card-version-tailwindcss"),
+    ).toHaveTextContent("4.2.2");
+
+    view.unmount();
+    view = render(<TechTabsBlock defaultCategory="i18n" />);
+    expect(screen.getByTestId("tech-card-version-next-intl")).toHaveTextContent(
+      "4.9.1",
+    );
+
+    view.unmount();
+    view = render(<TechTabsBlock defaultCategory="tools" />);
+    expect(screen.getByTestId("tech-card-version-lefthook")).toHaveTextContent(
+      "2.1.4",
+    );
+
+    view.unmount();
+    render(<TechTabsBlock defaultCategory="testing" />);
+    expect(screen.getByTestId("tech-card-version-vitest")).toHaveTextContent(
+      "4.1.2",
+    );
+    expect(
+      screen.getByTestId("tech-card-version-playwright"),
+    ).toHaveTextContent("1.59.0");
+  });
 });
