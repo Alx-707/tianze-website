@@ -1,6 +1,6 @@
 # Hero 设计方案 - Stitch Prompts
 
-> 基于 `docs/design/` 文档生成
+> 基于当时的设计文档主面生成；当前相关历史材料已归档到 `docs/archive/design/`
 > 日期: 2026-02-02
 
 ---

@@ -100,12 +100,12 @@ TURNSTILE_SECRET_KEY=你的服务端私钥
 - **[technical/next16-cache-notes.md](./docs/technical/next16-cache-notes.md)** - Next.js 16 / Cache Components / i18n 缓存注意点
 - **[technical/deployment-notes.md](./docs/technical/deployment-notes.md)** - Cloudflare / build:cf / preview / deploy 当前技术事实
 
-当前真相、发布证明和治理合同文档保留在 `docs/guides/`：
+当前真相、发布证明和治理合同文档保留在 `docs/guides/`，优先入口是：
 
-- **[RELEASE-PROOF-RUNBOOK.md](./docs/guides/RELEASE-PROOF-RUNBOOK.md)** - 发布前验证与发布门禁执行顺序
-- **[QUALITY-PROOF-LEVELS.md](./docs/guides/QUALITY-PROOF-LEVELS.md)** - 不同级别检查各自证明什么
 - **[POLICY-SOURCE-OF-TRUTH.md](./docs/guides/POLICY-SOURCE-OF-TRUTH.md)** - 当前规则和政策以哪些文件为准
 - **[CANONICAL-TRUTH-REGISTRY.md](./docs/guides/CANONICAL-TRUTH-REGISTRY.md)** - 当前运行时、i18n、Contact、Cloudflare 证明边界的正式真相表
+- **[QUALITY-PROOF-LEVELS.md](./docs/guides/QUALITY-PROOF-LEVELS.md)** - 不同级别检查各自证明什么
+- **[RELEASE-PROOF-RUNBOOK.md](./docs/guides/RELEASE-PROOF-RUNBOOK.md)** - 发布前验证与发布门禁执行顺序
 
 ---
 

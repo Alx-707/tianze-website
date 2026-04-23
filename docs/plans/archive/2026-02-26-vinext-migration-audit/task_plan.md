@@ -21,7 +21,7 @@
 
 ## Errors Encountered
 - 用户提供的文档路径 `docs/migration/vendor-lock-in-audit.md` 不存在；仓库可用替代文档为 `docs/archive/migration/2026-03-16-active-migration-docs/cloudflare-workers-migration-report.md`。
-- 用户提供的文档路径 `docs/known-issues/phase6-api-worker-bundle-failure.md` 不存在；仓库仅发现相近文档（`docs/archive/migration/2026-03-16-cloudflare-bundle-phases/cloudflare_bundle_phase6.md`、`docs/known-issues/*`）。
+- 用户提供的文档路径 `docs/known-issues/phase6-api-worker-bundle-failure.md` 当时不存在；当前可对照的归档材料主要在 `docs/archive/migration/2026-03-16-cloudflare-bundle-phases/cloudflare_bundle_phase6.md`。
 
 ## Status
 **Stage 1 Completed** - 审计报告已输出到 `docs/archive/migration/2026-03-16-active-migration-docs/vinext-migration-audit-phase1.md`，等待用户确认是否进入阶段二迁移执行。
