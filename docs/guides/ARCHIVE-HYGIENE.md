@@ -27,9 +27,9 @@ When a rule changes:
 2. then update supplemental summaries
 3. do not reverse this order
 
-### 4. Archive Does Not Mean Current
-Anything under `docs/archive/` or explicitly marked as supplemental/superseded should not be treated as a live rule source.
-If a file outside `docs/archive/` still claims to be current, verify that claim against [POLICY-SOURCE-OF-TRUTH.md](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/POLICY-SOURCE-OF-TRUTH.md) before treating it as canonical.
+### 4. Historical Material Does Not Mean Current
+Anything intentionally retired from the live docs tree, or explicitly marked as supplemental/superseded, should not be treated as a live rule source.
+If a file outside the current docs surface still claims to be current, verify that claim against [POLICY-SOURCE-OF-TRUTH.md](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/POLICY-SOURCE-OF-TRUTH.md) before treating it as canonical.
 
 ## Ongoing Maintenance
 - When a new policy file is introduced, decide whether it is canonical or supplemental.

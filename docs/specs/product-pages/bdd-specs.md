@@ -1,6 +1,6 @@
 # Product Pages Redesign — Behavioral Specifications
 
-> Design doc: `docs/superpowers/archive/specs/2026-03-23-product-pages-design.md`
+> Historical design doc retired from live docs surface; this BDD file is the active behavior contract.
 > Date: 2026-03-23
 
 ---

@@ -3,9 +3,6 @@
 > Support doc:
 > this file is an execution runbook for AI-code review and detection.
 > It supports governance, but it is not the primary runtime truth source.
->
-> Full historical version:
-> `docs/archive/guides/support-full/AI-CODING-DETECTION-RUNBOOK.full.md`
 
 ## 目标
 
@@ -78,4 +75,4 @@
 
 ## 什么时候看长版
 
-如果要重新审视整套 AI 检测哲学、Stryker / BDD / E2E 分工，再看 archive 里的长版。
+如果要重新审视整套 AI 检测哲学、Stryker / BDD / E2E 分工，直接基于当前 runbook、行为合同、测试主树和 git 历史重建，不再依赖 docs 里的 archive 长版链接。

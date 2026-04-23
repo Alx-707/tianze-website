@@ -11,10 +11,10 @@
 ## 当前结构
 
 - `current/`：当前仍在用的 Superpowers 产物
-- `archive/`：历史 spec / plan / review
 
 清理原则：
 
 - 当前仍在用的内容留在主层
-- 明显过时或已完成的内容逐步移到 `docs/archive/`
+- 明显过时或已完成的内容优先通过 git 历史回看，不再要求常驻 live docs tree
 - 不再让所有历史 spec / plan 平铺并列
+- 更老的历史包优先通过 git 历史回看，不强依赖 live docs tree 持续挂载

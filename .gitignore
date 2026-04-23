@@ -27,6 +27,9 @@ public/messages/
 *.swp
 *.swo
 
+# x-reader runtime
+unified_inbox.json
+
 # AI Tools (personal config)
 .agent/
 .continue/

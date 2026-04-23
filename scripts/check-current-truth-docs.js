@@ -100,13 +100,6 @@ const CHECKS = [
     ],
   },
   {
-    file: ".claude/rules/architecture.md",
-    required: [
-      "src/config/single-site-page-expression.ts",
-      "src/config/single-site-seo.ts",
-    ],
-  },
-  {
     file: ".claude/rules/content.md",
     required: [
       "src/config/single-site-page-expression.ts",

@@ -139,11 +139,11 @@ If another document conflicts with this file, treat this file plus the linked ca
 ## Test-Only / Tooling-Only Surfaces
 - `messages/en.json` and `messages/zh.json`
 - historical plan files under `docs/plans/**` unless a canonical guide explicitly points to them
-- archive content under `docs/archive/**`
+- retired historical content kept only in git history or temporary Trash batches
 - generated and experimental worktree copies under `.claude/worktrees/**`
 
 ## Current Canonical Companions
 - [`POLICY-SOURCE-OF-TRUTH.md`](../../docs/guides/POLICY-SOURCE-OF-TRUTH.md)
 - [`QUALITY-PROOF-LEVELS.md`](../../docs/guides/QUALITY-PROOF-LEVELS.md)
 - [`RELEASE-PROOF-RUNBOOK.md`](../../docs/guides/RELEASE-PROOF-RUNBOOK.md)
-- [`.claude/rules/architecture.md`](../../.claude/rules/architecture.md)
+- [`.claude/rules/conventions.md`](../../.claude/rules/conventions.md)

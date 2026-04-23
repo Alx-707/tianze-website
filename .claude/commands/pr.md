@@ -2,7 +2,7 @@
 
 Submission pipeline: preflight → self-heal → commit → push → PR → CI monitoring → merge → cleanup.
 
-**Prerequisite**: `/review` (Codex Semantic Review) should be run before `/pr`. If not done, warn the user once and proceed.
+**Code review**: Cloud reviews (CodeRabbit) run automatically after PR creation in Phase 6.
 
 ## Execution Steps
 
@@ -113,4 +113,4 @@ echo '{"ts":"<ISO-8601>","command":"pr","branch":"<branch>","preflight_pass":<bo
 
 - GitHub Flow: all branches merge to `main` via PR
 - No auto-merge: all PRs require explicit merge after review
-- Codex code review is done separately via `/review` BEFORE running `/pr`
+- Code review relies on cloud reviewers (CodeRabbit) after PR creation

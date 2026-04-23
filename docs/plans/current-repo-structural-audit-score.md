@@ -159,7 +159,7 @@ This score should be read as: the repository is meaningfully engineered, but it 
   - Recurring drift around legacy markers, stale thresholds, and mismatched docs suggests closure is weaker than detection.
 - Representative paths:
   - [`docs/plans`](/Users/Data/Warehouse/Pipe/tianze-website/docs/plans)
-  - [`docs/archive/code-review`](/Users/Data/Warehouse/Pipe/tianze-website/docs/archive/code-review)
+  - [`docs/superpowers`](/Users/Data/Warehouse/Pipe/tianze-website/docs/superpowers)
   - [`reviews/review-20260221-220203-8b751f.md`](/Users/Data/Warehouse/Pipe/tianze-website/reviews/review-20260221-220203-8b751f.md)
 
 ## Highest-Priority Risks

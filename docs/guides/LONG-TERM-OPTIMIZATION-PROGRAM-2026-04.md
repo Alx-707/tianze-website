@@ -3,9 +3,6 @@
 > Support doc:
 > this file records long-horizon optimization strategy.
 > It is a planning surface, not an immediate runtime truth document.
->
-> Full historical version:
-> `docs/archive/guides/support-full/LONG-TERM-OPTIMIZATION-PROGRAM-2026-04.full.md`
 
 ## 一句话结论
 
@@ -53,3 +50,4 @@
 
 - 这份文档是长期规划 support doc
 - 如果和当前 runtime / release / proof 现实冲突，以 canonical docs 为准
+- 如果需要追溯更旧的长链路推演，改看 git 历史，不再依赖 docs 里的 archive 长版。

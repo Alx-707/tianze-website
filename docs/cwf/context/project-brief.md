@@ -1,7 +1,7 @@
 # Tianze Website - Project Brief
 
 > **定位**：网站项目的唯一工作文档，c-wf / d-wf / i-wf 的共同输入。
-> **原始素材存档**：`docs/archive/corporate-info/`
+> **原始素材主入口**：`docs/cwf/context/company/`
 
 ---
 
