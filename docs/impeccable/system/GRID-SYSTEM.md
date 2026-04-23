@@ -190,4 +190,4 @@ function heroGuides(cols: number, rows: number): GuideConfig[] {
 | `docs/impeccable/external/vercel-design-system/README.md` | Vercel design system overview |
 | `docs/impeccable/external/vercel-design-system/layout.css` | Vercel grid CSS variables |
 | `docs/impeccable/external/vercel-design-system/components/Layout.tsx` | Vercel component reference |
-| `docs/impeccable/homepage/reference/vercel-*.png` | Vercel homepage screenshots |
+| Vercel homepage screenshots | 已移出主树；需要时优先查 git 历史 |

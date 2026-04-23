@@ -2,7 +2,7 @@
 
 > 调研时间：2026-03-24
 > 调研对象：Ledes / Ctube / Anita / Goody
-> 详细报告：`docs/research/competitor-{ledestube,ctube,anita,goody}-analysis.md`
+> 说明：单体竞品分析已退出主树，这份文档是当前保留的竞品总结层。
 
 ---
 

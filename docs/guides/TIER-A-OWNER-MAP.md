@@ -1,67 +1,73 @@
-# Tier A Owner Map
+# Tier A 责任映射
 
-## Purpose
-This file defines the highest-risk paths in the repository and the minimum ownership/review expectations for them.
+## 目的
 
-It is intentionally role-based first. Once stable GitHub handles are confirmed, mirror this map into `.github/CODEOWNERS`.
+这份文档定义仓库里**风险最高的一层路径**，以及这些路径改动时最低限度需要什么 owner / review / proof。
+
+它是语义层 owner map。  
+`.github/CODEOWNERS` 是仓库强制层。两者要互相对齐。
 
 ## Tier A Definition
-Tier A paths are repository areas where a change can materially affect:
+
+Tier A 路径指的是：一旦改动，可能实质影响下面这些面的仓库区域：
+
 - request entry behavior
 - locale / SEO / SSR semantics
 - production security posture
-- multi-platform build or runtime correctness
+- multi-platform build 或 runtime correctness
 - lead capture / contact pipeline correctness
 
 ## Review Policy
-- Tier A changes require one primary owner review and one cross-domain review when the change crosses runtime/security/platform boundaries.
-- Tier A changes are not considered proven by fast local gates alone.
-- Tier A changes must use the proof levels defined in [QUALITY-PROOF-LEVELS.md](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/QUALITY-PROOF-LEVELS.md).
-- The repository default owner remains primary-only; the backup identity is reserved for Tier A paths and other explicitly critical surfaces.
-- When a second maintainer can be mapped into enforceable repository ownership, follow [MAINTAINER-ACTIVATION-CHECKLIST.md](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/MAINTAINER-ACTIVATION-CHECKLIST.md) instead of inventing a new ownership model.
 
-## Operational Checklist For Tier A Changes
-1. Identify whether the touched path is Tier A using the owner map below.
-2. Confirm the primary owner review path is available.
-3. If the change crosses runtime, security, or platform boundaries, require the cross-review listed for that row.
-4. Run the relevant staged review entrypoint before merge, not after merge.
-5. If the backup review path is unavailable, treat the change as blocked or re-scope it; do not describe the repo as diversified.
-6. If the change is release-critical, require the proof level listed for that row and pair it with release-proof policy.
+- Tier A 改动至少需要一个 primary owner review
+- 如果改动跨 runtime / security / platform 边界，还要补 cross-domain review
+- 只靠 fast local gate 不能证明 Tier A 改动安全
+- Tier A 改动必须遵守 [`QUALITY-PROOF-LEVELS.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/QUALITY-PROOF-LEVELS.md) 的 proof 口径
+- 仓库默认 owner 仍是 primary-only；backup identity 只保留给 Tier A 和明确关键面
+- 如果未来真有第二位 maintainer 能映射成 enforceable repository owner，要在同一治理周期里同步更新这份文档和 `.github/CODEOWNERS`
+
+## Tier A 改动执行清单
+
+1. 先判断本次路径是不是 Tier A
+2. 确认 primary owner review 路径存在
+3. 如果跨 runtime / security / platform，补对应 cross-review
+4. staged review 要在 merge 前跑，不是 merge 后补
+5. 如果 backup review path 当前不可用，就要么阻塞、要么缩 scope，不能假装仓库已经 diversified
+6. 如果这次改动 release-critical，proof level 要直接按表里最低要求走
 
 ## Owner Map
 
 | Tier A Area | Paths | Primary Owner Role | Backup Owner Role | Required Cross-Review | Minimum Proof Before Merge |
 |---|---|---|---|---|---|
-| Runtime entry + locale routing | `src/middleware.ts`, `src/i18n/**`, `src/app/[locale]/layout.tsx`, `src/app/[locale]/head.tsx` | Runtime / i18n maintainer | Platform maintainer | Security review when headers/nonce/cookies change | `local-full` for normal merges, `release-proof` for release-critical changes |
-| Contact + inquiry + subscribe pipeline | `src/lib/actions/contact.ts`, `src/app/api/inquiry/**`, `src/app/api/subscribe/**`, `src/lib/contact-form-processing.ts`, `src/lib/lead-pipeline/**`, `src/components/forms/**` | Lead pipeline maintainer | Runtime maintainer | Security review when validation/rate-limit/abuse checks change | `local-full` minimum; `ci-proof` required before release branch merge |
-| Abuse protection + request security | `src/config/security.ts`, `src/lib/security/**`, `src/app/api/verify-turnstile/**`, `src/app/api/csp-report/**` | Security maintainer | Runtime maintainer | Platform review when Cloudflare/Vercel behavior may differ | `ci-proof` minimum; `release-proof` for policy/header/nonce changes |
-| Platform build + deployment chain | `open-next.config.ts`, `next.config.ts`, `.github/workflows/**`, `scripts/cloudflare/**`, `wrangler.jsonc`, `vercel.json` | Platform maintainer | Runtime maintainer | Runtime review when request path behavior is affected | `release-proof` |
-| Translation critical path | `messages/en.json`, `messages/zh.json`, `messages/en/critical.json`, `messages/zh/critical.json`, `scripts/validate-translations.js`, `scripts/translation-sync.js`, `scripts/regenerate-flat-translations.js` | i18n maintainer | Runtime maintainer | Runtime review when SSR/critical-path keys change | `local-full` minimum; `ci-proof` when user-facing entry paths are affected |
-| Cache invalidation + health signals | `src/app/api/cache/invalidate/**`, `src/lib/cache/**`, `src/app/api/health/**` | Platform maintainer | Runtime maintainer | Security review for auth/invalidation policy changes | `ci-proof` minimum |
+| Runtime entry + locale routing | `src/middleware.ts`, `src/i18n/**`, `src/app/[locale]/layout.tsx`, `src/app/[locale]/head.tsx` | Runtime / i18n maintainer | Platform maintainer | 安全头 / nonce / cookies 改动时要补 Security review | 普通合并至少 `local-full`，release-critical 走 `release-proof` |
+| Contact + inquiry + subscribe pipeline | `src/lib/actions/contact.ts`, `src/app/api/inquiry/**`, `src/app/api/subscribe/**`, `src/lib/contact-form-processing.ts`, `src/lib/lead-pipeline/**`, `src/components/forms/**` | Lead pipeline maintainer | Runtime maintainer | validation / rate-limit / abuse chain 改动时补 Security review | 最低 `local-full`；进 release branch 前至少 `ci-proof` |
+| Abuse protection + request security | `src/config/security.ts`, `src/lib/security/**`, `src/app/api/verify-turnstile/**`, `src/app/api/csp-report/**` | Security maintainer | Runtime maintainer | Cloudflare / Vercel 差异可能受影响时补 Platform review | 最低 `ci-proof`；policy / header / nonce 级改动走 `release-proof` |
+| Platform build + deployment chain | `open-next.config.ts`, `next.config.ts`, `.github/workflows/**`, `scripts/cloudflare/**`, `wrangler.jsonc`, `vercel.json` | Platform maintainer | Runtime maintainer | 请求路径行为受影响时补 Runtime review | `release-proof` |
+| Translation critical path | `messages/en.json`, `messages/zh.json`, `messages/en/critical.json`, `messages/zh/critical.json`, `scripts/validate-translations.js`, `scripts/translation-sync.js`, `scripts/regenerate-flat-translations.js` | i18n maintainer | Runtime maintainer | SSR / critical-path keys 改动时补 Runtime review | 最低 `local-full`；影响入口路径时补 `ci-proof` |
+| Cache invalidation + health signals | `src/app/api/cache/invalidate/**`, `src/lib/cache/**`, `src/app/api/health/**` | Platform maintainer | Runtime maintainer | auth / invalidation policy 改动时补 Security review | 最低 `ci-proof` |
 
 ## Current Repository State
-- Repository-level ownership is now enforced via [`.github/CODEOWNERS`](/Users/Data/Warehouse/Pipe/tianze-website/.github/CODEOWNERS).
-- This map remains the semantic owner-definition layer above raw CODEOWNERS patterns.
-- The current enforceable default owner is:
+
+- 仓库级 ownership 目前由 [`.github/CODEOWNERS`](/Users/Data/Warehouse/Pipe/tianze-website/.github/CODEOWNERS) 强制
+- 这份文档负责“语义责任边界”，不等于直接文件模式
+- 当前 enforceable default owner：
   - primary: `@Alx-707`
-- The current enforceable Tier A backup review path is:
+- 当前 enforceable Tier A backup review path：
   - `developer@flood-control.com`
-- The remaining constraint is explicit:
-  - active maintenance is broader than one person in practice
-  - there is still not a second enforceable repository owner identity that independently shares Tier A throughput
-  - the backup path improves review resilience, but it does not eliminate enforceable ownership concentration
-- Role separation remains documented above the identity mapping so future expansion does not collapse into raw file ownership alone.
+- 当前还存在的硬约束：
+  - 实际维护能力已经不止一个人
+  - 但还没有第二个 enforceable repository owner identity 真正独立分担 Tier A 吞吐
+  - backup path 提高了 review 韧性，但没有彻底消除 owner concentration
 
 ## Hard Ceiling
-- This file can define routing, review expectations, and proof requirements.
-- It cannot create a second enforceable repository owner identity.
-- Until another owner identity is actually mapped into repo-level enforcement, Tier A resilience remains a review fallback model, not a diversified operating model.
+
+- 这份文档可以定义 routing、review expectation、proof requirement
+- 它不能凭空造出第二个 enforceable repository owner
+- 在第二个 owner identity 真正映射进仓库前，Tier A 韧性仍然只是 review fallback model，不是 fully diversified operating model
 
 ## Promotion / Demotion Rules
-- Promote to Tier A when a path affects runtime entry behavior, dual-platform compatibility, security posture, or lead capture correctness.
-- Demote from Tier A only after two conditions hold:
-  - the path is no longer on a critical path, and
-  - ownership and proof requirements have been reduced intentionally, not by drift.
 
-## Next Step
-Reduce enforceable owner concentration over time by mapping the Tier A backup review path to at least one additional repository owner identity as soon as one is actually available.
+- 只要一个路径会影响 runtime entry、双平台兼容、安全姿态或 lead capture correctness，就该升到 Tier A
+- 只有同时满足下面两条，才允许从 Tier A 降级：
+  - 它已经不在关键路径上
+  - owner / proof 要求是经过有意识调整，而不是自然漂移没了

@@ -53,8 +53,7 @@ describe("current-truth docs guard", () => {
     const files = createValidFiles();
     files["docs/guides/CANONICAL-TRUTH-REGISTRY.md"] =
       "src/config/single-site-page-expression.ts";
-    files["docs/guides/LOCALE-RUNTIME-CONTRACT.md"] =
-      "Server runtime may then merge site-specific overlays";
+    files[".claude/rules/i18n.md"] = "messages/en.json";
 
     const repoDir = createTempRepo(files);
     tempDirs.push(repoDir);
@@ -69,9 +68,9 @@ describe("current-truth docs guard", () => {
             'missing current-truth pattern "src/config/single-site-seo.ts"',
         }),
         expect.objectContaining({
-          file: "docs/guides/LOCALE-RUNTIME-CONTRACT.md",
+          file: ".claude/rules/i18n.md",
           error:
-            'forbidden current-truth pattern "Server runtime may then merge site-specific overlays"',
+            'missing current-truth pattern "Current repo truth does **not** include a live `src/sites/**/messages/**` runtime overlay layout."',
         }),
       ]),
     );

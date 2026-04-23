@@ -1,149 +1,84 @@
-# Brand Positioning — Tianze Website
+# 品牌定位
 
-> Ring 1, Task 3 | Status: Confirmed by owner (2026-03-29)
-> Inputs: Task 1 (business goals), Task 2 (competitive analysis), product-marketing-context.md
+> Ring 1 | 已确认（2026-03-29）
 
-## Company-Level Positioning
+## 定位底座
 
-### Foundation (internal positioning)
+天泽真正能站住脚的底层事实是：
 
-**"We make the machines that make the pipes."**
+> **We make the machines that make the pipes.**
 
-This is the positioning base — a true, unique, defensible fact. But it is NOT the buyer-facing headline. Buyers don't care that we make machines; they care about what that means for their products.
+这句话不是最终对外 headline，  
+但它是所有对外表达的因果起点。
 
-### Buyer-Facing Narrative (external messaging)
+## 对外表达方式
 
-**"Precision from the engineers who design the bending machines."**
+买家不关心“你们会不会做机器”本身，  
+他们关心的是：
 
-The logic chain:
-1. We design and build bending machines (fact — uncontested, Task 2 verified)
-2. Therefore we understand bending tolerances at an engineering level (capability)
-3. Therefore our pipe fittings have superior precision (buyer benefit)
+- 这会不会带来更高精度
+- 更稳定质量
+- 更快定制
+- 更可信的制造能力
 
-This transforms "we make machines" from a self-introduction into a **quality promise with a verifiable cause**. Competitors can only say "our pipes are good" (self-assessment). Tianze can say "our pipes are precise, because we engineer the machines that form them" (causal claim, verifiable).
+所以更适合对外说的是：
 
-### Messaging hierarchy
+> **精度来自做弯管设备的工程团队。**
 
-| Layer | Content | Purpose |
-|-------|---------|---------|
-| **Headline** | Precision you can measure | Buyer benefit, attention |
-| **Support** | Because we design the bending machines ourselves | Reason to believe |
-| **Evidence** | Tolerance data, test reports, machine evolution | Proof |
+逻辑链要始终保持清楚：
 
-### Positioning tests
+1. 天泽自己设计和制造弯管设备
+2. 所以对弯曲工艺、公差、模具更理解
+3. 所以产品精度和制造一致性更有说服力
 
-| Test | Result |
-|------|--------|
-| Is it true? | Yes — Tianze designs bending machines |
-| Is it unique? | Yes — 0 of 8 competitors can make this causal claim |
-| Is it relevant to buyers? | Yes — precision/tolerance is a top concern for distributors and contractors |
-| Is it defensible? | Yes — requires actual equipment manufacturing capability |
-| Can the owner say it face-to-face? | Confirmed (2026-03-29) |
+## 当前品牌表达顺序
 
-## Per-Line Positioning (3 Business Lines)
+### 第一层：买家收益
 
-### Line 1: Pipes (管道)
+- 精度
+- 稳定性
+- 工厂直供
+- 技术深度
 
-**"Factory-direct pipe products from the manufacturer that builds its own bending machines."**
+### 第二层：原因
 
-Covers PVC conduit fittings (by regional standard) and PETG pneumatic tubes.
+- 因为设备也是自己做的
+- 因为模具和生产链都在自己手里
 
-**PVC Conduit Fittings:**
-- Standards-compliant (technology meets AS/NZS, ASTM — certification in progress)
-- Factory-direct pricing (no trading company markup)
-- Quality verifiable through process (show the machine, show the bend, show the test)
+### 第三层：证据
 
-**PETG Pneumatic Tubes:**
-- Transparency and seal quality as technical differentiators
-- Stable supply to major domestic integrators (reference without naming)
-- Custom specs for hospital/lab system requirements
+- 工艺流程
+- 设备照片/演进
+- 公差与测试
+- 样品验证
 
-### Line 2: Equipment (设备)
+## 三条业务线的定位方法
 
-**"PVC bending machines from the manufacturer that uses them every day."**
+### 管件
 
-Key angles:
-- Technical scarcity (very few alternatives globally — Task 2 validated)
-- Self-validated: "we use our own machines in production" — proof that they work
-- Iterative improvement narrative: show machine evolution across generations (owner preference, not competitor comparison)
-- Hot-bending cost advantage: ~50% savings vs injection molding (industry-validated)
+重点不是“我们也能卖管件”，而是：
 
-### Line 3: Custom Molds / OEM (定制模具)
+- 工厂直供
+- 标准能力
+- 精度可验证
 
-**"Custom PVC fittings from a factory with in-house mold development and bending machine manufacturing."**
+### 设备
 
-Key angles:
-- In-house mold development capability (not outsourced)
-- Low MOQ flexibility
-- Technical depth that OEM buyers can rely on for non-standard specs
+重点不是“有一台机器”，而是：
 
-## Differentiation Matrix
+- 这是工厂自己每天在用的设备
+- 不是只会卖，不会自己跑产线
 
-| Dimension | Trading companies | Small factories | Large manufacturers | **Tianze** |
-|-----------|------------------|-----------------|--------------------|-----------|
-| Price | High (margin stacked) | Low (cut corners) | Medium-high (overhead) | **Factory-direct, competitive** |
-| Quality proof | Cert photos (borrowed) | Basic ISO | Full cert suite | **Machine + process + cert** |
-| Customization | Limited | Some | Rigid (high MOQ) | **Flexible (own mold + machine)** |
-| Technical depth | None | Shallow | Medium | **Deep (equipment manufacturer)** |
-| Trust signal | Alibaba ratings | Factory photos | Brand recognition | **"We make the machines"** |
-| Certification | Pass-through | Partial | Full | **In progress (transparent)** |
+### OEM / 定制
 
-## Certification Positioning
+重点不是“欢迎来图定制”，而是：
 
-### The problem
+- 设备、模具、制造链都在自己手里
+- 非标响应能力更扎实
 
-Ledes and Ctube have locked up the "China's first UL/CSA certified" narrative. Tianze cannot win that race.
+## 当前定位边界
 
-### The strategy
-
-**Don't compete on certification quantity. Compete on manufacturing transparency.**
-
-Certification positioning language (3 options, ranked by directness):
-
-**Option A (recommended):**
-> "Our products are engineered to meet AS/NZS, ASTM, and UL standards. Australian certification is in progress. We welcome testing — request free samples and verify yourself."
-
-**Option B (more conservative):**
-> "Standards-compliant manufacturing. ISO 9001:2015 certified. Market-specific certifications in progress."
-
-**Option C (more assertive):**
-> "We build to the standard. Every product, every batch. Certification formalizes what our manufacturing process already guarantees."
-
-### Trust compensation for certification gaps
-
-Per Ring 3 trust signal hierarchy, compensate Level 1 (certification) gaps with:
-- **Level 2**: Verifiable facts — test data tables, standards comparison charts
-- **Level 4**: Process transparency — production process videos, QC documentation
-- **Level 5**: Commitment mechanisms — free samples ("ships in 3 days"), factory visit invitation, cooperative certification application
-
-## Brand Voice Alignment
-
-Existing brand voice (from product-marketing-context.md): Professional, pragmatic, technically oriented.
-
-This positioning reinforces the voice:
-- "We make the machines" is a factual claim, not a boast — aligns with "use data and facts"
-- Certification transparency is pragmatic, not defensive — aligns with "no overpromising"
-- Process-based trust is engineer-thinking — aligns with "precise, reliable"
-
-## Narrative Strategy: Iterative Evolution (Not Competitor Benchmarking)
-
-**Owner decision (2026-03-29):** Equipment narrative should show Tianze's own product evolution across generations, not head-to-head comparisons with competitors like Bogda or SINOTECH.
-
-Rationale:
-- "We keep improving" conveys engineering culture and continuous investment
-- Avoids antagonizing industry peers
-- More defensible — competitors can't dispute your own improvement trajectory
-- Gives content team ongoing material (each upgrade is a new story)
-
-Implementation in Ring 3:
-- Equipment page: timeline or comparison showing Gen 1 → Gen 2 → Gen 3 improvements
-- About page: R&D investment narrative tied to machine iterations
-- Blog: technical articles on specific improvements and why they matter
-
----
-
-**Owner confirmed (2026-03-29):**
-1. "We make the machines that make the pipes" — confirmed, would say face-to-face
-2. Option A selected for certification wording
-3. 3 business lines (not 4) — PETG is sub-product under Pipes, not independent line. Corrected.
-4. No exaggeration flagged
+- 不把天泽讲成普通贸易商
+- 不把设备能力埋成背景补充
+- 不用空话说“质量很好”
+- 所有定位都要尽量落到买家能理解的结果和证据上

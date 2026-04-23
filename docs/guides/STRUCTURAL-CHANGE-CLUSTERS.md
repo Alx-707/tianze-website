@@ -1,49 +1,67 @@
-# Structural Change Clusters
+# 结构共改簇清单
 
-## Purpose
-This file captures recurring co-change clusters that should be reviewed as one structural area, not as isolated files.
+## 目的
 
-Source:
+这份文档记录仓库里那些**经常一起变、应该一起审**的文件簇。  
+目的是防止只盯着一个文件改，结果把整条结构链改歪了。
+
+来源：
+
 - [`reports/architecture/structural-hotspots-latest.md`](/Users/Data/Warehouse/Pipe/tianze-website/reports/architecture/structural-hotspots-latest.md)
 
-## Cluster 1: Translation Critical Quartet
+## Cluster 1：翻译关键四件套
 
-Files:
+### Files
+
 - `messages/en.json`
 - `messages/zh.json`
 - `messages/en/critical.json`
 - `messages/zh/critical.json`
 
-Why it matters:
-- This is the strongest logical-coupling cluster in the repository.
-- These files participate in runtime user-facing semantics, not only content storage.
+### 为什么重要
 
-Review rule:
-- If one file in the quartet changes, reviewers should inspect the other three.
-- If the change affects runtime-facing copy or error semantics, use at least `local-full proof`.
-- Run `pnpm review:translation-quartet` to execute the quartet validation path.
+- 这是仓库里逻辑耦合度最高的一组文件
+- 它们不只是存内容，还直接影响 runtime 用户可见语义
 
-## Cluster 2: Lead Submission Surfaces
+### Review rule
 
-Files:
+- 四件套里只要改了一个，另外三个也要一起看
+- 如果影响 runtime-facing copy 或 error semantics，至少走 `local-full proof`
+- 执行命令：
+
+```bash
+pnpm review:translation-quartet
+```
+
+## Cluster 2：线索提交通道
+
+### Files
+
 - `src/lib/actions/contact.ts`
 - `src/app/api/inquiry/route.ts`
 - `src/app/api/subscribe/route.ts`
 - `src/lib/api/lead-route-response.ts`
 
-Why it matters:
-- These submission surfaces move together historically and form one operational family.
-- Changes in error handling, validation, abuse protection, or response semantics should be assessed family-wide.
+### 为什么重要
 
-Review rule:
-- If one submission surface changes materially, reviewers should inspect the other family members for contract drift.
-- If validation, rate-limit, or abuse logic changes, require security-aware review.
-- Use [`LEAD-API-FAMILY-CONTRACT.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/LEAD-API-FAMILY-CONTRACT.md) as the explicit shared contract for this family.
-- Run `pnpm review:lead-family` to execute the family contract/protection regression suite.
+- 这几个入口历史上就是一起动的
+- 只要动到错误处理、校验、防滥用、响应语义，就不能只审一个点
 
-## Cluster 3: Homepage Section Cluster
+### Review rule
 
-Files:
+- 一个 submission surface 发生实质变化时，其他 family member 也要一起看，防 contract drift
+- 涉及 validation、rate limit、abuse logic，就要走 security-aware review
+- 当前 live contract surface 就是这些文件本身 + `pnpm review:lead-family`
+- 执行命令：
+
+```bash
+pnpm review:lead-family
+```
+
+## Cluster 3：首页分区簇
+
+### Files
+
 - `src/components/sections/hero-section.tsx`
 - `src/components/sections/products-section.tsx`
 - `src/components/sections/final-cta.tsx`
@@ -51,18 +69,25 @@ Files:
 - `src/components/sections/resources-section.tsx`
 - `src/components/sections/scenarios-section.tsx`
 
-Why it matters:
-- These sections are historically co-edited and behave like one structural surface.
-- Local polish in one section often implies broader page-structure drift risk.
+### 为什么重要
 
-Review rule:
-- Review homepage-section changes as a cluster, especially when changing layout rhythm, proof hierarchy, or CTA sequencing.
-- Use [`HOMEPAGE-SECTION-CLUSTER-CONTRACT.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/HOMEPAGE-SECTION-CLUSTER-CONTRACT.md) as the cluster contract.
-- Run `pnpm review:homepage-sections` to execute the homepage section regression suite.
+- 这几个 section 历史上高频共改
+- 一个区域的局部 polish，常常会把整页层级、proof 节奏、CTA 顺序带歪
 
-## Cluster 4: Locale Runtime Surface
+### Review rule
 
-Files:
+- 只要改到首页 section，默认把它当一组来审
+- 当前 live contract surface 是这些 section 文件 + `pnpm review:homepage-sections`
+- 执行命令：
+
+```bash
+pnpm review:homepage-sections
+```
+
+## Cluster 4：Locale Runtime Surface
+
+### Files
+
 - `src/middleware.ts`
 - `src/i18n/request.ts`
 - `src/i18n/locale-utils.ts`
@@ -73,15 +98,20 @@ Files:
 - `src/app/global-error.tsx`
 - `src/lib/seo-metadata.ts`
 - `src/lib/content-utils.ts`
-- `src/app/global-error.tsx`
 
-Review rule:
-- Use [`LOCALE-RUNTIME-CONTRACT.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/LOCALE-RUNTIME-CONTRACT.md) as the cluster contract.
-- Run `pnpm review:locale-runtime` to execute the locale runtime regression suite.
+### Review rule
 
-## Cluster 5: Cache Invalidation + Health Signals
+- 这个簇优先按 [`.claude/rules/i18n.md`](/Users/Data/Warehouse/Pipe/tianze-website/.claude/rules/i18n.md) 来看
+- 执行命令：
 
-Files:
+```bash
+pnpm review:locale-runtime
+```
+
+## Cluster 5：缓存失效 + 健康信号
+
+### Files
+
 - `src/app/api/cache/invalidate/route.ts`
 - `src/lib/cache/invalidate.ts`
 - `src/lib/cache/cache-tags.ts`
@@ -91,19 +121,37 @@ Files:
 - `src/lib/cache/invalidation-guards.ts`
 - `tests/integration/api/cache-health-contract.test.ts`
 
-Review rule:
-- Use [`CACHE-HEALTH-CONTRACT.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/CACHE-HEALTH-CONTRACT.md) as the cluster contract.
-- Run `pnpm review:cache-health` to execute the cache/health regression suite.
+### Review rule
 
-## Usage
-- Use `pnpm review:tier-a:staged` first if the staged diff touches Tier A paths.
-- Use `pnpm review:clusters:staged` for the default staged structural-cluster pass. It scans the staged diff and runs every matching cluster review automatically.
-- Use `pnpm review:cluster <name> --staged` when you already know a single cluster is in scope and want only that cluster's review.
-- In practice, `review:clusters:staged` is the broad staged entrypoint, and `review:cluster <name> --staged` is the targeted fallback when the scope is already known.
-- Use this file together with:
-  - [`docs/guides/TIER-A-OWNER-MAP.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/TIER-A-OWNER-MAP.md)
-  - [`docs/guides/QUALITY-PROOF-LEVELS.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/QUALITY-PROOF-LEVELS.md)
-  - [`docs/guides/TRANSLATION-QUARTET-CONTRACT.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/TRANSLATION-QUARTET-CONTRACT.md)
-  - [`docs/guides/HOMEPAGE-SECTION-CLUSTER-CONTRACT.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/HOMEPAGE-SECTION-CLUSTER-CONTRACT.md)
-  - [`docs/guides/LOCALE-RUNTIME-CONTRACT.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/LOCALE-RUNTIME-CONTRACT.md)
-  - [`docs/guides/CACHE-HEALTH-CONTRACT.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/CACHE-HEALTH-CONTRACT.md)
+- 当前 live contract surface 是这些缓存 / health 文件本身 + `pnpm review:cache-health`
+- 执行命令：
+
+```bash
+pnpm review:cache-health
+```
+
+## 使用方式
+
+- staged diff 碰到 Tier A 路径时，先跑：
+
+```bash
+pnpm review:tier-a:staged
+```
+
+- 默认的 staged 结构审查入口是：
+
+```bash
+pnpm review:clusters:staged
+```
+
+- 如果你已经很清楚只碰到一个簇，就跑：
+
+```bash
+pnpm review:cluster <name> --staged
+```
+
+## 配套文档
+
+- [`docs/guides/TIER-A-OWNER-MAP.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/TIER-A-OWNER-MAP.md)
+- [`docs/guides/QUALITY-PROOF-LEVELS.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/QUALITY-PROOF-LEVELS.md)
+- [`.claude/rules/i18n.md`](/Users/Data/Warehouse/Pipe/tianze-website/.claude/rules/i18n.md)

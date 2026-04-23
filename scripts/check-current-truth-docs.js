@@ -22,23 +22,6 @@ const CHECKS = [
     ],
   },
   {
-    file: "docs/guides/template-usage.md",
-    required: [
-      "src/config/single-site-page-expression.ts",
-      "src/config/single-site-seo.ts",
-    ],
-  },
-  {
-    file: "docs/guides/content-asset-inventory.md",
-    required: [
-      "src/config/single-site-page-expression.ts",
-      "src/config/single-site-seo.ts",
-      "messages/en.json",
-      "messages/zh.json",
-      "tooling artifact",
-    ],
-  },
-  {
     file: "docs/guides/DERIVATIVE-PROJECT-REPLACEMENT-CHECKLIST.md",
     required: [
       "src/config/single-site-page-expression.ts",
@@ -46,14 +29,6 @@ const CHECKS = [
       "Do not replace first",
       "Minimum proof after replacement",
     ],
-  },
-  {
-    file: "docs/guides/LOCALE-RUNTIME-CONTRACT.md",
-    forbidden: ["Server runtime may then merge site-specific overlays"],
-  },
-  {
-    file: "docs/guides/TRANSLATION-QUARTET-CONTRACT.md",
-    forbidden: ["Site-specific runtime overlays:"],
   },
   {
     file: "docs/guides/TIER-A-OWNER-MAP.md",
@@ -86,26 +61,27 @@ const CHECKS = [
     forbidden: ["src/sites/message-overrides.ts", "src/sites/**/messages/**"],
   },
   {
-    file: "docs/guides/frontend-llm-workflow.md",
-    forbidden: [
-      "先看 `src/sites/**`",
-      "src/sites/** 和 `src/constants/product-catalog.ts`",
-    ],
-  },
-  {
-    file: "docs/guides/AI-CODING-DETECTION-RUNBOOK.md",
-    forbidden: [
-      "当前站点身份真相源已经进入 `src/sites/**`",
-      "先改 `src/sites/**`",
-    ],
-  },
-  {
     file: ".claude/rules/content.md",
     required: [
       "src/config/single-site-page-expression.ts",
       "src/config/single-site-seo.ts",
       "implementation detail",
+      "docs/cwf/context/**",
     ],
+  },
+  {
+    file: ".claude/rules/i18n.md",
+    required: [
+      "messages/en.json",
+      "messages/zh.json",
+      "public/messages/{locale}/critical.json",
+      "Root layout must emit the correct server-rendered `<html lang={locale}>`",
+      "Current repo truth does **not** include a live `src/sites/**/messages/**` runtime overlay layout.",
+    ],
+  },
+  {
+    file: ".claude/rules/testing.md",
+    required: ["docs/specs/behavioral-contracts.md"],
   },
 ];
 
