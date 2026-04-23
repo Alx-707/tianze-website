@@ -72,12 +72,30 @@ if (compare(current, min) < 0 || compare(current, maxExclusive) >= 0) {
 NODE
 echo "[setup] node: $(node -v)"
 
-command -v corepack >/dev/null 2>&1 || { echo "[setup] corepack not found"; exit 1; }
+PNPM_VERSION="${PNPM_VERSION:-$(node -p "const match = require('./package.json').packageManager?.match(/^pnpm@(.+)$/); if (!match) throw new Error('pnpm packageManager is missing'); match[1]")}" 
 
-PNPM_VERSION="${PNPM_VERSION:-$(node -p "const match = require('./package.json').packageManager?.match(/^pnpm@(.+)$/); if (!match) throw new Error('pnpm packageManager is missing'); match[1]")}"
+if command -v corepack >/dev/null 2>&1; then
+  corepack enable
+  corepack prepare "pnpm@$PNPM_VERSION" --activate
+else
+  if command -v pnpm >/dev/null 2>&1; then
+    CURRENT_PNPM_VERSION="$(pnpm -v)"
+    if [ "$CURRENT_PNPM_VERSION" != "$PNPM_VERSION" ]; then
+      echo "[setup] corepack not found; installing pnpm@$PNPM_VERSION via npm"
+      command -v npm >/dev/null 2>&1 || { echo "[setup] npm not found"; exit 1; }
+      npm install --global --prefix "$HOME/.local" "pnpm@$PNPM_VERSION"
+      export PATH="$HOME/.local/bin:$PATH"
+    else
+      echo "[setup] corepack not found; using existing pnpm@$CURRENT_PNPM_VERSION"
+    fi
+  else
+    echo "[setup] corepack not found; installing pnpm@$PNPM_VERSION via npm"
+    command -v npm >/dev/null 2>&1 || { echo "[setup] npm not found"; exit 1; }
+    npm install --global --prefix "$HOME/.local" "pnpm@$PNPM_VERSION"
+    export PATH="$HOME/.local/bin:$PATH"
+  fi
+fi
 
-corepack enable
-corepack prepare "pnpm@$PNPM_VERSION" --activate
 echo "[setup] pnpm: $(pnpm -v)"
 
 pnpm install --frozen-lockfile
