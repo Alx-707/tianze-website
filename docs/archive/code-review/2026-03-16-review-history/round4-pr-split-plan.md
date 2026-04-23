@@ -240,8 +240,8 @@
 - `AGENTS.md`
 - `.claude/rules/architecture.md`
 - `.claude/rules/review-checklist.md`
-- `docs/known-issues/middleware-to-proxy-migration.md`
-- `docs/known-issues/middleware-to-proxy-migration.md`
+- `docs/archive/middleware-proxy-compat-record.md`
+- `docs/archive/middleware-proxy-compat-record.md`
 
 ### 需要手工拆 hunk 的文件
 

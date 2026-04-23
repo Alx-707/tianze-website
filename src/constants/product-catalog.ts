@@ -2,8 +2,8 @@
  * Product catalog compatibility wrapper.
  *
  * During the single-site cutover, routes and sitemap generation should read the
- * canonical Tianze catalog through the single-site source instead of the active
- * site runtime selector.
+ * canonical single-site catalog through the single-site source instead of
+ * inventing a second product-truth layer in consumers.
  */
 
 import {

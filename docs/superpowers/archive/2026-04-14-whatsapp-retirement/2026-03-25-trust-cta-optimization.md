@@ -8,7 +8,7 @@
 
 **Tech Stack:** Next.js 16 + next-intl 4.8 + Tailwind CSS 4.2 + Lucide React icons
 
-**Spec:** `docs/superpowers/specs/2026-03-25-trust-cta-design.md`
+**Spec:** `docs/superpowers/archive/2026-04-14-whatsapp-retirement/2026-03-25-trust-cta-design.md`
 
 ---
 

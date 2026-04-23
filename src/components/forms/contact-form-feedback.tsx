@@ -73,11 +73,21 @@ interface ErrorDisplayProps {
   containerRef?: (_node: HTMLDivElement | null) => void;
 }
 
+interface ErrorDisplayState {
+  uniqueDetails: string[] | undefined;
+  isValidationError: boolean;
+  isPartialSuccess: boolean;
+  translatedError: string | undefined;
+  shouldShowTranslatedMessage: boolean;
+  shouldShowRawMessage: boolean;
+  containerClass: string;
+}
+
 function getErrorDisplayState(
   state: ServerActionResult<ContactFormResult>,
   translateForm: (key: string) => string,
   translateApi: (key: string) => string,
-) {
+): ErrorDisplayState {
   const translatedDetails = state.details?.map((detail) =>
     detail.startsWith("errors.") ? translateForm(detail) : detail,
   );
@@ -93,12 +103,13 @@ function getErrorDisplayState(
 
   return {
     uniqueDetails,
+    isValidationError,
     isPartialSuccess,
     translatedError,
     shouldShowTranslatedMessage:
-      translatedError && !isValidationError && !isPartialSuccess,
+      translatedError !== undefined && !isValidationError && !isPartialSuccess,
     shouldShowRawMessage:
-      state.error &&
+      state.error !== undefined &&
       !state.errorCode &&
       !isValidationError &&
       !isPartialSuccess,

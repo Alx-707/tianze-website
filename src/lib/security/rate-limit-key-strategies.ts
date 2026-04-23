@@ -12,7 +12,7 @@
  */
 
 import { NextRequest } from "next/server";
-import { getRuntimeEnvString } from "@/lib/env";
+import { getRuntimeEnvString, isRuntimeProduction } from "@/lib/env";
 import { logger } from "@/lib/logger";
 import { generateHMAC } from "@/lib/security-crypto";
 import { getClientIP } from "@/lib/security/client-ip";
@@ -23,19 +23,11 @@ export type KeyStrategy = (request: NextRequest) => Promise<string> | string;
 /** HMAC output length (64-bit = 16 hex chars) */
 const HMAC_OUTPUT_LENGTH = 16;
 
-/** Number of pepper warnings already emitted in the current process */
-let pepperWarningCount = 0;
+/** Whether pepper warning has been logged */
+let hasLoggedPepperWarning = false;
 
 /** Minimum pepper length for security (32 bytes = 64 hex chars recommended) */
 const MIN_PEPPER_LENGTH = 32;
-
-function warnPepperOnce(message: string): void {
-  pepperWarningCount += 1;
-  if (pepperWarningCount > 1) {
-    return;
-  }
-  logger.warn(message);
-}
 
 /**
  * Get HMAC pepper from environment
@@ -47,7 +39,7 @@ function warnPepperOnce(message: string): void {
  */
 function getPepper(): string {
   const currentPepper = getRuntimeEnvString("RATE_LIMIT_PEPPER");
-  const isProduction = getRuntimeEnvString("NODE_ENV") === "production";
+  const isProduction = isRuntimeProduction();
 
   if (!currentPepper) {
     if (isProduction) {
@@ -57,10 +49,13 @@ function getPepper(): string {
       );
     }
 
-    warnPepperOnce(
-      "[Rate Limit] RATE_LIMIT_PEPPER not configured. Using default development pepper. " +
-        "This is insecure - set RATE_LIMIT_PEPPER for production.",
-    );
+    if (!hasLoggedPepperWarning) {
+      logger.warn(
+        "[Rate Limit] RATE_LIMIT_PEPPER not configured. Using default development pepper. " +
+          "This is insecure - set RATE_LIMIT_PEPPER for production.",
+      );
+      hasLoggedPepperWarning = true;
+    }
     return "default-dev-pepper-insecure";
   }
 
@@ -74,13 +69,36 @@ function getPepper(): string {
       );
     }
 
-    warnPepperOnce(
-      `[Rate Limit] RATE_LIMIT_PEPPER is weak (${currentPepper.length} chars). ` +
-        `Recommend at least ${MIN_PEPPER_LENGTH} chars for production.`,
-    );
+    if (!hasLoggedPepperWarning) {
+      logger.warn(
+        `[Rate Limit] RATE_LIMIT_PEPPER is weak (${currentPepper.length} chars). ` +
+          `Recommend at least ${MIN_PEPPER_LENGTH} chars for production.`,
+      );
+      hasLoggedPepperWarning = true;
+    }
   }
 
   return currentPepper;
+}
+
+export function extractBearerToken(authHeader: string): string | null {
+  const bearerPrefixLength = "Bearer".length;
+  const scheme = authHeader.slice(0, bearerPrefixLength);
+  if (scheme.toLowerCase() !== "bearer") {
+    return null;
+  }
+
+  const separator = authHeader[bearerPrefixLength];
+  if (!separator || !/\s/.test(separator)) {
+    return null;
+  }
+
+  const token = authHeader.slice(bearerPrefixLength + 1).trim();
+  if (token.length === 0) {
+    return null;
+  }
+
+  return token;
 }
 
 /**
@@ -192,38 +210,15 @@ export async function getSessionPriorityKey(
 export async function getApiKeyPriorityKey(
   request: NextRequest,
 ): Promise<string> {
-  const apiKey = extractBearerToken(request.headers.get("Authorization"));
-  if (apiKey) {
+  const authHeader = request.headers.get("Authorization");
+  const apiKey = authHeader ? extractBearerToken(authHeader) : null;
+
+  if (typeof apiKey === "string") {
     return `apikey:${await hmacKey(apiKey)}`;
   }
 
   // Fallback to IP
   return getIPKey(request);
-}
-
-export function extractBearerToken(authHeader: string | null): string | null {
-  if (!authHeader) {
-    return null;
-  }
-
-  const trimmedHeader = authHeader.trimStart();
-  const bearerPrefixLength = "Bearer".length;
-  const scheme = trimmedHeader.slice(0, bearerPrefixLength);
-  if (scheme.toLowerCase() !== "bearer") {
-    return null;
-  }
-
-  const separator = trimmedHeader[bearerPrefixLength];
-  if (!separator || !/\s/.test(separator)) {
-    return null;
-  }
-
-  const token = trimmedHeader.slice(bearerPrefixLength + 1).trim();
-  if (!token || /\s/.test(token)) {
-    return null;
-  }
-
-  return token;
 }
 
 /**
@@ -237,15 +232,14 @@ export function extractBearerToken(authHeader: string | null): string | null {
  * @returns true if format appears valid (not empty, reasonable length)
  */
 function isValidSessionFormat(sessionId: string): boolean {
-  // Reject obviously invalid values before the generic length check.
-  // This keeps sentinels like "null" from being silently bucketed as short IDs.
-  if (sessionId === "undefined" || sessionId === "[object Object]") {
+  // Basic sanity checks - session must be non-empty and reasonable length
+  // Actual validation (signature, expiry) should happen in auth middleware
+  if (!sessionId || sessionId.length < 8 || sessionId.length > 256) {
     return false;
   }
 
-  // Basic sanity checks - session must be non-empty and reasonable length
-  // Actual validation (signature, expiry) should happen in auth middleware
-  if (sessionId.length < 8 || sessionId.length > 256) {
+  // Reject obviously invalid values
+  if (sessionId === "undefined" || sessionId === "[object Object]") {
     return false;
   }
 
@@ -256,5 +250,5 @@ function isValidSessionFormat(sessionId: string): boolean {
  * Reset pepper warning state (for testing)
  */
 export function resetPepperWarning(): void {
-  pepperWarningCount = 0;
+  hasLoggedPepperWarning = false;
 }

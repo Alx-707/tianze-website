@@ -14,6 +14,7 @@ import {
   NAVIGATION_BREAKPOINTS,
   type NavigationItem,
 } from "../navigation";
+import { SINGLE_SITE_NAVIGATION } from "@/config/single-site";
 
 // Use vi.hoisted to ensure proper mock setup
 const { mockLocalesConfig } = vi.hoisted(() => ({
@@ -49,6 +50,10 @@ describe("navigation", () => {
   });
 
   describe("mainNavigation", () => {
+    it("should forward the canonical single-site navigation source", () => {
+      expect(mainNavigation).toBe(SINGLE_SITE_NAVIGATION);
+    });
+
     it("should have all required navigation items", () => {
       const expectedKeys = ["home", "about", "products", "blog"];
       const actualKeys = mainNavigation.map((item) => item.key);

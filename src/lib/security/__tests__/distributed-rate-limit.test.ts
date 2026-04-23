@@ -1,3 +1,4 @@
+/* eslint-disable max-lines, max-lines-per-function -- backend matrix stays in one file so fake-timer and store fixtures remain in one place */
 /**
  * Distributed Rate Limit Tests
  *
@@ -11,6 +12,7 @@ import {
   COUNT_FIVE,
   COUNT_TEN,
   COUNT_THREE,
+  COUNT_TWO,
   MINUTE_MS,
   ONE,
 } from "@/constants";
@@ -19,7 +21,7 @@ import {
   checkDistributedRateLimit,
   cleanupRateLimitStore,
   createRateLimitHeaders,
-  getPendingRateLimitQueueSize,
+  getRateLimitQueueSizeForTesting,
   getRateLimitStatus,
   RATE_LIMIT_PRESETS,
   resetRateLimitStore,
@@ -49,6 +51,38 @@ function setEnv(key: string, value: string | undefined): void {
   } else {
     env[key] = value;
   }
+}
+
+function createDeferred<T>() {
+  let resolve!: (value: T) => void;
+  let reject!: (reason?: unknown) => void;
+  const promise = new Promise<T>((res, rej) => {
+    resolve = res;
+    reject = rej;
+  });
+  return { promise, resolve, reject };
+}
+
+async function flushMicrotasks(turns = 6): Promise<void> {
+  for (let index = 0; index < turns; index += 1) {
+    await Promise.resolve();
+  }
+}
+
+async function expectPromiseToSettleSoon<T>(
+  promise: Promise<T>,
+  timeoutMs = ONE,
+): Promise<T> {
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    setTimeout(() => {
+      reject(new Error(`Promise did not settle within ${timeoutMs}ms`));
+    }, timeoutMs);
+  });
+
+  const racedPromise = Promise.race([promise, timeoutPromise]);
+  await flushMicrotasks();
+  await vi.advanceTimersByTimeAsync(timeoutMs);
+  return racedPromise;
 }
 
 describe("distributed-rate-limit", () => {
@@ -164,63 +198,62 @@ describe("distributed-rate-limit", () => {
       expect(result.remaining).toBe(maxRequests - ONE);
     });
 
-    it("falls back open with explicit degraded fields when an open preset store throws", async () => {
+    it("falls back safely when the store throws", async () => {
       const mod = await import("@/lib/security/stores/rate-limit-store");
-      const error = new Error("boom");
-
-      vi.setSystemTime(new Date("2026-04-19T00:00:00.000Z"));
-      const now = Date.now();
       vi.spyOn(mod, "createRateLimitStore").mockReturnValue({
-        increment: vi.fn().mockRejectedValue(error),
+        increment: vi.fn().mockRejectedValue(new Error("boom")),
       } as unknown as ReturnType<typeof mod.createRateLimitStore>);
 
       const result = await checkDistributedRateLimit("fallback-user", "csp");
 
-      expect(result).toEqual({
-        allowed: true,
-        remaining: RATE_LIMIT_PRESETS.csp.maxRequests - ONE,
-        resetTime: now + RATE_LIMIT_PRESETS.csp.windowMs,
-        retryAfter: null,
-        degraded: true,
-      });
-      expect(mockLoggerWarn).toHaveBeenCalledWith(
-        "[Rate Limit] Storage failure — fail-open, allowing request (degraded)",
-      );
-      expect(mockLoggerError).toHaveBeenCalledWith(
-        "[Rate Limit] Storage backend error details",
-        { error },
-      );
+      expect(result.allowed).toBe(true);
+      expect(result.remaining).toBe(RATE_LIMIT_PRESETS.csp.maxRequests - ONE);
+      expect(mockLoggerError).toHaveBeenCalled();
     });
 
-    it("falls back closed with explicit degraded fields when a closed preset store throws", async () => {
+    it("fails closed when the store factory throws for a closed preset", async () => {
       const mod = await import("@/lib/security/stores/rate-limit-store");
-      const error = new Error("closed-boom");
-
-      vi.setSystemTime(new Date("2026-04-19T00:00:00.000Z"));
-      const now = Date.now();
-      vi.spyOn(mod, "createRateLimitStore").mockReturnValue({
-        increment: vi.fn().mockRejectedValue(error),
-      } as unknown as ReturnType<typeof mod.createRateLimitStore>);
+      vi.spyOn(mod, "createRateLimitStore").mockImplementation(() => {
+        throw new Error("factory boom");
+      });
 
       const result = await checkDistributedRateLimit(
-        "fallback-user-closed",
+        "factory-fail-closed",
         "contact",
       );
 
-      expect(result).toEqual({
+      expect(result).toMatchObject({
         allowed: false,
         remaining: 0,
-        resetTime: now + RATE_LIMIT_PRESETS.contact.windowMs,
-        retryAfter: Math.ceil(RATE_LIMIT_PRESETS.contact.windowMs / 1000),
         degraded: true,
         deniedReason: "storage_failure",
       });
+      expect(result.retryAfter).toBe(Math.ceil(MINUTE_MS / 1000));
       expect(mockLoggerWarn).toHaveBeenCalledWith(
-        "[Rate Limit] Storage failure — fail-closed, denying request (degraded)",
+        expect.stringContaining("fail-closed"),
       );
-      expect(mockLoggerError).toHaveBeenCalledWith(
-        "[Rate Limit] Storage backend error details",
-        { error },
+    });
+
+    it("fails open when the store factory throws for an open preset", async () => {
+      const mod = await import("@/lib/security/stores/rate-limit-store");
+      vi.spyOn(mod, "createRateLimitStore").mockImplementation(() => {
+        throw new Error("factory boom");
+      });
+
+      const result = await checkDistributedRateLimit(
+        "factory-fail-open",
+        "csp",
+      );
+
+      expect(result).toMatchObject({
+        allowed: true,
+        remaining: RATE_LIMIT_PRESETS.csp.maxRequests - ONE,
+        degraded: true,
+      });
+      expect(result.retryAfter).toBeNull();
+      expect("deniedReason" in result).toBe(false);
+      expect(mockLoggerWarn).toHaveBeenCalledWith(
+        expect.stringContaining("fail-open"),
       );
     });
   });
@@ -276,10 +309,27 @@ describe("distributed-rate-limit", () => {
       const result = await checkDistributedRateLimit(identifier, "contact");
 
       expect(result.allowed).toBe(false);
-      expect(result.deniedReason).toBe("limit");
-      expect(result.retryAfter).toBe(
-        Math.ceil((result.resetTime - Date.now()) / 1000),
-      );
+      expect(result.retryAfter).not.toBeNull();
+      expect(result.retryAfter).toBeGreaterThan(0);
+    });
+
+    it("returns exact blocked metadata when the limit is exceeded", async () => {
+      vi.setSystemTime(1_700_000_000_000);
+      const identifier = "blocked-metadata-user";
+
+      for (let i = 0; i < COUNT_FIVE; i++) {
+        await checkDistributedRateLimit(identifier, "contact");
+      }
+
+      const result = await checkDistributedRateLimit(identifier, "contact");
+
+      expect(result).toMatchObject({
+        allowed: false,
+        remaining: 0,
+        resetTime: 1_700_000_000_000 + MINUTE_MS,
+        retryAfter: Math.ceil(MINUTE_MS / 1000),
+        deniedReason: "limit",
+      });
     });
 
     it("should allow requests again after window reset", async () => {
@@ -355,15 +405,13 @@ describe("distributed-rate-limit", () => {
   // =========================================================================
   describe("getRateLimitStatus", () => {
     it("should return full limit when no entry exists", async () => {
-      vi.setSystemTime(new Date("2026-04-19T00:00:00.000Z"));
+      vi.setSystemTime(1_700_000_000_000);
 
       const result = await getRateLimitStatus("new-user", "contact");
 
       expect(result.allowed).toBe(true);
       expect(result.remaining).toBe(COUNT_FIVE);
-      expect(result.resetTime).toBe(
-        Date.now() + RATE_LIMIT_PRESETS.contact.windowMs,
-      );
+      expect(result.resetTime).toBe(1_700_000_000_000 + MINUTE_MS);
       expect(result.retryAfter).toBeNull();
     });
 
@@ -385,8 +433,6 @@ describe("distributed-rate-limit", () => {
     it("should return full limit for expired entry", async () => {
       const identifier = "expired-entry-user";
 
-      vi.setSystemTime(new Date("2026-04-19T00:00:00.000Z"));
-
       // Make a request
       await checkDistributedRateLimit(identifier, "contact");
 
@@ -398,31 +444,48 @@ describe("distributed-rate-limit", () => {
 
       expect(status.remaining).toBe(COUNT_FIVE);
       expect(status.allowed).toBe(true);
-      expect(status.resetTime).toBe(
-        Date.now() + RATE_LIMIT_PRESETS.contact.windowMs,
-      );
     });
 
-    it("should treat stale stored entries as expired even when the backend still returns them", async () => {
+    it("treats stale store entries as expired even when the backend still returns them", async () => {
+      vi.setSystemTime(1_700_000_000_000);
       const mod = await import("@/lib/security/stores/rate-limit-store");
-
-      vi.setSystemTime(new Date("2026-04-19T00:00:00.000Z"));
-      const now = Date.now();
       vi.spyOn(mod, "createRateLimitStore").mockReturnValue({
+        increment: vi.fn(),
         get: vi.fn().mockResolvedValue({
           count: COUNT_FIVE,
-          expiresAt: now - ONE,
+          expiresAt: 1_700_000_000_000 - ONE,
         }),
-        increment: vi.fn(),
         delete: vi.fn(),
       } as unknown as ReturnType<typeof mod.createRateLimitStore>);
 
-      const status = await getRateLimitStatus("stale-entry-user", "contact");
+      const status = await getRateLimitStatus("stale-store-entry", "contact");
 
       expect(status).toEqual({
         allowed: true,
-        remaining: RATE_LIMIT_PRESETS.contact.maxRequests,
-        resetTime: now + RATE_LIMIT_PRESETS.contact.windowMs,
+        remaining: COUNT_FIVE,
+        resetTime: 1_700_000_000_000 + MINUTE_MS,
+        retryAfter: null,
+      });
+    });
+
+    it("treats exact-expiry store entries as expired", async () => {
+      vi.setSystemTime(1_700_000_000_000);
+      const mod = await import("@/lib/security/stores/rate-limit-store");
+      vi.spyOn(mod, "createRateLimitStore").mockReturnValue({
+        increment: vi.fn(),
+        get: vi.fn().mockResolvedValue({
+          count: COUNT_FIVE,
+          expiresAt: 1_700_000_000_000,
+        }),
+        delete: vi.fn(),
+      } as unknown as ReturnType<typeof mod.createRateLimitStore>);
+
+      const status = await getRateLimitStatus("exact-expiry-entry", "contact");
+
+      expect(status).toEqual({
+        allowed: true,
+        remaining: COUNT_FIVE,
+        resetTime: 1_700_000_000_000 + MINUTE_MS,
         retryAfter: null,
       });
     });
@@ -448,8 +511,7 @@ describe("distributed-rate-limit", () => {
 
     it("should show blocked status when at limit", async () => {
       const identifier = "status-at-limit-user";
-
-      vi.setSystemTime(new Date("2026-04-19T00:00:00.000Z"));
+      vi.setSystemTime(1_700_000_000_000);
 
       // Exhaust limit
       for (let i = 0; i < COUNT_FIVE; i++) {
@@ -462,63 +524,109 @@ describe("distributed-rate-limit", () => {
       // At limit (count=5), next request would be blocked
       expect(status.allowed).toBe(false);
       expect(status.remaining).toBe(0);
-      expect(status.retryAfter).toBe(
-        Math.ceil((status.resetTime - Date.now()) / 1000),
-      );
+      expect(status.resetTime).toBe(1_700_000_000_000 + MINUTE_MS);
+      expect(status.retryAfter).toBe(Math.ceil(MINUTE_MS / 1000));
     });
 
-    it("returns explicit fail-open degraded status when the store read fails", async () => {
+    it("fails closed for status checks when a closed preset store read throws", async () => {
+      vi.setSystemTime(1_700_000_000_000);
       const mod = await import("@/lib/security/stores/rate-limit-store");
-      const error = new Error("status-open");
-
-      vi.setSystemTime(new Date("2026-04-19T00:00:00.000Z"));
-      const now = Date.now();
       vi.spyOn(mod, "createRateLimitStore").mockReturnValue({
-        get: vi.fn().mockRejectedValue(error),
         increment: vi.fn(),
+        get: vi.fn().mockRejectedValue(new Error("status boom")),
         delete: vi.fn(),
       } as unknown as ReturnType<typeof mod.createRateLimitStore>);
 
-      const result = await getRateLimitStatus("status-open-user", "csp");
+      const status = await getRateLimitStatus("status-fail-closed", "contact");
 
-      expect(result).toEqual({
-        allowed: true,
-        remaining: RATE_LIMIT_PRESETS.csp.maxRequests,
-        resetTime: now + RATE_LIMIT_PRESETS.csp.windowMs,
-        retryAfter: null,
-        degraded: true,
-      });
-      expect(mockLoggerError).toHaveBeenCalledWith(
-        "[Rate Limit] Status check storage failure — fail-open",
-        { error },
-      );
-    });
-
-    it("returns explicit fail-closed degraded status when the store read fails", async () => {
-      const mod = await import("@/lib/security/stores/rate-limit-store");
-      const error = new Error("status-closed");
-
-      vi.setSystemTime(new Date("2026-04-19T00:00:00.000Z"));
-      const now = Date.now();
-      vi.spyOn(mod, "createRateLimitStore").mockReturnValue({
-        get: vi.fn().mockRejectedValue(error),
-        increment: vi.fn(),
-        delete: vi.fn(),
-      } as unknown as ReturnType<typeof mod.createRateLimitStore>);
-
-      const result = await getRateLimitStatus("status-closed-user", "contact");
-
-      expect(result).toEqual({
+      expect(status).toMatchObject({
         allowed: false,
         remaining: 0,
-        resetTime: now + RATE_LIMIT_PRESETS.contact.windowMs,
-        retryAfter: Math.ceil(RATE_LIMIT_PRESETS.contact.windowMs / 1000),
         degraded: true,
         deniedReason: "storage_failure",
+        resetTime: 1_700_000_000_000 + MINUTE_MS,
       });
+      expect(status.retryAfter).toBe(Math.ceil(MINUTE_MS / 1000));
       expect(mockLoggerError).toHaveBeenCalledWith(
         "[Rate Limit] Status check storage failure — fail-closed",
-        { error },
+        expect.objectContaining({ error: expect.any(Error) }),
+      );
+    });
+
+    it("fails open for status checks when an open preset store read throws", async () => {
+      vi.setSystemTime(1_700_000_000_000);
+      const mod = await import("@/lib/security/stores/rate-limit-store");
+      vi.spyOn(mod, "createRateLimitStore").mockReturnValue({
+        increment: vi.fn(),
+        get: vi.fn().mockRejectedValue(new Error("status boom")),
+        delete: vi.fn(),
+      } as unknown as ReturnType<typeof mod.createRateLimitStore>);
+
+      const status = await getRateLimitStatus("status-fail-open", "csp");
+
+      expect(status).toMatchObject({
+        allowed: true,
+        remaining: RATE_LIMIT_PRESETS.csp.maxRequests,
+        degraded: true,
+        resetTime: 1_700_000_000_000 + MINUTE_MS,
+      });
+      expect(status.retryAfter).toBeNull();
+      expect("deniedReason" in status).toBe(false);
+      expect(mockLoggerError).toHaveBeenCalledWith(
+        "[Rate Limit] Status check storage failure — fail-open",
+        expect.objectContaining({ error: expect.any(Error) }),
+      );
+    });
+
+    it("fails closed for status checks when the store factory throws", async () => {
+      vi.setSystemTime(1_700_000_000_000);
+      const mod = await import("@/lib/security/stores/rate-limit-store");
+      vi.spyOn(mod, "createRateLimitStore").mockImplementation(() => {
+        throw new Error("status factory boom");
+      });
+
+      const status = await getRateLimitStatus(
+        "status-factory-fail-closed",
+        "contact",
+      );
+
+      expect(status).toMatchObject({
+        allowed: false,
+        remaining: 0,
+        degraded: true,
+        deniedReason: "storage_failure",
+        resetTime: 1_700_000_000_000 + MINUTE_MS,
+      });
+      expect(status.retryAfter).toBe(Math.ceil(MINUTE_MS / 1000));
+      expect(mockLoggerError).toHaveBeenCalledWith(
+        "[Rate Limit] Status check storage failure — fail-closed",
+        expect.objectContaining({ error: expect.any(Error) }),
+      );
+    });
+
+    it("fails open for status checks when the store factory throws", async () => {
+      vi.setSystemTime(1_700_000_000_000);
+      const mod = await import("@/lib/security/stores/rate-limit-store");
+      vi.spyOn(mod, "createRateLimitStore").mockImplementation(() => {
+        throw new Error("status factory boom");
+      });
+
+      const status = await getRateLimitStatus(
+        "status-factory-fail-open",
+        "csp",
+      );
+
+      expect(status).toMatchObject({
+        allowed: true,
+        remaining: RATE_LIMIT_PRESETS.csp.maxRequests,
+        degraded: true,
+        resetTime: 1_700_000_000_000 + MINUTE_MS,
+      });
+      expect(status.retryAfter).toBeNull();
+      expect("deniedReason" in status).toBe(false);
+      expect(mockLoggerError).toHaveBeenCalledWith(
+        "[Rate Limit] Status check storage failure — fail-open",
+        expect.objectContaining({ error: expect.any(Error) }),
       );
     });
   });
@@ -650,6 +758,32 @@ describe("distributed-rate-limit", () => {
   // 6. cleanupRateLimitStore Tests
   // =========================================================================
   describe("cleanupRateLimitStore", () => {
+    it("calls cleanup when the backing store exposes it", async () => {
+      const mod = await import("@/lib/security/stores/rate-limit-store");
+      const cleanup = vi.fn();
+      vi.spyOn(mod, "createRateLimitStore").mockReturnValue({
+        increment: vi.fn(),
+        get: vi.fn().mockResolvedValue(null),
+        delete: vi.fn(),
+        cleanup,
+      } as unknown as ReturnType<typeof mod.createRateLimitStore>);
+
+      cleanupRateLimitStore();
+
+      expect(cleanup).toHaveBeenCalledTimes(1);
+    });
+
+    it("does not throw when the backing store has no cleanup hook", async () => {
+      const mod = await import("@/lib/security/stores/rate-limit-store");
+      vi.spyOn(mod, "createRateLimitStore").mockReturnValue({
+        increment: vi.fn(),
+        get: vi.fn().mockResolvedValue(null),
+        delete: vi.fn(),
+      } as unknown as ReturnType<typeof mod.createRateLimitStore>);
+
+      expect(() => cleanupRateLimitStore()).not.toThrow();
+    });
+
     it("should remove expired entries from memory store", async () => {
       // Create some entries
       await checkDistributedRateLimit("cleanup-user-1", "contact");
@@ -658,7 +792,8 @@ describe("distributed-rate-limit", () => {
       // Advance time past the window to expire entries
       vi.advanceTimersByTime(MINUTE_MS + ONE);
 
-      expect(cleanupRateLimitStore()).toBe(true);
+      // Cleanup should not throw
+      expect(() => cleanupRateLimitStore()).not.toThrow();
 
       // After cleanup, new requests should get full limit
       const result = await getRateLimitStatus("cleanup-user-1", "contact");
@@ -671,26 +806,15 @@ describe("distributed-rate-limit", () => {
       await checkDistributedRateLimit("active-user", "contact");
 
       // Advance time but not past window
-      vi.advanceTimersByTime(MINUTE_MS / ONE / ONE); // Half the window
+      vi.advanceTimersByTime(MINUTE_MS / 2);
 
       // Cleanup
-      expect(cleanupRateLimitStore()).toBe(true);
+      cleanupRateLimitStore();
 
       // Entry should still exist with same count
       const status = await getRateLimitStatus("active-user", "contact");
       // count=2, remaining = 5-2 = 3
       expect(status.remaining).toBe(COUNT_FIVE - ONE - ONE);
-    });
-
-    it("should report false when the active store is not the memory backend", async () => {
-      const mod = await import("@/lib/security/stores/rate-limit-store");
-      vi.spyOn(mod, "createRateLimitStore").mockReturnValue({
-        get: vi.fn(),
-        increment: vi.fn(),
-        delete: vi.fn(),
-      } as unknown as ReturnType<typeof mod.createRateLimitStore>);
-
-      expect(cleanupRateLimitStore()).toBe(false);
     });
   });
 
@@ -792,77 +916,126 @@ describe("distributed-rate-limit", () => {
   // 9. Atomicity & Concurrency Tests (Red — non-atomic read-modify-write)
   // =========================================================================
   describe("atomicity and concurrency", () => {
-    it("cleans up settled queue entries", async () => {
+    it("keeps same-key requests serialized until the latest queued request settles", async () => {
+      resetRateLimitStore();
       const mod = await import("@/lib/security/stores/rate-limit-store");
-
-      let resolveIncrement!: (value: {
-        count: number;
-        expiresAt: number;
-      }) => void;
-      const incrementPromise = new Promise<{
-        count: number;
-        expiresAt: number;
-      }>((resolve) => {
-        resolveIncrement = resolve;
-      });
-
+      const first = createDeferred<{ count: number; expiresAt: number }>();
+      const second = createDeferred<{ count: number; expiresAt: number }>();
+      const expiresAt = Date.now() + MINUTE_MS;
+      const increment = vi
+        .fn()
+        .mockImplementationOnce(() => first.promise)
+        .mockImplementationOnce(() => second.promise)
+        .mockResolvedValueOnce({
+          count: COUNT_THREE,
+          expiresAt,
+        });
       vi.spyOn(mod, "createRateLimitStore").mockReturnValue({
-        increment: vi.fn(() => incrementPromise),
-        get: vi.fn(),
+        increment,
+        get: vi.fn().mockResolvedValue(null),
         delete: vi.fn(),
       } as unknown as ReturnType<typeof mod.createRateLimitStore>);
 
-      const pending = checkDistributedRateLimit(
-        "queue-cleanup-user",
+      const firstRequest = checkDistributedRateLimit("queued-user", "contact");
+      const secondRequest = checkDistributedRateLimit("queued-user", "contact");
+
+      await flushMicrotasks();
+
+      expect(increment).toHaveBeenCalledTimes(1);
+      expect(getRateLimitQueueSizeForTesting()).toBe(1);
+
+      first.resolve({ count: ONE, expiresAt });
+      await expect(
+        expectPromiseToSettleSoon(firstRequest),
+      ).resolves.toMatchObject({
+        allowed: true,
+        remaining: COUNT_FIVE - ONE,
+        retryAfter: null,
+      });
+      await flushMicrotasks();
+
+      expect(increment).toHaveBeenCalledTimes(2);
+      expect(getRateLimitQueueSizeForTesting()).toBe(1);
+
+      const thirdRequest = checkDistributedRateLimit("queued-user", "contact");
+      await flushMicrotasks();
+
+      expect(increment).toHaveBeenCalledTimes(2);
+
+      second.resolve({ count: COUNT_TWO, expiresAt });
+
+      await expect(
+        expectPromiseToSettleSoon(secondRequest),
+      ).resolves.toMatchObject({
+        allowed: true,
+        remaining: COUNT_FIVE - COUNT_TWO,
+        retryAfter: null,
+      });
+      await expect(
+        expectPromiseToSettleSoon(thirdRequest),
+      ).resolves.toMatchObject({
+        allowed: true,
+        remaining: COUNT_FIVE - COUNT_THREE,
+        retryAfter: null,
+      });
+
+      expect(increment).toHaveBeenCalledTimes(3);
+      expect(getRateLimitQueueSizeForTesting()).toBe(0);
+    });
+
+    it("releases queued requests after the leading request degrades on storage failure", async () => {
+      resetRateLimitStore();
+      const mod = await import("@/lib/security/stores/rate-limit-store");
+      const first = createDeferred<{ count: number; expiresAt: number }>();
+      const expiresAt = Date.now() + MINUTE_MS;
+      const increment = vi
+        .fn()
+        .mockImplementationOnce(() => first.promise)
+        .mockResolvedValue({
+          count: ONE,
+          expiresAt,
+        });
+      vi.spyOn(mod, "createRateLimitStore").mockReturnValue({
+        increment,
+        get: vi.fn().mockResolvedValue(null),
+        delete: vi.fn(),
+      } as unknown as ReturnType<typeof mod.createRateLimitStore>);
+
+      const firstRequest = checkDistributedRateLimit(
+        "queued-failure-user",
+        "contact",
+      );
+      const secondRequest = checkDistributedRateLimit(
+        "queued-failure-user",
         "contact",
       );
 
-      expect(getPendingRateLimitQueueSize()).toBe(1);
+      await flushMicrotasks();
 
-      resolveIncrement({ count: 1, expiresAt: Date.now() + MINUTE_MS });
-      await pending;
-      await vi.advanceTimersByTimeAsync(0);
+      expect(increment).toHaveBeenCalledTimes(1);
+      expect(getRateLimitQueueSizeForTesting()).toBe(1);
 
-      expect(getPendingRateLimitQueueSize()).toBe(0);
-    });
+      first.reject(new Error("boom"));
 
-    it("keeps the latest queued operation registered while an older one settles", async () => {
-      const mod = await import("@/lib/security/stores/rate-limit-store");
+      await expect(
+        expectPromiseToSettleSoon(firstRequest),
+      ).resolves.toMatchObject({
+        allowed: false,
+        degraded: true,
+        deniedReason: "storage_failure",
+        retryAfter: Math.ceil(MINUTE_MS / 1000),
+      });
+      await flushMicrotasks();
 
-      const resolvers: Array<
-        (value: { count: number; expiresAt: number }) => void
-      > = [];
-      vi.spyOn(mod, "createRateLimitStore").mockReturnValue({
-        increment: vi.fn(
-          () =>
-            new Promise<{ count: number; expiresAt: number }>((resolve) => {
-              resolvers.push(resolve);
-            }),
-        ),
-        get: vi.fn(),
-        delete: vi.fn(),
-      } as unknown as ReturnType<typeof mod.createRateLimitStore>);
-
-      const first = checkDistributedRateLimit("queue-serial-user", "contact");
-      const second = checkDistributedRateLimit("queue-serial-user", "contact");
-
-      expect(getPendingRateLimitQueueSize()).toBe(1);
-
-      await vi.advanceTimersByTimeAsync(0);
-      expect(resolvers).toHaveLength(1);
-
-      resolvers[0]?.({ count: 1, expiresAt: Date.now() + MINUTE_MS });
-      await first;
-      await vi.advanceTimersByTimeAsync(0);
-
-      expect(resolvers).toHaveLength(2);
-      expect(getPendingRateLimitQueueSize()).toBe(1);
-
-      resolvers[1]?.({ count: 2, expiresAt: Date.now() + MINUTE_MS });
-      await second;
-      await vi.advanceTimersByTimeAsync(0);
-
-      expect(getPendingRateLimitQueueSize()).toBe(0);
+      expect(increment).toHaveBeenCalledTimes(2);
+      await expect(
+        expectPromiseToSettleSoon(secondRequest),
+      ).resolves.toMatchObject({
+        allowed: true,
+        remaining: COUNT_FIVE - ONE,
+        retryAfter: null,
+      });
+      expect(getRateLimitQueueSizeForTesting()).toBe(0);
     });
 
     it("should use atomic increment to prevent over-admission under concurrent access", async () => {
@@ -896,7 +1069,7 @@ describe("distributed-rate-limit", () => {
           // Async delay opens the race window: all concurrent reads
           // see the same snapshot before any write lands
           await new Promise<void>((resolve) => {
-            setTimeout(resolve, 20);
+            setTimeout(resolve, ONE);
           });
           return new Response(JSON.stringify({ result: snapshot }), {
             status: 200,
@@ -914,7 +1087,7 @@ describe("distributed-rate-limit", () => {
       });
 
       const identifier = "concurrent-redis-user";
-      const concurrentRequests = COUNT_TEN;
+      const concurrentRequests = COUNT_FIVE + ONE;
 
       // Fire 10 concurrent requests against a window of 5 (contact preset)
       const results = await Promise.all(
@@ -938,33 +1111,30 @@ describe("distributed-rate-limit", () => {
   // 10. Storage Failure Behavior Tests (Red — silent null instead of throw)
   // =========================================================================
   describe("storage failure behavior", () => {
-    it("should set degraded flag and warn when storage backend throws", async () => {
-      // First call to initialize the store
-      await checkDistributedRateLimit("init-for-failure", "contact");
-
-      // We need the store's increment to throw. Since the memory store
-      // increment does not throw, we simulate by resetting and using
-      // env vars pointing to a non-existent Redis that fails.
+    it("should set degraded flag and log full failure details when storage backend throws", async () => {
       resetRateLimitStore();
-      setEnv("UPSTASH_REDIS_REST_URL", "http://localhost:1");
-      setEnv("UPSTASH_REDIS_REST_TOKEN", "fake-token");
+      const mod = await import("@/lib/security/stores/rate-limit-store");
+      vi.spyOn(mod, "createRateLimitStore").mockReturnValue({
+        increment: vi.fn().mockRejectedValue(new Error("boom")),
+      } as unknown as ReturnType<typeof mod.createRateLimitStore>);
 
-      // This will try to connect to a non-existent Redis.
-      // The current implementation returns null from redisCommand and
-      // does NOT throw — meaning checkDistributedRateLimit's catch block
-      // is not reached. The result should have degraded=true, but
-      // the current code silently returns null from increment without
-      // triggering the fail-open path.
       const result = await checkDistributedRateLimit(
         "storage-failure-user",
         "contact",
       );
 
-      // Expected: degraded should be true when storage fails
-      expect(result.degraded).toBe(true);
-      // Expected: logger.warn should be called about degraded state
+      expect(result).toMatchObject({
+        allowed: false,
+        degraded: true,
+        deniedReason: "storage_failure",
+      });
+      expect(result.retryAfter).toBe(Math.ceil(MINUTE_MS / 1000));
       expect(mockLoggerWarn).toHaveBeenCalledWith(
         expect.stringContaining("degraded"),
+      );
+      expect(mockLoggerError).toHaveBeenCalledWith(
+        "[Rate Limit] Storage backend error details",
+        expect.objectContaining({ error: expect.any(Error) }),
       );
     });
   });
@@ -977,8 +1147,12 @@ describe("distributed-rate-limit", () => {
       // cacheInvalidate is a security-sensitive preset and should
       // fail-closed (deny) when storage is unavailable, not fail-open.
       resetRateLimitStore();
-      setEnv("UPSTASH_REDIS_REST_URL", "http://localhost:1");
-      setEnv("UPSTASH_REDIS_REST_TOKEN", "fake-token");
+      const mod = await import("@/lib/security/stores/rate-limit-store");
+      vi.spyOn(mod, "createRateLimitStore").mockReturnValue({
+        increment: vi
+          .fn()
+          .mockRejectedValue(new Error("cache invalidate boom")),
+      } as unknown as ReturnType<typeof mod.createRateLimitStore>);
 
       const result = await checkDistributedRateLimit(
         "failmode-user",
@@ -988,6 +1162,32 @@ describe("distributed-rate-limit", () => {
       // For security-sensitive endpoints, storage failure should deny the request
       expect(result.allowed).toBe(false);
       expect(result.degraded).toBe(true);
+      expect(result.deniedReason).toBe("storage_failure");
+      expect(result.retryAfter).toBe(Math.ceil(MINUTE_MS / 1000));
+      expect(result.resetTime).toBeGreaterThanOrEqual(Date.now());
+      expect(mockLoggerError).toHaveBeenCalledWith(
+        "[Rate Limit] Storage backend error details",
+        expect.objectContaining({ error: expect.any(Error) }),
+      );
+    });
+
+    it("should use fail-open for csp preset on storage failure", async () => {
+      resetRateLimitStore();
+      const mod = await import("@/lib/security/stores/rate-limit-store");
+      vi.spyOn(mod, "createRateLimitStore").mockReturnValue({
+        increment: vi.fn().mockRejectedValue(new Error("csp boom")),
+      } as unknown as ReturnType<typeof mod.createRateLimitStore>);
+
+      const result = await checkDistributedRateLimit("fail-open-user", "csp");
+
+      expect(result.allowed).toBe(true);
+      expect(result.degraded).toBe(true);
+      expect(result.retryAfter).toBeNull();
+      expect("deniedReason" in result).toBe(false);
+      expect(mockLoggerError).toHaveBeenCalledWith(
+        "[Rate Limit] Storage backend error details",
+        expect.objectContaining({ error: expect.any(Error) }),
+      );
     });
   });
 });

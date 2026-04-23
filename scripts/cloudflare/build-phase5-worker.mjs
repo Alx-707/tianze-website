@@ -51,7 +51,6 @@ function resolveServerFunction(pathname) {
   }
 
   if (
-    pathname === "/api/contact" ||
     pathname === "/api/inquiry" ||
     pathname === "/api/subscribe" ||
     pathname === "/api/verify-turnstile" ||

@@ -38,6 +38,14 @@ vi.mock("@/lib/security/distributed-rate-limit", () => ({
   },
 }));
 
+vi.mock("@/lib/security/rate-limit-key-strategies", () => ({
+  getIPKey: vi.fn(async () => "ip:test-key"),
+}));
+
+vi.mock("@/lib/security/client-ip", () => ({
+  getClientIP: vi.fn(() => "192.168.1.1"),
+}));
+
 vi.mock("@/lib/logger", () => ({
   logger: {
     info: vi.fn(),
@@ -105,7 +113,7 @@ describe("CSP Report API Route - Rate Limiting", () => {
 
       expect(response.status).toBe(200);
       expect(mockCheckDistributedRateLimit).toHaveBeenCalledWith(
-        expect.stringMatching(/^ip:[0-9a-f]{16}$/),
+        "ip:test-key",
         "csp",
       );
 

@@ -37,7 +37,11 @@ type UpstashResultEnvelope = { result: unknown };
 export function hasUpstashResultProperty(
   value: unknown,
 ): value is UpstashResultEnvelope {
-  return typeof value === "object" && value !== null && "result" in value;
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    Object.hasOwn(value, "result")
+  );
 }
 
 export function unwrapUpstashResult(value: unknown): unknown {
@@ -54,6 +58,16 @@ export function getUpstashPipelineResults(payload: unknown): unknown[] {
   }
 
   return [];
+}
+
+function getStrictUpstashPipelineResults(payload: unknown): unknown[] {
+  const results = getUpstashPipelineResults(payload);
+  if (results.length === 0) {
+    throw new Error(
+      "[Rate Limit] Invalid Upstash response: expected multi-exec results",
+    );
+  }
+  return results;
 }
 
 export function parseStrictNumber(value: unknown, label: string): number {
@@ -107,12 +121,17 @@ class RedisRateLimitStore implements RateLimitStore {
     }
 
     const data = await response.json();
-    const [countResult, _expireResult, ttlResult] =
-      getUpstashPipelineResults(data);
+    const results = getStrictUpstashPipelineResults(data);
+    if (results.length < 3) {
+      throw new Error(
+        "[Rate Limit] Invalid Upstash response: expected multi-exec results",
+      );
+    }
+    const [countResult, _expireResult, ttlResult] = results;
     const count = parseStrictNumber(countResult, "count");
-    const ttlMs = parseStrictNumber(ttlResult, "TTL");
+    const ttlMs = Number(unwrapUpstashResult(ttlResult));
 
-    if (ttlMs < 0) {
+    if (!Number.isFinite(ttlMs) || ttlMs < 0) {
       logger.error("[Rate Limit] Upstash transaction returned invalid TTL");
       throw new Error("Upstash rate limit operation returned invalid TTL");
     }
@@ -141,7 +160,11 @@ class RedisRateLimitStore implements RateLimitStore {
     }
 
     const data = await response.json();
-    const [countResult, ttlResult] = getUpstashPipelineResults(data);
+    const results = getUpstashPipelineResults(data);
+    if (results.length < 2) {
+      return null;
+    }
+    const [countResult, ttlResult] = results;
     const rawCount = unwrapUpstashResult(countResult);
     if (rawCount === null || rawCount === undefined) {
       return null;
@@ -201,7 +224,10 @@ class MemoryRateLimitStore implements RateLimitStore {
 
   get(key: string): Promise<RateLimitEntry | null> {
     const entry = this.store.get(key);
-    if (!entry || entry.expiresAt < Date.now()) {
+    if (!entry || entry.expiresAt <= Date.now()) {
+      if (entry) {
+        this.store.delete(key);
+      }
       return Promise.resolve(null);
     }
     return Promise.resolve(entry);
@@ -210,6 +236,15 @@ class MemoryRateLimitStore implements RateLimitStore {
   delete(key: string): Promise<void> {
     this.store.delete(key);
     return Promise.resolve();
+  }
+
+  cleanup(): void {
+    const now = Date.now();
+    for (const [key, entry] of this.store.entries()) {
+      if (entry.expiresAt <= now) {
+        this.store.delete(key);
+      }
+    }
   }
 }
 

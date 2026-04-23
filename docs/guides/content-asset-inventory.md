@@ -126,10 +126,10 @@
 
 当前位置：
 
-- [company-facts.yaml](/Users/Data/Warehouse/Pipe/tianze-website/docs/content/company/company-facts.yaml)
-- [products.yaml](/Users/Data/Warehouse/Pipe/tianze-website/docs/content/company/products.yaml)
-- [value-copy.md](/Users/Data/Warehouse/Pipe/tianze-website/docs/content/company/value-copy.md)
-- [proof-points.md](/Users/Data/Warehouse/Pipe/tianze-website/docs/content/shared/proof-points.md)
+- [company-facts.yaml](/Users/Data/Warehouse/Pipe/tianze-website/docs/cwf/context/company/company-facts.yaml)
+- [products.yaml](/Users/Data/Warehouse/Pipe/tianze-website/docs/cwf/context/company/products.yaml)
+- [value-copy.md](/Users/Data/Warehouse/Pipe/tianze-website/docs/cwf/context/company/value-copy.md)
+- [proof-points.md](/Users/Data/Warehouse/Pipe/tianze-website/docs/cwf/context/proof-points.md)
 
 它是什么：
 
@@ -152,13 +152,13 @@
 
 当前位置：
 
-- [PROJECT-BRIEF.md](/Users/Data/Warehouse/Pipe/tianze-website/docs/content/PROJECT-BRIEF.md)
-- [README.md](/Users/Data/Warehouse/Pipe/tianze-website/docs/content/README.md)
-- [customers.md](/Users/Data/Warehouse/Pipe/tianze-website/docs/content/company/customers.md)
-- [content-gaps.md](/Users/Data/Warehouse/Pipe/tianze-website/docs/content/company/content-gaps.md)
-- [findings.md](/Users/Data/Warehouse/Pipe/tianze-website/docs/content/homepage/findings.md)
-- [v5-final.md](/Users/Data/Warehouse/Pipe/tianze-website/docs/content/homepage/v5-final.md)
-- [v1-final.md](/Users/Data/Warehouse/Pipe/tianze-website/docs/content/faq/v1-final.md)
+- [PROJECT-BRIEF.md](/Users/Data/Warehouse/Pipe/tianze-website/docs/cwf/context/project-brief.md)
+- [README.md](/Users/Data/Warehouse/Pipe/tianze-website/docs/cwf/README.md)
+- [customers.md](/Users/Data/Warehouse/Pipe/tianze-website/docs/cwf/context/company/customers.md)
+- [content-gaps.md](/Users/Data/Warehouse/Pipe/tianze-website/docs/cwf/context/company/content-gaps.md)
+- [findings.md](/Users/Data/Warehouse/Pipe/tianze-website/docs/cwf/homepage/findings.md)
+- [v5-final.md](/Users/Data/Warehouse/Pipe/tianze-website/docs/cwf/homepage/v5-final.md)
+- [v1-final.md](/Users/Data/Warehouse/Pipe/tianze-website/docs/cwf/faq/v1-final.md)
 
 它是什么：
 
@@ -246,7 +246,7 @@
 - `content/pages/**`
 - `content/posts/**`
 - 内容清单和 MDX 加载底座
-- `docs/content/company/*.yaml`
+- `docs/cwf/context/company/*.yaml`
 
 ## 哪些还比较散
 

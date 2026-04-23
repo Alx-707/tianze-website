@@ -79,7 +79,7 @@ describe("lead-schema mutation fast path", () => {
     }
   });
 
-  it("rejects infinite numeric strings instead of treating them as descriptions", () => {
+  it("treats non-finite numeric strings as descriptive quantities", () => {
     const infinityQuantity = productLeadSchema.safeParse({
       ...validProductLead,
       quantity: "Infinity",
@@ -89,8 +89,12 @@ describe("lead-schema mutation fast path", () => {
       quantity: "1e400",
     });
 
-    expect(infinityQuantity.success).toBe(false);
-    expect(overflowQuantity.success).toBe(false);
+    expect(infinityQuantity.success).toBe(true);
+    expect(overflowQuantity.success).toBe(true);
+    if (infinityQuantity.success && overflowQuantity.success) {
+      expect(infinityQuantity.data.quantity).toBe("Infinity");
+      expect(overflowQuantity.data.quantity).toBe("1e400");
+    }
   });
 
   it("rejects zero, negative, and non-finite numeric quantities", () => {

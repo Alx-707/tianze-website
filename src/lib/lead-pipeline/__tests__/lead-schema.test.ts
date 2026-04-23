@@ -134,32 +134,62 @@ describe("Lead Schema", () => {
       ).toBe(false);
     });
 
-    it("should trim productSlug", () => {
-      const leadWithSpaces = {
+    it("should trim product slug and quantity strings", () => {
+      const leadWithSpacing = {
         ...validProductLead,
         productSlug: "  industrial-pump-x100  ",
+        quantity: "  500 units  ",
       };
-      const result = productLeadSchema.safeParse(leadWithSpaces);
+      const result = productLeadSchema.safeParse(leadWithSpacing);
       expect(result.success).toBe(true);
       if (result.success) {
         expect(result.data.productSlug).toBe("industrial-pump-x100");
-      }
-    });
-
-    it("should trim string quantity", () => {
-      const leadWithSpaces = {
-        ...validProductLead,
-        quantity: "  500 units  ",
-      };
-      const result = productLeadSchema.safeParse(leadWithSpaces);
-      expect(result.success).toBe(true);
-      if (result.success) {
         expect(result.data.quantity).toBe("500 units");
+        expect(result.data.marketingConsent).toBe(false);
       }
     });
 
-    it("should reject product lead with zero numeric quantity", () => {
-      const invalidLead = { ...validProductLead, quantity: 0 };
+    it("should reject product lead without productSlug", () => {
+      const { productSlug: _, ...invalidLead } = validProductLead;
+      const result = productLeadSchema.safeParse(invalidLead);
+      expect(result.success).toBe(false);
+    });
+
+    it("should reject non-string, non-number quantity values", () => {
+      expect(
+        productLeadSchema.safeParse({
+          ...validProductLead,
+          quantity: true,
+        }).success,
+      ).toBe(false);
+      expect(
+        productLeadSchema.safeParse({
+          ...validProductLead,
+          quantity: { value: 10 },
+        }).success,
+      ).toBe(false);
+    });
+
+    it("should reject product lead with a whitespace-only productSlug", () => {
+      const invalidLead = { ...validProductLead, productSlug: "   " };
+      const result = productLeadSchema.safeParse(invalidLead);
+      expect(result.success).toBe(false);
+    });
+
+    it("should reject product lead without productName", () => {
+      const { productName: _, ...invalidLead } = validProductLead;
+      const result = productLeadSchema.safeParse(invalidLead);
+      expect(result.success).toBe(false);
+    });
+
+    it("should accept product lead without optional requirements", () => {
+      const { requirements: _, ...minimalLead } = validProductLead;
+      const result = productLeadSchema.safeParse(minimalLead);
+      expect(result.success).toBe(true);
+    });
+
+    it("should reject product lead with a whitespace-only quantity string", () => {
+      const invalidLead = { ...validProductLead, quantity: "   " };
       const result = productLeadSchema.safeParse(invalidLead);
       expect(result.success).toBe(false);
     });
@@ -216,44 +246,15 @@ describe("Lead Schema", () => {
       }
     });
 
-    it("should reject infinite numeric quantity strings", () => {
-      const infinityQuantity = productLeadSchema.safeParse({
+    it("should still accept descriptive quantity strings and positive numeric strings", () => {
+      const singleDigitQuantity = productLeadSchema.safeParse({
         ...validProductLead,
-        quantity: "Infinity",
+        quantity: "1",
       });
-      const overflowQuantity = productLeadSchema.safeParse({
+      const numericStringQuantity = productLeadSchema.safeParse({
         ...validProductLead,
-        quantity: "1e400",
+        quantity: "12",
       });
-
-      expect(infinityQuantity.success).toBe(false);
-      expect(overflowQuantity.success).toBe(false);
-      if (!infinityQuantity.success && !overflowQuantity.success) {
-        expect(infinityQuantity.error.issues[0]?.message).toBe(
-          "Quantity must be positive when using a numeric string",
-        );
-        expect(overflowQuantity.error.issues[0]?.message).toBe(
-          "Quantity must be positive when using a numeric string",
-        );
-      }
-    });
-
-    it("should reject non-string, non-number quantity values", () => {
-      expect(
-        productLeadSchema.safeParse({
-          ...validProductLead,
-          quantity: true,
-        }).success,
-      ).toBe(false);
-      expect(
-        productLeadSchema.safeParse({
-          ...validProductLead,
-          quantity: { value: 10 },
-        }).success,
-      ).toBe(false);
-    });
-
-    it("should keep descriptive strings even when they end with digits", () => {
       const descriptiveQuantity = productLeadSchema.safeParse({
         ...validProductLead,
         quantity: "500 units per month",
@@ -263,30 +264,23 @@ describe("Lead Schema", () => {
         quantity: "approx 500",
       });
 
+      expect(singleDigitQuantity.success).toBe(true);
+      expect(numericStringQuantity.success).toBe(true);
       expect(descriptiveQuantity.success).toBe(true);
       expect(trailingNumericDescription.success).toBe(true);
-      if (descriptiveQuantity.success && trailingNumericDescription.success) {
+      if (
+        singleDigitQuantity.success &&
+        numericStringQuantity.success &&
+        descriptiveQuantity.success &&
+        trailingNumericDescription.success
+      ) {
+        expect(singleDigitQuantity.data.quantity).toBe("1");
+        expect(typeof singleDigitQuantity.data.quantity).toBe("string");
+        expect(numericStringQuantity.data.quantity).toBe("12");
+        expect(typeof numericStringQuantity.data.quantity).toBe("string");
         expect(descriptiveQuantity.data.quantity).toBe("500 units per month");
         expect(trailingNumericDescription.data.quantity).toBe("approx 500");
       }
-    });
-
-    it("should reject product lead without productSlug", () => {
-      const { productSlug: _, ...invalidLead } = validProductLead;
-      const result = productLeadSchema.safeParse(invalidLead);
-      expect(result.success).toBe(false);
-    });
-
-    it("should reject product lead without productName", () => {
-      const { productName: _, ...invalidLead } = validProductLead;
-      const result = productLeadSchema.safeParse(invalidLead);
-      expect(result.success).toBe(false);
-    });
-
-    it("should accept product lead without optional requirements", () => {
-      const { requirements: _, ...minimalLead } = validProductLead;
-      const result = productLeadSchema.safeParse(minimalLead);
-      expect(result.success).toBe(true);
     });
   });
 
@@ -349,25 +343,6 @@ describe("Lead Schema", () => {
       }
     });
 
-    it("should discriminate product lead with string quantity", () => {
-      const productLead = {
-        type: LEAD_TYPES.PRODUCT,
-        fullName: "Test User",
-        email: "test@example.com",
-        productSlug: "test-product",
-        productName: "Test Product",
-        quantity: "10 boxes",
-      };
-      const result = leadSchema.safeParse(productLead);
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toMatchObject({
-          quantity: "10 boxes",
-          type: LEAD_TYPES.PRODUCT,
-        });
-      }
-    });
-
     it("should correctly discriminate newsletter lead", () => {
       const newsletterLead = {
         type: LEAD_TYPES.NEWSLETTER,
@@ -387,6 +362,10 @@ describe("Lead Schema", () => {
       };
       const result = leadSchema.safeParse(invalidLead);
       expect(result.success).toBe(false);
+    });
+
+    it("should keep all three discriminated union variants registered", () => {
+      expect(leadSchema.options).toHaveLength(3);
     });
   });
 

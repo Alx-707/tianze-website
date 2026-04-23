@@ -17,6 +17,21 @@ import { type IdempotencyStore } from "@/lib/security/stores/idempotency-store";
 export const DEFAULT_TTL_MS = 24 * MILLISECONDS_PER_HOUR;
 export const HTTP_CONFLICT = 409;
 
+function hasOwnNumericStatusCode(
+  value: unknown,
+): value is Record<string, unknown> & { statusCode: number } {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return false;
+  }
+
+  if (!Object.hasOwn(value, "statusCode")) {
+    return false;
+  }
+
+  const record = value as Record<string, unknown>;
+  return typeof record.statusCode === "number";
+}
+
 /**
  * Poll the store until the entry transitions from PENDING to COMPLETED.
  * Used by the "loser" of a concurrent SETNX race to wait for the winner.
@@ -27,9 +42,9 @@ export async function waitForCompletion(
 ): Promise<NextResponse> {
   const POLL_INTERVAL_MS = 50;
   const TIMEOUT_MS = 10_000;
-  const maxAttempts = TIMEOUT_MS / POLL_INTERVAL_MS;
+  const pollAttempts = Math.floor(TIMEOUT_MS / POLL_INTERVAL_MS);
 
-  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+  for (let attempt = 0; attempt < pollAttempts; attempt += 1) {
     await new Promise<void>((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
     const entry = await store.get(key);
     if (!entry) {
@@ -40,7 +55,9 @@ export async function waitForCompletion(
       );
     }
     if (entry.status === "success") {
-      return NextResponse.json(entry.response);
+      return NextResponse.json(entry.response, {
+        status: HTTP_OK,
+      });
     }
     if (entry.status === "error") {
       return createApiErrorResponse(
@@ -63,33 +80,14 @@ export function normalizeHandlerResult(result: unknown): {
   body: unknown;
   statusCode: number;
 } {
-  let objectLike: object | null = null;
-  if (typeof result === "object") {
-    objectLike = result;
-  }
-
-  if (objectLike === null) {
+  if (!hasOwnNumericStatusCode(result)) {
     return { body: result, statusCode: HTTP_OK };
-  }
-
-  if (Array.isArray(objectLike)) {
-    return { body: [...objectLike], statusCode: HTTP_OK };
-  }
-
-  const record = objectLike as Record<string, unknown>;
-  if (!Object.hasOwn(record, "statusCode")) {
-    return { body: { ...record }, statusCode: HTTP_OK };
-  }
-
-  const { statusCode } = record;
-  if (typeof statusCode !== "number") {
-    return { body: { ...record }, statusCode: HTTP_OK };
   }
 
   // Strip statusCode from the JSON payload; keep it on the stored entry.
   // This mirrors `createApiErrorResponse()` which communicates status via HTTP,
   // not via a redundant JSON field.
-  const { statusCode: _statusCode, ...rest } = record;
+  const { statusCode, ...rest } = result;
   return { body: rest, statusCode };
 }
 
@@ -112,9 +110,9 @@ export async function waitForCompletionResult<T>(
 ): Promise<IdempotentResult<T>> {
   const POLL_INTERVAL_MS = 50;
   const TIMEOUT_MS = 10_000;
-  const maxAttempts = TIMEOUT_MS / POLL_INTERVAL_MS;
+  const pollAttempts = Math.floor(TIMEOUT_MS / POLL_INTERVAL_MS);
 
-  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+  for (let attempt = 0; attempt < pollAttempts; attempt += 1) {
     await new Promise<void>((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
     const entry = await store.get(key);
     if (!entry) {

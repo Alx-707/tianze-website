@@ -83,7 +83,7 @@ Project-specific rules in `.claude/rules/` — read when relevant:
 - `debugging.md` — Troubleshooting
 - `dependency-upgrade.md` — Dependency upgrade protocol
 - `i18n.md` — next-intl usage, cache components compatibility
-- `page-patterns.md` — Page-level design patterns (→ `docs/design/system/PAGE-PATTERNS.md`)
+- `page-patterns.md` — Page-level design patterns (→ `docs/impeccable/system/PAGE-PATTERNS.md`)
 - `quality-gates.md` — CI, complexity limits
 - `review-checklist.md` — Code review verification commands (FradSer agents 参考)
 - `security.md` — CSP, validation, API endpoint protection table
@@ -121,10 +121,10 @@ Emotional goals: Professional confidence, engineering credibility, reliability a
 
 ### Design System References
 - Production truth: `src/app/globals.css` (always authoritative)
-- Token spec: `docs/design/system/TIANZE-DESIGN-TOKENS.md`
-- Motion: `docs/design/system/MOTION-PRINCIPLES.md`
-- Grid: `docs/design/system/GRID-SYSTEM.md`
-- Page Patterns: `docs/design/system/PAGE-PATTERNS.md`
+- Token spec: `docs/impeccable/system/TIANZE-DESIGN-TOKENS.md`
+- Motion: `docs/impeccable/system/MOTION-PRINCIPLES.md`
+- Grid: `docs/impeccable/system/GRID-SYSTEM.md`
+- Page Patterns: `docs/impeccable/system/PAGE-PATTERNS.md`
 
 ## Error-Driven Rules
 

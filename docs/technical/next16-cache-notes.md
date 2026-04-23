@@ -1,0 +1,69 @@
+# Next.js 16 Cache Notes
+
+这份文档记录当前仓库在 Next.js 16、Cache Components 和 i18n 组合下，需要长期记住的缓存注意点。
+
+## 当前状态
+
+- `cacheComponents: true` 已启用
+- 数据函数级 `"use cache"` + `cacheLife()` 已使用
+- locale 传递以显式参数为主
+- `setRequestLocale` 当前仍在用
+- PPR 暂未启用
+- dynamicIO 暂未启用
+- `cacheTag()` / `revalidateTag()` 暂未引入
+
+## 当前稳妥做法
+
+### 1. 缓存放在数据函数，不放在整页
+
+当前更稳的方式是：
+
+- 在数据函数层使用 `"use cache"`
+- 页面层保持清晰
+- 不把关键转化页做成大面积缓存实验场
+
+### 2. i18n 相关缓存必须显式传 `locale`
+
+当前默认原则：
+
+- `locale` 显式传入
+- 避免把隐式 request 依赖塞进缓存函数
+- next-intl 相关调用优先走显式 locale 模式
+
+### 3. Contact 等关键路径保持保守
+
+关键转化路径不要为了缓存优化而扩大风险面，尤其是：
+
+- Contact
+- inquiry
+- subscribe
+- health
+
+## 当前未开启项的含义
+
+### PPR
+
+当前未启用，主要原因不是“不会用”，而是 next-intl / locale 路由 / 当前运行模型组合下还没有必要冒这个风险。
+
+### dynamicIO
+
+当前未启用，原因类似：  
+现阶段更看重稳定性，而不是为了追新渲染模型去扩大 i18n 和缓存边界风险。
+
+## 未来升级入口
+
+以后如果要重新看这条线，优先检查：
+
+- `src/i18n/request.ts`
+- `src/app/[locale]/layout.tsx`
+- `src/lib/load-messages.ts`
+- `src/lib/i18n-performance.ts`
+- 任何使用 `"use cache"` 且直接碰 i18n 的函数
+
+## 当前参考来源
+
+当前这份结论主要来自：
+
+- `docs/archive/next16-cache-i18n-upgrade-status.md`
+
+如果后面这条线继续推进，应优先更新这份文档，而不是继续堆零散升级笔记。

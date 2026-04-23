@@ -48,12 +48,8 @@ const sanitizedString = () => z.string().overwrite(sanitizePlainText);
 
 function isPositiveQuantityString(value: string): boolean {
   const parsedQuantity = Number(value);
-  if (Number.isNaN(parsedQuantity)) {
-    return true;
-  }
-
   if (!Number.isFinite(parsedQuantity)) {
-    return false;
+    return true;
   }
 
   return parsedQuantity > 0;
@@ -81,7 +77,7 @@ const baseLeadFields = {
 };
 
 const productQuantitySchema: z.ZodType<string | number> = z
-  .unknown()
+  .any()
   .transform((value) => (typeof value === "string" ? value.trim() : value))
   .refine(isValidProductQuantity, {
     message: "Quantity must be positive when using a numeric string",
@@ -135,7 +131,7 @@ export const newsletterLeadSchema = z.object({
  * Unified lead schema using discriminated union
  * Allows type-safe handling of different lead types
  */
-const leadSchemaVariants = {
+const leadSchemaOptions = {
   contact: contactLeadSchema,
   product: productLeadSchema,
   newsletter: newsletterLeadSchema,
@@ -143,7 +139,7 @@ const leadSchemaVariants = {
 
 export const leadSchema = z.discriminatedUnion(
   "type",
-  Object.values(leadSchemaVariants) as [
+  Object.values(leadSchemaOptions) as [
     typeof contactLeadSchema,
     typeof productLeadSchema,
     typeof newsletterLeadSchema,

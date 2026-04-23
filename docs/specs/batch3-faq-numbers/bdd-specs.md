@@ -1,6 +1,6 @@
 # Behavioral Specifications: Batch 3 — Distributed FAQ + Core Numbers
 
-> Design spec: `docs/superpowers/specs/2026-03-25-batch3-faq-numbers-design.md` (v2 — distributed)
+> Design spec: `docs/superpowers/archive/specs/2026-03-25-batch3-faq-numbers-design.md` (v2 — distributed)
 > Each scenario maps to 1 Red task (failing test) + 1 Green task (implementation).
 
 ---

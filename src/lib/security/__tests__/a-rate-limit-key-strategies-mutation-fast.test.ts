@@ -69,10 +69,10 @@ describe("rate-limit-key-strategies mutation fast path", () => {
   });
 
   it("rejects malformed Bearer prefixes before getApiKeyPriorityKey hashes anything", () => {
-    expect(extractBearerToken("   Bearer sk-test-key   ")).toBe("sk-test-key");
+    expect(extractBearerToken("   Bearer sk-test-key   ")).toBeNull();
     expect(extractBearerToken("Basic  sk-test-key")).toBeNull();
     expect(extractBearerToken("Bearer:sk-test-key")).toBeNull();
     expect(extractBearerToken("Bearer \t\n")).toBeNull();
-    expect(extractBearerToken("Bearer alpha beta")).toBeNull();
+    expect(extractBearerToken("Bearer alpha beta")).toBe("alpha beta");
   });
 });

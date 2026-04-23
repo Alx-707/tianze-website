@@ -1,6 +1,6 @@
 # Product Pages Redesign — Behavioral Specifications
 
-> Design doc: `docs/superpowers/specs/2026-03-23-product-pages-design.md`
+> Design doc: `docs/superpowers/archive/specs/2026-03-23-product-pages-design.md`
 > Date: 2026-03-23
 
 ---

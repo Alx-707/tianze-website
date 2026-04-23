@@ -254,8 +254,8 @@ export interface PostListOptions {
 /**
  * High-level cache-friendly wrapper signatures designed in P2-1.
  *
- * Implementations will live in src/lib/content/blog.ts and
- * src/lib/content/products.ts in later tasks (P2-2 / P2-3).
+ * Implementations will live in src/lib/content/blog.ts and any future
+ * cache-friendly product wrapper that is reintroduced intentionally.
  *
  * These functions are intentionally designed to:
  * - accept only explicit, serializable parameters

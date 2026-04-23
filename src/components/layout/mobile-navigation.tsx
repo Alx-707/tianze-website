@@ -9,6 +9,7 @@
 import { useEffect, useRef, useState, type ComponentProps } from "react";
 import { Check, Globe, Menu, X } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
+import { SINGLE_SITE_HOME_LINK_TARGETS } from "@/config/single-site-page-expression";
 import {
   isActivePath,
   mobileNavigation,
@@ -193,7 +194,7 @@ export function MobileNavigation({
                 <SheetClose asChild>
                   <Link
                     href={{
-                      pathname: "/contact",
+                      pathname: SINGLE_SITE_HOME_LINK_TARGETS.contact,
                       query: { source: "mobile_nav_cta" },
                     }}
                     prefetch={false}

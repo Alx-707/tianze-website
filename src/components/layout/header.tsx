@@ -3,6 +3,7 @@
  *
  * 服务端渲染的头部，交互部件以客户端小岛方式注入，减少首屏 JS 体积。
  */
+import { SINGLE_SITE_HOME_LINK_TARGETS } from "@/config/single-site-page-expression";
 import { Link } from "@/i18n/routing";
 import { getRuntimeEnvString } from "@/lib/env";
 import { NAVIGATION_ARIA } from "@/lib/navigation";
@@ -207,7 +208,7 @@ function HeaderUtilityControls({
             className="header-cta-desktop-only"
           >
             <Link
-              href="/contact"
+              href={SINGLE_SITE_HOME_LINK_TARGETS.contact}
               prefetch={false}
               data-testid="header-cta"
               className="notranslate"

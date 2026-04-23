@@ -20,8 +20,8 @@ import {
 
 export type NavigationItem = SiteNavigationItem;
 
-// Main navigation configuration
-// 导航顺序：首页、产品、博客、关于、隐私政策
+// Main navigation is authored in `src/config/single-site.ts`; this wrapper keeps
+// existing consumers pinned to the active single-site source.
 export const mainNavigation: NavigationItem[] = SINGLE_SITE_NAVIGATION;
 
 // Mobile navigation configuration (can be different from main nav)

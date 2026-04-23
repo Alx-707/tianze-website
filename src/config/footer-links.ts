@@ -92,6 +92,8 @@ export interface FooterStyleTokens {
   hover: FooterHoverTokens;
 }
 
+// Footer truth is authored in `src/config/single-site.ts`; this module only
+// exposes the active single-site columns together with style tokens.
 export const FOOTER_COLUMNS: FooterColumnConfig[] = SINGLE_SITE_FOOTER_COLUMNS;
 
 export type FooterTokens = typeof FOOTER_STYLE_TOKENS;

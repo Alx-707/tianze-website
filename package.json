@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "engines": {
-    "node": ">=20.19 <21",
+    "node": ">=20.19 <23",
     "pnpm": ">=10.13.1 <11"
   },
   "packageManager": "pnpm@10.13.1",
@@ -24,6 +24,9 @@
     "test:debug": "VITEST_DEBUG_OUTPUT=true vitest run",
     "prepare": "git rev-parse --git-dir > /dev/null 2>&1 && lefthook install || true",
     "type-check": "tsc --noEmit",
+    "type-check:source": "tsc --noEmit -p tsconfig.typecheck-source.json",
+    "type-check:generated": "tsc --noEmit",
+    "validate:generated-types": "pnpm clean:next-artifacts && pnpm build && pnpm type-check:generated",
     "validate:translations": "node scripts/validate-translations.js",
     "i18n:regenerate-flat": "node scripts/regenerate-flat-translations.js",
     "type-check:tests": "tsc --noEmit -p tsconfig.test.json",
@@ -83,6 +86,8 @@
     "quality:gate:fast": "node scripts/quality-gate.js --mode=fast",
     "quality:gate:full": "node scripts/quality-gate.js --mode=full",
     "quality:gate:json": "node scripts/quality-gate.js --output=json",
+    "design:detect": "node scripts/design-detect.mjs",
+    "design:detect:ci": "node scripts/design-detect.mjs --json",
     "quality:quick:staged": "node scripts/quality-quick-staged.js",
     "arch:metrics": "node scripts/architecture-metrics.js",
     "arch:hotspots": "node scripts/structural-hotspots.js",
@@ -138,7 +143,6 @@
     "build:cf:phase6": "pnpm build:cf && node scripts/cloudflare/build-phase6-workers.mjs",
     "preview:cf": "pnpm clean:next-artifacts && pnpm build:cf && pnpm exec opennextjs-cloudflare preview --env preview",
     "preview:cf:wrangler": "pnpm clean:next-artifacts && pnpm build:cf && pnpm exec wrangler dev --env preview",
-    "proof:cf:preview-deployed": "node scripts/cloudflare/proof-preview-deployed.mjs",
     "deploy:cf": "pnpm clean:next-artifacts && pnpm build:cf && pnpm exec wrangler deploy --env production",
     "deploy:cf:phase6:preview": "pnpm clean:next-artifacts && pnpm build:cf:phase6 && node scripts/cloudflare/deploy-phase6.mjs --env preview",
     "deploy:cf:phase6:production": "pnpm clean:next-artifacts && pnpm build:cf:phase6 && node scripts/cloudflare/deploy-phase6.mjs --env production",
@@ -149,9 +153,12 @@
     "deploy:cf:preview": "pnpm clean:next-artifacts && pnpm build:cf && pnpm exec wrangler deploy --env preview",
     "deploy:cf:dry-run": "pnpm clean:next-artifacts && pnpm build:cf && pnpm exec wrangler deploy --dry-run --outdir /tmp/verify-cf --env preview",
     "test:mutation": "stryker run",
-    "test:mutation:lead": "stryker run --mutate 'src/lib/lead-pipeline/**/*.ts,!src/lib/lead-pipeline/**/__tests__/**/*.ts,!src/lib/lead-pipeline/**/*.test.ts,!src/lib/lead-pipeline/**/*.spec.ts'",
-    "test:mutation:security": "stryker run --mutate 'src/lib/security/**/*.ts,!src/lib/security/**/__tests__/**/*.ts,!src/lib/security/**/*.test.ts,!src/lib/security/**/*.spec.ts'",
-    "test:mutation:lead-security": "stryker run --mutate 'src/lib/lead-pipeline/**/*.ts,!src/lib/lead-pipeline/**/__tests__/**/*.ts,!src/lib/lead-pipeline/**/*.test.ts,!src/lib/lead-pipeline/**/*.spec.ts,src/lib/security/**/*.ts,!src/lib/security/**/__tests__/**/*.ts,!src/lib/security/**/*.test.ts,!src/lib/security/**/*.spec.ts'"
+    "test:mutation:idempotency": "stryker run --mutate 'src/lib/idempotency/**/*.ts'",
+    "test:mutation:security": "stryker run --mutate 'src/lib/security/**/*.ts'",
+    "test:mutation:lead": "stryker run --mutate 'src/lib/lead-pipeline/**/*.ts'",
+    "test:mutation:form-schema": "stryker run --mutate 'src/lib/form-schema/**/*.ts'",
+    "review:mutation:critical": "node scripts/review-mutation-critical.js",
+    "proof:cf:preview-deployed": "node scripts/cloudflare/proof-preview-deployed.mjs"
   },
   "dependencies": {
     "@marsidev/react-turnstile": "^1.5.0",
@@ -183,7 +190,7 @@
     "nextjs-toploader": "^3.9.17",
     "react": "19.2.4",
     "react-dom": "19.2.4",
-    "resend": "^6.10.0",
+    "resend": "^6.12.2",
     "server-only": "^0.0.1",
     "tailwind-merge": "^3.5.0",
     "zod": "^4.3.6"
@@ -213,7 +220,7 @@
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
     "@types/js-yaml": "^4.0.9",
-    "@types/node": "^20.19.39",
+    "@types/node": "^22.19.15",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitest/coverage-v8": "^4.1.2",
@@ -272,7 +279,8 @@
       "serialize-javascript@<=7.0.2": ">=7.0.3",
       "webpack@>=5.49.0 <5.104.1": ">=5.104.1",
       "picomatch@>=4.0.0 <4.0.4": ">=4.0.4",
-      "next-intl@<4.9.1": ">=4.9.1"
+      "next-intl@<4.9.1": ">=4.9.1",
+      "uuid": ">=14.0.0"
     },
     "onlyBuiltDependencies": [
       "@tailwindcss/oxide",

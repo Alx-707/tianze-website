@@ -1,5 +1,6 @@
 "use client";
 
+import { SINGLE_SITE_HOME_LINK_TARGETS } from "@/config/single-site-page-expression";
 import { Link } from "@/i18n/routing";
 import { ArrowRight } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -36,7 +37,7 @@ export function CTABannerBlock({
             asChild
           >
             <Link
-              href="/contact"
+              href={SINGLE_SITE_HOME_LINK_TARGETS.contact}
               prefetch={false}
               className="flex items-center gap-2"
             >

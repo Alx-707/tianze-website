@@ -14,9 +14,14 @@ vi.mock("@/lib/security/distributed-rate-limit", () => ({
       allowed: true,
       remaining: 10,
       resetTime: Date.now() + 60000,
+      retryAfter: null,
     }),
   ),
   createRateLimitHeaders: vi.fn(() => new Headers()),
+}));
+
+vi.mock("@/lib/security/rate-limit-key-strategies", () => ({
+  getIPKey: vi.fn(async () => "ip:test-key"),
 }));
 
 // Mock environment variables

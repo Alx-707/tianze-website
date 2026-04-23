@@ -8,41 +8,6 @@
   "excerptLength": 160,
   "dateFormat": "YYYY-MM-DD",
   "timeZone": "UTC",
-  "seo": {
-    "defaultTitle": "Tianze Pipe - Pipe Bending Experts",
-    "titleTemplate": "%s | Tianze Pipe - Pipe Bending Experts",
-    "defaultDescription": "Professional PVC conduit bends, fittings, pipe bending equipment, and PETG pneumatic tubes for global B2B projects.",
-    "defaultKeywords": [
-      "Tianze Pipe",
-      "PVC conduit fittings",
-      "pipe bending machine",
-      "PETG pneumatic tube",
-      "Schedule 80 conduit",
-      "pipe manufacturer China"
-    ],
-    "defaultOgImage": "/images/og-image.jpg"
-  },
-  "content": {
-    "posts": {
-      "enableComments": false,
-      "enableRelatedPosts": true,
-      "maxRelatedPosts": 3,
-      "enableReadingTime": true,
-      "enableToc": true,
-      "enableSocialShare": true
-    },
-    "pages": {
-      "enableToc": true,
-      "enableLastModified": true,
-      "enableBreadcrumbs": true
-    },
-    "products": {
-      "enableRelatedProducts": true,
-      "maxRelatedProducts": 4,
-      "enableSpecs": true,
-      "enableCertifications": true
-    }
-  },
   "validation": {
     "strictMode": false,
     "requireSlug": true,
@@ -59,11 +24,5 @@
       "requireCategory": true,
       "requirePrice": false
     }
-  },
-  "performance": {
-    "enableCache": true,
-    "cacheMaxAge": 3600,
-    "enableCompression": true,
-    "enableLazyLoading": true
   }
 }

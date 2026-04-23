@@ -1,7 +1,6 @@
 ---
 paths:
   - "src/app/api/**/*"
-  - "src/lib/actions/**/*"
   - "src/lib/security/**/*"
   - "src/lib/validations.ts"
 ---
@@ -49,7 +48,7 @@ See `/.claude/rules/threat-modeling.md` for STRIDE analysis on new/changed API r
 
 | Measure | Config |
 |---------|--------|
-| Rate Limiting | Default 10/min/IP, Contact API 5/min/IP |
+| Rate Limiting | Default 10/min/IP, canonical contact lead path 5/min/IP |
 | Anti-abuse / Bot filtering | Cloudflare Turnstile (human verification, not a CSRF token) |
 | Idempotency | Required for side-effectful public write paths where duplicate submission matters |
 | CSRF | Not required in the current architecture (no cookie-based session auth); if that changes, add Origin validation + SameSite + CSRF token |
@@ -60,9 +59,7 @@ Rate limit utility: `src/lib/security/distributed-rate-limit.ts`
 
 | Endpoint | Required Protection | Status |
 |----------|---------------------|--------|
-| `/api/whatsapp/send` | API Key Auth + Rate Limit | ✅ |
-| `/api/whatsapp/webhook` | Signature Verify + Rate Limit | ✅ |
-| Contact page Server Action | Turnstile + Rate Limit + validation + idempotency on the canonical lead path | ✅ |
+| Contact page Server Action | Rate Limit + validation + idempotency on the canonical lead path | ✅ |
 | `/api/inquiry` | Turnstile + Rate Limit + Idempotency + JSON body size gate | ✅ |
 | `/api/subscribe` | Rate Limit + Idempotency + JSON body size gate | ✅ |
 | `/api/cache/invalidate` | Secret Auth + Pre/Post Rate Limit | ✅ |
@@ -102,4 +99,5 @@ For public write endpoints, verify all applicable controls:
 - `AIRTABLE_API_KEY`, `RESEND_API_KEY`, `TURNSTILE_SECRET_KEY`
 
 ### Cookie Config
-- `httpOnly: true`, `secure: true`, `sameSite: 'strict'`
+- Locale cookie (`NEXT_LOCALE`) uses `sameSite: 'lax'` so cross-origin navigations preserve the chosen language (set in `src/middleware.ts`).
+- For any future authentication or session cookie, default to `httpOnly: true`, `secure: true`, `sameSite: 'strict'` unless a specific flow requires otherwise.

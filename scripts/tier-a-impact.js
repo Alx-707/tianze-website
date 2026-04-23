@@ -27,9 +27,10 @@ const AREAS = [
     crossReview: "Security review when validation/rate-limit/abuse changes",
     reviewCommand: "pnpm review:lead-family",
     patterns: [
-      "src/app/api/contact/",
+      "src/lib/actions/contact.ts",
       "src/app/api/inquiry/",
       "src/app/api/subscribe/",
+      "src/lib/contact-form-processing.ts",
       "src/lib/api/lead-route-response.ts",
       "src/lib/lead-pipeline/",
       "src/components/forms/",
