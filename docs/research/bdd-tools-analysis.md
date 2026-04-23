@@ -150,7 +150,7 @@ describeFeature(feature, ({ Scenario }) => {
 
 ### 方案 D：obra/superpowers brainstorming skill（已有，但不够）
 
-**是什么**：superpowers 内置的头脑风暴 skill，设计文档存储到 `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md`。
+**是什么**：superpowers 内置的头脑风暴 skill。在这个项目当前收口后的文档组织里，相关设计文档保留在 `docs/superpowers/` 工作盘中。
 
 **实际 BDD 能力**：brainstorming skill 的文档中**没有提及 BDD 或 Given/When/Then**。设计文档是自由格式，涵盖 architecture/components/data flow/error handling/testing，但没有结构化的行为规格层。
 
@@ -211,7 +211,7 @@ describeFeature(feature, ({ Scenario }) => {
 ```
 1. obra brainstorming
    └─ 自由探索需求，生成设计文档
-   └─ 输出：docs/superpowers/specs/YYYY-MM-DD-topic-design.md
+   └─ 输出：docs/superpowers/ 工作盘内的设计文档
 
 2. BDD Formulation（新增）
    └─ 触发：设计文档审批后，进入实现前

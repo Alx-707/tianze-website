@@ -21,7 +21,7 @@
 
 ### Brand Visual Alignment
 
-Reference: `docs/design/system/TIANZE-DESIGN-TOKENS.md`
+Reference: `docs/impeccable/system/TIANZE-DESIGN-TOKENS.md`
 - Primary: Steel Blue #004d9e
 - Aesthetic: Industrial Steel Blue + Vercel craft
 - Personality: Precise. Substantial. Trustworthy.

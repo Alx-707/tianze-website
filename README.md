@@ -88,12 +88,20 @@ TURNSTILE_SECRET_KEY=你的服务端私钥
 - **联系表单配置**：`src/config/contact-form-config.ts` 提供字段顺序、启用状态以及校验配置，并通过 `buildFormFieldsFromConfig` 与 `createContactFormSchemaFromConfig` 同步前后端字段定义。
 - **主题与变量**：`src/app/globals.css` 定义品牌色、布局与 CSS 变量，通过 Tailwind CSS 4 的 `@theme inline` 和 `:root/.dark` 实现明暗主题切换。
 
-## 🔧 维护与扩展
+## 🔧 文档入口
 
-当前仓库的活跃维护文档集中在 `docs/guides/`：
+当前仓库的新文档入口已经开始收口到 `docs/`：
 
-- **[PERFORMANCE-GOVERNANCE.md](./docs/guides/PERFORMANCE-GOVERNANCE.md)** - 当前性能治理总规则：哪些值得借鉴、哪些先别动、哪些证明才算数
-- **[tech-stack.md](./docs/guides/tech-stack.md)** - 当前技术栈、构建链路和关键依赖
+- **[docs/README.md](./docs/README.md)** - 文档总入口
+- **[project-context.md](./docs/project-context.md)** - 项目背景、公司信息、业务信息
+- **[design-truth.md](./docs/design-truth.md)** - 当前设计真相
+- **[integrations.md](./docs/integrations.md)** - 后续可能引入的插件、组件、集成清单
+- **[technical/tech-stack.md](./docs/technical/tech-stack.md)** - 纯技术栈信息
+- **[technical/next16-cache-notes.md](./docs/technical/next16-cache-notes.md)** - Next.js 16 / Cache Components / i18n 缓存注意点
+- **[technical/deployment-notes.md](./docs/technical/deployment-notes.md)** - Cloudflare / build:cf / preview / deploy 当前技术事实
+
+当前仍然有效的当前真相与发布证明文档，暂时仍以 `docs/guides/` 为准：
+
 - **[RELEASE-PROOF-RUNBOOK.md](./docs/guides/RELEASE-PROOF-RUNBOOK.md)** - 发布前验证与发布门禁执行顺序
 - **[QUALITY-PROOF-LEVELS.md](./docs/guides/QUALITY-PROOF-LEVELS.md)** - 不同级别检查各自证明什么
 - **[POLICY-SOURCE-OF-TRUTH.md](./docs/guides/POLICY-SOURCE-OF-TRUTH.md)** - 当前规则和政策以哪些文件为准

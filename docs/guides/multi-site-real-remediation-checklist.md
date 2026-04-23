@@ -94,7 +94,7 @@
 
 - [site-config.ts](/Users/Data/Warehouse/Pipe/tianze-website/src/config/paths/site-config.ts)
 - [site-facts.ts](/Users/Data/Warehouse/Pipe/tianze-website/src/config/site-facts.ts)
-- [company-facts.yaml](/Users/Data/Warehouse/Pipe/tianze-website/docs/content/company/company-facts.yaml)
+- [company-facts.yaml](/Users/Data/Warehouse/Pipe/tianze-website/docs/cwf/context/company/company-facts.yaml)
 
 ### 2. 联系方式和社媒
 
@@ -110,7 +110,7 @@
 主要涉及：
 
 - [product-catalog.ts](/Users/Data/Warehouse/Pipe/tianze-website/src/constants/product-catalog.ts)
-- [products.yaml](/Users/Data/Warehouse/Pipe/tianze-website/docs/content/company/products.yaml)
+- [products.yaml](/Users/Data/Warehouse/Pipe/tianze-website/docs/cwf/context/company/products.yaml)
 
 ### 4. 默认 SEO 值
 
@@ -174,9 +174,9 @@
 
 主要涉及：
 
-- [company-facts.yaml](/Users/Data/Warehouse/Pipe/tianze-website/docs/content/company/company-facts.yaml)
-- [products.yaml](/Users/Data/Warehouse/Pipe/tianze-website/docs/content/company/products.yaml)
-- [value-copy.md](/Users/Data/Warehouse/Pipe/tianze-website/docs/content/company/value-copy.md)
+- [company-facts.yaml](/Users/Data/Warehouse/Pipe/tianze-website/docs/cwf/context/company/company-facts.yaml)
+- [products.yaml](/Users/Data/Warehouse/Pipe/tianze-website/docs/cwf/context/company/products.yaml)
+- [value-copy.md](/Users/Data/Warehouse/Pipe/tianze-website/docs/cwf/context/company/value-copy.md)
 
 ### 4. 模板残留清理
 

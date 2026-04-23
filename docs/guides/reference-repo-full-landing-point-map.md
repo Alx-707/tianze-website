@@ -279,7 +279,7 @@
 
 当前项目落点：
 
-- [docs/content/**](/Users/Data/Warehouse/Pipe/tianze-website/docs/content)
+- [docs/cwf/**](/Users/Data/Warehouse/Pipe/tianze-website/docs/cwf)
 - [content/pages/**](/Users/Data/Warehouse/Pipe/tianze-website/content/pages)
 - [content/posts/**](/Users/Data/Warehouse/Pipe/tianze-website/content/posts)
 
@@ -341,9 +341,9 @@
 
 当前项目落点：
 
-- [company-facts.yaml](/Users/Data/Warehouse/Pipe/tianze-website/docs/content/company/company-facts.yaml)
-- [products.yaml](/Users/Data/Warehouse/Pipe/tianze-website/docs/content/company/products.yaml)
-- [value-copy.md](/Users/Data/Warehouse/Pipe/tianze-website/docs/content/company/value-copy.md)
+- [company-facts.yaml](/Users/Data/Warehouse/Pipe/tianze-website/docs/cwf/context/company/company-facts.yaml)
+- [products.yaml](/Users/Data/Warehouse/Pipe/tianze-website/docs/cwf/context/company/products.yaml)
+- [value-copy.md](/Users/Data/Warehouse/Pipe/tianze-website/docs/cwf/context/company/value-copy.md)
 
 现在为什么值得做：
 

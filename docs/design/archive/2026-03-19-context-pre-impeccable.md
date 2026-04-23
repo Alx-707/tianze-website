@@ -1,6 +1,6 @@
 # 项目背景 (Project Context)
 
-> 数据来源: `docs/content/company/`
+> 数据来源: `docs/cwf/context/company/`
 
 ---
 

@@ -1,6 +1,6 @@
 # 页面结构 (Sitemap)
 
-> 数据来源: 现有页面结构 + `docs/content/company/content-gaps.md`
+> 数据来源: 现有页面结构 + `docs/cwf/context/company/content-gaps.md`
 
 ---
 
@@ -124,7 +124,7 @@
 
 ## 内容就绪状态
 
-> 来源: `docs/content/company/content-gaps.md`
+> 来源: `docs/cwf/context/company/content-gaps.md`
 
 | 页面 | 内容就绪度 | 缺失项 |
 |------|------------|--------|

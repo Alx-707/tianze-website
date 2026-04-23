@@ -122,12 +122,12 @@ const mockMessages = { ... };
 Server Components cannot be rendered directly. Test their logic separately:
 
 ```typescript
-import { getAllProductsCached } from '@/lib/content/products';
+import { getAllPosts } from '@/lib/content';
 
-describe('getAllProductsCached', () => {
-  it('should return product list', async () => {
-    const products = await getAllProductsCached('en');
-    expect(products).toBeDefined();
+describe('getAllPosts', () => {
+  it('should return blog post list', async () => {
+    const posts = await getAllPosts('en');
+    expect(posts).toBeDefined();
   });
 });
 ```

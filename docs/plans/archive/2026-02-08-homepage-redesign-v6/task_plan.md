@@ -7,10 +7,10 @@
 - 分支: `feat/homepage-redesign-v6`
 
 ## 设计来源
-- 原型: `docs/design/homepage/prototype/v6-swagelok-vercel/index.html`
+- 原型: `docs/impeccable/homepage/prototype/v6-swagelok-vercel/index.html`
 - Tokens: `docs/design/archive/2026-03-16-s-legacy/tokens.md`
-- Grid: `docs/design/system/GRID-SYSTEM.md`
-- Components: `docs/design/system/COMPONENT-INVENTORY.md`
+- Grid: `docs/impeccable/system/GRID-SYSTEM.md`
+- Components: `docs/impeccable/system/COMPONENT-INVENTORY.md`
 
 ## Tasks
 
@@ -92,7 +92,7 @@
   - `src/components/grid/grid-system.tsx`
   - `src/components/grid/grid-section.tsx`
   - `src/components/grid/grid-block.tsx`
-- 描述: 按 `docs/design/system/GRID-SYSTEM.md` 规范实现三层 CSS Grid 装饰系统。GridSystem (外框+crosshairs) → GridSection (display:grid + guides) → GridBlock (z-index:2 + 1px margin)。>1024px 显示, ≤1024px 隐藏。
+- 描述: 按 `docs/impeccable/system/GRID-SYSTEM.md` 规范实现三层 CSS Grid 装饰系统。GridSystem (外框+crosshairs) → GridSection (display:grid + guides) → GridBlock (z-index:2 + 1px margin)。>1024px 显示, ≤1024px 隐藏。
 - 依赖: Task 8
 - TDD: grid 组件测试
 - 验证: `pnpm test -- grid/`

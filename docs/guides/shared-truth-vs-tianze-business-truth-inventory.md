@@ -104,7 +104,7 @@
 
 - [site-config.ts](/Users/Data/Warehouse/Pipe/tianze-website/src/config/paths/site-config.ts)
 - [site-facts.ts](/Users/Data/Warehouse/Pipe/tianze-website/src/config/site-facts.ts)
-- [company-facts.yaml](/Users/Data/Warehouse/Pipe/tianze-website/docs/content/company/company-facts.yaml)
+- [company-facts.yaml](/Users/Data/Warehouse/Pipe/tianze-website/docs/cwf/context/company/company-facts.yaml)
 
 这里面包含了什么：
 
@@ -123,7 +123,7 @@
 ## 2. Tianze 产品与市场结构
 
 - [product-catalog.ts](/Users/Data/Warehouse/Pipe/tianze-website/src/constants/product-catalog.ts)
-- [products.yaml](/Users/Data/Warehouse/Pipe/tianze-website/docs/content/company/products.yaml)
+- [products.yaml](/Users/Data/Warehouse/Pipe/tianze-website/docs/cwf/context/company/products.yaml)
 
 这里面包含了什么：
 
@@ -159,8 +159,8 @@
 
 ## 4. Tianze 专属业务研究和产品语义资料
 
-- [value-copy.md](/Users/Data/Warehouse/Pipe/tianze-website/docs/content/company/value-copy.md)
-- [products.yaml](/Users/Data/Warehouse/Pipe/tianze-website/docs/content/company/products.yaml)
+- [value-copy.md](/Users/Data/Warehouse/Pipe/tianze-website/docs/cwf/context/company/value-copy.md)
+- [products.yaml](/Users/Data/Warehouse/Pipe/tianze-website/docs/cwf/context/company/products.yaml)
 - [ring2/09-multilingual-architecture.md](/Users/Data/Warehouse/Pipe/tianze-website/docs/strategy/ring2/09-multilingual-architecture.md)
 - [ring4-implementation-handoff.md](/Users/Data/Warehouse/Pipe/tianze-website/docs/strategy/ring4-implementation-handoff.md)
 

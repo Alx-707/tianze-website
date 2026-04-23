@@ -36,18 +36,18 @@ dwf = 设计编排器 (Impeccable Edition)
 
 | 参数 | 来源 |
 |------|------|
-| **项目文档** | `docs/content/PROJECT-BRIEF.md` |
+| **项目文档** | `docs/cwf/context/project-brief.md` |
 | **生产 Token（权威）** | `src/app/globals.css` |
-| **Token 规范** | `docs/design/system/TIANZE-DESIGN-TOKENS.md` |
-| **动效约束** | `docs/design/system/MOTION-PRINCIPLES.md` |
-| **栅格系统** | `docs/design/system/GRID-SYSTEM.md` |
+| **Token 规范** | `docs/impeccable/system/TIANZE-DESIGN-TOKENS.md` |
+| **动效约束** | `docs/impeccable/system/MOTION-PRINCIPLES.md` |
+| **栅格系统** | `docs/impeccable/system/GRID-SYSTEM.md` |
 
 ### 用户输入
 
 | 参数 | 必填 | 说明 |
 |------|------|------|
-| **页面** | ✓ | 对应 `docs/content/` 下的目录 |
-| **文案版本** | ✓ | 对应 `docs/content/{页面}/` 下的定稿文件 |
+| **页面** | ✓ | 对应 `docs/cwf/` 下的目录 |
+| **文案版本** | ✓ | 对应 `docs/cwf/{页面}/` 下的定稿文件 |
 | **风格备注** | 可选 | 不填则沿用设计系统 |
 | **Token 约束级别** | 可选 | 参考（默认）/ 约束（严格匹配） |
 
@@ -56,7 +56,7 @@ dwf = 设计编排器 (Impeccable Edition)
 ## 输出结构
 
 ```
-docs/design/
+docs/impeccable/
 ├── system/                       # 全局设计系统（已有）
 │
 ├── {page}/                       # 按页面组织（如 homepage/）
@@ -86,13 +86,13 @@ docs/design/
    - IF 存在 → 继续
 
 2. 询问用户输入 [AskUserQuestion]
-   - 页面类型？ (列出 docs/content/ 下的目录)
+   - 页面类型？ (列出 docs/cwf/ 下的目录)
    - 文案版本？ (列出对应目录下的文件)
    - 风格备注？ (可选，自由文本)
    - Token 约束级别？ (参考 | 约束，默认参考)
 
 3. 自动处理
-   - 读取 PROJECT-BRIEF.md
+   - 读取 `docs/cwf/context/project-brief.md`
    - 读取 globals.css（生产 Token，权威来源）
    - 读取 TIANZE-DESIGN-TOKENS.md（Token 规范参考）
    - 读取 MOTION-PRINCIPLES.md
@@ -157,7 +157,7 @@ docs/design/
 - 杜绝: 过度 SaaS 模板感（彩色渐变背景、过度圆润）
 ```
 
-**输出**: `docs/design/{page}/prototype/v{N}/index.html`
+**输出**: `docs/impeccable/{page}/prototype/v{N}/index.html`
 
 ---
 
@@ -175,7 +175,7 @@ docs/design/
 | **Responsive** | 断点适配、触控目标尺寸、内容溢出 |
 | **Anti-patterns** | AI slop 检测、SaaS 模板感、品牌一致性 |
 
-**输出**: `docs/design/{page}/prototype/v{N}/audit-report.md`
+**输出**: `docs/impeccable/{page}/prototype/v{N}/audit-report.md`
 
 **自动修复**：如审计发现严重问题（Critical/High），自动修复后重新审计，不进入用户评审。
 
@@ -186,7 +186,7 @@ docs/design/
 **调用**: `AskUserQuestion`
 
 ```
-评审原型 docs/design/{page}/prototype/v{N}/index.html
+评审原型 docs/impeccable/{page}/prototype/v{N}/index.html
 
 审计结果摘要:
 {audit-report.md 的评分和关键发现}
@@ -236,7 +236,7 @@ docs/design/
 3. optimize → 性能优化（CSS 精简、动画性能、加载策略）
 ```
 
-**输出**: `docs/design/{page}/prototype/v{N+1}/index.html`（加固版本）
+**输出**: `docs/impeccable/{page}/prototype/v{N+1}/index.html`（加固版本）
 
 ---
 
@@ -244,11 +244,11 @@ docs/design/
 
 ```
 1. 复制最终版本
-   - cp -r docs/design/{page}/prototype/v{最终}/ → docs/design/{page}/prototype/final/
+   - cp -r docs/impeccable/{page}/prototype/v{最终}/ → docs/impeccable/{page}/prototype/final/
 
 2. 可选: extract
    - 如果设计系统需要更新，运行 extract 提取新的 Token
-   - 更新 docs/design/system/ 相关文件
+   - 更新 docs/impeccable/system/ 相关文件
 
 3. 生成 HANDOFF.md
 4. 生成 README.md
@@ -266,9 +266,9 @@ docs/design/
 
 ## 设计系统参考
 - 生产 Token: src/app/globals.css (权威)
-- Token 规范: docs/design/system/TIANZE-DESIGN-TOKENS.md
-- 动效规范: docs/design/system/MOTION-PRINCIPLES.md
-- 栅格系统: docs/design/system/GRID-SYSTEM.md
+- Token 规范: docs/impeccable/system/TIANZE-DESIGN-TOKENS.md
+- 动效规范: docs/impeccable/system/MOTION-PRINCIPLES.md
+- 栅格系统: docs/impeccable/system/GRID-SYSTEM.md
 
 ### 配色
 | Token | 值 | 用途 |
@@ -307,8 +307,8 @@ docs/design/
 {最终版本的 audit-report.md 摘要}
 
 ## 原型文件
-- HTML 原型: docs/design/{page}/prototype/final/index.html
-- 设计规范: docs/design/system/TIANZE-DESIGN-TOKENS.md
+- HTML 原型: docs/impeccable/{page}/prototype/final/index.html
+- 设计规范: docs/impeccable/system/TIANZE-DESIGN-TOKENS.md
 
 ## 迭代历史
 | 版本 | 日期 | 变更摘要 |
@@ -330,9 +330,9 @@ docs/design/
 
 ## 文件结构
 - `src/app/globals.css` - 生产 Token (权威)
-- `docs/design/system/TIANZE-DESIGN-TOKENS.md` - Token 规范
-- `docs/design/{page}/prototype/final/index.html` - 最终 HTML 原型
-- `docs/design/{page}/HANDOFF.md` - 开发交接文档
+- `docs/impeccable/system/TIANZE-DESIGN-TOKENS.md` - Token 规范
+- `docs/impeccable/{page}/prototype/final/index.html` - 最终 HTML 原型
+- `docs/impeccable/{page}/HANDOFF.md` - 开发交接文档
 
 ## 迭代记录
 | 版本 | 状态 | 反馈摘要 |
@@ -352,10 +352,10 @@ dwf 完成后，输出：
 设计定稿完成
 
 产物:
-- 设计 Token: src/app/globals.css (生产) + docs/design/system/TIANZE-DESIGN-TOKENS.md (规范)
-- HTML 原型: docs/design/{page}/prototype/final/index.html
-- 审计报告: docs/design/{page}/prototype/final/audit-report.md
-- 交接文档: docs/design/{page}/HANDOFF.md
+- 设计 Token: src/app/globals.css (生产) + docs/impeccable/system/TIANZE-DESIGN-TOKENS.md (规范)
+- HTML 原型: docs/impeccable/{page}/prototype/final/index.html
+- 审计报告: docs/impeccable/{page}/prototype/final/audit-report.md
+- 交接文档: docs/impeccable/{page}/HANDOFF.md
 
 下一步:
 - 运行 /superpowers:brainstorming 进入 BDD 开发流程
@@ -371,7 +371,7 @@ dwf 完成后，输出：
 ```
 /dwf
 
-→ 检测到 docs/design/{page}/ 存在
+→ 检测到 docs/impeccable/{page}/ 存在
 → 显示当前状态 (Phase N, 版本 vN)
 → 询问: 继续当前项目 / 开始新版本 / 开始新项目
 ```

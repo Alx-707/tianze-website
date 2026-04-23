@@ -308,7 +308,7 @@
 - `messages/**`
 - `content/pages/**`
 - `content/posts/**`
-- `docs/content/company/**`
+- `docs/cwf/context/company/**`
 
 ### C3. 模板残留清理
 

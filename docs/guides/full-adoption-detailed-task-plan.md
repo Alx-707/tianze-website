@@ -210,7 +210,7 @@
 - [content-asset-inventory.md](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/content-asset-inventory.md)
 - [content.json](/Users/Data/Warehouse/Pipe/tianze-website/content/config/content.json)
 - `content/pages/**`
-- `docs/content/company/**`
+- `docs/cwf/context/company/**`
 
 完成标准：
 

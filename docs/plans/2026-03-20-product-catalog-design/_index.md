@@ -6,7 +6,7 @@
 
 ## Context
 
-Tianze needs product catalog pages to support 4 market standards (UL/ASTM, AS/NZS 2053, NOM, IEC) plus PETG pneumatic tubes. The catalog structure was decided through a 4-source cross-validated research process documented in `docs/design/products/CATALOG-STRUCTURE.md`.
+Tianze needs product catalog pages to support 4 market standards (UL/ASTM, AS/NZS 2053, NOM, IEC) plus PETG pneumatic tubes. The catalog structure was decided through a 4-source cross-validated research process documented in `docs/impeccable/products/CATALOG-STRUCTURE.md`.
 
 ## Requirements
 

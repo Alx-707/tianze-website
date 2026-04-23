@@ -16,7 +16,7 @@
   - Many previously critical API/security and framework issues are already closed.
 
 ### Source 3: Project brief
-- Path: `docs/content/PROJECT-BRIEF.md`
+- Path: `docs/cwf/context/project-brief.md`
 - Key points:
   - Primary goal is inquiry conversion.
   - Secondary goals are product presentation and brand building.

@@ -119,7 +119,7 @@ Reason:
   - `src/components/blocks/products/__tests__/product-matrix-block.test.tsx`
 - Documentation evidence:
   - `docs/component-registry.md` had been presenting it as current Homepage truth before this workstream corrected the live registry
-  - `docs/superpowers/specs/2026-03-23-product-pages-design.md` explicitly says it is a legacy component and is not consumed by the current homepage
+  - `docs/superpowers/archive/specs/2026-03-23-product-pages-design.md` explicitly says it is a legacy component and is not consumed by the current homepage
   - historical plan references exist under `docs/plans/**`
 - Indirect evidence:
   - no barrel / MDX / loader references found

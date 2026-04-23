@@ -27,7 +27,7 @@ cwf = 文案编排器
 └── Phase 5: 用户评审 → 迭代或定稿
 ```
 
-**输出**：`docs/content/{page}/v{N}.md` + 可选 i18n JSON
+**输出**：`docs/cwf/{page}/v{N}.md` + 可选 i18n JSON
 
 ---
 
@@ -56,7 +56,7 @@ cwf = 文案编排器
 
 | 参数 | 来源 |
 |------|------|
-| **项目文档** | `docs/content/PROJECT-BRIEF.md`（唯一输入） |
+| **项目文档** | `docs/cwf/context/project-brief.md`（唯一输入） |
 
 ### 用户输入
 
@@ -75,7 +75,7 @@ cwf = 文案编排器
 ## 输出结构
 
 ```
-docs/content/{page}/
+docs/cwf/{page}/
 ├── v1.md                 # 版本 1
 ├── v2.md                 # 版本 2
 ├── v{N}-final.md         # 定稿版本
@@ -97,7 +97,7 @@ messages/
 
 ```
 1. 读取基础文档
-   - docs/content/PROJECT-BRIEF.md（唯一输入）
+   - docs/cwf/context/project-brief.md（唯一输入）
 
 2. 询问用户输入 [AskUserQuestion]
    - 页面类型？ (homepage / products / about / contact / faq / cases)
@@ -109,7 +109,7 @@ messages/
    - 审查模式？ (sequential 默认 / team，team 需启用 Agent Teams)
 
 3. 检测已有版本
-   - 扫描 docs/content/{page}/ 目录
+   - 扫描 docs/cwf/{page}/ 目录
    - 确定新版本号 v{N}
    - 创建输出目录
 ```
@@ -212,7 +212,7 @@ messages/
 - CTA: 明确标注 CTA 文案
 ```
 
-**输出**: `docs/content/{page}/v{N}.md`（草稿状态）
+**输出**: `docs/cwf/{page}/v{N}.md`（草稿状态）
 
 #### Phase 2 多方案模式 (variants > 1)
 
@@ -233,9 +233,9 @@ IF variants > 1:
   Subagent 3: "侧重行业地位和社会证明，风格偏权威"（仅 variants=3）
 
   → 输出到:
-    docs/content/{page}/v{N}-A.md
-    docs/content/{page}/v{N}-B.md
-    docs/content/{page}/v{N}-C.md (仅 variants=3)
+    docs/cwf/{page}/v{N}-A.md
+    docs/cwf/{page}/v{N}-B.md
+    docs/cwf/{page}/v{N}-C.md (仅 variants=3)
 
   → 用户选择:
     [AskUserQuestion]
@@ -403,7 +403,7 @@ Phase 3 支持两种模式，由 Phase 0 用户选择决定。
     ### 关键改进建议 (最多 5 条)"
 
 3. 四个队友并行审查
-   → 各自输出审查报告到 docs/content/{page}/.working/review-{维度}.md
+   → 各自输出审查报告到 docs/cwf/{page}/.working/review-{维度}.md
 
 4. 队长汇总 + 冲突解决
    → 收集 4 份报告
@@ -434,7 +434,7 @@ Phase 3 支持两种模式，由 Phase 0 用户选择决定。
 ##### Team 模式输出
 
 ```
-docs/content/{page}/.working/
+docs/cwf/{page}/.working/
 ├── review-language.md           # 语言审查报告
 ├── review-brand.md              # 品牌审查报告
 ├── review-psychology.md         # 心理学审查报告
@@ -480,7 +480,7 @@ English
 **调用**: `AskUserQuestion`
 
 ```
-评审文案 docs/content/{page}/v{N}.md
+评审文案 docs/cwf/{page}/v{N}.md
 
 1. 整体满意度？
    - 满意，定稿
@@ -612,7 +612,7 @@ English
 ```
 /cwf
 
-→ 检测到 docs/content/{page}/ 存在
+→ 检测到 docs/cwf/{page}/ 存在
 → 显示当前状态 (Phase N, 版本 vN, 模式)
 → 询问: 继续当前版本 / 开始新版本
 ```
@@ -645,7 +645,7 @@ Agent:
   → Phase 3a: 重新审查
   → Phase 3b: 评分 8/10，通过
   → Phase 3c: seo-geo
-  → Phase 5: 请评审 docs/content/homepage/v5.md
+  → Phase 5: 请评审 docs/cwf/homepage/v5.md
 
 用户: 满意
 
@@ -690,7 +690,7 @@ Agent:
     → 解决: 品牌术语保留，仅在非品牌表达中融入关键词
   → 应用修改 → v1.md 更新
   → 清理 Agent Team
-  → Phase 5: 请评审 docs/content/homepage/v1.md
+  → Phase 5: 请评审 docs/cwf/homepage/v1.md
 
 用户: 满意
 
@@ -708,7 +708,7 @@ cwf 完成
     ↓
 提示: "文案定稿，可运行 /dwf 进入设计流程"
     ↓
-dwf 读取 docs/content/{page}/v{N}-final.md
+dwf 读取 docs/cwf/{page}/v{N}-final.md
     ↓
 dwf 完成
     ↓

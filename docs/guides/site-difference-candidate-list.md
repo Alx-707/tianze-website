@@ -61,7 +61,7 @@
 
 - [site-config.ts](/Users/Data/Warehouse/Pipe/tianze-website/src/config/paths/site-config.ts)
 - [site-facts.ts](/Users/Data/Warehouse/Pipe/tianze-website/src/config/site-facts.ts)
-- [company-facts.yaml](/Users/Data/Warehouse/Pipe/tianze-website/docs/content/company/company-facts.yaml)
+- [company-facts.yaml](/Users/Data/Warehouse/Pipe/tianze-website/docs/cwf/context/company/company-facts.yaml)
 
 为什么最先分开：
 
@@ -115,7 +115,7 @@
 当前位置：
 
 - [product-catalog.ts](/Users/Data/Warehouse/Pipe/tianze-website/src/constants/product-catalog.ts)
-- [products.yaml](/Users/Data/Warehouse/Pipe/tianze-website/docs/content/company/products.yaml)
+- [products.yaml](/Users/Data/Warehouse/Pipe/tianze-website/docs/cwf/context/company/products.yaml)
 - [products/page.tsx](/Users/Data/Warehouse/Pipe/tianze-website/src/app/[locale]/products/page.tsx)
 - [page.tsx](/Users/Data/Warehouse/Pipe/tianze-website/src/app/[locale]/products/[market]/page.tsx)
 
@@ -245,7 +245,7 @@
 - [privacy.mdx](/Users/Data/Warehouse/Pipe/tianze-website/content/pages/en/privacy.mdx)
 - [terms.mdx](/Users/Data/Warehouse/Pipe/tianze-website/content/pages/en/terms.mdx)
 - [welcome.mdx](/Users/Data/Warehouse/Pipe/tianze-website/content/posts/en/welcome.mdx)
-- [README.md](/Users/Data/Warehouse/Pipe/tianze-website/docs/content/company/README.md)
+- [README.md](/Users/Data/Warehouse/Pipe/tianze-website/docs/cwf/context/company/README.md)
 
 为什么会随后分开：
 
