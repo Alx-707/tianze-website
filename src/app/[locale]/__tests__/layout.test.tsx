@@ -83,6 +83,12 @@ vi.mock("@/lib/env", () => ({
     }
     return undefined;
   },
+  getRuntimeEnvString: (key: string) => {
+    if (key === "NODE_ENV") {
+      return mockRuntimeEnv.NODE_ENV;
+    }
+    return undefined;
+  },
 }));
 
 vi.mock("@/lib/i18n/client-messages", () => ({
@@ -191,7 +197,7 @@ describe("LocaleLayout", () => {
       await renderAsyncPage(page);
 
       expect(screen.getByText("Skip to main content")).toBeInTheDocument();
-      expect(screen.queryAllByTestId("next-script")).toHaveLength(0);
+      expect(screen.getAllByTestId("next-script")).toHaveLength(3);
       expect(mockSetRequestLocale).toHaveBeenCalledWith("en");
     });
 

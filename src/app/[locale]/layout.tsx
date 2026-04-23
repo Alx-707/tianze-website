@@ -17,6 +17,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { LazyThemeSwitcher } from "@/components/ui/lazy-theme-switcher";
 import { FOOTER_COLUMNS, FOOTER_STYLE_TOKENS } from "@/config/footer-links";
 import { coerceLocale, isLocale } from "@/i18n/locale-utils";
+import { getRuntimeEnvBoolean, getRuntimeEnvString } from "@/lib/env";
 import { pickClientMessages } from "@/lib/i18n/client-messages";
 import { loadCompleteMessages } from "@/lib/load-messages";
 import { mainNavigation } from "@/lib/navigation";
@@ -157,11 +158,13 @@ export default async function LocaleLayout({
   const typedLocale = coerceLocale(locale);
   setRequestLocale(typedLocale);
   const disableDevTools =
-    process.env.PLAYWRIGHT_TEST === "true" ||
-    process.env.NEXT_PUBLIC_DISABLE_DEV_TOOLS === "true";
+    getRuntimeEnvBoolean("PLAYWRIGHT_TEST") === true ||
+    getRuntimeEnvBoolean("NEXT_PUBLIC_DISABLE_DEV_TOOLS") === true;
   const disableReactScan =
-    disableDevTools || process.env.NEXT_PUBLIC_DISABLE_REACT_SCAN === "true";
-  const shouldLoadDevScripts = process.env.NODE_ENV === "development";
+    disableDevTools ||
+    getRuntimeEnvBoolean("NEXT_PUBLIC_DISABLE_REACT_SCAN") === true;
+  const shouldLoadDevScripts =
+    getRuntimeEnvString("NODE_ENV") === "development";
   const skipToContentLabel =
     typedLocale === "zh" ? "跳转到主要内容" : "Skip to main content";
 
