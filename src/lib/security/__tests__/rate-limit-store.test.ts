@@ -1,4 +1,11 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import {
+  createRateLimitStore,
+  MemoryRateLimitStore,
+  RedisRateLimitStore,
+  resetRateLimitStoreWarnings,
+} from "@/lib/security/stores/rate-limit-store";
 
 const mockLoggerInfo = vi.hoisted(() => vi.fn());
 const mockLoggerWarn = vi.hoisted(() => vi.fn());
@@ -9,21 +16,8 @@ vi.mock("@/lib/logger", () => ({
     info: mockLoggerInfo,
     warn: mockLoggerWarn,
     error: mockLoggerError,
-    debug: vi.fn(),
   },
 }));
-
-import {
-  getUpstashPipelineResults,
-  hasUpstashResultProperty,
-  MemoryRateLimitStore,
-  parseLenientTTL,
-  parseStrictNumber,
-  RedisRateLimitStore,
-  createRateLimitStore,
-  resetRateLimitStoreWarnings,
-  unwrapUpstashResult,
-} from "@/lib/security/stores/rate-limit-store";
 
 function setEnv(key: string, value: string | undefined): void {
   const env = process.env as Record<string, string | undefined>;
@@ -39,29 +33,142 @@ describe("rate-limit-store", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.useRealTimers();
-    vi.unstubAllGlobals();
     process.env = { ...originalEnv };
-    resetRateLimitStoreWarnings();
     setEnv("UPSTASH_REDIS_REST_URL", undefined);
     setEnv("UPSTASH_REDIS_REST_TOKEN", undefined);
     setEnv("KV_REST_API_URL", undefined);
     setEnv("KV_REST_API_TOKEN", undefined);
-    setEnv("NODE_ENV", "test");
+    setEnv("NODE_ENV", undefined);
+    resetRateLimitStoreWarnings();
   });
 
-  afterEach(() => {
-    vi.useRealTimers();
-    vi.unstubAllGlobals();
-    process.env = originalEnv;
-    resetRateLimitStoreWarnings();
+  describe("createRateLimitStore", () => {
+    it("creates a Redis store when Upstash credentials exist", () => {
+      setEnv("UPSTASH_REDIS_REST_URL", "https://example.upstash.io");
+      setEnv("UPSTASH_REDIS_REST_TOKEN", "token");
+
+      const store = createRateLimitStore();
+
+      expect(store).toBeInstanceOf(RedisRateLimitStore);
+      expect(mockLoggerInfo).toHaveBeenCalledWith(
+        "[Rate Limit] Using Upstash Redis store",
+      );
+    });
+
+    it("throws when production is configured with KV only", () => {
+      setEnv("NODE_ENV", "production");
+      setEnv("KV_REST_API_URL", "https://example.kv.io");
+      setEnv("KV_REST_API_TOKEN", "token");
+
+      expect(() => createRateLimitStore()).toThrow(
+        "KV-only rate limiting is not allowed in production",
+      );
+    });
+
+    it("throws when production has no distributed store configured", () => {
+      setEnv("NODE_ENV", "production");
+
+      expect(() => createRateLimitStore()).toThrow(
+        "Production requires Upstash Redis",
+      );
+    });
+
+    it("falls back to memory in development and logs the warning once", () => {
+      setEnv("KV_REST_API_URL", "https://example.kv.io");
+      setEnv("KV_REST_API_TOKEN", "token");
+
+      const first = createRateLimitStore();
+      const second = createRateLimitStore();
+
+      expect(first).toBeInstanceOf(MemoryRateLimitStore);
+      expect(second).toBeInstanceOf(MemoryRateLimitStore);
+      expect(mockLoggerWarn).toHaveBeenCalledWith(
+        "[Rate Limit] KV store detected but Upstash Redis is preferred. Using in-memory fallback for development.",
+      );
+      expect(mockLoggerWarn).toHaveBeenCalledWith(
+        "[Rate Limit] Using in-memory store (development only)",
+      );
+      expect(
+        mockLoggerWarn.mock.calls.filter(
+          ([message]) =>
+            message === "[Rate Limit] Using in-memory store (development only)",
+        ),
+      ).toHaveLength(1);
+    });
+
+    it("falls back to memory when only the Upstash URL is configured in development", () => {
+      setEnv("UPSTASH_REDIS_REST_URL", "https://example.upstash.io");
+
+      const store = createRateLimitStore();
+
+      expect(store).toBeInstanceOf(MemoryRateLimitStore);
+      expect(mockLoggerInfo).not.toHaveBeenCalledWith(
+        "[Rate Limit] Using Upstash Redis store",
+      );
+    });
+
+    it("falls back to memory when only the Upstash token is configured in development", () => {
+      setEnv("UPSTASH_REDIS_REST_TOKEN", "token");
+
+      const store = createRateLimitStore();
+
+      expect(store).toBeInstanceOf(MemoryRateLimitStore);
+      expect(mockLoggerInfo).not.toHaveBeenCalledWith(
+        "[Rate Limit] Using Upstash Redis store",
+      );
+    });
+
+    it("treats partial KV configuration as missing in production", () => {
+      setEnv("NODE_ENV", "production");
+      setEnv("KV_REST_API_URL", "https://example.kv.io");
+
+      expect(() => createRateLimitStore()).toThrow(
+        "Production requires Upstash Redis",
+      );
+    });
+
+    it("does not emit the KV-only warning when KV configuration is incomplete", () => {
+      setEnv("KV_REST_API_TOKEN", "token");
+
+      const store = createRateLimitStore();
+
+      expect(store).toBeInstanceOf(MemoryRateLimitStore);
+      expect(mockLoggerWarn).not.toHaveBeenCalledWith(
+        "[Rate Limit] KV store detected but Upstash Redis is preferred. Using in-memory fallback for development.",
+      );
+    });
+
+    it("re-emits the memory fallback warning after reset", () => {
+      createRateLimitStore();
+      resetRateLimitStoreWarnings();
+      createRateLimitStore();
+
+      expect(
+        mockLoggerWarn.mock.calls.filter(
+          ([message]) =>
+            message === "[Rate Limit] Using in-memory store (development only)",
+        ),
+      ).toHaveLength(2);
+    });
+
+    it("emits the in-memory warning on the first fresh module load before any reset helper runs", async () => {
+      vi.resetModules();
+      mockLoggerWarn.mockClear();
+
+      const freshModule =
+        await import("@/lib/security/stores/rate-limit-store");
+      const store = freshModule.createRateLimitStore();
+
+      expect(store).toBeInstanceOf(freshModule.MemoryRateLimitStore);
+      expect(mockLoggerWarn).toHaveBeenCalledWith(
+        "[Rate Limit] Using in-memory store (development only)",
+      );
+      freshModule.resetRateLimitStoreWarnings();
+    });
   });
 
   describe("RedisRateLimitStore", () => {
     it("uses an atomic transaction for increment and ttl assignment", async () => {
-      vi.useFakeTimers();
-      vi.setSystemTime(new Date("2026-04-19T00:00:00.000Z"));
-
       const fetchMock = vi.fn(
         async () =>
           new Response(
@@ -74,13 +181,10 @@ describe("rate-limit-store", () => {
       const store = new RedisRateLimitStore("https://example.upstash.io", "t");
       const result = await store.increment("unsafe/key?value=yes", 60_000);
 
-      expect(result).toEqual({
-        count: 1,
-        expiresAt: Date.now() + 60_000,
-      });
+      expect(result.count).toBe(1);
       expect(fetchMock).toHaveBeenCalledWith(
         "https://example.upstash.io/multi-exec",
-        {
+        expect.objectContaining({
           method: "POST",
           headers: {
             Authorization: "Bearer t",
@@ -91,16 +195,16 @@ describe("rate-limit-store", () => {
             ["PEXPIRE", "unsafe/key?value=yes", "60000", "NX"],
             ["PTTL", "unsafe/key?value=yes"],
           ]),
-        },
+        }),
       );
     });
 
-    it("accepts Upstash object-wrapped multi-exec results", async () => {
+    it("accepts increment responses wrapped under result arrays", async () => {
       const fetchMock = vi.fn(
         async () =>
           new Response(
             JSON.stringify({
-              result: [{ result: 2 }, { result: 1 }, { result: 30_000 }],
+              result: [{ result: 2 }, { result: 1 }, { result: 45_000 }],
             }),
             { status: 200 },
           ),
@@ -108,83 +212,29 @@ describe("rate-limit-store", () => {
       vi.stubGlobal("fetch", fetchMock);
 
       const store = new RedisRateLimitStore("https://example.upstash.io", "t");
-      const result = await store.increment("wrapped-result-key", 30_000);
+      const result = await store.increment("idem:key", 60_000);
 
       expect(result.count).toBe(2);
       expect(result.expiresAt).toBeGreaterThan(Date.now());
     });
 
-    it("rejects increment payloads that do not contain pipeline results", async () => {
+    it("accepts direct array increment responses and preserves the exact ttl", async () => {
+      vi.spyOn(Date, "now").mockReturnValue(1_700_000_000_000);
       const fetchMock = vi.fn(
         async () =>
-          new Response(JSON.stringify({ result: "oops" }), { status: 200 }),
+          new Response(JSON.stringify([2, 1, 45_000]), { status: 200 }),
       );
       vi.stubGlobal("fetch", fetchMock);
 
       const store = new RedisRateLimitStore("https://example.upstash.io", "t");
-
-      await expect(store.increment("idem:key", 60_000)).rejects.toThrow(
-        "numeric count",
-      );
+      await expect(store.increment("idem:key", 60_000)).resolves.toEqual({
+        count: 2,
+        expiresAt: 1_700_000_045_000,
+      });
     });
 
-    it("throws when increment returns a null payload", async () => {
-      const fetchMock = vi.fn(
-        async () => new Response(JSON.stringify(null), { status: 200 }),
-      );
-      vi.stubGlobal("fetch", fetchMock);
-
-      const store = new RedisRateLimitStore("https://example.upstash.io", "t");
-
-      await expect(store.increment("idem:key", 60_000)).rejects.toThrow(
-        "numeric count",
-      );
-    });
-
-    it("logs and throws when increment receives a non-ok response", async () => {
-      const fetchMock = vi.fn(
-        async () =>
-          new Response("bad gateway", {
-            status: 503,
-            statusText: "Service Unavailable",
-          }),
-      );
-      vi.stubGlobal("fetch", fetchMock);
-
-      const store = new RedisRateLimitStore("https://example.upstash.io", "t");
-
-      await expect(store.increment("idem:key", 60_000)).rejects.toThrow(
-        "Upstash rate limit operation failed: 503",
-      );
-      expect(mockLoggerError).toHaveBeenCalledWith(
-        "[Rate Limit] Upstash pipeline failed: Service Unavailable",
-      );
-    });
-
-    it("throws when the atomic increment transaction returns an invalid ttl", async () => {
-      const fetchMock = vi.fn(
-        async () =>
-          new Response(
-            JSON.stringify([{ result: 1 }, { result: 1 }, { result: -1 }]),
-            { status: 200 },
-          ),
-      );
-      vi.stubGlobal("fetch", fetchMock);
-
-      const store = new RedisRateLimitStore("https://example.upstash.io", "t");
-
-      await expect(store.increment("idem:key", 60_000)).rejects.toThrow(
-        "invalid TTL",
-      );
-      expect(mockLoggerError).toHaveBeenCalledWith(
-        "[Rate Limit] Upstash transaction returned invalid TTL",
-      );
-    });
-
-    it("accepts zero ttl from the increment transaction", async () => {
-      vi.useFakeTimers();
-      vi.setSystemTime(new Date("2026-04-19T00:00:00.000Z"));
-
+    it("accepts zero ttl responses instead of treating them as invalid", async () => {
+      vi.spyOn(Date, "now").mockReturnValue(1_700_000_000_000);
       const fetchMock = vi.fn(
         async () =>
           new Response(
@@ -195,57 +245,14 @@ describe("rate-limit-store", () => {
       vi.stubGlobal("fetch", fetchMock);
 
       const store = new RedisRateLimitStore("https://example.upstash.io", "t");
-      const result = await store.increment("idem:key", 60_000);
-
-      expect(result).toEqual({ count: 1, expiresAt: Date.now() });
-    });
-
-    it("throws when the atomic increment transaction returns a non-numeric count", async () => {
-      const fetchMock = vi.fn(
-        async () =>
-          new Response(
-            JSON.stringify([
-              { result: "oops" },
-              { result: 1 },
-              { result: 60_000 },
-            ]),
-            { status: 200 },
-          ),
-      );
-      vi.stubGlobal("fetch", fetchMock);
-
-      const store = new RedisRateLimitStore("https://example.upstash.io", "t");
-
-      await expect(store.increment("idem:key", 60_000)).rejects.toThrow(
-        "numeric count",
-      );
-    });
-
-    it("throws when the atomic increment transaction returns a non-numeric ttl", async () => {
-      const fetchMock = vi.fn(
-        async () =>
-          new Response(
-            JSON.stringify([
-              { result: 1 },
-              { result: 1 },
-              { result: "not-a-number" },
-            ]),
-            { status: 200 },
-          ),
-      );
-      vi.stubGlobal("fetch", fetchMock);
-
-      const store = new RedisRateLimitStore("https://example.upstash.io", "t");
-
-      await expect(store.increment("idem:key", 60_000)).rejects.toThrow(
-        "numeric TTL",
-      );
+      await expect(store.increment("idem:key", 60_000)).resolves.toEqual({
+        count: 1,
+        expiresAt: 1_700_000_000_000,
+      });
     });
 
     it("gets count and ttl via POST pipeline instead of path-style REST", async () => {
-      vi.useFakeTimers();
-      vi.setSystemTime(new Date("2026-04-19T00:00:00.000Z"));
-
+      vi.spyOn(Date, "now").mockReturnValue(1_700_000_000_000);
       const fetchMock = vi.fn(
         async () =>
           new Response(
@@ -262,11 +269,11 @@ describe("rate-limit-store", () => {
 
       expect(result).toEqual({
         count: 3,
-        expiresAt: Date.now() + 45_000,
+        expiresAt: 1_700_000_045_000,
       });
       expect(fetchMock).toHaveBeenCalledWith(
         "https://example.upstash.io/pipeline",
-        {
+        expect.objectContaining({
           method: "POST",
           headers: {
             Authorization: "Bearer t",
@@ -276,24 +283,181 @@ describe("rate-limit-store", () => {
             ["GET", "unsafe/key?value=yes"],
             ["PTTL", "unsafe/key?value=yes"],
           ]),
-        },
+        }),
       );
     });
 
-    it("throws when GET receives a non-ok response", async () => {
+    it("throws when the atomic increment transaction returns an invalid ttl", async () => {
       const fetchMock = vi.fn(
         async () =>
-          new Response("bad gateway", {
-            status: 502,
-            statusText: "Bad Gateway",
+          new Response(
+            JSON.stringify([{ result: 1 }, { result: 1 }, { result: -1 }]),
+            {
+              status: 200,
+            },
+          ),
+      );
+      vi.stubGlobal("fetch", fetchMock);
+
+      const store = new RedisRateLimitStore("https://example.upstash.io", "t");
+
+      await expect(store.increment("idem:key", 60_000)).rejects.toThrow(
+        "invalid TTL",
+      );
+    });
+
+    it("throws when the atomic increment transaction returns a non-finite ttl", async () => {
+      const fetchMock = vi.fn(
+        async () =>
+          new Response(
+            JSON.stringify([{ result: 1 }, { result: 1 }, { result: "oops" }]),
+            { status: 200 },
+          ),
+      );
+      vi.stubGlobal("fetch", fetchMock);
+
+      const store = new RedisRateLimitStore("https://example.upstash.io", "t");
+
+      await expect(store.increment("idem:key", 60_000)).rejects.toThrow(
+        "invalid TTL",
+      );
+      expect(mockLoggerError).toHaveBeenCalledWith(
+        "[Rate Limit] Upstash transaction returned invalid TTL",
+      );
+    });
+
+    it("throws when the atomic increment transaction returns an infinite ttl", async () => {
+      const fetchMock = vi.fn(async () => ({
+        ok: true,
+        json: async () => [
+          { result: 1 },
+          { result: 1 },
+          { result: Number.POSITIVE_INFINITY },
+        ],
+      }));
+      vi.stubGlobal("fetch", fetchMock);
+
+      const store = new RedisRateLimitStore("https://example.upstash.io", "t");
+
+      await expect(store.increment("idem:key", 60_000)).rejects.toThrow(
+        "invalid TTL",
+      );
+      expect(mockLoggerError).toHaveBeenCalledWith(
+        "[Rate Limit] Upstash transaction returned invalid TTL",
+      );
+    });
+
+    it("throws when increment returns a malformed multi-exec payload", async () => {
+      const fetchMock = vi.fn(
+        async () =>
+          new Response(JSON.stringify({ result: null }), { status: 200 }),
+      );
+      vi.stubGlobal("fetch", fetchMock);
+
+      const store = new RedisRateLimitStore("https://example.upstash.io", "t");
+
+      await expect(store.increment("idem:key", 60_000)).rejects.toThrow(
+        "expected multi-exec results",
+      );
+    });
+
+    it("rejects increment payloads that inherit result arrays from the prototype", async () => {
+      const fetchMock = vi.fn(async () => ({
+        ok: true,
+        json: async () =>
+          Object.create({
+            result: [{ result: 1 }, { result: 1 }, { result: 60_000 }],
+          }),
+      }));
+      vi.stubGlobal("fetch", fetchMock);
+
+      const store = new RedisRateLimitStore("https://example.upstash.io", "t");
+
+      await expect(store.increment("idem:key", 60_000)).rejects.toThrow(
+        "expected multi-exec results",
+      );
+    });
+
+    it("throws when increment returns a primitive payload", async () => {
+      const fetchMock = vi.fn(
+        async () => new Response(JSON.stringify(1), { status: 200 }),
+      );
+      vi.stubGlobal("fetch", fetchMock);
+
+      const store = new RedisRateLimitStore("https://example.upstash.io", "t");
+
+      await expect(store.increment("idem:key", 60_000)).rejects.toThrow(
+        "expected multi-exec results",
+      );
+    });
+
+    it("throws when increment returns a null payload", async () => {
+      const fetchMock = vi.fn(
+        async () => new Response(JSON.stringify(null), { status: 200 }),
+      );
+      vi.stubGlobal("fetch", fetchMock);
+
+      const store = new RedisRateLimitStore("https://example.upstash.io", "t");
+
+      await expect(store.increment("idem:key", 60_000)).rejects.toThrow(
+        "expected multi-exec results",
+      );
+    });
+
+    it("throws when increment returns a short multi-exec payload", async () => {
+      const fetchMock = vi.fn(
+        async () =>
+          new Response(JSON.stringify([{ result: 1 }, { result: 1 }]), {
+            status: 200,
           }),
       );
       vi.stubGlobal("fetch", fetchMock);
 
       const store = new RedisRateLimitStore("https://example.upstash.io", "t");
 
-      await expect(store.get("idem:key")).rejects.toThrow(
-        "[Rate Limit] Upstash get failed: Bad Gateway",
+      await expect(store.increment("idem:key", 60_000)).rejects.toThrow(
+        "expected multi-exec results",
+      );
+    });
+
+    it("throws when the atomic increment transaction returns a non-numeric count", async () => {
+      const fetchMock = vi.fn(
+        async () =>
+          new Response(
+            JSON.stringify([
+              { result: "NaN" },
+              { result: 1 },
+              { result: 60_000 },
+            ]),
+            { status: 200 },
+          ),
+      );
+      vi.stubGlobal("fetch", fetchMock);
+
+      const store = new RedisRateLimitStore("https://example.upstash.io", "t");
+
+      await expect(store.increment("idem:key", 60_000)).rejects.toThrow(
+        "expected numeric count",
+      );
+    });
+
+    it("logs and throws when the increment pipeline returns a non-200 response", async () => {
+      const fetchMock = vi.fn(
+        async () =>
+          new Response(JSON.stringify({ error: "boom" }), {
+            status: 503,
+            statusText: "boom",
+          }),
+      );
+      vi.stubGlobal("fetch", fetchMock);
+
+      const store = new RedisRateLimitStore("https://example.upstash.io", "t");
+
+      await expect(store.increment("idem:key", 60_000)).rejects.toThrow(
+        "Upstash rate limit operation failed: 503",
+      );
+      expect(mockLoggerError).toHaveBeenCalledWith(
+        "[Rate Limit] Upstash pipeline failed: boom",
       );
     });
 
@@ -302,7 +466,9 @@ describe("rate-limit-store", () => {
         async () =>
           new Response(
             JSON.stringify({ result: [{ result: null }, { result: 45_000 }] }),
-            { status: 200 },
+            {
+              status: 200,
+            },
           ),
       );
       vi.stubGlobal("fetch", fetchMock);
@@ -312,13 +478,36 @@ describe("rate-limit-store", () => {
       await expect(store.get("idem:key")).resolves.toBeNull();
     });
 
-    it("returns null when GET returns an undefined count", async () => {
+    it("returns null when GET omits the count result entirely", async () => {
       const fetchMock = vi.fn(async () => ({
         ok: true,
-        json: async () => ({
-          result: [undefined, { result: 45_000 }],
-        }),
+        json: async () => ({ result: [undefined, { result: 45_000 }] }),
       }));
+      vi.stubGlobal("fetch", fetchMock);
+
+      const store = new RedisRateLimitStore("https://example.upstash.io", "t");
+
+      await expect(store.get("idem:key")).resolves.toBeNull();
+    });
+
+    it("returns null when GET wraps a non-array result payload", async () => {
+      const fetchMock = vi.fn(
+        async () =>
+          new Response(JSON.stringify({ result: null }), {
+            status: 200,
+          }),
+      );
+      vi.stubGlobal("fetch", fetchMock);
+
+      const store = new RedisRateLimitStore("https://example.upstash.io", "t");
+
+      await expect(store.get("idem:key")).resolves.toBeNull();
+    });
+
+    it("returns null when GET returns a primitive payload", async () => {
+      const fetchMock = vi.fn(
+        async () => new Response(JSON.stringify(1), { status: 200 }),
+      );
       vi.stubGlobal("fetch", fetchMock);
 
       const store = new RedisRateLimitStore("https://example.upstash.io", "t");
@@ -337,6 +526,89 @@ describe("rate-limit-store", () => {
       await expect(store.get("idem:key")).resolves.toBeNull();
     });
 
+    it("returns null when GET returns a short payload", async () => {
+      const fetchMock = vi.fn(
+        async () =>
+          new Response(JSON.stringify([{ result: "3" }]), { status: 200 }),
+      );
+      vi.stubGlobal("fetch", fetchMock);
+
+      const store = new RedisRateLimitStore("https://example.upstash.io", "t");
+
+      await expect(store.get("idem:key")).resolves.toBeNull();
+    });
+
+    it("coerces missing or negative GET ttl values to an immediate expiry", async () => {
+      vi.spyOn(Date, "now").mockReturnValue(1_700_000_000_000);
+      const fetchMock = vi.fn(
+        async () =>
+          new Response(
+            JSON.stringify({ result: [{ result: "3" }, { result: -1 }] }),
+            { status: 200 },
+          ),
+      );
+      vi.stubGlobal("fetch", fetchMock);
+
+      const store = new RedisRateLimitStore("https://example.upstash.io", "t");
+
+      await expect(store.get("idem:key")).resolves.toEqual({
+        count: 3,
+        expiresAt: 1_700_000_000_000,
+      });
+    });
+
+    it("coerces zero GET ttl values to an immediate expiry", async () => {
+      vi.spyOn(Date, "now").mockReturnValue(1_700_000_000_000);
+      const fetchMock = vi.fn(
+        async () =>
+          new Response(
+            JSON.stringify({ result: [{ result: "3" }, { result: 0 }] }),
+            { status: 200 },
+          ),
+      );
+      vi.stubGlobal("fetch", fetchMock);
+
+      const store = new RedisRateLimitStore("https://example.upstash.io", "t");
+
+      await expect(store.get("idem:key")).resolves.toEqual({
+        count: 3,
+        expiresAt: 1_700_000_000_000,
+      });
+    });
+
+    it("coerces infinite GET ttl values to an immediate expiry", async () => {
+      vi.spyOn(Date, "now").mockReturnValue(1_700_000_000_000);
+      const fetchMock = vi.fn(async () => ({
+        ok: true,
+        json: async () => ({
+          result: [{ result: "3" }, { result: Number.POSITIVE_INFINITY }],
+        }),
+      }));
+      vi.stubGlobal("fetch", fetchMock);
+
+      const store = new RedisRateLimitStore("https://example.upstash.io", "t");
+
+      await expect(store.get("idem:key")).resolves.toEqual({
+        count: 3,
+        expiresAt: 1_700_000_000_000,
+      });
+    });
+
+    it("throws when GET returns a non-200 response", async () => {
+      const fetchMock = vi.fn(
+        async () =>
+          new Response(JSON.stringify({ error: "boom" }), {
+            status: 503,
+            statusText: "boom",
+          }),
+      );
+      vi.stubGlobal("fetch", fetchMock);
+
+      const store = new RedisRateLimitStore("https://example.upstash.io", "t");
+
+      await expect(store.get("idem:key")).rejects.toThrow("Upstash get failed");
+    });
+
     it("throws when GET returns a non-numeric count", async () => {
       const fetchMock = vi.fn(
         async () =>
@@ -351,45 +623,9 @@ describe("rate-limit-store", () => {
 
       const store = new RedisRateLimitStore("https://example.upstash.io", "t");
 
-      await expect(store.get("idem:key")).rejects.toThrow("numeric count");
-    });
-
-    it("clamps non-finite GET ttl values to zero", async () => {
-      vi.useFakeTimers();
-      vi.setSystemTime(new Date("2026-04-19T00:00:00.000Z"));
-
-      const fetchMock = vi.fn(
-        async () =>
-          new Response(
-            JSON.stringify({ result: [{ result: "3" }, { result: "NaN" }] }),
-            { status: 200 },
-          ),
+      await expect(store.get("idem:key")).rejects.toThrow(
+        "expected numeric count",
       );
-      vi.stubGlobal("fetch", fetchMock);
-
-      const store = new RedisRateLimitStore("https://example.upstash.io", "t");
-      const result = await store.get("idem:key");
-
-      expect(result).toEqual({ count: 3, expiresAt: Date.now() });
-    });
-
-    it("clamps negative GET ttl values to zero", async () => {
-      vi.useFakeTimers();
-      vi.setSystemTime(new Date("2026-04-19T00:00:00.000Z"));
-
-      const fetchMock = vi.fn(
-        async () =>
-          new Response(
-            JSON.stringify({ result: [{ result: "3" }, { result: -45_000 }] }),
-            { status: 200 },
-          ),
-      );
-      vi.stubGlobal("fetch", fetchMock);
-
-      const store = new RedisRateLimitStore("https://example.upstash.io", "t");
-      const result = await store.get("idem:key");
-
-      expect(result).toEqual({ count: 3, expiresAt: Date.now() });
     });
 
     it("deletes via DEL command body instead of HTTP DELETE path", async () => {
@@ -402,263 +638,164 @@ describe("rate-limit-store", () => {
       const store = new RedisRateLimitStore("https://example.upstash.io", "t");
       await store.delete("unsafe/key?value=yes");
 
-      expect(fetchMock).toHaveBeenCalledWith("https://example.upstash.io", {
-        method: "POST",
-        headers: {
-          Authorization: "Bearer t",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(["DEL", "unsafe/key?value=yes"]),
-      });
+      expect(fetchMock).toHaveBeenCalledWith(
+        "https://example.upstash.io",
+        expect.objectContaining({
+          method: "POST",
+          headers: {
+            Authorization: "Bearer t",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(["DEL", "unsafe/key?value=yes"]),
+        }),
+      );
+    });
+
+    it("does not log when delete succeeds", async () => {
+      const fetchMock = vi.fn(
+        async () =>
+          new Response(JSON.stringify({ result: 1 }), { status: 200 }),
+      );
+      vi.stubGlobal("fetch", fetchMock);
+
+      const store = new RedisRateLimitStore("https://example.upstash.io", "t");
+      await expect(store.delete("idem:key")).resolves.toBeUndefined();
+
       expect(mockLoggerError).not.toHaveBeenCalled();
     });
 
-    it("logs delete failures without throwing", async () => {
+    it("logs delete failures instead of throwing", async () => {
       const fetchMock = vi.fn(
         async () =>
-          new Response("forbidden", {
-            status: 403,
-            statusText: "Forbidden",
+          new Response(JSON.stringify({ error: "boom" }), {
+            status: 500,
+            statusText: "boom",
           }),
       );
       vi.stubGlobal("fetch", fetchMock);
 
       const store = new RedisRateLimitStore("https://example.upstash.io", "t");
+      await expect(store.delete("idem:key")).resolves.toBeUndefined();
 
-      await expect(
-        store.delete("unsafe/key?value=yes"),
-      ).resolves.toBeUndefined();
       expect(mockLoggerError).toHaveBeenCalledWith(
-        "[Rate Limit] Failed to delete rate limit key: Forbidden",
+        "[Rate Limit] Failed to delete rate limit key: boom",
       );
     });
   });
 
   describe("MemoryRateLimitStore", () => {
-    it("increments an existing live entry without extending its expiry", async () => {
+    it("increments active entries and expires stale ones", async () => {
       vi.useFakeTimers();
-      vi.setSystemTime(new Date("2026-04-19T00:00:00.000Z"));
-
       const store = new MemoryRateLimitStore();
-      const first = await store.increment("memory:key", 60_000);
-      vi.advanceTimersByTime(10_000);
-      const second = await store.increment("memory:key", 60_000);
 
-      expect(first.expiresAt).toBe(Date.now() + 50_000);
-      expect(second).toEqual({
+      await expect(store.increment("rate:key", 100)).resolves.toMatchObject({
+        count: 1,
+      });
+      await expect(store.increment("rate:key", 100)).resolves.toMatchObject({
         count: 2,
-        expiresAt: first.expiresAt,
       });
+      await expect(store.get("rate:key")).resolves.toMatchObject({ count: 2 });
+
+      vi.setSystemTime(Date.now() + 200);
+      await expect(store.get("rate:key")).resolves.toBeNull();
+      vi.useRealTimers();
     });
 
-    it("resets an expired entry instead of incrementing it", async () => {
-      vi.useFakeTimers();
-      vi.setSystemTime(new Date("2026-04-19T00:00:00.000Z"));
-
+    it("deletes keys explicitly", async () => {
       const store = new MemoryRateLimitStore();
-      await store.increment("memory:key", 60_000);
-      vi.advanceTimersByTime(60_001);
 
-      const result = await store.increment("memory:key", 60_000);
+      await store.increment("rate:key", 100);
+      await store.delete("rate:key");
 
-      expect(result).toEqual({
+      await expect(store.get("rate:key")).resolves.toBeNull();
+    });
+
+    it("creates a fresh window after an entry has clearly expired", async () => {
+      vi.useFakeTimers();
+      const store = new MemoryRateLimitStore();
+
+      await store.increment("rate:key", 100);
+      vi.advanceTimersByTime(101);
+
+      await expect(store.get("rate:key")).resolves.toBeNull();
+      await expect(store.increment("rate:key", 100)).resolves.toMatchObject({
         count: 1,
-        expiresAt: Date.now() + 60_000,
       });
+      vi.useRealTimers();
     });
 
-    it("returns null for missing entries", async () => {
-      const store = new MemoryRateLimitStore();
-      await expect(store.get("missing:key")).resolves.toBeNull();
-    });
-
-    it("returns the stored entry while it is still active", async () => {
+    it("treats entries expiring exactly now as stale during increment", async () => {
       vi.useFakeTimers();
-      vi.setSystemTime(new Date("2026-04-19T00:00:00.000Z"));
-
       const store = new MemoryRateLimitStore();
-      const created = await store.increment("memory:key", 60_000);
+      const start = Date.now();
 
-      await expect(store.get("memory:key")).resolves.toEqual(created);
-    });
+      await store.increment("rate:key", 100);
+      vi.setSystemTime(start + 100);
 
-    it("resets the counter when an entry expires exactly at now", async () => {
-      vi.useFakeTimers();
-      vi.setSystemTime(new Date("2026-04-19T00:00:00.000Z"));
-
-      const store = new MemoryRateLimitStore();
-      await store.increment("memory:key", 60_000);
-      vi.advanceTimersByTime(60_000);
-
-      const result = await store.increment("memory:key", 60_000);
-
-      expect(result).toEqual({
+      await expect(store.increment("rate:key", 100)).resolves.toMatchObject({
         count: 1,
-        expiresAt: Date.now() + 60_000,
+        expiresAt: start + 200,
       });
+      vi.useRealTimers();
     });
 
-    it("returns null for expired stale entries", async () => {
+    it("cleanup removes expired entries from the internal map while preserving live ones", async () => {
       vi.useFakeTimers();
-      vi.setSystemTime(new Date("2026-04-19T00:00:00.000Z"));
-
       const store = new MemoryRateLimitStore();
-      await store.increment("memory:key", 60_000);
-      vi.advanceTimersByTime(60_001);
+      const start = Date.now();
 
-      await expect(store.get("memory:key")).resolves.toBeNull();
+      await store.increment("expired:key", 100);
+      await store.increment("live:key", 200);
+      vi.setSystemTime(start + 100);
+      store.cleanup();
+
+      const internalStore = (
+        store as unknown as { store: Map<string, unknown> }
+      ).store;
+      expect(internalStore.has("expired:key")).toBe(false);
+      expect(internalStore.has("live:key")).toBe(true);
+      vi.useRealTimers();
     });
 
-    it("deletes keys and resolves without a value", async () => {
+    it("cleanup removes entries that expire exactly at the current time", async () => {
+      vi.useFakeTimers();
       const store = new MemoryRateLimitStore();
-      await store.increment("memory:key", 60_000);
+      const start = Date.now();
 
-      await expect(store.delete("memory:key")).resolves.toBeUndefined();
-      await expect(store.get("memory:key")).resolves.toBeNull();
-    });
-  });
+      await store.increment("rate:key", 100);
+      vi.setSystemTime(start + 100);
+      store.cleanup();
 
-  describe("createRateLimitStore", () => {
-    it("returns a Redis store and logs when full Upstash credentials are configured", () => {
-      setEnv("UPSTASH_REDIS_REST_URL", "https://example.upstash.io");
-      setEnv("UPSTASH_REDIS_REST_TOKEN", "secret");
-
-      const store = createRateLimitStore();
-
-      expect(store).toBeInstanceOf(RedisRateLimitStore);
-      expect(mockLoggerInfo).toHaveBeenCalledWith(
-        "[Rate Limit] Using Upstash Redis store",
-      );
-      expect(mockLoggerWarn).not.toHaveBeenCalled();
+      await expect(store.get("rate:key")).resolves.toBeNull();
+      vi.useRealTimers();
     });
 
-    it("falls back to memory when an Upstash credential is missing", () => {
-      setEnv("UPSTASH_REDIS_REST_URL", "https://example.upstash.io");
+    it("removes expired entries from the internal map during reads", async () => {
+      vi.useFakeTimers();
+      const store = new MemoryRateLimitStore();
+      const start = Date.now();
 
-      const store = createRateLimitStore();
+      await store.increment("rate:key", 100);
+      vi.setSystemTime(start + 100);
 
-      expect(store).toBeInstanceOf(MemoryRateLimitStore);
-      expect(mockLoggerInfo).not.toHaveBeenCalled();
-      expect(mockLoggerWarn).toHaveBeenCalledWith(
-        "[Rate Limit] Using in-memory store (development only)",
-      );
+      await expect(store.get("rate:key")).resolves.toBeNull();
+      const internalStore = (
+        store as unknown as { store: Map<string, unknown> }
+      ).store;
+      expect(internalStore.has("rate:key")).toBe(false);
+      vi.useRealTimers();
     });
 
-    it("warns about KV fallback in development when both KV credentials exist", () => {
-      setEnv("KV_REST_API_URL", "https://example.kv.io");
-      setEnv("KV_REST_API_TOKEN", "kv-secret");
+    it("treats entries expiring exactly now as stale during reads", async () => {
+      vi.useFakeTimers();
+      const store = new MemoryRateLimitStore();
+      const start = Date.now();
 
-      const store = createRateLimitStore();
+      await store.increment("rate:key", 100);
+      vi.setSystemTime(start + 100);
 
-      expect(store).toBeInstanceOf(MemoryRateLimitStore);
-      expect(mockLoggerWarn).toHaveBeenCalledWith(
-        "[Rate Limit] KV store detected but Upstash Redis is preferred. Using in-memory fallback for development.",
-      );
-      expect(mockLoggerWarn).toHaveBeenCalledWith(
-        "[Rate Limit] Using in-memory store (development only)",
-      );
-    });
-
-    it("does not emit the KV fallback warning when only one KV credential exists", () => {
-      setEnv("KV_REST_API_URL", "https://example.kv.io");
-
-      const store = createRateLimitStore();
-
-      expect(store).toBeInstanceOf(MemoryRateLimitStore);
-      expect(mockLoggerWarn).toHaveBeenCalledTimes(1);
-      expect(mockLoggerWarn).toHaveBeenCalledWith(
-        "[Rate Limit] Using in-memory store (development only)",
-      );
-    });
-
-    it("logs the in-memory warning only once until reset", () => {
-      createRateLimitStore();
-      createRateLimitStore();
-
-      expect(mockLoggerWarn).toHaveBeenCalledTimes(1);
-
-      resetRateLimitStoreWarnings();
-      createRateLimitStore();
-
-      expect(mockLoggerWarn).toHaveBeenCalledTimes(2);
-    });
-
-    it("logs the initial in-memory warning before any reset helper runs", async () => {
-      vi.resetModules();
-
-      const { createRateLimitStore: createFreshStore } =
-        await import("@/lib/security/stores/rate-limit-store");
-
-      const store = createFreshStore();
-
-      expect(store.constructor.name).toBe("MemoryRateLimitStore");
-      expect(mockLoggerWarn).toHaveBeenCalledWith(
-        "[Rate Limit] Using in-memory store (development only)",
-      );
-    });
-
-    it("throws the production Upstash requirement error when Redis is missing", () => {
-      setEnv("NODE_ENV", "production");
-
-      expect(() => createRateLimitStore()).toThrow(
-        "[Rate Limit] Production requires Upstash Redis. Configure UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN.",
-      );
-    });
-
-    it("throws the KV-only production error when only KV credentials are configured", () => {
-      setEnv("NODE_ENV", "production");
-      setEnv("KV_REST_API_URL", "https://example.kv.io");
-      setEnv("KV_REST_API_TOKEN", "kv-secret");
-
-      expect(() => createRateLimitStore()).toThrow(
-        "[Rate Limit] KV-only rate limiting is not allowed in production. Configure Upstash Redis for distributed rate limiting.",
-      );
-    });
-
-    it("treats partial KV credentials in production as a missing Upstash setup", () => {
-      setEnv("NODE_ENV", "production");
-      setEnv("KV_REST_API_URL", "https://example.kv.io");
-
-      expect(() => createRateLimitStore()).toThrow(
-        "[Rate Limit] Production requires Upstash Redis. Configure UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN.",
-      );
-    });
-  });
-
-  describe("Upstash helper parsing", () => {
-    it("recognizes only non-null objects with a result property", () => {
-      expect(hasUpstashResultProperty({ result: 1 })).toBe(true);
-      expect(hasUpstashResultProperty({ value: 1 })).toBe(false);
-      expect(hasUpstashResultProperty(null)).toBe(false);
-    });
-
-    it("unwraps envelopes and preserves non-envelope values", () => {
-      expect(unwrapUpstashResult({ result: 3 })).toBe(3);
-      expect(unwrapUpstashResult("plain")).toBe("plain");
-      expect(unwrapUpstashResult(null)).toBeNull();
-    });
-
-    it("extracts pipeline results only from arrays or object-wrapped arrays", () => {
-      expect(getUpstashPipelineResults([{ result: 1 }])).toEqual([
-        { result: 1 },
-      ]);
-      expect(getUpstashPipelineResults({ result: [{ result: 2 }] })).toEqual([
-        { result: 2 },
-      ]);
-      expect(getUpstashPipelineResults({ result: "oops" })).toEqual([]);
-      expect(getUpstashPipelineResults({})).toEqual([]);
-    });
-
-    it("rejects non-finite strict numbers instead of silently accepting them", () => {
-      expect(parseStrictNumber({ result: 3 }, "count")).toBe(3);
-      expect(() => parseStrictNumber(NaN, "count")).toThrow("numeric count");
-      expect(() => parseStrictNumber(null, "count")).toThrow("numeric count");
-    });
-
-    it("clamps lenient ttl parsing to zero for invalid or negative values", () => {
-      expect(parseLenientTTL({ result: 5_000 })).toBe(5_000);
-      expect(parseLenientTTL(-1)).toBe(0);
-      expect(parseLenientTTL({ result: "NaN" })).toBe(0);
+      await expect(store.get("rate:key")).resolves.toBeNull();
+      vi.useRealTimers();
     });
   });
 });

@@ -192,15 +192,15 @@ export async function getRateLimitStatus(
   identifier: string,
   preset: RateLimitPreset,
 ): Promise<RateLimitResult> {
-  const store = getRateLimitStore();
   const config = getRateLimitConfig(preset);
   const key = `ratelimit:${preset}:${identifier}`;
 
   try {
+    const store = getRateLimitStore();
     const entry = await store.get(key);
     const now = Date.now();
 
-    if (!entry || now > entry.expiresAt) {
+    if (!entry || now >= entry.expiresAt) {
       return {
         allowed: true,
         remaining: config.maxRequests,
@@ -257,7 +257,15 @@ export function createRateLimitHeaders(result: RateLimitResult): Headers {
  */
 export function cleanupRateLimitStore(): boolean {
   const store = getRateLimitStore();
+  if ("cleanup" in store && typeof store.cleanup === "function") {
+    store.cleanup();
+    return true;
+  }
   return store instanceof MemoryRateLimitStore;
+}
+
+export function getRateLimitQueueSizeForTesting(): number {
+  return rateLimitQueue.size;
 }
 
 /**

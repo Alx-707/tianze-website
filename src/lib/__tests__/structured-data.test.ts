@@ -679,9 +679,9 @@ describe("Structured Data Generation", () => {
       expect(result).not.toContain("</script>");
       expect(result).not.toContain("<script>");
       expect(result).not.toContain("<b>");
-      expect(result).toContain("\\u003c/script>");
-      expect(result).toContain("\\u003cscript>");
-      expect(result).toContain("\\u003cb>");
+      expect(result).toContain("\\u003c/script\\u003e");
+      expect(result).toContain("\\u003cscript\\u003e");
+      expect(result).toContain("\\u003cb\\u003e");
 
       // 转义后的字符串仍然是有效的 JSON
       expect(() => JSON.parse(result)).not.toThrow();
@@ -689,6 +689,29 @@ describe("Structured Data Generation", () => {
       // JSON.parse 会自动将 \u003c 解码回 <
       expect(parsed.name).toBe('Test</script><script>alert("XSS")</script>');
       expect(parsed.description).toBe("Content with <b>HTML</b> tags");
+    });
+
+    it("should escape other HTML-sensitive characters and JS line separators", () => {
+      const riskyData = {
+        "@context": "https://schema.org",
+        "@type": "Thing",
+        name: "A > B & C",
+        description: "Line one\u2028line two\u2029line three",
+      };
+
+      const result = generateJSONLD(riskyData);
+
+      expect(result).toContain("\\u003e");
+      expect(result).toContain("\\u0026");
+      expect(result).toContain("\\u2028");
+      expect(result).toContain("\\u2029");
+      expect(result).not.toContain("\u2028");
+      expect(result).not.toContain("\u2029");
+
+      expect(() => JSON.parse(result)).not.toThrow();
+      const parsed = JSON.parse(result);
+      expect(parsed.name).toBe("A > B & C");
+      expect(parsed.description).toBe("Line one\u2028line two\u2029line three");
     });
 
     it("should handle data without < characters unchanged", () => {

@@ -289,6 +289,31 @@ describe("/api/inquiry route", () => {
       expect(data.errorCode).toBe(API_ERROR_CODES.INQUIRY_PROCESSING_ERROR);
     });
 
+    it("should return partial-success contract when only part of the pipeline succeeds", async () => {
+      vi.mocked(processLead).mockResolvedValueOnce({
+        success: false,
+        partialSuccess: true,
+        emailSent: true,
+        recordCreated: false,
+        referenceId: "ref-partial-123",
+      });
+
+      const request = createInquiryRequest(JSON.stringify(validInquiryData));
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(data.success).toBe(false);
+      expect(data.errorCode).toBe(API_ERROR_CODES.INQUIRY_PARTIAL_SUCCESS);
+      expect(data.data).toEqual({
+        partialSuccess: true,
+        referenceId: "ref-partial-123",
+        emailSent: true,
+        recordCreated: false,
+      });
+    });
+
     it("should handle validation error from processLead", async () => {
       vi.mocked(processLead).mockResolvedValueOnce({
         success: false,

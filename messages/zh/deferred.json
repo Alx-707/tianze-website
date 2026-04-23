@@ -1,4 +1,6 @@
 {
+  "error": "发生错误，请重试。",
+  "turnstileRequired": "请完成安全验证。",
   "errorBoundary": {
     "title": "发生错误",
     "description": "出现了一些问题，请尝试刷新页面。",

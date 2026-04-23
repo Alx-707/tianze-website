@@ -187,7 +187,7 @@ function createRateLimitResponse<T>(
  * @example
  * ```typescript
  * // In src/app/api/inquiry/route.ts
- * export const POST = withRateLimit('contact', async (req, { clientIP }) => {
+ * export const POST = withRateLimit('inquiry', async (req, { clientIP }) => {
  *   const body = await req.json();
  *   // ... handler logic
  *   return NextResponse.json({ success: true });

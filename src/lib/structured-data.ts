@@ -79,8 +79,14 @@ export async function generateLocalizedStructuredData(
 export function generateJSONLD(structuredData: unknown): string {
   const JSON_INDENT = COUNT_TWO;
   const jsonString = JSON.stringify(structuredData, null, JSON_INDENT);
-  // 转义 < 字符防止 </script> 截断攻击（Next.js 官方推荐）
-  return jsonString.replace(/</g, "\\u003c");
+  // Escape HTML-sensitive characters and JS line separators before embedding
+  // JSON-LD in a script tag so every call site shares the same hardening.
+  return jsonString
+    .replace(/</g, "\\u003c")
+    .replace(/>/g, "\\u003e")
+    .replace(/&/g, "\\u0026")
+    .replace(/\u2028/g, "\\u2028")
+    .replace(/\u2029/g, "\\u2029");
 }
 
 // 重新导出便捷函数

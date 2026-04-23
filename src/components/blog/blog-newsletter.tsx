@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useCallback, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import { CheckCircle, Loader2, Mail, XCircle } from "lucide-react";
 import { useTranslations } from "next-intl";
 import {
@@ -10,8 +11,7 @@ import {
 import { isPartialSuccessErrorCode } from "@/constants/api-error-codes";
 import { cn } from "@/lib/utils";
 import { getAttributionAsObject } from "@/lib/utm";
-import { generateIdempotencyKey } from "@/lib/idempotency-key";
-import { LazyTurnstile } from "@/components/forms/lazy-turnstile";
+import { generateIdempotencyKey } from "@/lib/idempotency";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -21,6 +21,21 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+
+// Lazy load Turnstile for performance
+const TurnstileWidget = dynamic(
+  () =>
+    import("@/components/security/turnstile").then((m) => m.TurnstileWidget),
+  {
+    ssr: false,
+    loading: () => (
+      <div
+        className="h-[65px] w-full animate-pulse rounded-md bg-muted"
+        aria-hidden="true"
+      />
+    ),
+  },
+);
 
 export interface BlogNewsletterProps {
   /** Custom class name */
@@ -50,15 +65,14 @@ const initialState: FormState = {
   error: undefined,
 };
 
-interface NewsletterCommonProps {
-  className: string | undefined;
-  title: string;
-  description: string;
-  success: boolean;
-  partial: boolean;
-  successMessage: string;
-  partialMessage: string | undefined;
-  formProps: Parameters<typeof NewsletterForm>[0];
+interface NewsletterSubmissionHandlers {
+  state: FormState;
+  formAction: (formData: FormData) => void;
+  isSubmitting: boolean;
+  turnstileToken: string | null;
+  handleTurnstileSuccess: (token: string) => void;
+  handleTurnstileError: () => void;
+  handleTurnstileExpire: () => void;
 }
 
 /**
@@ -123,6 +137,101 @@ function PartialMessage({ message }: { message: string }) {
       </p>
     </div>
   );
+}
+
+function useNewsletterSubmission(
+  t: ReturnType<typeof useTranslations>,
+  tApi: ReturnType<typeof useTranslations>,
+): NewsletterSubmissionHandlers {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const turnstileTokenRef = useRef<string | null>(null);
+  const idempotencyKeyRef = useRef<string | null>(null);
+
+  const handleTurnstileSuccess = useCallback((token: string) => {
+    turnstileTokenRef.current = token;
+    setTurnstileToken(token);
+  }, []);
+
+  const handleTurnstileError = useCallback(() => {
+    turnstileTokenRef.current = null;
+    setTurnstileToken(null);
+  }, []);
+
+  const handleTurnstileExpire = useCallback(() => {
+    turnstileTokenRef.current = null;
+    setTurnstileToken(null);
+  }, []);
+
+  async function handleSubmit(
+    _prevState: FormState,
+    formData: FormData,
+  ): Promise<FormState> {
+    setIsSubmitting(true);
+    try {
+      const email = String(formData.get("email") ?? "").trim();
+      const token = turnstileTokenRef.current;
+      if (!token) return { success: false, error: t("turnstileRequired") };
+
+      const idempotencyKey =
+        idempotencyKeyRef.current ?? generateIdempotencyKey();
+      idempotencyKeyRef.current = idempotencyKey;
+
+      const attribution = getAttributionAsObject();
+      const response = await fetch("/api/subscribe", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Idempotency-Key": idempotencyKey,
+        },
+        // nosemgrep: object-injection-sink-spread-operator
+        // Safe: attribution is from getAttributionAsObject() which returns sanitized alphanumeric values
+        body: JSON.stringify({
+          email,
+          pageType: "blog",
+          turnstileToken: token,
+          ...attribution,
+        }),
+      });
+      const result = (await response.json()) as SubscribeApiResponse;
+      const isPartial =
+        result.errorCode !== undefined &&
+        isPartialSuccessErrorCode(result.errorCode) &&
+        result.data?.partialSuccess === true;
+      if (isPartial) {
+        return {
+          success: false,
+          partial: true,
+          error: translateApiError(tApi, result.errorCode),
+          referenceId: result.data?.referenceId,
+        };
+      }
+      if (!response.ok || result.success !== true) {
+        return {
+          success: false,
+          error: translateApiError(tApi, result.errorCode),
+        };
+      }
+      idempotencyKeyRef.current = null;
+      return { success: true, error: undefined };
+    } catch {
+      return { success: false, error: t("error") };
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  const [state, formAction] = useActionState(handleSubmit, initialState);
+
+  return {
+    state,
+    formAction,
+    isSubmitting,
+    turnstileToken,
+    handleTurnstileSuccess,
+    handleTurnstileError,
+    handleTurnstileExpire,
+  };
 }
 
 /**
@@ -191,7 +300,7 @@ function NewsletterForm({
           </span>
         </Button>
       </div>
-      <LazyTurnstile
+      <TurnstileWidget
         onSuccess={onTurnstileSuccess}
         onError={onTurnstileError}
         onExpire={onTurnstileExpire}
@@ -280,51 +389,6 @@ function InlineVariant({
   );
 }
 
-function buildNewsletterCommonProps(args: {
-  className: string | undefined;
-  title: string;
-  description: string;
-  success: boolean;
-  partial: boolean;
-  successMessage: string;
-  partialMessage: string | undefined;
-  formProps: Parameters<typeof NewsletterForm>[0];
-}): NewsletterCommonProps {
-  return args;
-}
-
-function DefaultVariant({
-  className,
-  title,
-  description,
-  success,
-  partial,
-  successMessage,
-  partialMessage,
-  formProps,
-}: NewsletterCommonProps) {
-  return (
-    <Card className={cn("overflow-hidden", className)}>
-      <CardHeader className="bg-muted/50">
-        <CardTitle className="flex items-center gap-2 text-lg">
-          <Mail className="h-5 w-5" />
-          {title}
-        </CardTitle>
-        <CardDescription>{description}</CardDescription>
-      </CardHeader>
-      <CardContent className="pt-6">
-        {success ? (
-          <SuccessMessage message={successMessage} />
-        ) : partial && partialMessage !== undefined ? (
-          <PartialMessage message={partialMessage} />
-        ) : (
-          <NewsletterForm {...formProps} />
-        )}
-      </CardContent>
-    </Card>
-  );
-}
-
 /**
  * Blog Newsletter Component - subscription form for blog email notifications.
  */
@@ -334,85 +398,15 @@ export function BlogNewsletter({
 }: BlogNewsletterProps) {
   const t = useTranslations("blog.newsletter");
   const tApi = useTranslations(API_ERROR_NAMESPACE);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
-  const turnstileTokenRef = useRef<string | null>(null);
-  const idempotencyKeyRef = useRef<string | null>(null);
-
-  const handleTurnstileSuccess = useCallback((token: string) => {
-    turnstileTokenRef.current = token;
-    setTurnstileToken(token);
-  }, []);
-
-  const handleTurnstileError = useCallback(() => {
-    turnstileTokenRef.current = null;
-    setTurnstileToken(null);
-  }, []);
-
-  const handleTurnstileExpire = useCallback(() => {
-    turnstileTokenRef.current = null;
-    setTurnstileToken(null);
-  }, []);
-
-  async function handleSubmit(
-    _prevState: FormState,
-    formData: FormData,
-  ): Promise<FormState> {
-    setIsSubmitting(true);
-    try {
-      const email = String(formData.get("email") ?? "").trim();
-      const token = turnstileTokenRef.current;
-      if (!token) return { success: false, error: t("turnstileRequired") };
-
-      const idempotencyKey =
-        idempotencyKeyRef.current ?? generateIdempotencyKey();
-      idempotencyKeyRef.current = idempotencyKey;
-
-      const attribution = getAttributionAsObject();
-      const response = await fetch("/api/subscribe", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Idempotency-Key": idempotencyKey,
-        },
-        // nosemgrep: object-injection-sink-spread-operator
-        // Safe: attribution is from getAttributionAsObject() which returns sanitized alphanumeric values
-        body: JSON.stringify({
-          email,
-          pageType: "blog",
-          turnstileToken: token,
-          ...attribution,
-        }),
-      });
-      const result = (await response.json()) as SubscribeApiResponse;
-      const isPartial =
-        result.errorCode !== undefined &&
-        isPartialSuccessErrorCode(result.errorCode) &&
-        result.data?.partialSuccess === true;
-      if (isPartial) {
-        return {
-          success: false,
-          partial: true,
-          error: translateApiError(tApi, result.errorCode),
-          referenceId: result.data?.referenceId,
-        };
-      }
-      if (!response.ok || result.success !== true) {
-        return {
-          success: false,
-          error: translateApiError(tApi, result.errorCode),
-        };
-      }
-      idempotencyKeyRef.current = null;
-      return { success: true, error: undefined };
-    } catch {
-      return { success: false, error: t("error") };
-    } finally {
-      setIsSubmitting(false);
-    }
-  }
-
-  const [state, formAction] = useActionState(handleSubmit, initialState);
+  const {
+    state,
+    formAction,
+    isSubmitting,
+    turnstileToken,
+    handleTurnstileSuccess,
+    handleTurnstileError,
+    handleTurnstileExpire,
+  } = useNewsletterSubmission(t, tApi);
 
   const formProps = {
     onSubmit: formAction,
@@ -428,7 +422,7 @@ export function BlogNewsletter({
     onTurnstileExpire: handleTurnstileExpire,
   };
 
-  const commonProps = buildNewsletterCommonProps({
+  const commonProps = {
     className,
     title: t("title"),
     description: t("description"),
@@ -437,10 +431,29 @@ export function BlogNewsletter({
     successMessage: t("success"),
     partialMessage: state.error,
     formProps,
-  });
+  };
 
   if (variant === "compact") return <CompactVariant {...commonProps} />;
   if (variant === "inline") return <InlineVariant {...commonProps} />;
 
-  return <DefaultVariant {...commonProps} />;
+  return (
+    <Card className={cn("overflow-hidden", className)}>
+      <CardHeader className="bg-muted/50">
+        <CardTitle className="flex items-center gap-2 text-lg">
+          <Mail className="h-5 w-5" />
+          {t("title")}
+        </CardTitle>
+        <CardDescription>{t("description")}</CardDescription>
+      </CardHeader>
+      <CardContent className="pt-6">
+        {state.success ? (
+          <SuccessMessage message={t("success")} />
+        ) : state.partial && state.error !== undefined ? (
+          <PartialMessage message={state.error} />
+        ) : (
+          <NewsletterForm {...formProps} />
+        )}
+      </CardContent>
+    </Card>
+  );
 }

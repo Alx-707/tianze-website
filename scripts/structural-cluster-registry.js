@@ -21,19 +21,19 @@ const STRUCTURAL_CLUSTERS = [
   },
   {
     key: "lead-family",
-    name: "Lead API family",
-    label: "lead API family",
+    name: "Lead submission surfaces",
+    label: "lead submission surfaces",
     recommendedReview:
-      "Inspect sibling routes for contract/validation/rate-limit drift",
+      "Inspect contact action plus sibling write routes for contract/validation/rate-limit drift",
     command: "pnpm review:lead-family",
     files: [
-      "src/app/api/contact/route.ts",
+      "src/lib/actions/contact.ts",
       "src/app/api/inquiry/route.ts",
       "src/app/api/subscribe/route.ts",
       "src/lib/api/lead-route-response.ts",
     ],
     pattern:
-      /^(src\/app\/api\/(contact|inquiry|subscribe)\/.+|src\/lib\/api\/lead-route-response\.ts)$/,
+      /^(src\/lib\/actions\/contact\.ts|src\/app\/api\/(inquiry|subscribe)\/.+|src\/lib\/api\/lead-route-response\.ts)$/,
   },
   {
     key: "homepage-sections",

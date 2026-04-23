@@ -1,17 +1,9 @@
 "use client";
 
-import { useActionState, useCallback, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import { CheckCircle, Loader2, MessageSquare, XCircle } from "lucide-react";
 import { useTranslations } from "next-intl";
-import {
-  API_ERROR_NAMESPACE,
-  translateApiError,
-} from "@/lib/api/translate-error-code";
-import { isPartialSuccessErrorCode } from "@/constants/api-error-codes";
-import { generateIdempotencyKey } from "@/lib/idempotency-key";
 import { cn } from "@/lib/utils";
-import { getAttributionAsObject } from "@/lib/utm";
-import { LazyTurnstile } from "@/components/forms/lazy-turnstile";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -23,6 +15,22 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useProductInquirySubmission } from "@/components/products/use-product-inquiry-submission";
+
+// Lazy load Turnstile for performance
+const TurnstileWidget = dynamic(
+  () =>
+    import("@/components/security/turnstile").then((m) => m.TurnstileWidget),
+  {
+    ssr: false,
+    loading: () => (
+      <div
+        className="h-[65px] w-full animate-pulse rounded-md bg-muted"
+        aria-hidden="true"
+      />
+    ),
+  },
+);
 
 export interface ProductInquiryFormProps {
   /** Product name to display in the form */
@@ -33,29 +41,6 @@ export interface ProductInquiryFormProps {
   className?: string;
   /** Callback when form is submitted successfully */
   onSuccess?: () => void;
-}
-
-interface FormState {
-  success: boolean;
-  partial?: boolean;
-  error: string | undefined;
-  referenceId?: string | undefined;
-}
-
-const initialState: FormState = {
-  success: false,
-  error: undefined,
-};
-
-interface InquiryRenderState {
-  className: string | undefined;
-  title: string;
-  description: string;
-  success: boolean;
-  partial: boolean;
-  successMessage: string;
-  partialMessage: string | undefined;
-  form: React.ReactNode;
 }
 
 // Success message component
@@ -299,125 +284,6 @@ function RequirementsField({
   );
 }
 
-function renderInquiryState({
-  className,
-  title,
-  description,
-  success,
-  partial,
-  successMessage,
-  partialMessage,
-  form,
-}: InquiryRenderState) {
-  if (success) {
-    return (
-      <Card className={cn("overflow-hidden", className)}>
-        <SuccessMessage message={successMessage} />
-      </Card>
-    );
-  }
-
-  if (partial && partialMessage !== undefined) {
-    return (
-      <Card className={cn("overflow-hidden", className)}>
-        <FormHeader title={title} description={description} />
-        <CardContent className="pt-6">
-          <PartialMessage message={partialMessage} />
-        </CardContent>
-      </Card>
-    );
-  }
-
-  return (
-    <Card className={cn("overflow-hidden", className)}>
-      <FormHeader title={title} description={description} />
-      <CardContent className="pt-6">{form}</CardContent>
-    </Card>
-  );
-}
-
-// Extract form data from FormData object
-function extractFormData(formData: FormData) {
-  const fullName = String(formData.get("name") ?? "").trim();
-  const email = String(formData.get("email") ?? "").trim();
-  const company = String(formData.get("company") ?? "").trim();
-  const quantity = String(formData.get("quantity") ?? "").trim();
-  const targetPrice = String(formData.get("targetPrice") ?? "").trim();
-  const requirementsRaw = String(formData.get("requirements") ?? "").trim();
-  const requirements =
-    targetPrice !== ""
-      ? `${requirementsRaw}\n\nTarget Price: ${targetPrice}`.trim()
-      : requirementsRaw;
-  return { fullName, email, company, quantity, requirements };
-}
-
-// Submit inquiry to API
-interface SubmitInquiryParams {
-  data: ReturnType<typeof extractFormData>;
-  productSlug: string;
-  productName: string;
-  token: string;
-  idempotencyKey: string;
-}
-
-interface InquiryApiResponse {
-  success?: boolean;
-  errorCode?: string;
-  data?: {
-    partialSuccess?: boolean;
-    referenceId?: string;
-  };
-}
-
-async function submitInquiry({
-  data,
-  productSlug,
-  productName,
-  token,
-  idempotencyKey,
-}: SubmitInquiryParams): Promise<{
-  ok: boolean;
-  partial: boolean;
-  errorCode?: string;
-  referenceId?: string;
-}> {
-  const attribution = getAttributionAsObject();
-  const requestBody = {
-    type: "product",
-    fullName: data.fullName,
-    email: data.email,
-    productSlug,
-    productName,
-    quantity: data.quantity,
-    turnstileToken: token,
-    ...(data.company !== "" && { company: data.company }),
-    ...(data.requirements !== "" && { requirements: data.requirements }),
-    ...attribution,
-  };
-
-  const response = await fetch("/api/inquiry", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Idempotency-Key": idempotencyKey,
-    },
-    body: JSON.stringify(requestBody),
-  });
-  const result = (await response.json()) as InquiryApiResponse;
-  const partial =
-    result.errorCode !== undefined &&
-    isPartialSuccessErrorCode(result.errorCode) &&
-    result.data?.partialSuccess === true;
-  return {
-    ok: response.ok && result.success === true,
-    partial,
-    ...(result.errorCode !== undefined && { errorCode: result.errorCode }),
-    ...(result.data?.referenceId !== undefined
-      ? { referenceId: result.data.referenceId }
-      : {}),
-  };
-}
-
 /**
  * Product inquiry form for B2B product pages.
  */
@@ -429,121 +295,83 @@ export function ProductInquiryForm({
 }: ProductInquiryFormProps) {
   const t = useTranslations("products.inquiry");
   const tContact = useTranslations("contact.form");
-  const tApi = useTranslations(API_ERROR_NAMESPACE);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
-  const turnstileTokenRef = useRef<string | null>(null);
-  const idempotencyKeyRef = useRef<string | null>(null);
+  const {
+    state,
+    formAction,
+    isSubmitting,
+    turnstileToken,
+    handleTurnstileSuccess,
+    handleTurnstileReset,
+  } = useProductInquirySubmission({
+    onSuccess,
+    productName,
+    productSlug,
+  });
 
-  const handleTurnstileSuccess = useCallback((token: string) => {
-    turnstileTokenRef.current = token;
-    setTurnstileToken(token);
-  }, []);
-
-  const handleTurnstileReset = useCallback(() => {
-    turnstileTokenRef.current = null;
-    setTurnstileToken(null);
-  }, []);
-
-  async function handleSubmit(
-    _prevState: FormState,
-    formData: FormData,
-  ): Promise<FormState> {
-    setIsSubmitting(true);
-    try {
-      const token = turnstileTokenRef.current;
-      if (!token) return { success: false, error: t("turnstileRequired") };
-      const idempotencyKey =
-        idempotencyKeyRef.current ?? generateIdempotencyKey();
-      idempotencyKeyRef.current = idempotencyKey;
-
-      const data = extractFormData(formData);
-      const result = await submitInquiry({
-        data,
-        productSlug,
-        productName,
-        token,
-        idempotencyKey,
-      });
-      if (result.partial) {
-        return {
-          success: false,
-          partial: true,
-          error: translateApiError(tApi, result.errorCode),
-          referenceId: result.referenceId,
-        };
-      }
-      if (!result.ok)
-        return {
-          success: false,
-          error: translateApiError(tApi, result.errorCode),
-        };
-
-      idempotencyKeyRef.current = null;
-      onSuccess?.();
-      return { success: true, error: undefined };
-    } catch {
-      return { success: false, error: t("error") };
-    } finally {
-      setIsSubmitting(false);
-    }
+  if (state.success) {
+    return (
+      <Card className={cn("overflow-hidden", className)}>
+        <SuccessMessage message={t("success")} />
+      </Card>
+    );
   }
 
-  const [state, formAction] = useActionState(handleSubmit, initialState);
+  if (state.partial && state.error !== undefined) {
+    return (
+      <Card className={cn("overflow-hidden", className)}>
+        <FormHeader title={t("title")} description={t("description")} />
+        <CardContent className="pt-6">
+          <PartialMessage message={state.error} />
+        </CardContent>
+      </Card>
+    );
+  }
 
-  const form = (
-    <form action={formAction} className="space-y-4">
-      <input type="hidden" name="productSlug" value={productSlug} />
-      <input type="hidden" name="productName" value={productName} />
-      <ProductDisplay label={t("productName")} productName={productName} />
-      <ContactFields
-        nameLabel={tContact("firstName")}
-        namePlaceholder={tContact("firstNamePlaceholder")}
-        emailLabel={tContact("email")}
-        emailPlaceholder={tContact("emailPlaceholder")}
-      />
-      <CompanyField
-        label={tContact("company")}
-        placeholder={tContact("companyPlaceholder")}
-      />
-      <QuantityPriceFields
-        quantityLabel={t("quantity")}
-        quantityPlaceholder={t("quantityPlaceholder")}
-        priceLabel={t("targetPrice")}
-        pricePlaceholder={t("targetPricePlaceholder")}
-      />
-      <RequirementsField
-        label={t("requirements")}
-        placeholder={t("requirementsPlaceholder")}
-      />
-      <LazyTurnstile
-        onSuccess={handleTurnstileSuccess}
-        onError={handleTurnstileReset}
-        onExpire={handleTurnstileReset}
-        action="product_inquiry"
-        size="compact"
-        theme="auto"
-      />
-      {state.error !== undefined && !state.partial && (
-        <ErrorMessage error={state.error} />
-      )}
-      <SubmitButton
-        isSubmitting={isSubmitting}
-        submitLabel={t("submit")}
-        submittingLabel={t("submitting")}
-        disabled={!turnstileToken}
-      />
-    </form>
+  return (
+    <Card className={cn("overflow-hidden", className)}>
+      <FormHeader title={t("title")} description={t("description")} />
+      <CardContent className="pt-6">
+        <form action={formAction} className="space-y-4">
+          <input type="hidden" name="productSlug" value={productSlug} />
+          <input type="hidden" name="productName" value={productName} />
+          <ProductDisplay label={t("productName")} productName={productName} />
+          <ContactFields
+            nameLabel={tContact("firstName")}
+            namePlaceholder={tContact("firstNamePlaceholder")}
+            emailLabel={tContact("email")}
+            emailPlaceholder={tContact("emailPlaceholder")}
+          />
+          <CompanyField
+            label={tContact("company")}
+            placeholder={tContact("companyPlaceholder")}
+          />
+          <QuantityPriceFields
+            quantityLabel={t("quantity")}
+            quantityPlaceholder={t("quantityPlaceholder")}
+            priceLabel={t("targetPrice")}
+            pricePlaceholder={t("targetPricePlaceholder")}
+          />
+          <RequirementsField
+            label={t("requirements")}
+            placeholder={t("requirementsPlaceholder")}
+          />
+          <TurnstileWidget
+            onSuccess={handleTurnstileSuccess}
+            onError={handleTurnstileReset}
+            onExpire={handleTurnstileReset}
+            action="product_inquiry"
+            size="compact"
+            theme="auto"
+          />
+          {state.error !== undefined && <ErrorMessage error={state.error} />}
+          <SubmitButton
+            isSubmitting={isSubmitting}
+            submitLabel={t("submit")}
+            submittingLabel={t("submitting")}
+            disabled={!turnstileToken}
+          />
+        </form>
+      </CardContent>
+    </Card>
   );
-
-  return renderInquiryState({
-    className,
-    title: t("title"),
-    description: t("description"),
-    success: state.success,
-    partial: state.partial === true,
-    successMessage: t("success"),
-    partialMessage: state.error,
-    form,
-  });
 }

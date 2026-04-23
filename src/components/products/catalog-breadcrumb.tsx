@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { Link, routing } from "@/i18n/routing";
+import { JsonLdScript } from "@/components/seo";
 import { SITE_CONFIG } from "@/config/paths";
 import type { MarketDefinition } from "@/constants/product-catalog";
 import {
@@ -31,11 +32,6 @@ function buildJsonLd(items: BreadcrumbEntry[]) {
       item: item.url,
     })),
   };
-}
-
-/** Escape JSON string for safe embedding in <script> tags */
-function safeJsonLd(data: ReturnType<typeof buildJsonLd>): string {
-  return JSON.stringify(data).replace(/</g, "\\u003c");
 }
 
 export async function CatalogBreadcrumb({
@@ -95,12 +91,7 @@ export async function CatalogBreadcrumb({
         </BreadcrumbList>
       </Breadcrumb>
 
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: safeJsonLd(buildJsonLd(entries)),
-        }}
-      />
+      <JsonLdScript data={buildJsonLd(entries)} />
     </>
   );
 }

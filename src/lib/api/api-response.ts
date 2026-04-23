@@ -18,6 +18,12 @@ export interface ApiErrorResponse {
   errorCode: ApiErrorCode;
 }
 
+export interface ApiPartialSuccessResponse<T> {
+  success: false;
+  errorCode: ApiErrorCode;
+  data: T;
+}
+
 /**
  * Standard API success response structure
  */
@@ -73,4 +79,12 @@ export function createApiSuccessResponse<T>(
   status: number = HTTP_OK,
 ): NextResponse<ApiSuccessResponse<T>> {
   return NextResponse.json({ success: true, data }, { status });
+}
+
+export function createApiPartialSuccessResponse<T>(
+  errorCode: ApiErrorCode,
+  data: T,
+  status: number = HTTP_OK,
+): NextResponse<ApiPartialSuccessResponse<T>> {
+  return NextResponse.json({ success: false, errorCode, data }, { status });
 }

@@ -7,19 +7,18 @@ import { notFound } from "next/navigation";
 import { NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { getFontClassNames } from "@/app/[locale]/layout-fonts";
-import { loadCompleteMessages } from "@/lib/load-messages";
-import { env, getRuntimeEnvBoolean } from "@/lib/env";
-import { pickClientMessages } from "@/lib/i18n/client-messages";
-import { generateJSONLD } from "@/lib/structured-data";
 import { AttributionBootstrap } from "@/components/attribution-bootstrap";
 import { LazyCookieConsentIsland } from "@/components/cookie/lazy-cookie-consent-island";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/layout/header";
 import { LazyTopLoader } from "@/components/lazy/lazy-top-loader";
+import { JsonLdScript } from "@/components/seo";
 import { ThemeProvider } from "@/components/theme-provider";
 import { LazyThemeSwitcher } from "@/components/ui/lazy-theme-switcher";
 import { FOOTER_COLUMNS, FOOTER_STYLE_TOKENS } from "@/config/footer-links";
 import { coerceLocale, isLocale } from "@/i18n/locale-utils";
+import { pickClientMessages } from "@/lib/i18n/client-messages";
+import { loadCompleteMessages } from "@/lib/load-messages";
 import { mainNavigation } from "@/lib/navigation";
 
 // Client analytics are rendered as an island to avoid impacting LCP
@@ -94,20 +93,10 @@ async function AsyncLocaleLayoutContent({
         CSP nonce is NOT required for these scripts because:
         1. type="application/ld+json" declares data-only content (not executable JavaScript)
         2. Per CSP Level 3 spec, script-src restrictions apply only to executable scripts
-        3. Reference: https://www.w3.org/TR/CSP3/#should-block-inline
+        3. JsonLdScript centralizes the escaping we rely on across the repo
       */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: generateJSONLD(organizationData),
-        }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: generateJSONLD(websiteData),
-        }}
-      />
+      <JsonLdScript data={organizationData} />
+      <JsonLdScript data={websiteData} />
       <NextIntlClientProvider locale={locale} messages={clientMessages}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           {/* P1-1 Fix: Single attribution initialization for UTM tracking */}
@@ -168,11 +157,11 @@ export default async function LocaleLayout({
   const typedLocale = coerceLocale(locale);
   setRequestLocale(typedLocale);
   const disableDevTools =
-    env.PLAYWRIGHT_TEST ||
-    getRuntimeEnvBoolean("NEXT_PUBLIC_DISABLE_DEV_TOOLS");
+    process.env.PLAYWRIGHT_TEST === "true" ||
+    process.env.NEXT_PUBLIC_DISABLE_DEV_TOOLS === "true";
   const disableReactScan =
-    disableDevTools || getRuntimeEnvBoolean("NEXT_PUBLIC_DISABLE_REACT_SCAN");
-  const shouldLoadDevScripts = env.NODE_ENV === "development";
+    disableDevTools || process.env.NEXT_PUBLIC_DISABLE_REACT_SCAN === "true";
+  const shouldLoadDevScripts = process.env.NODE_ENV === "development";
   const skipToContentLabel =
     typedLocale === "zh" ? "跳转到主要内容" : "Skip to main content";
 

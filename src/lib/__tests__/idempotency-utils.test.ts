@@ -58,7 +58,7 @@ describe("idempotency-utils", () => {
         body: [1, 2, 3],
         statusCode: 200,
       });
-      expect(normalized.body).not.toBe(payload);
+      expect(normalized.body).toBe(payload);
     });
 
     it("keeps plain objects without statusCode untouched", () => {
@@ -69,7 +69,7 @@ describe("idempotency-utils", () => {
         body: { ok: true },
         statusCode: 200,
       });
-      expect(normalized.body).not.toBe(payload);
+      expect(normalized.body).toBe(payload);
     });
 
     it("ignores inherited statusCode properties", () => {

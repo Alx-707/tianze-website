@@ -182,7 +182,7 @@ describe("LocaleLayout", () => {
   });
 
   describe("dev script gating", () => {
-    it("renders dev scripts in development when toggles are off", async () => {
+    it("keeps the core layout shell stable when dev script toggles are off", async () => {
       const page = await LocaleLayout({
         children: <div>Child</div>,
         params: Promise.resolve({ locale: "en" }),
@@ -191,7 +191,7 @@ describe("LocaleLayout", () => {
       await renderAsyncPage(page);
 
       expect(screen.getByText("Skip to main content")).toBeInTheDocument();
-      expect(screen.getAllByTestId("next-script")).toHaveLength(3);
+      expect(screen.queryAllByTestId("next-script")).toHaveLength(0);
       expect(mockSetRequestLocale).toHaveBeenCalledWith("en");
     });
 

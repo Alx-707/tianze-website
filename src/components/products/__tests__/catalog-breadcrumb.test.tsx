@@ -43,6 +43,10 @@ vi.mock("@/i18n/routing", () => ({
 }));
 
 vi.mock("@/config/paths", () => ({
+  LOCALES_CONFIG: {
+    locales: ["en", "zh"],
+    defaultLocale: "en",
+  },
   SITE_CONFIG: {
     baseUrl: "https://www.tianze-pipe.com",
   },

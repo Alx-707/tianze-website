@@ -1,4 +1,6 @@
 {
+  "error": "An error occurred. Please try again.",
+  "turnstileRequired": "Please complete the security verification.",
   "errorBoundary": {
     "title": "An error occurred",
     "description": "Something went wrong. Please try refreshing the page.",

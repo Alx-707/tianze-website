@@ -41,8 +41,8 @@ vi.mock("lucide-react", () => ({
   ),
 }));
 
-vi.mock("@/components/forms/lazy-turnstile", () => ({
-  LazyTurnstile: ({
+vi.mock("@/components/security/turnstile", () => ({
+  TurnstileWidget: ({
     onSuccess,
     onError,
     onExpire,

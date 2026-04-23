@@ -20,14 +20,12 @@ const splitFunctions: Record<string, SplittedFunctionOptions> = {
     // a clean proof after re-enabling minification.
     minify: false,
     routes: [
-      "app/api/contact/route",
       "app/api/inquiry/route",
       "app/api/subscribe/route",
       "app/api/verify-turnstile/route",
       "app/api/health/route",
     ],
     patterns: [
-      "/api/contact",
       "/api/inquiry",
       "/api/subscribe",
       "/api/verify-turnstile",
