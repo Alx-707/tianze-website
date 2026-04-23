@@ -81,8 +81,8 @@
 当前这份结论主要来自：
 
 - `docs/guides/CLOUDFLARE-ISSUE-TAXONOMY.md`
-- `docs/archive/middleware-proxy-compat-record.md`
 - `docs/guides/RELEASE-PROOF-RUNBOOK.md`
 - `docs/guides/QUALITY-PROOF-LEVELS.md`
+- 当前代码与脚本主树（尤其 `src/middleware.ts`、`scripts/cloudflare/**`）
 
 后面如果部署链路调整，优先更新这份文档。

@@ -228,7 +228,6 @@ pnpm review:homepage-sections
 
 **Files:**
 - Modify: `docs/guides/content-asset-inventory.md`
-- Modify: `docs/archive/guides/reference-program/site-difference-candidate-list.md`
 - Modify: `docs/guides/LONG-TERM-OPTIMIZATION-PROGRAM-2026-04.md`
 - Modify: `messages/{en,zh}/{critical,deferred}.json` only where asset boundaries need cleanup
 - Modify: content pages or metadata helpers only when boundary cleanup requires it

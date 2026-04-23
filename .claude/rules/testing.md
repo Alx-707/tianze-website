@@ -25,9 +25,9 @@ pnpm test:e2e          # Playwright E2E tests
 - Do not use wall-clock thresholds (`Date.now()`, `performance.now()`, "< 1000ms", etc.) in normal unit/integration gate tests.
 - If performance must be checked, use a dedicated benchmark/perf harness or an explicit opt-in test path.
 - Stateful UI tests must explicitly create the state they assert against; do not rely on implicit cooldowns, shared state leakage, or timing side effects.
-- If a change touches `src/sites/**` or site identity wrappers, tests must prove current-site behavior still matches the active site rather than only asserting object shape
+- If a change touches site identity wrappers or env-based site switching, tests must prove current-site behavior still matches the active site rather than only asserting object shape
 - For any site-aware change, add proof for “no cross-site leakage” instead of only asserting the new site renders
-- Multi-site pilot is already present. When `src/sites/**`, `src/sites/**/messages/**`, or site-switching env behavior changes, include non-default-site proof rather than leaving it as a future TODO
+- The repo already has a site-aware build lane (`build:site:equipment`), but it does **not** currently have a live `src/sites/**` tree. Do not write tests that assume `src/sites/**` exists unless that structure is added in the same branch.
 - Preferred proof for site-aware changes: `pnpm build:site:equipment`; stronger platform proof: `pnpm build:cf:site:equipment`
 
 ## Test File Organization
@@ -38,7 +38,7 @@ pnpm test:e2e          # Playwright E2E tests
 
 ## Playwright E2E Selectors
 
-**IMPORTANT**: Selector priority (highest to lowest):
+Use user-facing locators first. This follows Playwright + Testing Library guidance:
 
 | Priority | Method | Use Case |
 |----------|--------|----------|
@@ -46,7 +46,8 @@ pnpm test:e2e          # Playwright E2E tests
 | 2️⃣ | `getByLabel()` | Form labels |
 | 3️⃣ | `getByPlaceholder()` | Input placeholders |
 | 4️⃣ | `getByText()` | Text content |
-| 5️⃣ | `getByTestId()` | When above not applicable |
+| 5️⃣ | `getByAltText()` / `getByTitle()` | Images or title-driven UI |
+| 6️⃣ | `getByTestId()` | Last resort when user-facing locators are not practical |
 
 ```typescript
 // ✅ Recommended: semantic selectors
@@ -96,7 +97,7 @@ expect(result.success).toBe(false); // WRONG: mock returns true
 vi.unmock("zod");
 ```
 
-Rule: Any test file that tests Zod schema validation (`.safeParse`, `.parse`, rejection paths) **must** call `vi.unmock("zod")` at the top level before `describe()`.
+Rule: Any test file that tests Zod schema validation (`.safeParse`, `.parse`, rejection paths) **must** call `vi.unmock("zod")` at the top level before `describe()`, because `vi.unmock` is hoisted.
 
 ## Centralized Mock System
 

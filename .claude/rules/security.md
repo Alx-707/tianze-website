@@ -7,25 +7,72 @@ paths:
 
 # Security Implementation
 
-## Threat Modeling
-
-See `/.claude/rules/threat-modeling.md` for STRIDE analysis on new/changed API routes.
+> This file mixes framework-backed security behavior with repo security policy. Repo-specific rules are labeled where the framework does not prescribe one exact approach.
 
 ## Server Code Protection
 
 - Add `import "server-only"` at top of sensitive server files
 - Server Actions / Route Handlers must perform authn/authz internally (DAL-style); proxy/middleware may act as optional front-line filtering only and must not be the sole auth layer
 
+## New API Route Steps
+
+When creating a public write endpoint (POST/PUT/PATCH/DELETE):
+
+1. Define Zod schema in `src/lib/validations.ts`
+2. Add rate limit preset in `src/lib/security/distributed-rate-limit.ts`
+3. Write the route handler with this skeleton:
+
+```typescript
+import 'server-only';
+import { NextRequest } from 'next/server';
+import { API_ERROR_CODES } from '@/constants/api-error-codes';
+import { HTTP_TOO_MANY_REQUESTS } from '@/constants';
+import { checkDistributedRateLimit } from '@/lib/security/distributed-rate-limit';
+import { getClientIP } from '@/lib/security/client-ip';
+import { safeParseJson } from '@/lib/api/safe-parse-json';
+import {
+  createApiErrorResponse,
+  createApiSuccessResponse,
+} from '@/lib/api/api-response';
+import { mySchema } from '@/lib/validations';
+
+export async function POST(request: NextRequest) {
+  const clientIP = getClientIP(request);
+  const rateResult = await checkDistributedRateLimit(clientIP, 'my-endpoint');
+  if (!rateResult.allowed) {
+    return createApiErrorResponse(
+      API_ERROR_CODES.RATE_LIMIT_EXCEEDED,
+      HTTP_TOO_MANY_REQUESTS,
+    );
+  }
+
+  const body = await safeParseJson(request);
+  if (!body.ok) {
+    return createApiErrorResponse(body.errorCode, body.statusCode);
+  }
+
+  const parsed = mySchema.safeParse(body.data);
+  if (!parsed.success) {
+    return createApiErrorResponse(API_ERROR_CODES.INVALID_REQUEST, 400);
+  }
+
+  // Business logic here
+  return createApiSuccessResponse({ /* result */ });
+}
+```
+
+4. Add endpoint to the "Known API Endpoints" table below
+5. Add tests covering rate limit, validation rejection, and happy path
+
 ## XSS Prevention
 
-- **Never** use unfiltered `dangerouslySetInnerHTML`
-- Must use `DOMPurify.sanitize()` to filter user HTML
+- **Never** use unfiltered `dangerouslySetInnerHTML` → use `DOMPurify.sanitize()` instead
 - URLs must validate protocol (only `https://`, `http://`, `/`)
 
 ## Input Validation
 
-- **All user input** must use Zod schema validation
-- API routes must call `schema.parse(body)` before processing
+- **Repo policy**: all user input uses Zod schema validation
+- API routes must validate request data with `schema.parse(...)` or `schema.safeParse(...)` before processing. Use `safeParse` when the route needs to return a structured validation response instead of throwing.
 - Query params: explicitly validate type (may be string/array/object)
 - File paths: use allowlist or `path.resolve()` + prefix check (symlinks may escape)
 - Public JSON endpoints must have an explicit **body size gate** before or during parsing

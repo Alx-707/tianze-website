@@ -64,6 +64,8 @@
 
 当前这份结论主要来自：
 
-- `docs/archive/next16-cache-i18n-upgrade-status.md`
+- 代码主树中的当前实现
+- `docs/guides/POLICY-SOURCE-OF-TRUTH.md`
+- `docs/guides/CANONICAL-TRUTH-REGISTRY.md`
 
 如果后面这条线继续推进，应优先更新这份文档，而不是继续堆零散升级笔记。

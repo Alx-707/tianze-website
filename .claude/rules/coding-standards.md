@@ -5,9 +5,9 @@
 ### Strict Mode
 - `strict: true`, `noImplicitAny: true`
 - **No `any`** (tests have limited exceptions)
-- Prefer `interface` over `type`
+- TypeScript docs treat `interface` vs `type` as mostly a design choice; in this repo, default to `interface` for object shapes, and use `type` for unions, tuples, mapped types, or utility-heavy compositions
 - Use `satisfies` for type-safe object literals
-- Avoid `enum`, use `const` objects
+- Repo convention: prefer `const` objects + union types over `enum` unless third-party interop explicitly requires `enum`
 
 ### exactOptionalPropertyTypes
 
@@ -54,72 +54,20 @@ Always use `@/` alias. No deep relative imports.
 
 ## Constants
 
-- No magic numbers
-- Organize by domain in `src/constants/`
-- Use `as const`
+- Organize by domain in `src/constants/`, use `as const`
+- Magic number rules → see `code-quality.md`
 - User-facing text must use i18n keys
 
 ## Logging
 
-- **No `console.log` in production**
-- Only `console.error`, `console.warn` allowed
-- Use `src/lib/logger.ts` for structured logging
-
-## Testing (BDD)
-
-### Behavior-Driven Development
-
-The project uses full BDD workflow: Discovery → Formulation → Automation.
-
-- **Discovery**: clarify requirements through `brainstorming`
-- **Formulation**: write `bdd-specs.md` with Given/When/Then scenarios
-- **Automation**: Red-Green-Refactor (TDD loop)
-
-### Test Writing Principles
-
-Write tests from the user's perspective, not the implementation's perspective. Describe **what the user does and sees**, not what the component renders internally.
-
 ```typescript
-// ❌ Implementation-focused: verifies existence
-it("renders primary and secondary CTA buttons", () => {
-  expect(screen.getByText("Get Quote")).toBeInTheDocument();
-});
+// ❌ Bare console in production
+console.log('user submitted', data);
 
-// ✅ Behavior-focused: verifies what the user can do
-it("navigates to contact page when user clicks primary CTA", () => {
-  const link = screen.getByText("Get Quote").closest("a");
-  expect(link).toHaveAttribute("href", "/contact");
-});
+// ✅ Structured logger
+import { logger } from '@/lib/logger';
+logger.error('API failed', { endpoint, statusCode });
+logger.warn('Rate limit approaching', { remaining, ip });
 ```
 
-Rules:
-- **No production code without a failing test first** (Iron Law)
-- Interactive elements (Button, Link, Form) must verify **behavior** (navigation target, submission), not just presence
-- Link tests must verify `href` resolves to a known route
-- Test descriptions use "user does X → Y happens" language
-- Each BDD scenario maps to 2 tasks: Red (write the failing test) + Green (implement the minimal fix)
-
-### [2026-02-08] Origin — Codex review found 4 functional bugs (dead CTA buttons, broken links) that existing presence-only tests failed to catch.
-
-## Git Commits
-
-Conventional Commits format:
-
-```
-<type>[optional scope]: <description>    (≤50 chars, lowercase, imperative)
-
-- Bullet point 1                         (body required, ≤72 chars/line)
-- Bullet point 2
-```
-
-Types: `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `build`, `ci`, `style`
-
-Breaking changes: add `!` before `:` (e.g., `feat(api)!: migrate to oauth`)
-
-## Git Branching (GitHub Flow)
-
-- **`main`**: the only long-lived branch, always deployable
-- **`feature/*`**: feature branches merged into `main` via PR
-- **`hotfix/*`**: emergency fix branches merged into `main` via PR
-
-Flow: `main` → create feature branch → develop → open PR → pass CI → merge → delete branch.
+Production: only `logger.error()`, `logger.warn()`. Dev: `logger.info()`, `logger.debug()`.

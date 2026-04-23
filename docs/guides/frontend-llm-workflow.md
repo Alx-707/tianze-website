@@ -3,9 +3,6 @@
 > Support doc:
 > this file records the repo-specific frontend LLM workflow.
 > For current runtime truth and release proof, use the canonical docs in `docs/guides/`.
->
-> Full historical version:
-> `docs/archive/guides/support-full/frontend-llm-workflow.full.md`
 
 ## 一句话结论
 
@@ -93,4 +90,4 @@
 
 ## 什么时候看长版
 
-如果你要重新评估整套 LLM workflow、skills 选型和阶段拆分，再去看 archive 里的长版文档。
+如果你要重新评估整套 LLM workflow、skills 选型和阶段拆分，优先基于当前 `docs/guides/`、`docs/impeccable/`、`docs/cwf/` 和代码主树重建判断；更旧的长版推演不再作为当前 docs surface 的依赖。

@@ -3,9 +3,6 @@
 > Support doc:
 > this file is an asset inventory and authoring-seam map.
 > It supports current-truth work, but it is not itself the runtime truth source.
->
-> Full historical version:
-> `docs/archive/guides/support-full/content-asset-inventory.full.md`
 
 ## 目的
 
@@ -95,3 +92,5 @@
 - 看当前页面表达 authoring seam：先看 `src/config/single-site-page-expression.ts`
 - 看当前 SEO authoring seam：先看 `src/config/single-site-seo.ts`
 - 看 runtime message 真相：先看 split bundles，而不是 `messages/en.json` / `messages/zh.json`
+
+如果需要追溯更旧的盘点过程，用 git 历史即可；当前 docs surface 不再挂 archive 长版。

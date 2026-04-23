@@ -1,7 +1,7 @@
 # Implementation Plan: Product Catalog Page Structure
 
 > Date: 2026-03-20
-> Design: `docs/archive/plans/legacy-execution/2026-03-20-product-catalog-design/`
+> Historical design package retired from the live docs surface; use this plan plus `docs/plans/2026-03-20-product-catalog-architecture.md` as the active reference.
 > Architecture: `docs/plans/2026-03-20-product-catalog-architecture.md`
 > Status: Ready for execution (v2 — post-Codex audit)
 
