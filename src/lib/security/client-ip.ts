@@ -7,6 +7,7 @@
 
 import cloudflareIpRanges from "@/lib/security/cloudflare-ip-ranges.json";
 import { NextRequest } from "next/server";
+import { getRuntimeEnvString, isRuntimeDevelopment } from "@/lib/env";
 import { INTERNAL_TRUSTED_CLIENT_IP_HEADER } from "@/lib/security/client-ip-headers";
 import {
   getIPVersion,
@@ -52,7 +53,7 @@ const TRUSTED_PROXY_CONFIGS: Record<DeploymentPlatform, TrustedProxyConfig> = {
 };
 
 function getDeploymentPlatform(): DeploymentPlatform | null {
-  const platform = process.env.DEPLOYMENT_PLATFORM;
+  const platform = getRuntimeEnvString("DEPLOYMENT_PLATFORM");
 
   if (platform) {
     const normalizedPlatform = platform.toLowerCase();
@@ -64,13 +65,13 @@ function getDeploymentPlatform(): DeploymentPlatform | null {
     return null;
   }
 
-  if (process.env.VERCEL) {
+  if (getRuntimeEnvString("VERCEL")) {
     return PLATFORM_VERCEL;
   }
-  if (process.env.CF_PAGES) {
+  if (getRuntimeEnvString("CF_PAGES")) {
     return PLATFORM_CLOUDFLARE;
   }
-  if (process.env.NODE_ENV === "development") {
+  if (isRuntimeDevelopment()) {
     return PLATFORM_DEVELOPMENT;
   }
 

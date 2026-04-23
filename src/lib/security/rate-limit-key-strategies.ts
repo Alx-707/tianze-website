@@ -12,6 +12,7 @@
  */
 
 import { NextRequest } from "next/server";
+import { getRuntimeEnvString, isRuntimeProduction } from "@/lib/env";
 import { logger } from "@/lib/logger";
 import { generateHMAC } from "@/lib/security-crypto";
 import { getClientIP } from "@/lib/security/client-ip";
@@ -37,8 +38,8 @@ const MIN_PEPPER_LENGTH = 32;
  * @throws Error in production if pepper is missing or too short
  */
 function getPepper(): string {
-  const currentPepper = process.env.RATE_LIMIT_PEPPER;
-  const isProduction = process.env.NODE_ENV === "production";
+  const currentPepper = getRuntimeEnvString("RATE_LIMIT_PEPPER");
+  const isProduction = isRuntimeProduction();
 
   if (!currentPepper) {
     if (isProduction) {
@@ -128,7 +129,7 @@ export async function hmacKey(input: string): Promise<string> {
 export async function hmacKeyWithRotation(input: string): Promise<string[]> {
   const keys = [await hmacKey(input)];
 
-  const previousPepper = process.env.RATE_LIMIT_PEPPER_PREVIOUS;
+  const previousPepper = getRuntimeEnvString("RATE_LIMIT_PEPPER_PREVIOUS");
   if (previousPepper) {
     const previousDigest = await generateHMAC(input, previousPepper, "SHA-256");
     const previousKey = previousDigest.slice(0, HMAC_OUTPUT_LENGTH);
