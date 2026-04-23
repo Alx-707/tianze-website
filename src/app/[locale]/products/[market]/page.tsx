@@ -356,7 +356,7 @@ export default async function MarketPage({ params }: MarketPageProps) {
 
       {!marketSpecs && (
         <section className="mb-12 rounded-lg border border-border bg-muted/30 p-8 text-center">
-          <p className="text-muted-foreground">{t("market.specsComingSoon")}</p>
+          <p className="text-muted-foreground">{t("market.cta.description")}</p>
         </section>
       )}
 
