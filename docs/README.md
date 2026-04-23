@@ -21,6 +21,10 @@
 - `technical/next16-cache-notes.md`：Next.js 16 / Cache Components / i18n 缓存注意点
 - `technical/deployment-notes.md`：Cloudflare / build:cf / preview / deploy 当前技术事实
 
+## 治理合同
+
+- `guides/`：当前真相、发布证明、治理合同
+
 ## 工作盘
 
 - `superpowers/`：Superpowers 的 spec / plan / review 产物
