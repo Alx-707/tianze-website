@@ -173,9 +173,7 @@ async function main() {
     console.log(
       "[cf-preview-smoke] Policy: local preview proves page/header/cookie behavior. API proof belongs to deployed smoke.",
     );
-    console.log(
-      "[cf-preview-smoke] Reference: .claude/rules/cloudflare.md",
-    );
+    console.log("[cf-preview-smoke] Reference: .claude/rules/cloudflare.md");
   }
 
   if (
