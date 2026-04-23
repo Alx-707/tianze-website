@@ -3,7 +3,7 @@
 ## 初始化
 - 分支: `feat/homepage-redesign-v6` (from `main`)
 - 模式: 挂机
-- 设计规范: `docs/design/archive/2026-03-16-s-legacy/tokens.md`, `docs/impeccable/system/GRID-SYSTEM.md`, `docs/impeccable/system/COMPONENT-INVENTORY.md`
+- 设计规范: `docs/archive/design/2026-03-16-s-legacy/tokens.md`, `docs/impeccable/system/GRID-SYSTEM.md`, `docs/impeccable/system/COMPONENT-INVENTORY.md`
 - 原型: docs/impeccable/homepage/prototype/v6-swagelok-vercel/index.html
 
 ## Session 1: Task 1-7

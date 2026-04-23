@@ -9,7 +9,7 @@
 - **圆角**: 8px 基础 (vs 旧 20px Twitter rounded)
 
 ## 完整设计规范
-- `docs/design/archive/2026-03-16-s-legacy/tokens.md` — 色彩、字体、间距、阴影、交互状态
+- `docs/archive/design/2026-03-16-s-legacy/tokens.md` — 色彩、字体、间距、阴影、交互状态
 - `docs/impeccable/system/GRID-SYSTEM.md` — Vercel CSS Grid 装饰系统规范
 - `docs/impeccable/system/COMPONENT-INVENTORY.md` — 16 个组件映射表
 

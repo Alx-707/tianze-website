@@ -1097,7 +1097,7 @@ Round 3 复审阶段新增的 `CR-023` ~ `CR-026` 已在 Round 4 的 Wave A / Wa
 - 证据：
   - 修复前：`src/lib/load-messages.ts` 的生产态主路径优先自我 HTTP fetch，再回退到 `public/messages` 和 `messages` 文件系统读取。
   - 修复前：`src/i18n/request.ts` 的 fallback response 仍直接导入 flat `messages/${locale}.json`。
-  - `docs/plans/2026-03-03-security-architecture-remediation/task-017-i18n-canonical-format.md` 已把这组 split/flat 并存明确标记为 drift 源，但当前主仓库尚未收敛。
+  - `docs/archive/plans/legacy-execution/2026-03-03-security-architecture-remediation/task-017-i18n-canonical-format.md` 已把这组 split/flat 并存明确标记为 drift 源，但当前主仓库尚未收敛。
 - 影响：
   - 主运行时链和 fallback 链仍然依赖两套不同格式的消息源，继续放大“哪份文件才是真相源”的维护成本。
   - 生产态消息加载先依赖对外可访问的 base URL；若 ingress、域名或平台网络路径异常，会先经历失败 fetch + error log，再落到文件系统回退，增加噪音和隐式性能开销。
