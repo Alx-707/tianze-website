@@ -90,7 +90,7 @@ TURNSTILE_SECRET_KEY=你的服务端私钥
 
 ## 🔧 文档入口
 
-当前仓库的新文档入口已经开始收口到 `docs/`：
+当前仓库的文档入口收口到 `docs/`：
 
 - **[docs/README.md](./docs/README.md)** - 文档总入口
 - **[project-context.md](./docs/project-context.md)** - 项目背景、公司信息、业务信息
@@ -100,7 +100,7 @@ TURNSTILE_SECRET_KEY=你的服务端私钥
 - **[technical/next16-cache-notes.md](./docs/technical/next16-cache-notes.md)** - Next.js 16 / Cache Components / i18n 缓存注意点
 - **[technical/deployment-notes.md](./docs/technical/deployment-notes.md)** - Cloudflare / build:cf / preview / deploy 当前技术事实
 
-当前仍然有效的当前真相与发布证明文档，暂时仍以 `docs/guides/` 为准：
+当前真相、发布证明和治理合同文档保留在 `docs/guides/`：
 
 - **[RELEASE-PROOF-RUNBOOK.md](./docs/guides/RELEASE-PROOF-RUNBOOK.md)** - 发布前验证与发布门禁执行顺序
 - **[QUALITY-PROOF-LEVELS.md](./docs/guides/QUALITY-PROOF-LEVELS.md)** - 不同级别检查各自证明什么

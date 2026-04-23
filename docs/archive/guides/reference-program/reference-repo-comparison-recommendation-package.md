@@ -62,7 +62,7 @@
 - [site-difference-candidate-list.md](/Users/Data/Warehouse/Pipe/tianze-website/docs/archive/guides/reference-program/site-difference-candidate-list.md)
 - [content-asset-inventory.md](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/content-asset-inventory.md)
 - [multi-site-proof-requirements-draft.md](/Users/Data/Warehouse/Pipe/tianze-website/docs/archive/guides/reference-program/multi-site-proof-requirements-draft.md)
-- [future-upgrade-window-rules.md](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/future-upgrade-window-rules.md)
+- [future-upgrade-window-rules.md](/Users/Data/Warehouse/Pipe/tianze-website/docs/archive/guides/supplemental/future-upgrade-window-rules.md)
 - [quality-guardrail-gap-table.md](/Users/Data/Warehouse/Pipe/tianze-website/docs/archive/guides/reference-program/quality-guardrail-gap-table.md)
 
 这意味着：

@@ -1,7 +1,7 @@
 # 项目技术栈
 
 > Dependency upgrade process and project-specific upgrade constraints:
-> `docs/guides/dependency-upgrade-playbook.md`
+> `docs/archive/guides/supplemental/dependency-upgrade-playbook.md`
 
 ## 1. 核心框架
 

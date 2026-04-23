@@ -188,7 +188,7 @@
 主要落点：
 
 - [RELEASE-PROOF-RUNBOOK.md](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/RELEASE-PROOF-RUNBOOK.md)
-- [dependency-upgrade-playbook.md](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/dependency-upgrade-playbook.md)
+- [dependency-upgrade-playbook.md](/Users/Data/Warehouse/Pipe/tianze-website/docs/archive/guides/supplemental/dependency-upgrade-playbook.md)
 - `scripts/cloudflare/**`
 - `package.json`
 
@@ -247,7 +247,7 @@
 
 - [shared-truth-vs-tianze-business-truth-inventory.md](/Users/Data/Warehouse/Pipe/tianze-website/docs/archive/guides/reference-program/shared-truth-vs-tianze-business-truth-inventory.md)
 - [site-difference-candidate-list.md](/Users/Data/Warehouse/Pipe/tianze-website/docs/archive/guides/reference-program/site-difference-candidate-list.md)
-- [future-upgrade-window-rules.md](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/future-upgrade-window-rules.md)
+- [future-upgrade-window-rules.md](/Users/Data/Warehouse/Pipe/tianze-website/docs/archive/guides/supplemental/future-upgrade-window-rules.md)
 
 完成标准：
 

@@ -200,7 +200,7 @@
 
 ### 当前产出
 
-- [future-upgrade-window-rules.md](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/future-upgrade-window-rules.md)
+- [future-upgrade-window-rules.md](/Users/Data/Warehouse/Pipe/tianze-website/docs/archive/guides/supplemental/future-upgrade-window-rules.md)
 
 ## 6. 质量护栏查漏补缺表
 

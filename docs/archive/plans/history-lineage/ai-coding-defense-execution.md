@@ -158,7 +158,7 @@
 
 **目标**：消除 BC 编号副本，只保留一份真相。
 
-**文件**：`docs/plans/quality-defense-plan.md`
+**文件**：`docs/archive/plans/history-lineage/quality-defense-plan.md`
 
 将 lines 17-33 的 BC 编号表替换为：
 ```markdown

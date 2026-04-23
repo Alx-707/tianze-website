@@ -106,7 +106,7 @@ CodeQL 擅长跨文件数据流分析，这一点很有价值。
 - 行为合同：
   [`docs/specs/behavioral-contracts.md`](../specs/behavioral-contracts.md)
 - AI 防护实施计划：
-  [`docs/plans/ai-coding-defense-execution.md`](../plans/ai-coding-defense-execution.md)
+  [`docs/archive/plans/history-lineage/ai-coding-defense-execution.md`](../plans/ai-coding-defense-execution.md)
 - 审查清单：
   [`/.claude/rules/review-checklist.md`](../../.claude/rules/review-checklist.md)
 - 测试规则：
@@ -130,7 +130,7 @@ CodeQL 擅长跨文件数据流分析，这一点很有价值。
 先读四份文件，建立检测标准：
 
 1. [`docs/specs/behavioral-contracts.md`](../specs/behavioral-contracts.md)
-2. [`docs/plans/ai-coding-defense-execution.md`](../plans/ai-coding-defense-execution.md)
+2. [`docs/archive/plans/history-lineage/ai-coding-defense-execution.md`](../plans/ai-coding-defense-execution.md)
 3. [`/.claude/rules/review-checklist.md`](../../.claude/rules/review-checklist.md)
 4. [`/.claude/rules/testing.md`](../../.claude/rules/testing.md)
 
@@ -426,7 +426,7 @@ pnpm test:mutation:lead
 要求：
 1. 先阅读以下文件，再开始跑命令：
    - docs/specs/behavioral-contracts.md
-   - docs/plans/ai-coding-defense-execution.md
+   - docs/archive/plans/history-lineage/ai-coding-defense-execution.md
    - .claude/rules/review-checklist.md
    - .claude/rules/testing.md
 2. 按手册中的顺序执行，不要跳步。

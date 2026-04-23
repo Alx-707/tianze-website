@@ -43,7 +43,7 @@ Drive the repair program forward with dependency-aware execution, sub-agent coor
 - Add a canonical repo-side release entrypoint now, even before the final Cloudflare proof split is fully closed.
   - `release:verify` can cover the repo-owned checks immediately, while the remaining Cloudflare split-worker proof stays explicitly tracked as an open A2/A5 edge.
 - Treat real Cloudflare deployment verification as passed based on external execution evidence, so the remaining program scope is no longer release truth. The final cleanup phase now focuses on third-party service completion, guardrails, and governance.
-- Use `docs/plans/final_cleanup_execution_checklist.md` as the new execution handoff for the close-out phase.
+- Use `docs/archive/plans/history-lineage/final_cleanup_execution_checklist.md` as the new execution handoff for the close-out phase.
 
 ## Errors Encountered
 - A targeted mobile-navigation unit test failed after localizing the language section label because the assertion expected the wrong casing.
@@ -131,7 +131,7 @@ Policy reference: `.claude/rules/architecture.md` → Cloudflare Verification Po
 Remaining program work is in Tracks B (performance), C (accessibility), and D (governance) — none of which are release blockers.
 
 ## Final Cleanup Snapshot
-- Deliverable created: `docs/plans/final_cleanup_execution_checklist.md`
+- Deliverable created: `docs/archive/plans/history-lineage/final_cleanup_execution_checklist.md`
 - Main remaining work:
   - fill production secrets / third-party service config
   - finish performance guardrails
