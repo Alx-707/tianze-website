@@ -38,9 +38,9 @@ const config: Config = { name: 'test', ...(desc ? { description: desc } : {}) };
 ### Path Aliases
 Always use `@/` alias. No deep relative imports.
 
-### Import Order (Convention — not yet enforced)
+### Import Order
 
-`@ianvs/prettier-plugin-sort-imports` is installed, but the project does not currently ship a `.prettierrc`, so the ordering rules are not enforced yet. Maintain the following order manually:
+Maintain this order (no lint enforcement — the rule itself is the mechanism):
 
 1. `react`, `react/*`
 2. `next`, `next/*`

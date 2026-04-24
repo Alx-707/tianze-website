@@ -1,7 +1,14 @@
+---
+paths:
+  - "docs/specs/**"
+  - "docs/superpowers/specs/**"
+  - "docs/superpowers/plans/**"
+---
+
 # Codex Dispatch Protocol
 
-Superpowers 工作流中 Codex (GPT-5.4) 参与的决策规则。
-仅适用于 BDD (Superpowers) 工作流。Impeccable (设计/dwf) 工作流不派发 Codex。
+结构化开发（BDD / Superpowers）中 Codex 参与的决策规则。
+适用于有 spec → plan → task 拆分的开发流程。Impeccable (设计/dwf) 工作流不派发 Codex。
 
 ## Integration Points
 
