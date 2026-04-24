@@ -917,6 +917,12 @@
       "tryAgain": "Try again",
       "goHome": "Back to homepage"
     },
+    "blog": {
+      "title": "Failed to load article",
+      "description": "We couldn't load this article. Please try again or return to the homepage to browse other content.",
+      "tryAgain": "Try again",
+      "goHome": "Back to homepage"
+    },
     "contact": {
       "title": "Contact form temporarily unavailable",
       "description": "Our team will look into this issue immediately. You can try again later or contact us through other channels.",
