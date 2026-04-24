@@ -23,6 +23,7 @@ Completed on `main` as isolated commits:
 | Route/static sitemap derivation | `44cbda7 fix(routes): derive route config` |
 | Environment runtime contract | `9969a94 fix(env): align runtime contract` |
 | Legacy schema helper cleanup | `fb8545a refactor(seo): remove legacy schema helpers` |
+| Product-market MDX cache boundary and generated content manifest | `764262a fix(content): cache product market faq reads` |
 
 Implementation note: `PATHNAMES` stayed as literal `as const` route data because deriving it with `Object.fromEntries()` breaks `next-intl` typed-route inference. The duplicated dynamic parsing/static sitemap pieces were still moved to derive from route config.
 
@@ -45,6 +46,8 @@ Implementation note: `PATHNAMES` stayed as literal `as const` route data because
 - `messages/en.json`, `messages/zh.json` - blog route error copy.
 - `content/pages/en/product-market.mdx`, `content/pages/zh/product-market.mdx` - product-market FAQ ownership.
 - `src/app/[locale]/products/[market]/page.tsx` - pass MDX FAQ items instead of shared translation keys.
+- `src/lib/content-manifest.generated.ts`, `src/lib/mdx-importers.generated.ts` - generated import map includes product-market MDX.
+- `tests/architecture/cache-directive-policy.test.ts` - guards the product-market MDX read behind a Cache Components boundary.
 - `src/config/single-site-page-expression.ts` - remove About prose and market FAQ key pool.
 - `src/types/content.types.ts` - typed optional frontmatter for About page sections.
 - `src/config/paths/paths-config.ts`, `src/config/paths/utils.ts`, `src/lib/i18n/route-parsing.ts`, `src/config/single-site-seo.ts`, `src/app/sitemap.ts` - route/sitemap config derivation.
