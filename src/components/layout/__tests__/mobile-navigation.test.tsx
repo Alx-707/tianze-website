@@ -235,7 +235,7 @@ describe("MobileNavigation Component", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockLocale.current = "en";
-    mockTranslationOverrides.current = undefined;
+    mockTranslationOverrides.current = {};
   });
 
   describe("Basic Rendering", () => {

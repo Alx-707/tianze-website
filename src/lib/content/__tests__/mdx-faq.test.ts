@@ -27,7 +27,7 @@ describe("extractFaqFromMetadata", () => {
     };
     const result = extractFaqFromMetadata(metadata);
     expect(result).toHaveLength(2);
-    expect(result[0].id).toBe("moq");
+    expect(result[0]?.id).toBe("moq");
   });
 });
 
@@ -52,7 +52,7 @@ describe("generateFaqSchemaFromItems", () => {
     const schema = generateFaqSchemaFromItems(items, "en");
     expect(schema["@type"]).toBe("FAQPage");
     expect(schema.mainEntity).toHaveLength(1);
-    expect(schema.mainEntity[0]["@type"]).toBe("Question");
+    expect(schema.mainEntity[0]?.["@type"]).toBe("Question");
   });
 });
 

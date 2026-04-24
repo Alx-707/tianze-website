@@ -73,9 +73,11 @@ describe("extractHeadingsFromContent", () => {
       "## What Information We Collect {#info-collect}",
     );
 
-    expect(v1[0].id).toBe("info-collect");
-    expect(v2[0].id).toBe("info-collect");
-    expect(v1[0].id).toBe(v2[0].id);
+    expect(v1).toHaveLength(1);
+    expect(v2).toHaveLength(1);
+    expect(v1[0]?.id).toBe("info-collect");
+    expect(v2[0]?.id).toBe("info-collect");
+    expect(v1[0]?.id).toBe(v2[0]?.id);
   });
 
   it("returns empty array for content with no headings", () => {
