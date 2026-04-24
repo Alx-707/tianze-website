@@ -3389,3 +3389,6 @@ EOF
 - `single-site*.ts` config structure (already clean)
 - Security contracts
 - Multi-language expansion beyond en/zh
+
+### Known debt
+- About page values/stats/CTA copy currently lives in `SINGLE_SITE_ABOUT_SHELL_COPY`; under the strict four-layer rule it should move to Layer 3 content later. This follow-up migration is out of scope for this plan.

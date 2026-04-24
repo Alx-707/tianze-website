@@ -88,6 +88,7 @@ export const SINGLE_SITE_ABOUT_STATS_ITEMS = [
   },
 ] as const;
 
+// Known debt: About values/stats/CTA prose should move to Layer 3 MDX/frontmatter in a follow-up.
 export const SINGLE_SITE_ABOUT_SHELL_COPY = {
   en: {
     valuesTitle: "Manufacturing Excellence",
