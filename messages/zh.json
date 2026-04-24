@@ -42,6 +42,8 @@
     }
   },
   "navigation": {
+    "siteName": "天泽管业",
+    "siteDescription": "专业PVC管道与PETG气动传输管制造商。",
     "home": "首页",
     "more": "更多",
     "about": "关于",

@@ -123,12 +123,15 @@ export function MobileNavigation({
   openMenuLabel,
   closeMenuLabel,
   languageLabel = "Language",
-  siteName = "Tianze Pipe",
-  siteDescription = "Professional PVC conduit and PETG pneumatic tube manufacturer.",
+  siteName,
+  siteDescription,
 }: MobileNavigationProps) {
   const t = useTranslations();
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(initialOpen);
+  const resolvedSiteName = siteName ?? t("navigation.siteName");
+  const resolvedSiteDescription =
+    siteDescription ?? t("navigation.siteDescription");
 
   useCloseMenuOnPathChange(pathname, isOpen, () => setIsOpen(false));
 
@@ -172,8 +175,8 @@ export function MobileNavigation({
           onEscapeKeyDown={() => setIsOpen(false)}
         >
           <MobileNavigationHeader
-            siteName={siteName}
-            siteDescription={siteDescription}
+            siteName={resolvedSiteName}
+            siteDescription={resolvedSiteDescription}
           />
           <Separator className="my-4" />
           <nav

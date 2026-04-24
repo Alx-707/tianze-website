@@ -9,6 +9,7 @@ import {
 import { createMockTranslations, renderWithIntl } from "@/test/utils";
 
 const mockLocale = { current: "en" as "en" | "zh" };
+const mockTranslationOverrides: { current?: Record<string, string> } = {};
 
 // Mock next-intl
 // Note: 使用集中的 mock 翻译函数,无需在此定义具体翻译
@@ -16,7 +17,9 @@ vi.mock("next-intl", () => ({
   NextIntlClientProvider: ({ children }: { children: React.ReactNode }) =>
     children,
   useLocale: vi.fn(() => mockLocale.current),
-  useTranslations: vi.fn(() => createMockTranslations()),
+  useTranslations: vi.fn(() =>
+    createMockTranslations(mockTranslationOverrides.current),
+  ),
 }));
 
 // Mock i18n routing
@@ -231,6 +234,8 @@ describe("MobileNavigation Component", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    mockLocale.current = "en";
+    mockTranslationOverrides.current = undefined;
   });
 
   describe("Basic Rendering", () => {
@@ -259,6 +264,23 @@ describe("MobileNavigation Component", () => {
 
       const container = screen.getByTestId("sheet");
       expect(container).toBeInTheDocument();
+    });
+
+    it("uses localized site description instead of the English default", () => {
+      mockLocale.current = "zh";
+      mockTranslationOverrides.current = {
+        "navigation.siteName": "天泽管业",
+        "navigation.siteDescription": "专业PVC管道与PETG气动传输管制造商。",
+      };
+
+      renderWithIntl(<MobileNavigation />);
+
+      expect(screen.getByTestId("sheet-description")).toHaveTextContent(
+        "专业PVC管道与PETG气动传输管制造商。",
+      );
+      expect(screen.getByTestId("sheet-description")).not.toHaveTextContent(
+        "Professional PVC conduit and PETG pneumatic tube manufacturer.",
+      );
     });
   });
 

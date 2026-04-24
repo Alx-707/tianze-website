@@ -42,6 +42,8 @@
     }
   },
   "navigation": {
+    "siteName": "Tianze Pipe",
+    "siteDescription": "Professional PVC conduit and PETG pneumatic tube manufacturer.",
     "home": "Home",
     "more": "More",
     "about": "About",
