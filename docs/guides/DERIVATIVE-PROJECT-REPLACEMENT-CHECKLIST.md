@@ -11,7 +11,7 @@ export countries, social media links, SEO defaults.
 
 Markets, families, product structure.
 
-### Step 3: Page Assembly — `single-site-page-expression.ts`
+### Step 3: Page Assembly — `src/config/single-site-page-expression.ts`
 
 Page switches (show FAQ, show stats), CTA targets, section ordering.
 
@@ -19,7 +19,7 @@ Page switches (show FAQ, show stats), CTA targets, section ordering.
 
 All page narrative, FAQ Q&A, hero copy, legal text. One MDX file per page per locale.
 
-### Step 5: Crawl Strategy — `single-site-seo.ts`
+### Step 5: Crawl Strategy — `src/config/single-site-seo.ts`
 
 Sitemap priorities, change frequencies, robots rules.
 
@@ -43,10 +43,21 @@ pnpm review:translation-quartet
 
 Steps 1-6 are replacement. Step 7 is review. Step 8 is proof. Do not skip or reorder.
 
-## What NOT to replace first
+## Do not replace first
 
 - Legal/About shell runtime mechanics
 - i18n loader semantics
 - Cloudflare proof model
 - Security/abuse-protection chain
 - Shared UI components
+
+## Minimum proof after replacement
+
+- `pnpm review:docs-truth`
+- `pnpm review:derivative-readiness`
+- `pnpm review:translation-quartet`
+- `pnpm type-check`
+- `pnpm lint:check`
+- `pnpm exec vitest run`
+- `pnpm build`
+- `pnpm build:cf`

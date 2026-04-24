@@ -29,7 +29,7 @@
 | Terms | Layer 3 `content/pages/{locale}/terms.mdx` | Layer 3 | 不适用 | Layer 2 不再保存 TOC key | Layer 4 `legal.*` | TOC 从 MDX heading 派生 |
 | OEM custom manufacturing | Layer 3 `content/pages/{locale}/oem-custom-manufacturing.mdx` | 当前页面组件 + Layer 3 FAQ | Layer 3 frontmatter `faq[]` | Layer 2 | Layer 4 | Batch B 后 FAQ 不再来自共享翻译池 |
 | Bending machines | Layer 3 `content/pages/{locale}/bending-machines.mdx` | 当前页面组件 + typed equipment config | Layer 3 frontmatter `faq[]` | Layer 2 | Layer 4 | 设备 highlights 用 locale-aware typed config |
-| Product market pages | Route metadata helper + catalog/config | Product catalog/config | 不适用 | Layer 2/product config | Layer 4 | ProductGroup schema 从产品结构派生 |
+| Product market pages | Route metadata helper + catalog/config | Product catalog/config | 不适用 | Layer 2/product config + `src/config/single-site-seo.ts` | Layer 4 | ProductGroup schema 从产品结构派生 |
 | Blog posts | `content/posts/{locale}/*.mdx` | `content/posts/{locale}/*.mdx` | 不适用 | 不适用 | Layer 4 | OG 图来自 post frontmatter 或 central fallback |
 
 ## SEO Metadata Ownership
@@ -96,10 +96,10 @@ Runtime 正式读取：
 2. 替换 Layer 2：`src/config/single-site-page-expression.ts`
 3. 替换 Layer 3：`content/pages/{locale}/*.mdx`
 4. 替换产品/设备 typed config（如果产品线不同）
-5. 只保留或微调 Layer 4 UI chrome；不要把页面正文塞回 messages
-6. 检查 SEO frontmatter、OG 图、schema
-7. 检查 sitemap lastmod 是否来自内容日期
-8. 跑完整验证链再发布
+5. 替换 crawl/索引策略：`src/config/single-site-seo.ts`
+6. 只保留或微调 Layer 4 UI chrome；不要把页面正文塞回 messages
+7. 检查 SEO frontmatter、OG 图、schema
+8. 检查 sitemap lastmod 是否来自内容日期，再跑完整验证链再发布
 
 ## 配套 canonical docs
 

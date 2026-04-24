@@ -6,9 +6,11 @@ Every content field has exactly one canonical authoring source. Runtime-derived 
 
 Company name, address, contact, established year, employee count, certifications, export countries, social links. First file to replace for a new brand.
 
-## Layer 2: Page Expression — single-site-page-expression.ts
+## Layer 2: Page Expression — src/config/single-site-page-expression.ts
 
 Structural switches and pointers only. "About page shows FAQ = yes" belongs here. FAQ content does not. Second file to replace.
+
+`src/config/single-site-seo.ts` owns crawl/indexing policy such as sitemap priorities and robots rules. It is not page prose.
 
 ## Layer 3: Page Content — content/pages/{locale}/*.mdx
 
@@ -63,3 +65,7 @@ Legal pages add: layout: 'legal', showToc: true.
 Pages with FAQ add: faq[] array with { id, question, answer } items.
 
 About page adds: heroTitle, heroSubtitle, heroDescription.
+
+## Non-Authoring Context
+
+Generated or planning-only context under `docs/cwf/context/**` is an implementation detail. It can help explain or audit work, but it must not become a content authoring source.
