@@ -29,6 +29,14 @@ vi.mock("@/lib/structured-data", () => ({
   })),
 }));
 
+vi.mock("@/lib/content/mdx-faq", () => ({
+  generateFaqSchemaFromItems: vi.fn(() => ({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: [],
+  })),
+}));
+
 vi.mock("@/components/seo", () => ({
   JsonLdScript: ({ data }: { data: unknown }) =>
     React.createElement("script", {
@@ -40,14 +48,25 @@ vi.mock("@/components/seo", () => ({
 
 describe("Feature: FaqSection Reusable Component", () => {
   async function renderFaqSection(
-    props?: Partial<{ items: string[]; title: string; locale: "en" | "zh" }>,
+    props?: Partial<{
+      items: string[];
+      faqItems: Array<{ id: string; question: string; answer: string }>;
+      title: string;
+      locale: "en" | "zh";
+    }>,
   ) {
     const { FaqSection } = await import("@/components/sections/faq-section");
-    const element = await FaqSection({
-      items: props?.items ?? ["moq", "leadTime"],
+    const baseProps = {
       title: props?.title ?? "Frequently Asked Questions",
       locale: props?.locale ?? "en",
-    });
+    } as const;
+    const element =
+      props?.faqItems !== undefined
+        ? await FaqSection({ ...baseProps, faqItems: props.faqItems })
+        : await FaqSection({
+            ...baseProps,
+            items: props?.items ?? ["moq", "leadTime"],
+          });
     return render(element);
   }
 
@@ -102,6 +121,24 @@ describe("Feature: FaqSection Reusable Component", () => {
       );
       await userEvent.click(trigger);
       expect(screen.getByText(/500 to 1,000 pieces/)).toBeVisible();
+    });
+  });
+
+  describe("Scenario 1.2b: renders accordion items from direct FAQ items", () => {
+    it("renders direct MDX-sourced FAQ items", async () => {
+      await renderFaqSection({
+        faqItems: [
+          {
+            id: "factory-visit",
+            question: "Can I visit your factory?",
+            answer: "Yes, factory visits can be arranged.",
+          },
+        ],
+      });
+
+      expect(screen.getByText("Can I visit your factory?")).toBeInTheDocument();
+      await userEvent.click(screen.getByText("Can I visit your factory?"));
+      expect(screen.getByText(/factory visits can be arranged/i)).toBeVisible();
     });
   });
 
