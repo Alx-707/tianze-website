@@ -1,13 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { PRODUCT_CATALOG } from "@/constants/product-catalog";
 import {
-  SINGLE_SITE_ABOUT_FAQ_ITEMS,
   SINGLE_SITE_ABOUT_PAGE_EXPRESSION,
   SINGLE_SITE_ABOUT_STATS_ITEMS,
   SINGLE_SITE_ABOUT_VALUE_ITEM_KEYS,
   SINGLE_SITE_BENDING_MACHINES_PAGE_EXPRESSION,
-  SINGLE_SITE_CONTACT_FAQ_ITEMS,
-  SINGLE_SITE_CONTACT_PAGE_FALLBACK,
   SINGLE_SITE_HOME_FINAL_TRUST_ITEMS,
   SINGLE_SITE_HOME_GRID_SECTION_ORDER,
   SINGLE_SITE_HOME_HERO_PROOF_ITEMS,
@@ -20,9 +17,8 @@ import {
   SINGLE_SITE_MARKET_FAQ_ITEMS,
   SINGLE_SITE_OEM_PAGE_EXPRESSION,
   SINGLE_SITE_PRODUCTS_PAGE_EXPRESSION,
-  getSingleSiteContactPageFallbackCopy,
+  getSingleSiteAboutShellCopy,
 } from "@/config/single-site-page-expression";
-import { SINGLE_SITE_KEY } from "@/config/single-site";
 
 describe("single-site-page-expression", () => {
   it("keeps homepage section order explicit and non-empty", () => {
@@ -107,21 +103,7 @@ describe("single-site-page-expression", () => {
     ]);
   });
 
-  it("keeps contact and about FAQ keys explicit", () => {
-    expect(SINGLE_SITE_CONTACT_FAQ_ITEMS).toEqual([
-      "moq",
-      "leadTime",
-      "payment",
-      "samples",
-      "oem",
-    ]);
-    expect(SINGLE_SITE_ABOUT_FAQ_ITEMS).toEqual([
-      "manufacturer",
-      "factoryVisit",
-      "exportExperience",
-      "certifications",
-      "verifyCerts",
-    ]);
+  it("keeps market FAQ keys explicit", () => {
     expect(SINGLE_SITE_MARKET_FAQ_ITEMS).toEqual([
       "sch40vs80",
       "conduitSize",
@@ -136,12 +118,11 @@ describe("single-site-page-expression", () => {
     ]);
   });
 
-  it("keeps contact fallback copy and site key in the single-site expression layer", () => {
-    expect(SINGLE_SITE_CONTACT_PAGE_FALLBACK.siteKey).toBe(SINGLE_SITE_KEY);
-    expect(getSingleSiteContactPageFallbackCopy("en").title).toBe("Contact Us");
-    expect(getSingleSiteContactPageFallbackCopy("zh").formTitle).toBe(
-      "给我们留言",
+  it("keeps about shell copy outside translation JSON", () => {
+    expect(getSingleSiteAboutShellCopy("en").valuesTitle).toBe(
+      "Manufacturing Excellence",
     );
+    expect(getSingleSiteAboutShellCopy("zh").cta.button).toBe("获取报价");
   });
 
   it("keeps product page grouping aligned with the catalog", () => {

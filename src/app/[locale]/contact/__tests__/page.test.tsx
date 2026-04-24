@@ -1,7 +1,8 @@
-import type { PropsWithChildren } from "react";
-import { render, screen } from "@testing-library/react";
+import React, { type PropsWithChildren } from "react";
+import { screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import ContactPage, { generateMetadata } from "@/app/[locale]/contact/page";
+import { renderAsyncPage } from "@/testing/render-async-page";
 
 const {
   mockGenerateMetadataForPath,
@@ -16,6 +17,15 @@ const {
   mockGetPageBySlug: vi.fn(),
   mockSetRequestLocale: vi.fn(),
 }));
+
+vi.mock("react", async () => {
+  const actual = await vi.importActual<typeof React>("react");
+
+  return {
+    ...actual,
+    Suspense: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+});
 
 const contactPage = {
   metadata: {
@@ -135,9 +145,9 @@ describe("ContactPage MDX migration", () => {
       params: Promise.resolve({ locale: "en" }),
     });
 
-    render(page);
+    await renderAsyncPage(page as React.JSX.Element);
 
-    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
+    expect(await screen.findByRole("heading", { level: 1 })).toHaveTextContent(
       "Contact Us",
     );
     expect(screen.getByTestId("mdx-body")).toHaveTextContent(
@@ -152,9 +162,9 @@ describe("ContactPage MDX migration", () => {
       params: Promise.resolve({ locale: "en" }),
     });
 
-    render(page);
+    await renderAsyncPage(page as React.JSX.Element);
 
-    expect(screen.getByTestId("faq-section")).toHaveTextContent(
+    expect(await screen.findByTestId("faq-section")).toHaveTextContent(
       "What is your MOQ?",
     );
   });

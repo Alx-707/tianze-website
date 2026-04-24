@@ -1,4 +1,4 @@
-import type { ComponentProps, ReactNode } from "react";
+import { Suspense, type ComponentProps, type ReactNode } from "react";
 import {
   ArrowRight,
   BadgeCheck,
@@ -6,7 +6,6 @@ import {
   HeadphonesIcon,
   Wrench,
 } from "lucide-react";
-import { getTranslations } from "next-intl/server";
 import { MDXContent } from "@/components/mdx/mdx-content";
 import { FaqSection } from "@/components/sections/faq-section";
 import { Button } from "@/components/ui/button";
@@ -22,6 +21,7 @@ import {
   SINGLE_SITE_ABOUT_PAGE_EXPRESSION,
   SINGLE_SITE_ABOUT_STATS_ITEMS,
   SINGLE_SITE_ABOUT_VALUE_ITEM_KEYS,
+  getSingleSiteAboutShellCopy,
 } from "@/config/single-site-page-expression";
 import { Link } from "@/i18n/routing";
 import { interpolateFaqAnswer } from "@/lib/content/mdx-faq";
@@ -94,13 +94,13 @@ function resolveValueIcon(key: string): ReactNode {
   }
 }
 
-export async function AboutPageShell({
+export function AboutPageShell({
   metadata,
   content,
   locale,
-}: AboutPageShellProps): Promise<ReactNode> {
-  const t = await getTranslations({ locale, namespace: "about" });
+}: AboutPageShellProps): ReactNode {
   const typedLocale = locale as Locale;
+  const shellCopy = getSingleSiteAboutShellCopy(locale);
 
   const faqItems: FaqItem[] = (metadata.faq ?? []).map((item) => ({
     ...item,
@@ -109,15 +109,15 @@ export async function AboutPageShell({
 
   const valueItems = SINGLE_SITE_ABOUT_VALUE_ITEM_KEYS.map((key) => ({
     key,
-    title: t(`values.${key}.title`),
-    description: t(`values.${key}.description`),
+    title: shellCopy.values[key].title,
+    description: shellCopy.values[key].description,
     icon: resolveValueIcon(key),
   }));
 
   const statItems = SINGLE_SITE_ABOUT_STATS_ITEMS.map((item) => ({
     key: item.key,
     value: `${resolveAboutStatValue(item.valueSource)}${item.suffix}`,
-    label: t(`stats.${item.labelKey}`),
+    label: shellCopy.stats[item.labelKey],
   }));
 
   const ctaHref = SINGLE_SITE_ABOUT_PAGE_EXPRESSION.ctaHref as ComponentProps<
@@ -162,7 +162,7 @@ export async function AboutPageShell({
       <section className="bg-muted/30 py-12 md:py-16">
         <div className="container mx-auto px-4">
           <h2 className="mb-10 text-center text-2xl font-bold">
-            {t("values.title")}
+            {shellCopy.valuesTitle}
           </h2>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {valueItems.map((item) => (
@@ -195,20 +195,22 @@ export async function AboutPageShell({
       </section>
 
       {faqItems.length > 0 ? (
-        <FaqSection faqItems={faqItems} locale={typedLocale} />
+        <Suspense fallback={null}>
+          <FaqSection faqItems={faqItems} locale={typedLocale} />
+        </Suspense>
       ) : null}
 
       <section className="bg-primary py-12 md:py-16">
         <div className="container mx-auto px-4 text-center">
           <h2 className="mb-4 text-2xl font-bold text-primary-foreground">
-            {t("cta.title")}
+            {shellCopy.cta.title}
           </h2>
           <p className="mx-auto mb-8 max-w-2xl text-primary-foreground/80">
-            {t("cta.description")}
+            {shellCopy.cta.description}
           </p>
           <Button asChild size="lg" variant="secondary">
             <Link href={ctaHref}>
-              {t("cta.button")}
+              {shellCopy.cta.button}
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>

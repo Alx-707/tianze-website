@@ -1,5 +1,4 @@
 import { PRODUCT_CATALOG } from "@/constants/product-catalog";
-import { SINGLE_SITE_KEY } from "@/config/single-site";
 
 /**
  * Canonical single-site page-expression inputs.
@@ -55,62 +54,6 @@ export const SINGLE_SITE_HOME_SCENARIO_ITEMS = [
   "item3",
 ] as const;
 
-export const SINGLE_SITE_CONTACT_FAQ_ITEMS = [
-  "moq",
-  "leadTime",
-  "payment",
-  "samples",
-  "oem",
-] as const;
-
-export const SINGLE_SITE_CONTACT_PAGE_FALLBACK = {
-  siteKey: SINGLE_SITE_KEY,
-  copy: {
-    en: {
-      title: "Contact Us",
-      description:
-        "Get in touch with our team for inquiries, support, or partnership opportunities.",
-      formTitle: "Send us a message",
-      formDescription:
-        "Share your project details and our team will follow up with the right next step.",
-      labels: {
-        firstName: "First Name",
-        lastName: "Last Name",
-        email: "Email Address",
-        company: "Company Name",
-        subject: "Subject",
-        message: "Message",
-        acceptPrivacy: "I agree to the privacy policy and terms of service",
-        submit: "Send Message",
-      },
-    },
-    zh: {
-      title: "联系我们",
-      description: "欢迎联系天泽团队，咨询合作、产品支持或项目需求。",
-      formTitle: "给我们留言",
-      formDescription: "告诉我们您的项目需求，我们会尽快安排合适的同事跟进。",
-      labels: {
-        firstName: "名字",
-        lastName: "姓氏",
-        email: "邮箱",
-        company: "公司名称",
-        subject: "主题",
-        message: "留言内容",
-        acceptPrivacy: "我同意隐私政策和服务条款",
-        submit: "发送消息",
-      },
-    },
-  },
-} as const;
-
-export const SINGLE_SITE_ABOUT_FAQ_ITEMS = [
-  "manufacturer",
-  "factoryVisit",
-  "exportExperience",
-  "certifications",
-  "verifyCerts",
-] as const;
-
 export const SINGLE_SITE_ABOUT_VALUE_ITEM_KEYS = [
   "quality",
   "innovation",
@@ -144,6 +87,83 @@ export const SINGLE_SITE_ABOUT_STATS_ITEMS = [
     suffix: "",
   },
 ] as const;
+
+export const SINGLE_SITE_ABOUT_SHELL_COPY = {
+  en: {
+    valuesTitle: "Manufacturing Excellence",
+    values: {
+      quality: {
+        title: "Precision Engineering",
+        description:
+          "Every bend is engineered for consistency, with process control built around stable dimensions and repeatable results.",
+      },
+      innovation: {
+        title: "In-House R&D",
+        description:
+          "From bending machines to custom molds, we develop key production capability inside the factory.",
+      },
+      service: {
+        title: "Technical Support",
+        description:
+          "Our team supports buyers with product matching, sample review, documentation, and export coordination.",
+      },
+      integrity: {
+        title: "Certified Quality",
+        description:
+          "ISO 9001:2015 certified production, traceable batches, and clear standard-matching for export projects.",
+      },
+    },
+    stats: {
+      yearsExperience: "Years Experience",
+      countriesServed: "Export Countries",
+      happyClients: "Team Members",
+      productsDelivered: "Factory Area (Acres)",
+    },
+    cta: {
+      title: "Partner With Pipe Bending Experts",
+      description:
+        "Whether you need bending machines, custom molds, or finished fittings, our team is ready to discuss your project.",
+      button: "Request Quote",
+    },
+  },
+  zh: {
+    valuesTitle: "制造优势",
+    values: {
+      quality: {
+        title: "精密工程",
+        description:
+          "每一道弯管都围绕稳定尺寸和批量一致性来控制，重点是让成品可重复、可追溯。",
+      },
+      innovation: {
+        title: "自主研发",
+        description:
+          "从弯管机到定制模具，关键生产能力在工厂内部沉淀，方便快速响应规格变化。",
+      },
+      service: {
+        title: "技术支持",
+        description:
+          "团队可配合买家完成产品匹配、样品确认、资料文件和出口交付沟通。",
+      },
+      integrity: {
+        title: "品质认证",
+        description:
+          "ISO 9001:2015 认证生产，批次可追溯，并按出口项目要求匹配对应标准。",
+      },
+    },
+    stats: {
+      yearsExperience: "年行业经验",
+      countriesServed: "出口国家",
+      happyClients: "团队成员",
+      productsDelivered: "工厂面积（亩）",
+    },
+    cta: {
+      title: "与弯管专家合作",
+      description:
+        "无论您需要弯管设备、定制模具还是成品管件，我们都可以根据项目需求继续沟通。",
+      button: "获取报价",
+    },
+  },
+} as const;
 
 export const SINGLE_SITE_HOME_QUALITY_COMMITMENT_ITEMS = [
   "commitment1",
@@ -202,7 +222,6 @@ export const SINGLE_SITE_PRODUCTS_PAGE_EXPRESSION = {
 } as const;
 
 export const SINGLE_SITE_BENDING_MACHINES_PAGE_EXPRESSION = {
-  faqItems: ["bendingRadius", "manufacturer"],
   whyCardKeys: ["card1", "card2", "card3"],
   stats: [
     {
@@ -228,7 +247,6 @@ export const SINGLE_SITE_BENDING_MACHINES_PAGE_EXPRESSION = {
 } as const;
 
 export const SINGLE_SITE_OEM_PAGE_EXPRESSION = {
-  faqItems: ["oem", "samples"],
   supportedStandards: [
     "UL 651 / ASTM D1785",
     "AS/NZS 2053",
@@ -245,6 +263,6 @@ export const SINGLE_SITE_OEM_PAGE_EXPRESSION = {
   ctaHref: "/contact",
 } as const;
 
-export function getSingleSiteContactPageFallbackCopy(locale: string) {
-  return SINGLE_SITE_CONTACT_PAGE_FALLBACK.copy[locale === "zh" ? "zh" : "en"];
+export function getSingleSiteAboutShellCopy(locale: string) {
+  return SINGLE_SITE_ABOUT_SHELL_COPY[locale === "zh" ? "zh" : "en"];
 }

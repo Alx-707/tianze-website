@@ -1764,49 +1764,6 @@
       "turnstileRequired": "Please complete the security verification."
     }
   },
-  "about": {
-    "pageTitle": "About Tianze",
-    "pageDescription": "Discover Tianze Pipe Industry - pipe bending experts with integrated equipment, process, and fittings solutions. ISO 9001:2015 certified manufacturer.",
-    "hero": {
-      "title": "Pipe Bending Experts",
-      "subtitle": "Equipment + Process + Fittings Integrated",
-      "description": "Lianyungang Tianze Pipe Industry Co., Ltd. is a specialized manufacturer of PVC electrical conduits and PETG pneumatic tubes. With proprietary bending equipment and in-house mold development, we deliver complete solutions from machinery to finished fittings."
-    },
-    "mission": {
-      "title": "Our Mission",
-      "content": "To be the world's most trusted pipe bending partner by providing integrated solutions that combine advanced machinery, precision processes, and high-quality fittings. We empower our clients with technology, not just products."
-    },
-    "values": {
-      "title": "Manufacturing Excellence",
-      "quality": {
-        "title": "Precision Engineering",
-        "description": "Every bend is engineered for perfection. Our CNC-controlled equipment delivers consistent quality with tolerances measured in fractions of a millimeter."
-      },
-      "innovation": {
-        "title": "In-House R&D",
-        "description": "From bending machines to custom molds, we develop our own technology. This vertical integration means faster innovation and better solutions."
-      },
-      "service": {
-        "title": "Technical Support",
-        "description": "We don't just sell products - we transfer knowledge. Complete technical training, installation support, and lifetime maintenance guidance included."
-      },
-      "integrity": {
-        "title": "Certified Quality",
-        "description": "ISO 9001:2015 certified with UL, ASTM, and AS/NZS compliance. Every batch is traceable, every product is guaranteed."
-      }
-    },
-    "stats": {
-      "yearsExperience": "Years Experience",
-      "countriesServed": "Export Countries",
-      "happyClients": "Team Members",
-      "productsDelivered": "Factory Area (Acres)"
-    },
-    "cta": {
-      "title": "Partner With Pipe Bending Experts",
-      "description": "Whether you need bending machines, custom molds, or finished fittings, our team is ready to deliver. Get a free consultation and quote today.",
-      "button": "Request Quote"
-    }
-  },
   "products": {
     "pageTitle": "Products",
     "pageDescription": "Explore our comprehensive range of high-quality products for your business needs.",
@@ -1882,37 +1839,9 @@
   "faq": {
     "sectionTitle": "Frequently Asked Questions",
     "items": {
-      "moq": {
-        "question": "What is the minimum order quantity (MOQ)?",
-        "answer": "Our MOQ is typically 500 to 1,000 pieces, depending on the specific pipe type and size. Standard conduit bends in common sizes (20mm, 25mm, 32mm) have lower MOQs, while larger or custom-specification items may require higher minimums.\n\nFor first-time buyers, we offer flexible trial order arrangements. Contact our sales team to discuss quantities that work for your project requirements."
-      },
-      "leadTime": {
-        "question": "What is the lead time for standard orders?",
-        "answer": "Standard orders ship within 15 to 30 days from order confirmation. The timeline depends on:\n\n- Order quantity: Smaller orders (under 5,000 pieces) ship faster\n- Product type: Standard sizes ship within 15 days; custom specifications may take up to 30 days\n- Season: Peak season (March-June) may add 5-7 days\n\nWe maintain stock of common Schedule 40 and Schedule 80 fittings for faster dispatch. For urgent requirements, contact us — expedited production may be available depending on current line capacity."
-      },
-      "payment": {
-        "question": "What payment terms do you accept?",
-        "answer": "Our standard payment terms:\n\n- T/T (Bank Transfer): 30% deposit upon order confirmation, 70% balance before shipment\n- L/C (Letter of Credit): Available for orders above USD 10,000, at sight or 30/60/90 days\n\nAll payments are processed through our verified corporate bank account. We provide proforma invoices and commercial invoices for every transaction."
-      },
-      "samples": {
-        "question": "Do you offer free samples?",
-        "answer": "Yes. We provide free samples for standard PVC conduit bends and fittings. Buyers pay only the shipping cost (typically via express courier).\n\n- Standard products: 3-5 sample pieces at no charge\n- Custom specifications: Sample charges may apply, credited toward your first bulk order\n- Sample lead time: 5-7 business days\n\nRequest samples through our contact form or email, specifying the product type, size, and applicable standard (ASTM, IEC, or AS/NZS)."
-      },
-      "oem": {
-        "question": "Can you do OEM or custom labeling?",
-        "answer": "Yes. We offer full OEM and customization services:\n\n- Custom printing: Your brand name, logo, and product codes printed on conduit surfaces\n- Custom color: PVC conduits available in colors beyond standard white/gray (minimum order applies)\n- Custom packaging: Branded boxes, labels, and bundling to your specifications\n- Custom specifications: Non-standard sizes, wall thicknesses, or bend angles\n\nOEM orders typically require a minimum of 2,000 pieces per SKU. Lead time for first OEM production is 25-30 days, including printing plate setup."
-      },
-      "certifications": {
-        "question": "What certifications do your products hold?",
-        "answer": "Certified:\n- ISO 9001:2015 Quality Management System (Certificate #240021Q09730R0S, valid through March 2027)\n\nStandards compliance:\nOur products are manufactured and tested to meet the following international standards:\n\n- ASTM D1785 / UL 651: Schedule 40 and Schedule 80 PVC conduit for the North American market\n- AS/NZS 61386: PVC conduit systems for Australia and New Zealand (certification in progress)\n- IEC 61386: Conduit systems for cable management, applicable in Europe, Asia, and the Middle East\n- NOM-001-SEDE: Electrical installation requirements for the Mexican market\n\nWe invest in third-party testing to verify material properties, dimensional accuracy, and mechanical performance against each standard's requirements."
-      },
       "standardsDifference": {
         "question": "What is the difference between UL 651, IEC 61386, and AS/NZS 61386?",
         "answer": "These are regional standards governing PVC electrical conduit, each with different testing requirements:\n\n- UL 651 / ASTM D1785 (North America): Wall thickness (Schedule 40/80), flame resistance, impact resistance at specific temperatures\n- IEC 61386 (Europe, Asia, Middle East): Mechanical strength classification (light/medium/heavy duty at 750N/320N), IP ratings\n- AS/NZS 61386 (Australia, New Zealand): Based on IEC 61386 with additional local requirements for UV resistance and fire performance\n\nThe main practical difference: North American standards classify by wall thickness (Schedule 40 for general use, Schedule 80 for exposed or high-impact), while IEC-based standards classify by mechanical crush resistance measured in Newtons.\n\nWe manufacture to all three standard families, so we can supply the correct product regardless of your market's requirements."
-      },
-      "verifyCerts": {
-        "question": "How can I verify your certifications?",
-        "answer": "Our ISO 9001:2015 certificate (#240021Q09730R0S) was issued by an accredited certification body. You can verify it by:\n\n1. Requesting a copy of the certificate directly from us (PDF available upon request)\n2. Contacting the issuing certification body with the certificate number\n3. Checking during a factory audit or third-party inspection visit\n\nFor product standard compliance, we provide test reports from accredited laboratories upon request. These reports document material composition, dimensional measurements, impact resistance, flame spread, and other properties tested per the applicable standard."
       },
       "sch40vs80": {
         "question": "What is the difference between Schedule 40 and Schedule 80?",
@@ -1949,18 +1878,6 @@
       "corrosion": {
         "question": "How does PVC conduit perform in corrosive environments?",
         "answer": "PVC has inherent chemical resistance that makes it ideal for harsh environments:\n\n- Acids and bases: Resistant to most common acids, alkalis, and salt solutions\n- Soil chemicals: Unaffected by soil moisture, fertilizers, and common groundwater contaminants\n- Coastal/marine: No galvanic corrosion (unlike metal conduit) — will not rust or corrode in salt air\n- Industrial: Resistant to most oils, detergents, and common industrial chemicals\n\nPVC conduit is often specified in:\n- Coastal and marine environments where metal conduit corrodes rapidly\n- Chemical processing plants and laboratories\n- Agricultural facilities with fertilizer and chemical exposure\n- Water treatment plants and wastewater facilities\n\nUnlike metal conduit, PVC requires no protective coatings, galvanizing, or cathodic protection — reducing both installation cost and long-term maintenance."
-      },
-      "manufacturer": {
-        "question": "Are you a manufacturer or trading company?",
-        "answer": "We are a direct manufacturer. Our factory in Lianyungang, Jiangsu operates complete production lines for PVC conduit extrusion, bending, expansion, and cutting.\n\nWhat sets us apart: we build the bending machines that make our products. Before producing PVC conduit fittings, we designed and manufactured the bending equipment itself. This means:\n\n- Deep understanding of PVC forming technology and material behavior\n- Rapid tooling development for custom bend angles and radii\n- Full quality control from raw material to finished product\n- No dependence on third-party equipment suppliers for production capability\n\nThis vertical integration — from bending machine R&D to finished conduit fittings — means the same team that designs the equipment controls the finished product quality."
-      },
-      "factoryVisit": {
-        "question": "Where is your factory? Can I visit?",
-        "answer": "Our factory is located at:\n\nNo. 6 Yulong Road, Dongwangji Industrial Zone, Guanyun County, Lianyungang, Jiangsu, China\n\nWe welcome factory visits and can arrange:\n- Guided tour of production lines (extrusion, bending, expansion, cutting, QC)\n- Live demonstration of our bending machines in operation\n- Meeting with our technical team to discuss your specific requirements\n- Video tour for buyers who cannot travel in person\n\nTo schedule a visit, contact us at least 2 weeks in advance so we can prepare relevant product samples and production demonstrations for your review."
-      },
-      "exportExperience": {
-        "question": "How long have you been exporting?",
-        "answer": "Tianze has been manufacturing PVC conduit products since {established} and currently exports to {countries}+ countries across:\n\n- North America: Schedule 40/80 conduit per ASTM D1785\n- Oceania: AS/NZS 61386 compliant conduit for Australia and New Zealand\n- Middle East & Asia: IEC 61386 conduit systems\n- Latin America: NOM-compliant products for Mexico and regional markets\n\nOur team includes dedicated export staff who handle documentation, customs requirements, and logistics coordination. We ship via major Chinese ports (Lianyungang, Shanghai, Ningbo) with experience in both FCL and LCL arrangements."
       }
     }
   },

@@ -1,8 +1,18 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { renderAsyncPage } from "@/testing/render-async-page";
 
 const mockGetTranslations = vi.fn();
+
+vi.mock("react", async () => {
+  const actual = await vi.importActual<typeof React>("react");
+
+  return {
+    ...actual,
+    Suspense: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+});
 
 vi.mock("next-intl/server", () => ({
   getTranslations: mockGetTranslations,
@@ -46,18 +56,20 @@ describe("Feature: OEM Custom Manufacturing Page", () => {
     const page = await Page({
       params: Promise.resolve({ locale }),
     });
-    return render(page);
+    return renderAsyncPage(page as React.JSX.Element);
   }
 
   it("renders the hero section with title", async () => {
     await renderPage();
-    const heading = screen.getByRole("heading", { level: 1 });
+    const heading = await screen.findByRole("heading", { level: 1 });
     expect(heading).toHaveTextContent("OEM Custom Manufacturing");
   });
 
   it("renders 4 service scope modules", async () => {
     await renderPage();
-    expect(screen.getByText("scope.customSizes.title")).toBeInTheDocument();
+    expect(
+      await screen.findByText("scope.customSizes.title"),
+    ).toBeInTheDocument();
     expect(screen.getByText("scope.privateLabel.title")).toBeInTheDocument();
     expect(screen.getByText("scope.moldDevelopment.title")).toBeInTheDocument();
     expect(
@@ -67,7 +79,7 @@ describe("Feature: OEM Custom Manufacturing Page", () => {
 
   it("renders 5 process steps", async () => {
     await renderPage();
-    expect(screen.getByText("process.step1.title")).toBeInTheDocument();
+    expect(await screen.findByText("process.step1.title")).toBeInTheDocument();
     expect(screen.getByText("process.step2.title")).toBeInTheDocument();
     expect(screen.getByText("process.step3.title")).toBeInTheDocument();
     expect(screen.getByText("process.step4.title")).toBeInTheDocument();
@@ -76,17 +88,17 @@ describe("Feature: OEM Custom Manufacturing Page", () => {
 
   it("renders supported standards section", async () => {
     await renderPage();
-    expect(screen.getByText("standards.title")).toBeInTheDocument();
+    expect(await screen.findByText("standards.title")).toBeInTheDocument();
   });
 
   it("renders FAQ section", async () => {
     await renderPage();
-    expect(screen.getByTestId("faq-section")).toBeInTheDocument();
+    expect(await screen.findByTestId("faq-section")).toBeInTheDocument();
   });
 
   it("CTA links to /contact", async () => {
     await renderPage();
-    const ctaLink = screen.getByRole("link", { name: /cta\.button/i });
+    const ctaLink = await screen.findByRole("link", { name: /cta\.button/i });
     expect(ctaLink).toHaveAttribute("href", "/contact");
   });
 

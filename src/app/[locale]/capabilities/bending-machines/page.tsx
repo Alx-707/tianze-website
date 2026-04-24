@@ -1,4 +1,4 @@
-import type { ComponentProps } from "react";
+import { Suspense, type ComponentProps } from "react";
 import type { Metadata } from "next";
 import Image from "next/image";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -210,8 +210,7 @@ function CtaSection({
 
 // --- Page component ---
 
-export default async function BendingMachinesPage({ params }: PageProps) {
-  const { locale } = await params;
+async function BendingMachinesContent({ locale }: { locale: string }) {
   setRequestLocale(locale);
 
   const t = await getTranslations({ locale, namespace: "capabilities" });
@@ -260,7 +259,9 @@ export default async function BendingMachinesPage({ params }: PageProps) {
         stats={stats}
       />
 
-      <FaqSection faqItems={faqItems} locale={locale as Locale} />
+      <Suspense fallback={null}>
+        <FaqSection faqItems={faqItems} locale={locale as Locale} />
+      </Suspense>
 
       <CtaSection
         heading={t("cta.heading")}
@@ -269,5 +270,31 @@ export default async function BendingMachinesPage({ params }: PageProps) {
         href={SINGLE_SITE_BENDING_MACHINES_PAGE_EXPRESSION.ctaHref}
       />
     </main>
+  );
+}
+
+function BendingMachinesLoadingSkeleton() {
+  return (
+    <main className="mx-auto max-w-[1080px] px-6 py-8 md:py-12">
+      <div className="mb-8 h-10 w-72 animate-pulse rounded bg-muted" />
+      <div className="space-y-4">
+        {Array.from({ length: 6 }, (_, index) => (
+          <div
+            key={index}
+            className="h-4 w-full animate-pulse rounded bg-muted"
+          />
+        ))}
+      </div>
+    </main>
+  );
+}
+
+export default async function BendingMachinesPage({ params }: PageProps) {
+  const { locale } = await params;
+
+  return (
+    <Suspense fallback={<BendingMachinesLoadingSkeleton />}>
+      <BendingMachinesContent locale={locale} />
+    </Suspense>
   );
 }

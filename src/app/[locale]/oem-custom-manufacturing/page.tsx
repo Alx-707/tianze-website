@@ -1,4 +1,4 @@
-import type { ComponentProps } from "react";
+import { Suspense, type ComponentProps } from "react";
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import {
@@ -207,10 +207,7 @@ function CtaSection({
 
 // --- Page component ---
 
-export default async function OemCustomManufacturingPage({
-  params,
-}: PageProps) {
-  const { locale } = await params;
+async function OemCustomManufacturingContent({ locale }: { locale: string }) {
   setRequestLocale(locale);
 
   const t = await getTranslations({ locale, namespace: "oem" });
@@ -263,7 +260,9 @@ export default async function OemCustomManufacturingPage({
         customLabel={t("standards.custom")}
       />
 
-      <FaqSection faqItems={faqItems} locale={locale as Locale} />
+      <Suspense fallback={null}>
+        <FaqSection faqItems={faqItems} locale={locale as Locale} />
+      </Suspense>
 
       <CtaSection
         heading={t("cta.heading")}
@@ -272,5 +271,33 @@ export default async function OemCustomManufacturingPage({
         href={SINGLE_SITE_OEM_PAGE_EXPRESSION.ctaHref}
       />
     </main>
+  );
+}
+
+function OemCustomManufacturingLoadingSkeleton() {
+  return (
+    <main className="mx-auto max-w-[1080px] px-6 py-8 md:py-12">
+      <div className="mb-8 h-10 w-72 animate-pulse rounded bg-muted" />
+      <div className="space-y-4">
+        {Array.from({ length: 6 }, (_, index) => (
+          <div
+            key={index}
+            className="h-4 w-full animate-pulse rounded bg-muted"
+          />
+        ))}
+      </div>
+    </main>
+  );
+}
+
+export default async function OemCustomManufacturingPage({
+  params,
+}: PageProps) {
+  const { locale } = await params;
+
+  return (
+    <Suspense fallback={<OemCustomManufacturingLoadingSkeleton />}>
+      <OemCustomManufacturingContent locale={locale} />
+    </Suspense>
   );
 }
