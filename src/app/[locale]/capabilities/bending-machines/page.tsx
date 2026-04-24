@@ -92,11 +92,15 @@ function WhyItMattersSection({
 
 function MachineCard({
   machine,
+  locale,
   t,
 }: {
   machine: EquipmentSpec;
+  locale: Locale;
   t: (key: string) => string;
 }) {
+  const highlights = machine.highlights[locale];
+
   return (
     <section className="rounded-lg border border-border p-6 md:p-8">
       <div className="grid gap-8 md:grid-cols-2">
@@ -127,12 +131,12 @@ function MachineCard({
           </dl>
           <div className="mt-4">
             <ul className="flex flex-wrap gap-2">
-              {machine.highlights.map((_, index) => (
+              {highlights.map((highlight) => (
                 <li
-                  key={index}
+                  key={highlight}
                   className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary"
                 >
-                  {t(`equipment.${machine.slug}.highlights.${index}`)}
+                  {highlight}
                 </li>
               ))}
             </ul>
@@ -249,7 +253,12 @@ async function BendingMachinesContent({ locale }: { locale: string }) {
         <h2 className="mb-8 text-2xl font-bold">{t("machines.title")}</h2>
         <div className="space-y-8">
           {EQUIPMENT_SPECS.map((machine) => (
-            <MachineCard key={machine.slug} machine={machine} t={t} />
+            <MachineCard
+              key={machine.slug}
+              machine={machine}
+              locale={locale as Locale}
+              t={t}
+            />
           ))}
         </div>
       </section>
