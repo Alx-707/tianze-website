@@ -27,6 +27,40 @@ interface ProductGroupInput {
   }>;
 }
 
+interface EquipmentListSchemaInput {
+  name: string;
+  items: Array<{
+    name: string;
+    description: string;
+  }>;
+}
+
+interface OemPageSchemaInput {
+  name: string;
+  description?: string;
+  locale: string;
+  specialty: string;
+}
+
+interface AboutPageSchemaInput {
+  title: string;
+  description?: string;
+  locale: string;
+  companyName: string;
+  established: string | number;
+  employees: number;
+}
+
+interface LegalPageSchemaInput {
+  schemaType: "PrivacyPolicy" | "WebPage";
+  additionalType?: string;
+  locale: string;
+  name: string;
+  description?: string;
+  publishedAt?: string;
+  modifiedAt?: string;
+}
+
 /**
  * 生成组织结构化数据
  */
@@ -216,6 +250,85 @@ export function generateProductGroupData(
       ...(product.url ? { url: product.url } : {}),
     })),
   };
+}
+
+export function buildEquipmentListSchema(
+  data: EquipmentListSchemaInput,
+): Record<string, unknown> {
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: data.name,
+    itemListElement: data.items.map((item, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      item: {
+        "@type": "Product",
+        name: item.name,
+        description: item.description,
+      },
+    })),
+  };
+}
+
+export function buildOemPageSchema(
+  data: OemPageSchemaInput,
+): Record<string, unknown> {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name: data.name,
+    ...(data.description ? { description: data.description } : {}),
+    inLanguage: data.locale,
+    specialty: data.specialty,
+  };
+}
+
+export function buildAboutPageSchema(
+  data: AboutPageSchemaInput,
+): Record<string, unknown> {
+  return {
+    "@context": "https://schema.org",
+    "@type": "AboutPage",
+    name: data.title,
+    ...(data.description ? { description: data.description } : {}),
+    inLanguage: data.locale,
+    mainEntity: {
+      "@type": "Organization",
+      name: data.companyName,
+      foundingDate: String(data.established),
+      numberOfEmployees: {
+        "@type": "QuantitativeValue",
+        value: data.employees,
+      },
+    },
+  };
+}
+
+export function buildLegalPageSchema(
+  data: LegalPageSchemaInput,
+): Record<string, unknown> {
+  return {
+    "@context": "https://schema.org",
+    "@type": data.schemaType,
+    ...(data.additionalType ? { additionalType: data.additionalType } : {}),
+    inLanguage: data.locale,
+    name: data.name,
+    ...(data.description ? { description: data.description } : {}),
+    ...(data.publishedAt ? { datePublished: data.publishedAt } : {}),
+    ...(data.modifiedAt ? { dateModified: data.modifiedAt } : {}),
+  };
+}
+
+export function buildBreadcrumbListSchema(
+  items: Array<{ name: string; url: string }>,
+): Record<string, unknown> {
+  return generateBreadcrumbData({
+    items: items.map((item, index) => ({
+      ...item,
+      position: index + 1,
+    })),
+  });
 }
 
 /**

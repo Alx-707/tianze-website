@@ -26,6 +26,7 @@ import {
 } from "@/config/single-site-page-expression";
 import { Link } from "@/i18n/routing";
 import { LAYER1_FACTS, interpolateFaqAnswer } from "@/lib/content/mdx-faq";
+import { buildAboutPageSchema } from "@/lib/structured-data-generators";
 import type { FaqItem, Locale, PageMetadata } from "@/types/content.types";
 
 interface AboutPageShellProps {
@@ -88,23 +89,15 @@ function resolveValueIcon(key: string): ReactNode {
   }
 }
 
-function buildAboutSchema(metadata: PageMetadata, locale: string) {
-  return {
-    "@context": "https://schema.org",
-    "@type": "AboutPage",
-    name: metadata.title,
-    description: metadata.description,
-    inLanguage: locale,
-    mainEntity: {
-      "@type": "Organization",
-      name: siteFacts.company.name,
-      foundingDate: String(siteFacts.company.established),
-      numberOfEmployees: {
-        "@type": "QuantitativeValue",
-        value: siteFacts.company.employees,
-      },
-    },
-  };
+function createAboutSchema(metadata: PageMetadata, locale: string) {
+  return buildAboutPageSchema({
+    title: metadata.title,
+    locale,
+    companyName: siteFacts.company.name,
+    established: siteFacts.company.established,
+    employees: siteFacts.company.employees,
+    ...(metadata.description ? { description: metadata.description } : {}),
+  });
 }
 
 export function AboutPageShell({
@@ -136,7 +129,7 @@ export function AboutPageShell({
   const ctaHref = SINGLE_SITE_ABOUT_PAGE_EXPRESSION.ctaHref as ComponentProps<
     typeof Link
   >["href"];
-  const aboutSchema = buildAboutSchema(metadata, locale);
+  const aboutSchema = createAboutSchema(metadata, locale);
 
   return (
     <main>

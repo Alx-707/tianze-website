@@ -15,6 +15,7 @@ import {
   extractFaqFromMetadata,
   interpolateFaqAnswer,
 } from "@/lib/content/mdx-faq";
+import { buildEquipmentListSchema } from "@/lib/structured-data-generators";
 import {
   EQUIPMENT_SPECS,
   type EquipmentSpec,
@@ -229,20 +230,13 @@ async function BendingMachinesContent({ locale }: { locale: string }) {
       value: getCapabilityStatValue(stat, t),
       label: t(`${stat.translationKey}.label`),
     }));
-  const equipmentSchema = {
-    "@context": "https://schema.org",
-    "@type": "ItemList",
+  const equipmentSchema = buildEquipmentListSchema({
     name: "PVC Pipe Bending Machines",
-    itemListElement: EQUIPMENT_SPECS.map((spec, index) => ({
-      "@type": "ListItem",
-      position: index + 1,
-      item: {
-        "@type": "Product",
-        name: t(`equipment.${spec.slug}.name`),
-        description: spec.highlights[locale as Locale].join(", "),
-      },
+    items: EQUIPMENT_SPECS.map((spec) => ({
+      name: t(`equipment.${spec.slug}.name`),
+      description: spec.highlights[locale as Locale].join(", "),
     })),
-  };
+  });
 
   return (
     <main className="mx-auto max-w-[1080px] px-6 py-8 md:py-12">
