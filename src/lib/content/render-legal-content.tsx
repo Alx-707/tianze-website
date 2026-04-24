@@ -36,7 +36,7 @@ function parseHeadingId(text: string): { displayText: string; id: string } {
 
 interface RenderState {
   elements: ReactNode[];
-  listItems: string[];
+  listItems: ReactNode[];
   tableRows: string[][];
   tableHeaders: string[];
   inTable: boolean;
@@ -126,9 +126,9 @@ function isTableSeparator(cells: string[]): boolean {
   return cells.every((cell) => /^-+$/.test(cell));
 }
 
-function renderInlineBold(text: string, index: number): ReactNode {
+function renderInlineMarkdownParts(text: string): ReactNode[] {
   const parts = text.split(/(\*\*[^*]+\*\*)/g);
-  const renderedParts = parts.map((part, i) => {
+  return parts.map((part, i) => {
     if (part.startsWith('**') && part.endsWith('**')) {
       return (
         <strong key={i} className='font-medium text-foreground'>
@@ -138,13 +138,15 @@ function renderInlineBold(text: string, index: number): ReactNode {
     }
     return part;
   });
+}
 
+function renderInlineBold(text: string, index: number): ReactNode {
   return (
     <p
       key={`p-${index}`}
       className='mt-3 whitespace-pre-line text-sm leading-relaxed text-muted-foreground'
     >
-      {renderedParts}
+      {renderInlineMarkdownParts(text)}
     </p>
   );
 }
@@ -177,14 +179,14 @@ function handleListLine(state: RenderState, trimmed: string): boolean {
   if (/^\d+\.\s/.test(trimmed)) {
     flushList(state);
     const text = trimmed.replace(/^\d+\.\s/, '');
-    state.listItems.push(text);
+    state.listItems.push(renderInlineMarkdownParts(text));
     return true;
   }
 
   // Unordered list
   if (trimmed.startsWith('- ')) {
     const text = trimmed.slice(LIST_ITEM_PREFIX_LENGTH);
-    state.listItems.push(text);
+    state.listItems.push(renderInlineMarkdownParts(text));
     return true;
   }
 
