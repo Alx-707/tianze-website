@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { getPageBySlug } from "@/lib/content";
 import type { FaqItem } from "@/types/content.types";
 import {
   extractFaqFromMetadata,
@@ -53,4 +54,30 @@ describe("generateFaqSchemaFromItems", () => {
     expect(schema.mainEntity).toHaveLength(1);
     expect(schema.mainEntity[0]["@type"]).toBe("Question");
   });
+});
+
+describe("FAQ locale parity", () => {
+  const FAQ_PAGE_SLUGS = [
+    "about",
+    "contact",
+    "oem-custom-manufacturing",
+    "bending-machines",
+  ] as const;
+
+  for (const slug of FAQ_PAGE_SLUGS) {
+    it(`${slug} keeps identical FAQ IDs in en and zh`, async () => {
+      const enPage = await getPageBySlug(slug, "en");
+      const zhPage = await getPageBySlug(slug, "zh");
+
+      const enIds = extractFaqFromMetadata(
+        enPage.metadata as unknown as Record<string, unknown>,
+      ).map((item) => item.id);
+      const zhIds = extractFaqFromMetadata(
+        zhPage.metadata as unknown as Record<string, unknown>,
+      ).map((item) => item.id);
+
+      expect(enIds).toEqual(zhIds);
+      expect(enIds.length).toBeGreaterThan(0);
+    });
+  }
 });
