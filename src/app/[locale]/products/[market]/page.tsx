@@ -1,5 +1,6 @@
 import { type ComponentProps } from "react";
 import type { Metadata } from "next";
+import { cacheLife, cacheTag } from "next/cache";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import {
@@ -23,6 +24,7 @@ import {
   getRowValueTranslationKey,
 } from "@/lib/spec-table-translator";
 import { DYNAMIC_PATHS_CONFIG, SITE_CONFIG } from "@/config/paths";
+import { contentTags } from "@/lib/cache/cache-tags";
 import { getPageBySlug } from "@/lib/content";
 import { extractFaqFromMetadata } from "@/lib/content/mdx-faq";
 import { generateMetadataForPath } from "@/lib/seo-metadata";
@@ -54,6 +56,10 @@ function getMarketSpecs(marketSlug: string): MarketSpecs | undefined {
 }
 
 async function getProductMarketFaqItems(locale: Locale): Promise<FaqItem[]> {
+  "use cache";
+  cacheLife("days");
+  cacheTag(contentTags.page("product-market", locale));
+
   const faqPage = await getPageBySlug("product-market", locale);
   return extractFaqFromMetadata(faqPage.metadata);
 }

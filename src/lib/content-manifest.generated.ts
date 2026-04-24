@@ -84,6 +84,14 @@ export const CONTENT_MANIFEST: ContentManifest = {
   {
     "type": "pages",
     "locale": "en",
+    "slug": "product-market",
+    "extension": ".mdx",
+    "filePath": "/content/pages/en/product-market.mdx",
+    "relativePath": "content/pages/en/product-market.mdx"
+  },
+  {
+    "type": "pages",
+    "locale": "en",
     "slug": "terms",
     "extension": ".mdx",
     "filePath": "/content/pages/en/terms.mdx",
@@ -128,6 +136,14 @@ export const CONTENT_MANIFEST: ContentManifest = {
     "extension": ".mdx",
     "filePath": "/content/pages/zh/privacy.mdx",
     "relativePath": "content/pages/zh/privacy.mdx"
+  },
+  {
+    "type": "pages",
+    "locale": "zh",
+    "slug": "product-market",
+    "extension": ".mdx",
+    "filePath": "/content/pages/zh/product-market.mdx",
+    "relativePath": "content/pages/zh/product-market.mdx"
   },
   {
     "type": "pages",
@@ -195,6 +211,14 @@ export const CONTENT_MANIFEST: ContentManifest = {
     "filePath": "/content/pages/en/privacy.mdx",
     "relativePath": "content/pages/en/privacy.mdx"
   },
+  "pages/en/product-market": {
+    "type": "pages",
+    "locale": "en",
+    "slug": "product-market",
+    "extension": ".mdx",
+    "filePath": "/content/pages/en/product-market.mdx",
+    "relativePath": "content/pages/en/product-market.mdx"
+  },
   "pages/en/terms": {
     "type": "pages",
     "locale": "en",
@@ -242,6 +266,14 @@ export const CONTENT_MANIFEST: ContentManifest = {
     "extension": ".mdx",
     "filePath": "/content/pages/zh/privacy.mdx",
     "relativePath": "content/pages/zh/privacy.mdx"
+  },
+  "pages/zh/product-market": {
+    "type": "pages",
+    "locale": "zh",
+    "slug": "product-market",
+    "extension": ".mdx",
+    "filePath": "/content/pages/zh/product-market.mdx",
+    "relativePath": "content/pages/zh/product-market.mdx"
   },
   "pages/zh/terms": {
     "type": "pages",
