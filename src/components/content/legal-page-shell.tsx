@@ -16,6 +16,7 @@ interface LegalPageShellProps {
   headings: HeadingItem[];
   locale: string;
   schemaType: "PrivacyPolicy" | "WebPage";
+  schemaAdditionalType?: string;
 }
 
 export async function LegalPageShell({
@@ -24,12 +25,14 @@ export async function LegalPageShell({
   headings,
   locale,
   schemaType,
+  schemaAdditionalType,
 }: LegalPageShellProps): Promise<ReactNode> {
   const t = await getTranslations({ locale, namespace: "legal" });
 
   const schema = {
     "@context": "https://schema.org",
     "@type": schemaType,
+    ...(schemaAdditionalType ? { additionalType: schemaAdditionalType } : {}),
     inLanguage: locale,
     name: metadata.seo?.title ?? metadata.title,
     description: metadata.seo?.description ?? metadata.description,

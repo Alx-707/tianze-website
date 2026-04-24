@@ -8,6 +8,7 @@ import {
 } from "@/lib/seo-metadata";
 import { SINGLE_SITE_BENDING_MACHINES_PAGE_EXPRESSION } from "@/config/single-site-page-expression";
 import { siteFacts } from "@/config/site-facts";
+import { JsonLdScript } from "@/components/seo";
 import { FaqSection } from "@/components/sections/faq-section";
 import { Link } from "@/i18n/routing";
 import { generateLocaleStaticParams } from "@/app/[locale]/generate-static-params";
@@ -237,9 +238,25 @@ async function BendingMachinesContent({ locale }: { locale: string }) {
       value: getCapabilityStatValue(stat, t),
       label: t(`${stat.translationKey}.label`),
     }));
+  const equipmentSchema = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "PVC Pipe Bending Machines",
+    itemListElement: EQUIPMENT_SPECS.map((spec, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      item: {
+        "@type": "Product",
+        name: t(`equipment.${spec.slug}.name`),
+        description: spec.highlights[locale as Locale].join(", "),
+      },
+    })),
+  };
 
   return (
     <main className="mx-auto max-w-[1080px] px-6 py-8 md:py-12">
+      <JsonLdScript data={equipmentSchema} />
+
       <header className="mb-8 md:mb-12">
         <h1 className="text-heading mb-4">{page.metadata.title}</h1>
         <p className="max-w-2xl text-lg text-muted-foreground">

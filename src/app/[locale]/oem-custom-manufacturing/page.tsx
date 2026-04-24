@@ -6,6 +6,7 @@ import {
   type Locale as SeoLocale,
 } from "@/lib/seo-metadata";
 import { SINGLE_SITE_OEM_PAGE_EXPRESSION } from "@/config/single-site-page-expression";
+import { JsonLdScript } from "@/components/seo";
 import { FaqSection } from "@/components/sections/faq-section";
 import { Link } from "@/i18n/routing";
 import { generateLocaleStaticParams } from "@/app/[locale]/generate-static-params";
@@ -240,9 +241,19 @@ async function OemCustomManufacturingContent({ locale }: { locale: string }) {
       };
     },
   );
+  const oemSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name: page.metadata.title,
+    description: page.metadata.description,
+    inLanguage: locale,
+    specialty: "OEM Custom Manufacturing",
+  };
 
   return (
     <main className="mx-auto max-w-[1080px] px-6 py-8 md:py-12">
+      <JsonLdScript data={oemSchema} />
+
       <header className="mb-8 md:mb-12">
         <h1 className="text-heading mb-4">{page.metadata.title}</h1>
         <p className="max-w-2xl text-lg text-muted-foreground">

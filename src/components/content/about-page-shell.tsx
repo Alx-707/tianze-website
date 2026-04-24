@@ -7,6 +7,7 @@ import {
   Wrench,
 } from "lucide-react";
 import { MDXContent } from "@/components/mdx/mdx-content";
+import { JsonLdScript } from "@/components/seo";
 import { FaqSection } from "@/components/sections/faq-section";
 import { Button } from "@/components/ui/button";
 import {
@@ -94,6 +95,25 @@ function resolveValueIcon(key: string): ReactNode {
   }
 }
 
+function buildAboutSchema(metadata: PageMetadata, locale: string) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "AboutPage",
+    name: metadata.title,
+    description: metadata.description,
+    inLanguage: locale,
+    mainEntity: {
+      "@type": "Organization",
+      name: siteFacts.company.name,
+      foundingDate: String(siteFacts.company.established),
+      numberOfEmployees: {
+        "@type": "QuantitativeValue",
+        value: siteFacts.company.employees,
+      },
+    },
+  };
+}
+
 export function AboutPageShell({
   metadata,
   content,
@@ -123,9 +143,12 @@ export function AboutPageShell({
   const ctaHref = SINGLE_SITE_ABOUT_PAGE_EXPRESSION.ctaHref as ComponentProps<
     typeof Link
   >["href"];
+  const aboutSchema = buildAboutSchema(metadata, locale);
 
   return (
     <main>
+      <JsonLdScript data={aboutSchema} />
+
       <section className="relative overflow-hidden bg-muted/30 py-16 md:py-24">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
