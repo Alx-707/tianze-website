@@ -17,6 +17,7 @@ import {
   getRuntimeEnvString,
   getRuntimeNodeEnv,
   isRuntimeCi,
+  isRuntimeCloudflare,
   isRuntimeDevelopment,
   isRuntimePlaywright,
   isRuntimeProduction,
@@ -32,6 +33,8 @@ afterEach(() => {
   vi.stubEnv("CI", "false");
   vi.stubEnv("PLAYWRIGHT_TEST", "false");
   vi.stubEnv("NEXT_PHASE", "");
+  vi.stubEnv("DEPLOYMENT_PLATFORM", "");
+  vi.stubEnv("NEXT_PUBLIC_DEPLOYMENT_PLATFORM", "vercel");
   vi.stubEnv("PORT", "");
   vi.stubEnv("TURNSTILE_BYPASS", "false");
 });
@@ -204,6 +207,18 @@ describe("runtime env helpers", () => {
     expect(getRuntimeAppEnv()).toBe("preview");
     expect(isSecureAppEnv()).toBe(true);
     expect(isRuntimeProductionBuildPhase()).toBe(true);
+  });
+
+  it("detects Cloudflare runtime from server or public deployment platform", () => {
+    vi.stubEnv("DEPLOYMENT_PLATFORM", "cloudflare");
+    expect(isRuntimeCloudflare()).toBe(true);
+
+    vi.stubEnv("DEPLOYMENT_PLATFORM", "");
+    vi.stubEnv("NEXT_PUBLIC_DEPLOYMENT_PLATFORM", "cloudflare");
+    expect(isRuntimeCloudflare()).toBe(true);
+
+    vi.stubEnv("NEXT_PUBLIC_DEPLOYMENT_PLATFORM", "vercel");
+    expect(isRuntimeCloudflare()).toBe(false);
   });
 
   it("returns undefined for unknown runtime app env", () => {

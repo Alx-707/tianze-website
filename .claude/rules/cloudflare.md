@@ -87,6 +87,10 @@ pnpm build && pnpm build:cf
 
 Cloudflare runtime has `setTimeout()` and Cache Components boundary issues. Contact/inquiry/subscribe pages must not use `use cache` or `cacheLife` on data-fetching functions.
 
+### Runtime message JSON bypasses `unstable_cache`
+
+Do not wrap runtime i18n JSON module imports in `unstable_cache` on Cloudflare. Wrangler/Miniflare can revalidate those cached loaders across request contexts and fail with “Cannot perform I/O on behalf of a different request.” Use direct module imports for Cloudflare runtime; keep `unstable_cache` only for non-CI, non-build, non-Cloudflare runtime paths.
+
 ### Loading.tsx for conversion pages
 
 Route-level `loading.tsx` controls no-JS / slow-streaming first paint. For contact/inquiry/subscribe, either provide meaningful content or omit `loading.tsx` entirely — empty skeletons break SSR content contracts.

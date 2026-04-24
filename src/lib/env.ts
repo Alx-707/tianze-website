@@ -571,6 +571,13 @@ export function isRuntimeProductionBuildPhase(): boolean {
   return getRuntimeEnvString("NEXT_PHASE") === "phase-production-build";
 }
 
+export function isRuntimeCloudflare(): boolean {
+  return (
+    getRuntimeEnvString("DEPLOYMENT_PLATFORM") === "cloudflare" ||
+    getRuntimeEnvString("NEXT_PUBLIC_DEPLOYMENT_PLATFORM") === "cloudflare"
+  );
+}
+
 export function isSecureAppEnv(): boolean {
   const appEnv = getRuntimeAppEnv();
   return appEnv === "production" || appEnv === "preview";

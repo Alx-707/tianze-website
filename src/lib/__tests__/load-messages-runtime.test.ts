@@ -19,6 +19,7 @@ describe("load-messages runtime gating", () => {
       isRuntimeDevelopment: () => false,
       isRuntimePlaywright: () => false,
       isRuntimeProductionBuildPhase: () => false,
+      isRuntimeCloudflare: () => false,
     }));
 
     const { loadCriticalMessages } = await import("@/lib/load-messages");
@@ -39,6 +40,7 @@ describe("load-messages runtime gating", () => {
       isRuntimeDevelopment: () => false,
       isRuntimePlaywright: () => false,
       isRuntimeProductionBuildPhase: () => true,
+      isRuntimeCloudflare: () => false,
     }));
 
     const { loadDeferredMessages } = await import("@/lib/load-messages");
@@ -59,6 +61,7 @@ describe("load-messages runtime gating", () => {
       isRuntimeDevelopment: () => true,
       isRuntimePlaywright: () => false,
       isRuntimeProductionBuildPhase: () => false,
+      isRuntimeCloudflare: () => false,
     }));
 
     const { loadCriticalMessages } = await import("@/lib/load-messages");
@@ -66,5 +69,26 @@ describe("load-messages runtime gating", () => {
     await loadCriticalMessages("en");
 
     expect(unstableCache).toHaveBeenCalledTimes(1);
+  });
+
+  it("bypasses unstable_cache on Cloudflare runtime", async () => {
+    const unstableCache = vi.fn((loader: () => Promise<unknown>) => loader);
+
+    vi.doMock("next/cache", () => ({
+      unstable_cache: unstableCache,
+    }));
+    vi.doMock("@/lib/env", () => ({
+      isRuntimeCi: () => false,
+      isRuntimeDevelopment: () => true,
+      isRuntimePlaywright: () => false,
+      isRuntimeProductionBuildPhase: () => false,
+      isRuntimeCloudflare: () => true,
+    }));
+
+    const { loadCriticalMessages } = await import("@/lib/load-messages");
+
+    await loadCriticalMessages("en");
+
+    expect(unstableCache).not.toHaveBeenCalled();
   });
 });

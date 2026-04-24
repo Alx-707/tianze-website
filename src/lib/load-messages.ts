@@ -10,6 +10,7 @@ import { unstable_cache } from "next/cache";
 import { i18nTags } from "@/lib/cache/cache-tags";
 import {
   isRuntimeCi,
+  isRuntimeCloudflare,
   isRuntimeDevelopment,
   isRuntimePlaywright,
   isRuntimeProductionBuildPhase,
@@ -25,6 +26,7 @@ type MessageType = "critical" | "deferred";
 const isCiEnv = isRuntimeCi() || isRuntimePlaywright();
 const isProductionBuild = () => isRuntimeProductionBuildPhase();
 const isDev = () => isRuntimeDevelopment();
+const isCloudflareRuntime = () => isRuntimeCloudflare();
 const revalidate = () => (isDev() ? 1 : MONITORING_INTERVALS.CACHE_CLEANUP);
 
 const MESSAGE_LOADERS: Record<
@@ -66,7 +68,7 @@ function createCached(locale: Locale, type: MessageType) {
 
 function load(locale: Locale, type: MessageType): Promise<Messages> {
   const safeLocale = coerceLocale(locale);
-  return isCiEnv || isProductionBuild()
+  return isCiEnv || isProductionBuild() || isCloudflareRuntime()
     ? loadMessageSource(safeLocale, type)
     : createCached(safeLocale, type)();
 }

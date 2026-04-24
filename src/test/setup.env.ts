@@ -144,6 +144,9 @@ vi.mock("@/lib/env", () => {
       readProcessEnvValue("PLAYWRIGHT_TEST") === "true",
     isRuntimeProductionBuildPhase: () =>
       readProcessEnvValue("NEXT_PHASE") === "phase-production-build",
+    isRuntimeCloudflare: () =>
+      readProcessEnvValue("DEPLOYMENT_PLATFORM") === "cloudflare" ||
+      readProcessEnvValue("NEXT_PUBLIC_DEPLOYMENT_PLATFORM") === "cloudflare",
     isSecureAppEnv: () => {
       const value = readProcessEnvValue("APP_ENV") ?? mockEnv.APP_ENV;
       return value === "production" || value === "preview";
