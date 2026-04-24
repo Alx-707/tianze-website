@@ -32,7 +32,42 @@ describe("loadLegalPage", () => {
 
     const result = await loadLegalPage("privacy", "en");
     expect(result.metadata.title).toBe("Privacy Policy");
+    expect(result.metadata.layout).toBe("legal");
+    expect(result.metadata.showToc).toBe(true);
     expect(result.metadata.lastReviewed).toBe("2024-04-01");
+  });
+
+  it("falls back to updatedAt when lastReviewed is absent", async () => {
+    mockGetPageBySlug.mockResolvedValueOnce({
+      metadata: {
+        title: "Terms",
+        slug: "terms",
+        publishedAt: "2024-01-01",
+        updatedAt: "2024-06-15",
+      },
+      content: "## Terms",
+      slug: "terms",
+      filePath: "content/pages/en/terms.mdx",
+    });
+
+    const result = await loadLegalPage("terms", "en");
+    expect(result.metadata.lastReviewed).toBe("2024-06-15");
+  });
+
+  it("falls back to publishedAt when both lastReviewed and updatedAt are absent", async () => {
+    mockGetPageBySlug.mockResolvedValueOnce({
+      metadata: {
+        title: "Terms",
+        slug: "terms",
+        publishedAt: "2024-01-01",
+      },
+      content: "## Terms",
+      slug: "terms",
+      filePath: "content/pages/en/terms.mdx",
+    });
+
+    const result = await loadLegalPage("terms", "en");
+    expect(result.metadata.lastReviewed).toBe("2024-01-01");
   });
 });
 
