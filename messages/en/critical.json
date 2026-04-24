@@ -691,34 +691,6 @@
     "languageSelector": "Select language",
     "themeSelector": "Select theme"
   },
-  "seo": {
-    "title": "Tianze Pipe - Pipe Bending Experts",
-    "description": "Professional pipe bending machinery and fittings manufacturer. Equipment + Process + Fittings integrated solutions.",
-    "siteName": "Tianze Pipe",
-    "keywords": "pipe bending machine, PVC pipe bending, pipe bending equipment, PVC conduit, PETG pneumatic tube, pipe fittings, industrial pipes",
-    "pages": {
-      "home": {
-        "title": "Tianze Pipe - Pipe Bending Experts | Equipment & Fittings",
-        "description": "Professional pipe bending machinery and fittings manufacturer. Semi-auto & full-auto bending machines, PVC conduits, PETG pneumatic tubes. ISO 9001:2015 certified."
-      },
-      "about": {
-        "title": "About Us - Tianze Pipe | Manufacturing Excellence",
-        "description": "Discover Tianze Pipe's integrated manufacturing capability: pipe bending equipment, precision molds, and quality pipe fittings since {established}."
-      },
-      "contact": {
-        "title": "Contact Us - Tianze Pipe | Get a Quote",
-        "description": "Contact our team for pipe bending machinery, PVC conduits, or PETG pneumatic tube inquiries. Export to {countries}+ countries."
-      },
-      "products": {
-        "title": "Products - Tianze Pipe | Machines & Pipe Fittings",
-        "description": "Explore our pipe bending machines (semi-auto/full-auto), PVC conduits (Schedule 80), and PETG pneumatic logistics tubes."
-      },
-      "blog": {
-        "title": "News & Insights - Tianze Pipe",
-        "description": "Latest industry insights, technical guides, and company updates from Tianze Pipe."
-      }
-    }
-  },
   "underConstruction": {
     "title": "Under Construction",
     "subtitle": "We're working hard to bring you something amazing",

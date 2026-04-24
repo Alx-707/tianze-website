@@ -15,56 +15,6 @@ const { mockGenerateCanonicalURL, mockGenerateLanguageAlternates } = vi.hoisted(
   }),
 );
 
-// Mock static JSON imports for SEO translations
-// Include all page types to fully exercise getPageDataByType branches
-vi.mock("@messages/en/critical.json", () => ({
-  default: {
-    seo: {
-      title: "English Title",
-      description: "English Description",
-      siteName: "Test Site EN",
-      keywords: "test,site,en",
-      pages: {
-        home: { title: "Home EN", description: "Home Description EN" },
-        about: { title: "About EN", description: "About Description EN" },
-        contact: { title: "Contact EN", description: "Contact Description EN" },
-        blog: { title: "Blog EN", description: "Blog Description EN" },
-        products: {
-          title: "Products EN",
-          description: "Products Description EN",
-        },
-        faq: { title: "Faq EN", description: "Faq Description EN" },
-        privacy: { title: "Privacy EN", description: "Privacy Description EN" },
-        terms: { title: "Terms EN", description: "Terms Description EN" },
-      },
-    },
-  },
-}));
-
-vi.mock("@messages/zh/critical.json", () => ({
-  default: {
-    seo: {
-      title: "Chinese Title",
-      description: "Chinese Description",
-      siteName: "Test Site ZH",
-      keywords: "test,site,zh",
-      pages: {
-        home: { title: "Home ZH", description: "Home Description ZH" },
-        about: { title: "About ZH", description: "About Description ZH" },
-        contact: { title: "Contact ZH", description: "Contact Description ZH" },
-        blog: { title: "Blog ZH", description: "Blog Description ZH" },
-        products: {
-          title: "Products ZH",
-          description: "Products Description ZH",
-        },
-        faq: { title: "Faq ZH", description: "Faq Description ZH" },
-        privacy: { title: "Privacy ZH", description: "Privacy Description ZH" },
-        terms: { title: "Terms ZH", description: "Terms Description ZH" },
-      },
-    },
-  },
-}));
-
 vi.mock("@/config/paths", () => ({
   SITE_CONFIG: {
     baseUrl: "https://example.com",
@@ -105,15 +55,15 @@ describe("SEO Metadata", () => {
   });
 
   describe("generateLocalizedMetadata", () => {
-    it("should generate basic metadata from static translations", () => {
+    it("should generate basic metadata from SITE_CONFIG fallback", () => {
       const metadata = generateLocalizedMetadata("en", "home");
 
-      // Title and description come from mocked JSON translations
-      expect(metadata.title).toBe("Home EN");
-      expect(metadata.description).toBe("Home Description EN");
-      expect(metadata.openGraph?.title).toBe("Home EN");
-      expect(metadata.openGraph?.description).toBe("Home Description EN");
-      expect(metadata.openGraph?.siteName).toBe("Test Site EN");
+      expect(metadata.title).toBe("Default Title");
+      expect(metadata.description).toBe("Default Description");
+      expect(metadata.keywords).toEqual(["test", "site"]);
+      expect(metadata.openGraph?.title).toBe("Default Title");
+      expect(metadata.openGraph?.description).toBe("Default Description");
+      expect(metadata.openGraph?.siteName).toBe("Test Site");
       expect(metadata.openGraph?.locale).toBe("en");
       expect(metadata.alternates?.canonical).toBe(
         "https://example.com/canonical",
@@ -135,7 +85,7 @@ describe("SEO Metadata", () => {
       });
     });
 
-    it("should generate metadata with custom config override", () => {
+    it("should use config title and description when provided", () => {
       const config = {
         title: "Custom Title",
         description: "Custom Description",
@@ -167,6 +117,19 @@ describe("SEO Metadata", () => {
       expect(metadata.twitter?.images).toEqual(["/custom-image.jpg"]);
     });
 
+    it("should interpolate SITE_CONFIG-owned config strings", () => {
+      const metadata = generateLocalizedMetadata("en", "about", {
+        title: "Established in {established}",
+        description:
+          "Exports to {countries}+ countries with {employees}+ staff",
+      });
+
+      expect(metadata.title).toBe("Established in 2018");
+      expect(metadata.description).toBe(
+        "Exports to 20+ countries with 60+ staff",
+      );
+    });
+
     it("should handle product type correctly", () => {
       const config = {
         type: "product" as const,
@@ -178,17 +141,17 @@ describe("SEO Metadata", () => {
       expect((metadata.openGraph as any)?.type).toBe("website");
     });
 
-    it("should handle different locales with static translations", () => {
+    it("should localize metadata chrome without reading SEO translations", () => {
       const metadataZh = generateLocalizedMetadata("zh", "about");
       const metadataEn = generateLocalizedMetadata("en", "about");
 
       expect(metadataZh.openGraph?.locale).toBe("zh");
-      expect(metadataZh.title).toBe("About ZH");
-      expect(metadataZh.openGraph?.siteName).toBe("Test Site ZH");
+      expect(metadataZh.title).toBe("Default Title");
+      expect(metadataZh.openGraph?.siteName).toBe("Test Site");
 
       expect(metadataEn.openGraph?.locale).toBe("en");
-      expect(metadataEn.title).toBe("About EN");
-      expect(metadataEn.openGraph?.siteName).toBe("Test Site EN");
+      expect(metadataEn.title).toBe("Default Title");
+      expect(metadataEn.openGraph?.siteName).toBe("Test Site");
     });
 
     it("should handle missing environment variables", () => {
@@ -210,17 +173,14 @@ describe("SEO Metadata", () => {
       expect(mockGenerateLanguageAlternates).toHaveBeenCalledWith("contact");
     });
 
-    it("should fall back to default values for unknown pages", () => {
-      // Pages not in mock JSON should use default values from SITE_CONFIG
+    it("should fall back to SITE_CONFIG values for unknown pages", () => {
       const metadata = generateLocalizedMetadata("en", "unknown" as any);
 
-      // Falls back to root-level title from mock or SITE_CONFIG default
-      expect(metadata.title).toBe("English Title");
-      expect(metadata.description).toBe("English Description");
+      expect(metadata.title).toBe("Default Title");
+      expect(metadata.description).toBe("Default Description");
     });
 
-    it("should use page translations for all page types with full data", () => {
-      // Test all page types to cover getPageDataByType switch branches
+    it("should use SITE_CONFIG fallback for every page type without config", () => {
       const pageTypes = [
         "home",
         "about",
@@ -233,8 +193,8 @@ describe("SEO Metadata", () => {
 
       pageTypes.forEach((pageType) => {
         const metadata = generateLocalizedMetadata("en", pageType);
-        const expectedTitle = `${pageType.charAt(0).toUpperCase() + pageType.slice(1)} EN`;
-        expect(metadata.title).toBe(expectedTitle);
+        expect(metadata.title).toBe("Default Title");
+        expect(metadata.description).toBe("Default Description");
       });
     });
   });
@@ -437,40 +397,25 @@ describe("SEO Metadata", () => {
     });
   });
 
-  describe("translations fallback branches", () => {
-    it("should fallback to SITE_CONFIG.name when siteName is empty", async () => {
-      // Re-mock messages with empty siteName to test line 190-191
-      vi.doMock("@messages/en/critical.json", () => ({
-        default: {
-          seo: {
-            title: "English Title",
-            description: "English Description",
-            siteName: "", // Empty siteName
-            keywords: "test,site",
-            pages: {
-              home: { title: "Home EN", description: "Home Description EN" },
-            },
-          },
-        },
-      }));
+  describe("SITE_CONFIG fallback branches", () => {
+    it("should use SITE_CONFIG.name for OpenGraph siteName", () => {
+      const metadata = generateLocalizedMetadata("en", "home");
 
-      // Re-import to get updated mock
-      const { generateLocalizedMetadata: gen } =
-        await import("../seo-metadata");
-
-      // The siteName fallback branch may use the module cache
-      // This test ensures the branch exists but may not fully execute in isolation
-      const metadata = gen("en", "home");
-      expect(metadata.openGraph?.siteName).toBeDefined();
+      expect(metadata.openGraph?.siteName).toBe("Test Site");
     });
 
-    it("should handle missing keywords in translations", () => {
-      // Test line 200 branch: when config.keywords is provided, translations.keywords is not used
+    it("should use config keywords before SITE_CONFIG keywords", () => {
       const metadata = generateLocalizedMetadata("en", "home", {
         keywords: ["custom", "keywords"],
       });
 
       expect(metadata.keywords).toEqual(["custom", "keywords"]);
+    });
+
+    it("should use SITE_CONFIG keywords when config keywords are absent", () => {
+      const metadata = generateLocalizedMetadata("en", "home");
+
+      expect(metadata.keywords).toEqual(["test", "site"]);
     });
   });
 });

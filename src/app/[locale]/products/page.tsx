@@ -27,11 +27,16 @@ export async function generateMetadata({
   params,
 }: ProductsPageProps): Promise<Metadata> {
   const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "catalog" });
 
   return generateMetadataForPath({
     locale: locale as SeoLocale,
     pageType: "products",
     path: "/products",
+    config: {
+      title: t("overview.title"),
+      description: t("overview.description"),
+    },
   });
 }
 

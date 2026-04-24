@@ -53,11 +53,13 @@ describe("load-messages canonical runtime source", () => {
     vi.resetModules();
 
     const messages = (await loadCompleteMessagesFromSource("en")) as {
-      seo?: { siteName?: string };
+      seo?: unknown;
+      footer?: { description?: string };
       home?: { hero?: { title?: string } };
     };
 
-    expect(messages.seo?.siteName).toBe("Tianze Pipe");
+    expect(messages.seo).toBeUndefined();
+    expect(messages.footer?.description).toBeTruthy();
     expect(messages.home?.hero?.title).toBeTruthy();
   });
 });
