@@ -29,8 +29,17 @@ const CONTENT_CHECKS = [
       "SINGLE_SITE_BENDING_MACHINES_PAGE_EXPRESSION",
       "SINGLE_SITE_OEM_PAGE_EXPRESSION",
       "SINGLE_SITE_ABOUT_STATS_ITEMS",
-      "SINGLE_SITE_ABOUT_SHELL_COPY",
     ],
+  },
+  {
+    file: "content/pages/en/about.mdx",
+    label: "about page prose is replaceable in MDX",
+    snippets: ["aboutSections:", "valuesTitle:", "statLabels:", "cta:"],
+  },
+  {
+    file: "content/pages/en/product-market.mdx",
+    label: "product market FAQ is replaceable in MDX",
+    snippets: ["faq:", "question:", "answer:"],
   },
   {
     file: "src/config/single-site-seo.ts",
