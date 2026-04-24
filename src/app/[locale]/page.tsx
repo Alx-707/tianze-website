@@ -72,7 +72,6 @@ export async function generateMetadata({
     pageType: "home",
     path: "",
     config: {
-      title: t("hero.title"),
       description: t("hero.subtitle"),
     },
   });
