@@ -40,7 +40,6 @@ const baseMetadata: PageMetadata = {
   title: "About Tianze Pipe",
   description: "Leading PVC conduit manufacturer",
   slug: "about",
-  locale: "en",
   publishedAt: "2024-01-01",
   heroTitle: "Our Story",
   heroSubtitle: "Pipe Bending Experts",
@@ -135,12 +134,9 @@ describe("AboutPageShell", () => {
   });
 
   it("falls back to title when heroTitle is absent", () => {
-    const noHeroMetadata = {
-      ...baseMetadata,
-      heroTitle: undefined,
-      heroSubtitle: undefined,
-      heroDescription: undefined,
-    };
+    const { heroTitle: _ht, heroSubtitle: _hs, heroDescription: _hd, ...rest } =
+      baseMetadata;
+    const noHeroMetadata: PageMetadata = rest;
     render(
       <AboutPageShell
         metadata={noHeroMetadata}
