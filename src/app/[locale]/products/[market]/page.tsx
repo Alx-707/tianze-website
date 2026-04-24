@@ -25,6 +25,7 @@ import {
   getRowValueTranslationKey,
 } from "@/lib/spec-table-translator";
 import { SITE_CONFIG } from "@/config/paths";
+import { generateMetadataForPath } from "@/lib/seo-metadata";
 import { FaqSection } from "@/components/sections/faq-section";
 import { CatalogBreadcrumb } from "@/components/products/catalog-breadcrumb";
 import { FamilySection } from "@/components/products/family-section";
@@ -76,27 +77,15 @@ export async function generateMetadata({
   const t = await getTranslations({ locale, namespace: "catalog" });
   const marketLabel = t(`markets.${marketSlug}.label`);
   const marketDescription = t(`markets.${marketSlug}.description`);
-  const path = `/products/${market.slug}`;
-  const canonical = `${SITE_CONFIG.baseUrl}/${locale}${path}`;
-
-  return {
-    title: `${marketLabel} | ${SITE_CONFIG.name}`,
-    description: marketDescription,
-    alternates: {
-      canonical,
-      languages: Object.fromEntries(
-        routing.locales.map((l) => [l, `${SITE_CONFIG.baseUrl}/${l}${path}`]),
-      ),
-    },
-    openGraph: {
+  return generateMetadataForPath({
+    locale: locale as Locale,
+    pageType: "products",
+    path: `/products/${market.slug}`,
+    config: {
       title: `${marketLabel} | ${SITE_CONFIG.name}`,
       description: marketDescription,
-      type: "website",
     },
-    other: {
-      google: "notranslate",
-    },
-  };
+  });
 }
 
 // --- Extracted sub-sections (keep MarketPage under 120 lines) ---

@@ -39,12 +39,25 @@ vi.mock("@/i18n/routing", () => ({
 
 vi.mock("@/config/paths", () => ({
   SITE_CONFIG: {
+    name: "Tianze Pipe",
     baseUrl: "https://www.tianze-pipe.com",
+    seo: {
+      defaultTitle: "Tianze Pipe",
+      defaultDescription: "PVC conduit fittings manufacturer",
+      keywords: ["PVC conduit fittings"],
+    },
   },
   LOCALES_CONFIG: {
     locales: ["en", "zh"],
     defaultLocale: "en",
   },
+  PATHS_CONFIG: {
+    pages: {
+      products: "/products",
+    },
+  },
+  getLocalizedPath: (pageType: string) =>
+    pageType === "products" ? "/products" : "/",
 }));
 
 vi.mock("@/components/products/catalog-breadcrumb", () => ({
@@ -171,12 +184,21 @@ describe("Market Landing Page", () => {
   });
 
   describe("metadata", () => {
-    it("adds google notranslate metadata", async () => {
+    it("uses central path-aware metadata with x-default alternates", async () => {
       const metadata = await generatePageMetadata("north-america");
 
       expect(metadata).toMatchObject({
-        other: {
-          google: "notranslate",
+        title: "UL / ASTM Series | Tianze Pipe",
+        description:
+          "PVC conduit fittings engineered to UL 651 and ASTM D1785 standards for North American applications.",
+        alternates: {
+          canonical: "https://www.tianze-pipe.com/en/products/north-america",
+          languages: {
+            en: "https://www.tianze-pipe.com/en/products/north-america",
+            zh: "https://www.tianze-pipe.com/zh/products/north-america",
+            "x-default":
+              "https://www.tianze-pipe.com/en/products/north-america",
+          },
         },
       });
     });
