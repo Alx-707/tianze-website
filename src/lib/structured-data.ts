@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { I18nPerformanceMonitor } from "@/lib/i18n-performance";
 import {
+  buildSchemaFallback,
   generateArticleData,
   generateBreadcrumbData,
   generateOrganizationData,
@@ -51,11 +52,7 @@ export async function generateLocalizedStructuredData(
       case "BreadcrumbList":
         return generateBreadcrumbData(data as BreadcrumbData);
       default:
-        // 对于未知类型，返回基础结构而不使用扩展运算符
-        return {
-          "@context": "https://schema.org",
-          "@type": type,
-        };
+        return buildSchemaFallback(type);
     }
   } catch (error) {
     // 记录错误并返回基础结构
@@ -63,11 +60,7 @@ export async function generateLocalizedStructuredData(
       // 处理已知错误类型
       I18nPerformanceMonitor.recordError();
     }
-    // 错误情况下也不使用扩展运算符，避免潜在的安全风险
-    return {
-      "@context": "https://schema.org",
-      "@type": type,
-    };
+    return buildSchemaFallback(type);
   }
 }
 

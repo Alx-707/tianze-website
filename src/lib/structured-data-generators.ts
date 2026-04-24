@@ -61,6 +61,22 @@ interface LegalPageSchemaInput {
   modifiedAt?: string;
 }
 
+interface LocalBusinessSchemaInput {
+  name: string;
+  address: string;
+  phone?: string;
+  email?: string;
+  openingHours?: string[];
+  priceRange?: string;
+}
+
+export function buildSchemaFallback(type: string): Record<string, unknown> {
+  return {
+    "@context": "https://schema.org",
+    "@type": type,
+  };
+}
+
 /**
  * 生成组织结构化数据
  */
@@ -329,6 +345,36 @@ export function buildBreadcrumbListSchema(
       position: index + 1,
     })),
   });
+}
+
+export function buildLocalBusinessSchema(
+  business: LocalBusinessSchemaInput,
+): Record<string, unknown> {
+  const schema: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    name: business.name,
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: business.address,
+    },
+    url: SITE_CONFIG.baseUrl,
+  };
+
+  if (business.phone) {
+    schema.telephone = business.phone;
+  }
+  if (business.email) {
+    schema.email = business.email;
+  }
+  if (business.openingHours) {
+    schema.openingHours = business.openingHours;
+  }
+  if (business.priceRange) {
+    schema.priceRange = business.priceRange;
+  }
+
+  return schema;
 }
 
 /**

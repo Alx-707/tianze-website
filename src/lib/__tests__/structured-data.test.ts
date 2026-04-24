@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 // Import after mocks
 import {
@@ -118,6 +120,24 @@ describe("Structured Data Generation", () => {
     it("does not expose legacy FAQ or breadcrumb schema aliases", () => {
       expect("generateFAQSchema" in structuredDataPublicApi).toBe(false);
       expect("generateBreadcrumbSchema" in structuredDataPublicApi).toBe(false);
+    });
+
+    it("keeps schema context literals out of compatibility modules", () => {
+      const structuredDataSource = readFileSync(
+        join(process.cwd(), "src/lib/structured-data.ts"),
+        "utf8",
+      );
+      const structuredDataHelpersSource = readFileSync(
+        join(process.cwd(), "src/lib/structured-data-helpers.ts"),
+        "utf8",
+      );
+
+      expect(structuredDataSource).not.toContain(
+        '"@context": "https://schema.org"',
+      );
+      expect(structuredDataHelpersSource).not.toContain(
+        '"@context": "https://schema.org"',
+      );
     });
   });
 
