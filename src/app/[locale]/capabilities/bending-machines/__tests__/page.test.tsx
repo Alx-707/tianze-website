@@ -68,7 +68,7 @@ describe("Feature: Bending Machines Capability Page", () => {
   it("renders the hero section with title", async () => {
     await renderPage();
     const heading = screen.getByRole("heading", { level: 1 });
-    expect(heading).toHaveTextContent("hero.title");
+    expect(heading).toHaveTextContent("PVC Pipe Bending Machines");
   });
 
   it("renders value proposition cards", async () => {

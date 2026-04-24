@@ -2,16 +2,32 @@ import type { ComponentProps } from "react";
 import type { Metadata } from "next";
 import Image from "next/image";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { generateMetadataForPath, type Locale } from "@/lib/seo-metadata";
+import {
+  generateMetadataForPath,
+  type Locale as SeoLocale,
+} from "@/lib/seo-metadata";
 import { SINGLE_SITE_BENDING_MACHINES_PAGE_EXPRESSION } from "@/config/single-site-page-expression";
 import { siteFacts } from "@/config/site-facts";
 import { FaqSection } from "@/components/sections/faq-section";
 import { Link } from "@/i18n/routing";
 import { generateLocaleStaticParams } from "@/app/[locale]/generate-static-params";
+import { getPageBySlug } from "@/lib/content";
+import {
+  extractFaqFromMetadata,
+  interpolateFaqAnswer,
+} from "@/lib/content/mdx-faq";
 import {
   EQUIPMENT_SPECS,
   type EquipmentSpec,
 } from "@/constants/equipment-specs";
+import type { FaqItem, Locale } from "@/types/content.types";
+
+const LAYER1_FACTS: Record<string, string | number> = {
+  companyName: siteFacts.company.name,
+  established: siteFacts.company.established,
+  exportCountries: siteFacts.stats.exportCountries,
+  employees: siteFacts.company.employees,
+};
 
 export function generateStaticParams() {
   return generateLocaleStaticParams();
@@ -25,15 +41,17 @@ export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "capabilities" });
+  const page = await getPageBySlug("bending-machines", locale as Locale);
+  const description =
+    page.metadata.seo?.description ?? page.metadata.description;
 
   return generateMetadataForPath({
-    locale: locale as Locale,
+    locale: locale as SeoLocale,
     pageType: "bendingMachines",
     path: "/capabilities/bending-machines",
     config: {
-      title: t("meta.title"),
-      description: t("meta.description"),
+      title: page.metadata.seo?.title ?? page.metadata.title,
+      ...(description ? { description } : {}),
     },
   });
 }
@@ -197,6 +215,13 @@ export default async function BendingMachinesPage({ params }: PageProps) {
   setRequestLocale(locale);
 
   const t = await getTranslations({ locale, namespace: "capabilities" });
+  const page = await getPageBySlug("bending-machines", locale as Locale);
+  const faqItems: FaqItem[] = extractFaqFromMetadata(
+    page.metadata as unknown as Record<string, unknown>,
+  ).map((item) => ({
+    ...item,
+    answer: interpolateFaqAnswer(item.answer, LAYER1_FACTS),
+  }));
 
   const whyCards: WhyCardData[] =
     SINGLE_SITE_BENDING_MACHINES_PAGE_EXPRESSION.whyCardKeys.map((cardKey) => ({
@@ -213,9 +238,9 @@ export default async function BendingMachinesPage({ params }: PageProps) {
   return (
     <main className="mx-auto max-w-[1080px] px-6 py-8 md:py-12">
       <header className="mb-8 md:mb-12">
-        <h1 className="text-heading mb-4">{t("hero.title")}</h1>
+        <h1 className="text-heading mb-4">{page.metadata.title}</h1>
         <p className="max-w-2xl text-lg text-muted-foreground">
-          {t("hero.subtitle")}
+          {page.metadata.description}
         </p>
       </header>
 
@@ -235,10 +260,7 @@ export default async function BendingMachinesPage({ params }: PageProps) {
         stats={stats}
       />
 
-      <FaqSection
-        items={[...SINGLE_SITE_BENDING_MACHINES_PAGE_EXPRESSION.faqItems]}
-        locale={locale as Locale}
-      />
+      <FaqSection faqItems={faqItems} locale={locale as Locale} />
 
       <CtaSection
         heading={t("cta.heading")}

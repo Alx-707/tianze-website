@@ -1,11 +1,28 @@
 import type { ComponentProps } from "react";
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { generateMetadataForPath, type Locale } from "@/lib/seo-metadata";
+import {
+  generateMetadataForPath,
+  type Locale as SeoLocale,
+} from "@/lib/seo-metadata";
 import { SINGLE_SITE_OEM_PAGE_EXPRESSION } from "@/config/single-site-page-expression";
 import { FaqSection } from "@/components/sections/faq-section";
 import { Link } from "@/i18n/routing";
 import { generateLocaleStaticParams } from "@/app/[locale]/generate-static-params";
+import { siteFacts } from "@/config/site-facts";
+import { getPageBySlug } from "@/lib/content";
+import {
+  extractFaqFromMetadata,
+  interpolateFaqAnswer,
+} from "@/lib/content/mdx-faq";
+import type { FaqItem, Locale } from "@/types/content.types";
+
+const LAYER1_FACTS: Record<string, string | number> = {
+  companyName: siteFacts.company.name,
+  established: siteFacts.company.established,
+  exportCountries: siteFacts.stats.exportCountries,
+  employees: siteFacts.company.employees,
+};
 
 export function generateStaticParams() {
   return generateLocaleStaticParams();
@@ -19,15 +36,20 @@ export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "oem" });
+  const page = await getPageBySlug(
+    "oem-custom-manufacturing",
+    locale as Locale,
+  );
+  const description =
+    page.metadata.seo?.description ?? page.metadata.description;
 
   return generateMetadataForPath({
-    locale: locale as Locale,
+    locale: locale as SeoLocale,
     pageType: "oem",
     path: "/oem-custom-manufacturing",
     config: {
-      title: t("meta.title"),
-      description: t("meta.description"),
+      title: page.metadata.seo?.title ?? page.metadata.title,
+      ...(description ? { description } : {}),
     },
   });
 }
@@ -192,6 +214,16 @@ export default async function OemCustomManufacturingPage({
   setRequestLocale(locale);
 
   const t = await getTranslations({ locale, namespace: "oem" });
+  const page = await getPageBySlug(
+    "oem-custom-manufacturing",
+    locale as Locale,
+  );
+  const faqItems: FaqItem[] = extractFaqFromMetadata(
+    page.metadata as unknown as Record<string, unknown>,
+  ).map((item) => ({
+    ...item,
+    answer: interpolateFaqAnswer(item.answer, LAYER1_FACTS),
+  }));
 
   const scopeCards: ScopeCardData[] =
     SINGLE_SITE_OEM_PAGE_EXPRESSION.scopeKeys.map((key) => ({
@@ -215,9 +247,9 @@ export default async function OemCustomManufacturingPage({
   return (
     <main className="mx-auto max-w-[1080px] px-6 py-8 md:py-12">
       <header className="mb-8 md:mb-12">
-        <h1 className="text-heading mb-4">{t("hero.title")}</h1>
+        <h1 className="text-heading mb-4">{page.metadata.title}</h1>
         <p className="max-w-2xl text-lg text-muted-foreground">
-          {t("hero.subtitle")}
+          {page.metadata.description}
         </p>
       </header>
 
@@ -231,10 +263,7 @@ export default async function OemCustomManufacturingPage({
         customLabel={t("standards.custom")}
       />
 
-      <FaqSection
-        items={[...SINGLE_SITE_OEM_PAGE_EXPRESSION.faqItems]}
-        locale={locale as Locale}
-      />
+      <FaqSection faqItems={faqItems} locale={locale as Locale} />
 
       <CtaSection
         heading={t("cta.heading")}
