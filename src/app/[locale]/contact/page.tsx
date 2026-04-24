@@ -260,23 +260,5 @@ async function ContactContent({ locale }: { locale: string }) {
 export default async function ContactPage({ params }: ContactPageProps) {
   const { locale } = await params;
 
-  return (
-    <Suspense
-      fallback={
-        <main className="min-h-[80vh] px-4 py-16">
-          <div className="mx-auto max-w-4xl space-y-4">
-            <div className="mx-auto h-10 w-64 animate-pulse rounded bg-muted" />
-            {Array.from({ length: 6 }, (_, index) => (
-              <div
-                key={index}
-                className="h-4 w-full animate-pulse rounded bg-muted"
-              />
-            ))}
-          </div>
-        </main>
-      }
-    >
-      <ContactContent locale={locale} />
-    </Suspense>
-  );
+  return <ContactContent locale={locale} />;
 }
