@@ -91,6 +91,19 @@ Cloudflare runtime has `setTimeout()` and Cache Components boundary issues. Cont
 
 Do not wrap runtime i18n JSON module imports in `unstable_cache` on Cloudflare. Wrangler/Miniflare can revalidate those cached loaders across request contexts and fail with “Cannot perform I/O on behalf of a different request.” Use direct module imports for Cloudflare runtime; keep `unstable_cache` only for non-CI, non-build, non-Cloudflare runtime paths.
 
+The same boundary applies to `react/cache` wrappers around `next-intl/server`
+translation helpers. On Cloudflare runtime, call `getTranslations` directly
+instead of using a module-level cached wrapper.
+
+MDX/page content query helpers follow the same rule: React request-cache wrappers
+are allowed for normal Next.js runtime, but Cloudflare runtime must use direct
+content loader calls unless the caller is inside an explicit Next Cache
+Components `"use cache"` boundary.
+
+Cloudflare runtime must not read MDX files through Node `fs`. Page/post lookup
+has to use the generated content manifest, which embeds frontmatter and body
+text at build time.
+
 ### Loading.tsx for conversion pages
 
 Route-level `loading.tsx` controls no-JS / slow-streaming first paint. For contact/inquiry/subscribe, either provide meaningful content or omit `loading.tsx` entirely — empty skeletons break SSR content contracts.

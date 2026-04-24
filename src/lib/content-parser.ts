@@ -8,7 +8,12 @@ import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
 import yaml, { type LoadOptions } from "js-yaml";
-import { isRuntimeProduction } from "@/lib/env";
+import { isRuntimeCloudflare, isRuntimeProduction } from "@/lib/env";
+import {
+  getAllContentEntries,
+  getContentEntriesByType,
+  type ContentEntry,
+} from "@/lib/content-manifest";
 import {
   ContentError,
   ContentValidationError,
@@ -19,7 +24,10 @@ import {
 } from "@/types/content.types";
 import {
   CONTENT_DIR,
+  PAGES_DIR,
   getValidationConfig,
+  POSTS_DIR,
+  PRODUCTS_DIR,
   shouldFilterDraft,
   validateFilePath,
 } from "@/lib/content-utils";
@@ -40,6 +48,37 @@ const yamlWithSafeLoad: YamlWithSafeLoad = yaml as YamlWithSafeLoad;
 if (!yamlWithSafeLoad.safeLoad) {
   yamlWithSafeLoad.safeLoad = (str: string, opts?: LoadOptions) =>
     yamlWithSafeLoad.load(str, opts);
+}
+
+function inferContentTypeFromDir(contentDir: string): ContentType {
+  const resolved = path.resolve(contentDir);
+
+  if (resolved === path.resolve(POSTS_DIR)) return "posts";
+  if (resolved === path.resolve(PAGES_DIR)) return "pages";
+  if (resolved === path.resolve(PRODUCTS_DIR)) return "products";
+
+  return "pages";
+}
+
+function findManifestEntry(filePath: string): ContentEntry | undefined {
+  return getAllContentEntries().find(
+    (entry) =>
+      entry.filePath === filePath ||
+      entry.relativePath === filePath ||
+      path.normalize(entry.filePath) === path.normalize(filePath) ||
+      path.normalize(entry.relativePath) === path.normalize(filePath),
+  );
+}
+
+function parseManifestEntry<T extends ContentMetadata>(
+  entry: ContentEntry,
+): ParsedContent<T> {
+  return {
+    slug: entry.slug,
+    metadata: entry.metadata as T,
+    content: entry.content,
+    filePath: entry.filePath,
+  };
 }
 
 /**
@@ -82,59 +121,51 @@ function getProductionValidationConfig(): ValidationConfig {
 /**
  * Parse MDX file with frontmatter
  */
-export async function parseContentFile<
-  T extends ContentMetadata = ContentMetadata,
->(
+export function parseContentFile<T extends ContentMetadata = ContentMetadata>(
   filePath: string,
   type: ContentType,
   options: ParseContentOptions = {},
 ): Promise<ParsedContent<T>> {
-  const validationConfig =
-    options.validationConfig ?? getProductionValidationConfig();
+  if (isRuntimeCloudflare()) {
+    return Promise.resolve().then(() =>
+      parseManifestContentFile<T>(filePath, type),
+    );
+  }
+  return parseFileSystemContentFile<T>(filePath, type, options);
+}
 
+function parseManifestContentFile<T extends ContentMetadata>(
+  filePath: string,
+  type: ContentType,
+): ParsedContent<T> {
+  const entry = findManifestEntry(filePath);
+  if (entry === undefined || entry.type !== type) {
+    throw new ContentError(
+      `Content file not found: ${filePath}`,
+      "FILE_NOT_FOUND",
+    );
+  }
+  return parseManifestEntry<T>(entry);
+}
+
+async function parseFileSystemContentFile<T extends ContentMetadata>(
+  filePath: string,
+  type: ContentType,
+  options: ParseContentOptions,
+): Promise<ParsedContent<T>> {
   try {
-    // Validate file path for security
     const validatedPath = validateFilePath(filePath, CONTENT_DIR);
-
-    const fileExists = await fs.promises
-      .access(validatedPath)
-      .then(() => true)
-      .catch(() => false);
-    if (!fileExists) {
-      throw new ContentError(
-        `Content file not found: ${filePath}`,
-        "FILE_NOT_FOUND",
-      );
-    }
-
-    // eslint-disable-next-line security/detect-non-literal-fs-filename -- validatedPath已通过validateFilePath安全验证，防止路径遍历攻击
-    const fileContent = await fs.promises.readFile(validatedPath, "utf-8");
-
-    // Check file size limits
-    if (fileContent.length > CONTENT_LIMITS.MAX_FILE_SIZE) {
-      throw new ContentError(
-        `Content file too large: ${fileContent.length} bytes (max: ${CONTENT_LIMITS.MAX_FILE_SIZE})`,
-        "FILE_TOO_LARGE",
-      );
-    }
-
-    const { data: frontmatter, content } = matter(fileContent, {
-      engines: {
-        yaml: (source: string) => yaml.load(source) as Record<string, unknown>,
-      },
-    });
-
-    // Validate metadata with config
+    const fileContent = await readValidatedContentFile(validatedPath, filePath);
+    const { frontmatter, content } = parseMdxSource(fileContent);
+    const validationConfig =
+      options.validationConfig ?? getProductionValidationConfig();
     const validation = validateContentMetadata(
       frontmatter,
       type,
       validationConfig,
     );
-
-    // Log validation issues
     logValidationResult(filePath, validation, options.strictMode);
 
-    // In strict mode, throw error on validation failure
     if (options.strictMode && !validation.isValid) {
       throw new ContentValidationError(
         `Content validation failed for ${filePath}`,
@@ -143,7 +174,6 @@ export async function parseContentFile<
       );
     }
 
-    // Extract slug from filename (fallback if not in frontmatter)
     const slug =
       (frontmatter["slug"] as string) ??
       path.basename(filePath, path.extname(filePath));
@@ -166,6 +196,47 @@ export async function parseContentFile<
       "PARSE_ERROR",
     );
   }
+}
+
+async function readValidatedContentFile(
+  validatedPath: string,
+  originalPath: string,
+): Promise<string> {
+  const fileExists = await fs.promises
+    .access(validatedPath)
+    .then(() => true)
+    .catch(() => false);
+  if (!fileExists) {
+    throw new ContentError(
+      `Content file not found: ${originalPath}`,
+      "FILE_NOT_FOUND",
+    );
+  }
+
+  // eslint-disable-next-line security/detect-non-literal-fs-filename -- validatedPath已通过validateFilePath安全验证，防止路径遍历攻击
+  const fileContent = await fs.promises.readFile(validatedPath, "utf-8");
+
+  if (fileContent.length > CONTENT_LIMITS.MAX_FILE_SIZE) {
+    throw new ContentError(
+      `Content file too large: ${fileContent.length} bytes (max: ${CONTENT_LIMITS.MAX_FILE_SIZE})`,
+      "FILE_TOO_LARGE",
+    );
+  }
+
+  return fileContent;
+}
+
+function parseMdxSource(fileContent: string): {
+  frontmatter: Record<string, unknown>;
+  content: string;
+} {
+  const { data: frontmatter, content } = matter(fileContent, {
+    engines: {
+      yaml: (source: string) => yaml.load(source) as Record<string, unknown>,
+    },
+  });
+
+  return { frontmatter, content };
 }
 
 /**
@@ -222,6 +293,11 @@ export async function getContentFiles(
   contentDir: string,
   locale?: Locale,
 ): Promise<string[]> {
+  if (isRuntimeCloudflare()) {
+    const type = inferContentTypeFromDir(contentDir);
+    return getContentEntriesByType(type, locale).map((entry) => entry.filePath);
+  }
+
   // When a locale is provided, read from the locale-specific subdirectory
   // (e.g. content/pages/en, content/posts/zh). This matches the actual
   // content layout under the content/ directory.
