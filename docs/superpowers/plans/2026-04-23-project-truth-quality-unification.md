@@ -3369,6 +3369,7 @@ EOF
 - Legal pages: unified through one shared shell, metadata from MDX frontmatter, TOC from headings
 - About page: MDX-first with controlled shell for FAQ/CTA/stats
 - Contact page: hero/FAQ to MDX, form labels stay in translation JSON
+- OEM and bending machine pages: structured-card exception; MDX owns FAQ/SEO metadata, while scope cards, process steps, standards, and CTA copy stay in translation namespaces
 - FAQ: per-page MDX frontmatter, no shared pool
 - Equipment: highlights become `Record<Locale, string[]>`
 - SEO: `seo.pages.*` eliminated, MDX frontmatter owns page metadata

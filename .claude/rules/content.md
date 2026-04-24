@@ -16,7 +16,8 @@ Structural switches and pointers only. "About page shows FAQ = yes" belongs here
 
 All substantive page content: prose, hero copy, FAQ Q&A (in frontmatter), page-level metadata (title, SEO description, dates). If it must be rewritten when changing brands, it belongs here. Third set to replace.
 
-**Exception:** Structured card data (equipment specs, product catalog) stays in typed config with i18n.
+**Exception:** Structured card data (equipment specs, product catalog, OEM scope/process cards, bending machine specification/process cards) stays in typed config with i18n.
+OEM and bending machine pages are mixed structured pages: MDX owns FAQ and SEO metadata, while card grids, process steps, standards, and CTA modules remain in their translation namespaces.
 
 **FAQ rule:** Each page owns its FAQ in its own MDX frontmatter. No shared FAQ pool.
 
