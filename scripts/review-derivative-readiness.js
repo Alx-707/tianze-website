@@ -25,14 +25,11 @@ const CONTENT_CHECKS = [
       "SINGLE_SITE_HOME_FINAL_TRUST_ITEMS",
       "SINGLE_SITE_HOME_SCENARIO_ITEMS",
       "SINGLE_SITE_HOME_QUALITY_COMMITMENT_ITEMS",
-      "SINGLE_SITE_CONTACT_PAGE_FALLBACK",
       "SINGLE_SITE_PRODUCTS_PAGE_EXPRESSION",
       "SINGLE_SITE_BENDING_MACHINES_PAGE_EXPRESSION",
-      "whyCardKeys",
-      'valueSource: "siteFacts.stats.exportCountries"',
       "SINGLE_SITE_OEM_PAGE_EXPRESSION",
-      "SINGLE_SITE_ABOUT_FAQ_ITEMS",
       "SINGLE_SITE_ABOUT_STATS_ITEMS",
+      "SINGLE_SITE_ABOUT_SHELL_COPY",
     ],
   },
   {
@@ -49,7 +46,7 @@ const CONTENT_CHECKS = [
     label:
       "derivative checklist defines replacement-first and keep-fixed areas",
     snippets: [
-      "Replace first",
+      "Replacement order",
       "Do not replace first",
       "Minimum proof after replacement",
     ],
