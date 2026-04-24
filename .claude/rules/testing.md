@@ -20,6 +20,12 @@ pnpm test:coverage     # With coverage report
 pnpm test:e2e          # Playwright E2E tests
 ```
 
+## CI Coverage Gate
+
+CI enforces **70% incremental coverage** on changed files. This means: if you modify a source file, at least 70% of its executable statements must be covered by tests in the PR. The gate runs `pnpm quality:gate` in the architecture check job.
+
+When planning work that modifies multiple source files, account for test coverage in the task breakdown. If a task changes a page or component file, it should include a step to verify incremental coverage or add tests to maintain the threshold. Run `pnpm test:coverage` locally to check before pushing.
+
 ## Behavior Contract Source
 
 The repo-level user-facing behavior anchor is:
