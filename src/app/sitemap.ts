@@ -2,6 +2,10 @@ import type { MetadataRoute } from "next";
 import type { Locale, PostSummary } from "@/types/content.types";
 import { getAllPostsCached } from "@/lib/content/blog";
 import {
+  getMdxPageLastModified,
+  isMdxDrivenPage,
+} from "@/lib/content/page-dates";
+import {
   getContentLastModified,
   getStaticPageLastModified,
   type StaticPageLastModConfig,
@@ -67,7 +71,7 @@ function createSitemapEntry(
 }
 
 // Generate static page entries for all locales
-function generateStaticPageEntries(): MetadataRoute.Sitemap {
+async function generateStaticPageEntries(): Promise<MetadataRoute.Sitemap> {
   const entries: MetadataRoute.Sitemap = [];
 
   for (const locale of routing.locales) {
@@ -75,7 +79,9 @@ function generateStaticPageEntries(): MetadataRoute.Sitemap {
       const config = getPageConfig(page);
       const url = `${BASE_URL}/${locale}${page}`;
       const alternates = buildAlternateLanguages(page);
-      const lastModified = getStaticPageLastModified(page, STATIC_PAGE_LASTMOD);
+      const lastModified = isMdxDrivenPage(page)
+        ? await getMdxPageLastModified(page)
+        : getStaticPageLastModified(page, STATIC_PAGE_LASTMOD);
 
       entries.push(
         createSitemapEntry({ url, lastModified, config, alternates }),
@@ -173,17 +179,18 @@ async function generateBlogEntries(): Promise<MetadataRoute.Sitemap> {
 // Generate product catalog entries (market + family pages) for all locales
 function generateCatalogEntries(): MetadataRoute.Sitemap {
   const entries: MetadataRoute.Sitemap = [];
-  const now = new Date();
 
   // Market landing pages
   const marketConfig = getPageConfig("productMarket");
   for (const market of PRODUCT_CATALOG.markets) {
     const path = `/products/${market.slug}`;
+    const lastModified = getStaticPageLastModified(path, STATIC_PAGE_LASTMOD);
+
     for (const locale of routing.locales) {
       entries.push(
         createSitemapEntry({
           url: `${BASE_URL}/${locale}${path}`,
-          lastModified: now,
+          lastModified,
           config: marketConfig,
           alternates: buildAlternateLanguages(path),
         }),
@@ -199,7 +206,7 @@ function generateCatalogEntries(): MetadataRoute.Sitemap {
  * Includes static pages, product catalog pages, and blog pages with i18n alternates.
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const staticEntries = generateStaticPageEntries();
+  const staticEntries = await generateStaticPageEntries();
   const catalogEntries = generateCatalogEntries();
   const blogEntries = await generateBlogEntries();
 
