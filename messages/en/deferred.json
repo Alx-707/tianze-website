@@ -6,6 +6,11 @@
     "description": "Something went wrong. Please try refreshing the page.",
     "tryAgain": "Try Again"
   },
+  "legal": {
+    "effectiveDate": "Effective Date",
+    "lastUpdated": "Last Updated",
+    "tableOfContents": "Table of Contents"
+  },
   "themeDemo": {
     "title": "Theme System Demo",
     "description": "Testing theme switching and Chinese-English font mixing",

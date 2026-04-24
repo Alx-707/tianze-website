@@ -1495,6 +1495,11 @@
     "description": "出现了一些问题，请尝试刷新页面。",
     "tryAgain": "重试"
   },
+  "legal": {
+    "effectiveDate": "生效日期",
+    "lastUpdated": "最后更新",
+    "tableOfContents": "目录"
+  },
   "themeDemo": {
     "title": "主题系统演示",
     "description": "测试主题切换和中英文字体混排效果",
