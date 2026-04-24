@@ -52,6 +52,30 @@ export const CONTENT_MANIFEST: ContentManifest = {
   {
     "type": "pages",
     "locale": "en",
+    "slug": "bending-machines",
+    "extension": ".mdx",
+    "filePath": "/content/pages/en/bending-machines.mdx",
+    "relativePath": "content/pages/en/bending-machines.mdx"
+  },
+  {
+    "type": "pages",
+    "locale": "en",
+    "slug": "contact",
+    "extension": ".mdx",
+    "filePath": "/content/pages/en/contact.mdx",
+    "relativePath": "content/pages/en/contact.mdx"
+  },
+  {
+    "type": "pages",
+    "locale": "en",
+    "slug": "oem-custom-manufacturing",
+    "extension": ".mdx",
+    "filePath": "/content/pages/en/oem-custom-manufacturing.mdx",
+    "relativePath": "content/pages/en/oem-custom-manufacturing.mdx"
+  },
+  {
+    "type": "pages",
+    "locale": "en",
     "slug": "privacy",
     "extension": ".mdx",
     "filePath": "/content/pages/en/privacy.mdx",
@@ -72,6 +96,30 @@ export const CONTENT_MANIFEST: ContentManifest = {
     "extension": ".mdx",
     "filePath": "/content/pages/zh/about.mdx",
     "relativePath": "content/pages/zh/about.mdx"
+  },
+  {
+    "type": "pages",
+    "locale": "zh",
+    "slug": "bending-machines",
+    "extension": ".mdx",
+    "filePath": "/content/pages/zh/bending-machines.mdx",
+    "relativePath": "content/pages/zh/bending-machines.mdx"
+  },
+  {
+    "type": "pages",
+    "locale": "zh",
+    "slug": "contact",
+    "extension": ".mdx",
+    "filePath": "/content/pages/zh/contact.mdx",
+    "relativePath": "content/pages/zh/contact.mdx"
+  },
+  {
+    "type": "pages",
+    "locale": "zh",
+    "slug": "oem-custom-manufacturing",
+    "extension": ".mdx",
+    "filePath": "/content/pages/zh/oem-custom-manufacturing.mdx",
+    "relativePath": "content/pages/zh/oem-custom-manufacturing.mdx"
   },
   {
     "type": "pages",
@@ -115,6 +163,30 @@ export const CONTENT_MANIFEST: ContentManifest = {
     "filePath": "/content/pages/en/about.mdx",
     "relativePath": "content/pages/en/about.mdx"
   },
+  "pages/en/bending-machines": {
+    "type": "pages",
+    "locale": "en",
+    "slug": "bending-machines",
+    "extension": ".mdx",
+    "filePath": "/content/pages/en/bending-machines.mdx",
+    "relativePath": "content/pages/en/bending-machines.mdx"
+  },
+  "pages/en/contact": {
+    "type": "pages",
+    "locale": "en",
+    "slug": "contact",
+    "extension": ".mdx",
+    "filePath": "/content/pages/en/contact.mdx",
+    "relativePath": "content/pages/en/contact.mdx"
+  },
+  "pages/en/oem-custom-manufacturing": {
+    "type": "pages",
+    "locale": "en",
+    "slug": "oem-custom-manufacturing",
+    "extension": ".mdx",
+    "filePath": "/content/pages/en/oem-custom-manufacturing.mdx",
+    "relativePath": "content/pages/en/oem-custom-manufacturing.mdx"
+  },
   "pages/en/privacy": {
     "type": "pages",
     "locale": "en",
@@ -138,6 +210,30 @@ export const CONTENT_MANIFEST: ContentManifest = {
     "extension": ".mdx",
     "filePath": "/content/pages/zh/about.mdx",
     "relativePath": "content/pages/zh/about.mdx"
+  },
+  "pages/zh/bending-machines": {
+    "type": "pages",
+    "locale": "zh",
+    "slug": "bending-machines",
+    "extension": ".mdx",
+    "filePath": "/content/pages/zh/bending-machines.mdx",
+    "relativePath": "content/pages/zh/bending-machines.mdx"
+  },
+  "pages/zh/contact": {
+    "type": "pages",
+    "locale": "zh",
+    "slug": "contact",
+    "extension": ".mdx",
+    "filePath": "/content/pages/zh/contact.mdx",
+    "relativePath": "content/pages/zh/contact.mdx"
+  },
+  "pages/zh/oem-custom-manufacturing": {
+    "type": "pages",
+    "locale": "zh",
+    "slug": "oem-custom-manufacturing",
+    "extension": ".mdx",
+    "filePath": "/content/pages/zh/oem-custom-manufacturing.mdx",
+    "relativePath": "content/pages/zh/oem-custom-manufacturing.mdx"
   },
   "pages/zh/privacy": {
     "type": "pages",

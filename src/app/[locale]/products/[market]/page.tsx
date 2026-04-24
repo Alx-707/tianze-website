@@ -7,6 +7,7 @@ import {
   getFamiliesForMarket,
   getAllMarketSlugs,
   isValidMarketSlug,
+  type ProductFamilyDefinition,
 } from "@/constants/product-catalog";
 import {
   SINGLE_SITE_MARKET_FAQ_ITEMS,
@@ -25,6 +26,8 @@ import {
   getRowValueTranslationKey,
 } from "@/lib/spec-table-translator";
 import { SITE_CONFIG } from "@/config/paths";
+import { generateMetadataForPath } from "@/lib/seo-metadata";
+import { JsonLdScript } from "@/components/seo";
 import { FaqSection } from "@/components/sections/faq-section";
 import { CatalogBreadcrumb } from "@/components/products/catalog-breadcrumb";
 import { FamilySection } from "@/components/products/family-section";
@@ -35,6 +38,7 @@ import {
 } from "@/components/products/product-specs";
 import { StickyFamilyNav } from "@/components/products/sticky-family-nav";
 import { Link, routing } from "@/i18n/routing";
+import { generateProductGroupData } from "@/lib/structured-data-generators";
 
 // --- Spec data lookup ---
 
@@ -76,27 +80,15 @@ export async function generateMetadata({
   const t = await getTranslations({ locale, namespace: "catalog" });
   const marketLabel = t(`markets.${marketSlug}.label`);
   const marketDescription = t(`markets.${marketSlug}.description`);
-  const path = `/products/${market.slug}`;
-  const canonical = `${SITE_CONFIG.baseUrl}/${locale}${path}`;
-
-  return {
-    title: `${marketLabel} | ${SITE_CONFIG.name}`,
-    description: marketDescription,
-    alternates: {
-      canonical,
-      languages: Object.fromEntries(
-        routing.locales.map((l) => [l, `${SITE_CONFIG.baseUrl}/${l}${path}`]),
-      ),
-    },
-    openGraph: {
+  return generateMetadataForPath({
+    locale: locale as Locale,
+    pageType: "products",
+    path: `/products/${market.slug}`,
+    config: {
       title: `${marketLabel} | ${SITE_CONFIG.name}`,
       description: marketDescription,
-      type: "website",
     },
-    other: {
-      google: "notranslate",
-    },
-  };
+  });
 }
 
 // --- Extracted sub-sections (keep MarketPage under 120 lines) ---
@@ -179,6 +171,28 @@ function CtaSection({
   );
 }
 
+function MarketHero({
+  standardLabel,
+  marketLabel,
+  marketDescription,
+}: {
+  standardLabel: string;
+  marketLabel: string;
+  marketDescription: string;
+}) {
+  return (
+    <header className="mb-8 md:mb-12">
+      <span className="mb-2 inline-block rounded bg-muted px-2 py-0.5 font-mono text-xs text-muted-foreground">
+        {standardLabel}
+      </span>
+      <h1 className="text-heading mb-4">{marketLabel}</h1>
+      <p className="text-body max-w-2xl text-muted-foreground">
+        {marketDescription}
+      </p>
+    </header>
+  );
+}
+
 // --- Helper functions for spec translation ---
 
 function translateSpecColumns(
@@ -251,6 +265,41 @@ function buildTrustSignalsSectionProps(
   };
 }
 
+function buildProductGroupSchema({
+  families,
+  familySpecsMap,
+  marketSlug,
+  marketLabel,
+  marketDescription,
+  marketUrl,
+  t,
+}: {
+  families: readonly ProductFamilyDefinition[];
+  familySpecsMap: Map<string, MarketSpecs["families"][number]>;
+  marketSlug: string;
+  marketLabel: string;
+  marketDescription: string;
+  marketUrl: string;
+  t: (key: string) => string;
+}) {
+  return generateProductGroupData({
+    name: marketLabel,
+    description: marketDescription,
+    url: marketUrl,
+    brand: SITE_CONFIG.name,
+    products: families.map((family) => {
+      const image = familySpecsMap.get(family.slug)?.images[0];
+
+      return {
+        name: t(`families.${marketSlug}.${family.slug}.label`),
+        description: t(`families.${marketSlug}.${family.slug}.description`),
+        ...(image ? { image: `${SITE_CONFIG.baseUrl}${image}` } : {}),
+        url: `${marketUrl}#${family.slug}`,
+      };
+    }),
+  });
+}
+
 // --- Page component ---
 
 export default async function MarketPage({ params }: MarketPageProps) {
@@ -268,10 +317,20 @@ export default async function MarketPage({ params }: MarketPageProps) {
   const marketLabel = t(`markets.${marketSlug}.label`);
   const marketDescription = t(`markets.${marketSlug}.description`);
 
-  // Build family specs lookup for FamilySection rendering
+  // Build family specs lookup for FamilySection rendering and structured data.
   const familySpecsMap = new Map(
     marketSpecs?.families.map((fs) => [fs.slug, fs]),
   );
+  const marketUrl = `${SITE_CONFIG.baseUrl}/${locale}/products/${market.slug}`;
+  const productGroupSchema = buildProductGroupSchema({
+    families,
+    familySpecsMap,
+    marketSlug,
+    marketLabel,
+    marketDescription,
+    marketUrl,
+    t,
+  });
 
   return (
     <main
@@ -279,17 +338,14 @@ export default async function MarketPage({ params }: MarketPageProps) {
       data-testid="market-page-content"
       translate="no"
     >
+      <JsonLdScript data={productGroupSchema} />
       <CatalogBreadcrumb market={market} marketLabel={marketLabel} />
 
-      <header className="mb-8 md:mb-12">
-        <span className="mb-2 inline-block rounded bg-muted px-2 py-0.5 font-mono text-xs text-muted-foreground">
-          {market.standardLabel}
-        </span>
-        <h1 className="text-heading mb-4">{marketLabel}</h1>
-        <p className="text-body max-w-2xl text-muted-foreground">
-          {marketDescription}
-        </p>
-      </header>
+      <MarketHero
+        standardLabel={market.standardLabel}
+        marketLabel={marketLabel}
+        marketDescription={marketDescription}
+      />
 
       {marketSpecs && (
         <StickyFamilyNav

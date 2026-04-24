@@ -14,6 +14,19 @@ const FALLBACK_BASE_URL = SITE_CONFIG.baseUrl;
 
 const DEFAULT_LOGO_PATH = "/next.svg";
 
+interface ProductGroupInput {
+  name: string;
+  description: string;
+  url: string;
+  brand: string;
+  products: Array<{
+    name: string;
+    description?: string;
+    image?: string;
+    url?: string;
+  }>;
+}
+
 /**
  * 生成组织结构化数据
  */
@@ -179,6 +192,29 @@ export function generateProductData(
       : undefined,
     sku: data.sku,
     // 移除 ...data 扩展运算符，只使用已验证的属性
+  };
+}
+
+export function generateProductGroupData(
+  data: ProductGroupInput,
+): Record<string, unknown> {
+  return {
+    "@context": "https://schema.org",
+    "@type": "ProductGroup",
+    name: data.name,
+    description: data.description,
+    url: data.url,
+    brand: {
+      "@type": "Brand",
+      name: data.brand,
+    },
+    hasVariant: data.products.map((product) => ({
+      "@type": "Product",
+      name: product.name,
+      ...(product.description ? { description: product.description } : {}),
+      ...(product.image ? { image: product.image } : {}),
+      ...(product.url ? { url: product.url } : {}),
+    })),
   };
 }
 

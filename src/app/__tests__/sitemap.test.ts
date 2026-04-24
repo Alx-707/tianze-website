@@ -1,4 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
+import { getMdxPageLastModified } from "@/lib/content/page-dates";
+import { getStaticPageLastModified } from "@/lib/sitemap-utils";
 import sitemap from "../sitemap";
 
 // Mock dependencies before imports
@@ -50,17 +52,34 @@ vi.mock("@/lib/sitemap-utils", () => ({
   getStaticPageLastModified: vi.fn((page) => {
     const dates: Record<string, Date> = {
       "": new Date("2024-12-01T00:00:00Z"),
-      "/about": new Date("2024-06-01T00:00:00Z"),
-      "/contact": new Date("2024-06-01T00:00:00Z"),
       "/products": new Date("2024-11-01T00:00:00Z"),
       "/blog": new Date("2024-11-01T00:00:00Z"),
-      "/privacy": new Date("2024-06-01T00:00:00Z"),
-      "/terms": new Date("2024-06-01T00:00:00Z"),
-      "/capabilities/bending-machines": new Date("2026-03-23T00:00:00Z"),
-      "/oem-custom-manufacturing": new Date("2026-03-23T00:00:00Z"),
+      "/products/north-america": new Date("2024-11-01T00:00:00Z"),
+      "/products/australia-new-zealand": new Date("2024-11-01T00:00:00Z"),
+      "/products/mexico": new Date("2024-11-01T00:00:00Z"),
+      "/products/europe": new Date("2024-11-01T00:00:00Z"),
+      "/products/pneumatic-tube-systems": new Date("2024-11-01T00:00:00Z"),
     };
-    return dates[page] || new Date("2024-01-01T00:00:00Z");
+    const date = dates[page];
+    if (date === undefined) {
+      throw new Error(`Unexpected static lastmod fallback: ${page}`);
+    }
+    return date;
   }),
+}));
+
+vi.mock("@/lib/content/page-dates", () => ({
+  isMdxDrivenPage: vi.fn((path: string) =>
+    [
+      "/about",
+      "/contact",
+      "/privacy",
+      "/terms",
+      "/capabilities/bending-machines",
+      "/oem-custom-manufacturing",
+    ].includes(path),
+  ),
+  getMdxPageLastModified: vi.fn(async () => new Date("2026-04-20T00:00:00Z")),
 }));
 
 describe("sitemap.ts", () => {
@@ -220,6 +239,40 @@ describe("sitemap.ts", () => {
       );
 
       expect(about?.changeFrequency).toBe("monthly");
+    });
+
+    it("should use MDX updatedAt for MDX-driven page lastmod", async () => {
+      const result = await sitemap();
+      const about = result.find(
+        (entry) => entry.url === "https://example.com/en/about",
+      );
+
+      expect(getMdxPageLastModified).toHaveBeenCalledWith("/about");
+      expect(about?.lastModified).toEqual(new Date("2026-04-20T00:00:00Z"));
+    });
+
+    it("should use sidecar dates for non-MDX and product market pages", async () => {
+      const result = await sitemap();
+      const products = result.find(
+        (entry) => entry.url === "https://example.com/en/products",
+      );
+      const northAmerica = result.find(
+        (entry) =>
+          entry.url === "https://example.com/en/products/north-america",
+      );
+
+      expect(getStaticPageLastModified).toHaveBeenCalledWith(
+        "/products",
+        expect.any(Map),
+      );
+      expect(getStaticPageLastModified).toHaveBeenCalledWith(
+        "/products/north-america",
+        expect.any(Map),
+      );
+      expect(products?.lastModified).toEqual(new Date("2024-11-01T00:00:00Z"));
+      expect(northAmerica?.lastModified).toEqual(
+        new Date("2024-11-01T00:00:00Z"),
+      );
     });
 
     it("should keep terms page SEO defaults explicit", async () => {

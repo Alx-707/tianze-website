@@ -42,6 +42,8 @@
     }
   },
   "navigation": {
+    "siteName": "天泽管业",
+    "siteDescription": "专业PVC管道与PETG气动传输管制造商。",
     "home": "首页",
     "more": "更多",
     "about": "关于",
@@ -690,34 +692,6 @@
     "error": "发生了错误",
     "languageSelector": "选择语言",
     "themeSelector": "选择主题"
-  },
-  "seo": {
-    "title": "天泽管业 - 弯管制造专家",
-    "description": "专业弯管设备与管件制造商。设备+工艺+管件一体化解决方案。",
-    "siteName": "天泽管业",
-    "keywords": "弯管机, PVC弯管, 弯管设备, PVC电工管, PETG气动管, 管件, 工业管道",
-    "pages": {
-      "home": {
-        "title": "天泽管业 - 弯管制造专家 | 设备与管件",
-        "description": "专业弯管设备与管件制造商。半自动/全自动弯管机、PVC电工管、PETG气动物流管。ISO 9001:2015认证企业。"
-      },
-      "about": {
-        "title": "关于我们 - 天泽管业 | 制造能力",
-        "description": "了解天泽管业的一体化制造能力：弯管设备、精密模具、优质管件。创立于{established}年。"
-      },
-      "contact": {
-        "title": "联系我们 - 天泽管业 | 获取报价",
-        "description": "咨询弯管设备、PVC管材或PETG气动管产品。产品出口{countries}+国家和地区。"
-      },
-      "products": {
-        "title": "产品中心 - 天泽管业 | 设备与管件",
-        "description": "探索弯管机（半自动/全自动）、PVC电工管（美标Schedule 80）、PETG气动物流管产品线。"
-      },
-      "blog": {
-        "title": "新闻动态 - 天泽管业",
-        "description": "天泽管业最新行业资讯、技术指南和公司动态。"
-      }
-    }
   },
   "underConstruction": {
     "title": "建设中",

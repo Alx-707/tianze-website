@@ -12,6 +12,7 @@ const BOLD_WRAPPER_LENGTH = 2;
 const H2_PREFIX_LENGTH = 3;
 const H3_PREFIX_LENGTH = 4;
 const LIST_ITEM_PREFIX_LENGTH = 2;
+export const EXPLICIT_ID_PATTERN = /\s*\\?\{#([a-z0-9-]+)\\?\}\s*$/;
 
 export function slugifyHeading(text: string): string {
   const trimmed = text.trim();
@@ -25,9 +26,17 @@ export function slugifyHeading(text: string): string {
     .replace(/\s+/g, '-');
 }
 
+export function parseHeadingId(text: string): { displayText: string; id: string } {
+  const match = EXPLICIT_ID_PATTERN.exec(text);
+  if (match) {
+    return { displayText: text.slice(0, match.index).trim(), id: match[1] ?? "" };
+  }
+  return { displayText: text, id: slugifyHeading(text) };
+}
+
 interface RenderState {
   elements: ReactNode[];
-  listItems: string[];
+  listItems: ReactNode[];
   tableRows: string[][];
   tableHeaders: string[];
   inTable: boolean;
@@ -117,9 +126,9 @@ function isTableSeparator(cells: string[]): boolean {
   return cells.every((cell) => /^-+$/.test(cell));
 }
 
-function renderInlineBold(text: string, index: number): ReactNode {
+function renderInlineMarkdownParts(text: string): ReactNode[] {
   const parts = text.split(/(\*\*[^*]+\*\*)/g);
-  const renderedParts = parts.map((part, i) => {
+  return parts.map((part, i) => {
     if (part.startsWith('**') && part.endsWith('**')) {
       return (
         <strong key={i} className='font-medium text-foreground'>
@@ -129,13 +138,15 @@ function renderInlineBold(text: string, index: number): ReactNode {
     }
     return part;
   });
+}
 
+function renderInlineBold(text: string, index: number): ReactNode {
   return (
     <p
       key={`p-${index}`}
       className='mt-3 whitespace-pre-line text-sm leading-relaxed text-muted-foreground'
     >
-      {renderedParts}
+      {renderInlineMarkdownParts(text)}
     </p>
   );
 }
@@ -168,14 +179,14 @@ function handleListLine(state: RenderState, trimmed: string): boolean {
   if (/^\d+\.\s/.test(trimmed)) {
     flushList(state);
     const text = trimmed.replace(/^\d+\.\s/, '');
-    state.listItems.push(text);
+    state.listItems.push(renderInlineMarkdownParts(text));
     return true;
   }
 
   // Unordered list
   if (trimmed.startsWith('- ')) {
     const text = trimmed.slice(LIST_ITEM_PREFIX_LENGTH);
-    state.listItems.push(text);
+    state.listItems.push(renderInlineMarkdownParts(text));
     return true;
   }
 
@@ -184,15 +195,15 @@ function handleListLine(state: RenderState, trimmed: string): boolean {
 
 /** Render H2 heading */
 function renderH2(state: RenderState, trimmed: string): void {
-  const text = trimmed.slice(H2_PREFIX_LENGTH).trim();
-  const id = slugifyHeading(text);
+  const raw = trimmed.slice(H2_PREFIX_LENGTH).trim();
+  const { displayText, id } = parseHeadingId(raw);
   state.elements.push(
     <h2
       key={`h2-${id || state.index}`}
       id={id || undefined}
       className='mt-8 scroll-mt-24 text-xl font-semibold tracking-tight text-foreground first:mt-0'
     >
-      {text}
+      {displayText}
     </h2>,
   );
   state.index += 1;
@@ -200,15 +211,15 @@ function renderH2(state: RenderState, trimmed: string): void {
 
 /** Render H3 heading */
 function renderH3(state: RenderState, trimmed: string): void {
-  const text = trimmed.slice(H3_PREFIX_LENGTH).trim();
-  const id = slugifyHeading(text);
+  const raw = trimmed.slice(H3_PREFIX_LENGTH).trim();
+  const { displayText, id } = parseHeadingId(raw);
   state.elements.push(
     <h3
       key={`h3-${id || state.index}`}
       id={id || undefined}
       className='mt-6 scroll-mt-24 text-base font-semibold text-foreground'
     >
-      {text}
+      {displayText}
     </h3>,
   );
   state.index += 1;

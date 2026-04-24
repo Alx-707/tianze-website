@@ -41,6 +41,22 @@ export interface PageMetadata extends ContentMetadata {
   layout?: "default" | "landing" | "docs" | "legal";
   showToc?: boolean;
   lastReviewed?: string;
+  faq?: FaqItem[];
+  heroTitle?: string;
+  heroSubtitle?: string;
+  heroDescription?: string;
+}
+
+export interface FaqItem {
+  id: string;
+  question: string;
+  answer: string;
+}
+
+export interface LegalPageMetadata extends PageMetadata {
+  layout: "legal";
+  showToc: true;
+  lastReviewed: string;
 }
 
 // Content with parsed frontmatter and content

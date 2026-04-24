@@ -1,17 +1,25 @@
-import type { ComponentProps } from "react";
+import { Suspense, type ComponentProps } from "react";
 import type { Metadata } from "next";
 import Image from "next/image";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { generateMetadataForPath, type Locale } from "@/lib/seo-metadata";
+import { generateMetadataForPath } from "@/lib/seo-metadata";
 import { SINGLE_SITE_BENDING_MACHINES_PAGE_EXPRESSION } from "@/config/single-site-page-expression";
 import { siteFacts } from "@/config/site-facts";
+import { JsonLdScript } from "@/components/seo";
 import { FaqSection } from "@/components/sections/faq-section";
 import { Link } from "@/i18n/routing";
 import { generateLocaleStaticParams } from "@/app/[locale]/generate-static-params";
+import { getPageBySlug } from "@/lib/content";
+import {
+  LAYER1_FACTS,
+  extractFaqFromMetadata,
+  interpolateFaqAnswer,
+} from "@/lib/content/mdx-faq";
 import {
   EQUIPMENT_SPECS,
   type EquipmentSpec,
 } from "@/constants/equipment-specs";
+import type { FaqItem, Locale } from "@/types/content.types";
 
 export function generateStaticParams() {
   return generateLocaleStaticParams();
@@ -25,15 +33,17 @@ export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "capabilities" });
+  const page = await getPageBySlug("bending-machines", locale as Locale);
+  const description =
+    page.metadata.seo?.description ?? page.metadata.description;
 
   return generateMetadataForPath({
     locale: locale as Locale,
     pageType: "bendingMachines",
     path: "/capabilities/bending-machines",
     config: {
-      title: t("meta.title"),
-      description: t("meta.description"),
+      title: page.metadata.seo?.title ?? page.metadata.title,
+      ...(description ? { description } : {}),
     },
   });
 }
@@ -74,11 +84,15 @@ function WhyItMattersSection({
 
 function MachineCard({
   machine,
+  locale,
   t,
 }: {
   machine: EquipmentSpec;
+  locale: Locale;
   t: (key: string) => string;
 }) {
+  const highlights = machine.highlights[locale];
+
   return (
     <section className="rounded-lg border border-border p-6 md:p-8">
       <div className="grid gap-8 md:grid-cols-2">
@@ -109,12 +123,12 @@ function MachineCard({
           </dl>
           <div className="mt-4">
             <ul className="flex flex-wrap gap-2">
-              {machine.highlights.map((_, index) => (
+              {highlights.map((highlight) => (
                 <li
-                  key={index}
+                  key={highlight}
                   className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary"
                 >
-                  {t(`equipment.${machine.slug}.highlights.${index}`)}
+                  {highlight}
                 </li>
               ))}
             </ul>
@@ -192,11 +206,17 @@ function CtaSection({
 
 // --- Page component ---
 
-export default async function BendingMachinesPage({ params }: PageProps) {
-  const { locale } = await params;
+async function BendingMachinesContent({ locale }: { locale: string }) {
   setRequestLocale(locale);
 
   const t = await getTranslations({ locale, namespace: "capabilities" });
+  const page = await getPageBySlug("bending-machines", locale as Locale);
+  const faqItems: FaqItem[] = extractFaqFromMetadata(page.metadata).map(
+    (item) => ({
+      ...item,
+      answer: interpolateFaqAnswer(item.answer, LAYER1_FACTS),
+    }),
+  );
 
   const whyCards: WhyCardData[] =
     SINGLE_SITE_BENDING_MACHINES_PAGE_EXPRESSION.whyCardKeys.map((cardKey) => ({
@@ -209,13 +229,29 @@ export default async function BendingMachinesPage({ params }: PageProps) {
       value: getCapabilityStatValue(stat, t),
       label: t(`${stat.translationKey}.label`),
     }));
+  const equipmentSchema = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "PVC Pipe Bending Machines",
+    itemListElement: EQUIPMENT_SPECS.map((spec, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      item: {
+        "@type": "Product",
+        name: t(`equipment.${spec.slug}.name`),
+        description: spec.highlights[locale as Locale].join(", "),
+      },
+    })),
+  };
 
   return (
     <main className="mx-auto max-w-[1080px] px-6 py-8 md:py-12">
+      <JsonLdScript data={equipmentSchema} />
+
       <header className="mb-8 md:mb-12">
-        <h1 className="text-heading mb-4">{t("hero.title")}</h1>
+        <h1 className="text-heading mb-4">{page.metadata.title}</h1>
         <p className="max-w-2xl text-lg text-muted-foreground">
-          {t("hero.subtitle")}
+          {page.metadata.description}
         </p>
       </header>
 
@@ -225,7 +261,12 @@ export default async function BendingMachinesPage({ params }: PageProps) {
         <h2 className="mb-8 text-2xl font-bold">{t("machines.title")}</h2>
         <div className="space-y-8">
           {EQUIPMENT_SPECS.map((machine) => (
-            <MachineCard key={machine.slug} machine={machine} t={t} />
+            <MachineCard
+              key={machine.slug}
+              machine={machine}
+              locale={locale as Locale}
+              t={t}
+            />
           ))}
         </div>
       </section>
@@ -235,10 +276,9 @@ export default async function BendingMachinesPage({ params }: PageProps) {
         stats={stats}
       />
 
-      <FaqSection
-        items={[...SINGLE_SITE_BENDING_MACHINES_PAGE_EXPRESSION.faqItems]}
-        locale={locale as Locale}
-      />
+      <Suspense fallback={null}>
+        <FaqSection faqItems={faqItems} locale={locale as Locale} />
+      </Suspense>
 
       <CtaSection
         heading={t("cta.heading")}
@@ -247,5 +287,31 @@ export default async function BendingMachinesPage({ params }: PageProps) {
         href={SINGLE_SITE_BENDING_MACHINES_PAGE_EXPRESSION.ctaHref}
       />
     </main>
+  );
+}
+
+function BendingMachinesLoadingSkeleton() {
+  return (
+    <main className="mx-auto max-w-[1080px] px-6 py-8 md:py-12">
+      <div className="mb-8 h-10 w-72 animate-pulse rounded bg-muted" />
+      <div className="space-y-4">
+        {Array.from({ length: 6 }, (_, index) => (
+          <div
+            key={index}
+            className="h-4 w-full animate-pulse rounded bg-muted"
+          />
+        ))}
+      </div>
+    </main>
+  );
+}
+
+export default async function BendingMachinesPage({ params }: PageProps) {
+  const { locale } = await params;
+
+  return (
+    <Suspense fallback={<BendingMachinesLoadingSkeleton />}>
+      <BendingMachinesContent locale={locale} />
+    </Suspense>
   );
 }

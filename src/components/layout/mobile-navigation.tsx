@@ -35,6 +35,8 @@ interface MobileNavigationProps {
   openMenuLabel?: string;
   closeMenuLabel?: string;
   languageLabel?: string;
+  siteName?: string;
+  siteDescription?: string;
 }
 
 interface MobileMenuButtonProps extends ComponentProps<"button"> {
@@ -95,16 +97,41 @@ function useCloseMenuOnPathChange(
   }, [isOpen, onClose, pathname]);
 }
 
+function MobileNavigationHeader({
+  siteName,
+  siteDescription,
+}: {
+  siteName: string;
+  siteDescription: string;
+}) {
+  return (
+    <SheetHeader className="text-left">
+      <SheetTitle className="sr-only">{NAVIGATION_ARIA.mobileMenu}</SheetTitle>
+      <div className="text-lg font-semibold" aria-hidden="true">
+        {siteName}
+      </div>
+      <SheetDescription className="text-sm text-muted-foreground">
+        {siteDescription}
+      </SheetDescription>
+    </SheetHeader>
+  );
+}
+
 export function MobileNavigation({
   className,
   initialOpen = false,
   openMenuLabel,
   closeMenuLabel,
   languageLabel = "Language",
+  siteName,
+  siteDescription,
 }: MobileNavigationProps) {
   const t = useTranslations();
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(initialOpen);
+  const resolvedSiteName = siteName ?? t("navigation.siteName");
+  const resolvedSiteDescription =
+    siteDescription ?? t("navigation.siteDescription");
 
   useCloseMenuOnPathChange(pathname, isOpen, () => setIsOpen(false));
 
@@ -147,17 +174,10 @@ export function MobileNavigation({
           data-testid="mobile-menu-content"
           onEscapeKeyDown={() => setIsOpen(false)}
         >
-          <SheetHeader className="text-left">
-            <SheetTitle className="sr-only">
-              {NAVIGATION_ARIA.mobileMenu}
-            </SheetTitle>
-            <div className="text-lg font-semibold" aria-hidden="true">
-              {t("seo.siteName")}
-            </div>
-            <SheetDescription className="text-sm text-muted-foreground">
-              {t("seo.description")}
-            </SheetDescription>
-          </SheetHeader>
+          <MobileNavigationHeader
+            siteName={resolvedSiteName}
+            siteDescription={resolvedSiteDescription}
+          />
           <Separator className="my-4" />
           <nav
             className="flex flex-col space-y-1"

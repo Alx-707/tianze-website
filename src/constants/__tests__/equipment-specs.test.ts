@@ -33,7 +33,8 @@ describe("Feature: Equipment Specs", () => {
 
   it("each machine has highlights", () => {
     for (const machine of EQUIPMENT_SPECS) {
-      expect(machine.highlights.length).toBeGreaterThan(0);
+      expect(machine.highlights.en.length).toBeGreaterThan(0);
+      expect(machine.highlights.zh).toHaveLength(machine.highlights.en.length);
     }
   });
 

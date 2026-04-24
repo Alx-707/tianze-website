@@ -33,10 +33,8 @@ const { mockRouting, mockEnMessages, mockZhMessages, mockGetFormats } =
         about: "About",
         contact: "Contact",
       },
-      seo: {
-        title: "Tianze Pipe",
-        description: "Modern B2B Enterprise Web Platform",
-        siteName: "Tianze Pipe",
+      footer: {
+        description: "Professional PVC conduit manufacturer.",
       },
     },
     mockZhMessages: {
@@ -50,10 +48,8 @@ const { mockRouting, mockEnMessages, mockZhMessages, mockGetFormats } =
         about: "关于",
         contact: "联系",
       },
-      seo: {
-        title: "Tianze Pipe",
-        description: "现代化B2B企业网络平台",
-        siteName: "Tianze Pipe",
+      footer: {
+        description: "专业PVC管道制造商。",
       },
     },
     mockGetFormats: vi.fn(),
@@ -201,8 +197,7 @@ describe("i18n 核心功能单元测试", () => {
         "common.success",
         "navigation.home",
         "navigation.about",
-        "seo.title",
-        "seo.description",
+        "footer.description",
       ];
 
       const validateMessages = (messages: Record<string, unknown>) => {

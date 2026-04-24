@@ -1,222 +1,193 @@
-import React from "react";
+import React, { type PropsWithChildren } from "react";
 import { screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import ContactPage, { generateMetadata } from "@/app/[locale]/contact/page";
 import { renderAsyncPage } from "@/testing/render-async-page";
 
-const mockGetTranslations = vi.hoisted(() => vi.fn());
+const {
+  mockGenerateMetadataForPath,
+  mockGetContactCopy,
+  mockGetMessages,
+  mockGetPageBySlug,
+  mockSetRequestLocale,
+} = vi.hoisted(() => ({
+  mockGenerateMetadataForPath: vi.fn(),
+  mockGetContactCopy: vi.fn(),
+  mockGetMessages: vi.fn(),
+  mockGetPageBySlug: vi.fn(),
+  mockSetRequestLocale: vi.fn(),
+}));
 
 vi.mock("react", async () => {
   const actual = await vi.importActual<typeof React>("react");
+
   return {
     ...actual,
     Suspense: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   };
 });
 
-vi.mock("next-intl/server", () => ({
-  getTranslations: mockGetTranslations,
-  setRequestLocale: vi.fn(),
-}));
-
-vi.mock("next/server", () => ({
-  connection: vi.fn(() => Promise.resolve()),
-}));
-
-vi.mock("next/cache", () => ({
-  cacheLife: () => {
-    // no-op in tests
+const contactPage = {
+  metadata: {
+    title: "Contact Us",
+    description: "Get in touch with Tianze Pipe.",
+    slug: "contact",
+    publishedAt: "2024-01-01",
+    seo: {
+      title: "Contact Tianze Pipe | Get a Quote",
+      description: "Contact our sales team within 24 hours.",
+    },
+    faq: [
+      {
+        id: "moq",
+        question: "What is your MOQ?",
+        answer: "MOQ depends on SKU.",
+      },
+    ],
   },
+  content: "## Get in Touch\n\nMDX contact body.",
+  slug: "contact",
+  filePath: "content/pages/en/contact.mdx",
+};
+
+const contactCopy = {
+  header: {
+    title: "Legacy Contact",
+    description: "Legacy description",
+  },
+  panel: {
+    contact: {
+      title: "Contact Methods",
+      emailLabel: "Email",
+      phoneLabel: "Phone",
+    },
+    response: {
+      title: "Response Time",
+      responseTimeLabel: "Response",
+      responseTimeValue: "Within 24 hours",
+      bestForLabel: "Best for",
+      bestForValue: "Quotes",
+      prepareLabel: "Prepare",
+      prepareValue: "Product specs",
+    },
+    hours: {
+      title: "Business Hours",
+      weekdaysLabel: "Weekdays",
+      saturdayLabel: "Saturday",
+      sundayLabel: "Sunday",
+      closedLabel: "Closed",
+    },
+  },
+};
+
+vi.mock("next-intl", () => ({
+  NextIntlClientProvider: ({ children }: PropsWithChildren) => (
+    <div data-testid="intl-provider">{children}</div>
+  ),
+}));
+
+vi.mock("next-intl/server", () => ({
+  getMessages: mockGetMessages,
+  setRequestLocale: mockSetRequestLocale,
 }));
 
 vi.mock("@/components/contact/contact-form", () => ({
   ContactForm: () => <div data-testid="contact-form">Contact Form</div>,
 }));
 
-vi.mock("@/components/ui/card", () => ({
-  Card: ({
-    children,
-    className,
-    ...props
-  }: React.PropsWithChildren<{
-    className?: string;
-    [key: string]: unknown;
-  }>) => (
-    <div data-testid="card" className={className} {...props}>
-      {children}
-    </div>
-  ),
-}));
-
-vi.mock("@/lib/contact/getContactCopy", () => ({
-  getContactCopy: () =>
-    Promise.resolve({
-      header: {
-        title: "Contact Us",
-        description:
-          "Get in touch with our team for inquiries, support, or partnership opportunities.",
-      },
-      panel: {
-        contact: {
-          title: "Contact Methods",
-          emailLabel: "Email",
-          phoneLabel: "Phone",
-        },
-        hours: {
-          title: "Business Hours",
-          weekdaysLabel: "Mon - Fri",
-          saturdayLabel: "Saturday",
-          sundayLabel: "Sunday",
-          closedLabel: "Closed",
-        },
-        response: {
-          title: "What to expect",
-          responseTimeLabel: "Typical response",
-          responseTimeValue: "Within 24 business hours",
-          bestForLabel: "Best for",
-          bestForValue:
-            "RFQs, product specs, MOQ, samples, and lead-time questions",
-          prepareLabel: "Helpful details",
-          prepareValue:
-            "Share product type, size/standard, quantity, destination market, and timeline",
-        },
-      },
-    }),
-}));
-
-vi.mock("@/lib/load-messages", () => ({
-  loadCriticalMessages: () => Promise.resolve({}),
-  loadDeferredMessages: () => Promise.resolve({}),
-}));
-
-vi.mock("@/lib/i18n/client-messages", () => ({
-  pickMessages: () => ({}),
-}));
-
-vi.mock("@/config/site-facts", () => ({
-  siteFacts: {
-    company: {
-      established: 2018,
-      employees: 60,
-    },
-    stats: {
-      exportCountries: 100,
-    },
-    contact: {
-      email: "hello@example.com",
-      phone: "+1-555-0123",
-      businessHours: { weekdays: "9:00 - 18:00", saturday: "10:00 - 16:00" },
-    },
-  },
-}));
-
-vi.mock("@/config/paths/site-config", () => ({
-  SITE_CONFIG: {
-    name: "Tianze",
-    url: "https://tianze.com",
-    seo: { keywords: [] },
-  },
-}));
-
-vi.mock("@/lib/seo-metadata", () => ({
-  generateMetadataForPath: ({
-    config,
+vi.mock("@/components/sections/faq-section", () => ({
+  FaqSection: ({
+    faqItems,
   }: {
-    config: { title: string; description: string };
-  }) => ({
-    title: config.title,
-    description: config.description,
-  }),
-}));
-
-vi.mock("@/components/sections/faq-accordion", () => ({
-  FaqAccordion: ({
-    items,
-  }: {
-    items: Array<{ key: string; question: string; answer: string }>;
+    faqItems: Array<{ id: string; question: string }>;
   }) => (
-    <section data-testid="faq-accordion">
-      {items.map((item) => (
-        <div key={item.key} data-testid={`faq-item-${item.key}`}>
-          {item.question}
-        </div>
+    <section data-testid="faq-section">
+      {faqItems.map((item) => (
+        <div key={item.id}>{item.question}</div>
       ))}
     </section>
   ),
 }));
 
-vi.mock("next-intl", () => ({
-  NextIntlClientProvider: ({ children }: { children: React.ReactNode }) => (
-    <>{children}</>
+vi.mock("@/lib/content", () => ({
+  getPageBySlug: mockGetPageBySlug,
+}));
+
+vi.mock("@/lib/content/render-legal-content", () => ({
+  renderLegalContent: (content: string) => (
+    <div data-testid="mdx-body">{content}</div>
   ),
 }));
 
-vi.mock("@/app/[locale]/generate-static-params", () => ({
-  generateLocaleStaticParams: () => [{ locale: "en" }, { locale: "zh" }],
+vi.mock("@/lib/contact/getContactCopy", () => ({
+  getContactCopy: mockGetContactCopy,
 }));
 
-describe("ContactPage", () => {
-  const defaultTranslations = {
-    title: "Contact Us",
-    description:
-      "Get in touch with our team for inquiries, support, or partnership opportunities.",
-  } as const;
+vi.mock("@/lib/seo-metadata", () => ({
+  generateMetadataForPath: mockGenerateMetadataForPath,
+}));
 
-  const mockParams = { locale: "en" };
-
+describe("ContactPage MDX migration", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockGetTranslations.mockResolvedValue(
-      (key: string) =>
-        defaultTranslations[key as keyof typeof defaultTranslations] || key,
-    );
+    mockGetPageBySlug.mockResolvedValue(contactPage);
+    mockGetMessages.mockResolvedValue({ contact: {}, apiErrors: {} });
+    mockGetContactCopy.mockResolvedValue(contactCopy);
+    mockGenerateMetadataForPath.mockReturnValue({
+      title: "Contact Tianze Pipe | Get a Quote",
+      description: "Contact our sales team within 24 hours.",
+      other: {},
+    });
   });
 
-  it("renders the current contact page truth", async () => {
-    const page = await ContactPage({ params: Promise.resolve(mockParams) });
-    await renderAsyncPage(page);
-
-    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
-      "Contact Us",
-    );
-    expect(
-      screen.getByText(
-        "Get in touch with our team for inquiries, support, or partnership opportunities.",
-      ),
-    ).toBeInTheDocument();
-    expect(screen.getByTestId("contact-form")).toBeInTheDocument();
-    expect(screen.getAllByTestId("card")).toHaveLength(2);
-    expect(screen.getByTestId("faq-accordion")).toBeInTheDocument();
-    expect(screen.getByText("Contact Methods")).toBeInTheDocument();
-    expect(screen.getByText("Business Hours")).toBeInTheDocument();
-  });
-
-  it("generates stable metadata", async () => {
-    const metadata = await generateMetadata({
-      params: Promise.resolve(mockParams),
+  it("renders hero and body from MDX while keeping the form provider", async () => {
+    const page = await ContactPage({
+      params: Promise.resolve({ locale: "en" }),
     });
 
-    expect(metadata).toHaveProperty("title", "Contact Us");
-    expect(metadata).toHaveProperty(
-      "description",
-      "Get in touch with our team for inquiries, support, or partnership opportunities.",
+    await renderAsyncPage(page as React.JSX.Element);
+
+    expect(await screen.findByRole("heading", { level: 1 })).toHaveTextContent(
+      "Contact Us",
     );
-    expect(metadata).toHaveProperty("other.google", "notranslate");
+    expect(screen.getByTestId("mdx-body")).toHaveTextContent(
+      "MDX contact body.",
+    );
+    expect(screen.getByTestId("intl-provider")).toBeInTheDocument();
+    expect(screen.getByTestId("contact-form")).toBeInTheDocument();
   });
 
-  it("keeps rendering when translation loading fails inside content", async () => {
-    mockGetTranslations.mockRejectedValue(new Error("Translation error"));
+  it("renders FAQ from MDX frontmatter", async () => {
+    const page = await ContactPage({
+      params: Promise.resolve({ locale: "en" }),
+    });
 
-    const page = await ContactPage({ params: Promise.resolve(mockParams) });
+    await renderAsyncPage(page as React.JSX.Element);
 
-    await expect(renderAsyncPage(page)).resolves.toBeDefined();
+    expect(await screen.findByTestId("faq-section")).toHaveTextContent(
+      "What is your MOQ?",
+    );
   });
 
-  it("still rejects when params resolution itself fails", async () => {
-    const invalidParams = Promise.reject(new Error("Params error"));
+  it("uses MDX metadata for SEO", async () => {
+    const metadata = await generateMetadata({
+      params: Promise.resolve({ locale: "en" }),
+    });
 
-    await expect(ContactPage({ params: invalidParams })).rejects.toThrow(
-      "Params error",
-    );
+    expect(mockGetPageBySlug).toHaveBeenCalledWith("contact", "en");
+    expect(mockGenerateMetadataForPath).toHaveBeenCalledWith({
+      locale: "en",
+      pageType: "contact",
+      path: "/contact",
+      config: {
+        title: "Contact Tianze Pipe | Get a Quote",
+        description: "Contact our sales team within 24 hours.",
+      },
+    });
+    expect(metadata).toMatchObject({
+      title: "Contact Tianze Pipe | Get a Quote",
+      description: "Contact our sales team within 24 hours.",
+      other: { google: "notranslate" },
+    });
   });
 });

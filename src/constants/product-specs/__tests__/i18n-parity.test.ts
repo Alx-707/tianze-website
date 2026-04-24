@@ -207,20 +207,14 @@ describe("Feature: Product Translation Key Parity", () => {
           ).toBeDefined();
         }
 
-        // Check equipment highlights
-        for (let i = 0; i < equipment.highlights.length; i++) {
-          const enHighlightKey = `capabilities.equipment.${equipment.slug}.highlights.${i}`;
-          const zhHighlightKey = `capabilities.equipment.${equipment.slug}.highlights.${i}`;
-
-          expect(
-            getNestedValue(enDeferred, enHighlightKey),
-            `missing en: ${enHighlightKey}`,
-          ).toBeDefined();
-          expect(
-            getNestedValue(zhDeferred, zhHighlightKey),
-            `missing zh: ${zhHighlightKey}`,
-          ).toBeDefined();
-        }
+        expect(
+          equipment.highlights.en,
+          `${equipment.slug} missing English highlights`,
+        ).not.toHaveLength(0);
+        expect(
+          equipment.highlights.zh,
+          `${equipment.slug} highlights must keep en/zh parity`,
+        ).toHaveLength(equipment.highlights.en.length);
       }
     });
   });

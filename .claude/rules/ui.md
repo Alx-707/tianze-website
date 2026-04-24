@@ -9,8 +9,7 @@ paths:
 
 ## Before Creating Components
 
-1. Check `docs/component-registry.md` — an existing component may already solve the need
-2. If creating new, update the registry after
+Check `src/components/` subdirectories (`ui/`, `blocks/`, `sections/`, `forms/`, `products/`, `layout/`, `contact/`, `trust/`) for existing components before creating new ones.
 
 ## Design Tokens
 

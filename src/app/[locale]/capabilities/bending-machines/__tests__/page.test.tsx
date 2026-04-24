@@ -1,8 +1,18 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { renderAsyncPage } from "@/testing/render-async-page";
 
 const mockGetTranslations = vi.fn();
+
+vi.mock("react", async () => {
+  const actual = await vi.importActual<typeof React>("react");
+
+  return {
+    ...actual,
+    Suspense: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+});
 
 vi.mock("next-intl/server", () => ({
   getTranslations: mockGetTranslations,
@@ -62,18 +72,18 @@ describe("Feature: Bending Machines Capability Page", () => {
     const page = await Page({
       params: Promise.resolve({ locale }),
     });
-    return render(page);
+    return renderAsyncPage(page as React.JSX.Element);
   }
 
   it("renders the hero section with title", async () => {
     await renderPage();
-    const heading = screen.getByRole("heading", { level: 1 });
-    expect(heading).toHaveTextContent("hero.title");
+    const heading = await screen.findByRole("heading", { level: 1 });
+    expect(heading).toHaveTextContent("PVC Pipe Bending Machines");
   });
 
   it("renders value proposition cards", async () => {
     await renderPage();
-    expect(screen.getByText("why.card1.title")).toBeInTheDocument();
+    expect(await screen.findByText("why.card1.title")).toBeInTheDocument();
     expect(screen.getByText("why.card2.title")).toBeInTheDocument();
     expect(screen.getByText("why.card3.title")).toBeInTheDocument();
   });
@@ -81,7 +91,7 @@ describe("Feature: Bending Machines Capability Page", () => {
   it("renders specs for both machines", async () => {
     await renderPage();
     expect(
-      screen.getByText("equipment.full-auto-bending-machine.name"),
+      await screen.findByText("equipment.full-auto-bending-machine.name"),
     ).toBeInTheDocument();
     expect(
       screen.getByText("equipment.semi-auto-bending-machine.name"),
@@ -90,14 +100,14 @@ describe("Feature: Bending Machines Capability Page", () => {
 
   it("renders production capability numbers", async () => {
     await renderPage();
-    expect(screen.getByText("50,000+")).toBeInTheDocument();
+    expect(await screen.findByText("50,000+")).toBeInTheDocument();
     expect(screen.getByText("20+")).toBeInTheDocument();
     expect(screen.getByText("10+")).toBeInTheDocument();
   });
 
   it("CTA links to /contact", async () => {
     await renderPage();
-    const ctaLink = screen.getByRole("link", { name: /cta\.button/i });
+    const ctaLink = await screen.findByRole("link", { name: /cta\.button/i });
     expect(ctaLink).toHaveAttribute("href", "/contact");
   });
 

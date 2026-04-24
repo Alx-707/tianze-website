@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import { getTranslations } from "next-intl/server";
 import { generateMetadataForPath, type Locale } from "@/lib/seo-metadata";
 import { GridFrame } from "@/components/grid";
 import { HeroSection } from "@/components/sections/hero-section";
@@ -64,10 +65,15 @@ export async function generateMetadata({
   params,
 }: HomePageProps): Promise<Metadata> {
   const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "home" });
+
   return generateMetadataForPath({
     locale: locale as Locale,
     pageType: "home",
     path: "",
+    config: {
+      description: t("hero.subtitle"),
+    },
   });
 }
 
