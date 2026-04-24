@@ -12,19 +12,22 @@ import { ScenariosSection } from "@/components/sections/scenarios-section";
 import { QualitySection } from "@/components/sections/quality-section";
 import { FinalCTA } from "@/components/sections/final-cta";
 import {
+  generateLocaleStaticParams,
+  type LocaleParam,
+} from "@/app/[locale]/generate-static-params";
+import {
   SINGLE_SITE_HOME_GRID_SECTION_ORDER,
   SINGLE_SITE_HOME_TRAILING_SECTION_ORDER,
   type SingleSiteHomeGridSectionId,
   type SingleSiteHomeTrailingSectionId,
 } from "@/config/single-site-page-expression";
-import { routing } from "@/i18n/routing";
 
 export function generateStaticParams() {
-  return routing.locales.map((locale) => ({ locale }));
+  return generateLocaleStaticParams();
 }
 
 interface HomePageProps {
-  params: Promise<{ locale: "en" | "zh" }>;
+  params: Promise<LocaleParam>;
 }
 
 function renderHomeGridSection(

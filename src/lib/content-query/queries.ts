@@ -2,6 +2,7 @@
  * 内容查询函数
  */
 
+import { cache } from "react";
 import path from "path";
 import type {
   BlogPost,
@@ -77,20 +78,25 @@ export async function getContentBySlug<
 /**
  * Get blog post by slug
  */
-export function getPostBySlug(
-  slug: string,
-  locale?: Locale,
-): Promise<BlogPost> {
-  return getContentBySlug<BlogPostMetadata>(
-    slug,
-    "posts",
-    locale,
-  ) as Promise<BlogPost>;
-}
+export const getPostBySlug = cache(
+  (slug: string, locale?: Locale): Promise<BlogPost> => {
+    return getContentBySlug<BlogPostMetadata>(
+      slug,
+      "posts",
+      locale,
+    ) as Promise<BlogPost>;
+  },
+);
 
 /**
  * Get page by slug
  */
-export function getPageBySlug(slug: string, locale?: Locale): Promise<Page> {
-  return getContentBySlug<PageMetadata>(slug, "pages", locale) as Promise<Page>;
-}
+export const getPageBySlug = cache(
+  (slug: string, locale?: Locale): Promise<Page> => {
+    return getContentBySlug<PageMetadata>(
+      slug,
+      "pages",
+      locale,
+    ) as Promise<Page>;
+  },
+);
