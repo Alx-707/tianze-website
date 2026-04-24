@@ -12,7 +12,7 @@ const BOLD_WRAPPER_LENGTH = 2;
 const H2_PREFIX_LENGTH = 3;
 const H3_PREFIX_LENGTH = 4;
 const LIST_ITEM_PREFIX_LENGTH = 2;
-const EXPLICIT_ID_PATTERN = /\s*\{#([a-z0-9-]+)\}\s*$/;
+const EXPLICIT_ID_PATTERN = /\s*\\?\{#([a-z0-9-]+)\\?\}\s*$/;
 
 export function slugifyHeading(text: string): string {
   const trimmed = text.trim();

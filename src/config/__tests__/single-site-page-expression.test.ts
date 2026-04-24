@@ -20,8 +20,6 @@ import {
   SINGLE_SITE_MARKET_FAQ_ITEMS,
   SINGLE_SITE_OEM_PAGE_EXPRESSION,
   SINGLE_SITE_PRODUCTS_PAGE_EXPRESSION,
-  SINGLE_SITE_PRIVACY_SECTION_KEYS,
-  SINGLE_SITE_TERMS_SECTION_KEYS,
   getSingleSiteContactPageFallbackCopy,
 } from "@/config/single-site-page-expression";
 import { SINGLE_SITE_KEY } from "@/config/single-site";
@@ -135,34 +133,6 @@ describe("single-site-page-expression", () => {
       "indoorOutdoor",
       "solarDataCenter",
       "corrosion",
-    ]);
-    expect(SINGLE_SITE_PRIVACY_SECTION_KEYS).toEqual([
-      "introduction",
-      "informationCollected",
-      "howWeUse",
-      "sharing",
-      "security",
-      "retention",
-      "rights",
-      "children",
-      "changes",
-      "contact",
-    ]);
-    expect(SINGLE_SITE_TERMS_SECTION_KEYS).toEqual([
-      "introduction",
-      "acceptance",
-      "services",
-      "orders",
-      "payment",
-      "shipping",
-      "warranty",
-      "liability",
-      "ip",
-      "confidentiality",
-      "termination",
-      "governing",
-      "disputes",
-      "contact",
     ]);
   });
 

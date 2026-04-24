@@ -6,7 +6,7 @@ import { SINGLE_SITE_KEY } from "@/config/single-site";
  *
  * Keep reusable page-expression inputs here:
  * - FAQ item keys
- * - section keys / card order / display mapping
+ * - card order / display mapping
  * - CTA targets
  * - supported standards / scope keys / process-step counts
  * - fallback copy
@@ -61,36 +61,6 @@ export const SINGLE_SITE_CONTACT_FAQ_ITEMS = [
   "payment",
   "samples",
   "oem",
-] as const;
-
-export const SINGLE_SITE_PRIVACY_SECTION_KEYS = [
-  "introduction",
-  "informationCollected",
-  "howWeUse",
-  "sharing",
-  "security",
-  "retention",
-  "rights",
-  "children",
-  "changes",
-  "contact",
-] as const;
-
-export const SINGLE_SITE_TERMS_SECTION_KEYS = [
-  "introduction",
-  "acceptance",
-  "services",
-  "orders",
-  "payment",
-  "shipping",
-  "warranty",
-  "liability",
-  "ip",
-  "confidentiality",
-  "termination",
-  "governing",
-  "disputes",
-  "contact",
 ] as const;
 
 export const SINGLE_SITE_CONTACT_PAGE_FALLBACK = {

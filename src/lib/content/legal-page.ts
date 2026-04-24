@@ -10,7 +10,7 @@ interface HeadingItem {
 
 const H2_PREFIX = "## ";
 const H3_PREFIX = "### ";
-const EXPLICIT_ID_PATTERN = /\s*\{#([a-z0-9-]+)\}\s*$/;
+const EXPLICIT_ID_PATTERN = /\s*\\?\{#([a-z0-9-]+)\\?\}\s*$/;
 
 function parseHeading(raw: string): { text: string; id: string } {
   const match = EXPLICIT_ID_PATTERN.exec(raw);
