@@ -2,14 +2,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 // Import after mocks
 import {
   generateArticleSchema,
-  generateBreadcrumbSchema,
-  generateFAQSchema,
   generateJSONLD,
   generateLocalBusinessSchema,
   generateLocalizedStructuredData,
   generateProductSchema,
   generateStructuredData,
 } from "../structured-data";
+import * as structuredDataPublicApi from "../structured-data";
 
 // 测试常量定义
 const TEST_COUNTS = {
@@ -115,6 +114,13 @@ describe("Structured Data Generation", () => {
     vi.restoreAllMocks();
   });
 
+  describe("public structured-data API", () => {
+    it("does not expose legacy FAQ or breadcrumb schema aliases", () => {
+      expect("generateFAQSchema" in structuredDataPublicApi).toBe(false);
+      expect("generateBreadcrumbSchema" in structuredDataPublicApi).toBe(false);
+    });
+  });
+
   describe("generateLocalizedStructuredData - Organization", () => {
     it("should generate valid organization schema", async () => {
       const schema = await generateLocalizedStructuredData(
@@ -171,49 +177,6 @@ describe("Structured Data Generation", () => {
         inLanguage: ["en", "zh"],
       });
       expect(schema).toHaveProperty("potentialAction");
-    });
-  });
-
-  describe("generateBreadcrumbSchema", () => {
-    it("should generate breadcrumb schema for nested pages", async () => {
-      const breadcrumbs = [
-        { name: "Home", url: "https://example.com/" },
-        { name: "About", url: "https://example.com/about" },
-        { name: "Contact", url: "https://example.com/contact" },
-      ];
-
-      const schema = await generateBreadcrumbSchema(breadcrumbs, "en");
-
-      expect(schema).toMatchObject({
-        "@context": "https://schema.org",
-        "@type": "BreadcrumbList",
-        itemListElement: [
-          {
-            "@type": "ListItem",
-            position: 1,
-            name: "Home",
-            item: "https://example.com/",
-          },
-          {
-            "@type": "ListItem",
-            position: 2,
-            name: "About",
-            item: "https://example.com/about",
-          },
-          {
-            "@type": "ListItem",
-            position: 3,
-            name: "Contact",
-            item: "https://example.com/contact",
-          },
-        ],
-      });
-    });
-
-    it("should handle empty breadcrumbs", async () => {
-      const schema = await generateBreadcrumbSchema([], "en");
-
-      expect(schema.itemListElement).toEqual([]);
     });
   });
 
@@ -347,46 +310,6 @@ describe("Structured Data Generation", () => {
         },
         sku: "FREE-001",
         offers: undefined, // This should cover the undefined case on line 170
-      });
-    });
-  });
-
-  describe("generateFAQSchema", () => {
-    it("should generate valid FAQ schema", async () => {
-      const faqData = [
-        {
-          question: "What is this platform?",
-          answer: "A modern enterprise platform",
-        },
-        {
-          question: "How does it work?",
-          answer: "Through advanced technology",
-        },
-      ];
-
-      const schema = await generateFAQSchema(faqData, "en");
-
-      expect(schema).toEqual({
-        "@context": "https://schema.org",
-        "@type": "FAQPage",
-        mainEntity: [
-          {
-            "@type": "Question",
-            name: "What is this platform?",
-            acceptedAnswer: {
-              "@type": "Answer",
-              text: "A modern enterprise platform",
-            },
-          },
-          {
-            "@type": "Question",
-            name: "How does it work?",
-            acceptedAnswer: {
-              "@type": "Answer",
-              text: "Through advanced technology",
-            },
-          },
-        ],
       });
     });
   });

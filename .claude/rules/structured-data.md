@@ -17,3 +17,7 @@ Pages and component shells may render `<JsonLdScript>`, but they must not hand-r
 FAQ content comes from page-owned MDX frontmatter whenever the page has an MDX source. Convert FAQ items to JSON-LD with `generateFaqSchemaFromItems()` from `src/lib/content/mdx-faq.ts`.
 
 Do not add a second FAQ schema helper for the same item shape.
+
+## Legacy API cleanup
+
+Do not reintroduce `generateFAQSchema()` or `generateBreadcrumbSchema()` from `src/lib/structured-data.ts`. FAQ uses `generateFaqSchemaFromItems()`, and breadcrumbs use `buildBreadcrumbListSchema()`.

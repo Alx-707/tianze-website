@@ -52,14 +52,6 @@ export function createArticleStructuredData(
   return generateLocalizedStructuredData(locale, "Article", article);
 }
 
-// 兼容测试所需的便捷导出：根据测试用例命名
-export function generateBreadcrumbSchema(
-  breadcrumbs: Array<{ name: string; url: string }>,
-  locale: Locale,
-) {
-  return createBreadcrumbStructuredData(locale, breadcrumbs);
-}
-
 export function generateArticleSchema(
   article: {
     title: string;
@@ -145,25 +137,6 @@ export function generateProductSchema(
     "Product",
     payload as ProductData,
   );
-}
-
-export function generateFAQSchema(
-  faq: Array<{ question: string; answer: string }>,
-  _locale: Locale,
-) {
-  // 直接构建 FAQPage 结构以满足测试断言
-  return {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: faq.map((item) => ({
-      "@type": "Question",
-      name: item.question,
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: item.answer,
-      },
-    })),
-  } as Record<string, unknown>;
 }
 
 export function generateLocalBusinessSchema(

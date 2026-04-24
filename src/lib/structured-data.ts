@@ -94,8 +94,6 @@ export {
   createArticleStructuredData,
   createBreadcrumbStructuredData,
   generateArticleSchema,
-  generateBreadcrumbSchema,
-  generateFAQSchema,
   generateLocalBusinessSchema,
   generateProductSchema,
 } from "@/lib/structured-data-helpers";
