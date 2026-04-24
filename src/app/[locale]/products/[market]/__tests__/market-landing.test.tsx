@@ -82,6 +82,20 @@ vi.mock("@/components/sections/faq-section", () => ({
   FaqSection: () => <section data-testid="faq-section">FAQ</section>,
 }));
 
+vi.mock("@/lib/content", () => ({
+  getPageBySlug: vi.fn(async () => ({
+    metadata: {
+      faq: [
+        {
+          id: "market-faq",
+          question: "Market FAQ?",
+          answer: "Market FAQ answer.",
+        },
+      ],
+    },
+  })),
+}));
+
 vi.mock("@/components/products/product-specs", () => ({
   ProductSpecs: ({ title }: { title?: string }) => (
     <div data-testid="product-specs">{title}</div>

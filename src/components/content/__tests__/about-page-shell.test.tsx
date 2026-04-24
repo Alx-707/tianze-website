@@ -44,6 +44,38 @@ const baseMetadata: PageMetadata = {
   heroTitle: "Our Story",
   heroSubtitle: "Pipe Bending Experts",
   heroDescription: "Factory-owned production since 2018.",
+  aboutSections: {
+    valuesTitle: "Manufacturing Excellence",
+    values: {
+      quality: {
+        title: "Precision Engineering",
+        description: "Consistent production control.",
+      },
+      innovation: {
+        title: "In-House R&D",
+        description: "Factory-owned process development.",
+      },
+      service: {
+        title: "Technical Support",
+        description: "Buyer support from sample to export.",
+      },
+      integrity: {
+        title: "Certified Quality",
+        description: "Traceable batches and standards matching.",
+      },
+    },
+    statLabels: {
+      yearsExperience: "Years Experience",
+      countriesServed: "Export Countries",
+      happyClients: "Team Members",
+      productsDelivered: "Factory Area (Acres)",
+    },
+    cta: {
+      title: "Partner With Pipe Bending Experts",
+      description: "Discuss your project with our team.",
+      button: "Request Quote",
+    },
+  },
   faq: [
     {
       id: "manufacturer",

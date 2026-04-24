@@ -9,23 +9,22 @@ import {
   isValidMarketSlug,
   type ProductFamilyDefinition,
 } from "@/constants/product-catalog";
-import {
-  SINGLE_SITE_MARKET_FAQ_ITEMS,
-  SINGLE_SITE_PRODUCTS_PAGE_EXPRESSION,
-} from "@/config/single-site-page-expression";
+import { SINGLE_SITE_PRODUCTS_PAGE_EXPRESSION } from "@/config/single-site-page-expression";
 import { NORTH_AMERICA_SPECS } from "@/constants/product-specs/north-america";
 import { AUSTRALIA_NZ_SPECS } from "@/constants/product-specs/australia-new-zealand";
 import { MEXICO_SPECS } from "@/constants/product-specs/mexico";
 import { EUROPE_SPECS } from "@/constants/product-specs/europe";
 import { PNEUMATIC_SPECS } from "@/constants/product-specs/pneumatic-tube-systems";
 import type { MarketSpecs, SpecGroup } from "@/constants/product-specs/types";
-import type { Locale } from "@/types/content.types";
+import type { FaqItem, Locale } from "@/types/content.types";
 import {
   getColumnTranslationKey,
   getGroupLabelTranslationKey,
   getRowValueTranslationKey,
 } from "@/lib/spec-table-translator";
 import { SITE_CONFIG } from "@/config/paths";
+import { getPageBySlug } from "@/lib/content";
+import { extractFaqFromMetadata } from "@/lib/content/mdx-faq";
 import { generateMetadataForPath } from "@/lib/seo-metadata";
 import { JsonLdScript } from "@/components/seo";
 import { FaqSection } from "@/components/sections/faq-section";
@@ -52,6 +51,11 @@ const SPECS_BY_MARKET: Record<string, MarketSpecs> = {
 
 function getMarketSpecs(marketSlug: string): MarketSpecs | undefined {
   return SPECS_BY_MARKET[marketSlug];
+}
+
+async function getProductMarketFaqItems(locale: Locale): Promise<FaqItem[]> {
+  const faqPage = await getPageBySlug("product-market", locale);
+  return extractFaqFromMetadata(faqPage.metadata);
 }
 
 // --- Static params ---
@@ -313,6 +317,7 @@ export default async function MarketPage({ params }: MarketPageProps) {
   const market = getMarketBySlug(marketSlug)!;
   const families = getFamiliesForMarket(marketSlug);
   const marketSpecs = getMarketSpecs(marketSlug);
+  const faqItems = await getProductMarketFaqItems(locale as Locale);
   const t = await getTranslations({ locale, namespace: "catalog" });
   const marketLabel = t(`markets.${marketSlug}.label`);
   const marketDescription = t(`markets.${marketSlug}.description`);
@@ -422,10 +427,7 @@ export default async function MarketPage({ params }: MarketPageProps) {
         />
       )}
 
-      <FaqSection
-        items={[...SINGLE_SITE_MARKET_FAQ_ITEMS]}
-        locale={locale as Locale}
-      />
+      <FaqSection faqItems={faqItems} locale={locale as Locale} />
 
       <CtaSection
         heading={t("market.cta.heading", { marketLabel })}

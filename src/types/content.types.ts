@@ -45,12 +45,24 @@ export interface PageMetadata extends ContentMetadata {
   heroTitle?: string;
   heroSubtitle?: string;
   heroDescription?: string;
+  aboutSections?: AboutPageSections;
 }
 
 export interface FaqItem {
   id: string;
   question: string;
   answer: string;
+}
+
+export interface AboutPageSections {
+  valuesTitle: string;
+  values: Record<string, { title: string; description: string }>;
+  statLabels: Record<string, string>;
+  cta: {
+    title: string;
+    description: string;
+    button: string;
+  };
 }
 
 export interface LegalPageMetadata extends PageMetadata {
