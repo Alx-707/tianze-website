@@ -1,8 +1,8 @@
 import { getPageBySlug } from "@/lib/content";
-import { slugifyHeading } from "@/lib/content/render-legal-content";
+import { parseHeadingId } from "@/lib/content/render-legal-content";
 import type { LegalPageMetadata, Locale } from "@/types/content.types";
 
-interface HeadingItem {
+export interface HeadingItem {
   level: 2 | 3;
   text: string;
   id: string;
@@ -10,15 +10,6 @@ interface HeadingItem {
 
 const H2_PREFIX = "## ";
 const H3_PREFIX = "### ";
-const EXPLICIT_ID_PATTERN = /\s*\\?\{#([a-z0-9-]+)\\?\}\s*$/;
-
-function parseHeading(raw: string): { text: string; id: string } {
-  const match = EXPLICIT_ID_PATTERN.exec(raw);
-  if (match) {
-    return { text: raw.slice(0, match.index).trim(), id: match[1] ?? "" };
-  }
-  return { text: raw, id: slugifyHeading(raw) };
-}
 
 export function extractHeadingsFromContent(content: string): HeadingItem[] {
   const headings: HeadingItem[] = [];
@@ -26,10 +17,10 @@ export function extractHeadingsFromContent(content: string): HeadingItem[] {
   for (const line of content.split("\n")) {
     const trimmed = line.trim();
     if (trimmed.startsWith(H3_PREFIX)) {
-      const { text, id } = parseHeading(trimmed.slice(H3_PREFIX.length).trim());
+      const { displayText: text, id } = parseHeadingId(trimmed.slice(H3_PREFIX.length).trim());
       headings.push({ level: 3, text, id });
     } else if (trimmed.startsWith(H2_PREFIX)) {
-      const { text, id } = parseHeading(trimmed.slice(H2_PREFIX.length).trim());
+      const { displayText: text, id } = parseHeadingId(trimmed.slice(H2_PREFIX.length).trim());
       headings.push({ level: 2, text, id });
     }
   }

@@ -1,14 +1,9 @@
 import type { ReactNode } from "react";
 import { getTranslations } from "next-intl/server";
 import { JsonLdScript } from "@/components/seo";
+import type { HeadingItem } from "@/lib/content/legal-page";
 import { renderLegalContent } from "@/lib/content/render-legal-content";
 import type { LegalPageMetadata } from "@/types/content.types";
-
-interface HeadingItem {
-  level: 2 | 3;
-  text: string;
-  id: string;
-}
 
 interface LegalPageShellProps {
   metadata: LegalPageMetadata;

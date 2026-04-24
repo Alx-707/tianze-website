@@ -12,7 +12,7 @@ const BOLD_WRAPPER_LENGTH = 2;
 const H2_PREFIX_LENGTH = 3;
 const H3_PREFIX_LENGTH = 4;
 const LIST_ITEM_PREFIX_LENGTH = 2;
-const EXPLICIT_ID_PATTERN = /\s*\\?\{#([a-z0-9-]+)\\?\}\s*$/;
+export const EXPLICIT_ID_PATTERN = /\s*\\?\{#([a-z0-9-]+)\\?\}\s*$/;
 
 export function slugifyHeading(text: string): string {
   const trimmed = text.trim();
@@ -26,7 +26,7 @@ export function slugifyHeading(text: string): string {
     .replace(/\s+/g, '-');
 }
 
-function parseHeadingId(text: string): { displayText: string; id: string } {
+export function parseHeadingId(text: string): { displayText: string; id: string } {
   const match = EXPLICIT_ID_PATTERN.exec(text);
   if (match) {
     return { displayText: text.slice(0, match.index).trim(), id: match[1] ?? "" };

@@ -13,24 +13,15 @@ import { siteFacts } from "@/config/site-facts";
 import { COUNT_TWO } from "@/constants";
 import { getPageBySlug } from "@/lib/content";
 import {
+  LAYER1_FACTS,
   extractFaqFromMetadata,
   interpolateFaqAnswer,
 } from "@/lib/content/mdx-faq";
 import { renderLegalContent } from "@/lib/content/render-legal-content";
 import { getContactCopy } from "@/lib/contact/getContactCopy";
 import { pickMessages } from "@/lib/i18n/client-messages";
-import {
-  generateMetadataForPath,
-  type Locale as SeoLocale,
-} from "@/lib/seo-metadata";
+import { generateMetadataForPath } from "@/lib/seo-metadata";
 import type { FaqItem, Locale } from "@/types/content.types";
-
-const LAYER1_FACTS: Record<string, string | number> = {
-  companyName: siteFacts.company.name,
-  established: siteFacts.company.established,
-  exportCountries: siteFacts.stats.exportCountries,
-  employees: siteFacts.company.employees,
-};
 
 interface ContactPageProps {
   params: Promise<LocaleParam>;
@@ -49,7 +40,7 @@ export async function generateMetadata({
     page.metadata.seo?.description ?? page.metadata.description;
 
   const metadata = generateMetadataForPath({
-    locale: locale as SeoLocale,
+    locale: locale as Locale,
     pageType: "contact",
     path: "/contact",
     config: {
@@ -194,15 +185,17 @@ function ContactFormSkeleton() {
 async function ContactContent({ locale }: { locale: string }) {
   setRequestLocale(locale);
 
-  const page = await getPageBySlug("contact", locale as Locale);
-  const messages = await getMessages({ locale });
-  const copy = await getContactCopy(locale as Locale);
-  const faqItems: FaqItem[] = extractFaqFromMetadata(
-    page.metadata as unknown as Record<string, unknown>,
-  ).map((item) => ({
-    ...item,
-    answer: interpolateFaqAnswer(item.answer, LAYER1_FACTS),
-  }));
+  const [page, messages, copy] = await Promise.all([
+    getPageBySlug("contact", locale as Locale),
+    getMessages({ locale }),
+    getContactCopy(locale as Locale),
+  ]);
+  const faqItems: FaqItem[] = extractFaqFromMetadata(page.metadata).map(
+    (item) => ({
+      ...item,
+      answer: interpolateFaqAnswer(item.answer, LAYER1_FACTS),
+    }),
+  );
   const contactClientMessages = pickMessages(messages, [
     "contact",
     "apiErrors",

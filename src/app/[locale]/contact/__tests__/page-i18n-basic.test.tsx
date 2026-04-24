@@ -7,14 +7,8 @@ describe("Contact page MDX i18n basics", () => {
     const en = await getPageBySlug("contact", "en");
     const zh = await getPageBySlug("contact", "zh");
 
-    expect(
-      extractFaqFromMetadata(
-        en.metadata as unknown as Record<string, unknown>,
-      ).map((item) => item.id),
-    ).toEqual(
-      extractFaqFromMetadata(
-        zh.metadata as unknown as Record<string, unknown>,
-      ).map((item) => item.id),
+    expect(extractFaqFromMetadata(en.metadata).map((item) => item.id)).toEqual(
+      extractFaqFromMetadata(zh.metadata).map((item) => item.id),
     );
   });
 

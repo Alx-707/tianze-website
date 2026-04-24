@@ -72,6 +72,14 @@ function createSitemapEntry(
 
 // Generate static page entries for all locales
 async function generateStaticPageEntries(): Promise<MetadataRoute.Sitemap> {
+  const mdxPages = SINGLE_SITE_PUBLIC_STATIC_PAGES.filter(isMdxDrivenPage);
+  const mdxDates = new Map<string, Date>();
+  await Promise.all(
+    mdxPages.map(async (page) => {
+      mdxDates.set(page, await getMdxPageLastModified(page));
+    }),
+  );
+
   const entries: MetadataRoute.Sitemap = [];
 
   for (const locale of routing.locales) {
@@ -79,9 +87,9 @@ async function generateStaticPageEntries(): Promise<MetadataRoute.Sitemap> {
       const config = getPageConfig(page);
       const url = `${BASE_URL}/${locale}${page}`;
       const alternates = buildAlternateLanguages(page);
-      const lastModified = isMdxDrivenPage(page)
-        ? await getMdxPageLastModified(page)
-        : getStaticPageLastModified(page, STATIC_PAGE_LASTMOD);
+      const lastModified =
+        mdxDates.get(page) ??
+        getStaticPageLastModified(page, STATIC_PAGE_LASTMOD);
 
       entries.push(
         createSitemapEntry({ url, lastModified, config, alternates }),

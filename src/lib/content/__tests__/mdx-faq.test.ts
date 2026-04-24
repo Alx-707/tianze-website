@@ -70,10 +70,10 @@ describe("FAQ locale parity", () => {
       const zhPage = await getPageBySlug(slug, "zh");
 
       const enIds = extractFaqFromMetadata(
-        enPage.metadata as unknown as Record<string, unknown>,
+        enPage.metadata ,
       ).map((item) => item.id);
       const zhIds = extractFaqFromMetadata(
-        zhPage.metadata as unknown as Record<string, unknown>,
+        zhPage.metadata ,
       ).map((item) => item.id);
 
       expect(enIds).toEqual(zhIds);

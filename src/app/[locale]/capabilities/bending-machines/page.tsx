@@ -2,10 +2,7 @@ import { Suspense, type ComponentProps } from "react";
 import type { Metadata } from "next";
 import Image from "next/image";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import {
-  generateMetadataForPath,
-  type Locale as SeoLocale,
-} from "@/lib/seo-metadata";
+import { generateMetadataForPath } from "@/lib/seo-metadata";
 import { SINGLE_SITE_BENDING_MACHINES_PAGE_EXPRESSION } from "@/config/single-site-page-expression";
 import { siteFacts } from "@/config/site-facts";
 import { JsonLdScript } from "@/components/seo";
@@ -14,6 +11,7 @@ import { Link } from "@/i18n/routing";
 import { generateLocaleStaticParams } from "@/app/[locale]/generate-static-params";
 import { getPageBySlug } from "@/lib/content";
 import {
+  LAYER1_FACTS,
   extractFaqFromMetadata,
   interpolateFaqAnswer,
 } from "@/lib/content/mdx-faq";
@@ -22,13 +20,6 @@ import {
   type EquipmentSpec,
 } from "@/constants/equipment-specs";
 import type { FaqItem, Locale } from "@/types/content.types";
-
-const LAYER1_FACTS: Record<string, string | number> = {
-  companyName: siteFacts.company.name,
-  established: siteFacts.company.established,
-  exportCountries: siteFacts.stats.exportCountries,
-  employees: siteFacts.company.employees,
-};
 
 export function generateStaticParams() {
   return generateLocaleStaticParams();
@@ -47,7 +38,7 @@ export async function generateMetadata({
     page.metadata.seo?.description ?? page.metadata.description;
 
   return generateMetadataForPath({
-    locale: locale as SeoLocale,
+    locale: locale as Locale,
     pageType: "bendingMachines",
     path: "/capabilities/bending-machines",
     config: {
@@ -220,12 +211,12 @@ async function BendingMachinesContent({ locale }: { locale: string }) {
 
   const t = await getTranslations({ locale, namespace: "capabilities" });
   const page = await getPageBySlug("bending-machines", locale as Locale);
-  const faqItems: FaqItem[] = extractFaqFromMetadata(
-    page.metadata as unknown as Record<string, unknown>,
-  ).map((item) => ({
-    ...item,
-    answer: interpolateFaqAnswer(item.answer, LAYER1_FACTS),
-  }));
+  const faqItems: FaqItem[] = extractFaqFromMetadata(page.metadata).map(
+    (item) => ({
+      ...item,
+      answer: interpolateFaqAnswer(item.answer, LAYER1_FACTS),
+    }),
+  );
 
   const whyCards: WhyCardData[] =
     SINGLE_SITE_BENDING_MACHINES_PAGE_EXPRESSION.whyCardKeys.map((cardKey) => ({

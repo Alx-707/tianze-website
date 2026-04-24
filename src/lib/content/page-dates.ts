@@ -1,6 +1,7 @@
 import type { Locale } from "@/types/content.types";
 import { routing } from "@/i18n/routing";
 import { getPageBySlug } from "@/lib/content";
+import { logger } from "@/lib/logger";
 
 const MDX_PAGE_SLUGS: Record<string, string> = {
   "/about": "about",
@@ -21,20 +22,20 @@ export async function getMdxPageLastModified(path: string): Promise<Date> {
     throw new Error(`No MDX slug mapping for path: ${path}`);
   }
 
-  let latest = new Date(0);
-
-  for (const locale of routing.locales) {
-    try {
-      const page = await getPageBySlug(slug, locale as Locale);
-      const dateStr = page.metadata.updatedAt ?? page.metadata.publishedAt;
-      const date = new Date(dateStr);
-      if (date > latest) {
-        latest = date;
+  const results = await Promise.all(
+    routing.locales.map(async (locale) => {
+      try {
+        const page = await getPageBySlug(slug, locale as Locale);
+        const dateStr = page.metadata.updatedAt ?? page.metadata.publishedAt;
+        return new Date(dateStr);
+      } catch (error) {
+        logger.warn("MDX page missing for locale", { slug, locale, error });
+        return new Date(0);
       }
-    } catch {
-      // A missing locale is allowed; all locales missing is a build error below.
-    }
-  }
+    }),
+  );
+
+  const latest = results.reduce((a, b) => (a > b ? a : b), new Date(0));
 
   if (latest.getTime() === 0) {
     throw new Error(`No content found for slug: ${slug}`);

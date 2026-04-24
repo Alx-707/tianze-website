@@ -1,7 +1,15 @@
+import { siteFacts } from "@/config/site-facts";
 import type { FaqItem } from "@/types/content.types";
 
+export const LAYER1_FACTS: Record<string, string | number> = {
+  companyName: siteFacts.company.name,
+  established: siteFacts.company.established,
+  exportCountries: siteFacts.stats.exportCountries,
+  employees: siteFacts.company.employees,
+};
+
 export function extractFaqFromMetadata(
-  metadata: Record<string, unknown>,
+  metadata: { faq?: unknown },
 ): FaqItem[] {
   const { faq } = metadata;
   if (!Array.isArray(faq)) return [];

@@ -25,15 +25,8 @@ import {
   getSingleSiteAboutShellCopy,
 } from "@/config/single-site-page-expression";
 import { Link } from "@/i18n/routing";
-import { interpolateFaqAnswer } from "@/lib/content/mdx-faq";
+import { LAYER1_FACTS, interpolateFaqAnswer } from "@/lib/content/mdx-faq";
 import type { FaqItem, Locale, PageMetadata } from "@/types/content.types";
-
-const LAYER1_FACTS: Record<string, string | number> = {
-  companyName: siteFacts.company.name,
-  established: siteFacts.company.established,
-  exportCountries: siteFacts.stats.exportCountries,
-  employees: siteFacts.company.employees,
-};
 
 interface AboutPageShellProps {
   metadata: PageMetadata;
