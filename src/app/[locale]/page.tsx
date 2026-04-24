@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { getTranslations } from "next-intl/server";
 import { generateMetadataForPath, type Locale } from "@/lib/seo-metadata";
+import { getLocalizedPath } from "@/config/paths";
 import { GridFrame } from "@/components/grid";
 import { HeroSection } from "@/components/sections/hero-section";
 import { ChainSection } from "@/components/sections/chain-section";
@@ -73,7 +74,7 @@ export async function generateMetadata({
   return generateMetadataForPath({
     locale: locale as Locale,
     pageType: "home",
-    path: "",
+    path: getLocalizedPath("home", locale as Locale),
     config: {
       description: t("hero.subtitle"),
     },

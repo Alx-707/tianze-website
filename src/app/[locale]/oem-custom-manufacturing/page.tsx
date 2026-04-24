@@ -14,6 +14,7 @@ import {
   interpolateFaqAnswer,
 } from "@/lib/content/mdx-faq";
 import { buildOemPageSchema } from "@/lib/structured-data-generators";
+import { getLocalizedPath } from "@/config/paths";
 import type { FaqItem, Locale } from "@/types/content.types";
 
 export function generateStaticParams() {
@@ -38,7 +39,7 @@ export async function generateMetadata({
   return generateMetadataForPath({
     locale: locale as Locale,
     pageType: "oem",
-    path: "/oem-custom-manufacturing",
+    path: getLocalizedPath("oem", locale as Locale),
     config: {
       title: page.metadata.seo?.title ?? page.metadata.title,
       ...(description ? { description } : {}),

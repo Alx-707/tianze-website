@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { generateMetadataForPath } from "@/lib/seo-metadata";
+import { getLocalizedPath } from "@/config/paths";
 import { SINGLE_SITE_BENDING_MACHINES_PAGE_EXPRESSION } from "@/config/single-site-page-expression";
 import { siteFacts } from "@/config/site-facts";
 import { JsonLdScript } from "@/components/seo";
@@ -41,7 +42,7 @@ export async function generateMetadata({
   return generateMetadataForPath({
     locale: locale as Locale,
     pageType: "bendingMachines",
-    path: "/capabilities/bending-machines",
+    path: getLocalizedPath("bendingMachines", locale as Locale),
     config: {
       title: page.metadata.seo?.title ?? page.metadata.title,
       ...(description ? { description } : {}),

@@ -22,7 +22,7 @@ import {
   getGroupLabelTranslationKey,
   getRowValueTranslationKey,
 } from "@/lib/spec-table-translator";
-import { SITE_CONFIG } from "@/config/paths";
+import { DYNAMIC_PATHS_CONFIG, SITE_CONFIG } from "@/config/paths";
 import { getPageBySlug } from "@/lib/content";
 import { extractFaqFromMetadata } from "@/lib/content/mdx-faq";
 import { generateMetadataForPath } from "@/lib/seo-metadata";
@@ -87,7 +87,10 @@ export async function generateMetadata({
   return generateMetadataForPath({
     locale: locale as Locale,
     pageType: "products",
-    path: `/products/${market.slug}`,
+    path: DYNAMIC_PATHS_CONFIG.productMarket.pattern.replace(
+      "[market]",
+      market.slug,
+    ),
     config: {
       title: `${marketLabel} | ${SITE_CONFIG.name}`,
       description: marketDescription,

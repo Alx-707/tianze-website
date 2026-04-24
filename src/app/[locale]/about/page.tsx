@@ -8,6 +8,7 @@ import {
 } from "@/app/[locale]/generate-static-params";
 import { getPageBySlug } from "@/lib/content";
 import { generateMetadataForPath, type Locale } from "@/lib/seo-metadata";
+import { getLocalizedPath } from "@/config/paths";
 
 export function generateStaticParams() {
   return generateLocaleStaticParams();
@@ -29,7 +30,7 @@ export async function generateMetadata({
   return generateMetadataForPath({
     locale: locale as Locale,
     pageType: "about",
-    path: "/about",
+    path: getLocalizedPath("about", locale as Locale),
     config: {
       title: page.metadata.seo?.title ?? page.metadata.title,
       ...(description ? { description } : {}),

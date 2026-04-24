@@ -56,6 +56,12 @@ vi.mock("@/config/paths", () => ({
       products: "/products",
     },
   },
+  DYNAMIC_PATHS_CONFIG: {
+    productMarket: {
+      pattern: "/products/[market]",
+      paramName: "market",
+    },
+  },
   getLocalizedPath: (pageType: string) =>
     pageType === "products" ? "/products" : "/",
 }));

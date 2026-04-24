@@ -5,6 +5,7 @@
  * Link component, handling both static and dynamic routes.
  */
 import type { ComponentProps } from "react";
+import { DYNAMIC_PATHS_CONFIG } from "@/config/paths";
 import type { Link } from "@/i18n/routing";
 import { routing } from "@/i18n/routing-config";
 
@@ -25,6 +26,29 @@ interface DynamicRoutePattern {
   buildHref: (match: RegExpMatchArray) => LinkHref;
 }
 
+type DynamicRouteKey = keyof typeof DYNAMIC_PATHS_CONFIG;
+
+function routePatternToRegex(pattern: string): RegExp {
+  const escaped = escapeRegExp(pattern).replace(/\\\[([^/]+?)\\\]/g, "([^/]+)");
+  // nosemgrep: javascript.lang.security.audit.detect-non-literal-regexp.detect-non-literal-regexp
+  // eslint-disable-next-line security/detect-non-literal-regexp -- patterns come from trusted static route config
+  return new RegExp(`^${escaped}$`);
+}
+
+const DYNAMIC_ROUTE_BUILDERS: Record<
+  DynamicRouteKey,
+  (match: RegExpMatchArray) => LinkHref
+> = {
+  productMarket: (match) => ({
+    pathname: DYNAMIC_PATHS_CONFIG.productMarket.pattern,
+    params: { market: match[1]! },
+  }),
+  blogDetail: (match) => ({
+    pathname: DYNAMIC_PATHS_CONFIG.blogDetail.pattern,
+    params: { slug: match[1]! },
+  }),
+};
+
 /**
  * Dynamic route patterns for matching actual URLs to route patterns.
  *
@@ -39,23 +63,14 @@ interface DynamicRoutePattern {
  * // Matches pattern: /^\/blog\/([^/]+)$/
  * // Returns: { pathname: "/blog/[slug]", params: { slug: "my-post" } }
  */
-export const DYNAMIC_ROUTE_PATTERNS: readonly DynamicRoutePattern[] = [
-  // One-segment: /products/{market}
-  {
-    pattern: /^\/products\/([^/]+)$/,
-    buildHref: (match: RegExpMatchArray): LinkHref => ({
-      pathname: "/products/[market]",
-      params: { market: match[1]! },
-    }),
-  },
-  {
-    pattern: /^\/blog\/([^/]+)$/,
-    buildHref: (match: RegExpMatchArray): LinkHref => ({
-      pathname: "/blog/[slug]",
-      params: { slug: match[1]! },
-    }),
-  },
-] as const;
+export const DYNAMIC_ROUTE_PATTERNS: readonly DynamicRoutePattern[] = (
+  Object.entries(DYNAMIC_PATHS_CONFIG) as Array<
+    [DynamicRouteKey, (typeof DYNAMIC_PATHS_CONFIG)[DynamicRouteKey]]
+  >
+).map(([key, config]) => ({
+  pattern: routePatternToRegex(config.pattern),
+  buildHref: DYNAMIC_ROUTE_BUILDERS[key],
+}));
 
 /**
  * Regex to match and strip locale prefixes from pathnames.
