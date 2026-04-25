@@ -8,7 +8,7 @@ import userEvent from "@testing-library/user-event";
 import { useTranslations } from "next-intl";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { mobileNavigation } from "@/lib/navigation";
-import { MobileNavigation } from "@/components/layout/mobile-navigation";
+import { MobileNavigationInteractive as MobileNavigation } from "@/components/layout/mobile-navigation-interactive";
 
 // Mock next-intl
 vi.mock("next-intl", () => ({
@@ -133,8 +133,7 @@ describe("Mobile Navigation - Core Tests", () => {
 
       // The close icon is actually x-icon in the Sheet close button
       expect(screen.getByTestId("x-icon")).toBeInTheDocument();
-      // Menu icon is still visible in the trigger button
-      expect(screen.getByTestId("menu-icon")).toBeInTheDocument();
+      expect(screen.queryByTestId("menu-icon")).not.toBeInTheDocument();
     });
 
     it("should close menu when close button is clicked", async () => {

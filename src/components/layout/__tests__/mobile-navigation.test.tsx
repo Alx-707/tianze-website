@@ -1,11 +1,13 @@
 import React from "react";
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { MobileNavigationLinks } from "@/components/layout/mobile-navigation";
 import {
   MobileMenuButton,
-  MobileNavigation,
-} from "@/components/layout/mobile-navigation";
+  MobileNavigationInteractive as MobileNavigation,
+} from "@/components/layout/mobile-navigation-interactive";
 import { createMockTranslations, renderWithIntl } from "@/test/utils";
 
 const mockLocale = { current: "en" as "en" | "zh" };
@@ -239,6 +241,15 @@ describe("MobileNavigation Component", () => {
   });
 
   describe("Basic Rendering", () => {
+    it("renders a server-safe link list for the no-JS fallback", () => {
+      const html = renderToStaticMarkup(<MobileNavigationLinks />);
+
+      expect(html).toContain("Home");
+      expect(html).toContain("About");
+      expect(html).toContain('href="/"');
+      expect(html).not.toContain("aria-expanded");
+    });
+
     it("renders mobile navigation trigger", () => {
       renderWithIntl(<MobileNavigation />);
 

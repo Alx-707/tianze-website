@@ -7,7 +7,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useTranslations } from "next-intl";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { MobileNavigation } from "@/components/layout/mobile-navigation";
+import { MobileNavigationInteractive as MobileNavigation } from "@/components/layout/mobile-navigation-interactive";
 
 // Mock next-intl - 完整的Mock配置
 vi.mock("next-intl", () => ({

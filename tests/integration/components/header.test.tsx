@@ -60,9 +60,19 @@ vi.mock("@/components/layout/nav-switcher", () => ({
 }));
 
 vi.mock("@/components/layout/mobile-navigation", () => ({
-  MobileNavigation: () => (
-    <div data-testid="mobile-navigation">Mobile Navigation</div>
+  MobileNavigationLinks: () => (
+    <nav data-testid="mobile-navigation-links">
+      <a href="/">Home</a>
+    </nav>
   ),
+}));
+
+vi.mock("@/components/layout/mobile-navigation-interactive", () => ({
+  MobileNavigationInteractive: ({
+    children,
+  }: {
+    children?: React.ReactNode;
+  }) => <div data-testid="mobile-navigation-interactive">{children}</div>,
 }));
 
 vi.mock("@/components/layout/header-client", () => ({
