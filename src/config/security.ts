@@ -34,10 +34,22 @@ const CSP_INLINE_SCRIPT_SHA256_BASE64_ALLOWLIST = [
   "i+oOQWaCXue4EjKa+/5AcHbPo2Xy7vfP2mIpoxIkebw=",
 
   // Locale-specific inline scripts for `/en` home route (JSON-LD + streamed RSC payload).
+  "0d+gdTiq+Wm8Alp1qv0n8zLmGrlhTsmITZZrAAGHu4U=",
+  "2dEsvJ9x/vk9goXSkpykCEbam/fDCw/v67euZ1a/6Y4=",
   "M58sHH45JvOJ/+TUUZR77KwEQaUjXrF2Vpi7KGGmfoo=",
   "1VpYxXC3q+hYxOKSOO6r3l5xX0lWghAjxhJCV1MGJ7c=",
   "/98yFs6PuWLmCbIoc5Ds7rlKGCCVVAbp/EiR7UGiH08=",
+  "E6QfeQZh8OiLBsyiZrcbxwiM/DXBhSEZ4B3SpXSMvyM=",
   "fj1oC3/wZs8vDEvuk4a6VzvRq61bebt+bpngZ+38TRI=",
+  "HbQKT3hgdqupDLgkrgYvmwo1lFYePSVdImXTvUyJJyM=",
+  "YMin26Oa7ZSgbLyy3QLUwDeSKiNHGyV/SluMwXSIkTI=",
+  "Ap68fBxgoAAmfa4VTIs6iQEGVzv24BWEwzM6WcqJXbY=",
+  "e3x/TA46p+lnirXC9+fzCar3iFSDKikXGW85jpLwY7s=",
+  "aQ9azh9mAQRsQ/3vwgiEeNedqr+8fH+JeGdT5t2RYj0=",
+  "MEXBhuehiS4iaxRlLs/6UoflWvXnPnpldK8+IZ1zGo4=",
+  "IGZ/+yh8rU1tu3gqpN1fbBC3y/Jouw3GdqF9sPd6XSE=",
+  "poWImLi2t9XEwzUgkgs4kDV6PI6EJLeljjtoqxsEsLM=",
+  "szua/RN+5mTwzKhqTKiO7uc7Y893j14bYnOevm3UCYk=",
   "sQpVd3DjVAxMTrpWAZpebGIW0PsHr6xAYtenUIymbm4=",
   "SuR1RHwr2HPAm0p8qbuVh9Pqbx+RJnJ/mWNtBZSy9C0=",
   "QbylbhZsSL75OL4NDP2HDPRMjtmgr7DguMEhdk/YbEA=",
@@ -115,6 +127,20 @@ const CSP_INLINE_SCRIPT_SHA256_BASE64_ALLOWLIST = [
   "dqFs8AGqrorMuZcCo0Dzxw0RzTLF2dotbxScUNIaods=",
   "FXLkGXkqwiRO+IpKooxvCZQa0YDhJmspeUanXxrLad8=",
   "VTLEvRTo7MVijRlpd4qqZiiS6gptD3EL+LcpHb3K/Fo=",
+
+  // Locale-specific inline scripts for `/zh` home route after Wave B schema/nav updates.
+  "/l+U8XzvFtqMOXbYkt7U9syC0UWvut8OcTrV893R2nU=",
+  "TQR9bOot/1E/5X7HrwLg9Z5RLWOC1tdWNH6cjFEZhuo=",
+  "Q5HqcOzinS2Lpe8U0jOqQHE4IFvf8YxMOHlG0hhq8K4=",
+  "xHCu3ijXSSiKcq6eh7xS+76fqmCEE1xxAqKTQTQ9G1M=",
+  "isOGDKRga6Xd4txIxJcfNucAUZsRyfpNTKLi5pauUGs=",
+  "0WdQp6Aq4jXr1wHDOcAenq9A3ePK+VWR/rPo6mKF9BM=",
+  "A3qcKjA9AnKVEShbQOktFsh2WdX1umEWaDmAyjh//g8=",
+  "gKPWxHkmPx5JYKylzFheKqFJIeWvG8dIanvv9a05Tt8=",
+  "4IWLFeg24B0VgHsFAflNau+Yybg2vSStVEhA0syTTr0=",
+  "7MYPqWv53oSMkwrBVWH24kTj+/IWvaS/s8ruyNnG8sg=",
+  "c2mvWkqA0ypUzzRF0VU/IdYXvPeu2ftIZoGUVRw7T8w=",
+  "Ra48qGlimbJBr1HQORs9o9aORJNtnTM7Uznvo/qJky4=",
 ] as const;
 
 // Exported for CI/runtime verification scripts (see scripts/csp/check-inline-scripts.ts).
