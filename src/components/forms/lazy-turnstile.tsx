@@ -44,8 +44,13 @@ interface LazyTurnstileProps {
 function createTurnstilePlaceholderStyle(
   size: NonNullable<LazyTurnstileProps["size"]>,
 ): TurnstilePlaceholderStyle {
+  const placeholderHeight =
+    size === "compact"
+      ? TURNSTILE_WIDGET_HEIGHT_PX.compact
+      : TURNSTILE_WIDGET_HEIGHT_PX.normal;
+
   return {
-    [TURNSTILE_PLACEHOLDER_HEIGHT_CSS_VAR]: `${TURNSTILE_WIDGET_HEIGHT_PX[size]}px`,
+    "--turnstile-placeholder-height": `${placeholderHeight}px`,
   };
 }
 
