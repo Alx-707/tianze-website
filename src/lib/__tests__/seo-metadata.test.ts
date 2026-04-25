@@ -98,7 +98,7 @@ describe("SEO Metadata", () => {
         section: "Technology",
       };
 
-      const metadata = generateLocalizedMetadata("zh", "blog", config);
+      const metadata = generateLocalizedMetadata("zh", "products", config);
 
       expect(metadata.title).toBe("Custom Title");
       expect(metadata.description).toBe("Custom Description");
@@ -185,7 +185,6 @@ describe("SEO Metadata", () => {
         "home",
         "about",
         "contact",
-        "blog",
         "products",
         "privacy",
         "terms",
@@ -302,7 +301,6 @@ describe("SEO Metadata", () => {
         "home",
         "about",
         "contact",
-        "blog",
         "products",
         "privacy",
         "terms",
