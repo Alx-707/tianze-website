@@ -21,6 +21,10 @@ const withMDX = createMDX({
 
 const isCloudflare = process.env.DEPLOY_TARGET === "cloudflare";
 const nextConfig: NextConfig = {
+  // Hash-based CSP validation depends on deterministic inline RSC payloads.
+  // Next's default random build id changes those payload hashes on every build.
+  generateBuildId: () => "tianze-website",
+
   // Exclude test/report artifacts from OpenNext bundle
   outputFileTracingExcludes: {
     "/*": [

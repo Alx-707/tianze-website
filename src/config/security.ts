@@ -157,6 +157,7 @@ const CSP_INLINE_SCRIPT_SHA256_BASE64_ALLOWLIST = [
   "gE5bUou6NmWqLEObsJhKTpcmZ7f8d5U7YJtchrEHnus=",
   "eiVq7/rx4I9YBjACbBfezhU2Y7Sv7Bctf5gRnPbs1Dk=",
   "Ck6hoZSo33GFUp1rAnoxFMZE0JU3ubdagcnBCOHy7uI=",
+  "oSSkrpcToE3caqAzp7lmJIBnWW957af283X3ceXU+ZY=",
 
   // Locale-specific inline scripts for `/zh` home route after Wave D blog removal.
   "CX2oCPM01nB2hPcwFL3pnarkZLy4nTZ7rsKT905TDJM=",
@@ -172,6 +173,7 @@ const CSP_INLINE_SCRIPT_SHA256_BASE64_ALLOWLIST = [
   "Qivnxdzv3YhE3nIXGplvHTfL5Op4x9E+20lU4SfKk7o=",
   "UsiFOC2lXsDTOqYOKXg9lkdJ502pwtwwn3fJWtmbRRA=",
   "iQzX6HEsGABo3JYr8kuhCzuUaYZ7PWXmf4vzz0bZu4I=",
+  "NLnqP76EOPg0/VdamYHGSCvz+UUlWvaGqjyJImtcvqc=",
 ] as const;
 
 // Exported for CI/runtime verification scripts (see scripts/csp/check-inline-scripts.ts).
