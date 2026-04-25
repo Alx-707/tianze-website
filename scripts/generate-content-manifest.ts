@@ -229,7 +229,13 @@ function generateImportersCode(entries: ContentEntry[]): string {
 
 function generateManifestTsCode(manifest: ContentManifest): string {
   const entriesJson = JSON.stringify(manifest.entries, null, 2);
-  const byKeyJson = JSON.stringify(manifest.byKey, null, 2);
+
+  const byKeyIndex: Record<string, number> = {};
+  for (const [key, entry] of Object.entries(manifest.byKey)) {
+    const idx = manifest.entries.indexOf(entry);
+    byKeyIndex[key] = idx;
+  }
+  const byKeyIndexJson = JSON.stringify(byKeyIndex, null, 2);
 
   return `/**
  * AUTO-GENERATED FILE - DO NOT EDIT
@@ -258,9 +264,17 @@ export interface ContentManifest {
   byKey: Record<string, ContentEntry>;
 }
 
+const _entries: ContentEntry[] = ${entriesJson};
+
+const _byKeyIndex: Record<string, number> = ${byKeyIndexJson};
+
+const _byKey: Record<string, ContentEntry> = Object.fromEntries(
+  Object.entries(_byKeyIndex).map(([key, idx]) => [key, _entries[idx]!]),
+);
+
 export const CONTENT_MANIFEST: ContentManifest = {
-  entries: ${entriesJson},
-  byKey: ${byKeyJson},
+  entries: _entries,
+  byKey: _byKey,
 } as const;
 `;
 }

@@ -11,6 +11,7 @@ import yaml, { type LoadOptions } from "js-yaml";
 import { isRuntimeCloudflare, isRuntimeProduction } from "@/lib/env";
 import {
   getAllContentEntries,
+  getContentEntry,
   getContentEntriesByType,
   type ContentEntry,
 } from "@/lib/content-manifest";
@@ -60,13 +61,19 @@ function inferContentTypeFromDir(contentDir: string): ContentType {
   return "pages";
 }
 
-function findManifestEntry(filePath: string): ContentEntry | undefined {
+function findManifestEntry(
+  filePath: string,
+  type: ContentType,
+): ContentEntry | undefined {
+  const normalized = path.normalize(filePath);
+  const slug = path.basename(normalized, path.extname(normalized));
+  const locale = path.basename(path.dirname(normalized));
+  if (locale) {
+    const entry = getContentEntry(type, locale as Locale, slug);
+    if (entry) return entry;
+  }
   return getAllContentEntries().find(
-    (entry) =>
-      entry.filePath === filePath ||
-      entry.relativePath === filePath ||
-      path.normalize(entry.filePath) === path.normalize(filePath) ||
-      path.normalize(entry.relativePath) === path.normalize(filePath),
+    (entry) => entry.filePath === filePath || entry.relativePath === filePath,
   );
 }
 
@@ -138,7 +145,7 @@ function parseManifestContentFile<T extends ContentMetadata>(
   filePath: string,
   type: ContentType,
 ): ParsedContent<T> {
-  const entry = findManifestEntry(filePath);
+  const entry = findManifestEntry(filePath, type);
   if (entry === undefined || entry.type !== type) {
     throw new ContentError(
       `Content file not found: ${filePath}`,
