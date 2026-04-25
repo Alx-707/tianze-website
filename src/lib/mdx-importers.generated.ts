@@ -18,10 +18,8 @@ type ContentImporter = () => Promise<MDXContentModule>;
 
 export const postImporters: Record<string, Record<string, ContentImporter>> = {
   en: {
-    'welcome': () => import('@content/posts/en/welcome.mdx'),
   },
   zh: {
-    'welcome': () => import('@content/posts/zh/welcome.mdx'),
   },
 };
 

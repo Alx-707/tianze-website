@@ -262,10 +262,6 @@ export function createPageSEOConfig(
       type: "website" as const,
       keywords: ["Contact", "Support", "Business"],
     },
-    blog: {
-      type: "article" as const,
-      keywords: ["Blog", "Articles", "Technology", "Insights"],
-    },
     products: {
       type: "website" as const,
       keywords: ["Products", "Solutions", "Enterprise", "B2B"],
@@ -303,9 +299,6 @@ export function createPageSEOConfig(
       break;
     case "contact":
       baseConfig = baseConfigs.contact;
-      break;
-    case "blog":
-      baseConfig = baseConfigs.blog;
       break;
     case "products":
       baseConfig = baseConfigs.products;

@@ -57,7 +57,6 @@ vi.mock("@/lib/navigation", () => {
       href: "/products",
       translationKey: "navigation.products",
     },
-    { key: "blog", href: "/blog", translationKey: "navigation.blog" },
     { key: "contact", href: "/contact", translationKey: "navigation.contact" },
   ];
 
@@ -368,7 +367,6 @@ describe("MobileNavigation Component", () => {
       expect(screen.getByText("About")).toBeInTheDocument();
       expect(screen.getByText("Services")).toBeInTheDocument();
       expect(screen.getByText("Products")).toBeInTheDocument();
-      expect(screen.getByText("Blog")).toBeInTheDocument();
       expect(screen.getByText("Contact")).toBeInTheDocument();
     });
 
@@ -536,7 +534,7 @@ describe("MobileNavigation Component", () => {
       mockUsePathname.mockReturnValue("/contact");
       rerender(<MobileNavigation />);
 
-      mockUsePathname.mockReturnValue("/blog");
+      mockUsePathname.mockReturnValue("/products");
       rerender(<MobileNavigation />);
 
       // Should still render correctly

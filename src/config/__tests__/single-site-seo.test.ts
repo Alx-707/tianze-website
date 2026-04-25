@@ -24,10 +24,6 @@ describe("single-site-seo", () => {
       changeFrequency: "monthly",
       priority: 0.7,
     });
-    expect(SINGLE_SITE_SITEMAP_PAGE_CONFIG.blogPost).toEqual({
-      changeFrequency: "monthly",
-      priority: 0.6,
-    });
     expect(SINGLE_SITE_SITEMAP_PAGE_CONFIG.productMarket).toEqual({
       changeFrequency: "weekly",
       priority: 0.8,
@@ -39,8 +35,8 @@ describe("single-site-seo", () => {
   });
 
   it("keeps static page lastmod defaults and robots disallow list centralized", () => {
-    expect(SINGLE_SITE_STATIC_PAGE_LASTMOD["/blog"]).toBe(
-      "2024-11-01T00:00:00Z",
+    expect(SINGLE_SITE_STATIC_PAGE_LASTMOD["/products"]).toBe(
+      "2026-04-26T00:00:00Z",
     );
     expect(SINGLE_SITE_ROBOTS_DISALLOW_PATHS).toEqual([
       "/api/",

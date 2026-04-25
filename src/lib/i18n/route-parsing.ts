@@ -43,25 +43,21 @@ const DYNAMIC_ROUTE_BUILDERS: Record<
     pathname: DYNAMIC_PATHS_CONFIG.productMarket.pattern,
     params: { market: match[1]! },
   }),
-  blogDetail: (match) => ({
-    pathname: DYNAMIC_PATHS_CONFIG.blogDetail.pattern,
-    params: { slug: match[1]! },
-  }),
 };
 
 /**
  * Dynamic route patterns for matching actual URLs to route patterns.
  *
- * When a user navigates between locales, the current URL (e.g., `/blog/my-post`)
- * needs to be mapped back to its route pattern (e.g., `/blog/[slug]`) with params.
+ * When a user navigates between locales, the current URL (e.g., `/products/europe`)
+ * needs to be mapped back to its route pattern (e.g., `/products/[market]`) with params.
  *
  * Order matters: more-specific patterns (more segments) must come first
  * to avoid false matches by shorter patterns.
  *
  * @example
- * // URL: /blog/my-post
- * // Matches pattern: /^\/blog\/([^/]+)$/
- * // Returns: { pathname: "/blog/[slug]", params: { slug: "my-post" } }
+ * // URL: /products/europe
+ * // Matches pattern: /^\/products\/([^/]+)$/
+ * // Returns: { pathname: "/products/[market]", params: { market: "europe" } }
  */
 export const DYNAMIC_ROUTE_PATTERNS: readonly DynamicRoutePattern[] = (
   Object.entries(DYNAMIC_PATHS_CONFIG) as Array<
@@ -80,7 +76,7 @@ export const DYNAMIC_ROUTE_PATTERNS: readonly DynamicRoutePattern[] = (
  *
  * @example
  * "/en/about".replace(LOCALE_PREFIX_RE, "") // → "/about"
- * "/zh/blog/post".replace(LOCALE_PREFIX_RE, "") // → "/blog/post"
+ * "/zh/products/europe".replace(LOCALE_PREFIX_RE, "") // → "/products/europe"
  * "/about".replace(LOCALE_PREFIX_RE, "") // → "/about" (no change)
  */
 function escapeRegExp(input: string): string {
@@ -135,8 +131,8 @@ export function normalizePathnameForLink(pathname: string): string {
  * // → "/about"
  *
  * // Dynamic route
- * parsePathnameForLink("/zh/blog/my-post")
- * // → { pathname: "/blog/[slug]", params: { slug: "my-post" } }
+ * parsePathnameForLink("/zh/products/europe")
+ * // → { pathname: "/products/[market]", params: { market: "europe" } }
  */
 export function parsePathnameForLink(currentPathname: string): LinkHref {
   const pathname = normalizePathnameForLink(currentPathname);

@@ -188,13 +188,6 @@ export const SINGLE_SITE_DEFINITION: SiteDefinition = {
           translationKey: "footer.sections.navigation.products",
         },
         {
-          key: "blog",
-          label: "Blog",
-          href: "/blog",
-          external: false,
-          translationKey: "footer.sections.navigation.blog",
-        },
-        {
           key: "contact",
           label: "Contact",
           href: "/contact",

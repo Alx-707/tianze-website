@@ -57,7 +57,6 @@
     "enterprise": "企业版",
     "docs": "文档",
     "pricing": "定价",
-    "blog": "博客",
     "privacy": "隐私政策",
     "login": "登录",
     "logout": "退出",
@@ -612,7 +611,6 @@
         "home": "首页",
         "about": "关于",
         "products": "产品",
-        "blog": "博客",
         "contact": "联系"
       },
       "social": {

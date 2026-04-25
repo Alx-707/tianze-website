@@ -84,7 +84,7 @@ export function generateStructuredData(
   [Record<string, unknown>, Record<string, unknown>, Record<string, unknown>]
 >;
 export async function generateStructuredData(
-  page: PageType,
+  page: PageType | "blog",
   locale: Locale,
   extras?: {
     article?: {

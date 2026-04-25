@@ -35,7 +35,6 @@ describe("paths configuration", () => {
         "home",
         "about",
         "contact",
-        "blog",
         "products",
         "privacy",
         "terms",
@@ -63,7 +62,6 @@ describe("paths configuration", () => {
         "home",
         "about",
         "contact",
-        "blog",
         "products",
         "privacy",
         "terms",
@@ -220,14 +218,13 @@ describe("paths configuration", () => {
       expect(pathnames["/"]).toBe("/");
       expect(pathnames["/about"]).toBe("/about");
       expect(pathnames["/contact"]).toBe("/contact");
-      expect(pathnames["/blog"]).toBe("/blog");
       expect(pathnames["/products"]).toBe("/products");
     });
 
     it("should include dynamic route patterns", () => {
       const pathnames = getPathnames();
 
-      expect(pathnames["/blog/[slug]"]).toBe("/blog/[slug]");
+      expect(pathnames["/products/[market]"]).toBe("/products/[market]");
     });
 
     it("should have consistent paths", () => {
@@ -308,7 +305,6 @@ describe("paths configuration", () => {
         "home",
         "about",
         "contact",
-        "blog",
         "products",
         "privacy",
         "terms",
@@ -574,7 +570,6 @@ describe("paths configuration", () => {
         "home",
         "about",
         "contact",
-        "blog",
         "products",
         "privacy",
         "terms",

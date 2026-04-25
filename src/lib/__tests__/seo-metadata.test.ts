@@ -237,11 +237,11 @@ describe("SEO Metadata", () => {
     });
 
     it("should return specific page config", () => {
-      const config = createPageSEOConfig("blog");
+      const config = createPageSEOConfig("products");
 
       expect(config).toEqual({
-        type: "article",
-        keywords: ["Blog", "Articles", "Technology", "Insights"],
+        type: "website",
+        keywords: ["Products", "Solutions", "Enterprise", "B2B"],
       });
     });
 
@@ -281,7 +281,6 @@ describe("SEO Metadata", () => {
         "home",
         "about",
         "contact",
-        "blog",
         "products",
         "privacy",
         "terms",
