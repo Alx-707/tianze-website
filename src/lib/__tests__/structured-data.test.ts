@@ -20,10 +20,6 @@ const TEST_COUNTS = {
   FALLBACK_STRUCTURED_DATA: 2, // Organization + Website (fallback)
 } as const;
 
-const PLACEHOLDER_PATTERN = /\[[A-Z0-9_]+\]/;
-const isPlaceholderOrUrl = (value: string) =>
-  PLACEHOLDER_PATTERN.test(value) || /^https?:\/\/.+/.test(value);
-
 // Use vi.hoisted to ensure proper mock setup
 const { mockGetTranslations, mockGenerateCanonicalURL, mockRecordError } =
   vi.hoisted(() => ({
@@ -72,7 +68,6 @@ vi.mock("@/config/paths/site-config", () => ({
     social: {
       twitter: "https://x.com/tianzepipe",
       linkedin: "https://www.linkedin.com/company/tianze-pipe",
-      github: "https://github.com/tianze-pipe",
     },
     contact: {
       phone: "+86-518-0000-0000",
@@ -166,12 +161,11 @@ describe("Structured Data Generation", () => {
       });
 
       const sameAs = schema["sameAs"] as string[];
-      expect(Array.isArray(sameAs)).toBe(true);
-      expect(sameAs.length).toBeGreaterThan(0);
-      sameAs.forEach((link) => {
-        expect(typeof link).toBe("string");
-        expect(isPlaceholderOrUrl(link)).toBe(true);
-      });
+      expect(sameAs).toEqual([
+        "https://x.com/tianzepipe",
+        "https://www.linkedin.com/company/tianze-pipe",
+      ]);
+      expect(sameAs).toHaveLength(2);
     });
 
     it("should handle different locales", async () => {

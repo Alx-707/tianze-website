@@ -125,7 +125,6 @@ export const SINGLE_SITE_DEFINITION: SiteDefinition = {
     social: {
       linkedin: social.linkedin,
       twitter: social.twitter,
-      github: social.github,
     },
   },
   productCatalog: singleSiteProductCatalog,
@@ -228,13 +227,6 @@ export const SINGLE_SITE_DEFINITION: SiteDefinition = {
           href: social.linkedin,
           external: true,
           translationKey: "footer.sections.social.linkedin",
-        },
-        {
-          key: "github",
-          label: "GitHub",
-          href: social.github,
-          external: true,
-          translationKey: "footer.sections.social.github",
         },
       ],
     },

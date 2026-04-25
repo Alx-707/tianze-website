@@ -114,9 +114,6 @@ export function generateOrganizationData(
       t("organization.social.linkedin", {
         defaultValue: SITE_CONFIG.social.linkedin,
       }),
-      t("organization.social.github", {
-        defaultValue: SITE_CONFIG.social.github,
-      }),
     ],
     // 移除 ...data 扩展运算符，只使用已验证的属性
   };

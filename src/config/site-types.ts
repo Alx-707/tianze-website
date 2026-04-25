@@ -76,7 +76,6 @@ export interface BusinessStats {
 
 export interface SocialLinks {
   linkedin?: string;
-  github?: string;
   facebook?: string;
   youtube?: string;
   twitter?: string;
