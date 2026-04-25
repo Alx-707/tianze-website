@@ -5,6 +5,7 @@
  * Captures marketing attribution data from URL parameters and stores in sessionStorage
  * Uses first-touch attribution model (only stores if no existing data)
  */
+import { loadConsent } from "@/lib/cookie-consent";
 
 const UTM_STORAGE_KEY = "marketing_attribution";
 
@@ -27,6 +28,8 @@ export interface AttributionData extends UtmParams, ClickIds {
   capturedAt?: string;
 }
 
+let pendingAttribution: AttributionData | null = null;
+
 function sanitizeParam(value: string | null): string | undefined {
   if (!value) return undefined;
   const trimmed = value.trim().slice(0, 256);
@@ -35,6 +38,10 @@ function sanitizeParam(value: string | null): string | undefined {
   return /^[\x20-\x7E]+$/.test(trimmed) && !/[<>"'`]/.test(trimmed)
     ? trimmed
     : undefined;
+}
+
+function hasMarketingConsent(): boolean {
+  return loadConsent()?.consent.marketing === true;
 }
 
 export function captureUtmParams(): UtmParams {
@@ -103,7 +110,25 @@ export function storeAttributionData(): void {
     capturedAt: new Date().toISOString(),
   };
 
-  sessionStorage.setItem(UTM_STORAGE_KEY, JSON.stringify(data));
+  if (hasMarketingConsent()) {
+    sessionStorage.setItem(UTM_STORAGE_KEY, JSON.stringify(data));
+  } else {
+    pendingAttribution = data;
+  }
+}
+
+export function flushPendingAttribution(): void {
+  if (typeof window === "undefined" || !pendingAttribution) return;
+  if (!hasMarketingConsent()) return;
+
+  const existing = sessionStorage.getItem(UTM_STORAGE_KEY);
+  if (existing) {
+    pendingAttribution = null;
+    return;
+  }
+
+  sessionStorage.setItem(UTM_STORAGE_KEY, JSON.stringify(pendingAttribution));
+  pendingAttribution = null;
 }
 
 export function getAttributionSnapshot(): AttributionData {

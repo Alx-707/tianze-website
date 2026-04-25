@@ -29,17 +29,39 @@ export function AttributionBootstrap() {
     }
 
     let cancelled = false;
+    let removeFlushListeners: (() => void) | undefined;
 
     loadAttributionModule()
-      .then(({ storeAttributionData }) => {
+      .then(({ flushPendingAttribution, storeAttributionData }) => {
         if (!cancelled) {
           storeAttributionData();
+
+          const flushOnConsentChange = () => {
+            flushPendingAttribution();
+          };
+          const flushEvents = [
+            "click",
+            "focus",
+            "storage",
+            "visibilitychange",
+          ] as const;
+
+          for (const eventName of flushEvents) {
+            window.addEventListener(eventName, flushOnConsentChange);
+          }
+
+          removeFlushListeners = () => {
+            for (const eventName of flushEvents) {
+              window.removeEventListener(eventName, flushOnConsentChange);
+            }
+          };
         }
       })
       .catch(() => undefined);
 
     return () => {
       cancelled = true;
+      removeFlushListeners?.();
     };
   }, []);
 
