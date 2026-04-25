@@ -141,6 +141,35 @@ const CSP_INLINE_SCRIPT_SHA256_BASE64_ALLOWLIST = [
   "7MYPqWv53oSMkwrBVWH24kTj+/IWvaS/s8ruyNnG8sg=",
   "c2mvWkqA0ypUzzRF0VU/IdYXvPeu2ftIZoGUVRw7T8w=",
   "Ra48qGlimbJBr1HQORs9o9aORJNtnTM7Uznvo/qJky4=",
+
+  // Locale-specific inline scripts for `/en` home route after Wave D blog removal.
+  "7C68InwUmErphlcJfyrAEDBjf+a2TvRqjAgfXkg+bLM=",
+  "0ScIiOFrFVGtMT3wcMCQr0XZkZzicpltQC/QZACGVbo=",
+  "xTOvfZi1J8ezwnGhKPtJ3AWhBKk+DGJ8UNdWjcFsXiU=",
+  "GXqPhojy2QiudyH1jHl7U8feL7Z0JPhXXRJi82+9YPw=",
+  "Y38IXvCjlaWw9y5gPAqRCU0laxDX76JJqcRvH7YLXmw=",
+  "CKxpUr9Aa/c3yZg+s0EsOTyim15hrmdcuz1TsQk7qAg=",
+  "dwCzINMuP45XZXm2Y06+liOaG62j0ujrQ8fQIyhj0iE=",
+  "F6Sw4yLHSCEAHRGs9G8+QmA5kiLEADmRGdyWVtvuId8=",
+  "0RrdpdZgmb9dSkKQRx/c/4C93VQ3q2ujvaqM1nnmEkY=",
+  "7v/4iCa2aRqUbJWkiiHYnncrKJjYI7TfDAOzuBlOeKw=",
+  "pe258EHCJryE40LecpfMFHviRyt9lp1knzUnRYCuAjw=",
+  "gE5bUou6NmWqLEObsJhKTpcmZ7f8d5U7YJtchrEHnus=",
+  "eiVq7/rx4I9YBjACbBfezhU2Y7Sv7Bctf5gRnPbs1Dk=",
+
+  // Locale-specific inline scripts for `/zh` home route after Wave D blog removal.
+  "CX2oCPM01nB2hPcwFL3pnarkZLy4nTZ7rsKT905TDJM=",
+  "NEpRWMV8L6BuNqkgOED1SZTUZ4zgT784qoZrvTXgvcw=",
+  "y1QnbtgqtkrxY2vfEPnVGxumcrPujyMqPRY59+tbH3s=",
+  "l8Mvcy6/xFbD7qQftAhtUdachFghUHkgWcqwln1m2OQ=",
+  "ElLJeOGK87cxA+fFskTYYdIjRVY7m66x1f5bbExTf08=",
+  "eFid1irj0zpci67e/qRCgXW7d4V1IIZg13l7xU6bSvA=",
+  "Mh2aOR2oItK2oxLLpSSdBJnLMpfN5z1AyG1MxsilT0M=",
+  "OJQ786vZcb8F8zvy6cEl9wqSL0f/Q484lcoZSOsvEVs=",
+  "MYJqlcQBwUm1jEXGtlKq8rB8siFxxCdCT9x4RnmweAc=",
+  "pj4HG6MSddV1DXP6XhoJoxtnd5zFroSkSmGD/KFGVdA=",
+  "Qivnxdzv3YhE3nIXGplvHTfL5Op4x9E+20lU4SfKk7o=",
+  "UsiFOC2lXsDTOqYOKXg9lkdJ502pwtwwn3fJWtmbRRA=",
 ] as const;
 
 // Exported for CI/runtime verification scripts (see scripts/csp/check-inline-scripts.ts).
