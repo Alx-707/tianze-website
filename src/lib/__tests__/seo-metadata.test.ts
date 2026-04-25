@@ -231,15 +231,7 @@ describe("SEO Metadata", () => {
 
       expect(config).toEqual({
         type: "website",
-        keywords: [
-          "test",
-          "site",
-          "shadcn/ui",
-          "Radix UI",
-          "Modern Web",
-          "Enterprise Platform",
-          "B2B Solution",
-        ],
+        keywords: ["test", "site", "B2B Solution"],
         image: "/images/og-image.jpg",
       });
     });
@@ -275,7 +267,35 @@ describe("SEO Metadata", () => {
 
       // Should fallback to home config
       expect(config.type).toBe("website");
-      expect(config.keywords).toContain("shadcn/ui");
+      expect(config.keywords).toContain("B2B Solution");
+    });
+
+    it("should exclude developer-stack keywords from every page type", () => {
+      const bannedKeywords = [
+        "shadcn/ui",
+        "Radix UI",
+        "Modern Web",
+        "Enterprise Platform",
+      ];
+      const pageTypes: PageType[] = [
+        "home",
+        "about",
+        "contact",
+        "blog",
+        "products",
+        "privacy",
+        "terms",
+        "bendingMachines",
+        "oem",
+      ];
+
+      pageTypes.forEach((pageType) => {
+        const config = createPageSEOConfig(pageType);
+
+        bannedKeywords.forEach((keyword) => {
+          expect(config.keywords).not.toContain(keyword);
+        });
+      });
     });
 
     it("should return correct config for all page types", () => {
