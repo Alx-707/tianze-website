@@ -36,7 +36,10 @@ const CSP_INLINE_SCRIPT_SHA256_BASE64_ALLOWLIST = [
   // Locale-specific inline scripts for `/en` home route (JSON-LD + streamed RSC payload).
   "M58sHH45JvOJ/+TUUZR77KwEQaUjXrF2Vpi7KGGmfoo=",
   "1VpYxXC3q+hYxOKSOO6r3l5xX0lWghAjxhJCV1MGJ7c=",
+  "/98yFs6PuWLmCbIoc5Ds7rlKGCCVVAbp/EiR7UGiH08=",
   "fj1oC3/wZs8vDEvuk4a6VzvRq61bebt+bpngZ+38TRI=",
+  "sQpVd3DjVAxMTrpWAZpebGIW0PsHr6xAYtenUIymbm4=",
+  "SuR1RHwr2HPAm0p8qbuVh9Pqbx+RJnJ/mWNtBZSy9C0=",
   "QbylbhZsSL75OL4NDP2HDPRMjtmgr7DguMEhdk/YbEA=",
   "jnfzFrJufxib7NKZRvmQEj6aSEiJ1RSpGknbbXDey6s=",
   "TcTQd+HmML769MvTdqixiLSvXjkJHlgb2637WPm6Ctw=",
@@ -75,7 +78,10 @@ const CSP_INLINE_SCRIPT_SHA256_BASE64_ALLOWLIST = [
   // Locale-specific inline scripts for `/zh` home route (JSON-LD + streamed RSC payload).
   "JSkRdWTPUR13OV2dQyqC3uQxDGf1sZx5yC7aqOJty4M=",
   "UVgINgKK3LVb6bhjXJWh8hfnTavN7GZTFOIGDQ3lyRM=",
+  "PiQmtASgrSXJNzmwZKaEZNvn22kxNIfAZYLVJnEk+Do=",
   "WyfG6NY0f0xIXlGStZVlpW1fJnNtUjtLbbT9MJyKk9s=",
+  "HjpLMcMiPrZVU+FT38R4Qt03O2e2GP7oWkQfkYkRRS8=",
+  "SC4GnB0JppsvMJHIGLsrxPLLstapQTkC6Fw3RpjT64k=",
   "RKt8AzwGogBNUIYcYZUiZAEtHgR5DpIdU19ZtbVQIlY=",
   "PJm0pssBy6vJj8cIMqkJyZGFc73C0AS8lwpvb2JaiFQ=",
   "B7XOKvTDjW4iB489JD2EScQCgmDUEs77y2LQQ6AruR4=",
