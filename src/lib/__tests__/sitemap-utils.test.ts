@@ -73,26 +73,28 @@ describe("sitemap-utils", () => {
       expect(result).toEqual(mockMtime);
     });
 
-    it("should fallback to current date when no timestamps and no filePath", () => {
-      const before = new Date();
-      const result = getContentLastModified({});
-      const after = new Date();
+    it("should not fallback to fake now when no timestamps and no filePath", () => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date("2026-04-26T00:00:00Z"));
 
-      expect(result.getTime()).toBeGreaterThanOrEqual(before.getTime());
-      expect(result.getTime()).toBeLessThanOrEqual(after.getTime());
+      try {
+        const result = getContentLastModified({});
+
+        expect(result.toISOString()).toBe("2026-01-01T00:00:00.000Z");
+        expect(result.toISOString()).not.toBe("2026-04-26T00:00:00.000Z");
+      } finally {
+        vi.useRealTimers();
+      }
     });
 
-    it("should fallback to current date when fs.stat throws", () => {
+    it("should fallback to conservative fixed date when fs.stat throws", () => {
       mockFs.statSync.mockImplementation(() => {
         throw new Error("File not found");
       });
 
-      const before = new Date();
       const result = getContentLastModified({}, "/nonexistent/file.mdx");
-      const after = new Date();
 
-      expect(result.getTime()).toBeGreaterThanOrEqual(before.getTime());
-      expect(result.getTime()).toBeLessThanOrEqual(after.getTime());
+      expect(result.toISOString()).toBe("2026-01-01T00:00:00.000Z");
     });
 
     it("should skip invalid updatedAt and use publishedAt", () => {
@@ -175,33 +177,32 @@ describe("sitemap-utils", () => {
       expect(result.toISOString()).toBe("2023-01-15T00:00:00.000Z");
     });
 
-    it("should return current date for unknown path", () => {
+    it("should not return fake now for unknown path", () => {
       const config = new Map([["/about", new Date("2023-01-15T00:00:00Z")]]);
 
-      const before = new Date();
-      const result = getStaticPageLastModified("/unknown", config);
-      const after = new Date();
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date("2026-04-26T00:00:00Z"));
 
-      expect(result.getTime()).toBeGreaterThanOrEqual(before.getTime());
-      expect(result.getTime()).toBeLessThanOrEqual(after.getTime());
+      try {
+        const result = getStaticPageLastModified("/unknown", config);
+
+        expect(result.toISOString()).toBe("2026-01-01T00:00:00.000Z");
+        expect(result.toISOString()).not.toBe("2026-04-26T00:00:00.000Z");
+      } finally {
+        vi.useRealTimers();
+      }
     });
 
-    it("should return current date when config is undefined", () => {
-      const before = new Date();
+    it("should return conservative fixed date when config is undefined", () => {
       const result = getStaticPageLastModified("/about");
-      const after = new Date();
 
-      expect(result.getTime()).toBeGreaterThanOrEqual(before.getTime());
-      expect(result.getTime()).toBeLessThanOrEqual(after.getTime());
+      expect(result.toISOString()).toBe("2026-01-01T00:00:00.000Z");
     });
 
-    it("should return current date when config is empty", () => {
-      const before = new Date();
+    it("should return conservative fixed date when config is empty", () => {
       const result = getStaticPageLastModified("/about", new Map());
-      const after = new Date();
 
-      expect(result.getTime()).toBeGreaterThanOrEqual(before.getTime());
-      expect(result.getTime()).toBeLessThanOrEqual(after.getTime());
+      expect(result.toISOString()).toBe("2026-01-01T00:00:00.000Z");
     });
   });
 });
