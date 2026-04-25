@@ -232,7 +232,7 @@ async function BendingMachinesContent({ locale }: { locale: string }) {
       label: t(`${stat.translationKey}.label`),
     }));
   const equipmentSchema = buildEquipmentListSchema({
-    name: "PVC Pipe Bending Machines",
+    name: page.metadata.title,
     items: EQUIPMENT_SPECS.map((spec) => ({
       name: t(`equipment.${spec.slug}.name`),
       description: spec.highlights[locale as Locale].join(", "),

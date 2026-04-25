@@ -403,12 +403,21 @@ const _entries: ContentEntry[] = [
       "slug": "product-market",
       "publishedAt": "2024-11-01",
       "updatedAt": "2026-04-24",
+      "lastReviewed": "2026-04-24",
       "author": "Tianze Pipe Team",
       "layout": "default",
       "draft": false,
       "seo": {
         "title": "Product Market FAQ",
-        "description": "FAQ content for PVC conduit market landing pages."
+        "description": "FAQ content for PVC conduit market landing pages.",
+        "keywords": [
+          "pvc conduit",
+          "schedule 40",
+          "schedule 80",
+          "iec 61386",
+          "lszh",
+          "conduit faq"
+        ]
       },
       "faq": [
         {
@@ -785,12 +794,21 @@ const _entries: ContentEntry[] = [
       "slug": "product-market",
       "publishedAt": "2024-11-01",
       "updatedAt": "2026-04-24",
+      "lastReviewed": "2026-04-24",
       "author": "Tianze Pipe 团队",
       "layout": "default",
       "draft": false,
       "seo": {
         "title": "产品市场 FAQ",
-        "description": "PVC 电工套管市场落地页 FAQ 内容。"
+        "description": "PVC 电工套管市场落地页 FAQ 内容。",
+        "keywords": [
+          "PVC电工套管",
+          "Schedule 40",
+          "Schedule 80",
+          "IEC 61386",
+          "LSZH",
+          "套管常见问题"
+        ]
       },
       "faq": [
         {
