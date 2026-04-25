@@ -273,7 +273,7 @@ test.describe("Next.js 16 国际化重定向验证", () => {
       });
 
       // localePrefix: 'always' 要求所有路径必须包含语言前缀
-      const response = await page.goto(`${BASE_URL}/en/blog`, {
+      const response = await page.goto(`${BASE_URL}/en/about`, {
         timeout: 30000,
         waitUntil: "networkidle",
       });
@@ -282,7 +282,7 @@ test.describe("Next.js 16 国际化重定向验证", () => {
 
       // 应该保持英文（URL 已指定 /en/，不受 Accept-Language 影响）
       const finalUrl = page.url();
-      expect(finalUrl).toMatch(/\/en\/blog\/?$/);
+      expect(finalUrl).toMatch(/\/en\/about\/?$/);
 
       // 等待客户端水合完成后再检查 lang 属性
       // html[lang] 应在服务端首包上正确，无需客户端补丁
@@ -290,7 +290,7 @@ test.describe("Next.js 16 国际化重定向验证", () => {
 
       // NOTE: 此测试仅验证 lang 属性设置正确，不验证页面内容是否正常加载。
       // 如果页面渲染 global-error.tsx，测试仍会通过（因为 global-error 也设置 lang）。
-      // 页面内容验证应在专门的 Blog 功能测试中进行。
+      // 页面内容验证应在专门的功能测试中进行。
     });
   });
 

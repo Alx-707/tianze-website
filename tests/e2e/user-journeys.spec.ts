@@ -78,7 +78,6 @@ test.describe("Journey: Navigate All Pages (BC-002)", () => {
     { path: "/en/about", titlePattern: /About/i },
     { path: "/en/products", titlePattern: /Product/i },
     { path: "/en/contact", titlePattern: /Contact|Tianze/i },
-    { path: "/en/blog", titlePattern: /Blog|Tianze/i },
     {
       path: "/en/oem-custom-manufacturing",
       titlePattern: /OEM|Custom|Tianze/i,

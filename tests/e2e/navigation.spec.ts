@@ -88,8 +88,9 @@ test.describe("Navigation System", () => {
       // All navigation items are links (Products no longer has dropdown children)
       await expect(nav.getByRole("link", { name: "Home" })).toBeVisible();
       await expect(nav.getByRole("link", { name: "Products" })).toBeVisible();
-      await expect(nav.getByRole("link", { name: "Blog" })).toBeVisible();
+      await expect(nav.getByRole("link", { name: "OEM" })).toBeVisible();
       await expect(nav.getByRole("link", { name: "About" })).toBeVisible();
+      await expect(nav.getByRole("link", { name: "Contact" })).toBeVisible();
     });
 
     test("should navigate between pages and highlight active link", async ({
@@ -253,10 +254,13 @@ test.describe("Navigation System", () => {
       // Verify sheet content
       await expect(mobileNavSheet.getByRole("heading").first()).toBeVisible();
 
-      // Verify navigation links in mobile menu (match actual config: home, products, blog, about)
-      const expectedLinks = ["Home", "Products", "Blog", "About"];
+      // Verify navigation links in mobile menu (match actual config)
+      const expectedLinks = ["Home", "Products", "OEM", "About", "Contact"];
       for (const linkText of expectedLinks) {
-        const link = mobileNavSheet.getByRole("link", { name: linkText });
+        const link = mobileNavSheet.getByRole("link", {
+          exact: true,
+          name: linkText,
+        });
         await expect(link).toBeVisible();
       }
       await expect(mobileNavSheet.getByText("Select Language")).toBeVisible();
