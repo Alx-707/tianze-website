@@ -108,6 +108,21 @@ describe("UTM Parameter Tracking", () => {
 
       expect(params.utmSource?.length).toBeLessThanOrEqual(256);
     });
+
+    it.each([
+      "pvc-conduit",
+      "brand_search",
+      "pvc conduit",
+      "brand+search",
+      "google/cpc",
+      "spring-2026",
+    ])("should keep valid campaign value %s", (campaign) => {
+      window.location.search = `?utm_campaign=${encodeURIComponent(campaign)}`;
+
+      const params = captureUtmParams();
+
+      expect(params.utmCampaign).toBe(campaign);
+    });
   });
 
   describe("captureClickIds", () => {

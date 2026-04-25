@@ -30,8 +30,11 @@ export interface AttributionData extends UtmParams, ClickIds {
 function sanitizeParam(value: string | null): string | undefined {
   if (!value) return undefined;
   const trimmed = value.trim().slice(0, 256);
-  // Only allow alphanumeric, underscore, hyphen
-  return /^[a-zA-Z0-9_-]+$/.test(trimmed) ? trimmed : undefined;
+  if (!trimmed) return undefined;
+  // Allow printable ASCII while blocking control chars and dangerous HTML delimiters.
+  return /^[\x20-\x7E]+$/.test(trimmed) && !/[<>"'`]/.test(trimmed)
+    ? trimmed
+    : undefined;
 }
 
 export function captureUtmParams(): UtmParams {
@@ -92,7 +95,7 @@ export function storeAttributionData(): void {
   if (!hasData) return;
 
   // nosemgrep: object-injection-sink-spread-operator
-  // Safe: utmParams and clickIds are derived from sanitizeParam() which validates alphanumeric only
+  // Safe: utmParams and clickIds are derived from sanitizeParam(), which blocks control chars and dangerous HTML delimiters.
   const data: AttributionData = {
     ...utmParams,
     ...clickIds,
@@ -117,7 +120,7 @@ export function getAttributionSnapshot(): AttributionData {
 
   // Fallback to current URL params if no stored data
   // nosemgrep: object-injection-sink-spread-operator
-  // Safe: captureUtmParams/captureClickIds return sanitized objects with validated alphanumeric values
+  // Safe: captureUtmParams/captureClickIds return sanitized objects with printable ASCII values minus dangerous HTML delimiters.
   return {
     ...captureUtmParams(),
     ...captureClickIds(),
