@@ -16,7 +16,7 @@ import type { ArticleData } from "@/lib/structured-data-types";
 import { MDXContent } from "@/components/mdx";
 import { JsonLdScript } from "@/components/seo";
 import { Badge } from "@/components/ui/badge";
-import { SITE_CONFIG } from "@/config/paths";
+import { getLocalizedPath, SITE_CONFIG } from "@/config/paths";
 
 function BlogDetailLoadingSkeleton() {
   return (
@@ -130,7 +130,7 @@ export async function generateMetadata({
     return generateMetadataForPath({
       locale: locale as SeoLocale,
       pageType: "blog",
-      path: `/blog/${slug}`,
+      path: `${getLocalizedPath("blog", locale as SeoLocale)}/${slug}`,
       config: buildBlogDetailSEOConfig(post),
     });
   } catch {
