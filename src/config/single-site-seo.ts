@@ -55,14 +55,14 @@ export const SINGLE_SITE_SITEMAP_DEFAULT_CONFIG = {
 export const SINGLE_SITE_STATIC_PAGE_LASTMOD = {
   // Non-MDX routes and product market pages use this sidecar date source.
   // MDX-driven pages read updatedAt from content/pages/{locale}/*.mdx.
-  "": "2024-12-01T00:00:00Z",
-  "/products": "2024-11-01T00:00:00Z",
+  "": "2026-04-26T00:00:00Z",
+  "/products": "2026-04-26T00:00:00Z",
   "/blog": "2024-11-01T00:00:00Z",
-  "/products/north-america": "2024-11-01T00:00:00Z",
-  "/products/australia-new-zealand": "2024-11-01T00:00:00Z",
-  "/products/mexico": "2024-11-01T00:00:00Z",
-  "/products/europe": "2024-11-01T00:00:00Z",
-  "/products/pneumatic-tube-systems": "2024-11-01T00:00:00Z",
+  "/products/north-america": "2026-04-26T00:00:00Z",
+  "/products/australia-new-zealand": "2026-04-26T00:00:00Z",
+  "/products/mexico": "2026-04-26T00:00:00Z",
+  "/products/europe": "2026-04-26T00:00:00Z",
+  "/products/pneumatic-tube-systems": "2026-04-26T00:00:00Z",
 } as const satisfies Record<string, string>;
 
 export const SINGLE_SITE_ROBOTS_DISALLOW_PATHS = [
