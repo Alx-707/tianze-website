@@ -7,6 +7,7 @@ import {
   generateMetadataForPath,
   type Locale as SeoLocale,
 } from "@/lib/seo-metadata";
+import { getLocalizedPath } from "@/config/paths";
 import { PostGrid } from "@/components/blog/post-grid";
 import { generateLocaleStaticParams } from "@/app/[locale]/generate-static-params";
 
@@ -48,7 +49,7 @@ export async function generateMetadata({
   return generateMetadataForPath({
     locale: locale as SeoLocale,
     pageType: "blog",
-    path: "/blog",
+    path: getLocalizedPath("blog", locale as SeoLocale),
     config: {
       title: t("pageTitle"),
       description: t("pageDescription"),

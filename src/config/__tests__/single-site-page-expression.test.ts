@@ -14,10 +14,8 @@ import {
   SINGLE_SITE_HOME_QUALITY_STANDARD_ITEMS,
   SINGLE_SITE_HOME_SCENARIO_ITEMS,
   SINGLE_SITE_HOME_TRAILING_SECTION_ORDER,
-  SINGLE_SITE_MARKET_FAQ_ITEMS,
   SINGLE_SITE_OEM_PAGE_EXPRESSION,
   SINGLE_SITE_PRODUCTS_PAGE_EXPRESSION,
-  getSingleSiteAboutShellCopy,
 } from "@/config/single-site-page-expression";
 
 describe("single-site-page-expression", () => {
@@ -101,28 +99,6 @@ describe("single-site-page-expression", () => {
       "standards",
       "countries",
     ]);
-  });
-
-  it("keeps market FAQ keys explicit", () => {
-    expect(SINGLE_SITE_MARKET_FAQ_ITEMS).toEqual([
-      "sch40vs80",
-      "conduitSize",
-      "bendingRadius",
-      "strengthGrades",
-      "lszh",
-      "standardsDifference",
-      "directBurial",
-      "indoorOutdoor",
-      "solarDataCenter",
-      "corrosion",
-    ]);
-  });
-
-  it("keeps about shell copy outside translation JSON", () => {
-    expect(getSingleSiteAboutShellCopy("en").valuesTitle).toBe(
-      "Manufacturing Excellence",
-    );
-    expect(getSingleSiteAboutShellCopy("zh").cta.button).toBe("获取报价");
   });
 
   it("keeps product page grouping aligned with the catalog", () => {

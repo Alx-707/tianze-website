@@ -17,6 +17,7 @@ import {
   getRuntimeEnvString,
   getRuntimeNodeEnv,
   isRuntimeCi,
+  isRuntimeCloudflare,
   isRuntimeDevelopment,
   isRuntimePlaywright,
   isRuntimeProduction,
@@ -32,6 +33,8 @@ afterEach(() => {
   vi.stubEnv("CI", "false");
   vi.stubEnv("PLAYWRIGHT_TEST", "false");
   vi.stubEnv("NEXT_PHASE", "");
+  vi.stubEnv("DEPLOYMENT_PLATFORM", "");
+  vi.stubEnv("NEXT_PUBLIC_DEPLOYMENT_PLATFORM", "vercel");
   vi.stubEnv("PORT", "");
   vi.stubEnv("TURNSTILE_BYPASS", "false");
 });
@@ -156,6 +159,12 @@ describe("env type safety", () => {
     expect("RESEND_API_KEY" in env).toBe(true);
   });
 
+  it("exposes the production runtime contract vars through the central env object", () => {
+    expect("NEXT_SERVER_ACTIONS_ENCRYPTION_KEY" in env).toBe(true);
+    expect("ALLOW_MEMORY_RATE_LIMIT" in env).toBe(true);
+    expect("ALLOW_MEMORY_IDEMPOTENCY" in env).toBe(true);
+  });
+
   it("should have correct client env vars defined", () => {
     expect("NEXT_PUBLIC_BASE_URL" in env).toBe(true);
     expect("NEXT_PUBLIC_TURNSTILE_SITE_KEY" in env).toBe(true);
@@ -198,6 +207,18 @@ describe("runtime env helpers", () => {
     expect(getRuntimeAppEnv()).toBe("preview");
     expect(isSecureAppEnv()).toBe(true);
     expect(isRuntimeProductionBuildPhase()).toBe(true);
+  });
+
+  it("detects Cloudflare runtime from server or public deployment platform", () => {
+    vi.stubEnv("DEPLOYMENT_PLATFORM", "cloudflare");
+    expect(isRuntimeCloudflare()).toBe(true);
+
+    vi.stubEnv("DEPLOYMENT_PLATFORM", "");
+    vi.stubEnv("NEXT_PUBLIC_DEPLOYMENT_PLATFORM", "cloudflare");
+    expect(isRuntimeCloudflare()).toBe(true);
+
+    vi.stubEnv("NEXT_PUBLIC_DEPLOYMENT_PLATFORM", "vercel");
+    expect(isRuntimeCloudflare()).toBe(false);
   });
 
   it("returns undefined for unknown runtime app env", () => {

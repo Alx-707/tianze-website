@@ -16,6 +16,8 @@ export interface ContentEntry {
   extension: string;
   filePath: string;
   relativePath: string;
+  metadata: Record<string, unknown>;
+  content: string;
 }
 
 export interface ContentManifest {
@@ -23,233 +25,905 @@ export interface ContentManifest {
   byKey: Record<string, ContentEntry>;
 }
 
+const _entries: ContentEntry[] = [
+  {
+    "type": "posts",
+    "locale": "en",
+    "slug": "welcome",
+    "extension": ".mdx",
+    "filePath": "/content/posts/en/welcome.mdx",
+    "relativePath": "content/posts/en/welcome.mdx",
+    "metadata": {
+      "locale": "en",
+      "title": "What Tianze Builds and Why Full-Chain Manufacturing Matters",
+      "description": "An introduction to Tianze Pipe, from conduit fittings and PETG pneumatic tubes to the bending equipment and molds behind them.",
+      "slug": "welcome",
+      "publishedAt": "2024-01-15",
+      "updatedAt": "2026-04-01",
+      "author": "Tianze Pipe Team",
+      "tags": [
+        "PVC conduit",
+        "pipe bending machine",
+        "PETG pneumatic tube",
+        "OEM manufacturing"
+      ],
+      "categories": [
+        "Company",
+        "Manufacturing"
+      ],
+      "featured": true,
+      "draft": false,
+      "excerpt": "Tianze combines pipe processing equipment, mold capability, and product manufacturing in one supply chain for global B2B buyers.",
+      "readingTime": 5,
+      "coverImage": "/images/blog/welcome-cover.jpg",
+      "seo": {
+        "title": "What Tianze Builds and Why Full-Chain Manufacturing Matters",
+        "description": "Learn how Tianze links equipment, molds, conduit fittings, and pneumatic tube production into one manufacturing chain.",
+        "keywords": [
+          "Tianze Pipe",
+          "PVC conduit manufacturer",
+          "bending machine manufacturer",
+          "PETG pneumatic tube",
+          "OEM pipe fittings"
+        ],
+        "ogImage": "/images/og-image.jpg"
+      }
+    },
+    "content": "\n# What Tianze Builds and Why Full-Chain Manufacturing Matters\n\nWhen buyers look for conduit fittings or pneumatic tube products, they usually\nsee a crowded market of traders, factories, and mixed suppliers. Tianze takes a\ndifferent position.\n\nWe are not only selling finished products. We also build the **equipment**,\n**molds**, and **forming process** behind those products. That matters because\nit changes how quickly we can react, how consistently we can produce, and how\nfar we can go on custom requirements.\n\n## Our Three Core Product Directions\n\n### 1. PVC Conduit Fittings and Pipes\n\nWe manufacture conduit bends, sockets, couplings, straight pipes, and related\nparts for different market standards and project needs.\n\n### 2. Pipe Processing Equipment\n\nTianze develops and manufactures bending machines, expanders, cutters, and\ntooling used in pipe processing. This is the engineering base behind our product\noffer.\n\n### 3. PETG Pneumatic Tube Systems\n\nFor medical and logistics applications, we also supply PETG pneumatic tubes,\nbends, and connectors with an emphasis on transparency, stability, and fit-up\naccuracy.\n\n## Why This Model Helps Buyers\n\n### Faster Response on Custom Work\n\nBecause the forming process is part of our own capability, custom bends and\nnon-standard parts are easier to assess and move into sampling.\n\n### Better Process Control\n\nEquipment, molds, and finished products are not being pushed across a chain of\nunrelated suppliers. That reduces variation and speeds up troubleshooting.\n\n### More Practical OEM Support\n\nFor buyers who need packaging adjustment, specification confirmation, or pilot\nsamples before scale, the direct factory model is easier to work with.\n\n## A Quick Tianze Snapshot\n\n- Operations started in **2018**\n- Formal registration completed in **2023**\n- Team size of **60 employees**\n- Export experience across **20+ countries**\n- ISO 9001:2015 certified quality system\n\n## What Comes Next\n\nThis site will keep expanding around three things buyers care about most:\n\n- product clarity\n- process proof\n- faster contact and quotation flow\n\nIf you are sourcing conduit fittings, pipe equipment, or pneumatic tube\nproducts, the fastest way to start is to send your drawing, target market, or\nrequired standard.\n\n_The value is not only in the pipe. It is in the process behind the pipe._\n"
+  },
+  {
+    "type": "posts",
+    "locale": "zh",
+    "slug": "welcome",
+    "extension": ".mdx",
+    "filePath": "/content/posts/zh/welcome.mdx",
+    "relativePath": "content/posts/zh/welcome.mdx",
+    "metadata": {
+      "locale": "zh",
+      "title": "天泽到底做什么，以及为什么全链制造很重要",
+      "description": "从 PVC 电工套管、PETG 气动物流管，到背后的弯管设备与模具能力，这篇文章介绍天泽的核心业务。",
+      "slug": "welcome",
+      "publishedAt": "2024-01-15",
+      "updatedAt": "2026-04-01",
+      "author": "Tianze Pipe 团队",
+      "tags": [
+        "PVC 电工套管",
+        "弯管机",
+        "PETG 气动物流管",
+        "OEM 制造"
+      ],
+      "categories": [
+        "公司",
+        "制造"
+      ],
+      "featured": true,
+      "draft": false,
+      "excerpt": "天泽把设备、模具和管件制造放在同一条链路里，这让全球 B2B 客户在定制、交付和一致性上更有把握。",
+      "readingTime": 5,
+      "coverImage": "/images/blog/welcome-cover.jpg",
+      "seo": {
+        "title": "天泽到底做什么，以及为什么全链制造很重要",
+        "description": "了解天泽如何把设备、模具、电工套管配件和气动物流管生产串成同一条制造链。",
+        "keywords": [
+          "天泽管业",
+          "PVC 电工套管",
+          "弯管机制造商",
+          "PETG 气动物流管",
+          "OEM 管件制造"
+        ],
+        "ogImage": "/images/og-image.jpg"
+      }
+    },
+    "content": "\n# 天泽到底做什么，以及为什么全链制造很重要\n\n很多采购商在找套管配件或气动物流管时，看到的往往是工厂、贸易商和混合供应商混在一起的市场。天泽的位置不一样。\n\n我们不只是卖成品，也掌握这些产品背后的 **设备**、**模具** 和\n**成型工艺**。这件事的重要性，不在于概念，而在于它会直接影响定制响应速度、量产稳定性和问题处理效率。\n\n## 我们的三条核心产品线\n\n### 1. PVC 电工套管及配件\n\n我们提供直管、弯头、接头、扩口、双承口等产品，覆盖不同市场标准和项目需求。\n\n### 2. 管材加工设备\n\n天泽自主研发和制造弯管机、扩管机、切管机及配套模具，这也是我们产品能力的工程底座。\n\n### 3. PETG 气动物流管系统\n\n针对医院和物流场景，我们也供应 PETG 气动物流管、弯管和连接件，重点在透明度、稳定性和装配匹配度。\n\n## 这种模式为什么对采购更有价值\n\n### 非标项目响应更快\n\n因为我们自己理解成型过程，所以面对特殊弯头、非标规格和小批量打样时，判断和推进都更直接。\n\n### 工艺控制更稳定\n\n设备、模具和成品不需要在多个无关供应商之间反复传递，生产一致性和问题排查效率都会更好。\n\n### OEM 支持更务实\n\n对于需要贴牌包装、规格确认、样品先行再量产的客户，厂家直供的协作方式更顺。\n\n## 一个简短的天泽概况\n\n- **开始运营：** 2018 年\n- **正式注册：** 2023 年\n- **团队规模：** 60 人\n- **出口经验：** 20+ 国家\n- **质量体系：** ISO 9001:2015\n\n## 接下来你会在这个网站上看到什么\n\n这个网站接下来会持续围绕三件事展开：\n\n- 产品边界更清楚\n- 工艺能力更可见\n- 联系和询盘路径更直接\n\n如果你正在采购电工套管配件、弯管设备或气动物流管产品，最直接的开始方式就是把图纸、目标市场或标准要求发给我们。\n\n_价值不只在管材本身，也在它背后的工艺链路。_\n"
+  },
+  {
+    "type": "pages",
+    "locale": "en",
+    "slug": "about",
+    "extension": ".mdx",
+    "filePath": "/content/pages/en/about.mdx",
+    "relativePath": "content/pages/en/about.mdx",
+    "metadata": {
+      "locale": "en",
+      "title": "About Tianze Pipe",
+      "description": "Learn how Tianze combines bending equipment know-how, conduit production, and OEM flexibility for global B2B buyers.",
+      "slug": "about",
+      "publishedAt": "2024-01-10",
+      "updatedAt": "2026-04-01",
+      "author": "Tianze Pipe Team",
+      "layout": "default",
+      "showToc": true,
+      "lastReviewed": "2026-04-01",
+      "draft": false,
+      "heroTitle": "About Tianze Pipe",
+      "heroSubtitle": "Pipe Bending Experts",
+      "heroDescription": "We combine bending equipment know-how, conduit production, and OEM flexibility — serving global B2B buyers from our Lianyungang factory.",
+      "seo": {
+        "title": "About Tianze Pipe",
+        "description": "Tianze Pipe is a manufacturer of PVC conduit systems, PETG pneumatic tubes, and pipe processing equipment with in-house bending capability.",
+        "keywords": [
+          "Tianze Pipe",
+          "PVC conduit manufacturer",
+          "pipe bending machine",
+          "PETG pneumatic tube"
+        ],
+        "ogImage": "/images/about-og.jpg"
+      },
+      "aboutSections": {
+        "valuesTitle": "Manufacturing Excellence",
+        "values": {
+          "quality": {
+            "title": "Precision Engineering",
+            "description": "Every bend is engineered for consistency, with process control built around stable dimensions and repeatable results."
+          },
+          "innovation": {
+            "title": "In-House R&D",
+            "description": "From bending machines to custom molds, we develop key production capability inside the factory."
+          },
+          "service": {
+            "title": "Technical Support",
+            "description": "Our team supports buyers with product matching, sample review, documentation, and export coordination."
+          },
+          "integrity": {
+            "title": "Certified Quality",
+            "description": "ISO 9001:2015 certified production, traceable batches, and clear standard-matching for export projects."
+          }
+        },
+        "statLabels": {
+          "yearsExperience": "Years Experience",
+          "countriesServed": "Export Countries",
+          "happyClients": "Team Members",
+          "productsDelivered": "Factory Area (Acres)"
+        },
+        "cta": {
+          "title": "Partner With Pipe Bending Experts",
+          "description": "Whether you need bending machines, custom molds, or finished fittings, our team is ready to discuss your project.",
+          "button": "Request Quote"
+        }
+      },
+      "faq": [
+        {
+          "id": "manufacturer",
+          "question": "Are you a manufacturer or trading company?",
+          "answer": "Tianze Pipe is a direct manufacturer established in 2018. We operate our own factory in Lianyungang, Jiangsu Province, with full control over production quality and timelines."
+        },
+        {
+          "id": "factory-visit",
+          "question": "Can I visit your factory?",
+          "answer": "Yes, we welcome factory visits. We can arrange a guided tour of our production facilities, quality testing lab, and warehouse. Contact us to schedule a visit."
+        },
+        {
+          "id": "export-experience",
+          "question": "What is your export experience?",
+          "answer": "We export to 20+ countries across Southeast Asia, the Middle East, Africa, South America, and Oceania. Our team handles international logistics, documentation, and customs requirements."
+        },
+        {
+          "id": "certifications",
+          "question": "What certifications do your products have?",
+          "answer": "Our products comply with international standards including AS/NZS 2053, ASTM D1785, IEC 61386, and NOM. We maintain ISO 9001:2015 quality management certification."
+        },
+        {
+          "id": "verify-certs",
+          "question": "How can I verify your certifications?",
+          "answer": "We provide official certification documents upon request. You can also verify our ISO certification through our registrar. Contact our sales team for documentation."
+        }
+      ]
+    },
+    "content": "\n## Who We Are\n\nTianze Pipe is a manufacturer focused on **PVC conduit fittings**, **pipe\nprocessing equipment**, and **PETG pneumatic tube systems**. Our advantage is\nsimple: we do not only sell pipe products, we also build the machines and molds\nbehind them.\n\nThat upstream control lets us respond faster on tooling, keep quality more\nstable, and support custom projects that are hard for pure traders to handle.\n\n## What We Make\n\n### PVC Conduit Fittings and Pipes\n\nWe produce conduit bends, straight pipes, couplings, bell ends, double-socket\nparts, and related fittings for multiple market standards.\n\n### Pipe Processing Equipment\n\nOur team develops and manufactures semi-automatic and fully automatic pipe\nbending machines, pipe expanders, cutters, and molds used in our own production\nworkflow.\n\n### PETG Pneumatic Tube Systems\n\nWe also supply high-transparency pneumatic tube products for hospital and\nlogistics applications, including straight tubes, bends, and connectors.\n\n## Why Buyers Work With Tianze\n\n### Equipment + Process + Fittings in One Chain\n\nBecause we understand the forming process from the equipment side, we can move\nfaster on difficult specifications, tooling changes, and production setup.\n\n### Flexible OEM and Custom Support\n\nWe support customer specifications, private label packaging, bend development,\nand pilot sample work before larger production.\n\n### Stable Export Supply\n\nTianze currently serves buyers in **20+ countries** with a focus on electrical\nconduit and industrial pipe applications.\n\n## Company Snapshot\n\n- **Operations started:** 2018\n- **Formal registration:** 2023\n- **Team size:** 60 employees\n- **Factory footprint:** 100 mu\n- **Certification:** ISO 9001:2015\n\n## How We Work\n\n### 1. Understand the Requirement\n\nWe review the application, standard, bend form, diameter range, and packaging\nrequirement before proposing a solution.\n\n### 2. Confirm Feasibility and Tooling\n\nFor standard products, we match existing production capability. For custom\nparts, we review tooling, mold, and process requirements first.\n\n### 3. Sample and Production\n\nAfter sample confirmation, we move into stable production with batch control and\ndelivery planning.\n\n## What We Care About\n\n- Practical communication\n- Fast response on technical questions\n- Honest feasibility feedback\n- Quality consistency in repeat orders\n\n## Contact\n\nIf you are sourcing conduit fittings, pipe processing equipment, or pneumatic\ntube products, contact us with your drawing, target market, or product list.\n\n- **Email:** sales@tianze-pipe.com\n- **Website:** https://tianze-pipe.com\n\n_Built for buyers who care about process control, not just unit price._\n"
+  },
+  {
+    "type": "pages",
+    "locale": "en",
+    "slug": "bending-machines",
+    "extension": ".mdx",
+    "filePath": "/content/pages/en/bending-machines.mdx",
+    "relativePath": "content/pages/en/bending-machines.mdx",
+    "metadata": {
+      "locale": "en",
+      "title": "PVC Pipe Bending Machines",
+      "description": "Full-auto and semi-auto PVC pipe bending machines designed and manufactured in-house.",
+      "slug": "bending-machines",
+      "publishedAt": "2026-03-23",
+      "updatedAt": "2026-04-01",
+      "lastReviewed": "2026-04-01",
+      "draft": false,
+      "seo": {
+        "title": "PVC Pipe Bending Machines | Tianze Equipment",
+        "description": "Industrial PVC pipe bending machines — full-auto CNC and semi-auto models. Designed and manufactured by Tianze for conduit fitting production."
+      },
+      "faq": [
+        {
+          "id": "bending-capacity",
+          "question": "What pipe sizes can your bending machines handle?",
+          "answer": "Our full-auto machine handles DN25-DN160mm. The semi-auto model covers DN20-DN110mm. Custom size ranges can be configured."
+        },
+        {
+          "id": "bending-automation",
+          "question": "What is the difference between full-auto and semi-auto?",
+          "answer": "Full-auto features CNC control with automatic feeding and multi-station design — ideal for high-volume production. Semi-auto requires manual loading but offers lower investment for smaller operations."
+        },
+        {
+          "id": "bending-support",
+          "question": "Do you provide installation and training?",
+          "answer": "Yes, we provide on-site installation, operator training, and ongoing technical support. Remote diagnostics are available for the full-auto model."
+        },
+        {
+          "id": "bending-spare-parts",
+          "question": "How do I get spare parts?",
+          "answer": "We maintain a spare parts inventory for all our machine models. Standard parts ship within 3-5 days. We also offer annual maintenance contracts."
+        }
+      ]
+    },
+    "content": "\n## Machine FAQ\n\nThis MDX file owns SEO metadata and FAQ content for the bending machines page. The visible machine cards, specifications, process steps, support copy, and CTA modules remain structured page sections powered by the translation namespace.\n"
+  },
+  {
+    "type": "pages",
+    "locale": "en",
+    "slug": "contact",
+    "extension": ".mdx",
+    "filePath": "/content/pages/en/contact.mdx",
+    "relativePath": "content/pages/en/contact.mdx",
+    "metadata": {
+      "locale": "en",
+      "title": "Contact Us",
+      "description": "Get in touch with Tianze Pipe for product inquiries, OEM requests, or technical support.",
+      "slug": "contact",
+      "publishedAt": "2024-01-01",
+      "updatedAt": "2026-04-01",
+      "lastReviewed": "2026-04-01",
+      "draft": false,
+      "seo": {
+        "title": "Contact Tianze Pipe | Get a Quote",
+        "description": "Contact our sales team for PVC conduit fittings inquiries, OEM manufacturing requests, or technical support. Quick response within 24 hours."
+      },
+      "faq": [
+        {
+          "id": "moq",
+          "question": "What is your minimum order quantity (MOQ)?",
+          "answer": "Our standard MOQ is 500 pieces per SKU for stock items. For custom/OEM orders, MOQ may vary — contact us for specific requirements."
+        },
+        {
+          "id": "lead-time",
+          "question": "What is your typical lead time?",
+          "answer": "Standard products: 15-20 working days. Custom/OEM orders: 25-35 working days depending on specifications and quantity."
+        },
+        {
+          "id": "payment",
+          "question": "What payment terms do you accept?",
+          "answer": "We accept T/T (30% deposit, 70% before shipment), L/C at sight, and Western Union for sample orders."
+        },
+        {
+          "id": "samples",
+          "question": "Can I get product samples?",
+          "answer": "Yes, we provide free samples for standard products (buyer pays shipping). Custom samples may have a small tooling fee."
+        },
+        {
+          "id": "oem",
+          "question": "Do you offer OEM/ODM services?",
+          "answer": "Yes, we provide full OEM/ODM services including custom colors, sizes, packaging, and branding. Minimum order quantities apply."
+        }
+      ]
+    },
+    "content": "\n## Get in Touch\n\nHave questions about our PVC conduit fittings or bending machines? Our\ninternational sales team responds within 24 business hours.\n\n## Response Expectations\n\n- **Email inquiries**: Response within 24 hours on business days\n- **Quote requests**: Detailed quotation within 48 hours\n- **Technical questions**: Our engineering team will respond within 2 business days\n- **Sample requests**: Confirmation and shipping details within 3 business days\n"
+  },
+  {
+    "type": "pages",
+    "locale": "en",
+    "slug": "oem-custom-manufacturing",
+    "extension": ".mdx",
+    "filePath": "/content/pages/en/oem-custom-manufacturing.mdx",
+    "relativePath": "content/pages/en/oem-custom-manufacturing.mdx",
+    "metadata": {
+      "locale": "en",
+      "title": "OEM Custom Manufacturing",
+      "description": "Custom PVC conduit fittings manufacturing — your brand, your specs, our factory.",
+      "slug": "oem-custom-manufacturing",
+      "publishedAt": "2024-06-01",
+      "updatedAt": "2026-04-01",
+      "lastReviewed": "2026-04-01",
+      "draft": false,
+      "seo": {
+        "title": "OEM Custom PVC Conduit Manufacturing | Tianze Pipe",
+        "description": "Full OEM/ODM services for PVC conduit fittings. Custom colors, sizes, packaging, and branding from our ISO-certified factory."
+      },
+      "faq": [
+        {
+          "id": "oem-moq",
+          "question": "What is the MOQ for OEM orders?",
+          "answer": "OEM orders typically require a minimum of 1,000 pieces per SKU. For new molds, higher quantities may be required to offset tooling costs."
+        },
+        {
+          "id": "oem-lead-time",
+          "question": "How long does an OEM order take?",
+          "answer": "First order with new molds: 35-45 days. Repeat orders: 20-25 days. Rush orders may be available — contact us for details."
+        },
+        {
+          "id": "oem-branding",
+          "question": "Can you put our brand on the products?",
+          "answer": "Yes, we offer full branding services including custom printing, embossing, packaging design, and labeling to your specifications."
+        },
+        {
+          "id": "oem-standards",
+          "question": "Which international standards can you manufacture to?",
+          "answer": "We manufacture to AS/NZS 2053, ASTM D1785, IEC 61386, NOM, and other regional standards. We can also work with your custom specifications."
+        },
+        {
+          "id": "oem-quality",
+          "question": "How do you ensure quality for OEM orders?",
+          "answer": "We maintain ISO 9001:2015 certification. Every OEM order goes through our standard QC process including raw material testing, in-process inspection, and final inspection with photo documentation."
+        }
+      ]
+    },
+    "content": "\n## OEM Manufacturing Scope\n\nThis MDX file owns SEO metadata and FAQ content for the OEM page. The visible scope cards, process steps, standards, and CTA modules remain structured page sections powered by the translation namespace.\n"
+  },
+  {
+    "type": "pages",
+    "locale": "en",
+    "slug": "privacy",
+    "extension": ".mdx",
+    "filePath": "/content/pages/en/privacy.mdx",
+    "relativePath": "content/pages/en/privacy.mdx",
+    "metadata": {
+      "locale": "en",
+      "title": "Privacy Policy",
+      "slug": "privacy",
+      "description": "Learn how Lianyungang Tianze Pipe Industry Co., Ltd. collects, uses, and protects your personal information. Our privacy policy explains your rights and our data handling practices.",
+      "publishedAt": "2024-01-01",
+      "updatedAt": "2024-04-01",
+      "author": "Legal Team",
+      "layout": "default",
+      "showToc": true,
+      "lastReviewed": "2024-04-01",
+      "draft": false,
+      "seo": {
+        "title": "Privacy Policy | Data Protection and Your Rights",
+        "description": "Our privacy policy explains how we collect, use, and protect your personal data. Learn about your rights under GDPR and CCPA.",
+        "keywords": [
+          "privacy policy",
+          "data protection",
+          "GDPR",
+          "CCPA",
+          "personal data"
+        ]
+      }
+    },
+    "content": "\n**Effective Date:** January 1, 2024\n**Last Updated:** April 1, 2024\n\n## Introduction \\{#introduction\\}\n\nLianyungang Tianze Pipe Industry Co., Ltd. (\"we,\" \"our,\" or \"us\") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website or engage with our services.\n\nPlease read this privacy policy carefully. If you do not agree with the terms of this privacy policy, please do not access the site.\n\n## Information We Collect \\{#info-collect\\}\n\n### Information You Provide to Us\n\nWe may collect information that you voluntarily provide when you:\n\n- Fill out inquiry or contact forms\n- Request a quotation\n- Subscribe to our newsletter\n- Create an account\n- Communicate with us via email, phone, or chat\n\nThis information may include:\n\n- **Contact Information**: Name, email address, phone number, company name, job title\n- **Business Information**: Company address, industry, purchasing requirements\n- **Communication Records**: Correspondence history, inquiry details\n- **Account Information**: Username, password (encrypted)\n\n### Information Automatically Collected\n\nWhen you visit our website, we automatically collect certain information about your device and usage patterns:\n\n- **Device Information**: IP address, browser type, operating system, device identifiers\n- **Usage Data**: Pages visited, time spent on pages, click patterns, referring URLs\n- **Location Data**: Country and city based on IP address (not precise location)\n\n### Cookies and Tracking Technologies\n\nWe use cookies and similar tracking technologies to enhance your experience:\n\n| Cookie Type | Purpose | Duration |\n|-------------|---------|----------|\n| Essential | Website functionality | Session |\n| Preference | Remember your settings | 1 year |\n| Analytics | Understand usage patterns | 2 years |\n| Marketing | Personalized content (if enabled) | 1 year |\n\nYou can control cookie preferences through your browser settings or our cookie consent banner.\n\n## How We Use Your Information \\{#how-we-use\\}\n\nWe use the information we collect for the following purposes:\n\n### Business Operations\n\n- Process and respond to your inquiries\n- Provide quotations and facilitate orders\n- Communicate about products and services\n- Manage customer relationships\n\n### Website Improvement\n\n- Analyze website usage and performance\n- Improve user experience and navigation\n- Develop new features and content\n- Troubleshoot technical issues\n\n### Marketing (With Your Consent)\n\n- Send newsletters and product updates\n- Provide personalized recommendations\n- Conduct customer surveys\n\n### Legal and Compliance\n\n- Comply with legal obligations\n- Protect against fraud and abuse\n- Enforce our terms of service\n\n## Legal Basis for Processing (GDPR) \\{#legal-basis\\}\n\nFor users in the European Economic Area (EEA), we process your personal data based on:\n\n- **Consent**: When you opt-in to marketing communications\n- **Contract Performance**: To fulfill business transactions\n- **Legitimate Interests**: For business operations and website improvement\n- **Legal Obligation**: To comply with applicable laws\n\n## Information Sharing and Disclosure \\{#sharing\\}\n\nWe do not sell your personal information. We may share your information with:\n\n### Service Providers\n\nThird parties who assist our business operations:\n\n- Website hosting providers\n- Email service providers\n- Analytics services\n- Customer relationship management (CRM) systems\n\nThese providers are contractually obligated to protect your data.\n\n### Business Partners\n\nWith your consent, we may share information with:\n\n- Logistics and shipping partners (for order fulfillment)\n- Payment processors (for transaction processing)\n\n### Legal Requirements\n\nWe may disclose information when required by:\n\n- Court orders or legal processes\n- Government requests\n- Protection of our legal rights\n- Emergency situations involving safety\n\n## International Data Transfers \\{#international-transfers\\}\n\nAs an international business, your data may be transferred to and processed in countries outside your residence, including China. We implement appropriate safeguards:\n\n- Standard contractual clauses\n- Data processing agreements\n- Security measures compliant with international standards\n\n## Data Security \\{#security\\}\n\nWe implement industry-standard security measures:\n\n- **Encryption**: SSL/TLS for data in transit\n- **Access Controls**: Role-based access to data\n- **Monitoring**: Regular security audits and monitoring\n- **Employee Training**: Data protection awareness programs\n\nHowever, no method of transmission over the Internet is 100% secure. We cannot guarantee absolute security.\n\n## Data Retention \\{#retention\\}\n\nWe retain your personal information for:\n\n- **Active Business Relationships**: Duration of relationship plus 5 years\n- **Inquiry Data**: 2 years from last contact\n- **Analytics Data**: 26 months (aggregated)\n- **Marketing Preferences**: Until withdrawal of consent\n\nAfter retention periods expire, data is securely deleted or anonymized.\n\n## Your Privacy Rights \\{#your-rights\\}\n\n### For All Users\n\nYou have the right to:\n\n- **Access**: Request a copy of your personal data\n- **Correction**: Update inaccurate information\n- **Deletion**: Request deletion of your data\n- **Objection**: Object to certain processing activities\n- **Portability**: Receive your data in a portable format\n\n### For EEA Residents (GDPR)\n\nAdditional rights include:\n\n- Withdraw consent at any time\n- Lodge a complaint with a supervisory authority\n- Restrict processing in certain circumstances\n\n### For California Residents (CCPA)\n\nYou have the right to:\n\n- Know what personal information is collected\n- Know if personal information is sold or disclosed\n- Say no to the sale of personal information\n- Access your personal information\n- Equal service and price (non-discrimination)\n\nTo exercise these rights, contact us using the information below.\n\n## Children's Privacy \\{#children\\}\n\nOur website is not intended for individuals under 16 years of age. We do not knowingly collect personal information from children. If you believe we have collected information from a child, please contact us immediately.\n\n## Third-Party Links \\{#third-party-links\\}\n\nOur website may contain links to third-party websites. We are not responsible for the privacy practices of these external sites. We encourage you to review their privacy policies.\n\n## Changes to This Policy \\{#changes\\}\n\nWe may update this Privacy Policy periodically. Changes will be posted on this page with an updated \"Last Updated\" date. Significant changes will be communicated via email or website notice.\n\n## Contact Us \\{#contact\\}\n\nIf you have questions about this Privacy Policy or wish to exercise your rights, please contact us:\n\n**Data Protection Contact**\nLianyungang Tianze Pipe Industry Co., Ltd.\nEmail: sales@tianze-pipe.com\nAddress: No.6 Yulong Road, Dongwangji Industrial Zone, Guanyun County, Lianyungang, Jiangsu, China\n\nFor EU residents, please contact us through the same data protection contact above.\n\n---\n\n**Document Version:** 2.0\n**Approved By:** Legal Department\n**Review Cycle:** Annual\n"
+  },
+  {
+    "type": "pages",
+    "locale": "en",
+    "slug": "product-market",
+    "extension": ".mdx",
+    "filePath": "/content/pages/en/product-market.mdx",
+    "relativePath": "content/pages/en/product-market.mdx",
+    "metadata": {
+      "locale": "en",
+      "title": "Product Market FAQ",
+      "description": "Shared FAQ content for product market landing pages.",
+      "slug": "product-market",
+      "publishedAt": "2024-11-01",
+      "updatedAt": "2026-04-24",
+      "lastReviewed": "2026-04-24",
+      "author": "Tianze Pipe Team",
+      "layout": "default",
+      "draft": false,
+      "seo": {
+        "title": "Product Market FAQ",
+        "description": "FAQ content for PVC conduit market landing pages.",
+        "keywords": [
+          "pvc conduit",
+          "schedule 40",
+          "schedule 80",
+          "iec 61386",
+          "lszh",
+          "conduit faq"
+        ]
+      },
+      "faq": [
+        {
+          "id": "sch40vs80",
+          "question": "What is the difference between Schedule 40 and Schedule 80?",
+          "answer": "Schedule 40 and Schedule 80 refer to wall thickness classifications under ASTM D1785.\n\nSchedule 40 is the standard wall thickness for concealed or general electrical conduit runs. Schedule 80 is thicker, heavier, and better suited to exposed locations, high-traffic areas, and industrial projects where impact resistance matters.\n"
+        },
+        {
+          "id": "conduitSize",
+          "question": "How do I choose the right conduit size?",
+          "answer": "Conduit size depends on the number, type, and size of conductors you need to route.\n\nThe key principle is wire fill capacity. Always check your local electrical code and project drawings, then match those requirements against the conduit dimensions and market standard.\n"
+        },
+        {
+          "id": "bendingRadius",
+          "question": "What is the minimum bending radius for PVC conduit?",
+          "answer": "Minimum bending radius depends on conduit size and the applicable local standard.\n\nFactory-made bends are formed with dedicated bending machines, which helps keep radius, wall thickness, and dimensional tolerance more consistent than field bending with manual heat.\n"
+        },
+        {
+          "id": "strengthGrades",
+          "question": "What are the mechanical strength grades: heavy, medium, and light?",
+          "answer": "IEC 61386 classifies conduit by mechanical resistance.\n\nHeavy duty is used for industrial, direct-burial, or concrete-encased conditions. Medium duty is common in commercial concealed runs. Light duty is used for lower-risk residential or protected installations.\n"
+        },
+        {
+          "id": "lszh",
+          "question": "What is LSZH and when is it needed?",
+          "answer": "LSZH means Low Smoke Zero Halogen.\n\nIt is used where fire-safety rules require lower smoke and no halogen gas release, such as public buildings, rail transit, data centers, hospitals, and high-occupancy enclosed spaces.\n"
+        },
+        {
+          "id": "standardsDifference",
+          "question": "What is the difference between UL 651, IEC 61386, and AS/NZS 61386?",
+          "answer": "These are regional standard families with different testing and classification rules.\n\nNorth American standards commonly classify by Schedule 40 or Schedule 80 wall thickness. IEC-based standards classify by mechanical strength. AS/NZS uses IEC-style requirements with local additions for Australia and New Zealand.\n"
+        },
+        {
+          "id": "directBurial",
+          "question": "Can PVC conduit be direct-buried or encased in concrete?",
+          "answer": "Yes. PVC conduit can be used for direct burial and concrete encasement when the selected product and installation method match the local code.\n\nFor direct burial or exposed risk areas, heavier grades such as Schedule 80 or heavy-duty IEC conduit are normally preferred.\n"
+        },
+        {
+          "id": "indoorOutdoor",
+          "question": "What is the difference between indoor and outdoor installation?",
+          "answer": "Outdoor conduit needs more attention to UV exposure, temperature movement, moisture, and physical damage.\n\nIndoor runs are usually protected and more stable. Outdoor exposed runs often require Schedule 80, wet-location fittings, expansion allowances, and UV-resistant material or coating.\n"
+        },
+        {
+          "id": "solarDataCenter",
+          "question": "Is your conduit suitable for solar farm or data center projects?",
+          "answer": "Yes. Solar projects commonly need durable underground and outdoor conduit. Data centers often need clean cable paths, LSZH options, and stable quality for repeat installation.\n\nSend the project standard, size list, and installation environment so we can match the correct product type.\n"
+        },
+        {
+          "id": "corrosion",
+          "question": "How does PVC conduit perform in corrosive environments?",
+          "answer": "PVC has strong chemical and corrosion resistance compared with metal conduit.\n\nIt is often used in coastal, agricultural, chemical, wastewater, and other environments where rust or galvanic corrosion is a concern.\n"
+        }
+      ]
+    },
+    "content": "\nThis MDX file owns FAQ content for product market landing pages. Product catalog labels, family specifications, and market standards remain in typed product/catalog configuration because they are structured product data rather than page prose.\n"
+  },
+  {
+    "type": "pages",
+    "locale": "en",
+    "slug": "terms",
+    "extension": ".mdx",
+    "filePath": "/content/pages/en/terms.mdx",
+    "relativePath": "content/pages/en/terms.mdx",
+    "metadata": {
+      "locale": "en",
+      "title": "Terms of Service",
+      "slug": "terms",
+      "description": "Read our terms and conditions for using our services and purchasing products. These terms govern the business relationship between Lianyungang Tianze Pipe Industry Co., Ltd. and our customers.",
+      "publishedAt": "2024-01-01",
+      "updatedAt": "2024-04-01",
+      "author": "Legal Team",
+      "layout": "default",
+      "showToc": true,
+      "lastReviewed": "2024-04-01",
+      "draft": false,
+      "seo": {
+        "title": "Terms of Service | Business Terms and Conditions",
+        "description": "Our terms of service outline the conditions for using our website and purchasing products. Including payment terms, shipping policies, and dispute resolution.",
+        "keywords": [
+          "terms of service",
+          "terms and conditions",
+          "B2B terms",
+          "trade terms",
+          "Incoterms"
+        ]
+      }
+    },
+    "content": "\n**Effective Date:** January 1, 2024\n**Last Updated:** April 1, 2024\n\n## Introduction \\{#introduction\\}\n\nWelcome to Lianyungang Tianze Pipe Industry Co., Ltd. These Terms of Service (\"Terms\") govern your access to and use of our website, products, and services. By accessing our website or engaging in business with us, you agree to be bound by these Terms.\n\nPlease read these Terms carefully before using our services. If you do not agree to these Terms, please do not use our website or services.\n\n## Acceptance of Terms \\{#acceptance\\}\n\nBy accessing or using our website, placing an order, or engaging in any business transaction with us, you acknowledge that you have read, understood, and agree to be bound by these Terms and our Privacy Policy.\n\nIf you are entering into these Terms on behalf of a company or other legal entity, you represent that you have the authority to bind such entity to these Terms.\n\n## Services Description \\{#services\\}\n\nLianyungang Tianze Pipe Industry Co., Ltd. provides:\n\n- Manufacturing and export of industrial products\n- Product customization services\n- Technical consultation and support\n- Quality assurance and certification services\n- Logistics coordination\n\nDetailed product specifications and service offerings are available upon request.\n\n## Orders and Contracts \\{#orders\\}\n\n### Inquiry and Quotation\n\n- All inquiries should include detailed specifications and quantity requirements\n- Quotations are valid for 30 days unless otherwise stated\n- Prices are subject to change based on market conditions and order specifications\n\n### Order Confirmation\n\nAn order is confirmed when:\n\n1. Written purchase order is received\n2. We issue a Proforma Invoice (PI)\n3. Deposit payment is received (if applicable)\n4. We provide written order confirmation\n\n### Contract Formation\n\nA binding contract is formed upon our written acceptance of your order. Order modifications require mutual written consent.\n\n## Payment Terms \\{#payment\\}\n\n### Accepted Payment Methods\n\n| Method | Minimum Order | Processing Time |\n|--------|---------------|-----------------|\n| T/T (Telegraphic Transfer) | No minimum | 1-3 business days |\n| L/C (Letter of Credit) | $10,000+ | As per L/C terms |\n| D/P (Documents against Payment) | Case by case | As per bank terms |\n\n### Standard Payment Terms\n\n- **Deposit**: 30% upon order confirmation\n- **Balance**: 70% before shipment (T/T) or upon document presentation (L/C)\n- **Custom Terms**: Available for established customers with good credit history\n\n### Late Payment\n\nLate payments may incur:\n\n- Interest at 1.5% per month on outstanding amounts\n- Suspension of pending orders\n- Requirement for prepayment on future orders\n\n## Shipping and Delivery \\{#shipping\\}\n\n### Trade Terms (Incoterms® 2020)\n\nWe typically operate under the following terms:\n\n- **FOB** (Free On Board): Named port of shipment\n- **CIF** (Cost, Insurance, Freight): Named port of destination\n- **EXW** (Ex Works): Our factory location\n\nSpecific terms will be stated in the quotation and contract.\n\n### Delivery Schedule\n\n- Standard lead time: 30-45 days after order confirmation\n- Custom orders: Timeline provided at quotation stage\n- Delivery dates are estimates and not guaranteed\n\n### Risk Transfer\n\nRisk of loss transfers to the buyer according to the agreed Incoterm.\n\n## Warranty and Returns \\{#warranty\\}\n\n### Product Warranty\n\n- Standard warranty: 12 months from delivery date\n- Warranty covers manufacturing defects only\n- Excludes damage from misuse, modification, or improper storage\n\n### Claims Process\n\n1. Submit written claim within 15 days of delivery (visible defects)\n2. Submit written claim within warranty period (hidden defects)\n3. Provide photos, documentation, and sample if requested\n4. Our quality team will investigate within 10 business days\n\n### Remedies\n\nAt our discretion, we will:\n\n- Repair or replace defective products\n- Provide credit for future orders\n- Refund the affected portion (for confirmed manufacturing defects)\n\n## Limitation of Liability \\{#liability\\}\n\n### Maximum Liability\n\nOur total liability for any claim shall not exceed the amount paid by you for the specific products or services giving rise to the claim.\n\n### Exclusions\n\nWe are not liable for:\n\n- Indirect, incidental, or consequential damages\n- Lost profits or business opportunities\n- Damages arising from improper use\n- Delays caused by force majeure events\n\n### Force Majeure\n\nNeither party shall be liable for delays or failures caused by circumstances beyond reasonable control, including but not limited to:\n\n- Natural disasters\n- War, terrorism, or civil unrest\n- Government actions or regulations\n- Epidemics or pandemics\n- Shipping or logistics disruptions\n\n## Intellectual Property \\{#ip\\}\n\n### Our Property\n\nAll content on our website, including text, images, logos, and product designs, is the property of Lianyungang Tianze Pipe Industry Co., Ltd. or its licensors.\n\n### Customer Specifications\n\n- Custom designs provided by customers remain their property\n- We will maintain confidentiality of customer specifications\n- Manufacturing of custom products does not transfer design rights to us\n\n### Usage Rights\n\nYou may not:\n\n- Reproduce our materials without written permission\n- Reverse engineer our products\n- Use our trademarks without authorization\n\n## Confidentiality \\{#confidentiality\\}\n\nBoth parties agree to:\n\n- Protect confidential information received from the other party\n- Use confidential information only for the purpose of the business relationship\n- Not disclose confidential information to third parties without consent\n\nConfidentiality obligations survive termination of the business relationship for 5 years.\n\n## Termination \\{#termination\\}\n\n### By Either Party\n\nEither party may terminate the business relationship by providing 30 days written notice.\n\n### Immediate Termination\n\nWe may terminate immediately if:\n\n- Payment defaults occur\n- Material breach of these Terms\n- Insolvency or bankruptcy proceedings\n- Violation of applicable laws\n\n### Effect of Termination\n\nUpon termination:\n\n- Outstanding payments become immediately due\n- Pending orders may be cancelled or completed at our discretion\n- Confidentiality obligations continue\n\n## Governing Law and Disputes \\{#governing-law\\}\n\n### Governing Law\n\nThese Terms are governed by the laws of the People's Republic of China.\n\n### Dispute Resolution\n\n1. **Negotiation**: Parties shall first attempt to resolve disputes through good-faith negotiation\n2. **Mediation**: If negotiation fails within 30 days, parties may attempt mediation\n3. **Arbitration**: Unresolved disputes shall be submitted to:\n\n**China International Economic and Trade Arbitration Commission (CIETAC)**\n- Rules: CIETAC Arbitration Rules\n- Location: Hong Kong or Beijing (mutual agreement)\n- Language: English or Chinese (mutual agreement)\n\nThe arbitral award shall be final and binding on both parties.\n\n## Export Compliance \\{#export-compliance\\}\n\n### Regulations\n\nBoth parties shall comply with all applicable export control laws and regulations, including:\n\n- Export Administration Regulations (EAR)\n- International Traffic in Arms Regulations (ITAR)\n- Applicable UN and national sanctions\n\n### Buyer's Obligations\n\nBuyer warrants that:\n\n- Products will not be used for prohibited purposes\n- Products will not be re-exported in violation of export laws\n- Buyer is not on any denied party list\n\n## General Provisions \\{#general\\}\n\n### Entire Agreement\n\nThese Terms, together with any quotations, orders, and written agreements, constitute the entire agreement between the parties.\n\n### Severability\n\nIf any provision is found invalid or unenforceable, the remaining provisions shall continue in effect.\n\n### Waiver\n\nFailure to enforce any right or provision shall not constitute a waiver of such right or provision.\n\n### Assignment\n\nYou may not assign your rights or obligations without our prior written consent.\n\n### Amendments\n\nWe reserve the right to modify these Terms. Changes will be effective upon posting to our website.\n\n## Contact Information \\{#contact\\}\n\nFor questions about these Terms of Service:\n\n**Lianyungang Tianze Pipe Industry Co., Ltd.**\nEmail: sales@tianze-pipe.com\nAddress: No.6 Yulong Road, Dongwangji Industrial Zone, Guanyun County, Lianyungang, Jiangsu, China\n\nFor order-related inquiries:\nEmail: sales@tianze-pipe.com\nPhone: +86-518-0000-0000\n\n---\n\n**Document Version:** 2.0\n**Approved By:** Legal Department\n**Review Cycle:** Annual\n"
+  },
+  {
+    "type": "pages",
+    "locale": "zh",
+    "slug": "about",
+    "extension": ".mdx",
+    "filePath": "/content/pages/zh/about.mdx",
+    "relativePath": "content/pages/zh/about.mdx",
+    "metadata": {
+      "locale": "zh",
+      "title": "关于 Tianze Pipe",
+      "description": "了解天泽如何把弯管设备能力、管件制造能力和 OEM 灵活性结合在一起，服务全球 B2B 客户。",
+      "slug": "about",
+      "publishedAt": "2024-01-10",
+      "updatedAt": "2026-04-01",
+      "author": "Tianze Pipe 团队",
+      "layout": "default",
+      "showToc": true,
+      "lastReviewed": "2026-04-01",
+      "draft": false,
+      "heroTitle": "关于 Tianze Pipe",
+      "heroSubtitle": "弯管制造专家",
+      "heroDescription": "我们把弯管设备能力、管件制造能力和 OEM 灵活性结合在一起，从连云港工厂服务全球 B2B 客户。",
+      "seo": {
+        "title": "关于 Tianze Pipe",
+        "description": "天泽专注于 PVC 电工套管、PETG 气动物流管以及管材加工设备，核心优势来自自主弯管设备与模具能力。",
+        "keywords": [
+          "天泽管业",
+          "PVC 电工套管",
+          "弯管机",
+          "PETG 气动物流管"
+        ],
+        "ogImage": "/images/about-og.jpg"
+      },
+      "aboutSections": {
+        "valuesTitle": "制造优势",
+        "values": {
+          "quality": {
+            "title": "精密工程",
+            "description": "每一道弯管都围绕稳定尺寸和批量一致性来控制，重点是让成品可重复、可追溯。"
+          },
+          "innovation": {
+            "title": "自主研发",
+            "description": "从弯管机到定制模具，关键生产能力在工厂内部沉淀，方便快速响应规格变化。"
+          },
+          "service": {
+            "title": "技术支持",
+            "description": "团队可配合买家完成产品匹配、样品确认、资料文件和出口交付沟通。"
+          },
+          "integrity": {
+            "title": "品质认证",
+            "description": "ISO 9001:2015 认证生产，批次可追溯，并按出口项目要求匹配对应标准。"
+          }
+        },
+        "statLabels": {
+          "yearsExperience": "年行业经验",
+          "countriesServed": "出口国家",
+          "happyClients": "团队成员",
+          "productsDelivered": "工厂面积（亩）"
+        },
+        "cta": {
+          "title": "与弯管专家合作",
+          "description": "无论您需要弯管设备、定制模具还是成品管件，我们都可以根据项目需求继续沟通。",
+          "button": "获取报价"
+        }
+      },
+      "faq": [
+        {
+          "id": "manufacturer",
+          "question": "你们是制造商还是贸易商？",
+          "answer": "天泽管业是工厂直供制造商，自 2018 年起生产 PVC 管材产品。我们在江苏连云港运营自己的工厂，能直接控制生产质量和交期。"
+        },
+        {
+          "id": "factory-visit",
+          "question": "可以参观工厂吗？",
+          "answer": "可以，我们欢迎工厂参观。我们可安排生产线、质量检测区和仓储区的现场参观。请提前联系我们预约。"
+        },
+        {
+          "id": "export-experience",
+          "question": "你们的出口经验如何？",
+          "answer": "我们已出口至 20+ 个国家，覆盖东南亚、中东、非洲、南美和大洋洲等市场。团队可处理国际物流、单证和清关相关要求。"
+        },
+        {
+          "id": "certifications",
+          "question": "你们的产品有哪些认证？",
+          "answer": "我们的产品符合 AS/NZS 2053、ASTM D1785、IEC 61386、NOM 等国际标准，并保持 ISO 9001:2015 质量管理体系认证。"
+        },
+        {
+          "id": "verify-certs",
+          "question": "如何核实你们的认证？",
+          "answer": "我们可按需提供正式认证文件。ISO 认证也可通过颁证机构核实。请联系销售团队获取相关文件。"
+        }
+      ]
+    },
+    "content": "\n## 我们是谁\n\nTianze Pipe 专注于 **PVC 电工套管配件**、**管材加工设备** 和\n**PETG 气动物流管系统**。我们的核心差异不只是卖产品，而是我们也掌握这些产品背后的弯管设备、模具和工艺。\n\n这种上游能力让我们在非标规格、模具开发、打样速度和量产稳定性上，比单纯贸易型供应商更有主动权。\n\n## 我们做什么\n\n### PVC 电工套管及配件\n\n我们提供直管、弯头、接头、扩口、双承口等电工套管产品，覆盖多个市场标准。\n\n### 管材加工设备\n\n我们自主研发和制造半自动、全自动弯管机、扩管机、切管机以及配套模具，并将这些能力直接用于自身生产体系。\n\n### PETG 气动物流管系统\n\n我们同时供应用于医院与物流场景的高透明 PETG 气动物流管、弯管和连接件。\n\n## 为什么客户会选择天泽\n\n### 设备、工艺、管件同链路控制\n\n因为我们理解产品成型过程本身，所以在复杂规格、模具调整和产线切换上响应更快。\n\n### OEM 与非标定制更灵活\n\n我们支持客户规格定制、贴牌包装、定向开发弯头和样品测试，再进入批量交付。\n\n### 稳定出口供货\n\n天泽目前服务 **20+ 国家** 的 B2B 客户，重点面向电工套管和工业管材应用场景。\n\n## 公司概况\n\n- **开始运营：** 2018 年\n- **正式注册：** 2023 年\n- **团队规模：** 60 人\n- **厂区面积：** 100 亩\n- **体系认证：** ISO 9001:2015\n\n## 我们如何合作\n\n### 1. 先确认需求\n\n先确认应用场景、目标标准、弯头形式、尺寸范围和包装要求，再判断最合适的供货方式。\n\n### 2. 再确认工艺和模具\n\n标准产品直接匹配现有产能；非标项目先做模具和工艺可行性评估，再进入样品阶段。\n\n### 3. 样品确认后进入量产\n\n样品确认后，我们再安排稳定生产、批次管控和交期计划。\n\n## 我们重视什么\n\n- 实事求是的沟通\n- 快速响应技术问题\n- 明确告知可行与不可行\n- 重复订单中的品质一致性\n\n## 联系我们\n\n如果您正在采购电工套管配件、弯管设备或气动物流管产品，欢迎直接带着图纸、目标市场或产品清单联系天泽。\n\n- **邮箱：** sales@tianze-pipe.com\n- **官网：** https://tianze-pipe.com\n\n_适合那些真正关心工艺和稳定交付，而不只看单价的采购项目。_\n"
+  },
+  {
+    "type": "pages",
+    "locale": "zh",
+    "slug": "bending-machines",
+    "extension": ".mdx",
+    "filePath": "/content/pages/zh/bending-machines.mdx",
+    "relativePath": "content/pages/zh/bending-machines.mdx",
+    "metadata": {
+      "locale": "zh",
+      "title": "PVC 管材弯管机",
+      "description": "自主设计制造的全自动和半自动 PVC 管材弯管设备。",
+      "slug": "bending-machines",
+      "publishedAt": "2026-03-23",
+      "updatedAt": "2026-04-01",
+      "lastReviewed": "2026-04-01",
+      "draft": false,
+      "seo": {
+        "title": "PVC 管材弯管机 | Tianze Equipment",
+        "description": "工业级 PVC 管材弯管设备，包括全自动 CNC 和半自动机型，由天泽为电工套管管件生产自主设计制造。"
+      },
+      "faq": [
+        {
+          "id": "bending-capacity",
+          "question": "你们的弯管机可加工哪些管径？",
+          "answer": "全自动机型可处理 DN25-DN160mm，半自动机型覆盖 DN20-DN110mm。特殊尺寸范围可按需求配置。"
+        },
+        {
+          "id": "bending-automation",
+          "question": "全自动和半自动有什么区别？",
+          "answer": "全自动机型采用 CNC 控制、自动送料和多工位设计，适合大批量生产；半自动机型需要人工上料，但投入更低，适合中小规模产线。"
+        },
+        {
+          "id": "bending-support",
+          "question": "你们提供安装和培训吗？",
+          "answer": "提供。我们可提供现场安装、操作培训和持续技术支持；全自动机型也支持远程诊断。"
+        },
+        {
+          "id": "bending-spare-parts",
+          "question": "备件如何购买？",
+          "answer": "我们为所有机型保留备件库存。常规备件 3-5 天内发出，也可提供年度维护服务。"
+        }
+      ]
+    },
+    "content": "\n## 设备 FAQ\n\n本 MDX 文件负责弯管机页面 SEO 元数据和 FAQ 内容。页面可见的设备卡片、规格参数、流程步骤、支持说明和 CTA 模块仍由结构化页面组件与翻译命名空间驱动。\n"
+  },
+  {
+    "type": "pages",
+    "locale": "zh",
+    "slug": "contact",
+    "extension": ".mdx",
+    "filePath": "/content/pages/zh/contact.mdx",
+    "relativePath": "content/pages/zh/contact.mdx",
+    "metadata": {
+      "locale": "zh",
+      "title": "联系我们",
+      "description": "联系 Tianze Pipe，咨询产品、OEM 定制或技术支持。",
+      "slug": "contact",
+      "publishedAt": "2024-01-01",
+      "updatedAt": "2026-04-01",
+      "lastReviewed": "2026-04-01",
+      "draft": false,
+      "seo": {
+        "title": "联系 Tianze Pipe | 获取报价",
+        "description": "联系天泽销售团队，咨询 PVC 电工套管配件、OEM 定制制造或技术支持。通常 24 小时内响应。"
+      },
+      "faq": [
+        {
+          "id": "moq",
+          "question": "你们的最小起订量是多少？",
+          "answer": "现货产品标准 MOQ 为每个 SKU 500 件。定制或 OEM 订单起订量会根据规格变化，请联系我们确认具体要求。"
+        },
+        {
+          "id": "lead-time",
+          "question": "通常交期多久？",
+          "answer": "标准产品通常为 15-20 个工作日。定制或 OEM 订单通常为 25-35 个工作日，具体取决于规格和数量。"
+        },
+        {
+          "id": "payment",
+          "question": "你们接受哪些付款方式？",
+          "answer": "我们接受 T/T（30% 订金，70% 发货前付清）、即期信用证，以及样品订单的 Western Union。"
+        },
+        {
+          "id": "samples",
+          "question": "可以提供产品样品吗？",
+          "answer": "可以。标准产品可提供免费样品，买方承担运费。定制样品可能涉及少量模具或打样费用。"
+        },
+        {
+          "id": "oem",
+          "question": "你们支持 OEM/ODM 吗？",
+          "answer": "支持。我们提供完整 OEM/ODM 服务，包括定制颜色、尺寸、包装和品牌标识，具体起订量按项目确认。"
+        }
+      ]
+    },
+    "content": "\n## 联系方式\n\n如果您正在了解 PVC 电工套管配件或弯管设备，欢迎直接联系。我们的外贸\n销售团队通常会在 24 个工作小时内回复。\n\n## 响应预期\n\n- **邮件咨询**：工作日 24 小时内回复\n- **报价请求**：48 小时内提供详细报价\n- **技术问题**：工程团队会在 2 个工作日内回复\n- **样品请求**：3 个工作日内确认样品和发货安排\n"
+  },
+  {
+    "type": "pages",
+    "locale": "zh",
+    "slug": "oem-custom-manufacturing",
+    "extension": ".mdx",
+    "filePath": "/content/pages/zh/oem-custom-manufacturing.mdx",
+    "relativePath": "content/pages/zh/oem-custom-manufacturing.mdx",
+    "metadata": {
+      "locale": "zh",
+      "title": "OEM 定制制造",
+      "description": "PVC 电工套管配件定制制造——您的品牌、您的规格、我们的工厂。",
+      "slug": "oem-custom-manufacturing",
+      "publishedAt": "2024-06-01",
+      "updatedAt": "2026-04-01",
+      "lastReviewed": "2026-04-01",
+      "draft": false,
+      "seo": {
+        "title": "OEM PVC 电工套管定制制造 | Tianze Pipe",
+        "description": "为 PVC 电工套管配件提供完整 OEM/ODM 服务，包括定制颜色、尺寸、包装和品牌标识，由 ISO 认证工厂生产。"
+      },
+      "faq": [
+        {
+          "id": "oem-moq",
+          "question": "OEM 订单的起订量是多少？",
+          "answer": "OEM 订单通常每个 SKU 最低 1,000 件。涉及新模具时，为分摊模具成本，起订量可能更高。"
+        },
+        {
+          "id": "oem-lead-time",
+          "question": "OEM 订单需要多久？",
+          "answer": "新模具首单通常 35-45 天；复购订单通常 20-25 天。紧急订单可联系我们确认排产可能性。"
+        },
+        {
+          "id": "oem-branding",
+          "question": "可以在产品上使用我们的品牌吗？",
+          "answer": "可以。我们支持定制印刷、压印、包装设计和标签，按您的品牌规范执行。"
+        },
+        {
+          "id": "oem-standards",
+          "question": "你们可以按哪些国际标准生产？",
+          "answer": "我们可按 AS/NZS 2053、ASTM D1785、IEC 61386、NOM 及其他区域标准生产，也可配合您的自定义规格。"
+        },
+        {
+          "id": "oem-quality",
+          "question": "OEM 订单如何保证质量？",
+          "answer": "我们保持 ISO 9001:2015 认证。每个 OEM 订单都会经过原料检测、过程检验和最终检验，并可提供照片记录。"
+        }
+      ]
+    },
+    "content": "\n## OEM 定制范围\n\n本 MDX 文件负责 OEM 页面 SEO 元数据和 FAQ 内容。页面可见的范围卡片、流程步骤、标准说明和 CTA 模块仍由结构化页面组件与翻译命名空间驱动。\n"
+  },
+  {
+    "type": "pages",
+    "locale": "zh",
+    "slug": "privacy",
+    "extension": ".mdx",
+    "filePath": "/content/pages/zh/privacy.mdx",
+    "relativePath": "content/pages/zh/privacy.mdx",
+    "metadata": {
+      "locale": "zh",
+      "title": "隐私政策",
+      "slug": "privacy",
+      "description": "了解连云港天泽管业有限公司如何收集、使用和保护您的个人信息。我们的隐私政策说明了您的权利和我们的数据处理实践。",
+      "publishedAt": "2024-01-01",
+      "updatedAt": "2024-04-01",
+      "author": "法务团队",
+      "layout": "default",
+      "showToc": true,
+      "lastReviewed": "2024-04-01",
+      "draft": false,
+      "seo": {
+        "title": "隐私政策 | 数据保护与您的权利",
+        "description": "我们的隐私政策说明如何收集、使用和保护您的个人数据。了解您在GDPR和CCPA下的权利。",
+        "keywords": [
+          "隐私政策",
+          "数据保护",
+          "GDPR",
+          "CCPA",
+          "个人数据"
+        ]
+      }
+    },
+    "content": "\n**生效日期：** 2024年1月1日\n**最后更新：** 2024年4月1日\n\n## 引言 \\{#introduction\\}\n\n连云港天泽管业有限公司（以下称\"我们\"）致力于保护您的隐私。本隐私政策说明当您访问我们的网站或使用我们的服务时，我们如何收集、使用、披露和保护您的信息。\n\n请仔细阅读本隐私政策。如果您不同意本隐私政策的条款，请勿访问本网站。\n\n## 我们收集的信息 \\{#info-collect\\}\n\n### 您主动提供的信息\n\n当您进行以下操作时，我们可能收集您自愿提供的信息：\n\n- 填写询价或联系表单\n- 请求报价\n- 订阅我们的新闻通讯\n- 创建账户\n- 通过电子邮件、电话或在线聊天与我们沟通\n\n这些信息可能包括：\n\n- **联系信息**：姓名、电子邮件地址、电话号码、公司名称、职位\n- **业务信息**：公司地址、行业、采购需求\n- **通信记录**：往来通信历史、询价详情\n- **账户信息**：用户名、密码（加密存储）\n\n### 自动收集的信息\n\n当您访问我们的网站时，我们会自动收集有关您设备和使用模式的某些信息：\n\n- **设备信息**：IP地址、浏览器类型、操作系统、设备标识符\n- **使用数据**：访问的页面、页面停留时间、点击模式、来源URL\n- **位置数据**：基于IP地址的国家和城市（非精确位置）\n\n### Cookie和跟踪技术\n\n我们使用Cookie和类似的跟踪技术来增强您的体验：\n\n| Cookie类型 | 用途 | 有效期 |\n|-----------|------|-------|\n| 必要性 | 网站功能 | 会话期间 |\n| 偏好设置 | 记住您的设置 | 1年 |\n| 分析 | 了解使用模式 | 2年 |\n| 营销 | 个性化内容（如启用） | 1年 |\n\n您可以通过浏览器设置或我们的Cookie同意横幅控制Cookie偏好。\n\n## 我们如何使用您的信息 \\{#how-we-use\\}\n\n我们将收集的信息用于以下目的：\n\n### 业务运营\n\n- 处理和回复您的询价\n- 提供报价并促成订单\n- 就产品和服务进行沟通\n- 管理客户关系\n\n### 网站改进\n\n- 分析网站使用情况和性能\n- 改善用户体验和导航\n- 开发新功能和内容\n- 排除技术问题\n\n### 营销（经您同意）\n\n- 发送新闻通讯和产品更新\n- 提供个性化推荐\n- 进行客户调查\n\n### 法律与合规\n\n- 遵守法律义务\n- 防范欺诈和滥用\n- 执行我们的服务条款\n\n## 处理的法律依据（GDPR） \\{#legal-basis\\}\n\n对于欧洲经济区（EEA）的用户，我们基于以下依据处理您的个人数据：\n\n- **同意**：当您选择接收营销通讯时\n- **合同履行**：为完成商业交易\n- **合法利益**：用于业务运营和网站改进\n- **法律义务**：遵守适用法律\n\n## 信息共享与披露 \\{#sharing\\}\n\n我们不会出售您的个人信息。我们可能与以下方共享您的信息：\n\n### 服务提供商\n\n协助我们业务运营的第三方：\n\n- 网站托管服务商\n- 电子邮件服务提供商\n- 分析服务\n- 客户关系管理（CRM）系统\n\n这些服务商在合同上有义务保护您的数据。\n\n### 业务合作伙伴\n\n经您同意，我们可能与以下方共享信息：\n\n- 物流和运输合作伙伴（用于订单履行）\n- 支付处理商（用于交易处理）\n\n### 法律要求\n\n在以下情况下，我们可能披露信息：\n\n- 法院命令或法律程序\n- 政府要求\n- 保护我们的合法权益\n- 涉及安全的紧急情况\n\n## 国际数据传输 \\{#international-transfers\\}\n\n作为国际企业，您的数据可能被传输至并在您居住地以外的国家/地区处理，包括中国。我们实施适当的保障措施：\n\n- 标准合同条款\n- 数据处理协议\n- 符合国际标准的安全措施\n\n## 数据安全 \\{#security\\}\n\n我们实施行业标准的安全措施：\n\n- **加密**：数据传输使用SSL/TLS加密\n- **访问控制**：基于角色的数据访问权限\n- **监控**：定期安全审计和监控\n- **员工培训**：数据保护意识培训计划\n\n然而，任何互联网传输方式都不是100%安全的。我们无法保证绝对安全。\n\n## 数据保留 \\{#retention\\}\n\n我们按以下期限保留您的个人信息：\n\n- **活跃业务关系**：关系存续期间加5年\n- **询价数据**：最后联系起2年\n- **分析数据**：26个月（汇总数据）\n- **营销偏好**：直至撤回同意\n\n保留期限届满后，数据将被安全删除或匿名化处理。\n\n## 您的隐私权利 \\{#your-rights\\}\n\n### 所有用户\n\n您有权：\n\n- **访问**：请求获取您个人数据的副本\n- **更正**：更新不准确的信息\n- **删除**：请求删除您的数据\n- **反对**：反对某些处理活动\n- **可携带性**：以可移植格式接收您的数据\n\n### 欧洲经济区居民（GDPR）\n\n额外权利包括：\n\n- 随时撤回同意\n- 向监管机构投诉\n- 在特定情况下限制处理\n\n### 加州居民（CCPA）\n\n您有权：\n\n- 了解收集了哪些个人信息\n- 了解个人信息是否被出售或披露\n- 拒绝出售个人信息\n- 访问您的个人信息\n- 获得平等的服务和价格（不受歧视）\n\n如需行使这些权利，请使用以下信息联系我们。\n\n## 儿童隐私 \\{#children\\}\n\n我们的网站不面向16岁以下的个人。我们不会故意收集儿童的个人信息。如果您认为我们收集了儿童的信息，请立即联系我们。\n\n## 第三方链接 \\{#third-party-links\\}\n\n我们的网站可能包含第三方网站的链接。我们对这些外部网站的隐私实践不承担责任。我们建议您查阅它们的隐私政策。\n\n## 本政策的变更 \\{#changes\\}\n\n我们可能会定期更新本隐私政策。变更将在本页面发布，并更新\"最后更新\"日期。重大变更将通过电子邮件或网站通知告知您。\n\n## 联系我们 \\{#contact\\}\n\n如果您对本隐私政策有疑问或希望行使您的权利，请联系我们：\n\n**数据保护联系方式**\n连云港天泽管业有限公司\n电子邮件：sales@tianze-pipe.com\n地址：中国江苏省连云港市灌云县东王集工业园玉龙路6号\n\n对于欧盟居民，也请通过上述数据保护联系方式与我们联系。\n\n---\n\n**文档版本：** 2.0\n**批准部门：** 法务部\n**审核周期：** 每年\n"
+  },
+  {
+    "type": "pages",
+    "locale": "zh",
+    "slug": "product-market",
+    "extension": ".mdx",
+    "filePath": "/content/pages/zh/product-market.mdx",
+    "relativePath": "content/pages/zh/product-market.mdx",
+    "metadata": {
+      "locale": "zh",
+      "title": "产品市场 FAQ",
+      "description": "产品市场落地页共用 FAQ 内容。",
+      "slug": "product-market",
+      "publishedAt": "2024-11-01",
+      "updatedAt": "2026-04-24",
+      "lastReviewed": "2026-04-24",
+      "author": "Tianze Pipe 团队",
+      "layout": "default",
+      "draft": false,
+      "seo": {
+        "title": "产品市场 FAQ",
+        "description": "PVC 电工套管市场落地页 FAQ 内容。",
+        "keywords": [
+          "PVC电工套管",
+          "Schedule 40",
+          "Schedule 80",
+          "IEC 61386",
+          "LSZH",
+          "套管常见问题"
+        ]
+      },
+      "faq": [
+        {
+          "id": "sch40vs80",
+          "question": "Schedule 40 和 Schedule 80 有什么区别？",
+          "answer": "Schedule 40 和 Schedule 80 是 ASTM D1785 标准下的壁厚等级。\n\nSchedule 40 是常规壁厚，适合隐蔽敷设或一般电气套管项目。Schedule 80 壁厚更厚、重量更大，更适合明装、高人流区域和工业项目等需要更高抗冲击能力的场景。\n"
+        },
+        {
+          "id": "conduitSize",
+          "question": "如何选择合适的套管尺寸？",
+          "answer": "套管尺寸取决于需要穿设的导线数量、类型和截面积。\n\n核心原则是穿线填充率。应先确认当地电气规范和项目图纸要求，再按套管尺寸和适用市场标准匹配产品。\n"
+        },
+        {
+          "id": "bendingRadius",
+          "question": "PVC 套管的最小弯曲半径是多少？",
+          "answer": "最小弯曲半径取决于管径和适用的当地标准。\n\n工厂预制弯管使用专用弯管设备成型，比现场手工热弯更容易保持弯曲半径、壁厚和尺寸公差的一致性。\n"
+        },
+        {
+          "id": "strengthGrades",
+          "question": "机械强度等级：重型、中型、轻型如何区分？",
+          "answer": "IEC 61386 按机械抗压能力对套管进行分类。\n\n重型适合工业、直埋或混凝土包封场景。中型常用于商业建筑隐蔽敷设。轻型适合低风险住宅或受保护安装环境。\n"
+        },
+        {
+          "id": "lszh",
+          "question": "什么是 LSZH？哪些场合需要使用？",
+          "answer": "LSZH 指低烟无卤材料。\n\n在公共建筑、轨道交通、数据中心、医院和高人员密度封闭空间等消防要求更高的场景，通常会要求使用低烟、无卤气体释放的材料。\n"
+        },
+        {
+          "id": "standardsDifference",
+          "question": "UL 651、IEC 61386 和 AS/NZS 61386 有什么区别？",
+          "answer": "它们是不同区域常用的标准体系，测试和分类方式不同。\n\n北美标准通常按 Schedule 40 或 Schedule 80 壁厚分类。IEC 系标准按机械强度分类。AS/NZS 基于 IEC 体系，并叠加澳大利亚和新西兰本地要求。\n"
+        },
+        {
+          "id": "directBurial",
+          "question": "PVC 套管是否适合直埋或混凝土包封安装？",
+          "answer": "适合，但需要选用符合当地规范和安装方式的产品。\n\n直埋或明装风险较高的场景，通常更建议使用 Schedule 80 或 IEC 重型套管。\n"
+        },
+        {
+          "id": "indoorOutdoor",
+          "question": "室内安装和室外安装有何不同？",
+          "answer": "室外安装需要重点考虑紫外线、温度变化、潮湿环境和物理损伤。\n\n室内环境通常更稳定。室外明装一般更适合 Schedule 80、湿润场所接头、伸缩补偿，以及抗紫外线材料或涂层。\n"
+        },
+        {
+          "id": "solarDataCenter",
+          "question": "你们的套管适用于光伏电站或数据中心项目吗？",
+          "answer": "适用。光伏项目通常需要耐久的地下和户外套管。数据中心则更关注干净顺滑的走线通道、LSZH 选项，以及批量安装的一致性。\n\n请提供项目标准、尺寸清单和安装环境，我们可以帮助匹配合适的产品类型。\n"
+        },
+        {
+          "id": "corrosion",
+          "question": "PVC 套管在腐蚀性环境下表现如何？",
+          "answer": "与金属套管相比，PVC 具有较好的化学耐受性和防腐蚀能力。\n\n在沿海、农业、化工、污水处理等容易生锈或发生电化学腐蚀的环境中，PVC 套管经常被采用。\n"
+        }
+      ]
+    },
+    "content": "\n本 MDX 文件负责产品市场落地页 FAQ 内容。产品目录标签、规格表和市场标准仍保留在类型化产品/目录配置中，因为它们属于结构化产品数据，而不是普通页面文案。\n"
+  },
+  {
+    "type": "pages",
+    "locale": "zh",
+    "slug": "terms",
+    "extension": ".mdx",
+    "filePath": "/content/pages/zh/terms.mdx",
+    "relativePath": "content/pages/zh/terms.mdx",
+    "metadata": {
+      "locale": "zh",
+      "title": "服务条款",
+      "slug": "terms",
+      "description": "阅读我们的服务使用条款和产品采购条件。本条款规定了连云港天泽管业有限公司与客户之间的业务关系。",
+      "publishedAt": "2024-01-01",
+      "updatedAt": "2024-04-01",
+      "author": "法务团队",
+      "layout": "default",
+      "showToc": true,
+      "lastReviewed": "2024-04-01",
+      "draft": false,
+      "seo": {
+        "title": "服务条款 | 业务条款与条件",
+        "description": "我们的服务条款概述了使用网站和购买产品的条件，包括付款条款、运输政策和争议解决方式。",
+        "keywords": [
+          "服务条款",
+          "业务条款",
+          "B2B条款",
+          "贸易条款",
+          "国际贸易术语"
+        ]
+      }
+    },
+    "content": "\n**生效日期：** 2024年1月1日\n**最后更新：** 2024年4月1日\n\n## 引言 \\{#introduction\\}\n\n欢迎访问连云港天泽管业有限公司。本服务条款（以下简称\"条款\"）规定您访问和使用我们的网站、产品及服务的条件。访问我们的网站或与我们进行业务往来，即表示您同意受本条款的约束。\n\n请在使用我们的服务前仔细阅读本条款。如果您不同意本条款，请勿使用我们的网站或服务。\n\n## 条款接受 \\{#acceptance\\}\n\n访问或使用我们的网站、下订单或与我们进行任何业务交易，即表示您确认已阅读、理解并同意受本条款及我们的隐私政策的约束。\n\n如果您代表公司或其他法律实体签订本条款，您声明您有权使该实体受本条款约束。\n\n## 服务说明 \\{#services\\}\n\n连云港天泽管业有限公司提供：\n\n- 工业产品制造和出口\n- 产品定制服务\n- 技术咨询和支持\n- 质量保证和认证服务\n- 物流协调\n\n详细的产品规格和服务内容可应要求提供。\n\n## 订单与合同 \\{#orders\\}\n\n### 询价与报价\n\n- 所有询价应包括详细的规格和数量要求\n- 报价有效期为30天，除非另有说明\n- 价格可能根据市场条件和订单规格进行调整\n\n### 订单确认\n\n订单在以下情况下确认：\n\n1. 收到书面采购订单\n2. 我们开具形式发票（PI）\n3. 收到定金（如适用）\n4. 我们提供书面订单确认\n\n### 合同成立\n\n合同在我们书面接受您的订单时成立。订单变更需双方书面同意。\n\n## 付款条款 \\{#payment\\}\n\n### 接受的付款方式\n\n| 方式 | 最低订单金额 | 处理时间 |\n|--------|---------------|--------------------|\n| 电汇（T/T） | 无最低要求 | 1-3个工作日 |\n| 信用证（L/C） | 10,000美元以上 | 按信用证条款 |\n| 付款交单（D/P） | 个案处理 | 按银行条款 |\n\n### 标准付款条款\n\n- **定金**：订单确认后支付30%\n- **余款**：发货前支付70%（电汇）或交单时支付（信用证）\n- **自定义条款**：信用记录良好的老客户可协商\n\n### 逾期付款\n\n逾期付款可能产生：\n\n- 未付金额按每月1.5%计息\n- 暂停待处理订单\n- 未来订单需预付款\n\n## 运输与交货 \\{#shipping\\}\n\n### 贸易术语（Incoterms® 2020）\n\n我们通常采用以下贸易术语：\n\n- **FOB**（离岸价）：指定装运港\n- **CIF**（成本加保险费加运费）：指定目的港\n- **EXW**（工厂交货）：我方工厂所在地\n\n具体条款将在报价和合同中注明。\n\n### 交货时间\n\n- 标准交货期：订单确认后30-45天\n- 定制订单：报价阶段提供时间表\n- 交货日期为预估时间，不作保证\n\n### 风险转移\n\n货物灭失风险按照约定的贸易术语转移至买方。\n\n## 保修与退换 \\{#warranty\\}\n\n### 产品保修\n\n- 标准保修期：交货之日起12个月\n- 保修范围仅限制造缺陷\n- 不包括因误用、改装或不当存储造成的损坏\n\n### 索赔流程\n\n1. 在交货后15天内提交书面索赔（外观缺陷）\n2. 在保修期内提交书面索赔（隐性缺陷）\n3. 根据要求提供照片、文件和样品\n4. 我们的质量团队将在10个工作日内进行调查\n\n### 补救措施\n\n我们将酌情：\n\n- 修理或更换有缺陷的产品\n- 提供未来订单的抵扣额度\n- 退还受影响部分的款项（经确认为制造缺陷）\n\n## 责任限制 \\{#liability\\}\n\n### 最大责任\n\n我们对任何索赔的总责任不超过您为引起索赔的特定产品或服务所支付的金额。\n\n### 免责范围\n\n我们不对以下情况负责：\n\n- 间接、附带或后果性损害\n- 利润损失或商机损失\n- 不当使用造成的损害\n- 不可抗力事件造成的延误\n\n### 不可抗力\n\n任何一方均不对超出合理控制范围的情况造成的延误或失败承担责任，包括但不限于：\n\n- 自然灾害\n- 战争、恐怖主义或内乱\n- 政府行为或法规\n- 流行病或疫情\n- 航运或物流中断\n\n## 知识产权 \\{#ip\\}\n\n### 我方财产\n\n我们网站上的所有内容，包括文字、图像、标志和产品设计，均为连云港天泽管业有限公司或其许可方的财产。\n\n### 客户规格\n\n- 客户提供的定制设计仍归客户所有\n- 我们将对客户规格保密\n- 定制产品的生产不会将设计权转让给我们\n\n### 使用权\n\n您不得：\n\n- 未经书面许可复制我们的材料\n- 对我们的产品进行逆向工程\n- 未经授权使用我们的商标\n\n## 保密条款 \\{#confidentiality\\}\n\n双方同意：\n\n- 保护从对方收到的保密信息\n- 仅将保密信息用于业务关系目的\n- 未经同意不向第三方披露保密信息\n\n保密义务在业务关系终止后5年内继续有效。\n\n## 终止条款 \\{#termination\\}\n\n### 任一方终止\n\n任何一方可提前30天书面通知终止业务关系。\n\n### 立即终止\n\n在以下情况下，我们可立即终止：\n\n- 发生付款违约\n- 严重违反本条款\n- 破产或清算程序\n- 违反适用法律\n\n### 终止效力\n\n终止后：\n\n- 所有未付款项立即到期\n- 待处理订单可由我方酌情取消或完成\n- 保密义务继续有效\n\n## 适用法律与争议解决 \\{#governing-law\\}\n\n### 适用法律\n\n本条款受中华人民共和国法律管辖。\n\n### 争议解决\n\n1. **协商**：双方应首先通过善意协商解决争议\n2. **调解**：如协商在30天内失败，双方可尝试调解\n3. **仲裁**：未解决的争议应提交至：\n\n**中国国际经济贸易仲裁委员会（CIETAC）**\n- 规则：CIETAC仲裁规则\n- 地点：香港或北京（双方协商）\n- 语言：英文或中文（双方协商）\n\n仲裁裁决为最终裁决，对双方均有约束力。\n\n## 出口合规 \\{#export-compliance\\}\n\n### 法规\n\n双方应遵守所有适用的出口管制法律法规，包括：\n\n- 出口管理条例（EAR）\n- 国际武器运输条例（ITAR）\n- 适用的联合国和国家制裁\n\n### 买方义务\n\n买方保证：\n\n- 产品不会用于禁止用途\n- 产品不会违反出口法律再出口\n- 买方未列入任何禁止交易名单\n\n## 一般条款 \\{#general\\}\n\n### 完整协议\n\n本条款连同任何报价、订单和书面协议，构成双方之间的完整协议。\n\n### 可分割性\n\n如任何条款被认定为无效或不可执行，其余条款将继续有效。\n\n### 弃权\n\n未能执行任何权利或条款不构成对该权利或条款的放弃。\n\n### 转让\n\n未经我方事先书面同意，您不得转让您的权利或义务。\n\n### 修订\n\n我们保留修改本条款的权利。变更将在发布到我们网站后生效。\n\n## 联系方式 \\{#contact\\}\n\n如对本服务条款有任何疑问：\n\n**连云港天泽管业有限公司**\n邮箱：sales@tianze-pipe.com\n地址：中国江苏省连云港市灌云县东王集工业园玉龙路6号\n\n订单相关咨询：\n邮箱：sales@tianze-pipe.com\n电话：+86-518-0000-0000\n\n---\n\n**文件版本：** 2.0\n**审批：** 法务部\n**审核周期：** 年度\n"
+  }
+];
+
+const _byKeyIndex: Record<string, number> = {
+  "posts/en/welcome": 0,
+  "posts/zh/welcome": 1,
+  "pages/en/about": 2,
+  "pages/en/bending-machines": 3,
+  "pages/en/contact": 4,
+  "pages/en/oem-custom-manufacturing": 5,
+  "pages/en/privacy": 6,
+  "pages/en/product-market": 7,
+  "pages/en/terms": 8,
+  "pages/zh/about": 9,
+  "pages/zh/bending-machines": 10,
+  "pages/zh/contact": 11,
+  "pages/zh/oem-custom-manufacturing": 12,
+  "pages/zh/privacy": 13,
+  "pages/zh/product-market": 14,
+  "pages/zh/terms": 15
+};
+
+const _byKey: Record<string, ContentEntry> = Object.fromEntries(
+  Object.entries(_byKeyIndex).map(([key, idx]) => [key, _entries[idx]!]),
+);
+
 export const CONTENT_MANIFEST: ContentManifest = {
-  entries: [
-  {
-    "type": "posts",
-    "locale": "en",
-    "slug": "welcome",
-    "extension": ".mdx",
-    "filePath": "/content/posts/en/welcome.mdx",
-    "relativePath": "content/posts/en/welcome.mdx"
-  },
-  {
-    "type": "posts",
-    "locale": "zh",
-    "slug": "welcome",
-    "extension": ".mdx",
-    "filePath": "/content/posts/zh/welcome.mdx",
-    "relativePath": "content/posts/zh/welcome.mdx"
-  },
-  {
-    "type": "pages",
-    "locale": "en",
-    "slug": "about",
-    "extension": ".mdx",
-    "filePath": "/content/pages/en/about.mdx",
-    "relativePath": "content/pages/en/about.mdx"
-  },
-  {
-    "type": "pages",
-    "locale": "en",
-    "slug": "bending-machines",
-    "extension": ".mdx",
-    "filePath": "/content/pages/en/bending-machines.mdx",
-    "relativePath": "content/pages/en/bending-machines.mdx"
-  },
-  {
-    "type": "pages",
-    "locale": "en",
-    "slug": "contact",
-    "extension": ".mdx",
-    "filePath": "/content/pages/en/contact.mdx",
-    "relativePath": "content/pages/en/contact.mdx"
-  },
-  {
-    "type": "pages",
-    "locale": "en",
-    "slug": "oem-custom-manufacturing",
-    "extension": ".mdx",
-    "filePath": "/content/pages/en/oem-custom-manufacturing.mdx",
-    "relativePath": "content/pages/en/oem-custom-manufacturing.mdx"
-  },
-  {
-    "type": "pages",
-    "locale": "en",
-    "slug": "privacy",
-    "extension": ".mdx",
-    "filePath": "/content/pages/en/privacy.mdx",
-    "relativePath": "content/pages/en/privacy.mdx"
-  },
-  {
-    "type": "pages",
-    "locale": "en",
-    "slug": "terms",
-    "extension": ".mdx",
-    "filePath": "/content/pages/en/terms.mdx",
-    "relativePath": "content/pages/en/terms.mdx"
-  },
-  {
-    "type": "pages",
-    "locale": "zh",
-    "slug": "about",
-    "extension": ".mdx",
-    "filePath": "/content/pages/zh/about.mdx",
-    "relativePath": "content/pages/zh/about.mdx"
-  },
-  {
-    "type": "pages",
-    "locale": "zh",
-    "slug": "bending-machines",
-    "extension": ".mdx",
-    "filePath": "/content/pages/zh/bending-machines.mdx",
-    "relativePath": "content/pages/zh/bending-machines.mdx"
-  },
-  {
-    "type": "pages",
-    "locale": "zh",
-    "slug": "contact",
-    "extension": ".mdx",
-    "filePath": "/content/pages/zh/contact.mdx",
-    "relativePath": "content/pages/zh/contact.mdx"
-  },
-  {
-    "type": "pages",
-    "locale": "zh",
-    "slug": "oem-custom-manufacturing",
-    "extension": ".mdx",
-    "filePath": "/content/pages/zh/oem-custom-manufacturing.mdx",
-    "relativePath": "content/pages/zh/oem-custom-manufacturing.mdx"
-  },
-  {
-    "type": "pages",
-    "locale": "zh",
-    "slug": "privacy",
-    "extension": ".mdx",
-    "filePath": "/content/pages/zh/privacy.mdx",
-    "relativePath": "content/pages/zh/privacy.mdx"
-  },
-  {
-    "type": "pages",
-    "locale": "zh",
-    "slug": "terms",
-    "extension": ".mdx",
-    "filePath": "/content/pages/zh/terms.mdx",
-    "relativePath": "content/pages/zh/terms.mdx"
-  }
-],
-  byKey: {
-  "posts/en/welcome": {
-    "type": "posts",
-    "locale": "en",
-    "slug": "welcome",
-    "extension": ".mdx",
-    "filePath": "/content/posts/en/welcome.mdx",
-    "relativePath": "content/posts/en/welcome.mdx"
-  },
-  "posts/zh/welcome": {
-    "type": "posts",
-    "locale": "zh",
-    "slug": "welcome",
-    "extension": ".mdx",
-    "filePath": "/content/posts/zh/welcome.mdx",
-    "relativePath": "content/posts/zh/welcome.mdx"
-  },
-  "pages/en/about": {
-    "type": "pages",
-    "locale": "en",
-    "slug": "about",
-    "extension": ".mdx",
-    "filePath": "/content/pages/en/about.mdx",
-    "relativePath": "content/pages/en/about.mdx"
-  },
-  "pages/en/bending-machines": {
-    "type": "pages",
-    "locale": "en",
-    "slug": "bending-machines",
-    "extension": ".mdx",
-    "filePath": "/content/pages/en/bending-machines.mdx",
-    "relativePath": "content/pages/en/bending-machines.mdx"
-  },
-  "pages/en/contact": {
-    "type": "pages",
-    "locale": "en",
-    "slug": "contact",
-    "extension": ".mdx",
-    "filePath": "/content/pages/en/contact.mdx",
-    "relativePath": "content/pages/en/contact.mdx"
-  },
-  "pages/en/oem-custom-manufacturing": {
-    "type": "pages",
-    "locale": "en",
-    "slug": "oem-custom-manufacturing",
-    "extension": ".mdx",
-    "filePath": "/content/pages/en/oem-custom-manufacturing.mdx",
-    "relativePath": "content/pages/en/oem-custom-manufacturing.mdx"
-  },
-  "pages/en/privacy": {
-    "type": "pages",
-    "locale": "en",
-    "slug": "privacy",
-    "extension": ".mdx",
-    "filePath": "/content/pages/en/privacy.mdx",
-    "relativePath": "content/pages/en/privacy.mdx"
-  },
-  "pages/en/terms": {
-    "type": "pages",
-    "locale": "en",
-    "slug": "terms",
-    "extension": ".mdx",
-    "filePath": "/content/pages/en/terms.mdx",
-    "relativePath": "content/pages/en/terms.mdx"
-  },
-  "pages/zh/about": {
-    "type": "pages",
-    "locale": "zh",
-    "slug": "about",
-    "extension": ".mdx",
-    "filePath": "/content/pages/zh/about.mdx",
-    "relativePath": "content/pages/zh/about.mdx"
-  },
-  "pages/zh/bending-machines": {
-    "type": "pages",
-    "locale": "zh",
-    "slug": "bending-machines",
-    "extension": ".mdx",
-    "filePath": "/content/pages/zh/bending-machines.mdx",
-    "relativePath": "content/pages/zh/bending-machines.mdx"
-  },
-  "pages/zh/contact": {
-    "type": "pages",
-    "locale": "zh",
-    "slug": "contact",
-    "extension": ".mdx",
-    "filePath": "/content/pages/zh/contact.mdx",
-    "relativePath": "content/pages/zh/contact.mdx"
-  },
-  "pages/zh/oem-custom-manufacturing": {
-    "type": "pages",
-    "locale": "zh",
-    "slug": "oem-custom-manufacturing",
-    "extension": ".mdx",
-    "filePath": "/content/pages/zh/oem-custom-manufacturing.mdx",
-    "relativePath": "content/pages/zh/oem-custom-manufacturing.mdx"
-  },
-  "pages/zh/privacy": {
-    "type": "pages",
-    "locale": "zh",
-    "slug": "privacy",
-    "extension": ".mdx",
-    "filePath": "/content/pages/zh/privacy.mdx",
-    "relativePath": "content/pages/zh/privacy.mdx"
-  },
-  "pages/zh/terms": {
-    "type": "pages",
-    "locale": "zh",
-    "slug": "terms",
-    "extension": ".mdx",
-    "filePath": "/content/pages/zh/terms.mdx",
-    "relativePath": "content/pages/zh/terms.mdx"
-  }
-},
+  entries: _entries,
+  byKey: _byKey,
 } as const;

@@ -8,6 +8,7 @@ import {
 import { LegalPageShell } from "@/components/content/legal-page-shell";
 import { loadLegalPage } from "@/lib/content/legal-page";
 import { generateMetadataForPath, type Locale } from "@/lib/seo-metadata";
+import { getLocalizedPath } from "@/config/paths";
 
 export function generateStaticParams() {
   return generateLocaleStaticParams();
@@ -26,7 +27,7 @@ export async function generateMetadata({
   return generateMetadataForPath({
     locale: locale as Locale,
     pageType: "terms",
-    path: "/terms",
+    path: getLocalizedPath("terms", locale as Locale),
     config: {
       title: metadata.seo?.title ?? metadata.title,
       ...((metadata.seo?.description ?? metadata.description) !== undefined

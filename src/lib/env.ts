@@ -44,6 +44,7 @@ export const env = createEnv({
     // Admin & automation secrets
     ADMIN_API_TOKEN: z.string().min(1).optional(),
     CACHE_INVALIDATION_SECRET: z.string().min(1).optional(),
+    NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: z.string().min(1).optional(),
 
     // Runtime and platform configuration
     LOG_LEVEL: z.enum(["error", "warn", "info", "debug"]).optional(),
@@ -66,6 +67,14 @@ export const env = createEnv({
     UPSTASH_REDIS_REST_TOKEN: z.string().min(1).optional(),
     KV_REST_API_URL: z.string().url().optional(),
     KV_REST_API_TOKEN: z.string().min(1).optional(),
+    ALLOW_MEMORY_RATE_LIMIT: z
+      .string()
+      .optional()
+      .transform((val) => val === "true"),
+    ALLOW_MEMORY_IDEMPOTENCY: z
+      .string()
+      .optional()
+      .transform((val) => val === "true"),
 
     // AI Translation Service (Lingo.dev)
     LINGO_DEV_API_KEY: z.string().min(1).optional(),
@@ -289,6 +298,8 @@ export const env = createEnv({
     TURNSTILE_BYPASS: process.env.TURNSTILE_BYPASS,
     ADMIN_API_TOKEN: process.env.ADMIN_API_TOKEN,
     CACHE_INVALIDATION_SECRET: process.env.CACHE_INVALIDATION_SECRET,
+    NEXT_SERVER_ACTIONS_ENCRYPTION_KEY:
+      process.env.NEXT_SERVER_ACTIONS_ENCRYPTION_KEY,
     LOG_LEVEL: process.env.LOG_LEVEL,
     CONTENT_ENABLE_DRAFTS: process.env.CONTENT_ENABLE_DRAFTS,
     DEPLOYMENT_PLATFORM: process.env.DEPLOYMENT_PLATFORM,
@@ -302,6 +313,8 @@ export const env = createEnv({
     UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
     KV_REST_API_URL: process.env.KV_REST_API_URL,
     KV_REST_API_TOKEN: process.env.KV_REST_API_TOKEN,
+    ALLOW_MEMORY_RATE_LIMIT: process.env.ALLOW_MEMORY_RATE_LIMIT,
+    ALLOW_MEMORY_IDEMPOTENCY: process.env.ALLOW_MEMORY_IDEMPOTENCY,
     LINGO_DEV_API_KEY: process.env.LINGO_DEV_API_KEY,
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
     GROQ_API_KEY: process.env.GROQ_API_KEY,
@@ -556,6 +569,13 @@ export function isRuntimePlaywright(): boolean {
 
 export function isRuntimeProductionBuildPhase(): boolean {
   return getRuntimeEnvString("NEXT_PHASE") === "phase-production-build";
+}
+
+export function isRuntimeCloudflare(): boolean {
+  return (
+    getRuntimeEnvString("DEPLOYMENT_PLATFORM") === "cloudflare" ||
+    getRuntimeEnvString("NEXT_PUBLIC_DEPLOYMENT_PLATFORM") === "cloudflare"
+  );
 }
 
 export function isSecureAppEnv(): boolean {

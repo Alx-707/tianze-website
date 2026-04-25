@@ -33,6 +33,22 @@ export function ProductSection({ products }) {       // Server Component
 export function ProductCard({ product }) { ... }     // Client only where needed
 ```
 
+## Route Error Boundary Policy
+
+Use route-level `error.tsx` for pages where a buyer-facing flow depends on dynamic data, form/runtime services, or route parameters:
+
+- `contact` has a route boundary because it contains the lead form path.
+- `products` has a route boundary because catalog/product rendering is a main buyer path.
+- `blog/[slug]` has a route boundary because every request depends on a dynamic content slug.
+
+Pure static MDX/legal/about-style pages may rely on the layout/global fallback unless they add external fetches, user actions, or dynamic route parameters. If a static page later becomes interactive or externally data-backed, add a route-level boundary in the same change.
+
+## Cache Policy
+
+- `React.cache()` is for request-level dedupe: same request, same arguments, same result. Use it for low-level content reads like `getPageBySlug()` and `getPostBySlug()` when metadata and page rendering can ask for the same file.
+- `'use cache'`, `cacheLife()`, and `cacheTag()` are for cross-request Cache Components / revalidation behavior. Use them for exported wrappers that define product/blog/page view models and tag invalidation.
+- Reserve the `*Cached` suffix for exported cross-request/cache-components wrappers. Do not use `*Cached` for a plain low-level helper unless it actually defines the cache boundary.
+
 ## Project-Specific Pitfalls
 
 ### Radix UI + Dynamic Import

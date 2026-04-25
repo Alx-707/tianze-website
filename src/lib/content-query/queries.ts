@@ -2,7 +2,9 @@
  * 内容查询函数
  */
 
+import { cache } from "react";
 import path from "path";
+import { isRuntimeCloudflare } from "@/lib/env";
 import type {
   BlogPost,
   BlogPostMetadata,
@@ -18,6 +20,14 @@ import { getContentFiles, parseContentFile } from "@/lib/content-parser";
 import { filterPosts } from "@/lib/content-query/filters";
 import { paginatePosts, sortPosts } from "@/lib/content-query/sorting";
 import { getContentConfig, PAGES_DIR, POSTS_DIR } from "@/lib/content-utils";
+
+type ContentLoader<T> = (slug: string, locale?: Locale) => Promise<T>;
+
+function cacheOutsideCloudflare<T>(loader: ContentLoader<T>): ContentLoader<T> {
+  const cachedLoader = cache(loader);
+  return (slug, locale) =>
+    isRuntimeCloudflare() ? loader(slug, locale) : cachedLoader(slug, locale);
+}
 
 /**
  * Get all blog posts
@@ -77,20 +87,25 @@ export async function getContentBySlug<
 /**
  * Get blog post by slug
  */
-export function getPostBySlug(
-  slug: string,
-  locale?: Locale,
-): Promise<BlogPost> {
-  return getContentBySlug<BlogPostMetadata>(
-    slug,
-    "posts",
-    locale,
-  ) as Promise<BlogPost>;
-}
+export const getPostBySlug = cacheOutsideCloudflare(
+  (slug: string, locale?: Locale): Promise<BlogPost> => {
+    return getContentBySlug<BlogPostMetadata>(
+      slug,
+      "posts",
+      locale,
+    ) as Promise<BlogPost>;
+  },
+);
 
 /**
  * Get page by slug
  */
-export function getPageBySlug(slug: string, locale?: Locale): Promise<Page> {
-  return getContentBySlug<PageMetadata>(slug, "pages", locale) as Promise<Page>;
-}
+export const getPageBySlug = cacheOutsideCloudflare(
+  (slug: string, locale?: Locale): Promise<Page> => {
+    return getContentBySlug<PageMetadata>(
+      slug,
+      "pages",
+      locale,
+    ) as Promise<Page>;
+  },
+);

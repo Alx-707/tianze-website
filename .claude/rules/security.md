@@ -139,11 +139,19 @@ For public write endpoints, verify all applicable controls:
 
 ## Environment Variables
 
+### Contract Ownership
+- App/runtime code reads typed values through `@/lib/env`; do not add direct `process.env.*` reads in application modules.
+- Node scripts use `scripts/lib/runtime-env.js` or a local validator when they intentionally inspect deployment environment.
+- Deployment config and Cloudflare/Vercel secrets supply the actual values; code only declares and validates the contract.
+- Production readiness is enforced by `scripts/validate-production-config.ts`, including:
+  - `NEXT_SERVER_ACTIONS_ENCRYPTION_KEY` for stable Server Actions encryption.
+  - `ALLOW_MEMORY_RATE_LIMIT` and `ALLOW_MEMORY_IDEMPOTENCY` as degraded local/test flags that must not be present in production.
+
 ### Client Exposure
 - `NEXT_PUBLIC_` vars exposed to client bundle — use sparingly
 
 ### Sensitive Keys (Never Commit)
-- `AIRTABLE_API_KEY`, `RESEND_API_KEY`, `TURNSTILE_SECRET_KEY`
+- `AIRTABLE_API_KEY`, `RESEND_API_KEY`, `TURNSTILE_SECRET_KEY`, `NEXT_SERVER_ACTIONS_ENCRYPTION_KEY`
 
 ### Cookie Config
 - Locale cookie (`NEXT_LOCALE`) uses `sameSite: 'lax'` so cross-origin navigations preserve the chosen language (set in `src/middleware.ts`).

@@ -22,11 +22,16 @@ import {
   SINGLE_SITE_ABOUT_PAGE_EXPRESSION,
   SINGLE_SITE_ABOUT_STATS_ITEMS,
   SINGLE_SITE_ABOUT_VALUE_ITEM_KEYS,
-  getSingleSiteAboutShellCopy,
 } from "@/config/single-site-page-expression";
 import { Link } from "@/i18n/routing";
 import { LAYER1_FACTS, interpolateFaqAnswer } from "@/lib/content/mdx-faq";
-import type { FaqItem, Locale, PageMetadata } from "@/types/content.types";
+import { buildAboutPageSchema } from "@/lib/structured-data-generators";
+import type {
+  AboutPageSections,
+  FaqItem,
+  Locale,
+  PageMetadata,
+} from "@/types/content.types";
 
 interface AboutPageShellProps {
   metadata: PageMetadata;
@@ -88,23 +93,32 @@ function resolveValueIcon(key: string): ReactNode {
   }
 }
 
-function buildAboutSchema(metadata: PageMetadata, locale: string) {
-  return {
-    "@context": "https://schema.org",
-    "@type": "AboutPage",
-    name: metadata.title,
-    description: metadata.description,
-    inLanguage: locale,
-    mainEntity: {
-      "@type": "Organization",
-      name: siteFacts.company.name,
-      foundingDate: String(siteFacts.company.established),
-      numberOfEmployees: {
-        "@type": "QuantitativeValue",
-        value: siteFacts.company.employees,
-      },
-    },
-  };
+function createAboutSchema(metadata: PageMetadata, locale: string) {
+  return buildAboutPageSchema({
+    title: metadata.title,
+    locale,
+    companyName: siteFacts.company.name,
+    established: siteFacts.company.established,
+    employees: siteFacts.company.employees,
+    ...(metadata.description ? { description: metadata.description } : {}),
+  });
+}
+
+function getAboutSections(metadata: PageMetadata): AboutPageSections {
+  if (!metadata.aboutSections) {
+    throw new Error("About page metadata is missing aboutSections frontmatter");
+  }
+
+  return metadata.aboutSections;
+}
+
+function getAboutValueCopy(shellCopy: AboutPageSections, key: string) {
+  const value = shellCopy.values[key];
+  if (!value) {
+    throw new Error(`About page metadata is missing value copy for ${key}`);
+  }
+
+  return value;
 }
 
 export function AboutPageShell({
@@ -113,30 +127,33 @@ export function AboutPageShell({
   locale,
 }: AboutPageShellProps): ReactNode {
   const typedLocale = locale as Locale;
-  const shellCopy = getSingleSiteAboutShellCopy(locale);
+  const shellCopy = getAboutSections(metadata);
 
   const faqItems: FaqItem[] = (metadata.faq ?? []).map((item) => ({
     ...item,
     answer: interpolateFaqAnswer(item.answer, LAYER1_FACTS),
   }));
 
-  const valueItems = SINGLE_SITE_ABOUT_VALUE_ITEM_KEYS.map((key) => ({
-    key,
-    title: shellCopy.values[key].title,
-    description: shellCopy.values[key].description,
-    icon: resolveValueIcon(key),
-  }));
+  const valueItems = SINGLE_SITE_ABOUT_VALUE_ITEM_KEYS.map((key) => {
+    const copy = getAboutValueCopy(shellCopy, key);
+    return {
+      key,
+      title: copy.title,
+      description: copy.description,
+      icon: resolveValueIcon(key),
+    };
+  });
 
   const statItems = SINGLE_SITE_ABOUT_STATS_ITEMS.map((item) => ({
     key: item.key,
     value: `${resolveAboutStatValue(item.valueSource)}${item.suffix}`,
-    label: shellCopy.stats[item.labelKey],
+    label: shellCopy.statLabels[item.labelKey],
   }));
 
   const ctaHref = SINGLE_SITE_ABOUT_PAGE_EXPRESSION.ctaHref as ComponentProps<
     typeof Link
   >["href"];
-  const aboutSchema = buildAboutSchema(metadata, locale);
+  const aboutSchema = createAboutSchema(metadata, locale);
 
   return (
     <main>

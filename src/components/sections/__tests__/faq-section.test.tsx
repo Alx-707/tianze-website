@@ -20,15 +20,6 @@ vi.mock("next-intl/server", () => ({
   setRequestLocale: vi.fn(),
 }));
 
-// Mock structured data
-vi.mock("@/lib/structured-data", () => ({
-  generateFAQSchema: vi.fn(() => ({
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: [],
-  })),
-}));
-
 vi.mock("@/lib/content/mdx-faq", () => ({
   generateFaqSchemaFromItems: vi.fn(() => ({
     "@context": "https://schema.org",

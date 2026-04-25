@@ -56,6 +56,12 @@ vi.mock("@/config/paths", () => ({
       products: "/products",
     },
   },
+  DYNAMIC_PATHS_CONFIG: {
+    productMarket: {
+      pattern: "/products/[market]",
+      paramName: "market",
+    },
+  },
   getLocalizedPath: (pageType: string) =>
     pageType === "products" ? "/products" : "/",
 }));
@@ -80,6 +86,20 @@ vi.mock("@/components/products/sticky-family-nav", () => ({
 
 vi.mock("@/components/sections/faq-section", () => ({
   FaqSection: () => <section data-testid="faq-section">FAQ</section>,
+}));
+
+vi.mock("@/lib/content", () => ({
+  getPageBySlug: vi.fn(async () => ({
+    metadata: {
+      faq: [
+        {
+          id: "market-faq",
+          question: "Market FAQ?",
+          answer: "Market FAQ answer.",
+        },
+      ],
+    },
+  })),
 }));
 
 vi.mock("@/components/products/product-specs", () => ({

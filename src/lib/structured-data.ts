@@ -1,75 +1,20 @@
 import { getTranslations } from "next-intl/server";
-import { I18nPerformanceMonitor } from "@/lib/i18n-performance";
 import {
-  generateArticleData,
-  generateBreadcrumbData,
   generateOrganizationData,
-  generateProductData,
   generateWebSiteData,
 } from "@/lib/structured-data-generators";
 import {
   generateArticleSchema,
+  generateLocalizedStructuredData,
   generateProductSchema,
 } from "@/lib/structured-data-helpers";
-import type {
-  ArticleData,
-  BreadcrumbData,
-  Locale,
-  OrganizationData,
-  ProductData,
-  StructuredDataType,
-  WebSiteData,
-} from "@/lib/structured-data-types";
+import type { Locale } from "@/lib/structured-data-types";
 import { type PageType } from "@/config/paths";
-// 导入需要的函数
 import { COUNT_TWO } from "@/constants";
 
-// 重新导出类型
 export type { Locale } from "@/lib/structured-data-types";
 
-/**
- * 生成本地化结构化数据
- */
-export async function generateLocalizedStructuredData(
-  locale: Locale,
-  type: "Organization" | "WebSite" | "Article" | "Product" | "BreadcrumbList",
-  data: StructuredDataType,
-): Promise<Record<string, unknown>> {
-  try {
-    // 使用原始的getTranslations，缓存已在底层实现
-    const t = await getTranslations({ locale, namespace: "structured-data" });
-
-    switch (type) {
-      case "Organization":
-        return generateOrganizationData(t, data as OrganizationData);
-      case "WebSite":
-        return generateWebSiteData(t, data as WebSiteData);
-      case "Article":
-        return generateArticleData(t, locale, data as ArticleData);
-      case "Product":
-        return generateProductData(t, data as ProductData);
-      case "BreadcrumbList":
-        return generateBreadcrumbData(data as BreadcrumbData);
-      default:
-        // 对于未知类型，返回基础结构而不使用扩展运算符
-        return {
-          "@context": "https://schema.org",
-          "@type": type,
-        };
-    }
-  } catch (error) {
-    // 记录错误并返回基础结构
-    if (error instanceof Error) {
-      // 处理已知错误类型
-      I18nPerformanceMonitor.recordError();
-    }
-    // 错误情况下也不使用扩展运算符，避免潜在的安全风险
-    return {
-      "@context": "https://schema.org",
-      "@type": type,
-    };
-  }
-}
+export { generateLocalizedStructuredData };
 
 /**
  * 生成JSON-LD脚本标签
@@ -94,8 +39,6 @@ export {
   createArticleStructuredData,
   createBreadcrumbStructuredData,
   generateArticleSchema,
-  generateBreadcrumbSchema,
-  generateFAQSchema,
   generateLocalBusinessSchema,
   generateProductSchema,
 } from "@/lib/structured-data-helpers";

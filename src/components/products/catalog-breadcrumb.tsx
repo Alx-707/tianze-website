@@ -3,6 +3,7 @@ import { Link, routing } from "@/i18n/routing";
 import { JsonLdScript } from "@/components/seo";
 import { SITE_CONFIG } from "@/config/paths";
 import type { MarketDefinition } from "@/constants/product-catalog";
+import { buildBreadcrumbListSchema } from "@/lib/structured-data-generators";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -16,24 +17,6 @@ type CatalogBreadcrumbProps =
   | { market?: undefined; marketLabel?: undefined }
   | { market: MarketDefinition; marketLabel?: string };
 
-interface BreadcrumbEntry {
-  name: string;
-  url: string;
-}
-
-function buildJsonLd(items: BreadcrumbEntry[]) {
-  return {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: items.map((item, index) => ({
-      "@type": "ListItem",
-      position: index + 1,
-      name: item.name,
-      item: item.url,
-    })),
-  };
-}
-
 export async function CatalogBreadcrumb({
   market,
   marketLabel,
@@ -44,7 +27,7 @@ export async function CatalogBreadcrumb({
   // JSON-LD URLs use default locale for canonical representation
   const canonicalBase = `${baseUrl}/${routing.defaultLocale}`;
 
-  const entries: BreadcrumbEntry[] = [
+  const entries: Array<{ name: string; url: string }> = [
     { name: tBreadcrumb("home"), url: canonicalBase },
     { name: tBreadcrumb("products"), url: `${canonicalBase}/products` },
   ];
@@ -91,7 +74,7 @@ export async function CatalogBreadcrumb({
         </BreadcrumbList>
       </Breadcrumb>
 
-      <JsonLdScript data={buildJsonLd(entries)} />
+      <JsonLdScript data={buildBreadcrumbListSchema(entries)} />
     </>
   );
 }

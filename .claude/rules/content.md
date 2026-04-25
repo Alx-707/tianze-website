@@ -18,6 +18,8 @@ All substantive page content: prose, hero copy, FAQ Q&A (in frontmatter), page-l
 
 **Exception:** Structured card data (equipment specs, product catalog, OEM scope/process cards, bending machine specification/process cards) stays in typed config with i18n.
 OEM and bending machine pages are mixed structured pages: MDX owns FAQ and SEO metadata, while card grids, process steps, standards, and CTA modules remain in their translation namespaces.
+Product market pages are also mixed structured pages: `content/pages/{locale}/product-market.mdx` owns FAQ content, typed product catalog/spec config owns families, standards, and dimensions, and the `catalog` translation namespace owns reusable labels/descriptions used across cards and dynamic routes.
+Home is a structured campaign landing exception: section order and reusable section copy remain in config/i18n until a dedicated conversion-copy rewrite migrates it. Do not treat Home's current shape as a template for normal static pages.
 
 **FAQ rule:** Each page owns its FAQ in its own MDX frontmatter. No shared FAQ pool.
 

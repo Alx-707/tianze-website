@@ -29,6 +29,12 @@ const CRITICAL_CACHE_POLICY_SOURCE_READERS = {
     readFileSync("src/app/api/health/route.ts", "utf8"),
 } satisfies Record<(typeof CRITICAL_CACHE_POLICY_FILES)[number], () => string>;
 
+const PRODUCT_MARKET_PAGE_FILE = "src/app/[locale]/products/[market]/page.tsx";
+
+function readProductMarketPageSource() {
+  return readFileSync(PRODUCT_MARKET_PAGE_FILE, "utf8");
+}
+
 type AstRecord = Record<string, unknown>;
 
 function isAstRecord(value: unknown): value is AstRecord {
@@ -176,5 +182,23 @@ describe("cache directive policy", () => {
         `${filePath} should not import cache-component helpers from next/cache`,
       ).toEqual([]);
     }
+  });
+
+  it("keeps product market page-owned MDX reads behind a Cache Components boundary", () => {
+    const source = readProductMarketPageSource();
+
+    expect(source).toContain(
+      'import { cacheLife, cacheTag } from "next/cache"',
+    );
+    expect(source).toContain(
+      'import { contentTags } from "@/lib/cache/cache-tags"',
+    );
+    expect(source).toMatch(
+      /async function getProductMarketFaqItems\([^)]*\)[\s\S]*?['"]use cache['"]/,
+    );
+    expect(source).toContain('cacheLife("days")');
+    expect(source).toContain(
+      'cacheTag(contentTags.page("product-market", locale))',
+    );
   });
 });

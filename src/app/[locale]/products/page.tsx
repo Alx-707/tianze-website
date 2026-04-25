@@ -10,6 +10,7 @@ import {
   getFamiliesForMarket,
 } from "@/constants/product-catalog";
 import { SINGLE_SITE_PRODUCTS_PAGE_EXPRESSION } from "@/config/single-site-page-expression";
+import { getLocalizedPath } from "@/config/paths";
 import { CatalogBreadcrumb } from "@/components/products/catalog-breadcrumb";
 import { MarketSeriesCard } from "@/components/products/market-series-card";
 import { Link } from "@/i18n/routing";
@@ -32,7 +33,7 @@ export async function generateMetadata({
   return generateMetadataForPath({
     locale: locale as SeoLocale,
     pageType: "products",
-    path: "/products",
+    path: getLocalizedPath("products", locale as SeoLocale),
     config: {
       title: t("overview.title"),
       description: t("overview.description"),

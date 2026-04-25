@@ -11,6 +11,8 @@
 
 import fs from "fs";
 import path from "path";
+import matter from "gray-matter";
+import yaml from "js-yaml";
 
 const CONTENT_DIR = path.join(process.cwd(), "content");
 const MANIFEST_OUTPUT = path.join(
@@ -35,6 +37,15 @@ const CONTENT_TYPES = ["posts", "pages", "products"] as const;
 const LOCALES = ["en", "zh"] as const;
 const VALID_EXTENSIONS = [".mdx", ".md"];
 
+type YamlWithSafeLoad = typeof yaml & {
+  safeLoad?: (str: string) => unknown;
+};
+
+const yamlWithSafeLoad = yaml as YamlWithSafeLoad;
+if (!yamlWithSafeLoad.safeLoad) {
+  yamlWithSafeLoad.safeLoad = (str: string) => yamlWithSafeLoad.load(str);
+}
+
 type ContentType = (typeof CONTENT_TYPES)[number];
 type Locale = (typeof LOCALES)[number];
 
@@ -45,6 +56,8 @@ interface ContentEntry {
   extension: string;
   filePath: string;
   relativePath: string;
+  metadata: Record<string, unknown>;
+  content: string;
 }
 
 interface ContentManifest {
@@ -73,6 +86,13 @@ function scanDirectory(
 
     const slug = path.basename(file, ext);
     const filePath = path.join(dirPath, file);
+    const fileContent = fs.readFileSync(filePath, "utf-8");
+    const { data: metadata, content } = matter(fileContent, {
+      engines: {
+        yaml: (source: string) =>
+          yamlWithSafeLoad.load(source) as Record<string, unknown>,
+      },
+    });
     const relativePath = path
       .relative(process.cwd(), filePath)
       .split(path.sep)
@@ -86,6 +106,8 @@ function scanDirectory(
       extension: ext,
       filePath: stableFilePath,
       relativePath,
+      metadata,
+      content,
     });
   }
 
@@ -207,7 +229,13 @@ function generateImportersCode(entries: ContentEntry[]): string {
 
 function generateManifestTsCode(manifest: ContentManifest): string {
   const entriesJson = JSON.stringify(manifest.entries, null, 2);
-  const byKeyJson = JSON.stringify(manifest.byKey, null, 2);
+
+  const byKeyIndex: Record<string, number> = {};
+  for (const [key, entry] of Object.entries(manifest.byKey)) {
+    const idx = manifest.entries.indexOf(entry);
+    byKeyIndex[key] = idx;
+  }
+  const byKeyIndexJson = JSON.stringify(byKeyIndex, null, 2);
 
   return `/**
  * AUTO-GENERATED FILE - DO NOT EDIT
@@ -227,6 +255,8 @@ export interface ContentEntry {
   extension: string;
   filePath: string;
   relativePath: string;
+  metadata: Record<string, unknown>;
+  content: string;
 }
 
 export interface ContentManifest {
@@ -234,9 +264,17 @@ export interface ContentManifest {
   byKey: Record<string, ContentEntry>;
 }
 
+const _entries: ContentEntry[] = ${entriesJson};
+
+const _byKeyIndex: Record<string, number> = ${byKeyIndexJson};
+
+const _byKey: Record<string, ContentEntry> = Object.fromEntries(
+  Object.entries(_byKeyIndex).map(([key, idx]) => [key, _entries[idx]!]),
+);
+
 export const CONTENT_MANIFEST: ContentManifest = {
-  entries: ${entriesJson},
-  byKey: ${byKeyJson},
+  entries: _entries,
+  byKey: _byKey,
 } as const;
 `;
 }

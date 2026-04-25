@@ -1,6 +1,8 @@
 import { getTranslations } from "next-intl/server";
 import { I18nPerformanceMonitor } from "@/lib/i18n-performance";
 import {
+  buildLocalBusinessSchema,
+  buildSchemaFallback,
   generateArticleData,
   generateBreadcrumbData,
   generateOrganizationData,
@@ -15,7 +17,7 @@ import type {
   ProductData,
   WebSiteData,
 } from "@/lib/structured-data-types";
-import { SITE_CONFIG, type PageType } from "@/config/paths";
+import { type PageType } from "@/config/paths";
 import { generateCanonicalURL } from "@/services/url-generator";
 
 /**
@@ -50,14 +52,6 @@ export function createArticleStructuredData(
   },
 ) {
   return generateLocalizedStructuredData(locale, "Article", article);
-}
-
-// 兼容测试所需的便捷导出：根据测试用例命名
-export function generateBreadcrumbSchema(
-  breadcrumbs: Array<{ name: string; url: string }>,
-  locale: Locale,
-) {
-  return createBreadcrumbStructuredData(locale, breadcrumbs);
 }
 
 export function generateArticleSchema(
@@ -147,25 +141,6 @@ export function generateProductSchema(
   );
 }
 
-export function generateFAQSchema(
-  faq: Array<{ question: string; answer: string }>,
-  _locale: Locale,
-) {
-  // 直接构建 FAQPage 结构以满足测试断言
-  return {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: faq.map((item) => ({
-      "@type": "Question",
-      name: item.question,
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: item.answer,
-      },
-    })),
-  } as Record<string, unknown>;
-}
-
 export function generateLocalBusinessSchema(
   business: {
     name: string;
@@ -177,31 +152,7 @@ export function generateLocalBusinessSchema(
   },
   _locale: Locale,
 ) {
-  const schema: Record<string, unknown> = {
-    "@context": "https://schema.org",
-    "@type": "LocalBusiness",
-    name: business.name,
-    address: {
-      "@type": "PostalAddress",
-      streetAddress: business.address,
-    },
-    url: SITE_CONFIG.baseUrl,
-  };
-
-  if (business.phone) {
-    schema.telephone = business.phone;
-  }
-  if (business.email) {
-    schema.email = business.email;
-  }
-  if (business.openingHours) {
-    schema.openingHours = business.openingHours;
-  }
-  if (business.priceRange) {
-    schema.priceRange = business.priceRange;
-  }
-
-  return schema;
+  return buildLocalBusinessSchema(business);
 }
 
 /**
@@ -231,11 +182,7 @@ export async function generateLocalizedStructuredData(
       case "BreadcrumbList":
         return generateBreadcrumbData(data as BreadcrumbData);
       default:
-        // 对于未知类型，返回基础结构而不使用扩展运算符
-        return {
-          "@context": "https://schema.org",
-          "@type": type,
-        };
+        return buildSchemaFallback(type);
     }
   } catch (error) {
     // 记录错误并返回基础结构
@@ -243,10 +190,6 @@ export async function generateLocalizedStructuredData(
       // 处理已知错误类型
       I18nPerformanceMonitor.recordError();
     }
-    // 错误情况下也不使用扩展运算符，避免潜在的安全风险
-    return {
-      "@context": "https://schema.org",
-      "@type": type,
-    };
+    return buildSchemaFallback(type);
   }
 }

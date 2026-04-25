@@ -4,7 +4,6 @@ import { FaqAccordion } from "@/components/sections/faq-accordion";
 import { SectionHead } from "@/components/ui/section-head";
 import { siteFacts } from "@/config/site-facts";
 import { generateFaqSchemaFromItems } from "@/lib/content/mdx-faq";
-import { generateFAQSchema } from "@/lib/structured-data";
 import type { FaqItem, Locale } from "@/types/content.types";
 
 const FAQ_ICU_VALUES = {
@@ -52,8 +51,12 @@ export async function FaqSection(props: FaqSectionProps) {
       question: t(`items.${key}.question`, FAQ_ICU_VALUES),
       answer: t(`items.${key}.answer`, FAQ_ICU_VALUES),
     }));
-    schemaData = generateFAQSchema(
-      faqData.map(({ question, answer }) => ({ question, answer })),
+    schemaData = generateFaqSchemaFromItems(
+      faqData.map(({ key, question, answer }) => ({
+        id: key,
+        question,
+        answer,
+      })),
       locale,
     );
   }

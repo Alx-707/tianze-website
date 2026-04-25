@@ -71,6 +71,9 @@ vi.mock("@/lib/env", () => {
     EMAIL_REPLY_TO: "reply@example.com",
     CSP_REPORT_URI: "https://example.com/csp-report",
     ADMIN_API_TOKEN: "test-admin-token",
+    NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: "test-server-actions-key",
+    ALLOW_MEMORY_RATE_LIMIT: false,
+    ALLOW_MEMORY_IDEMPOTENCY: false,
     NEXT_PUBLIC_BASE_URL: "https://example.com",
     NEXT_PUBLIC_VERCEL_URL: "example.vercel.app",
     NEXT_PUBLIC_TURNSTILE_SITE_KEY: "test-site-key-12345",
@@ -141,6 +144,9 @@ vi.mock("@/lib/env", () => {
       readProcessEnvValue("PLAYWRIGHT_TEST") === "true",
     isRuntimeProductionBuildPhase: () =>
       readProcessEnvValue("NEXT_PHASE") === "phase-production-build",
+    isRuntimeCloudflare: () =>
+      readProcessEnvValue("DEPLOYMENT_PLATFORM") === "cloudflare" ||
+      readProcessEnvValue("NEXT_PUBLIC_DEPLOYMENT_PLATFORM") === "cloudflare",
     isSecureAppEnv: () => {
       const value = readProcessEnvValue("APP_ENV") ?? mockEnv.APP_ENV;
       return value === "production" || value === "preview";

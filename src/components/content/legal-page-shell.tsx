@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { JsonLdScript } from "@/components/seo";
 import type { HeadingItem } from "@/lib/content/legal-page";
 import { renderLegalContent } from "@/lib/content/render-legal-content";
+import { buildLegalPageSchema } from "@/lib/structured-data-generators";
 import type { LegalPageMetadata } from "@/types/content.types";
 
 interface LegalPageShellProps {
@@ -24,17 +25,18 @@ export async function LegalPageShell({
 }: LegalPageShellProps): Promise<ReactNode> {
   const t = await getTranslations({ locale, namespace: "legal" });
 
-  const schema = {
-    "@context": "https://schema.org",
-    "@type": schemaType,
+  const schema = buildLegalPageSchema({
+    schemaType,
     ...(schemaAdditionalType ? { additionalType: schemaAdditionalType } : {}),
-    inLanguage: locale,
+    locale,
     name: metadata.seo?.title ?? metadata.title,
-    description: metadata.seo?.description ?? metadata.description,
-    datePublished: metadata.publishedAt,
-    dateModified:
+    publishedAt: metadata.publishedAt,
+    modifiedAt:
       metadata.updatedAt ?? metadata.lastReviewed ?? metadata.publishedAt,
-  } as const;
+    ...(metadata.seo?.description ?? metadata.description
+      ? { description: metadata.seo?.description ?? metadata.description }
+      : {}),
+  });
 
   const tocHeadings = headings.filter((heading) => heading.level === 2);
   const hasToc = tocHeadings.length > 0;

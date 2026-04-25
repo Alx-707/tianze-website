@@ -21,6 +21,7 @@ import { renderLegalContent } from "@/lib/content/render-legal-content";
 import { getContactCopy } from "@/lib/contact/getContactCopy";
 import { pickMessages } from "@/lib/i18n/client-messages";
 import { generateMetadataForPath } from "@/lib/seo-metadata";
+import { getLocalizedPath } from "@/config/paths";
 import type { FaqItem, Locale } from "@/types/content.types";
 
 interface ContactPageProps {
@@ -42,7 +43,7 @@ export async function generateMetadata({
   const metadata = generateMetadataForPath({
     locale: locale as Locale,
     pageType: "contact",
-    path: "/contact",
+    path: getLocalizedPath("contact", locale as Locale),
     config: {
       title: page.metadata.seo?.title ?? page.metadata.title,
       ...(description ? { description } : {}),

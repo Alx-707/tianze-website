@@ -1,3 +1,5 @@
+import { PATHS_CONFIG } from "@/config/paths/paths-config";
+
 export type SingleSiteSitemapChangeFrequency =
   | "always"
   | "hourly"
@@ -21,17 +23,9 @@ export interface SingleSiteSitemapPageConfig {
   priority: number;
 }
 
-export const SINGLE_SITE_PUBLIC_STATIC_PAGES = [
-  "",
-  "/about",
-  "/contact",
-  "/products",
-  "/blog",
-  "/privacy",
-  "/terms",
-  "/capabilities/bending-machines",
-  "/oem-custom-manufacturing",
-] as const;
+export const SINGLE_SITE_PUBLIC_STATIC_PAGES = Object.values(PATHS_CONFIG).map(
+  (paths) => (paths.en === "/" ? "" : paths.en),
+);
 
 export const SINGLE_SITE_SITEMAP_PAGE_CONFIG = {
   "": { changeFrequency: "daily", priority: 1.0 },
