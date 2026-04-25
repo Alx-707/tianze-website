@@ -73,10 +73,10 @@ describe("Mobile Navigation - Core Tests", () => {
         const translations: Record<string, string> = {
           "navigation.home": "Home",
           "navigation.about": "About",
-          "navigation.services": "Services",
           "navigation.contact": "Contact",
+          "navigation.contactSales": "Contact Sales",
           "navigation.products": "Products",
-          "navigation.blog": "Blog",
+          "navigation.oem": "OEM",
           "navigation.menu": "Menu",
           "navigation.close": "Close",
           "accessibility.openMenu": "Open menu",
@@ -163,7 +163,10 @@ describe("Mobile Navigation - Core Tests", () => {
       expect(
         screen.getByRole("link", { name: /products/i }),
       ).toBeInTheDocument();
-      expect(screen.getByRole("link", { name: /blog/i })).toBeInTheDocument();
+      expect(screen.getByRole("link", { name: /oem/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("link", { name: /^Contact$/i }),
+      ).toBeInTheDocument();
     });
 
     it("should highlight active navigation item", async () => {
@@ -283,7 +286,8 @@ describe("Mobile Navigation - Core Tests", () => {
       expect(
         screen.getByRole("link", { name: "Products" }),
       ).toBeInTheDocument();
-      expect(screen.getByRole("link", { name: "Blog" })).toBeInTheDocument();
+      expect(screen.getByRole("link", { name: "OEM" })).toBeInTheDocument();
+      expect(screen.getByRole("link", { name: "Contact" })).toBeInTheDocument();
     });
 
     it("should handle missing translations gracefully", async () => {

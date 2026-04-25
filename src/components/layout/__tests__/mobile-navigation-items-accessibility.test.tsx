@@ -72,8 +72,8 @@ describe("Mobile Navigation - Advanced Integration Tests", () => {
           "navigation.home": "Home",
           "navigation.about": "About",
           "navigation.products": "Products",
-          "navigation.blog": "Blog",
-          "navigation.privacy": "Privacy Policy",
+          "navigation.oem": "OEM",
+          "navigation.contact": "Contact",
           "navigation.menu": "Toggle mobile menu",
           "navigation.close": "Close",
           "accessibility.openMenu": "Open menu",
@@ -164,8 +164,8 @@ describe("Mobile Navigation - Advanced Integration Tests", () => {
 
       const links = screen.getAllByRole("link");
       expect(links.length).toBeGreaterThanOrEqual(3);
-      const [homeLink, productsLink, blogLink] = links as HTMLAnchorElement[];
-      if (!homeLink || !productsLink || !blogLink) {
+      const [homeLink, productsLink, oemLink] = links as HTMLAnchorElement[];
+      if (!homeLink || !productsLink || !oemLink) {
         throw new Error(
           "Expected navigation links to be present for keyboard test",
         );
@@ -178,7 +178,7 @@ describe("Mobile Navigation - Advanced Integration Tests", () => {
       expect(productsLink).toHaveFocus();
 
       await user.tab();
-      expect(blogLink).toHaveFocus();
+      expect(oemLink).toHaveFocus();
     });
 
     it("handles missing translations gracefully", async () => {
@@ -209,9 +209,9 @@ describe("Mobile Navigation - Advanced Integration Tests", () => {
       expect(linkTexts).toEqual([
         "Home",
         "Products",
-        "Blog",
+        "OEM",
         "About",
-        "Privacy Policy",
+        "Contact",
         "Contact Sales",
         "English✓",
         "简体中文",

@@ -54,13 +54,33 @@ describe("navigation", () => {
       expect(mainNavigation).toBe(SINGLE_SITE_NAVIGATION);
     });
 
-    it("should have all required navigation items", () => {
-      const expectedKeys = ["home", "about", "products", "blog"];
+    it("should match the B2B conversion path order", () => {
+      expect(mainNavigation).toEqual([
+        { key: "home", href: "/", translationKey: "navigation.home" },
+        {
+          key: "products",
+          href: "/products",
+          translationKey: "navigation.products",
+        },
+        {
+          key: "oem",
+          href: "/oem-custom-manufacturing",
+          translationKey: "navigation.oem",
+        },
+        { key: "about", href: "/about", translationKey: "navigation.about" },
+        {
+          key: "contact",
+          href: "/contact",
+          translationKey: "navigation.contact",
+        },
+      ]);
+    });
+
+    it("should remove blog and privacy from the main navigation", () => {
       const actualKeys = mainNavigation.map((item) => item.key);
 
-      expectedKeys.forEach((key) => {
-        expect(actualKeys).toContain(key);
-      });
+      expect(actualKeys).not.toContain("blog");
+      expect(actualKeys).not.toContain("privacy");
     });
 
     it("should have valid structure for all items", () => {

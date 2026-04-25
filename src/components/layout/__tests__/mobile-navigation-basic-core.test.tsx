@@ -94,9 +94,8 @@ describe("Mobile Navigation - Basic Core Tests", () => {
         const translations: Record<string, string> = {
           "navigation.home": "Home",
           "navigation.about": "About",
-          "navigation.services": "Services",
           "navigation.products": "Products",
-          "navigation.blog": "Blog",
+          "navigation.oem": "OEM",
           "navigation.contact": "Contact",
           "seo.siteName": "Site Name",
           "seo.description": "Site Description",
@@ -255,7 +254,8 @@ describe("Mobile Navigation - Basic Core Tests", () => {
       expect(screen.getByText("Home")).toBeInTheDocument();
       expect(screen.getByText("About")).toBeInTheDocument();
       expect(screen.getByText("Products")).toBeInTheDocument();
-      expect(screen.getByText("Blog")).toBeInTheDocument();
+      expect(screen.getByText("OEM")).toBeInTheDocument();
+      expect(screen.getByText("Contact")).toBeInTheDocument();
     });
 
     it("hides navigation items when menu is closed", async () => {
