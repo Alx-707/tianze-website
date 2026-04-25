@@ -7,12 +7,13 @@ import type {
   ProductData,
   WebSiteData,
 } from "@/lib/structured-data-types";
+import { SINGLE_SITE_FACTS } from "@/config/single-site";
 import { SITE_CONFIG } from "@/config/paths/site-config";
 import { routing } from "@/i18n/routing";
 
 const FALLBACK_BASE_URL = SITE_CONFIG.baseUrl;
 
-const DEFAULT_LOGO_PATH = "/next.svg";
+const DEFAULT_LOGO_PATH = SINGLE_SITE_FACTS.brandAssets.logo.horizontal;
 
 interface ProductGroupInput {
   name: string;

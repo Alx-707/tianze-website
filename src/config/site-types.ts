@@ -82,12 +82,25 @@ export interface SocialLinks {
   instagram?: string;
 }
 
+export interface BrandAssets {
+  logo: {
+    horizontal: string;
+    horizontalPng: string;
+    square: string;
+    width: number;
+    height: number;
+  };
+  ogImage: string;
+  favicon: string;
+}
+
 export interface SiteFacts {
   company: CompanyInfo;
   contact: ContactInfo;
   certifications: Certification[];
   stats: BusinessStats;
   social: SocialLinks;
+  brandAssets: BrandAssets;
 }
 
 export interface SiteNavigationItem {

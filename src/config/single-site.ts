@@ -126,6 +126,17 @@ export const SINGLE_SITE_DEFINITION: SiteDefinition = {
       linkedin: social.linkedin,
       twitter: social.twitter,
     },
+    brandAssets: {
+      logo: {
+        horizontal: "/images/logo.svg",
+        horizontalPng: "/images/logo.png",
+        square: "/images/logo-square.svg",
+        width: 200,
+        height: 60,
+      },
+      ogImage: "/images/og-image.jpg",
+      favicon: "/favicon.ico",
+    },
   },
   productCatalog: singleSiteProductCatalog,
   navigation: {

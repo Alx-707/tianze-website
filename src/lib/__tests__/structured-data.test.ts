@@ -151,7 +151,7 @@ describe("Structured Data Generation", () => {
         description:
           "Professional PVC conduit and PETG pneumatic tube manufacturer",
         url: "https://example.com",
-        logo: "https://example.com/next.svg",
+        logo: "https://example.com/images/logo.svg",
         contactPoint: {
           "@type": "ContactPoint",
           telephone: "+86-518-0000-0000",
@@ -224,7 +224,7 @@ describe("Structured Data Generation", () => {
           name: "Tianze Pipe",
           logo: {
             "@type": "ImageObject",
-            url: "https://example.com/next.svg",
+            url: "https://example.com/images/logo.svg",
           },
         },
         datePublished: "2023-01-01T00:00:00Z",
@@ -682,7 +682,7 @@ describe("Structured Data Generation", () => {
           name: "Test Publisher",
           logo: {
             "@type": "ImageObject",
-            url: "https://example.com/next.svg",
+            url: "https://example.com/images/logo.svg",
           },
         },
       };
