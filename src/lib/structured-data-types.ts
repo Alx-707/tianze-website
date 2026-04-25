@@ -17,7 +17,6 @@ export interface WebSiteData {
   name?: string;
   description?: string;
   url?: string;
-  searchUrl?: string;
 }
 
 export interface ArticleData {

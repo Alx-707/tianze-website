@@ -196,7 +196,9 @@ describe("Structured Data Generation", () => {
         url: "https://example.com",
         inLanguage: ["en", "zh"],
       });
-      expect(schema).toHaveProperty("potentialAction");
+      expect(schema).not.toHaveProperty("potentialAction");
+      expect(JSON.stringify(schema)).not.toContain("SearchAction");
+      expect(JSON.stringify(schema)).not.toContain("/search");
     });
   });
 

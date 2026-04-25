@@ -143,12 +143,6 @@ export function generateWebSiteData(
         defaultValue: SITE_CONFIG.seo.defaultDescription,
       }),
     url: data.url || FALLBACK_BASE_URL,
-    potentialAction: {
-      "@type": "SearchAction",
-      target:
-        data.searchUrl || `${FALLBACK_BASE_URL}/search?q={search_term_string}`,
-      "query-input": "required name=search_term_string",
-    },
     inLanguage: routing.locales,
     // 移除 ...data 扩展运算符，只使用已验证的属性
   };
