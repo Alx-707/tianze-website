@@ -3,7 +3,6 @@ import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 // Import after mocks
 import {
-  generateArticleSchema,
   generateJSONLD,
   generateLocalBusinessSchema,
   generateLocalizedStructuredData,
@@ -15,25 +14,18 @@ import * as structuredDataPublicApi from "../structured-data";
 // 测试常量定义
 const TEST_COUNTS = {
   HOME_STRUCTURED_DATA: 2, // Organization + Website
-  BLOG_STRUCTURED_DATA: 3, // Organization + Website + Article
   PRODUCTS_STRUCTURED_DATA: 3, // Organization + Website + Product
   FALLBACK_STRUCTURED_DATA: 2, // Organization + Website (fallback)
 } as const;
 
 // Use vi.hoisted to ensure proper mock setup
-const { mockGetTranslations, mockGenerateCanonicalURL, mockRecordError } =
-  vi.hoisted(() => ({
-    mockGetTranslations: vi.fn(),
-    mockGenerateCanonicalURL: vi.fn(),
-    mockRecordError: vi.fn(),
-  }));
+const { mockGetTranslations, mockRecordError } = vi.hoisted(() => ({
+  mockGetTranslations: vi.fn(),
+  mockRecordError: vi.fn(),
+}));
 
 vi.mock("next-intl/server", () => ({
   getTranslations: mockGetTranslations,
-}));
-
-vi.mock("@/services/url-generator", () => ({
-  generateCanonicalURL: mockGenerateCanonicalURL,
 }));
 
 vi.mock("@/lib/i18n-performance", () => ({
@@ -104,7 +96,6 @@ describe("Structured Data Generation", () => {
     });
 
     mockGetTranslations.mockResolvedValue(mockT);
-    mockGenerateCanonicalURL.mockReturnValue("https://example.com/test");
   });
 
   afterEach(() => {
@@ -193,69 +184,6 @@ describe("Structured Data Generation", () => {
       expect(schema).not.toHaveProperty("potentialAction");
       expect(JSON.stringify(schema)).not.toContain("SearchAction");
       expect(JSON.stringify(schema)).not.toContain("/search");
-    });
-  });
-
-  describe("generateArticleSchema", () => {
-    it("should generate valid article schema", async () => {
-      const articleData = {
-        title: "Test Article",
-        description: "Test Description",
-        author: "John Doe",
-        publishedTime: "2023-01-01T00:00:00Z",
-        modifiedTime: "2023-01-02T00:00:00Z",
-        image: "/test-image.jpg",
-        section: "Technology",
-      };
-
-      const schema = await generateArticleSchema(articleData, "en");
-
-      expect(schema).toEqual({
-        "@context": "https://schema.org",
-        "@type": "Article",
-        headline: "Test Article",
-        description: "Test Description",
-        author: {
-          "@type": "Person",
-          name: "John Doe",
-        },
-        publisher: {
-          "@type": "Organization",
-          name: "Tianze Pipe",
-          logo: {
-            "@type": "ImageObject",
-            url: "https://example.com/images/logo.svg",
-          },
-        },
-        datePublished: "2023-01-01T00:00:00Z",
-        dateModified: "2023-01-02T00:00:00Z",
-        image: {
-          "@type": "ImageObject",
-          url: "/test-image.jpg",
-        },
-        section: "Technology",
-        inLanguage: "en",
-        mainEntityOfPage: {
-          "@type": "WebPage",
-          "@id": "https://example.com/test",
-        },
-      });
-    });
-
-    it("should handle missing optional fields", async () => {
-      const articleData = {
-        title: "Test Article",
-        description: "Test Description",
-      };
-
-      const schema = await generateArticleSchema(articleData, "en");
-
-      expect(schema.author).toEqual({
-        "@type": "Person",
-        name: "Tianze Pipe Team",
-      });
-      expect(schema.datePublished).toBeDefined();
-      expect(schema.dateModified).toBeDefined();
     });
   });
 
@@ -367,20 +295,6 @@ describe("Structured Data Generation", () => {
       expect(data).toHaveLength(TEST_COUNTS.HOME_STRUCTURED_DATA); // Organization + Website
       expect(data[0]["@type"]).toBe("Organization");
       expect(data[1]["@type"]).toBe("WebSite");
-    });
-
-    it("should generate structured data for blog page", async () => {
-      const articleData = {
-        title: "Blog Post",
-        description: "Blog Description",
-      };
-
-      const data = await generateStructuredData("blog", "en", {
-        article: articleData,
-      });
-
-      expect(data).toHaveLength(TEST_COUNTS.BLOG_STRUCTURED_DATA); // Organization + Website + Article
-      expect(data[2]["@type"]).toBe("Article");
     });
 
     it("should generate structured data for products page", async () => {

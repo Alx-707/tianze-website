@@ -657,7 +657,6 @@
       "company": {
         "title": "公司",
         "about": "关于",
-        "blog": "博客",
         "careers": "招聘",
         "changelog": "更新日志",
         "contact": "联系我们",
@@ -712,11 +711,6 @@
         "title": "产品展示 - 建设中",
         "description": "我们的产品展示正在精心制作中。探索将改变您业务的创新解决方案。",
         "features": "产品功能和规格说明即将推出"
-      },
-      "blog": {
-        "title": "博客 - 建设中",
-        "description": "我们的博客正在准备富有洞察力的内容。敬请期待行业见解和公司动态。",
-        "features": "文章、教程和行业洞察即将推出"
       },
       "about": {
         "title": "关于我们 - 建设中",
@@ -910,12 +904,6 @@
     "products": {
       "title": "产品信息加载失败",
       "description": "我们未能加载产品详情。请点击重试或返回首页浏览其他内容。",
-      "tryAgain": "重试",
-      "goHome": "返回首页"
-    },
-    "blog": {
-      "title": "文章加载失败",
-      "description": "我们未能加载这篇文章。请点击重试或返回首页浏览其他内容。",
       "tryAgain": "重试",
       "goHome": "返回首页"
     },
@@ -1701,43 +1689,6 @@
   },
   "article": {
     "defaultAuthor": "天泽管业"
-  },
-  "blog": {
-    "pageTitle": "博客",
-    "pageDescription": "探索我们关于技术、设计和企业解决方案的最新文章、见解和更新。",
-    "readingTime": "分钟阅读",
-    "emptyState": "暂无文章发布，敬请期待！",
-    "backToList": "返回博客列表",
-    "publishedOn": "发布于",
-    "updatedOn": "更新于",
-    "author": "作者",
-    "tags": "标签",
-    "categories": "分类",
-    "allCategories": "全部",
-    "relatedArticles": "相关文章",
-    "shareArticle": "分享文章",
-    "articleNotFound": "文章未找到",
-    "sidebar": {
-      "mostPopular": "热门文章",
-      "categories": "分类"
-    },
-    "contentTypes": {
-      "article": "文章",
-      "case-study": "案例研究",
-      "guide": "指南",
-      "news": "新闻",
-      "whitepaper": "白皮书"
-    },
-    "newsletter": {
-      "title": "订阅我们的通讯",
-      "description": "获取最新的行业洞察、产品更新和贸易技巧。",
-      "placeholder": "请输入您的邮箱地址",
-      "submit": "订阅",
-      "submitting": "订阅中...",
-      "success": "感谢您的订阅！您将收到我们的最新动态。",
-      "error": "发生错误，请重试。",
-      "turnstileRequired": "请完成安全验证。"
-    }
   },
   "products": {
     "pageTitle": "产品中心",

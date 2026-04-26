@@ -37,7 +37,6 @@ export const CACHE_INVALIDATION_DOMAINS = [
 export const CACHE_INVALIDATION_ENTITIES = [
   "critical",
   "deferred",
-  "blog",
   "page",
   "detail",
   "categories",
@@ -126,16 +125,6 @@ export const invalidateI18n = {
  * Content invalidation utilities.
  */
 export const invalidateContent = {
-  /** Invalidate a specific blog post */
-  blogPost(slug: string, locale: Locale): InvalidationResult {
-    return invalidateTags(contentTags.forBlogPost(slug, locale));
-  },
-
-  /** Invalidate blog list for a locale */
-  blogList(locale: Locale): InvalidationResult {
-    return invalidateTags([contentTags.blogList(locale)]);
-  },
-
   /** Invalidate a specific page */
   page(slug: string, locale: Locale): InvalidationResult {
     return invalidateTags([contentTags.page(slug, locale)]);
@@ -205,7 +194,7 @@ export function invalidateDomain(
       tags.push(i18nTags.all());
       break;
     case CACHE_DOMAINS.CONTENT:
-      tags.push(contentTags.blogList("en"), contentTags.blogList("zh"));
+      tags.push(...contentTags.forLocale("en"), ...contentTags.forLocale("zh"));
       break;
     case CACHE_DOMAINS.PRODUCT:
       tags.push(...productTags.forLocale("en"), ...productTags.forLocale("zh"));
@@ -234,9 +223,6 @@ function invalidateContentRequest(
   entity: string | undefined,
   identifier: string | undefined,
 ): InvalidationResult {
-  if (entity === "blog" && identifier) {
-    return invalidateContent.blogPost(identifier, locale);
-  }
   if (entity === "page" && identifier) {
     return invalidateContent.page(identifier, locale);
   }

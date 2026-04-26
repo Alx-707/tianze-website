@@ -4,7 +4,6 @@ import {
   generateWebSiteData,
 } from "@/lib/structured-data-generators";
 import {
-  generateArticleSchema,
   generateLocalizedStructuredData,
   generateProductSchema,
 } from "@/lib/structured-data-helpers";
@@ -38,7 +37,6 @@ export function generateJSONLD(structuredData: unknown): string {
 export {
   createArticleStructuredData,
   createBreadcrumbStructuredData,
-  generateArticleSchema,
   generateLocalBusinessSchema,
   generateProductSchema,
 } from "@/lib/structured-data-helpers";
@@ -48,23 +46,6 @@ export function generateStructuredData(
   _page: "home",
   _locale: Locale,
 ): Promise<[Record<string, unknown>, Record<string, unknown>]>;
-export function generateStructuredData(
-  _page: "blog",
-  _locale: Locale,
-  _extras: {
-    article: {
-      title: string;
-      description: string;
-      author?: string;
-      publishedTime?: string;
-      modifiedTime?: string;
-      image?: string;
-      section?: string;
-    };
-  },
-): Promise<
-  [Record<string, unknown>, Record<string, unknown>, Record<string, unknown>]
->;
 export function generateStructuredData(
   _page: "products",
   _locale: Locale,
@@ -84,18 +65,9 @@ export function generateStructuredData(
   [Record<string, unknown>, Record<string, unknown>, Record<string, unknown>]
 >;
 export async function generateStructuredData(
-  page: PageType | "blog",
+  page: PageType,
   locale: Locale,
   extras?: {
-    article?: {
-      title: string;
-      description: string;
-      author?: string;
-      publishedTime?: string;
-      modifiedTime?: string;
-      image?: string;
-      section?: string;
-    };
     product?: {
       name: string;
       description: string;
@@ -114,10 +86,6 @@ export async function generateStructuredData(
 
   const base = [organization, website] as Array<Record<string, unknown>>;
 
-  if (page === "blog" && extras?.article) {
-    const article = await generateArticleSchema(extras.article, locale);
-    return [...base, article];
-  }
   if (page === "products" && extras?.product) {
     const product = await generateProductSchema(extras.product, locale);
     return [...base, product];
