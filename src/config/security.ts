@@ -174,6 +174,20 @@ const CSP_INLINE_SCRIPT_SHA256_BASE64_ALLOWLIST = [
   "UsiFOC2lXsDTOqYOKXg9lkdJ502pwtwwn3fJWtmbRRA=",
   "iQzX6HEsGABo3JYr8kuhCzuUaYZ7PWXmf4vzz0bZu4I=",
   "NLnqP76EOPg0/VdamYHGSCvz+UUlWvaGqjyJImtcvqc=",
+
+  // Locale-specific inline scripts for `/en` home route after site GitHub social removal.
+  "EzIF9pSwS4jKtUfRCVFgSZxWAv5Pi6wQj0gelu3f+JA=",
+  "xO/wOLxeu0Q7O9mrUQJcO0DDQsgGyrptysF5YwJX4+k=",
+  "JdjJWpL0KAXTAiDz7fw6ZK+OhpM52QK4H8KzAtGx7Vo=",
+  "MdnzkwTE8WkSwgeM9p3rmvKvtM52u96YuxlJpziqPTM=",
+  "XY3W9SljYiC2BR4/aLOqx5otsRQ7QVrAXlUOyMNYWdo=",
+
+  // Locale-specific inline scripts for `/zh` home route after site GitHub social removal.
+  "Wus2MZO+4PcmmE3eQy1NBEifVtTXZUsTdcSbQcdQVBU=",
+  "P7g69a7/Dy0xHbSSv6byLjqeLjqI4kP+br+JW6edzco=",
+  "YzK4uIbTGguBa3NptniRJWyeNb2NWrT0Sn1347eWOw8=",
+  "2qHqzYV3em/guTkMCv07TTrgs9Pq59YUyMUPIZ+r+F4=",
+  "ieGpeoAG6n6TUUtQXzOBSfLDoVGyq1hw1G0DzezptDs=",
 ] as const;
 
 // Exported for CI/runtime verification scripts (see scripts/csp/check-inline-scripts.ts).

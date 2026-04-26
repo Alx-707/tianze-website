@@ -175,9 +175,6 @@ describe("paths configuration", () => {
       expect(isPlaceholder(social.linkedin) || isHttpUrl(social.linkedin)).toBe(
         true,
       );
-      expect(isPlaceholder(social.github) || isHttpUrl(social.github)).toBe(
-        true,
-      );
     });
 
     it("should have contact information", () => {

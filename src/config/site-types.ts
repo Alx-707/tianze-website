@@ -16,7 +16,6 @@ export interface SiteSeoConfig {
 export interface SiteSocialConfig {
   twitter: string;
   linkedin: string;
-  github: string;
 }
 
 export interface SiteContactConfig {

@@ -80,12 +80,6 @@ export function getUnconfiguredPlaceholders(
       value: config.social.linkedin,
     });
   }
-  if (isPlaceholder(config.social.github)) {
-    placeholders.push({
-      path: "SITE_CONFIG.social.github",
-      value: config.social.github,
-    });
-  }
 
   if (isPlaceholder(config.contact.email)) {
     placeholders.push({

@@ -616,8 +616,7 @@
       "social": {
         "title": "社交",
         "twitter": "Twitter",
-        "linkedin": "LinkedIn",
-        "github": "GitHub"
+        "linkedin": "LinkedIn"
       },
       "support": {
         "title": "支持",
@@ -671,7 +670,6 @@
       },
       "social": {
         "title": "社交",
-        "github": "GitHub",
         "linkedin": "LinkedIn",
         "twitter": "Twitter",
         "youtube": "YouTube"
@@ -818,8 +816,7 @@
       "phone": "+86-518-0000-0000",
       "social": {
         "twitter": "https://x.com/tianzepipe",
-        "linkedin": "https://www.linkedin.com/company/tianze-pipe",
-        "github": "https://github.com/tianze-pipe"
+        "linkedin": "https://www.linkedin.com/company/tianze-pipe"
       }
     },
     "website": {

@@ -44,7 +44,6 @@ const baseUrl = resolveSingleSiteBaseUrl("https://tianze-pipe.com");
 const social = {
   twitter: "https://x.com/tianzepipe",
   linkedin: "https://www.linkedin.com/company/tianze-pipe",
-  github: "https://github.com/tianze-pipe",
 } as const;
 
 const contact = {
