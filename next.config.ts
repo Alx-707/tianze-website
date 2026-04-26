@@ -21,9 +21,24 @@ const withMDX = createMDX({
 
 const isCloudflare = process.env.DEPLOY_TARGET === "cloudflare";
 const nextConfig: NextConfig = {
-  // Hash-based CSP validation depends on deterministic inline RSC payloads.
-  // Next's default random build id changes those payload hashes on every build.
-  generateBuildId: () => "tianze-website",
+  // Keep the same build ID across containers serving the same commit, but do
+  // not reuse one fixed ID across releases. This avoids stale _next asset
+  // confusion while preserving deterministic multi-container deploys.
+  generateBuildId: async () => {
+    const { execSync } = await import("child_process");
+    try {
+      return execSync("git rev-parse --short HEAD", {
+        encoding: "utf-8",
+      }).trim();
+    } catch {
+      return (
+        process.env.CF_PAGES_COMMIT_SHA?.slice(0, 7) ??
+        process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) ??
+        process.env.GITHUB_SHA?.slice(0, 7) ??
+        "local-dev"
+      );
+    }
+  },
 
   // Exclude test/report artifacts from OpenNext bundle
   outputFileTracingExcludes: {
