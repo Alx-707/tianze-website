@@ -35,7 +35,7 @@ function sanitizeParam(value: string | null): string | undefined {
   const trimmed = value.trim().slice(0, 256);
   if (!trimmed) return undefined;
   // Allow printable ASCII while blocking control chars and dangerous HTML delimiters.
-  return /^[\x20-\x7E]+$/.test(trimmed) && !/[<>"'`]/.test(trimmed)
+  return /^[\x20-\x7E]+$/.test(trimmed) && !/[<>"'`\\]/.test(trimmed)
     ? trimmed
     : undefined;
 }

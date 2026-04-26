@@ -145,6 +145,21 @@ describe("UTM Parameter Tracking", () => {
 
       expect(params.utmCampaign).toBe(campaign);
     });
+
+    it.each([
+      "<script>alert(1)</script>",
+      'campaign"with"quotes',
+      "campaign'with'single",
+      "campaign\\with\\backslash",
+      "campaign`with`backtick",
+      "campaign\x00with\x00null",
+    ])("rejects dangerous UTM value '%s'", (input) => {
+      window.location.search = `?utm_campaign=${encodeURIComponent(input)}`;
+
+      const result = captureUtmParams();
+
+      expect(result.utmCampaign).toBeUndefined();
+    });
   });
 
   describe("captureClickIds", () => {

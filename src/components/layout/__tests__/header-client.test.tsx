@@ -4,6 +4,7 @@
  */
 import React from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
+import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import {
   LanguageToggleIsland,
@@ -37,8 +38,8 @@ vi.mock("next/dynamic", () => ({
 
 // Mock MobileNavigation server shell
 vi.mock("@/components/layout/mobile-navigation", () => ({
-  MobileNavigationLinks: () => (
-    <nav data-testid="mobile-navigation-links">
+  MobileNavigationLinks: (props: React.HTMLAttributes<HTMLElement>) => (
+    <nav data-testid="mobile-navigation-links" {...props}>
       <a href="/">Home</a>
       <a href="/about">About</a>
     </nav>
@@ -79,6 +80,14 @@ describe("MobileNavigationIsland", () => {
     expect(screen.queryByTestId("dynamic-component")).not.toBeInTheDocument();
   });
 
+  it("server-renders mobile navigation links as the pre-hydration fallback", () => {
+    const html = renderToStaticMarkup(<MobileNavigationIsland />);
+
+    expect(html).toContain('data-testid="header-mobile-navigation-fallback"');
+    expect(html).toContain("Home");
+    expect(html).toContain("About");
+  });
+
   it("passes localized labels to the hydrated mobile navigation", () => {
     render(
       <MobileNavigationIsland
@@ -103,6 +112,9 @@ describe("MobileNavigationIsland", () => {
 
     const dynamicComponent = screen.getByTestId("dynamic-component");
     expect(dynamicComponent).toHaveAttribute("data-ssr", "false");
+    expect(
+      screen.queryByTestId("header-mobile-navigation-fallback"),
+    ).not.toBeInTheDocument();
     expect(screen.getByTestId("mobile-navigation-links")).toBeInTheDocument();
   });
 

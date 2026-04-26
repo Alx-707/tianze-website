@@ -1,10 +1,59 @@
-import { render } from "@testing-library/react";
+import { render, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
+const { mockStoreAttributionData, mockFlushPendingAttribution } = vi.hoisted(
+  () => ({
+    mockStoreAttributionData: vi.fn(),
+    mockFlushPendingAttribution: vi.fn(),
+  }),
+);
+
+vi.mock("@/lib/utm", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/utm")>();
+  return {
+    ...actual,
+    storeAttributionData: () => {
+      mockStoreAttributionData();
+      actual.storeAttributionData();
+    },
+    flushPendingAttribution: () => {
+      mockFlushPendingAttribution();
+      actual.flushPendingAttribution();
+    },
+  };
+});
+
+function setMarketingConsent(marketing: boolean) {
+  window.localStorage.setItem(
+    "cookie-consent",
+    JSON.stringify({
+      consent: {
+        necessary: true,
+        analytics: false,
+        marketing,
+      },
+      updatedAt: new Date().toISOString(),
+      version: 1,
+    }),
+  );
+}
 
 describe("AttributionBootstrap", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    window.localStorage.clear();
+    window.sessionStorage.clear();
+    Object.defineProperty(globalThis, "localStorage", {
+      value: window.localStorage,
+      configurable: true,
+    });
+    Object.defineProperty(globalThis, "sessionStorage", {
+      value: window.sessionStorage,
+      configurable: true,
+    });
     window.history.replaceState({}, "", "/en");
+    window.location.search = "";
+    window.location.pathname = "/en";
   });
 
   it("detects attribution-bearing search strings", async () => {
@@ -44,5 +93,32 @@ describe("AttributionBootstrap", () => {
 
     await new Promise((resolve) => setTimeout(resolve, 0));
     expect(loadSpy).not.toHaveBeenCalled();
+  });
+
+  it("flushes pending attribution through the real consent event path", async () => {
+    setMarketingConsent(false);
+    window.location.search = "?utm_source=google&gclid=abc123";
+    window.location.pathname = "/en";
+
+    const module = await import("../attribution-bootstrap");
+    expect(window.location.search).toBe("?utm_source=google&gclid=abc123");
+    expect(module.shouldLoadAttribution(window.location.search)).toBe(true);
+    render(<module.AttributionBootstrap />);
+
+    await waitFor(() => expect(mockStoreAttributionData).toHaveBeenCalled());
+    expect(window.sessionStorage.getItem("marketing_attribution")).toBeNull();
+
+    setMarketingConsent(true);
+    await waitFor(() => {
+      window.dispatchEvent(new Event("storage"));
+      expect(mockFlushPendingAttribution).toHaveBeenCalled();
+      const stored = window.sessionStorage.getItem("marketing_attribution");
+      expect(stored).not.toBeNull();
+      expect(JSON.parse(stored as string)).toMatchObject({
+        utmSource: "google",
+        gclid: "abc123",
+        landingPage: "/en",
+      });
+    });
   });
 });
