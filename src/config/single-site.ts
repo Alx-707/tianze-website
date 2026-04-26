@@ -125,6 +125,9 @@ export const SINGLE_SITE_DEFINITION: SiteDefinition = {
       linkedin: social.linkedin,
       twitter: social.twitter,
     },
+    // TODO(wave1-blocked): These paths are intentional placeholders.
+    // Files do not exist until Task 8/9/10 business assets are delivered.
+    // Do NOT convert logo.tsx to next/image static import until files exist.
     brandAssets: {
       logo: {
         horizontal: "/images/logo.svg",

@@ -1,5 +1,9 @@
 "use client";
 
+// Current split: MobileNavigationLinks (server-rendered fallback) + this file (client interactivity).
+// Content assembly (MobileNavigationHeader, drawer layout) still lives here.
+// A deeper RSC boundary refactor would move content assembly to the server shell.
+
 import {
   cloneElement,
   isValidElement,

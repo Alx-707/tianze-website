@@ -48,6 +48,8 @@ proof for public claims.
 ## Reviewer notes
 
 - Do not infer blocked-task details from empty commits alone.
+- Use squash merge for the final Wave 1 merge so the earlier empty `BLOCKED`
+  marker commits do not enter `main` as standalone history.
 - Do not merge this branch as a final launch branch until the business-blocked
   inputs are delivered or the public-launch scope is explicitly reduced.
 - If any blocked input arrives, handle it as a normal code/content change with a
