@@ -1,10 +1,5 @@
 "use client";
 
-/**
- * UTM Parameter Tracking Utility
- * Captures marketing attribution data from URL parameters and stores in sessionStorage
- * Uses first-touch attribution model (only stores if no existing data)
- */
 import { loadConsent } from "@/lib/cookie-consent";
 
 const UTM_STORAGE_KEY = "marketing_attribution";
@@ -152,35 +147,31 @@ export function getAttributionSnapshot(): AttributionData {
   };
 }
 
-export function appendAttributionToFormData(formData: FormData): void {
-  const attribution = getAttributionSnapshot();
-
-  if (attribution.utmSource)
-    formData.append("utmSource", attribution.utmSource);
-  if (attribution.utmMedium)
-    formData.append("utmMedium", attribution.utmMedium);
-  if (attribution.utmCampaign)
-    formData.append("utmCampaign", attribution.utmCampaign);
-  if (attribution.utmTerm) formData.append("utmTerm", attribution.utmTerm);
-  if (attribution.utmContent)
-    formData.append("utmContent", attribution.utmContent);
-  if (attribution.gclid) formData.append("gclid", attribution.gclid);
-  if (attribution.fbclid) formData.append("fbclid", attribution.fbclid);
-  if (attribution.msclkid) formData.append("msclkid", attribution.msclkid);
-}
+const ATTRIBUTION_KEYS = [
+  "utmSource",
+  "utmMedium",
+  "utmCampaign",
+  "utmTerm",
+  "utmContent",
+  "gclid",
+  "fbclid",
+  "msclkid",
+] as const satisfies readonly (keyof AttributionData)[];
 
 export function getAttributionAsObject(): Record<string, string> {
   const attribution = getAttributionSnapshot();
   const result: Record<string, string> = {};
 
-  if (attribution.utmSource) result.utmSource = attribution.utmSource;
-  if (attribution.utmMedium) result.utmMedium = attribution.utmMedium;
-  if (attribution.utmCampaign) result.utmCampaign = attribution.utmCampaign;
-  if (attribution.utmTerm) result.utmTerm = attribution.utmTerm;
-  if (attribution.utmContent) result.utmContent = attribution.utmContent;
-  if (attribution.gclid) result.gclid = attribution.gclid;
-  if (attribution.fbclid) result.fbclid = attribution.fbclid;
-  if (attribution.msclkid) result.msclkid = attribution.msclkid;
+  for (const key of ATTRIBUTION_KEYS) {
+    const value = attribution[key];
+    if (value) result[key] = value;
+  }
 
   return result;
+}
+
+export function appendAttributionToFormData(formData: FormData): void {
+  for (const [key, value] of Object.entries(getAttributionAsObject())) {
+    formData.append(key, value);
+  }
 }

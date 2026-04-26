@@ -50,7 +50,7 @@ function createTurnstilePlaceholderStyle(
       : TURNSTILE_WIDGET_HEIGHT_PX.normal;
 
   return {
-    "--turnstile-placeholder-height": `${placeholderHeight}px`,
+    [TURNSTILE_PLACEHOLDER_HEIGHT_CSS_VAR]: `${placeholderHeight}px`,
   };
 }
 

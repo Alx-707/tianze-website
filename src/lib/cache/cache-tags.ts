@@ -133,9 +133,10 @@ export const contentTags = {
     });
   },
 
-  /** All content tags for a locale */
-  forLocale(_locale: Locale): string[] {
-    return [];
+  /** All content tags for a locale — currently page-only (blog removed) */
+  forLocale(locale: Locale): string[] {
+    const knownSlugs = ["about", "contact", "privacy", "terms"] as const;
+    return knownSlugs.map((slug) => contentTags.page(slug, locale));
   },
 };
 

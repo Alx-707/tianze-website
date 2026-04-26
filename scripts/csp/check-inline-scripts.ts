@@ -57,8 +57,32 @@ function parseCspDirectives(csp: string): Map<string, Set<string>> {
   return directives;
 }
 
-function assertScriptPolicyMatchesRuntime(csp: string, url: string): void {
-  const directives = parseCspDirectives(csp);
+type ParsedDirectives = Map<string, Set<string>>;
+
+function getScriptSrcNonces(directives: ParsedDirectives): Set<string> {
+  const scriptSrc = directives.get("script-src");
+  const nonces = new Set<string>();
+
+  for (const value of scriptSrc ?? []) {
+    const match = value.match(/^'nonce-([^']+)'$/);
+    if (match?.[1]) {
+      nonces.add(match[1]);
+    }
+  }
+
+  return nonces;
+}
+
+function allowsUnnoncedInlineScriptElements(
+  directives: ParsedDirectives,
+): boolean {
+  return directives.get("script-src-elem")?.has("'unsafe-inline'") ?? false;
+}
+
+function assertScriptPolicyMatchesRuntime(
+  directives: ParsedDirectives,
+  url: string,
+): void {
   const scriptSrc = directives.get("script-src");
   const scriptSrcElem = directives.get("script-src-elem");
 
@@ -84,31 +108,11 @@ function assertScriptPolicyMatchesRuntime(csp: string, url: string): void {
   }
 }
 
-function getScriptSrcNonces(csp: string): Set<string> {
-  const directives = parseCspDirectives(csp);
-  const scriptSrc = directives.get("script-src");
-  const nonces = new Set<string>();
-
-  for (const value of scriptSrc ?? []) {
-    const match = value.match(/^'nonce-([^']+)'$/);
-    if (match?.[1]) {
-      nonces.add(match[1]);
-    }
-  }
-
-  return nonces;
-}
-
-function allowsUnnoncedInlineScriptElements(csp: string): boolean {
-  const directives = parseCspDirectives(csp);
-  return directives.get("script-src-elem")?.has("'unsafe-inline'") ?? false;
-}
-
 function assertScriptNonceConsistency(
-  csp: string,
+  directives: ParsedDirectives,
   scripts: InlineScript[],
 ): void {
-  const cspNonces = getScriptSrcNonces(csp);
+  const cspNonces = getScriptSrcNonces(directives);
   if (cspNonces.size === 0) {
     throw new Error("script-src must contain at least one nonce source");
   }
@@ -131,7 +135,7 @@ function assertScriptNonceConsistency(
 
   if (
     unnoncedInlineScripts.length > 0 &&
-    !allowsUnnoncedInlineScriptElements(csp)
+    !allowsUnnoncedInlineScriptElements(directives)
   ) {
     throw new Error(
       "Unnonced inline scripts require script-src-elem 'unsafe-inline'",
@@ -183,10 +187,11 @@ async function run(): Promise<void> {
       if (!nonce) {
         throw new Error(`CSP nonce not found for ${url}`);
       }
-      assertScriptPolicyMatchesRuntime(csp, url);
+      const directives = parseCspDirectives(csp);
+      assertScriptPolicyMatchesRuntime(directives, url);
 
       const scripts = extractInlineScripts(html);
-      assertScriptNonceConsistency(csp, scripts);
+      assertScriptNonceConsistency(directives, scripts);
       const noncedInlineScripts = scripts.filter((s) => hasNonceAttr(s.attrs));
       const unnoncedInlineScripts = scripts.filter(
         (s) => !hasNonceAttr(s.attrs) && s.body.length > 0,
