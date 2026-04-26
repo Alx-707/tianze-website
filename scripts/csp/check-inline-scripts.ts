@@ -21,6 +21,11 @@ function hasNonceAttr(attrs: string): boolean {
   return /(^|\s)nonce=/.test(attrs);
 }
 
+function extractNonceAttr(attrs: string): string | null {
+  const match = attrs.match(/(?:^|\s)nonce=(?:"([^"]+)"|'([^']+)'|([^\s>]+))/);
+  return match?.[1] ?? match?.[2] ?? match?.[3] ?? null;
+}
+
 async function waitForReady(url: string, timeoutMs: number): Promise<void> {
   const start = Date.now();
   while (Date.now() - start < timeoutMs) {
@@ -79,6 +84,61 @@ function assertScriptPolicyMatchesRuntime(csp: string, url: string): void {
   }
 }
 
+function getScriptSrcNonces(csp: string): Set<string> {
+  const directives = parseCspDirectives(csp);
+  const scriptSrc = directives.get("script-src");
+  const nonces = new Set<string>();
+
+  for (const value of scriptSrc ?? []) {
+    const match = value.match(/^'nonce-([^']+)'$/);
+    if (match?.[1]) {
+      nonces.add(match[1]);
+    }
+  }
+
+  return nonces;
+}
+
+function allowsUnnoncedInlineScriptElements(csp: string): boolean {
+  const directives = parseCspDirectives(csp);
+  return directives.get("script-src-elem")?.has("'unsafe-inline'") ?? false;
+}
+
+function assertScriptNonceConsistency(
+  csp: string,
+  scripts: InlineScript[],
+): void {
+  const cspNonces = getScriptSrcNonces(csp);
+  if (cspNonces.size === 0) {
+    throw new Error("script-src must contain at least one nonce source");
+  }
+
+  const noncedInlineScripts = scripts.filter((script) =>
+    hasNonceAttr(script.attrs),
+  );
+  const unnoncedInlineScripts = scripts.filter(
+    (script) => !hasNonceAttr(script.attrs) && script.body.trim().length > 0,
+  );
+
+  for (const script of noncedInlineScripts) {
+    const nonce = extractNonceAttr(script.attrs);
+    if (!nonce || !cspNonces.has(nonce)) {
+      throw new Error(
+        `Inline script nonce "${nonce ?? "<missing>"}" does not match CSP`,
+      );
+    }
+  }
+
+  if (
+    unnoncedInlineScripts.length > 0 &&
+    !allowsUnnoncedInlineScriptElements(csp)
+  ) {
+    throw new Error(
+      "Unnonced inline scripts require script-src-elem 'unsafe-inline'",
+    );
+  }
+}
+
 async function fetchHtml(url: string): Promise<{ html: string; csp: string }> {
   const res = await fetch(url, { redirect: "follow" });
   const html = await res.text();
@@ -126,6 +186,7 @@ async function run(): Promise<void> {
       assertScriptPolicyMatchesRuntime(csp, url);
 
       const scripts = extractInlineScripts(html);
+      assertScriptNonceConsistency(csp, scripts);
       const noncedInlineScripts = scripts.filter((s) => hasNonceAttr(s.attrs));
       const unnoncedInlineScripts = scripts.filter(
         (s) => !hasNonceAttr(s.attrs) && s.body.length > 0,
