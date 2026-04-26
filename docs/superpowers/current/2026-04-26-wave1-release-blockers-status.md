@@ -29,38 +29,10 @@ own. Use this document to see what is actually waiting on business input.
 
 ## Known technical debt
 
-### CSP: `script-src-elem 'unsafe-inline'` is an architecture trade-off
+See [`docs/technical/technical-debt.md`](../../technical/technical-debt.md) for full details.
 
-`script-src` is strict (self + nonce only). However, `script-src-elem` allows
-`'unsafe-inline'` because Next.js App Router prerendered and RSC-streamed inline
-`<script>` elements cannot reliably receive a per-request nonce. This is a known
-Next.js limitation — static/cached HTML is generated at build time, before any
-request nonce exists.
-
-**What this means:** An attacker who can inject a `<script>` tag into the HTML
-response could execute it. The practical risk is low because:
-- The site has no user-generated content surfaces (no comments, no rich-text input)
-- All form submissions go through server actions, not client-side rendering
-- CSP report-uri is active and would surface violations
-
-**Previous approach:** A 136-entry SHA-256 hash allowlist. This was unmaintainable
-— every content, navigation, or JSON-LD change drifted the hashes.
-
-**Future options (Wave 2+):**
-1. Accept current trade-off, keep monitoring via CSP reports
-2. Restrict `'unsafe-inline'` to only prerendered routes (if Next.js adds per-route CSP)
-3. Move to full dynamic rendering with nonce on all pages (sacrifices PPR/static performance)
-
-**Decision needed by:** Before scaling to paid traffic (Google Ads). Not blocking
-for the current pre-launch engineering work.
-
-### Logo uses `<img>` instead of `next/image`
-
-`src/components/layout/logo.tsx` uses a native `<img>` tag to avoid pulling the
-`next/image` runtime into the shared layout chunk. This is intentional for now
-because the logo file does not yet exist (business asset blocked). Once the real
-logo is delivered, re-evaluate whether `next/image` is appropriate for a small
-static SVG in the critical layout path.
+- **TD-001**: CSP `script-src-elem 'unsafe-inline'` — Next.js App Router architecture trade-off, decision before paid traffic
+- **TD-002**: Logo `<img>` instead of `next/image` — revisit when logo file is delivered
 
 ## Business-blocked tasks
 
