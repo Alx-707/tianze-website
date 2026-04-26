@@ -32,7 +32,6 @@ export const SINGLE_SITE_SITEMAP_PAGE_CONFIG = {
   "/about": { changeFrequency: "monthly", priority: 0.8 },
   "/contact": { changeFrequency: "monthly", priority: 0.8 },
   "/products": { changeFrequency: "weekly", priority: 0.9 },
-  "/blog": { changeFrequency: "weekly", priority: 0.7 },
   "/privacy": { changeFrequency: "monthly", priority: 0.7 },
   "/terms": { changeFrequency: "monthly", priority: 0.7 },
   "/capabilities/bending-machines": {
@@ -43,7 +42,6 @@ export const SINGLE_SITE_SITEMAP_PAGE_CONFIG = {
     changeFrequency: "monthly",
     priority: 0.8,
   },
-  blogPost: { changeFrequency: "monthly", priority: 0.6 },
   productMarket: { changeFrequency: "weekly", priority: 0.8 },
 } as const satisfies Record<string, SingleSiteSitemapPageConfig>;
 
@@ -55,14 +53,13 @@ export const SINGLE_SITE_SITEMAP_DEFAULT_CONFIG = {
 export const SINGLE_SITE_STATIC_PAGE_LASTMOD = {
   // Non-MDX routes and product market pages use this sidecar date source.
   // MDX-driven pages read updatedAt from content/pages/{locale}/*.mdx.
-  "": "2024-12-01T00:00:00Z",
-  "/products": "2024-11-01T00:00:00Z",
-  "/blog": "2024-11-01T00:00:00Z",
-  "/products/north-america": "2024-11-01T00:00:00Z",
-  "/products/australia-new-zealand": "2024-11-01T00:00:00Z",
-  "/products/mexico": "2024-11-01T00:00:00Z",
-  "/products/europe": "2024-11-01T00:00:00Z",
-  "/products/pneumatic-tube-systems": "2024-11-01T00:00:00Z",
+  "": "2026-04-26T00:00:00Z",
+  "/products": "2026-04-26T00:00:00Z",
+  "/products/north-america": "2026-04-26T00:00:00Z",
+  "/products/australia-new-zealand": "2026-04-26T00:00:00Z",
+  "/products/mexico": "2026-04-26T00:00:00Z",
+  "/products/europe": "2026-04-26T00:00:00Z",
+  "/products/pneumatic-tube-systems": "2026-04-26T00:00:00Z",
 } as const satisfies Record<string, string>;
 
 export const SINGLE_SITE_ROBOTS_DISALLOW_PATHS = [

@@ -172,7 +172,7 @@ describe("Logo", () => {
       const image = screen.getByRole("img", {
         name: `${SITE_CONFIG.name} Logo`,
       });
-      expect(image).toHaveAttribute("src", "/next.svg");
+      expect(image).toHaveAttribute("src", "/images/logo.svg");
     });
 
     it("has dark mode invert class", () => {

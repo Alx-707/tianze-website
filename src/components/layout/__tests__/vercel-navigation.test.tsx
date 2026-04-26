@@ -42,7 +42,6 @@ vi.mock("@/i18n/routing", () => ({
     pathnames: {
       "/": "/",
       "/products": "/products",
-      "/blog": "/blog",
       "/about": "/about",
       "/privacy": "/privacy",
     },
@@ -75,9 +74,9 @@ vi.mock("@/lib/navigation", () => ({
       ],
     },
     {
-      key: "blog",
-      href: "/blog",
-      translationKey: "navigation.blog",
+      key: "contact",
+      href: "/contact",
+      translationKey: "navigation.contact",
     },
   ],
   NAVIGATION_ARIA: {
@@ -175,7 +174,7 @@ function createTranslationMock() {
     "navigation.products": "Products",
     "navigation.solutions": "Solutions",
     "navigation.enterprise": "Enterprise",
-    "navigation.blog": "Blog",
+    "navigation.contact": "Contact",
     "navigation.about": "About",
     "navigation.privacy": "Privacy",
   };
@@ -218,7 +217,7 @@ describe("VercelNavigation", () => {
       render(<VercelNavigation />);
 
       const items = screen.getAllByTestId("navigation-menu-item");
-      expect(items.length).toBe(3); // home, products (dropdown), blog
+      expect(items.length).toBe(3); // home, products (dropdown), contact
     });
 
     it("uses semantic desktop-only class for responsive display", () => {
@@ -237,20 +236,20 @@ describe("VercelNavigation", () => {
 
       // Home link
       expect(screen.getByTestId("nav-link-")).toBeInTheDocument();
-      // Blog link
-      expect(screen.getByTestId("nav-link-blog")).toBeInTheDocument();
+      // Contact link
+      expect(screen.getByTestId("nav-link-contact")).toBeInTheDocument();
     });
 
     it("displays translated text for link items", () => {
       render(<VercelNavigation />);
 
       expect(screen.getByText("Home")).toBeInTheDocument();
-      expect(screen.getByText("Blog")).toBeInTheDocument();
+      expect(screen.getByText("Contact")).toBeInTheDocument();
       expect(
         screen.getByTestId("vercel-navigation-link-label-home"),
       ).toHaveAttribute("translate", "no");
       expect(
-        screen.getByTestId("vercel-navigation-link-label-blog"),
+        screen.getByTestId("vercel-navigation-link-label-contact"),
       ).toHaveAttribute("translate", "no");
     });
 

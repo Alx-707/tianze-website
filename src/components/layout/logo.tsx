@@ -6,10 +6,9 @@
  * P0-2 Fix: Converted to Server Component (no interactivity needed)
  */
 import { Link } from "@/i18n/routing";
+import { SINGLE_SITE_FACTS } from "@/config/single-site";
 import { cn } from "@/lib/utils";
 import { SITE_CONFIG } from "@/config/paths/site-config";
-import { HOURS_PER_DAY } from "@/constants";
-import { COUNT_120 } from "@/constants/count";
 
 interface LogoProps {
   className?: string;
@@ -25,6 +24,8 @@ export function Logo({
   size = "md",
   ariaLabel = SITE_CONFIG.name,
 }: LogoProps) {
+  const { horizontal, width, height } = SINGLE_SITE_FACTS.brandAssets.logo;
+
   const getSizeClass = (sizeValue: "sm" | "md" | "lg"): string => {
     switch (sizeValue) {
       case "sm":
@@ -64,10 +65,10 @@ export function Logo({
       {/* Static logo asset does not need next/image client runtime. */}
       {/* eslint-disable-next-line @next/next/no-img-element -- static local SVG logo should not pull next/image runtime into the shared layout chunk */}
       <img
-        src="/next.svg"
+        src={horizontal}
         alt={`${SITE_CONFIG.name} Logo`}
-        width={COUNT_120}
-        height={HOURS_PER_DAY}
+        width={width}
+        height={height}
         className={cn(
           "transition-[filter,opacity] duration-200 dark:invert",
           getSizeClass(size),

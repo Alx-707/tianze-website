@@ -251,14 +251,7 @@ export function createPageSEOConfig(
   const baseConfigs: Record<PageType, SEOConfig> = {
     home: {
       type: "website" as const,
-      keywords: [
-        ...SITE_CONFIG.seo.keywords,
-        "shadcn/ui",
-        "Radix UI",
-        "Modern Web",
-        "Enterprise Platform",
-        "B2B Solution",
-      ],
+      keywords: [...SITE_CONFIG.seo.keywords, "B2B Solution"],
       image: "/images/og-image.jpg",
     },
     about: {
@@ -268,10 +261,6 @@ export function createPageSEOConfig(
     contact: {
       type: "website" as const,
       keywords: ["Contact", "Support", "Business"],
-    },
-    blog: {
-      type: "article" as const,
-      keywords: ["Blog", "Articles", "Technology", "Insights"],
     },
     products: {
       type: "website" as const,
@@ -310,9 +299,6 @@ export function createPageSEOConfig(
       break;
     case "contact":
       baseConfig = baseConfigs.contact;
-      break;
-    case "blog":
-      baseConfig = baseConfigs.blog;
       break;
     case "products":
       baseConfig = baseConfigs.products;

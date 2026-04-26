@@ -7,6 +7,8 @@
 
 import fs from "fs";
 
+import { logger } from "@/lib/logger";
+
 /**
  * Metadata interface for content with optional timestamps.
  */
@@ -15,6 +17,8 @@ export interface ContentTimestamps {
   updatedAt?: string | undefined;
 }
 
+const SITEMAP_FALLBACK_LASTMOD = new Date("2026-01-01T00:00:00Z");
+
 /**
  * Get the last modified date for content.
  *
@@ -22,7 +26,7 @@ export interface ContentTimestamps {
  * 1. updatedAt from metadata (if valid date)
  * 2. publishedAt from metadata (if valid date)
  * 3. File system mtime (if filePath provided)
- * 4. Current date (fallback)
+ * 4. Fixed conservative fallback date
  *
  * @param metadata - Content metadata with optional timestamps
  * @param filePath - Optional file path for fs.stat fallback
@@ -54,13 +58,25 @@ export function getContentLastModified(
       // eslint-disable-next-line security/detect-non-literal-fs-filename -- filePath comes from content manifest/parser, not user input
       const stats = fs.statSync(filePath);
       return stats.mtime;
-    } catch {
-      // File not found or access error, fall through to default
+    } catch (error) {
+      logger.warn(
+        "Sitemap content lastmod fallback used after fs.stat failure",
+        {
+          fallbackLastmod: SITEMAP_FALLBACK_LASTMOD.toISOString(),
+          filePath,
+          error,
+        },
+      );
+      return SITEMAP_FALLBACK_LASTMOD;
     }
   }
 
-  // Priority 4: Fallback to current date
-  return new Date();
+  logger.warn("Sitemap content lastmod fallback used without timestamps", {
+    fallbackLastmod: SITEMAP_FALLBACK_LASTMOD.toISOString(),
+    filePath,
+    metadata,
+  });
+  return SITEMAP_FALLBACK_LASTMOD;
 }
 
 /**
@@ -91,7 +107,7 @@ export type StaticPageLastModConfig = Map<string, Date>;
  *
  * @param path - The page path (e.g., '/about', '/contact')
  * @param config - Optional static page lastmod configuration
- * @returns Date object, or current date if not configured
+ * @returns Date object, or fixed fallback date if not configured
  */
 export function getStaticPageLastModified(
   path: string,
@@ -103,5 +119,9 @@ export function getStaticPageLastModified(
       return date;
     }
   }
-  return new Date();
+  logger.warn("Sitemap static page lastmod fallback used", {
+    fallbackLastmod: SITEMAP_FALLBACK_LASTMOD.toISOString(),
+    path,
+  });
+  return SITEMAP_FALLBACK_LASTMOD;
 }

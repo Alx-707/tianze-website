@@ -59,11 +59,6 @@ const {
         invalidatedTags: ["content:locale"],
         errors: [],
       })),
-      blogPost: vi.fn(() => ({
-        success: true,
-        invalidatedTags: ["content:blog"],
-        errors: [],
-      })),
       page: vi.fn(() => ({
         success: true,
         invalidatedTags: ["content:page"],
@@ -128,7 +123,6 @@ vi.mock("@/lib/cache/invalidate", () => ({
   CACHE_INVALIDATION_ENTITIES: [
     "critical",
     "deferred",
-    "blog",
     "page",
     "detail",
     "categories",

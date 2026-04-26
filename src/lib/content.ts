@@ -8,10 +8,8 @@
 // Re-export content query functions
 export {
   getAllPages,
-  getAllPosts,
   getContentStats,
   getContentBySlug,
-  getPostBySlug,
   getPageBySlug,
 } from "@/lib/content-query";
 
@@ -23,7 +21,6 @@ export {
   getContentConfig,
   validateFilePath,
   CONTENT_DIR,
-  POSTS_DIR,
   PAGES_DIR,
   CONFIG_DIR,
   ALLOWED_EXTENSIONS,

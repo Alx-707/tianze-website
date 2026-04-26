@@ -1,10 +1,6 @@
 "use client";
 
-/**
- * UTM Parameter Tracking Utility
- * Captures marketing attribution data from URL parameters and stores in sessionStorage
- * Uses first-touch attribution model (only stores if no existing data)
- */
+import { loadConsent } from "@/lib/cookie-consent";
 
 const UTM_STORAGE_KEY = "marketing_attribution";
 
@@ -27,11 +23,20 @@ export interface AttributionData extends UtmParams, ClickIds {
   capturedAt?: string;
 }
 
+let pendingAttribution: AttributionData | null = null;
+
 function sanitizeParam(value: string | null): string | undefined {
   if (!value) return undefined;
   const trimmed = value.trim().slice(0, 256);
-  // Only allow alphanumeric, underscore, hyphen
-  return /^[a-zA-Z0-9_-]+$/.test(trimmed) ? trimmed : undefined;
+  if (!trimmed) return undefined;
+  // Allow printable ASCII while blocking control chars and dangerous HTML delimiters.
+  return /^[\x20-\x7E]+$/.test(trimmed) && !/[<>"'`\\]/.test(trimmed)
+    ? trimmed
+    : undefined;
+}
+
+function hasMarketingConsent(): boolean {
+  return loadConsent()?.consent.marketing === true;
 }
 
 export function captureUtmParams(): UtmParams {
@@ -92,7 +97,7 @@ export function storeAttributionData(): void {
   if (!hasData) return;
 
   // nosemgrep: object-injection-sink-spread-operator
-  // Safe: utmParams and clickIds are derived from sanitizeParam() which validates alphanumeric only
+  // Safe: utmParams and clickIds are derived from sanitizeParam(), which blocks control chars and dangerous HTML delimiters.
   const data: AttributionData = {
     ...utmParams,
     ...clickIds,
@@ -100,7 +105,25 @@ export function storeAttributionData(): void {
     capturedAt: new Date().toISOString(),
   };
 
-  sessionStorage.setItem(UTM_STORAGE_KEY, JSON.stringify(data));
+  if (hasMarketingConsent()) {
+    sessionStorage.setItem(UTM_STORAGE_KEY, JSON.stringify(data));
+  } else {
+    pendingAttribution = data;
+  }
+}
+
+export function flushPendingAttribution(): void {
+  if (typeof window === "undefined" || !pendingAttribution) return;
+  if (!hasMarketingConsent()) return;
+
+  const existing = sessionStorage.getItem(UTM_STORAGE_KEY);
+  if (existing) {
+    pendingAttribution = null;
+    return;
+  }
+
+  sessionStorage.setItem(UTM_STORAGE_KEY, JSON.stringify(pendingAttribution));
+  pendingAttribution = null;
 }
 
 export function getAttributionSnapshot(): AttributionData {
@@ -117,42 +140,38 @@ export function getAttributionSnapshot(): AttributionData {
 
   // Fallback to current URL params if no stored data
   // nosemgrep: object-injection-sink-spread-operator
-  // Safe: captureUtmParams/captureClickIds return sanitized objects with validated alphanumeric values
+  // Safe: captureUtmParams/captureClickIds return sanitized objects with printable ASCII values minus dangerous HTML delimiters.
   return {
     ...captureUtmParams(),
     ...captureClickIds(),
   };
 }
 
-export function appendAttributionToFormData(formData: FormData): void {
-  const attribution = getAttributionSnapshot();
-
-  if (attribution.utmSource)
-    formData.append("utmSource", attribution.utmSource);
-  if (attribution.utmMedium)
-    formData.append("utmMedium", attribution.utmMedium);
-  if (attribution.utmCampaign)
-    formData.append("utmCampaign", attribution.utmCampaign);
-  if (attribution.utmTerm) formData.append("utmTerm", attribution.utmTerm);
-  if (attribution.utmContent)
-    formData.append("utmContent", attribution.utmContent);
-  if (attribution.gclid) formData.append("gclid", attribution.gclid);
-  if (attribution.fbclid) formData.append("fbclid", attribution.fbclid);
-  if (attribution.msclkid) formData.append("msclkid", attribution.msclkid);
-}
+const ATTRIBUTION_KEYS = [
+  "utmSource",
+  "utmMedium",
+  "utmCampaign",
+  "utmTerm",
+  "utmContent",
+  "gclid",
+  "fbclid",
+  "msclkid",
+] as const satisfies readonly (keyof AttributionData)[];
 
 export function getAttributionAsObject(): Record<string, string> {
   const attribution = getAttributionSnapshot();
   const result: Record<string, string> = {};
 
-  if (attribution.utmSource) result.utmSource = attribution.utmSource;
-  if (attribution.utmMedium) result.utmMedium = attribution.utmMedium;
-  if (attribution.utmCampaign) result.utmCampaign = attribution.utmCampaign;
-  if (attribution.utmTerm) result.utmTerm = attribution.utmTerm;
-  if (attribution.utmContent) result.utmContent = attribution.utmContent;
-  if (attribution.gclid) result.gclid = attribution.gclid;
-  if (attribution.fbclid) result.fbclid = attribution.fbclid;
-  if (attribution.msclkid) result.msclkid = attribution.msclkid;
+  for (const key of ATTRIBUTION_KEYS) {
+    const value = attribution[key];
+    if (value) result[key] = value;
+  }
 
   return result;
+}
+
+export function appendAttributionToFormData(formData: FormData): void {
+  for (const [key, value] of Object.entries(getAttributionAsObject())) {
+    formData.append(key, value);
+  }
 }

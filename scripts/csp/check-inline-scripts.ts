@@ -1,16 +1,9 @@
-import crypto from "crypto";
 import { spawn } from "child_process";
-
-import { CSP_INLINE_SCRIPT_SHA256_BASE64_ALLOWLIST_FOR_TESTS } from "../../src/config/security";
 
 type InlineScript = {
   attrs: string;
   body: string;
 };
-
-function sha256Base64(input: string): string {
-  return crypto.createHash("sha256").update(input, "utf8").digest("base64");
-}
 
 function extractInlineScripts(html: string): InlineScript[] {
   const scripts: InlineScript[] = [];
@@ -26,6 +19,11 @@ function extractInlineScripts(html: string): InlineScript[] {
 
 function hasNonceAttr(attrs: string): boolean {
   return /(^|\s)nonce=/.test(attrs);
+}
+
+function extractNonceAttr(attrs: string): string | null {
+  const match = attrs.match(/(?:^|\s)nonce=(?:"([^"]+)"|'([^']+)'|([^\s>]+))/);
+  return match?.[1] ?? match?.[2] ?? match?.[3] ?? null;
 }
 
 async function waitForReady(url: string, timeoutMs: number): Promise<void> {
@@ -47,6 +45,104 @@ function parseCspNonce(csp: string): string | null {
   return m ? m[1] : null;
 }
 
+function parseCspDirectives(csp: string): Map<string, Set<string>> {
+  const directives = new Map<string, Set<string>>();
+  for (const part of csp.split(";")) {
+    const tokens = part.trim().split(/\s+/).filter(Boolean);
+    const [name, ...values] = tokens;
+    if (name) {
+      directives.set(name, new Set(values));
+    }
+  }
+  return directives;
+}
+
+type ParsedDirectives = Map<string, Set<string>>;
+
+function getScriptSrcNonces(directives: ParsedDirectives): Set<string> {
+  const scriptSrc = directives.get("script-src");
+  const nonces = new Set<string>();
+
+  for (const value of scriptSrc ?? []) {
+    const match = value.match(/^'nonce-([^']+)'$/);
+    if (match?.[1]) {
+      nonces.add(match[1]);
+    }
+  }
+
+  return nonces;
+}
+
+function allowsUnnoncedInlineScriptElements(
+  directives: ParsedDirectives,
+): boolean {
+  return directives.get("script-src-elem")?.has("'unsafe-inline'") ?? false;
+}
+
+function assertScriptPolicyMatchesRuntime(
+  directives: ParsedDirectives,
+  url: string,
+): void {
+  const scriptSrc = directives.get("script-src");
+  const scriptSrcElem = directives.get("script-src-elem");
+
+  if (!scriptSrc) {
+    throw new Error(`Missing script-src directive for ${url}`);
+  }
+
+  if (scriptSrc.has("'unsafe-inline'")) {
+    throw new Error(`script-src must not contain 'unsafe-inline' for ${url}`);
+  }
+
+  if (!scriptSrcElem) {
+    throw new Error(`Missing script-src-elem directive for ${url}`);
+  }
+
+  if (!scriptSrcElem.has("'unsafe-inline'")) {
+    throw new Error(
+      [
+        `script-src-elem must explicitly allow 'unsafe-inline' for ${url}.`,
+        "Next.js App Router prerendered/RSC script elements cannot reliably receive request nonces.",
+      ].join("\n"),
+    );
+  }
+}
+
+function assertScriptNonceConsistency(
+  directives: ParsedDirectives,
+  scripts: InlineScript[],
+): void {
+  const cspNonces = getScriptSrcNonces(directives);
+  if (cspNonces.size === 0) {
+    throw new Error("script-src must contain at least one nonce source");
+  }
+
+  const noncedInlineScripts = scripts.filter((script) =>
+    hasNonceAttr(script.attrs),
+  );
+  const unnoncedInlineScripts = scripts.filter(
+    (script) => !hasNonceAttr(script.attrs) && script.body.trim().length > 0,
+  );
+
+  for (const script of noncedInlineScripts) {
+    const nonce = extractNonceAttr(script.attrs);
+    if (!nonce || !cspNonces.has(nonce)) {
+      throw new Error(
+        `Inline script nonce "${nonce ?? "<missing>"}" does not match CSP`,
+      );
+    }
+  }
+
+  if (
+    unnoncedInlineScripts.length > 0 &&
+    !allowsUnnoncedInlineScriptElements(directives)
+  ) {
+    throw new Error(
+      "Unnonced inline scripts require script-src-elem 'unsafe-inline'",
+    );
+  }
+}
+
 async function fetchHtml(url: string): Promise<{ html: string; csp: string }> {
   const res = await fetch(url, { redirect: "follow" });
   const html = await res.text();
@@ -63,9 +159,6 @@ async function fetchHtml(url: string): Promise<{ html: string; csp: string }> {
 async function run(): Promise<void> {
   const port = process.env.CSP_CHECK_PORT ?? "3210";
   const baseUrl = `http://localhost:${port}`;
-  const allowedHashes = new Set(
-    CSP_INLINE_SCRIPT_SHA256_BASE64_ALLOWLIST_FOR_TESTS,
-  );
 
   const child = spawn("pnpm", ["start"], {
     stdio: "inherit",
@@ -94,34 +187,26 @@ async function run(): Promise<void> {
       if (!nonce) {
         throw new Error(`CSP nonce not found for ${url}`);
       }
+      const directives = parseCspDirectives(csp);
+      assertScriptPolicyMatchesRuntime(directives, url);
 
       const scripts = extractInlineScripts(html);
-      const missing: Array<{ hash: string; preview: string }> = [];
+      assertScriptNonceConsistency(directives, scripts);
+      const noncedInlineScripts = scripts.filter((s) => hasNonceAttr(s.attrs));
+      const unnoncedInlineScripts = scripts.filter(
+        (s) => !hasNonceAttr(s.attrs) && s.body.length > 0,
+      );
 
-      for (const s of scripts) {
-        if (hasNonceAttr(s.attrs)) continue;
-        const body = s.body;
-        if (!body) continue;
-        const hash = sha256Base64(body);
-        if (!allowedHashes.has(hash)) {
-          missing.push({
-            hash,
-            preview: body.slice(0, 120).replace(/\n/g, "\\n"),
-          });
-        }
+      if (scripts.length === 0) {
+        throw new Error(`No inline scripts found for ${url}`);
       }
 
-      if (missing.length > 0) {
-        const details = missing
-          .slice(0, 8)
-          .map((m) => `- sha256=${m.hash} preview=${m.preview}`)
-          .join("\n");
+      if (
+        noncedInlineScripts.length === 0 &&
+        unnoncedInlineScripts.length === 0
+      ) {
         throw new Error(
-          [
-            `Found inline <script> without nonce not in hash allowlist for ${url}.`,
-            `If this is expected, update CSP hashes in src/config/security.ts and re-run this check.`,
-            details,
-          ].join("\n"),
+          `Inline script extraction returned no executable bodies for ${url}`,
         );
       }
     }

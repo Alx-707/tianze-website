@@ -21,8 +21,8 @@ import { useTranslations } from "next-intl";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   MobileMenuButton,
-  MobileNavigation,
-} from "@/components/layout/mobile-navigation";
+  MobileNavigationInteractive as MobileNavigation,
+} from "@/components/layout/mobile-navigation-interactive";
 
 // Mock next-intl
 vi.mock("next-intl", () => ({

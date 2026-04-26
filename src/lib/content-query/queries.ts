@@ -6,10 +6,7 @@ import { cache } from "react";
 import path from "path";
 import { isRuntimeCloudflare } from "@/lib/env";
 import type {
-  BlogPost,
-  BlogPostMetadata,
   ContentMetadata,
-  ContentQueryOptions,
   ContentType,
   Locale,
   Page,
@@ -17,9 +14,7 @@ import type {
   ParsedContent,
 } from "@/types/content.types";
 import { getContentFiles, parseContentFile } from "@/lib/content-parser";
-import { filterPosts } from "@/lib/content-query/filters";
-import { paginatePosts, sortPosts } from "@/lib/content-query/sorting";
-import { getContentConfig, PAGES_DIR, POSTS_DIR } from "@/lib/content-utils";
+import { getContentConfig, PAGES_DIR } from "@/lib/content-utils";
 
 type ContentLoader<T> = (slug: string, locale?: Locale) => Promise<T>;
 
@@ -27,25 +22,6 @@ function cacheOutsideCloudflare<T>(loader: ContentLoader<T>): ContentLoader<T> {
   const cachedLoader = cache(loader);
   return (slug, locale) =>
     isRuntimeCloudflare() ? loader(slug, locale) : cachedLoader(slug, locale);
-}
-
-/**
- * Get all blog posts
- */
-export async function getAllPosts(
-  locale?: Locale,
-  options: ContentQueryOptions = {},
-): Promise<BlogPost[]> {
-  const files = await getContentFiles(POSTS_DIR, locale);
-  const parsedPosts = await Promise.all(
-    files.map((file) => parseContentFile<BlogPostMetadata>(file, "posts")),
-  );
-
-  const filteredPosts = filterPosts(parsedPosts, options);
-  const sortedPosts = sortPosts(filteredPosts, options);
-  const paginatedPosts = paginatePosts(sortedPosts, options);
-
-  return paginatedPosts;
 }
 
 /**
@@ -69,7 +45,7 @@ export async function getAllPages(locale?: Locale): Promise<Page[]> {
 export async function getContentBySlug<
   T extends ContentMetadata = ContentMetadata,
 >(slug: string, type: ContentType, locale?: Locale): Promise<ParsedContent<T>> {
-  const contentDir = type === "posts" ? POSTS_DIR : PAGES_DIR;
+  const contentDir = PAGES_DIR;
   const files = await getContentFiles(contentDir, locale);
 
   const matchingFile = files.find((file) => {
@@ -83,19 +59,6 @@ export async function getContentBySlug<
 
   return parseContentFile<T>(matchingFile, type);
 }
-
-/**
- * Get blog post by slug
- */
-export const getPostBySlug = cacheOutsideCloudflare(
-  (slug: string, locale?: Locale): Promise<BlogPost> => {
-    return getContentBySlug<BlogPostMetadata>(
-      slug,
-      "posts",
-      locale,
-    ) as Promise<BlogPost>;
-  },
-);
 
 /**
  * Get page by slug

@@ -16,20 +16,6 @@ const STATIC_ROUTE_FIXTURES = [
 
 const DYNAMIC_ROUTE_FIXTURES = [
   {
-    input: "/blog/my-post",
-    expected: {
-      pathname: "/blog/[slug]",
-      params: { slug: "my-post" },
-    },
-  },
-  {
-    input: "/en/blog/welcome",
-    expected: {
-      pathname: "/blog/[slug]",
-      params: { slug: "welcome" },
-    },
-  },
-  {
     input: "/products/north-america",
     expected: {
       pathname: "/products/[market]",

@@ -28,8 +28,7 @@ describe("i18n Routing Configuration", () => {
       "/about": "/about",
       "/contact": "/contact",
       "/products": "/products",
-      "/blog": "/blog",
-      "/blog/[slug]": "/blog/[slug]",
+      "/products/[market]": "/products/[market]",
       "/privacy": "/privacy",
       "/terms": "/terms",
     },
@@ -67,7 +66,6 @@ describe("i18n Routing Configuration", () => {
           "/about": "/about",
           "/contact": "/contact",
           "/products": "/products",
-          "/blog": "/blog",
         }),
         alternateLinks: true,
         localeDetection: true,
@@ -80,8 +78,7 @@ describe("i18n Routing Configuration", () => {
         "/about",
         "/contact",
         "/products",
-        "/blog",
-        "/blog/[slug]",
+        "/products/[market]",
         "/privacy",
         "/terms",
       ];
@@ -167,7 +164,7 @@ describe("i18n Routing Configuration", () => {
       const config = mockDefineRouting.mock.calls[0]?.[0];
       const pathnames = config?.pathnames;
 
-      const mainPages = ["/", "/about", "/contact", "/products", "/blog"];
+      const mainPages = ["/", "/about", "/contact", "/products"];
       mainPages.forEach((page) => {
         expect(pathnames).toHaveProperty(page);
       });
@@ -177,7 +174,7 @@ describe("i18n Routing Configuration", () => {
       const config = mockDefineRouting.mock.calls[0]?.[0];
       const pathnames = config.pathnames;
 
-      const dynamicRoutes = ["/blog/[slug]"];
+      const dynamicRoutes = ["/products/[market]"];
       dynamicRoutes.forEach((route) => {
         expect(pathnames).toHaveProperty(route);
       });

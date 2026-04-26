@@ -17,8 +17,6 @@ import type {
   ProductData,
   WebSiteData,
 } from "@/lib/structured-data-types";
-import { type PageType } from "@/config/paths";
-import { generateCanonicalURL } from "@/services/url-generator";
 
 /**
  * 创建面包屑导航结构化数据
@@ -52,46 +50,6 @@ export function createArticleStructuredData(
   },
 ) {
   return generateLocalizedStructuredData(locale, "Article", article);
-}
-
-export function generateArticleSchema(
-  article: {
-    title: string;
-    description: string;
-    author?: string;
-    publishedTime?: string;
-    modifiedTime?: string;
-    image?: string;
-    section?: string;
-  },
-  locale: Locale,
-) {
-  // 为缺失的 URL 使用规范化地址（测试中已对该函数进行 mock）
-  const url = generateCanonicalURL("blog" as PageType, locale);
-  const now = new Date().toISOString();
-  const payload: Partial<ArticleData> = {
-    title: article.title,
-    description: article.description,
-    publishedTime: article.publishedTime ?? now,
-    modifiedTime: article.modifiedTime ?? article.publishedTime ?? now,
-    url,
-  };
-
-  if (article.author) {
-    payload.author = article.author;
-  }
-  if (article.image) {
-    payload.image = article.image;
-  }
-  if (article.section) {
-    payload.section = article.section;
-  }
-
-  return generateLocalizedStructuredData(
-    locale,
-    "Article",
-    payload as ArticleData,
-  );
 }
 
 export function generateProductSchema(

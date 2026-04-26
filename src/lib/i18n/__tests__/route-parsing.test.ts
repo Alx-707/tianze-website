@@ -13,7 +13,9 @@ describe("route-parsing", () => {
     });
 
     it("matches /zh prefix", () => {
-      expect("/zh/blog/post".replace(LOCALE_PREFIX_RE, "")).toBe("/blog/post");
+      expect("/zh/products/europe".replace(LOCALE_PREFIX_RE, "")).toBe(
+        "/products/europe",
+      );
     });
 
     it("does not match paths without locale prefix", () => {
@@ -32,18 +34,6 @@ describe("route-parsing", () => {
   });
 
   describe("DYNAMIC_ROUTE_PATTERNS", () => {
-    it("includes blog pattern", () => {
-      const blogPattern = DYNAMIC_ROUTE_PATTERNS.find((p) =>
-        p.pattern.test("/blog/my-post"),
-      );
-      expect(blogPattern).toBeDefined();
-      const match = "/blog/my-post".match(blogPattern!.pattern)!;
-      expect(blogPattern?.buildHref(match)).toEqual({
-        pathname: "/blog/[slug]",
-        params: { slug: "my-post" },
-      });
-    });
-
     it("includes product market pattern", () => {
       const marketPattern = DYNAMIC_ROUTE_PATTERNS.find((p) =>
         p.pattern.test("/products/north-america"),
@@ -56,9 +46,9 @@ describe("route-parsing", () => {
       });
     });
 
-    it("does not match nested blog paths", () => {
+    it("does not match removed blog paths", () => {
       const match = DYNAMIC_ROUTE_PATTERNS.find((p) =>
-        p.pattern.test("/blog/category/post"),
+        p.pattern.test("/blog/my-post"),
       );
       expect(match).toBeUndefined();
     });
@@ -77,7 +67,9 @@ describe("route-parsing", () => {
     });
 
     it("strips /zh locale prefix", () => {
-      expect(normalizePathnameForLink("/zh/blog/post")).toBe("/blog/post");
+      expect(normalizePathnameForLink("/zh/products/europe")).toBe(
+        "/products/europe",
+      );
     });
 
     it("handles empty string", () => {
@@ -98,8 +90,8 @@ describe("route-parsing", () => {
     });
 
     it("handles deep nested paths", () => {
-      expect(normalizePathnameForLink("/en/blog/2024/01/post")).toBe(
-        "/blog/2024/01/post",
+      expect(normalizePathnameForLink("/en/products/europe/boxes")).toBe(
+        "/products/europe/boxes",
       );
     });
   });
@@ -124,20 +116,6 @@ describe("route-parsing", () => {
     });
 
     describe("dynamic routes", () => {
-      it("returns blog dynamic route object", () => {
-        expect(parsePathnameForLink("/en/blog/my-post")).toEqual({
-          pathname: "/blog/[slug]",
-          params: { slug: "my-post" },
-        });
-      });
-
-      it("returns blog dynamic route object for zh locale", () => {
-        expect(parsePathnameForLink("/zh/blog/welcome")).toEqual({
-          pathname: "/blog/[slug]",
-          params: { slug: "welcome" },
-        });
-      });
-
       it("returns market dynamic route object", () => {
         expect(parsePathnameForLink("/en/products/north-america")).toEqual({
           pathname: "/products/[market]",
@@ -152,11 +130,8 @@ describe("route-parsing", () => {
         });
       });
 
-      it("handles slugs without locale prefix", () => {
-        expect(parsePathnameForLink("/blog/my-post")).toEqual({
-          pathname: "/blog/[slug]",
-          params: { slug: "my-post" },
-        });
+      it("leaves removed blog slugs as static strings", () => {
+        expect(parsePathnameForLink("/blog/my-post")).toBe("/blog/my-post");
       });
     });
 

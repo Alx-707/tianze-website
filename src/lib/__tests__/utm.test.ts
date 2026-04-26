@@ -1,4 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+const { mockLoadConsent } = vi.hoisted(() => ({
+  mockLoadConsent: vi.fn(),
+}));
+
+vi.mock("@/lib/cookie-consent", () => ({
+  loadConsent: mockLoadConsent,
+}));
+
 // Import after mocking
 import {
   appendAttributionToFormData,
@@ -41,12 +50,25 @@ Object.defineProperty(global, "sessionStorage", {
   writable: true,
 });
 
+function createStoredConsent(marketing: boolean) {
+  return {
+    consent: {
+      necessary: true as const,
+      analytics: false,
+      marketing,
+    },
+    updatedAt: new Date().toISOString(),
+    version: 1,
+  };
+}
+
 describe("UTM Parameter Tracking", () => {
   beforeEach(() => {
     mockSessionStorage.clear();
     mockSessionStorage.getItem.mockClear();
     mockSessionStorage.setItem.mockClear();
     vi.clearAllMocks();
+    mockLoadConsent.mockReturnValue(createStoredConsent(true));
   });
 
   afterEach(() => {
@@ -107,6 +129,36 @@ describe("UTM Parameter Tracking", () => {
       const params = captureUtmParams();
 
       expect(params.utmSource?.length).toBeLessThanOrEqual(256);
+    });
+
+    it.each([
+      "pvc-conduit",
+      "brand_search",
+      "pvc conduit",
+      "brand+search",
+      "google/cpc",
+      "spring-2026",
+    ])("should keep valid campaign value %s", (campaign) => {
+      window.location.search = `?utm_campaign=${encodeURIComponent(campaign)}`;
+
+      const params = captureUtmParams();
+
+      expect(params.utmCampaign).toBe(campaign);
+    });
+
+    it.each([
+      "<script>alert(1)</script>",
+      'campaign"with"quotes',
+      "campaign'with'single",
+      "campaign\\with\\backslash",
+      "campaign`with`backtick",
+      "campaign\x00with\x00null",
+    ])("rejects dangerous UTM value '%s'", (input) => {
+      window.location.search = `?utm_campaign=${encodeURIComponent(input)}`;
+
+      const result = captureUtmParams();
+
+      expect(result.utmCampaign).toBeUndefined();
     });
   });
 
@@ -198,6 +250,43 @@ describe("UTM Parameter Tracking", () => {
       storeAttributionData();
 
       expect(mockSessionStorage.setItem).not.toHaveBeenCalled();
+    });
+
+    it("should not write sessionStorage before marketing consent is granted", () => {
+      mockLoadConsent.mockReturnValue(createStoredConsent(false));
+      window.location.search = "?utm_source=google&gclid=abc123";
+
+      storeAttributionData();
+
+      expect(mockSessionStorage.setItem).not.toHaveBeenCalled();
+      expect(mockSessionStorage.store["marketing_attribution"]).toBeUndefined();
+    });
+
+    it("should flush pending attribution after marketing consent is granted", async () => {
+      mockLoadConsent.mockReturnValue(createStoredConsent(false));
+      window.location.search = "?utm_source=google&gclid=abc123";
+
+      storeAttributionData();
+      expect(mockSessionStorage.setItem).not.toHaveBeenCalled();
+
+      mockLoadConsent.mockReturnValue(createStoredConsent(true));
+      const utmModule = await import("../utm");
+      const flushPendingAttribution = (
+        utmModule as typeof utmModule & {
+          flushPendingAttribution?: () => void;
+        }
+      ).flushPendingAttribution;
+
+      expect(flushPendingAttribution).toBeTypeOf("function");
+
+      flushPendingAttribution?.();
+
+      expect(mockSessionStorage.setItem).toHaveBeenCalledTimes(1);
+      const storedData = JSON.parse(
+        mockSessionStorage.store["marketing_attribution"] as string,
+      );
+      expect(storedData.utmSource).toBe("google");
+      expect(storedData.gclid).toBe("abc123");
     });
   });
 

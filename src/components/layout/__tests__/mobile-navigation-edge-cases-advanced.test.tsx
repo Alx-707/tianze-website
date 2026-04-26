@@ -10,7 +10,7 @@ import { usePathname } from "next/navigation";
 import { screen } from "@testing-library/react";
 import { useTranslations } from "next-intl";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { MobileNavigation } from "@/components/layout/mobile-navigation";
+import { MobileNavigationInteractive as MobileNavigation } from "@/components/layout/mobile-navigation-interactive";
 import { renderWithIntl } from "@/test/utils";
 
 // Mock next-intl

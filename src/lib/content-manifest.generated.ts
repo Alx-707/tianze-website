@@ -27,96 +27,6 @@ export interface ContentManifest {
 
 const _entries: ContentEntry[] = [
   {
-    "type": "posts",
-    "locale": "en",
-    "slug": "welcome",
-    "extension": ".mdx",
-    "filePath": "/content/posts/en/welcome.mdx",
-    "relativePath": "content/posts/en/welcome.mdx",
-    "metadata": {
-      "locale": "en",
-      "title": "What Tianze Builds and Why Full-Chain Manufacturing Matters",
-      "description": "An introduction to Tianze Pipe, from conduit fittings and PETG pneumatic tubes to the bending equipment and molds behind them.",
-      "slug": "welcome",
-      "publishedAt": "2024-01-15",
-      "updatedAt": "2026-04-01",
-      "author": "Tianze Pipe Team",
-      "tags": [
-        "PVC conduit",
-        "pipe bending machine",
-        "PETG pneumatic tube",
-        "OEM manufacturing"
-      ],
-      "categories": [
-        "Company",
-        "Manufacturing"
-      ],
-      "featured": true,
-      "draft": false,
-      "excerpt": "Tianze combines pipe processing equipment, mold capability, and product manufacturing in one supply chain for global B2B buyers.",
-      "readingTime": 5,
-      "coverImage": "/images/blog/welcome-cover.jpg",
-      "seo": {
-        "title": "What Tianze Builds and Why Full-Chain Manufacturing Matters",
-        "description": "Learn how Tianze links equipment, molds, conduit fittings, and pneumatic tube production into one manufacturing chain.",
-        "keywords": [
-          "Tianze Pipe",
-          "PVC conduit manufacturer",
-          "bending machine manufacturer",
-          "PETG pneumatic tube",
-          "OEM pipe fittings"
-        ],
-        "ogImage": "/images/og-image.jpg"
-      }
-    },
-    "content": "\n# What Tianze Builds and Why Full-Chain Manufacturing Matters\n\nWhen buyers look for conduit fittings or pneumatic tube products, they usually\nsee a crowded market of traders, factories, and mixed suppliers. Tianze takes a\ndifferent position.\n\nWe are not only selling finished products. We also build the **equipment**,\n**molds**, and **forming process** behind those products. That matters because\nit changes how quickly we can react, how consistently we can produce, and how\nfar we can go on custom requirements.\n\n## Our Three Core Product Directions\n\n### 1. PVC Conduit Fittings and Pipes\n\nWe manufacture conduit bends, sockets, couplings, straight pipes, and related\nparts for different market standards and project needs.\n\n### 2. Pipe Processing Equipment\n\nTianze develops and manufactures bending machines, expanders, cutters, and\ntooling used in pipe processing. This is the engineering base behind our product\noffer.\n\n### 3. PETG Pneumatic Tube Systems\n\nFor medical and logistics applications, we also supply PETG pneumatic tubes,\nbends, and connectors with an emphasis on transparency, stability, and fit-up\naccuracy.\n\n## Why This Model Helps Buyers\n\n### Faster Response on Custom Work\n\nBecause the forming process is part of our own capability, custom bends and\nnon-standard parts are easier to assess and move into sampling.\n\n### Better Process Control\n\nEquipment, molds, and finished products are not being pushed across a chain of\nunrelated suppliers. That reduces variation and speeds up troubleshooting.\n\n### More Practical OEM Support\n\nFor buyers who need packaging adjustment, specification confirmation, or pilot\nsamples before scale, the direct factory model is easier to work with.\n\n## A Quick Tianze Snapshot\n\n- Operations started in **2018**\n- Formal registration completed in **2023**\n- Team size of **60 employees**\n- Export experience across **20+ countries**\n- ISO 9001:2015 certified quality system\n\n## What Comes Next\n\nThis site will keep expanding around three things buyers care about most:\n\n- product clarity\n- process proof\n- faster contact and quotation flow\n\nIf you are sourcing conduit fittings, pipe equipment, or pneumatic tube\nproducts, the fastest way to start is to send your drawing, target market, or\nrequired standard.\n\n_The value is not only in the pipe. It is in the process behind the pipe._\n"
-  },
-  {
-    "type": "posts",
-    "locale": "zh",
-    "slug": "welcome",
-    "extension": ".mdx",
-    "filePath": "/content/posts/zh/welcome.mdx",
-    "relativePath": "content/posts/zh/welcome.mdx",
-    "metadata": {
-      "locale": "zh",
-      "title": "天泽到底做什么，以及为什么全链制造很重要",
-      "description": "从 PVC 电工套管、PETG 气动物流管，到背后的弯管设备与模具能力，这篇文章介绍天泽的核心业务。",
-      "slug": "welcome",
-      "publishedAt": "2024-01-15",
-      "updatedAt": "2026-04-01",
-      "author": "Tianze Pipe 团队",
-      "tags": [
-        "PVC 电工套管",
-        "弯管机",
-        "PETG 气动物流管",
-        "OEM 制造"
-      ],
-      "categories": [
-        "公司",
-        "制造"
-      ],
-      "featured": true,
-      "draft": false,
-      "excerpt": "天泽把设备、模具和管件制造放在同一条链路里，这让全球 B2B 客户在定制、交付和一致性上更有把握。",
-      "readingTime": 5,
-      "coverImage": "/images/blog/welcome-cover.jpg",
-      "seo": {
-        "title": "天泽到底做什么，以及为什么全链制造很重要",
-        "description": "了解天泽如何把设备、模具、电工套管配件和气动物流管生产串成同一条制造链。",
-        "keywords": [
-          "天泽管业",
-          "PVC 电工套管",
-          "弯管机制造商",
-          "PETG 气动物流管",
-          "OEM 管件制造"
-        ],
-        "ogImage": "/images/og-image.jpg"
-      }
-    },
-    "content": "\n# 天泽到底做什么，以及为什么全链制造很重要\n\n很多采购商在找套管配件或气动物流管时，看到的往往是工厂、贸易商和混合供应商混在一起的市场。天泽的位置不一样。\n\n我们不只是卖成品，也掌握这些产品背后的 **设备**、**模具** 和\n**成型工艺**。这件事的重要性，不在于概念，而在于它会直接影响定制响应速度、量产稳定性和问题处理效率。\n\n## 我们的三条核心产品线\n\n### 1. PVC 电工套管及配件\n\n我们提供直管、弯头、接头、扩口、双承口等产品，覆盖不同市场标准和项目需求。\n\n### 2. 管材加工设备\n\n天泽自主研发和制造弯管机、扩管机、切管机及配套模具，这也是我们产品能力的工程底座。\n\n### 3. PETG 气动物流管系统\n\n针对医院和物流场景，我们也供应 PETG 气动物流管、弯管和连接件，重点在透明度、稳定性和装配匹配度。\n\n## 这种模式为什么对采购更有价值\n\n### 非标项目响应更快\n\n因为我们自己理解成型过程，所以面对特殊弯头、非标规格和小批量打样时，判断和推进都更直接。\n\n### 工艺控制更稳定\n\n设备、模具和成品不需要在多个无关供应商之间反复传递，生产一致性和问题排查效率都会更好。\n\n### OEM 支持更务实\n\n对于需要贴牌包装、规格确认、样品先行再量产的客户，厂家直供的协作方式更顺。\n\n## 一个简短的天泽概况\n\n- **开始运营：** 2018 年\n- **正式注册：** 2023 年\n- **团队规模：** 60 人\n- **出口经验：** 20+ 国家\n- **质量体系：** ISO 9001:2015\n\n## 接下来你会在这个网站上看到什么\n\n这个网站接下来会持续围绕三件事展开：\n\n- 产品边界更清楚\n- 工艺能力更可见\n- 联系和询盘路径更直接\n\n如果你正在采购电工套管配件、弯管设备或气动物流管产品，最直接的开始方式就是把图纸、目标市场或标准要求发给我们。\n\n_价值不只在管材本身，也在它背后的工艺链路。_\n"
-  },
-  {
     "type": "pages",
     "locale": "en",
     "slug": "about",
@@ -369,11 +279,11 @@ const _entries: ContentEntry[] = [
       "slug": "privacy",
       "description": "Learn how Lianyungang Tianze Pipe Industry Co., Ltd. collects, uses, and protects your personal information. Our privacy policy explains your rights and our data handling practices.",
       "publishedAt": "2024-01-01",
-      "updatedAt": "2024-04-01",
+      "updatedAt": "2026-04-26",
       "author": "Legal Team",
       "layout": "default",
       "showToc": true,
-      "lastReviewed": "2024-04-01",
+      "lastReviewed": "2026-04-26",
       "draft": false,
       "seo": {
         "title": "Privacy Policy | Data Protection and Your Rights",
@@ -487,11 +397,11 @@ const _entries: ContentEntry[] = [
       "slug": "terms",
       "description": "Read our terms and conditions for using our services and purchasing products. These terms govern the business relationship between Lianyungang Tianze Pipe Industry Co., Ltd. and our customers.",
       "publishedAt": "2024-01-01",
-      "updatedAt": "2024-04-01",
+      "updatedAt": "2026-04-26",
       "author": "Legal Team",
       "layout": "default",
       "showToc": true,
-      "lastReviewed": "2024-04-01",
+      "lastReviewed": "2026-04-26",
       "draft": false,
       "seo": {
         "title": "Terms of Service | Business Terms and Conditions",
@@ -760,11 +670,11 @@ const _entries: ContentEntry[] = [
       "slug": "privacy",
       "description": "了解连云港天泽管业有限公司如何收集、使用和保护您的个人信息。我们的隐私政策说明了您的权利和我们的数据处理实践。",
       "publishedAt": "2024-01-01",
-      "updatedAt": "2024-04-01",
+      "updatedAt": "2026-04-26",
       "author": "法务团队",
       "layout": "default",
       "showToc": true,
-      "lastReviewed": "2024-04-01",
+      "lastReviewed": "2026-04-26",
       "draft": false,
       "seo": {
         "title": "隐私政策 | 数据保护与您的权利",
@@ -878,11 +788,11 @@ const _entries: ContentEntry[] = [
       "slug": "terms",
       "description": "阅读我们的服务使用条款和产品采购条件。本条款规定了连云港天泽管业有限公司与客户之间的业务关系。",
       "publishedAt": "2024-01-01",
-      "updatedAt": "2024-04-01",
+      "updatedAt": "2026-04-26",
       "author": "法务团队",
       "layout": "default",
       "showToc": true,
-      "lastReviewed": "2024-04-01",
+      "lastReviewed": "2026-04-26",
       "draft": false,
       "seo": {
         "title": "服务条款 | 业务条款与条件",
@@ -901,22 +811,20 @@ const _entries: ContentEntry[] = [
 ];
 
 const _byKeyIndex: Record<string, number> = {
-  "posts/en/welcome": 0,
-  "posts/zh/welcome": 1,
-  "pages/en/about": 2,
-  "pages/en/bending-machines": 3,
-  "pages/en/contact": 4,
-  "pages/en/oem-custom-manufacturing": 5,
-  "pages/en/privacy": 6,
-  "pages/en/product-market": 7,
-  "pages/en/terms": 8,
-  "pages/zh/about": 9,
-  "pages/zh/bending-machines": 10,
-  "pages/zh/contact": 11,
-  "pages/zh/oem-custom-manufacturing": 12,
-  "pages/zh/privacy": 13,
-  "pages/zh/product-market": 14,
-  "pages/zh/terms": 15
+  "pages/en/about": 0,
+  "pages/en/bending-machines": 1,
+  "pages/en/contact": 2,
+  "pages/en/oem-custom-manufacturing": 3,
+  "pages/en/privacy": 4,
+  "pages/en/product-market": 5,
+  "pages/en/terms": 6,
+  "pages/zh/about": 7,
+  "pages/zh/bending-machines": 8,
+  "pages/zh/contact": 9,
+  "pages/zh/oem-custom-manufacturing": 10,
+  "pages/zh/privacy": 11,
+  "pages/zh/product-market": 12,
+  "pages/zh/terms": 13
 };
 
 const _byKey: Record<string, ContentEntry> = Object.fromEntries(

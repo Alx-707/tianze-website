@@ -20,7 +20,6 @@ export const VALID_CACHE_DOMAINS = [
 export const VALID_CACHE_ENTITIES = [
   "critical",
   "deferred",
-  "blog",
   "page",
   "detail",
   "categories",
@@ -73,9 +72,6 @@ function handleContentInvalidation(
   entity: string | undefined,
   identifier: string | undefined,
 ): InvalidationResult {
-  if (entity === "blog" && identifier) {
-    return invalidateContent.blogPost(identifier, locale);
-  }
   if (entity === "page" && identifier) {
     return invalidateContent.page(identifier, locale);
   }

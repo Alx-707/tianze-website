@@ -31,7 +31,6 @@ const mockTranslations: Record<string, string> = {
   "navigation.about": "About",
   "navigation.services": "Services",
   "navigation.products": "Products",
-  "navigation.blog": "Blog",
   "navigation.contact": "Contact",
 };
 
@@ -81,7 +80,6 @@ vi.mock("@/i18n/routing", () => ({
       "/about": "/about",
       "/contact": "/contact",
       "/products": "/products",
-      "/blog": "/blog",
       "/privacy": "/privacy",
     },
   },

@@ -62,7 +62,6 @@ vi.mock("@/lib/cache/invalidate", () => ({
   CACHE_INVALIDATION_ENTITIES: [
     "critical",
     "deferred",
-    "blog",
     "page",
     "detail",
     "categories",
@@ -88,7 +87,6 @@ vi.mock("@/lib/cache/invalidate", () => ({
   },
   invalidateContent: {
     locale: vi.fn(),
-    blogPost: vi.fn(),
     page: vi.fn(),
   },
   invalidateProduct: {

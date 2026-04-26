@@ -4,6 +4,7 @@
  */
 import React from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
+import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import {
   LanguageToggleIsland,
@@ -14,7 +15,7 @@ import {
 // Mock next/dynamic
 vi.mock("next/dynamic", () => ({
   default: (
-    loader: () => Promise<{ default: React.ComponentType<unknown> }>,
+    loader: () => Promise<Record<string, unknown>>,
     options?: { ssr?: boolean },
   ) => {
     // Return a component that renders a placeholder
@@ -23,7 +24,9 @@ vi.mock("next/dynamic", () => ({
         data-testid="dynamic-component"
         data-ssr={String(options?.ssr ?? true)}
         {...props}
-      />
+      >
+        {props.children as React.ReactNode}
+      </div>
     );
     DynamicComponent.displayName = "DynamicComponent";
 
@@ -33,9 +36,22 @@ vi.mock("next/dynamic", () => ({
   },
 }));
 
-// Mock MobileNavigation
+// Mock MobileNavigation server shell
 vi.mock("@/components/layout/mobile-navigation", () => ({
-  MobileNavigation: () => <div data-testid="mobile-navigation">Mobile Nav</div>,
+  MobileNavigationLinks: (props: React.HTMLAttributes<HTMLElement>) => (
+    <nav data-testid="mobile-navigation-links" {...props}>
+      <a href="/">Home</a>
+      <a href="/about">About</a>
+    </nav>
+  ),
+}));
+
+vi.mock("@/components/layout/mobile-navigation-interactive", () => ({
+  MobileNavigationInteractive: ({
+    children,
+  }: {
+    children?: React.ReactNode;
+  }) => <div data-testid="mobile-navigation-interactive">{children}</div>,
 }));
 
 // Mock NavSwitcher
@@ -64,6 +80,14 @@ describe("MobileNavigationIsland", () => {
     expect(screen.queryByTestId("dynamic-component")).not.toBeInTheDocument();
   });
 
+  it("server-renders mobile navigation links as the pre-hydration fallback", () => {
+    const html = renderToStaticMarkup(<MobileNavigationIsland />);
+
+    expect(html).toContain('data-testid="header-mobile-navigation-fallback"');
+    expect(html).toContain("Home");
+    expect(html).toContain("About");
+  });
+
   it("passes localized labels to the hydrated mobile navigation", () => {
     render(
       <MobileNavigationIsland
@@ -88,6 +112,10 @@ describe("MobileNavigationIsland", () => {
 
     const dynamicComponent = screen.getByTestId("dynamic-component");
     expect(dynamicComponent).toHaveAttribute("data-ssr", "false");
+    expect(
+      screen.queryByTestId("header-mobile-navigation-fallback"),
+    ).not.toBeInTheDocument();
+    expect(screen.getByTestId("mobile-navigation-links")).toBeInTheDocument();
   });
 
   it("marks the deferred menu label as notranslate", () => {

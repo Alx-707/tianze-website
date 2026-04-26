@@ -227,8 +227,7 @@
     "phone": "+86-518-0000-0000",
     "social": {
       "twitter": "https://x.com/tianzepipe",
-      "linkedin": "https://www.linkedin.com/company/tianze-pipe",
-      "github": "https://github.com/tianze-pipe"
+      "linkedin": "https://www.linkedin.com/company/tianze-pipe"
     }
   },
   "website": {
@@ -237,43 +236,6 @@
   },
   "article": {
     "defaultAuthor": "Tianze Pipe"
-  },
-  "blog": {
-    "pageTitle": "Blog",
-    "pageDescription": "Explore our latest articles, insights, and updates on technology, design, and enterprise solutions.",
-    "readingTime": "min read",
-    "emptyState": "No articles published yet. Check back soon!",
-    "backToList": "Back to Blog",
-    "publishedOn": "Published on",
-    "updatedOn": "Updated on",
-    "author": "By",
-    "tags": "Tags",
-    "categories": "Categories",
-    "allCategories": "All",
-    "relatedArticles": "Related Articles",
-    "shareArticle": "Share this article",
-    "articleNotFound": "Article not found",
-    "sidebar": {
-      "mostPopular": "Most Popular",
-      "categories": "Categories"
-    },
-    "contentTypes": {
-      "article": "Article",
-      "case-study": "Case Study",
-      "guide": "Guide",
-      "news": "News",
-      "whitepaper": "Whitepaper"
-    },
-    "newsletter": {
-      "title": "Subscribe to Our Newsletter",
-      "description": "Get the latest industry insights, product updates, and trade tips delivered to your inbox.",
-      "placeholder": "Enter your email address",
-      "submit": "Subscribe",
-      "submitting": "Subscribing...",
-      "success": "Thank you for subscribing! You will receive our latest updates.",
-      "error": "An error occurred. Please try again.",
-      "turnstileRequired": "Please complete the security verification."
-    }
   },
   "products": {
     "pageTitle": "Products",

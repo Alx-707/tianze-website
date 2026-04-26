@@ -28,11 +28,6 @@ export const PATHS_CONFIG = Object.freeze({
     zh: "/contact",
   }),
 
-  blog: Object.freeze({
-    en: "/blog",
-    zh: "/blog",
-  }),
-
   products: Object.freeze({
     en: "/products",
     zh: "/products",
@@ -62,10 +57,6 @@ export const PATHS_CONFIG = Object.freeze({
 
 // 动态路由配置 - 用于 next-intl 路由和语言切换
 export const DYNAMIC_PATHS_CONFIG = Object.freeze({
-  blogDetail: Object.freeze({
-    pattern: "/blog/[slug]",
-    paramName: "slug",
-  }),
   productMarket: Object.freeze({
     pattern: "/products/[market]",
     paramName: "market",

@@ -14,7 +14,7 @@ import type { Locale } from "@/types/content.types";
 export const CACHE_DOMAINS = {
   /** i18n translation messages */
   I18N: "i18n",
-  /** Content (blog posts, pages) */
+  /** Content pages */
   CONTENT: "content",
   /** Product data */
   PRODUCT: "product",
@@ -36,7 +36,6 @@ export const CACHE_ENTITIES = {
   },
   /** Content entities */
   CONTENT: {
-    BLOG: "blog",
     PAGE: "page",
     LIST: "list",
   },
@@ -121,29 +120,9 @@ export const i18nTags = {
 };
 
 /**
- * Content cache tag generators (blog posts, pages).
+ * Content cache tag generators (pages).
  */
 export const contentTags = {
-  /** Tag for a specific blog post */
-  blogPost(slug: string, locale: Locale): string {
-    return buildTag({
-      domain: CACHE_DOMAINS.CONTENT,
-      entity: CACHE_ENTITIES.CONTENT.BLOG,
-      identifier: slug,
-      locale,
-    });
-  },
-
-  /** Tag for blog list of a locale */
-  blogList(locale: Locale): string {
-    return buildTag({
-      domain: CACHE_DOMAINS.CONTENT,
-      entity: CACHE_ENTITIES.CONTENT.LIST,
-      identifier: "blog",
-      locale,
-    });
-  },
-
   /** Tag for a specific page */
   page(slug: string, locale: Locale): string {
     return buildTag({
@@ -154,14 +133,10 @@ export const contentTags = {
     });
   },
 
-  /** All tags for a blog post (includes list tags for cascading invalidation) */
-  forBlogPost(slug: string, locale: Locale): string[] {
-    return [this.blogPost(slug, locale), this.blogList(locale)];
-  },
-
-  /** All content tags for a locale */
+  /** All content tags for a locale — currently page-only (blog removed) */
   forLocale(locale: Locale): string[] {
-    return [this.blogList(locale)];
+    const knownSlugs = ["about", "contact", "privacy", "terms"] as const;
+    return knownSlugs.map((slug) => contentTags.page(slug, locale));
   },
 };
 

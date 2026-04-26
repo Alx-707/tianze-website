@@ -7,12 +7,13 @@ import type {
   ProductData,
   WebSiteData,
 } from "@/lib/structured-data-types";
+import { SINGLE_SITE_FACTS } from "@/config/single-site";
 import { SITE_CONFIG } from "@/config/paths/site-config";
 import { routing } from "@/i18n/routing";
 
 const FALLBACK_BASE_URL = SITE_CONFIG.baseUrl;
 
-const DEFAULT_LOGO_PATH = "/next.svg";
+const DEFAULT_LOGO_PATH = SINGLE_SITE_FACTS.brandAssets.logo.horizontal;
 
 interface ProductGroupInput {
   name: string;
@@ -114,9 +115,6 @@ export function generateOrganizationData(
       t("organization.social.linkedin", {
         defaultValue: SITE_CONFIG.social.linkedin,
       }),
-      t("organization.social.github", {
-        defaultValue: SITE_CONFIG.social.github,
-      }),
     ],
     // 移除 ...data 扩展运算符，只使用已验证的属性
   };
@@ -143,12 +141,6 @@ export function generateWebSiteData(
         defaultValue: SITE_CONFIG.seo.defaultDescription,
       }),
     url: data.url || FALLBACK_BASE_URL,
-    potentialAction: {
-      "@type": "SearchAction",
-      target:
-        data.searchUrl || `${FALLBACK_BASE_URL}/search?q={search_term_string}`,
-      "query-input": "required name=search_term_string",
-    },
     inLanguage: routing.locales,
     // 移除 ...data 扩展运算符，只使用已验证的属性
   };

@@ -16,7 +16,6 @@ export type PageType =
   | "home"
   | "about"
   | "contact"
-  | "blog"
   | "products"
   | "privacy"
   | "terms"
@@ -24,7 +23,7 @@ export type PageType =
   | "oem";
 
 // 动态路由类型定义
-export type DynamicPageType = "blogDetail" | "productMarket";
+export type DynamicPageType = "productMarket";
 
 // 动态路由路径模式
 export interface DynamicRoutePattern {

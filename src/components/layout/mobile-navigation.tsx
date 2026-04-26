@@ -1,14 +1,5 @@
-/**
- * Mobile Navigation Component
- *
- * Responsive mobile navigation with hamburger menu and slide-out sidebar.
- * Features smooth animations, keyboard navigation, and accessibility.
- */
-"use client";
-
-import { useEffect, useRef, useState, type ComponentProps } from "react";
-import { Check, Globe, Menu, X } from "lucide-react";
-import { useLocale, useTranslations } from "next-intl";
+import type { ComponentProps } from "react";
+import { useTranslations } from "next-intl";
 import { SINGLE_SITE_HOME_LINK_TARGETS } from "@/config/single-site-page-expression";
 import {
   isActivePath,
@@ -16,289 +7,73 @@ import {
   NAVIGATION_ARIA,
 } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import { Link, usePathname } from "@/i18n/routing";
+import { Link } from "@/i18n/routing";
 
-interface MobileNavigationProps {
-  className?: string;
-  initialOpen?: boolean;
-  openMenuLabel?: string;
-  closeMenuLabel?: string;
-  languageLabel?: string;
-  siteName?: string;
-  siteDescription?: string;
+export interface MobileNavigationLinksProps extends Omit<
+  ComponentProps<"nav">,
+  "children"
+> {
+  contactSalesLabel?: string;
+  currentPathname?: string;
+  onNavigate?: () => void;
 }
 
-interface MobileMenuButtonProps extends ComponentProps<"button"> {
-  isOpen: boolean;
-  openMenuLabel?: string;
-  closeMenuLabel?: string;
-  labelTestId?: string;
-}
-
-export function MobileMenuButton({
-  isOpen,
+export function MobileNavigationLinks({
   className,
-  onClick,
-  openMenuLabel,
-  closeMenuLabel,
-  labelTestId = "mobile-menu-button-label",
+  contactSalesLabel,
+  currentPathname,
+  onNavigate,
   ...props
-}: MobileMenuButtonProps) {
+}: MobileNavigationLinksProps) {
   const t = useTranslations();
-  const label = isOpen
-    ? (closeMenuLabel ?? t("accessibility.closeMenu"))
-    : (openMenuLabel ?? t("accessibility.openMenu"));
+  const resolvedContactSalesLabel =
+    contactSalesLabel ?? t("navigation.contactSales");
 
   return (
-    <Button
-      variant="ghost"
-      size="icon"
-      className={cn("relative", className)}
-      aria-label={label}
-      aria-expanded={isOpen}
-      aria-haspopup="dialog"
-      data-state={isOpen ? "open" : "closed"}
-      data-testid="header-mobile-menu-button"
-      onClick={onClick}
+    <nav
+      aria-label={NAVIGATION_ARIA.mobileMenu}
+      className={cn("flex flex-col space-y-1", className)}
       {...props}
     >
-      {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-      <span className="sr-only" data-testid={labelTestId} translate="no">
-        {label}
-      </span>
-    </Button>
-  );
-}
+      <ul className="space-y-1">
+        {mobileNavigation.map((item) => {
+          const isActive =
+            typeof currentPathname === "string" &&
+            isActivePath(currentPathname, item.href);
 
-function useCloseMenuOnPathChange(
-  pathname: string,
-  isOpen: boolean,
-  onClose: () => void,
-) {
-  const previousPathnameRef = useRef(pathname);
-
-  useEffect(() => {
-    if (previousPathnameRef.current !== pathname && isOpen) {
-      queueMicrotask(onClose);
-    }
-
-    previousPathnameRef.current = pathname;
-  }, [isOpen, onClose, pathname]);
-}
-
-function MobileNavigationHeader({
-  siteName,
-  siteDescription,
-}: {
-  siteName: string;
-  siteDescription: string;
-}) {
-  return (
-    <SheetHeader className="text-left">
-      <SheetTitle className="sr-only">{NAVIGATION_ARIA.mobileMenu}</SheetTitle>
-      <div className="text-lg font-semibold" aria-hidden="true">
-        {siteName}
-      </div>
-      <SheetDescription className="text-sm text-muted-foreground">
-        {siteDescription}
-      </SheetDescription>
-    </SheetHeader>
-  );
-}
-
-export function MobileNavigation({
-  className,
-  initialOpen = false,
-  openMenuLabel,
-  closeMenuLabel,
-  languageLabel = "Language",
-  siteName,
-  siteDescription,
-}: MobileNavigationProps) {
-  const t = useTranslations();
-  const pathname = usePathname();
-  const [isOpen, setIsOpen] = useState(initialOpen);
-  const resolvedSiteName = siteName ?? t("navigation.siteName");
-  const resolvedSiteDescription =
-    siteDescription ?? t("navigation.siteDescription");
-
-  useCloseMenuOnPathChange(pathname, isOpen, () => setIsOpen(false));
-
-  return (
-    <div className={cn("header-mobile-only", className)}>
-      <Sheet open={isOpen} onOpenChange={setIsOpen}>
-        <SheetTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="relative"
-            aria-label={
-              isOpen
-                ? (closeMenuLabel ?? t("accessibility.closeMenu"))
-                : (openMenuLabel ?? t("accessibility.openMenu"))
-            }
-            aria-expanded={isOpen}
-            aria-controls="mobile-navigation"
-            aria-haspopup="dialog"
-            data-state={isOpen ? "open" : "closed"}
-            data-testid="header-mobile-menu-button"
-          >
-            <Menu className="h-5 w-5" />
-            <span
-              className="sr-only"
-              data-testid="mobile-menu-toggle-label"
-              translate="no"
-            >
-              {isOpen
-                ? t("accessibility.closeMenu")
-                : t("accessibility.openMenu")}
-            </span>
-          </Button>
-        </SheetTrigger>
-        <SheetContent
-          side="right"
-          className="w-[300px] sm:w-[350px]"
-          id="mobile-navigation"
-          aria-label={NAVIGATION_ARIA.mobileMenu}
-          data-testid="mobile-menu-content"
-          onEscapeKeyDown={() => setIsOpen(false)}
-        >
-          <MobileNavigationHeader
-            siteName={resolvedSiteName}
-            siteDescription={resolvedSiteDescription}
-          />
-          <Separator className="my-4" />
-          <nav
-            className="flex flex-col space-y-1"
-            aria-label={NAVIGATION_ARIA.mobileMenu}
-          >
-            {mobileNavigation.map((item) => {
-              const isActive = isActivePath(pathname, item.href);
-              return (
-                <SheetClose key={item.key} asChild>
-                  <Link
-                    href={item.href as "/"}
-                    prefetch={false}
-                    className={cn(
-                      "flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors duration-200",
-                      isActive
-                        ? "bg-accent text-accent-foreground"
-                        : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
-                    )}
-                    aria-current={isActive ? "page" : undefined}
-                    onClick={() => setIsOpen(false)}
-                  >
-                    {t(item.translationKey)}
-                  </Link>
-                </SheetClose>
-              );
-            })}
-            <div className="pt-4">
-              <Button
-                variant="default"
-                size="sm"
-                asChild
-                className="w-full justify-start"
+          return (
+            <li key={item.key}>
+              <Link
+                href={item.href as "/"}
+                prefetch={false}
+                className={cn(
+                  "flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors duration-200",
+                  isActive
+                    ? "bg-accent text-accent-foreground"
+                    : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
+                )}
+                aria-current={isActive ? "page" : undefined}
+                onClick={onNavigate}
               >
-                <SheetClose asChild>
-                  <Link
-                    href={{
-                      pathname: SINGLE_SITE_HOME_LINK_TARGETS.contact,
-                      query: { source: "mobile_nav_cta" },
-                    }}
-                    prefetch={false}
-                    onClick={() => setIsOpen(false)}
-                  >
-                    {t("navigation.contactSales")}
-                  </Link>
-                </SheetClose>
-              </Button>
-            </div>
-            <Separator className="my-4" />
-            <MobileLanguageSwitcher
-              languageLabel={languageLabel}
-              pathname={pathname}
-              onNavigate={() => setIsOpen(false)}
-            />
-          </nav>
-        </SheetContent>
-      </Sheet>
-    </div>
-  );
-}
-
-/**
- * Mobile Language Switcher
- * Simple two-link list to avoid nested portal/focus issues with DropdownMenu inside Sheet.
- */
-function MobileLanguageSwitcher({
-  languageLabel,
-  pathname,
-  onNavigate,
-}: {
-  languageLabel: string;
-  pathname: string;
-  onNavigate?: () => void;
-}) {
-  const currentLocale = useLocale() === "zh" ? "zh" : "en";
-
-  const languages = [
-    { locale: "en" as const, label: "English" },
-    { locale: "zh" as const, label: "简体中文" },
-  ];
-
-  return (
-    <div
-      className="notranslate space-y-1"
-      data-testid="mobile-language-switcher"
-      translate="no"
-    >
-      <div
-        className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-muted-foreground"
-        data-testid="mobile-language-switcher-label"
-      >
-        <Globe className="h-4 w-4" />
-        <span translate="no">{languageLabel}</span>
-      </div>
-      {languages.map(({ locale, label }) => {
-        const isActive = currentLocale === locale;
-        return (
-          <SheetClose key={locale} asChild>
-            <Link
-              href={(pathname || "/") as "/"}
-              locale={locale}
-              prefetch={false}
-              className={cn(
-                "flex items-center justify-between rounded-md px-3 py-2 text-sm font-medium transition-colors duration-200",
-                isActive
-                  ? "bg-accent text-accent-foreground"
-                  : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
-              )}
-              onClick={onNavigate}
-              translate="no"
-            >
-              <span
-                data-testid={`mobile-language-option-label-${locale}`}
-                translate="no"
-              >
-                {label}
-              </span>
-              {isActive && <Check className="h-4 w-4" />}
-            </Link>
-          </SheetClose>
-        );
-      })}
-    </div>
+                {t(item.translationKey)}
+              </Link>
+            </li>
+          );
+        })}
+        <li className="pt-4">
+          <Link
+            href={{
+              pathname: SINGLE_SITE_HOME_LINK_TARGETS.contact,
+              query: { source: "mobile_nav_cta" },
+            }}
+            prefetch={false}
+            className="flex items-center rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground transition-colors duration-200 hover:bg-primary/90"
+            onClick={onNavigate}
+          >
+            {resolvedContactSalesLabel}
+          </Link>
+        </li>
+      </ul>
+    </nav>
   );
 }

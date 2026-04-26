@@ -49,6 +49,7 @@
     "about": "About",
     "contact": "Contact",
     "contactSales": "Contact Sales",
+    "oem": "OEM",
     "services": "Services",
     "products": "Products",
     "solutions": "Solutions",
@@ -56,7 +57,6 @@
     "enterprise": "Enterprise",
     "docs": "Docs",
     "pricing": "Pricing",
-    "blog": "Blog",
     "privacy": "Privacy Policy",
     "login": "Login",
     "logout": "Logout",
@@ -611,14 +611,12 @@
         "home": "Home",
         "about": "About",
         "products": "Products",
-        "blog": "Blog",
         "contact": "Contact"
       },
       "social": {
         "title": "Social",
         "twitter": "Twitter",
-        "linkedin": "LinkedIn",
-        "github": "GitHub"
+        "linkedin": "LinkedIn"
       },
       "support": {
         "title": "Support",
@@ -659,7 +657,6 @@
       "company": {
         "title": "Company",
         "about": "About",
-        "blog": "Blog",
         "careers": "Careers",
         "changelog": "Changelog",
         "contact": "Contact Us",
@@ -672,7 +669,6 @@
       },
       "social": {
         "title": "Social",
-        "github": "GitHub",
         "linkedin": "LinkedIn",
         "twitter": "Twitter",
         "youtube": "YouTube"
@@ -715,11 +711,6 @@
         "title": "Products - Under Construction",
         "description": "Our product showcase is being crafted with care. Discover innovative solutions that will transform your business.",
         "features": "Product features and specifications coming soon"
-      },
-      "blog": {
-        "title": "Blog - Under Construction",
-        "description": "Our blog is being prepared with insightful content. Stay tuned for industry insights and company updates.",
-        "features": "Articles, tutorials, and industry insights coming soon"
       },
       "about": {
         "title": "About Us - Under Construction",
@@ -819,8 +810,7 @@
       "phone": "+86-518-0000-0000",
       "social": {
         "twitter": "https://x.com/tianzepipe",
-        "linkedin": "https://www.linkedin.com/company/tianze-pipe",
-        "github": "https://github.com/tianze-pipe"
+        "linkedin": "https://www.linkedin.com/company/tianze-pipe"
       }
     },
     "website": {
@@ -914,12 +904,6 @@
     "products": {
       "title": "Failed to load product information",
       "description": "We couldn't load the product details. Please try again or return to the homepage to browse other content.",
-      "tryAgain": "Try again",
-      "goHome": "Back to homepage"
-    },
-    "blog": {
-      "title": "Failed to load article",
-      "description": "We couldn't load this article. Please try again or return to the homepage to browse other content.",
       "tryAgain": "Try again",
       "goHome": "Back to homepage"
     },

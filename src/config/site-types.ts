@@ -16,7 +16,6 @@ export interface SiteSeoConfig {
 export interface SiteSocialConfig {
   twitter: string;
   linkedin: string;
-  github: string;
 }
 
 export interface SiteContactConfig {
@@ -76,11 +75,22 @@ export interface BusinessStats {
 
 export interface SocialLinks {
   linkedin?: string;
-  github?: string;
   facebook?: string;
   youtube?: string;
   twitter?: string;
   instagram?: string;
+}
+
+export interface BrandAssets {
+  logo: {
+    horizontal: string;
+    horizontalPng: string;
+    square: string;
+    width: number;
+    height: number;
+  };
+  ogImage: string;
+  favicon: string;
 }
 
 export interface SiteFacts {
@@ -89,6 +99,7 @@ export interface SiteFacts {
   certifications: Certification[];
   stats: BusinessStats;
   social: SocialLinks;
+  brandAssets: BrandAssets;
 }
 
 export interface SiteNavigationItem {

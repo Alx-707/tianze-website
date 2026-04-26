@@ -17,43 +17,11 @@ vi.mock("@/i18n/routing", () => ({
   },
 }));
 
-vi.mock("@/lib/content/blog", () => ({
-  getAllPostsCached: vi.fn(async (locale: string) => {
-    if (locale === "en") {
-      return [
-        {
-          slug: "post-a",
-          title: "Post A",
-          publishedAt: "2024-04-01T00:00:00Z",
-          updatedAt: "2024-04-02T00:00:00Z",
-        },
-      ];
-    }
-    if (locale === "zh") {
-      return [
-        {
-          slug: "post-a",
-          title: "文章A",
-          publishedAt: "2024-04-01T00:00:00Z",
-          updatedAt: "2024-04-02T00:00:00Z",
-        },
-      ];
-    }
-    return [];
-  }),
-}));
-
 vi.mock("@/lib/sitemap-utils", () => ({
-  getContentLastModified: vi.fn(({ updatedAt, publishedAt }) => {
-    if (updatedAt) return new Date(updatedAt);
-    if (publishedAt) return new Date(publishedAt);
-    return new Date("2024-01-01T00:00:00Z");
-  }),
   getStaticPageLastModified: vi.fn((page) => {
     const dates: Record<string, Date> = {
       "": new Date("2024-12-01T00:00:00Z"),
       "/products": new Date("2024-11-01T00:00:00Z"),
-      "/blog": new Date("2024-11-01T00:00:00Z"),
       "/products/north-america": new Date("2024-11-01T00:00:00Z"),
       "/products/australia-new-zealand": new Date("2024-11-01T00:00:00Z"),
       "/products/mexico": new Date("2024-11-01T00:00:00Z"),
@@ -114,7 +82,6 @@ describe("sitemap.ts", () => {
       expect(urls).toContain("https://example.com/en/about");
       expect(urls).toContain("https://example.com/en/contact");
       expect(urls).toContain("https://example.com/en/products");
-      expect(urls).toContain("https://example.com/en/blog");
       expect(urls).toContain("https://example.com/en/privacy");
       expect(urls).toContain("https://example.com/en/terms");
       expect(urls).toContain(
@@ -123,12 +90,13 @@ describe("sitemap.ts", () => {
       expect(urls).toContain("https://example.com/en/oem-custom-manufacturing");
     });
 
-    it("should include blog post pages", async () => {
+    it("should not include removed blog pages", async () => {
       const result = await sitemap();
       const urls = result.map((entry) => entry.url);
 
-      expect(urls).toContain("https://example.com/en/blog/post-a");
-      expect(urls).toContain("https://example.com/zh/blog/post-a");
+      expect(urls).not.toContain("https://example.com/en/blog");
+      expect(urls).not.toContain("https://example.com/en/blog/post-a");
+      expect(urls).not.toContain("https://example.com/zh/blog/post-a");
     });
 
     it("should include product catalog market pages", async () => {

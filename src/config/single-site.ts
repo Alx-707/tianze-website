@@ -44,7 +44,6 @@ const baseUrl = resolveSingleSiteBaseUrl("https://tianze-pipe.com");
 const social = {
   twitter: "https://x.com/tianzepipe",
   linkedin: "https://www.linkedin.com/company/tianze-pipe",
-  github: "https://github.com/tianze-pipe",
 } as const;
 
 const contact = {
@@ -125,7 +124,20 @@ export const SINGLE_SITE_DEFINITION: SiteDefinition = {
     social: {
       linkedin: social.linkedin,
       twitter: social.twitter,
-      github: social.github,
+    },
+    // TODO(wave1-blocked): These paths are intentional placeholders.
+    // Files do not exist until Task 8/9/10 business assets are delivered.
+    // Do NOT convert logo.tsx to next/image static import until files exist.
+    brandAssets: {
+      logo: {
+        horizontal: "/images/logo.svg",
+        horizontalPng: "/images/logo.png",
+        square: "/images/logo-square.svg",
+        width: 200,
+        height: 60,
+      },
+      ogImage: "/images/og-image.jpg",
+      favicon: "/favicon.ico",
     },
   },
   productCatalog: singleSiteProductCatalog,
@@ -137,12 +149,16 @@ export const SINGLE_SITE_DEFINITION: SiteDefinition = {
         href: "/products",
         translationKey: "navigation.products",
       },
-      { key: "blog", href: "/blog", translationKey: "navigation.blog" },
+      {
+        key: "oem",
+        href: "/oem-custom-manufacturing",
+        translationKey: "navigation.oem",
+      },
       { key: "about", href: "/about", translationKey: "navigation.about" },
       {
-        key: "privacy",
-        href: "/privacy",
-        translationKey: "navigation.privacy",
+        key: "contact",
+        href: "/contact",
+        translationKey: "navigation.contact",
       },
     ],
   },
@@ -172,13 +188,6 @@ export const SINGLE_SITE_DEFINITION: SiteDefinition = {
           href: "/products",
           external: false,
           translationKey: "footer.sections.navigation.products",
-        },
-        {
-          key: "blog",
-          label: "Blog",
-          href: "/blog",
-          external: false,
-          translationKey: "footer.sections.navigation.blog",
         },
         {
           key: "contact",
@@ -228,13 +237,6 @@ export const SINGLE_SITE_DEFINITION: SiteDefinition = {
           href: social.linkedin,
           external: true,
           translationKey: "footer.sections.social.linkedin",
-        },
-        {
-          key: "github",
-          label: "GitHub",
-          href: social.github,
-          external: true,
-          translationKey: "footer.sections.social.github",
         },
       ],
     },

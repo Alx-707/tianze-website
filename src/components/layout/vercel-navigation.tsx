@@ -34,7 +34,6 @@ type StaticPathname =
   | "/"
   | "/about"
   | "/contact"
-  | "/blog"
   | "/products"
   | "/privacy"
   | "/terms";

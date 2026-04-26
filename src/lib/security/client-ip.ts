@@ -27,29 +27,38 @@ type DeploymentPlatform =
   | typeof PLATFORM_DEVELOPMENT;
 
 type HeadersLike = Pick<Headers, "get">;
+type TrustedHeaderName =
+  | typeof INTERNAL_TRUSTED_CLIENT_IP_HEADER
+  | "x-real-ip"
+  | "x-forwarded-for"
+  | "cf-connecting-ip";
 
 interface TrustedProxyConfig {
-  trustedHeaders: readonly string[];
+  primaryHeader: TrustedHeaderName;
+  secondaryHeader?: TrustedHeaderName;
   cdnIpRanges?: typeof cloudflareIpRanges;
 }
 
 const FALLBACK_IP = "0.0.0.0";
 const LOCALHOST_IP = "127.0.0.1";
 const INTERNAL_HEADER_CONFIG: TrustedProxyConfig = {
-  trustedHeaders: [INTERNAL_TRUSTED_CLIENT_IP_HEADER],
+  primaryHeader: INTERNAL_TRUSTED_CLIENT_IP_HEADER,
 };
 
-const TRUSTED_PROXY_CONFIGS: Record<DeploymentPlatform, TrustedProxyConfig> = {
-  [PLATFORM_VERCEL]: {
-    trustedHeaders: ["x-real-ip", "x-forwarded-for"],
-  },
-  [PLATFORM_CLOUDFLARE]: {
-    trustedHeaders: ["cf-connecting-ip", "x-forwarded-for"],
-    cdnIpRanges: cloudflareIpRanges,
-  },
-  [PLATFORM_DEVELOPMENT]: {
-    trustedHeaders: ["x-forwarded-for", "x-real-ip"],
-  },
+const VERCEL_TRUSTED_PROXY_CONFIG: TrustedProxyConfig = {
+  primaryHeader: "x-real-ip",
+  secondaryHeader: "x-forwarded-for",
+};
+
+const CLOUDFLARE_TRUSTED_PROXY_CONFIG: TrustedProxyConfig = {
+  primaryHeader: "cf-connecting-ip",
+  secondaryHeader: "x-forwarded-for",
+  cdnIpRanges: cloudflareIpRanges,
+};
+
+const DEVELOPMENT_TRUSTED_PROXY_CONFIG: TrustedProxyConfig = {
+  primaryHeader: "x-forwarded-for",
+  secondaryHeader: "x-real-ip",
 };
 
 function getDeploymentPlatform(): DeploymentPlatform | null {
@@ -78,20 +87,30 @@ function getDeploymentPlatform(): DeploymentPlatform | null {
   return null;
 }
 
+function readHeaderIP(
+  headers: HeadersLike,
+  headerName: TrustedHeaderName,
+): string | null {
+  const headerValue = headers.get(headerName);
+  if (!headerValue) {
+    return null;
+  }
+
+  const ip = parseFirstIP(headerValue);
+  return isValidIP(ip) ? ip : null;
+}
+
 function readTrustedHeaderIP(
   headers: HeadersLike,
-  trustedHeaders: readonly string[],
+  config: TrustedProxyConfig,
 ): string | null {
-  for (const headerName of trustedHeaders) {
-    const headerValue = headers.get(headerName);
-    if (!headerValue) {
-      continue;
-    }
+  const primaryIP = readHeaderIP(headers, config.primaryHeader);
+  if (primaryIP) {
+    return primaryIP;
+  }
 
-    const ip = parseFirstIP(headerValue);
-    if (isValidIP(ip)) {
-      return ip;
-    }
+  if (config.secondaryHeader) {
+    return readHeaderIP(headers, config.secondaryHeader);
   }
 
   return null;
@@ -108,7 +127,12 @@ function getPlatformContext(): {
 
   return {
     platform,
-    config: TRUSTED_PROXY_CONFIGS[platform],
+    config:
+      platform === PLATFORM_VERCEL
+        ? VERCEL_TRUSTED_PROXY_CONFIG
+        : platform === PLATFORM_CLOUDFLARE
+          ? CLOUDFLARE_TRUSTED_PROXY_CONFIG
+          : DEVELOPMENT_TRUSTED_PROXY_CONFIG,
   };
 }
 
@@ -166,10 +190,7 @@ export function getTrustedClientIPForInternalHeader(
     return null;
   }
 
-  return readTrustedHeaderIP(
-    request.headers,
-    platformContext.config.trustedHeaders,
-  );
+  return readTrustedHeaderIP(request.headers, platformContext.config);
 }
 
 export function getClientIP(request: NextRequest): string {
@@ -182,10 +203,7 @@ export function getClientIP(request: NextRequest): string {
     return getRequestFallbackIP(request, platformContext.platform);
   }
 
-  const headerIP = readTrustedHeaderIP(
-    request.headers,
-    platformContext.config.trustedHeaders,
-  );
+  const headerIP = readTrustedHeaderIP(request.headers, platformContext.config);
   if (headerIP) {
     return headerIP;
   }
@@ -222,16 +240,10 @@ export function getClientIPFromHeaders(headers: HeadersLike): string {
   }
 
   if (platformContext.platform === PLATFORM_CLOUDFLARE) {
-    return (
-      readTrustedHeaderIP(headers, INTERNAL_HEADER_CONFIG.trustedHeaders) ??
-      FALLBACK_IP
-    );
+    return readTrustedHeaderIP(headers, INTERNAL_HEADER_CONFIG) ?? FALLBACK_IP;
   }
 
-  const headerIP = readTrustedHeaderIP(
-    headers,
-    platformContext.config.trustedHeaders,
-  );
+  const headerIP = readTrustedHeaderIP(headers, platformContext.config);
   if (headerIP) {
     return headerIP;
   }

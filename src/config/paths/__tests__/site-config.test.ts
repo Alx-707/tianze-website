@@ -23,7 +23,6 @@ describe("site-config", () => {
     social: {
       twitter: "[TWITTER_URL]",
       linkedin: "[LINKEDIN_URL]",
-      github: "[GITHUB_URL]",
     },
     contact: {
       phone: "+1-555-0123",
@@ -134,7 +133,6 @@ describe("site-config", () => {
       const socialPaths = [
         "SITE_CONFIG.social.twitter",
         "SITE_CONFIG.social.linkedin",
-        "SITE_CONFIG.social.github",
       ];
 
       for (const path of socialPaths) {

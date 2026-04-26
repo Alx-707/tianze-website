@@ -1,11 +1,13 @@
 import React from "react";
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { MobileNavigationLinks } from "@/components/layout/mobile-navigation";
 import {
   MobileMenuButton,
-  MobileNavigation,
-} from "@/components/layout/mobile-navigation";
+  MobileNavigationInteractive as MobileNavigation,
+} from "@/components/layout/mobile-navigation-interactive";
 import { createMockTranslations, renderWithIntl } from "@/test/utils";
 
 const mockLocale = { current: "en" as "en" | "zh" };
@@ -55,7 +57,6 @@ vi.mock("@/lib/navigation", () => {
       href: "/products",
       translationKey: "navigation.products",
     },
-    { key: "blog", href: "/blog", translationKey: "navigation.blog" },
     { key: "contact", href: "/contact", translationKey: "navigation.contact" },
   ];
 
@@ -239,6 +240,15 @@ describe("MobileNavigation Component", () => {
   });
 
   describe("Basic Rendering", () => {
+    it("renders a server-safe link list for the no-JS fallback", () => {
+      const html = renderToStaticMarkup(<MobileNavigationLinks />);
+
+      expect(html).toContain("Home");
+      expect(html).toContain("About");
+      expect(html).toContain('href="/"');
+      expect(html).not.toContain("aria-expanded");
+    });
+
     it("renders mobile navigation trigger", () => {
       renderWithIntl(<MobileNavigation />);
 
@@ -357,7 +367,6 @@ describe("MobileNavigation Component", () => {
       expect(screen.getByText("About")).toBeInTheDocument();
       expect(screen.getByText("Services")).toBeInTheDocument();
       expect(screen.getByText("Products")).toBeInTheDocument();
-      expect(screen.getByText("Blog")).toBeInTheDocument();
       expect(screen.getByText("Contact")).toBeInTheDocument();
     });
 
@@ -525,7 +534,7 @@ describe("MobileNavigation Component", () => {
       mockUsePathname.mockReturnValue("/contact");
       rerender(<MobileNavigation />);
 
-      mockUsePathname.mockReturnValue("/blog");
+      mockUsePathname.mockReturnValue("/products");
       rerender(<MobileNavigation />);
 
       // Should still render correctly

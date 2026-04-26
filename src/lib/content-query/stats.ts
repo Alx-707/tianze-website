@@ -3,7 +3,7 @@
  */
 
 import type { ContentStats, Locale } from "@/types/content.types";
-import { getAllPages, getAllPosts } from "@/lib/content-query/queries";
+import { getAllPages } from "@/lib/content-query/queries";
 import { getContentConfig } from "@/lib/content-utils";
 import { ZERO } from "@/constants";
 
@@ -22,23 +22,21 @@ export async function getContentStats(): Promise<ContentStats> {
     lastUpdated: new Date().toISOString(),
   };
 
-  // Count posts by locale
+  // Count active page content by locale.
   for (const locale of config.supportedLocales) {
-    const posts = await getAllPosts(locale);
     const pages = await getAllPages(locale);
 
     // Use type-safe property access with explicit validation
     if (locale === "en" || locale === "zh") {
       // Safe property assignment for known locales
       if (locale === "en") {
-        stats.postsByLocale.en = posts.length;
+        stats.postsByLocale.en = ZERO;
         stats.pagesByLocale.en = pages.length;
       } else {
-        stats.postsByLocale.zh = posts.length;
+        stats.postsByLocale.zh = ZERO;
         stats.pagesByLocale.zh = pages.length;
       }
     }
-    stats.totalPosts += posts.length;
     stats.totalPages += pages.length;
   }
 
