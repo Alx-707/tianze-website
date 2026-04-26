@@ -36,6 +36,9 @@ describe("Security Configuration", () => {
       expect(csp).not.toMatch(/script-src(?!-elem)[^;]*'unsafe-inline'/);
       // script-src-elem is explicitly relaxed for prerendered App Router output
       expect(csp).toMatch(/script-src-elem[^;]*'unsafe-inline'/);
+      // App Router/RSC inline script content changes whenever streamed payloads
+      // change. We rely on script-src-elem instead of content hashes.
+      expect(csp).not.toContain("'sha256-");
       expect(csp).not.toContain("'unsafe-eval'");
       expect(csp).toContain("upgrade-insecure-requests");
     });

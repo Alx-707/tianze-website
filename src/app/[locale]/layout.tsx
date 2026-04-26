@@ -40,9 +40,9 @@ async function AsyncLocaleLayoutContent({
   locale,
   children,
 }: AsyncLocaleLayoutContentProps) {
-  // Note: Removed headers() call for CSP nonce to enable Cache Components static generation.
-  // JSON-LD scripts are data-only and don't require nonce for CSP compliance.
-  // For client-side scripts that need nonce, consider using a dynamic island component.
+  // Note: Removed headers() call for CSP nonce to enable Cache Components
+  // static generation. Prerendered inline script elements are covered by the
+  // explicit script-src-elem policy; JsonLdScript still handles escaping.
 
   const [
     tFooter,
@@ -91,9 +91,9 @@ async function AsyncLocaleLayoutContent({
       {/*
         JSON-LD Structured Data for SEO
         --------------------------------
-        CSP nonce is NOT required for these scripts because:
-        1. type="application/ld+json" declares data-only content (not executable JavaScript)
-        2. Per CSP Level 3 spec, script-src restrictions apply only to executable scripts
+        CSP nonce is NOT read here because:
+        1. headers() would force this layout out of Cache Components static generation
+        2. script-src-elem explicitly covers prerendered inline script elements
         3. JsonLdScript centralizes the escaping we rely on across the repo
       */}
       <JsonLdScript data={organizationData} />
