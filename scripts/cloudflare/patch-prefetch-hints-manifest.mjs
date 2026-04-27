@@ -1,5 +1,6 @@
 import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { getPhase6PatchPrefetchWorkerKeys } from "./phase6-topology-contract.mjs";
 
 const ROOT_DIR = process.cwd();
 const HANDLER_PATH = path.join(
@@ -9,9 +10,16 @@ const HANDLER_PATH = path.join(
   "default",
   "handler.mjs",
 );
-const SERVER_FUNCTION_INDEX_PATHS = [
-  path.join(ROOT_DIR, ".open-next", "server-functions", "apiLead", "index.mjs"),
-];
+const SERVER_FUNCTION_INDEX_PATHS = getPhase6PatchPrefetchWorkerKeys().map(
+  (workerKey) =>
+    path.join(
+      ROOT_DIR,
+      ".open-next",
+      "server-functions",
+      workerKey,
+      "index.mjs",
+    ),
+);
 
 const MANIFEST_GUARD_NEEDLE =
   ";throw new Error(`Unexpected loadManifest(${path2}) call!`)}function evalManifest";

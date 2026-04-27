@@ -73,12 +73,19 @@ function getPhase6ServerActionsKeyWorkerNames(baseWorkerName) {
   ).map((worker) => getPhase6WorkerName(baseWorkerName, worker.key));
 }
 
+function getPhase6PatchPrefetchWorkerKeys() {
+  return PHASE6_WORKER_CATALOG.filter(
+    (worker) => worker.patchPrefetchManifest,
+  ).map((worker) => worker.key);
+}
+
 export {
   PHASE6_API_WORKERS,
   PHASE6_WORKER_CATALOG,
   PHASE6_WORKERS_BY_KEY,
   getPhase6ConfigFileName,
   getPhase6DeploymentOrder,
+  getPhase6PatchPrefetchWorkerKeys,
   getPhase6WorkerDescriptor,
   getPhase6WorkerName,
   getPhase6WorkerNames,
