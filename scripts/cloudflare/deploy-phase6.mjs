@@ -192,7 +192,22 @@ async function printProductionCutoverBoundary() {
     return;
   }
 
-  const { status, routes } = await readProductionDomainRouteStatus();
+  let routeStatus;
+  try {
+    routeStatus = await readProductionDomainRouteStatus();
+  } catch (error) {
+    console.warn(
+      `[phase6] production worker deploy boundary warning: ${
+        (error && error.message) || error
+      }`,
+    );
+    console.log(
+      "[phase6] This deploy does not prove tianze-pipe.com cutover and does not start the legacy DO cleanup 7-day clock.",
+    );
+    return;
+  }
+
+  const { status, routes } = routeStatus;
 
   if (status === "missing") {
     console.log(
@@ -215,7 +230,9 @@ async function printProductionCutoverBoundary() {
   }
 
   const routePatterns = routes
-    .map((route) => route.pattern)
+    .map((route) =>
+      typeof route === "string" ? route : route.pattern || "(unlabelled route)",
+    )
     .filter(Boolean)
     .join(", ");
   console.log(

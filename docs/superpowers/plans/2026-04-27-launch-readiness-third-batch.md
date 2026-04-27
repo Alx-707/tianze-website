@@ -402,14 +402,33 @@ Near the top of `scripts/cloudflare/check-official-compare.mjs`, after `const PH
 
 ```js
 const SOURCE_ONLY = process.argv.includes("--source-only");
+const GENERATED_ONLY = process.argv.includes("--generated-only");
 const REQUIRE_GENERATED_CONFIG =
-  process.argv.includes("--require-generated") || !SOURCE_ONLY;
+  GENERATED_ONLY ||
+  process.argv.includes("--require-generated") ||
+  !SOURCE_ONLY;
+
+if (SOURCE_ONLY && GENERATED_ONLY) {
+  console.error(
+    "cf-official-compare: use either --source-only or --generated-only, not both.",
+  );
+  process.exit(1);
+}
+
+if (SOURCE_ONLY && process.argv.includes("--require-generated")) {
+  console.error(
+    "cf-official-compare: --source-only cannot be combined with --require-generated.",
+  );
+  process.exit(1);
+}
 ```
 
 Expected behavior:
 
 - Default `pnpm review:cf:official-compare` fails if `.open-next/wrangler/phase6` is absent.
 - `pnpm review:cf:official-compare:source` is the source-only check to run before `pnpm build:cf:phase6`.
+- `pnpm review:cf:official-compare:generated` checks generated artifacts only.
+- `--source-only` cannot be combined with `--generated-only` or `--require-generated`.
 
 - [ ] **Step 2: Replace raw forbidden-snippet checks with typed checks**
 
@@ -519,6 +538,19 @@ if (fs.existsSync(PHASE6_CONFIG_DIR)) {
     .readdirSync(PHASE6_CONFIG_DIR)
     .filter((fileName) => fileName.endsWith(".jsonc"));
 
+  if (phase6ConfigFiles.length === 0 && REQUIRE_GENERATED_CONFIG) {
+    failures.push({
+      file: path.relative(ROOT, PHASE6_CONFIG_DIR),
+      label: "phase6 generated deploy config must exist for strict compare",
+      missing: ["run pnpm build:cf:phase6 before strict compare"],
+      forbidden: [],
+    });
+  } else if (phase6ConfigFiles.length === 0) {
+    console.warn(
+      "cf-official-compare: phase6 generated config directory is empty; run with --require-generated after pnpm build:cf:phase6 for deploy-artifact proof.",
+    );
+  }
+
   for (const fileName of phase6ConfigFiles) {
     const relPath = path.join(".open-next", "wrangler", "phase6", fileName);
     const content = read(relPath);
@@ -588,22 +620,19 @@ const deployScriptChecks = [
   {
     name: "deploy:cf",
     expected: "pnpm deploy:cf:phase6:production",
-    mode: "startsWith",
   },
   {
     name: "deploy:cf:preview",
     expected: "pnpm deploy:cf:phase6:preview",
-    mode: "startsWith",
   },
   {
     name: "deploy:cf:dry-run",
     expected: "pnpm deploy:cf:phase6:dry-run",
-    mode: "startsWith",
   },
   {
     name: "preview:cf:wrangler",
-    expected: "legacy-entrypoint-guard.mjs",
-    mode: "includes",
+    expected:
+      "node scripts/cloudflare/legacy-entrypoint-guard.mjs preview:cf:wrangler",
   },
 ];
 ```
@@ -613,11 +642,7 @@ Then replace the deploy-script loop with:
 ```js
 for (const check of deployScriptChecks) {
   const script = scripts[check.name];
-  const matches =
-    typeof script === "string" &&
-    (check.mode === "startsWith"
-      ? script.startsWith(check.expected)
-      : script.includes(check.expected));
+  const matches = script === check.expected;
 
   if (!matches) {
     failures.push({
@@ -626,6 +651,25 @@ for (const check of deployScriptChecks) {
       missing: [`${check.name}: ${check.expected}`],
       forbidden: [],
     });
+  }
+
+  if (typeof script === "string") {
+    const forbidden = findForbiddenSnippets(script, [
+      ...destructiveDeployScriptSnippets,
+      "&&",
+      "||",
+      ";",
+    ]);
+
+    if (forbidden.length > 0) {
+      failures.push({
+        file: "package.json",
+        label:
+          "Cloudflare deploy aliases must stay exact and must not chain cleanup/destructive actions",
+        missing: [],
+        forbidden,
+      });
+    }
   }
 }
 ```
@@ -638,7 +682,7 @@ Run:
 pnpm review:cf:official-compare
 ```
 
-Expected: exit 0. If `.open-next/wrangler/phase6` is absent, output includes the generated-config warning and still exits 0.
+Expected: exit 0 only when generated phase6 config exists and passes. If `.open-next/wrangler/phase6` is absent or empty, default mode fails; use `pnpm review:cf:official-compare:source` before `pnpm build:cf:phase6`.
 
 - [ ] **Step 7: Validate strict compare after generating phase6 artifacts**
 

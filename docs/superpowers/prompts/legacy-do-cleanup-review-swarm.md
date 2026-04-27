@@ -5,15 +5,13 @@ read-only review of the legacy Cloudflare Durable Object cleanup debt or a
 future cleanup PR.
 
 ```md
-[$craft-workspace-tianze-website:review-swarm](/Users/Data/Warehouse/Pipe/tianze-website/.codex/skills/review-swarm/SKILL.md)
+[$craft-workspace-tianze-website:review-swarm](.codex/skills/review-swarm/SKILL.md)
 
 请对 `tianze-website` 的 legacy Cloudflare Durable Object cleanup 技术债做一次 read-only review-swarm 审查。
 
 ## Scope
 
-Repo:
-
-`/Users/Data/Warehouse/Pipe/tianze-website`
+Repo: local clone of `tianze-website` (open this prompt from your working copy).
 
 Primary review files:
 
@@ -124,4 +122,3 @@ Return a concise review with:
 
 If there are no material issues, say that directly. Do not manufacture nits.
 ```
-

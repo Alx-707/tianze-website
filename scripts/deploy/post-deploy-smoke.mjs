@@ -78,6 +78,7 @@ async function request(baseUrl, pathname, headers, retryEvents) {
   const url = new URL(pathname, baseUrl);
 
   let retries = 0;
+  let lastError;
 
   for (let attempt = 0; attempt <= REQUEST_RETRIES; attempt++) {
     try {
@@ -111,24 +112,30 @@ async function request(baseUrl, pathname, headers, retryEvents) {
         retries,
       };
     } catch (error) {
-      if (!isRetriableFetchError(error) || attempt === REQUEST_RETRIES) {
+      lastError = error;
+      if (!isRetriableFetchError(error)) {
         throw error;
       }
-      retries += 1;
-      const nextAttempt = attempt + 2;
-      retryEvents.push({
-        pathname,
-        reason: error instanceof Error ? error.message : String(error),
-        nextAttempt,
-      });
-      console.warn(
-        `[post-deploy-smoke] ${pathname} request failed; retrying attempt ${nextAttempt}/${REQUEST_RETRIES + 1}`,
-      );
-      await delay(getRetryDelayMs(attempt));
+
+      if (attempt < REQUEST_RETRIES) {
+        retries += 1;
+        const nextAttempt = attempt + 2;
+        retryEvents.push({
+          pathname,
+          reason: error instanceof Error ? error.message : String(error),
+          nextAttempt,
+        });
+        console.warn(
+          `[post-deploy-smoke] ${pathname} request failed; retrying attempt ${nextAttempt}/${REQUEST_RETRIES + 1}`,
+        );
+        await delay(getRetryDelayMs(attempt));
+      }
     }
   }
 
-  throw new Error("post-deploy-smoke retry loop exited without a response");
+  throw new Error("post-deploy-smoke retry loop exited without a response", {
+    cause: lastError,
+  });
 }
 
 function isRetriableFetchError(error) {

@@ -238,6 +238,19 @@ if (!SOURCE_ONLY) {
       .readdirSync(PHASE6_CONFIG_DIR)
       .filter((fileName) => fileName.endsWith(".jsonc"));
 
+    if (phase6ConfigFiles.length === 0 && REQUIRE_GENERATED_CONFIG) {
+      failures.push({
+        file: path.relative(ROOT, PHASE6_CONFIG_DIR),
+        label: "phase6 generated deploy config must exist for strict compare",
+        missing: ["run pnpm build:cf:phase6 before strict compare"],
+        forbidden: [],
+      });
+    } else if (phase6ConfigFiles.length === 0) {
+      console.warn(
+        "cf-official-compare: phase6 generated config directory is empty; run with --require-generated after pnpm build:cf:phase6 for deploy-artifact proof.",
+      );
+    }
+
     for (const fileName of phase6ConfigFiles) {
       const relPath = path.join(".open-next", "wrangler", "phase6", fileName);
       const content = read(relPath);
