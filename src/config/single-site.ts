@@ -110,7 +110,6 @@ export const SINGLE_SITE_DEFINITION: SiteDefinition = {
       {
         name: "ISO 9001:2015",
         certificateNumber: "240021Q09730R0S",
-        file: "/certs/iso9001.pdf",
         validUntil: "2027-03",
       },
     ],
