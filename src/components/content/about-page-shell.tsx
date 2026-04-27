@@ -7,7 +7,7 @@ import {
   Wrench,
 } from "lucide-react";
 import { MDXContent } from "@/components/mdx/mdx-content";
-import { JsonLdScript } from "@/components/seo";
+import { JsonLdGraphScript } from "@/components/seo";
 import { FaqSection } from "@/components/sections/faq-section";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,7 +24,11 @@ import {
   SINGLE_SITE_ABOUT_VALUE_ITEM_KEYS,
 } from "@/config/single-site-page-expression";
 import { Link } from "@/i18n/routing";
-import { LAYER1_FACTS, interpolateFaqAnswer } from "@/lib/content/mdx-faq";
+import {
+  LAYER1_FACTS,
+  generateFaqSchemaFromItems,
+  interpolateFaqAnswer,
+} from "@/lib/content/mdx-faq";
 import { buildAboutPageSchema } from "@/lib/structured-data-generators";
 import type {
   AboutPageSections,
@@ -121,6 +125,26 @@ function getAboutValueCopy(shellCopy: AboutPageSections, key: string) {
   return value;
 }
 
+function buildAboutValueItems(shellCopy: AboutPageSections) {
+  return SINGLE_SITE_ABOUT_VALUE_ITEM_KEYS.map((key) => {
+    const copy = getAboutValueCopy(shellCopy, key);
+    return {
+      key,
+      title: copy.title,
+      description: copy.description,
+      icon: resolveValueIcon(key),
+    };
+  });
+}
+
+function buildAboutStatItems(shellCopy: AboutPageSections) {
+  return SINGLE_SITE_ABOUT_STATS_ITEMS.map((item) => ({
+    key: item.key,
+    value: `${resolveAboutStatValue(item.valueSource)}${item.suffix}`,
+    label: shellCopy.statLabels[item.labelKey],
+  }));
+}
+
 export function AboutPageShell({
   metadata,
   content,
@@ -134,30 +158,22 @@ export function AboutPageShell({
     answer: interpolateFaqAnswer(item.answer, LAYER1_FACTS),
   }));
 
-  const valueItems = SINGLE_SITE_ABOUT_VALUE_ITEM_KEYS.map((key) => {
-    const copy = getAboutValueCopy(shellCopy, key);
-    return {
-      key,
-      title: copy.title,
-      description: copy.description,
-      icon: resolveValueIcon(key),
-    };
-  });
-
-  const statItems = SINGLE_SITE_ABOUT_STATS_ITEMS.map((item) => ({
-    key: item.key,
-    value: `${resolveAboutStatValue(item.valueSource)}${item.suffix}`,
-    label: shellCopy.statLabels[item.labelKey],
-  }));
+  const valueItems = buildAboutValueItems(shellCopy);
+  const statItems = buildAboutStatItems(shellCopy);
 
   const ctaHref = SINGLE_SITE_ABOUT_PAGE_EXPRESSION.ctaHref as ComponentProps<
     typeof Link
   >["href"];
   const aboutSchema = createAboutSchema(metadata, locale);
+  const faqSchema =
+    faqItems.length > 0 ? generateFaqSchemaFromItems(faqItems, typedLocale) : null;
 
   return (
     <main>
-      <JsonLdScript data={aboutSchema} />
+      <JsonLdGraphScript
+        locale={typedLocale}
+        data={faqSchema ? [aboutSchema, faqSchema] : [aboutSchema]}
+      />
 
       <section className="relative overflow-hidden bg-muted/30 py-16 md:py-24">
         <div className="container mx-auto px-4">
@@ -229,7 +245,11 @@ export function AboutPageShell({
 
       {faqItems.length > 0 ? (
         <Suspense fallback={null}>
-          <FaqSection faqItems={faqItems} locale={typedLocale} />
+          <FaqSection
+            faqItems={faqItems}
+            locale={typedLocale}
+            renderJsonLd={false}
+          />
         </Suspense>
       ) : null}
 

@@ -2,7 +2,9 @@ type Messages = Record<string, unknown>;
 
 const CLIENT_MESSAGE_NAMESPACES = [
   "accessibility",
+  "apiErrors",
   "common",
+  "contact",
   "cookie",
   "errors",
   "language",

@@ -108,26 +108,22 @@ pnpm review:homepage-sections
 pnpm review:locale-runtime
 ```
 
-## Cluster 5：缓存失效 + 健康信号
+## Cluster 5：健康信号 + 缓存标签工具
 
 ### Files
 
-- `src/app/api/cache/invalidate/route.ts`
-- `src/lib/cache/invalidate.ts`
 - `src/lib/cache/cache-tags.ts`
 - `src/app/api/health/route.ts`
 - `src/lib/api/cache-health-response.ts`
-- `src/lib/cache/invalidation-policy.ts`
-- `src/lib/cache/invalidation-guards.ts`
-- `tests/integration/api/cache-health-contract.test.ts`
+- `tests/integration/api/health.test.ts`
 
 ### Review rule
 
-- 当前 live contract surface 是这些缓存 / health 文件本身 + `pnpm review:cache-health`
+- 当前 live contract surface 是 health route、health response helper、cache tag utilities + `pnpm review:health`
 - 执行命令：
 
 ```bash
-pnpm review:cache-health
+pnpm review:health
 ```
 
 ## 使用方式

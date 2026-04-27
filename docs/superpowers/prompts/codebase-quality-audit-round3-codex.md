@@ -76,7 +76,6 @@ Prioritize the **business-critical and trust-building** surfaces neither Round 2
 - `src/app/api/subscribe/route.ts`
 - `src/app/api/verify-turnstile/route.ts`
 - `src/app/api/csp-report/route.ts`
-- `src/app/api/cache/invalidate/route.ts`
 - `src/app/api/health/route.ts`
 - `src/lib/airtable/instance.ts`
 - `src/lib/airtable/record-schema.ts`

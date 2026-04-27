@@ -1,5 +1,4 @@
 import { generateLocaleMetadata } from "@/app/[locale]/layout-metadata";
-import { generatePageStructuredData } from "@/app/[locale]/layout-structured-data";
 import "@/app/globals.css";
 import { type ReactNode } from "react";
 import Script from "next/script";
@@ -12,7 +11,6 @@ import { LazyCookieConsentIsland } from "@/components/cookie/lazy-cookie-consent
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/layout/header";
 import { LazyTopLoader } from "@/components/lazy/lazy-top-loader";
-import { JsonLdScript } from "@/components/seo";
 import { ThemeProvider } from "@/components/theme-provider";
 import { LazyThemeSwitcher } from "@/components/ui/lazy-theme-switcher";
 import { FOOTER_COLUMNS, FOOTER_STYLE_TOKENS } from "@/config/footer-links";
@@ -44,34 +42,27 @@ async function AsyncLocaleLayoutContent({
   // static generation. Prerendered inline script elements are covered by the
   // explicit script-src-elem policy; JsonLdScript still handles escaping.
 
-  const [
-    tFooter,
-    tNavigation,
-    tAccessibility,
-    tLanguage,
-    messages,
-    structuredData,
-  ] = await Promise.all([
-    getTranslations({
-      locale,
-      namespace: "footer",
-    }),
-    getTranslations({
-      locale,
-      namespace: "navigation",
-    }),
-    getTranslations({
-      locale,
-      namespace: "accessibility",
-    }),
-    getTranslations({
-      locale,
-      namespace: "language",
-    }),
-    // Load complete messages for root provider (eliminates need for nested providers)
-    loadCompleteMessages(locale),
-    generatePageStructuredData(locale),
-  ]);
+  const [tFooter, tNavigation, tAccessibility, tLanguage, messages] =
+    await Promise.all([
+      getTranslations({
+        locale,
+        namespace: "footer",
+      }),
+      getTranslations({
+        locale,
+        namespace: "navigation",
+      }),
+      getTranslations({
+        locale,
+        namespace: "accessibility",
+      }),
+      getTranslations({
+        locale,
+        namespace: "language",
+      }),
+      // Load complete messages for root provider (eliminates need for nested providers)
+      loadCompleteMessages(locale),
+    ]);
 
   const footerSystemStatus = tFooter("systemStatus");
   const contactSalesLabel = tNavigation("contactSales");
@@ -84,20 +75,9 @@ async function AsyncLocaleLayoutContent({
     label: tNavigation(item.translationKey.replace(/^navigation\./, "")),
   }));
   const clientMessages = pickClientMessages(messages);
-  const { organizationData, websiteData } = structuredData;
 
   return (
     <>
-      {/*
-        JSON-LD Structured Data for SEO
-        --------------------------------
-        CSP nonce is NOT read here because:
-        1. headers() would force this layout out of Cache Components static generation
-        2. script-src-elem explicitly covers prerendered inline script elements
-        3. JsonLdScript centralizes the escaping we rely on across the repo
-      */}
-      <JsonLdScript data={organizationData} />
-      <JsonLdScript data={websiteData} />
       <NextIntlClientProvider locale={locale} messages={clientMessages}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           {/* P1-1 Fix: Single attribution initialization for UTM tracking */}

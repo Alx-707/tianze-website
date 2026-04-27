@@ -38,7 +38,6 @@
 /messages/zh/critical.json @Alx-707 developer@flood-control.com
 /scripts/validate-translations.js @Alx-707 developer@flood-control.com
 
-# Tier A: cache invalidation + health
-/src/app/api/cache/invalidate/ @Alx-707 developer@flood-control.com
+# Tier A: cache utilities + health
 /src/lib/cache/ @Alx-707 developer@flood-control.com
 /src/app/api/health/ @Alx-707 developer@flood-control.com

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { generatePageStructuredData } from "@/app/[locale]/layout-structured-data";
+import { generatePageStructuredData } from "@/lib/page-structured-data";
 
 const {
   mockGetTranslations,

@@ -46,7 +46,7 @@ Pure static MDX/legal/about-style pages may rely on the layout/global fallback u
 ## Cache Policy
 
 - `React.cache()` is for request-level dedupe: same request, same arguments, same result. Use it for low-level content reads like `getPageBySlug()` and `getPostBySlug()` when metadata and page rendering can ask for the same file.
-- `'use cache'`, `cacheLife()`, and `cacheTag()` are for cross-request Cache Components / revalidation behavior. Use them for exported wrappers that define product/blog/page view models and tag invalidation.
+- `'use cache'`, `cacheLife()`, and `cacheTag()` are cross-request Cache Components APIs. Non-conversion pages may use a narrow `"use cache"` + `cacheLife()` boundary when Next.js build requires it, but `cacheTag()` and runtime tag invalidation are not part of the current launch path without an explicit Cloudflare/OpenNext proof plan.
 - Reserve the `*Cached` suffix for exported cross-request/cache-components wrappers. Do not use `*Cached` for a plain low-level helper unless it actually defines the cache boundary.
 
 ## Project-Specific Pitfalls

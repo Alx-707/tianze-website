@@ -60,7 +60,7 @@ vi.mock("@/app/[locale]/layout-metadata", () => ({
   generateLocaleMetadata: mockGenerateLocaleMetadata,
 }));
 
-vi.mock("@/app/[locale]/layout-structured-data", () => ({
+vi.mock("@/lib/page-structured-data", () => ({
   generatePageStructuredData: mockGeneratePageStructuredData,
 }));
 

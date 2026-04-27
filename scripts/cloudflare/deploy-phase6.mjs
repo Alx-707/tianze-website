@@ -1,7 +1,8 @@
-import { execSync, spawnSync } from "node:child_process";
+import { spawnSync } from "node:child_process";
 import { access } from "node:fs/promises";
 import path from "node:path";
 import { getPhase6DeploymentOrder } from "./phase6-topology-contract.mjs";
+import { loadLocalEnv } from "./load-local-env.mjs";
 
 const ROOT_DIR = process.cwd();
 const CONFIG_DIR = path.join(ROOT_DIR, ".open-next", "wrangler", "phase6");
@@ -14,7 +15,7 @@ const VALID_ENVS = new Set(["preview", "production"]);
 const VALID_CONFIGS = new Set(deploymentOrder);
 
 function parseArgs(argv) {
-  const args = { env: null, only: null, dryRun: false };
+  const args = { env: null, only: null, dryRun: false, envFile: null };
 
   for (let i = 2; i < argv.length; i++) {
     const arg = argv[i];
@@ -24,6 +25,8 @@ function parseArgs(argv) {
       args.only = argv[++i];
     } else if (arg === "--dry-run") {
       args.dryRun = true;
+    } else if (arg === "--env-file" && i + 1 < argv.length) {
+      args.envFile = argv[++i];
     } else {
       console.error(`[phase6] unknown argument: ${arg}`);
       printUsage();
@@ -36,7 +39,7 @@ function parseArgs(argv) {
 
 function printUsage() {
   console.error(
-    "Usage: node deploy-phase6.mjs --env <preview|production> [--only <config>] [--dry-run]",
+    "Usage: node deploy-phase6.mjs --env <preview|production> [--only <config>] [--dry-run] [--env-file <path>]",
   );
 }
 
@@ -72,6 +75,41 @@ if (args.only) {
 
 const targetEnv = args.env;
 const configsToDeployList = args.only ? [args.only] : deploymentOrder;
+
+function loadCommandEnv() {
+  const tokenWasSetBefore = Boolean(process.env.CLOUDFLARE_API_TOKEN?.trim());
+  const allowDefaultLocalEnv = targetEnv !== "production";
+
+  if (!allowDefaultLocalEnv && !args.envFile) {
+    console.log(
+      "[phase6] production deploy: repo-local .env auto-load skipped; use shell env or --env-file explicitly.",
+    );
+  }
+
+  let loadedFiles;
+  try {
+    loadedFiles = loadLocalEnv(ROOT_DIR, {
+      allowDefault: allowDefaultLocalEnv,
+      envFile: args.envFile,
+    });
+  } catch (error) {
+    console.error(`[phase6] ${(error && error.message) || error}`);
+    process.exit(1);
+  }
+
+  if (loadedFiles.length > 0) {
+    console.log(`[phase6] loaded env file(s): ${loadedFiles.join(", ")}`);
+  }
+
+  const tokenSource = tokenWasSetBefore
+    ? "shell environment"
+    : loadedFiles.length > 0
+      ? "loaded env file"
+      : "not set by shell or loaded env file";
+  console.log(`[phase6] CLOUDFLARE_API_TOKEN source: ${tokenSource}`);
+}
+
+loadCommandEnv();
 
 // --- Preflight checks ---
 
@@ -182,15 +220,21 @@ if (!args.dryRun) {
 
   // Preflight: verify server-actions-key sync
   console.log("[phase6] preflight: syncing server-actions encryption key...");
-  try {
-    execSync(
-      `node scripts/cloudflare/sync-server-actions-key.mjs --env ${targetEnv} --scope phase6`,
-      {
-        cwd: ROOT_DIR,
-        stdio: "inherit",
-      },
-    );
-  } catch {
+  const syncArgs = [
+    "scripts/cloudflare/sync-server-actions-key.mjs",
+    "--env",
+    targetEnv,
+    "--scope",
+    "phase6",
+  ];
+  if (args.envFile) {
+    syncArgs.push("--env-file", args.envFile);
+  }
+  const syncResult = spawnSync("node", syncArgs, {
+    cwd: ROOT_DIR,
+    stdio: "inherit",
+  });
+  if (syncResult.status !== 0) {
     console.error(
       "[phase6] server-actions-key sync failed. Aborting deployment.",
     );

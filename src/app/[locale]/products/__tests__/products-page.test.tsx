@@ -29,6 +29,16 @@ vi.mock("@/components/products/market-series-card", () => ({
 
 vi.mock("@/components/products/catalog-breadcrumb", () => ({
   CatalogBreadcrumb: () => <nav data-testid="breadcrumb">Products</nav>,
+  buildCatalogBreadcrumbJsonLd: vi.fn(async () => ({
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [],
+  })),
+}));
+
+vi.mock("@/components/seo", () => ({
+  JsonLdGraphScript: () => <script type="application/ld+json" />,
+  JsonLdScript: () => <script type="application/ld+json" />,
 }));
 
 vi.mock("next/image", () => ({

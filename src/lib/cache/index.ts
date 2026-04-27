@@ -1,7 +1,9 @@
 /**
  * Cache Utilities Index
  *
- * Exports cache tag generation and invalidation utilities.
+ * Exports cache tag generation utilities used by `unstable_cache`.
+ * Runtime invalidation was removed on 2026-04-26; content updates flow through
+ * redeploys, not request-time cache mutation APIs.
  */
 
 export {
@@ -14,20 +16,3 @@ export {
   seoTags,
   type CacheDomain,
 } from "./cache-tags";
-
-export {
-  CACHE_INVALIDATION_DOMAINS,
-  CACHE_INVALIDATION_ENTITIES,
-  CACHE_INVALIDATION_LOCALES,
-  invalidate,
-  invalidateI18n,
-  invalidateContent,
-  invalidateProduct,
-  invalidateLocale,
-  invalidateDomain,
-  invalidateCachePath,
-  invalidateCacheRequest,
-  type CacheInvalidationRequest,
-  type CacheInvalidationResult,
-  type InvalidationResult,
-} from "./invalidate";

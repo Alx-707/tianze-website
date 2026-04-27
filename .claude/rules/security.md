@@ -109,7 +109,6 @@ Rate limit utility: `src/lib/security/distributed-rate-limit.ts`
 | Contact page Server Action | Rate Limit + validation + idempotency on the canonical lead path | ✅ |
 | `/api/inquiry` | Turnstile + Rate Limit + Idempotency + JSON body size gate | ✅ |
 | `/api/subscribe` | Rate Limit + Idempotency + JSON body size gate | ✅ |
-| `/api/cache/invalidate` | Secret Auth + Pre/Post Rate Limit | ✅ |
 | `/api/csp-report` | Rate Limit + Body size gate | ✅ |
 | `/api/verify-turnstile` | JSON body size gate | ✅ |
 | `/api/health` | (Public healthcheck) | - |

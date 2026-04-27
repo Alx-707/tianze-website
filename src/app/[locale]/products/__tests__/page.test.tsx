@@ -63,6 +63,16 @@ vi.mock("@/lib/seo-metadata", () => ({
 // Mock CatalogBreadcrumb
 vi.mock("@/components/products/catalog-breadcrumb", () => ({
   CatalogBreadcrumb: () => <nav aria-label="breadcrumb">Breadcrumb</nav>,
+  buildCatalogBreadcrumbJsonLd: vi.fn(async () => ({
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [],
+  })),
+}));
+
+vi.mock("@/components/seo", () => ({
+  JsonLdGraphScript: () => <script type="application/ld+json" />,
+  JsonLdScript: () => <script type="application/ld+json" />,
 }));
 
 // Mock MarketSeriesCard

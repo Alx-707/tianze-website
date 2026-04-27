@@ -11,7 +11,6 @@ describe("phase6 topology contract", () => {
       gateway: "tianze-website-gateway",
       web: "tianze-website-web",
       apiLead: "tianze-website-api-lead",
-      apiOps: "tianze-website-api-ops",
     });
   });
 
@@ -19,7 +18,6 @@ describe("phase6 topology contract", () => {
     expect(getPhase6DeploymentOrder()).toEqual([
       "web.jsonc",
       "api-lead.jsonc",
-      "api-ops.jsonc",
       "gateway.jsonc",
     ]);
   });
@@ -29,7 +27,6 @@ describe("phase6 topology contract", () => {
       "tianze-website-gateway",
       "tianze-website-web",
       "tianze-website-api-lead",
-      "tianze-website-api-ops",
     ]);
   });
 });

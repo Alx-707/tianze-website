@@ -1,5 +1,7 @@
 import type { Locale } from "@/types/i18n";
-import { getTranslationsCached } from "@/lib/i18n/server/getTranslationsCached";
+import { logger } from "@/lib/logger";
+import { loadCompleteMessages } from "@/lib/load-messages";
+import type { MessageRecord } from "@/lib/i18n/read-message-path";
 
 export interface ContactHeaderCopy {
   title: string;
@@ -39,6 +41,96 @@ export interface ContactCopyModel {
   };
 }
 
+const CONTACT_COPY_FALLBACKS = {
+  title: "Contact Us",
+  description:
+    "Get in touch with our team for inquiries, support, or partnership opportunities.",
+  "panel.contactTitle": "Contact Methods",
+  "panel.email": "Email",
+  "panel.phone": "Phone",
+  "panel.hoursTitle": "Business Hours",
+  "panel.weekdays": "Mon - Fri",
+  "panel.saturday": "Saturday",
+  "panel.sunday": "Sunday",
+  "panel.closed": "Closed",
+  "panel.responseTitle": "What to expect",
+  "panel.responseTimeLabel": "Typical response",
+  "panel.responseTimeValue": "Within 24 business hours",
+  "panel.bestForLabel": "Best for",
+  "panel.bestForValue":
+    "RFQs, product specs, MOQ, samples, and lead-time questions",
+  "panel.prepareLabel": "Helpful details",
+  "panel.prepareValue":
+    "Share product type, size/standard, quantity, destination market, and timeline",
+} satisfies Record<string, string>;
+
+function readContactMessage(messages: MessageRecord, key: string) {
+  let current: unknown = messages;
+
+  for (const segment of [
+    "underConstruction",
+    "pages",
+    "contact",
+    ...key.split("."),
+  ]) {
+    if (
+      typeof current !== "object" ||
+      current === null ||
+      !Object.prototype.hasOwnProperty.call(current, segment)
+    ) {
+      return null;
+    }
+
+    current = (current as Record<string, unknown>)[segment];
+  }
+
+  return typeof current === "string" ? current : null;
+}
+
+export function getContactCopyFromMessages(
+  messages: MessageRecord,
+): ContactCopyModel {
+  const pick = (key: keyof typeof CONTACT_COPY_FALLBACKS) => {
+    const value = readContactMessage(messages, key);
+    if (value !== null) {
+      return value;
+    }
+
+    logger.warn("Missing contact page copy; using fallback", { key });
+    return CONTACT_COPY_FALLBACKS[key];
+  };
+
+  return {
+    header: {
+      title: pick("title"),
+      description: pick("description"),
+    },
+    panel: {
+      contact: {
+        title: pick("panel.contactTitle"),
+        emailLabel: pick("panel.email"),
+        phoneLabel: pick("panel.phone"),
+      },
+      hours: {
+        title: pick("panel.hoursTitle"),
+        weekdaysLabel: pick("panel.weekdays"),
+        saturdayLabel: pick("panel.saturday"),
+        sundayLabel: pick("panel.sunday"),
+        closedLabel: pick("panel.closed"),
+      },
+      response: {
+        title: pick("panel.responseTitle"),
+        responseTimeLabel: pick("panel.responseTimeLabel"),
+        responseTimeValue: pick("panel.responseTimeValue"),
+        bestForLabel: pick("panel.bestForLabel"),
+        bestForValue: pick("panel.bestForValue"),
+        prepareLabel: pick("panel.prepareLabel"),
+        prepareValue: pick("panel.prepareValue"),
+      },
+    },
+  };
+}
+
 /**
  * Server-side helper to build a structured copy model for the contact page.
  *
@@ -48,38 +140,5 @@ export interface ContactCopyModel {
 export async function getContactCopy(
   locale: Locale,
 ): Promise<ContactCopyModel> {
-  const t = await getTranslationsCached({
-    locale,
-    namespace: "underConstruction.pages.contact",
-  });
-
-  return {
-    header: {
-      title: t("title"),
-      description: t("description"),
-    },
-    panel: {
-      contact: {
-        title: t("panel.contactTitle"),
-        emailLabel: t("panel.email"),
-        phoneLabel: t("panel.phone"),
-      },
-      hours: {
-        title: t("panel.hoursTitle"),
-        weekdaysLabel: t("panel.weekdays"),
-        saturdayLabel: t("panel.saturday"),
-        sundayLabel: t("panel.sunday"),
-        closedLabel: t("panel.closed"),
-      },
-      response: {
-        title: t("panel.responseTitle"),
-        responseTimeLabel: t("panel.responseTimeLabel"),
-        responseTimeValue: t("panel.responseTimeValue"),
-        bestForLabel: t("panel.bestForLabel"),
-        bestForValue: t("panel.bestForValue"),
-        prepareLabel: t("panel.prepareLabel"),
-        prepareValue: t("panel.prepareValue"),
-      },
-    },
-  };
+  return getContactCopyFromMessages(await loadCompleteMessages(locale));
 }

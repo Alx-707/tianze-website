@@ -29,12 +29,6 @@ const DOMAIN_ROUTES = {
 const API_ROUTE_BINDING_RULES = [
   {
     match: (pathname) =>
-      pathname === "/api/cache/invalidate" || pathname === "/api/csp-report",
-    binding: PHASE6_WORKERS_BY_KEY.apiOps.binding,
-    target: "apiOps",
-  },
-  {
-    match: (pathname) =>
       pathname === "/api/inquiry" ||
       pathname === "/api/subscribe" ||
       pathname === "/api/verify-turnstile" ||
@@ -42,6 +36,12 @@ const API_ROUTE_BINDING_RULES = [
     binding: PHASE6_WORKERS_BY_KEY.apiLead.binding,
     target: "apiLead",
   },
+];
+const FORBIDDEN_RUNTIME_CACHE_CONFIG_KEYS = [
+  "r2_buckets",
+  "d1_databases",
+  "durable_objects",
+  "migrations",
 ];
 
 function parseJsoncFile(filePath, content) {
@@ -79,16 +79,26 @@ function withEnvSuffixedServiceName(services, envName) {
 function resolveEnvConfig(baseConfig, envName) {
   const envConfig = baseConfig.env?.[envName] ?? {};
   return {
-    r2_buckets: cloneJSON(envConfig.r2_buckets ?? baseConfig.r2_buckets ?? []),
-    d1_databases: cloneJSON(
-      envConfig.d1_databases ?? baseConfig.d1_databases ?? [],
-    ),
-    durable_objects: cloneJSON(
-      envConfig.durable_objects ?? baseConfig.durable_objects ?? undefined,
-    ),
-    migrations: cloneJSON(envConfig.migrations ?? baseConfig.migrations ?? []),
     vars: cloneJSON(envConfig.vars ?? {}),
   };
+}
+
+function assertNoRuntimeCacheConfig(config, label) {
+  for (const key of FORBIDDEN_RUNTIME_CACHE_CONFIG_KEYS) {
+    if (Object.prototype.hasOwnProperty.call(config, key)) {
+      throw new Error(
+        `[phase6] ${label} must not declare ${key}; runtime cache bindings were removed.`,
+      );
+    }
+  }
+}
+
+function assertRuntimeCacheBindingsAbsent(baseConfig) {
+  assertNoRuntimeCacheConfig(baseConfig, "wrangler.jsonc");
+
+  for (const [envName, envConfig] of Object.entries(baseConfig.env ?? {})) {
+    assertNoRuntimeCacheConfig(envConfig, `wrangler.jsonc env.${envName}`);
+  }
 }
 
 function createCommonConfig(baseConfig, name, main, { includeAssets }) {
@@ -99,6 +109,10 @@ function createCommonConfig(baseConfig, name, main, { includeAssets }) {
     main,
     alias: cloneJSON(PHASE6_ALIAS),
   };
+
+  if (baseConfig.placement) {
+    config.placement = cloneJSON(baseConfig.placement);
+  }
 
   if (includeAssets) {
     config.assets = {
@@ -126,19 +140,10 @@ function createServerWorkerConfig(
     },
   );
 
-  config.r2_buckets = cloneJSON(baseConfig.r2_buckets ?? []);
-  config.d1_databases = cloneJSON(baseConfig.d1_databases ?? []);
-  config.durable_objects = cloneJSON(baseConfig.durable_objects ?? undefined);
-  config.migrations = cloneJSON(baseConfig.migrations ?? []);
-
   config.env = {};
   for (const envName of envNames) {
     const envConfig = resolveEnvConfig(baseConfig, envName);
     config.env[envName] = {
-      r2_buckets: envConfig.r2_buckets,
-      d1_databases: envConfig.d1_databases,
-      durable_objects: envConfig.durable_objects,
-      migrations: envConfig.migrations,
       vars: envConfig.vars,
     };
   }
@@ -212,21 +217,15 @@ function createGatewayWorkerSource() {
   ).join("");
 
   return `//@ts-expect-error: Will be resolved by wrangler build
-import { handleImageRequest } from "../cloudflare/images.js";
+	import { handleImageRequest } from "../cloudflare/images.js";
 //@ts-expect-error: Will be resolved by wrangler build
 import { runWithCloudflareRequestContext } from "../cloudflare/init.js";
 //@ts-expect-error: Will be resolved by wrangler build
-import { maybeGetSkewProtectionResponse } from "../cloudflare/skew-protection.js";
-// @ts-expect-error: Will be resolved by wrangler build
-import { handler as middlewareHandler } from "../middleware/handler.mjs";
-//@ts-expect-error: Will be resolved by wrangler build
-export { DOQueueHandler } from "../.build/durable-objects/queue.js";
-//@ts-expect-error: Will be resolved by wrangler build
-export { DOShardedTagCache } from "../.build/durable-objects/sharded-tag-cache.js";
-//@ts-expect-error: Will be resolved by wrangler build
-export { BucketCachePurge } from "../.build/durable-objects/bucket-cache-purge.js";
-
-const routeRules = [
+	import { maybeGetSkewProtectionResponse } from "../cloudflare/skew-protection.js";
+	// @ts-expect-error: Will be resolved by wrangler build
+	import { handler as middlewareHandler } from "../middleware/handler.mjs";
+	
+	const routeRules = [
 ${routeRulesSource}
 ];
 
@@ -329,15 +328,9 @@ export default {
 
 function createServiceWorkerSource(functionName, importPath) {
   return `//@ts-expect-error: Will be resolved by wrangler build
-import { runWithCloudflareRequestContext } from "../cloudflare/init.js";
-//@ts-expect-error: Will be resolved by wrangler build
-export { DOQueueHandler } from "../.build/durable-objects/queue.js";
-//@ts-expect-error: Will be resolved by wrangler build
-export { DOShardedTagCache } from "../.build/durable-objects/sharded-tag-cache.js";
-//@ts-expect-error: Will be resolved by wrangler build
-export { BucketCachePurge } from "../.build/durable-objects/bucket-cache-purge.js";
-
-let cachedHandler;
+	import { runWithCloudflareRequestContext } from "../cloudflare/init.js";
+	
+	let cachedHandler;
 
 async function getServerHandler() {
   if (cachedHandler) {
@@ -379,6 +372,7 @@ async function writeJsonFile(filePath, value) {
 async function main() {
   const wranglerText = await readFile(SOURCE_WRANGLER_CONFIG_PATH, "utf8");
   const baseConfig = parseJsoncFile(SOURCE_WRANGLER_CONFIG_PATH, wranglerText);
+  assertRuntimeCacheBindingsAbsent(baseConfig);
   const baseWorkerName = baseConfig.name ?? "tianze-website";
   const workerNames = normalizeWorkerNames(baseWorkerName);
 

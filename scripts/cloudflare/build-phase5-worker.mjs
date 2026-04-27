@@ -7,22 +7,15 @@ const workerSource = `//@ts-expect-error: Will be resolved by wrangler build
 import { handleImageRequest } from "./cloudflare/images.js";
 //@ts-expect-error: Will be resolved by wrangler build
 import { runWithCloudflareRequestContext } from "./cloudflare/init.js";
-//@ts-expect-error: Will be resolved by wrangler build
-import { maybeGetSkewProtectionResponse } from "./cloudflare/skew-protection.js";
-// @ts-expect-error: Will be resolved by wrangler build
-import { handler as middlewareHandler } from "./middleware/handler.mjs";
-//@ts-expect-error: Will be resolved by wrangler build
-export { DOQueueHandler } from "./.build/durable-objects/queue.js";
-//@ts-expect-error: Will be resolved by wrangler build
-export { DOShardedTagCache } from "./.build/durable-objects/sharded-tag-cache.js";
-//@ts-expect-error: Will be resolved by wrangler build
-export { BucketCachePurge } from "./.build/durable-objects/bucket-cache-purge.js";
-
-const serverFunctionLoaders = {
-  default: () => import("./server-functions/default/handler.mjs"),
-  apiLead: () => import("./server-functions/apiLead/index.mjs"),
-  apiOps: () => import("./server-functions/apiOps/index.mjs"),
-};
+	//@ts-expect-error: Will be resolved by wrangler build
+	import { maybeGetSkewProtectionResponse } from "./cloudflare/skew-protection.js";
+	// @ts-expect-error: Will be resolved by wrangler build
+	import { handler as middlewareHandler } from "./middleware/handler.mjs";
+	
+	const serverFunctionLoaders = {
+	  default: () => import("./server-functions/default/handler.mjs"),
+	  apiLead: () => import("./server-functions/apiLead/index.mjs"),
+	};
 
 const serverFunctionHandlerCache = new Map();
 
@@ -43,15 +36,11 @@ async function getServerFunctionHandler(name) {
 
   serverFunctionHandlerCache.set(name, mod.handler);
   return mod.handler;
-}
-
-function resolveServerFunction(pathname) {
-  if (pathname === "/api/cache/invalidate" || pathname === "/api/csp-report") {
-    return "apiOps";
-  }
-
-  if (
-    pathname === "/api/inquiry" ||
+	}
+	
+	function resolveServerFunction(pathname) {
+	  if (
+	    pathname === "/api/inquiry" ||
     pathname === "/api/subscribe" ||
     pathname === "/api/verify-turnstile" ||
     pathname === "/api/health"

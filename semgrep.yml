@@ -253,9 +253,7 @@ rules:
         - "**/src/components/products/product-inquiry-form.tsx"
         - "**/src/lib/lead-pipeline/lead-schema.ts"
         # API routes - spread operators used with internal result objects only:
-        # - cache/invalidate: conditional errors array from internal InvalidationResult
         # - verify-turnstile: conditional errorCodes from Cloudflare API response
-        - "**/src/app/api/cache/invalidate/route.ts"
         - "**/src/app/api/verify-turnstile/route.ts"
         # Cookie consent - client-side state management with localStorage + hardcoded defaults
         - "**/src/lib/cookie-consent/context.tsx"
@@ -490,7 +488,6 @@ rules:
         - "**/*.test.*"
         - "**/*.spec.*"
         - "src/app/api/csp-report/**"
-        - "src/app/api/cache/invalidate/**"
     metadata:
       category: correctness
       technology: [nextjs]

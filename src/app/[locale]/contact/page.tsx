@@ -1,28 +1,35 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
-import { NextIntlClientProvider } from "next-intl";
-import { getMessages, setRequestLocale } from "next-intl/server";
+import { setRequestLocale } from "next-intl/server";
 import { ContactForm } from "@/components/contact/contact-form";
-import { FaqSection } from "@/components/sections/faq-section";
+import { FaqAccordion } from "@/components/sections/faq-accordion";
+import { JsonLdGraphScript } from "@/components/seo";
 import { Card } from "@/components/ui/card";
+import { SectionHead } from "@/components/ui/section-head";
 import {
   generateLocaleStaticParams,
   type LocaleParam,
 } from "@/app/[locale]/generate-static-params";
 import { siteFacts } from "@/config/site-facts";
 import { COUNT_TWO } from "@/constants";
-import { getPageBySlug } from "@/lib/content";
 import {
   LAYER1_FACTS,
   extractFaqFromMetadata,
+  generateFaqSchemaFromItems,
   interpolateFaqAnswer,
 } from "@/lib/content/mdx-faq";
 import { renderLegalContent } from "@/lib/content/render-legal-content";
-import { getContactCopy } from "@/lib/contact/getContactCopy";
-import { pickMessages } from "@/lib/i18n/client-messages";
+import { getContactCopyFromMessages } from "@/lib/contact/getContactCopy";
+import { CONTENT_MANIFEST } from "@/lib/content-manifest.generated";
+import { readMessagePath } from "@/lib/i18n/read-message-path";
+import { mergeObjects } from "@/lib/merge-objects";
 import { generateMetadataForPath } from "@/lib/seo-metadata";
 import { getLocalizedPath } from "@/config/paths";
-import type { FaqItem, Locale } from "@/types/content.types";
+import type { FaqItem, Locale, Page } from "@/types/content.types";
+import enCriticalMessages from "@messages/en/critical.json";
+import enDeferredMessages from "@messages/en/deferred.json";
+import zhCriticalMessages from "@messages/zh/critical.json";
+import zhDeferredMessages from "@messages/zh/deferred.json";
 
 interface ContactPageProps {
   params: Promise<LocaleParam>;
@@ -36,14 +43,15 @@ export async function generateMetadata({
   params,
 }: ContactPageProps): Promise<Metadata> {
   const { locale } = await params;
-  const page = await getPageBySlug("contact", locale as Locale);
+  const typedLocale = locale as Locale;
+  const page = getStaticContactPage(typedLocale);
   const description =
     page.metadata.seo?.description ?? page.metadata.description;
 
   const metadata = generateMetadataForPath({
-    locale: locale as Locale,
+    locale: typedLocale,
     pageType: "contact",
-    path: getLocalizedPath("contact", locale as Locale),
+    path: getLocalizedPath("contact", typedLocale),
     config: {
       title: page.metadata.seo?.title ?? page.metadata.title,
       ...(description ? { description } : {}),
@@ -62,7 +70,7 @@ export async function generateMetadata({
 function ContactMethodsCard({
   copy,
 }: {
-  copy: Awaited<ReturnType<typeof getContactCopy>>["panel"]["contact"];
+  copy: ReturnType<typeof getContactCopyFromMessages>["panel"]["contact"];
 }) {
   return (
     <Card className="p-6">
@@ -120,8 +128,10 @@ function ResponseExpectationsCard({
   responseCopy,
   hoursCopy,
 }: {
-  responseCopy: Awaited<ReturnType<typeof getContactCopy>>["panel"]["response"];
-  hoursCopy: Awaited<ReturnType<typeof getContactCopy>>["panel"]["hours"];
+  responseCopy: ReturnType<
+    typeof getContactCopyFromMessages
+  >["panel"]["response"];
+  hoursCopy: ReturnType<typeof getContactCopyFromMessages>["panel"]["hours"];
 }) {
   return (
     <Card className="p-6">
@@ -172,35 +182,195 @@ function ResponseExpectationsCard({
   );
 }
 
-function ContactFormSkeleton() {
+function ContactFaqSection({
+  faqItems,
+  title,
+}: {
+  faqItems: FaqItem[];
+  title: string;
+}) {
+  const accordionItems = faqItems.map((item) => ({
+    key: item.id,
+    question: item.question,
+    answer: item.answer,
+  }));
+
   return (
-    <Card className="space-y-4 p-6">
-      <div className="h-6 w-40 animate-pulse rounded bg-muted" />
-      {Array.from({ length: 5 }, (_, index) => (
-        <div key={index} className="h-10 animate-pulse rounded bg-muted" />
-      ))}
+    <section
+      className="section-divider py-14 md:py-[72px]"
+      data-testid="faq-section"
+    >
+      <div className="mx-auto max-w-[1080px] px-6">
+        <SectionHead title={title} />
+        <FaqAccordion items={accordionItems} />
+      </div>
+    </section>
+  );
+}
+
+function pickContactFormCopy(
+  messages: Record<string, unknown>,
+  key: string,
+  fallback: string,
+) {
+  return readMessagePath(messages, ["contact", "form", key], fallback);
+}
+
+function ContactFormStaticFallback({
+  messages,
+}: {
+  messages: Record<string, unknown>;
+}) {
+  const pick = (key: string, fallback: string) =>
+    pickContactFormCopy(messages, key, fallback);
+
+  return (
+    <Card className="mx-auto w-full max-w-2xl">
+      <form
+        aria-busy="true"
+        className="space-y-6 p-6"
+        data-contact-form-fallback="static"
+        noValidate
+      >
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="space-y-2">
+            <label className="text-sm" htmlFor="firstName">
+              {pick("firstName", "First Name")}
+            </label>
+            <input
+              id="firstName"
+              name="firstName"
+              type="text"
+              disabled
+              required
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm" htmlFor="lastName">
+              {pick("lastName", "Last Name")}
+            </label>
+            <input
+              id="lastName"
+              name="lastName"
+              type="text"
+              disabled
+              required
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm" htmlFor="email">
+              {pick("email", "Email")}
+            </label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              disabled
+              required
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm" htmlFor="company">
+              {pick("company", "Company Name")}
+            </label>
+            <input
+              id="company"
+              name="company"
+              type="text"
+              disabled
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+            />
+          </div>
+        </div>
+        <div className="space-y-2">
+          <label className="text-sm" htmlFor="message">
+            {pick("message", "Message")}
+          </label>
+          <textarea
+            id="message"
+            name="message"
+            disabled
+            required
+            rows={4}
+            className="flex min-h-[96px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+          />
+        </div>
+        <div className="flex items-center space-x-2">
+          <input
+            id="acceptPrivacy"
+            name="acceptPrivacy"
+            type="checkbox"
+            disabled
+            required
+            className="h-4 w-4 rounded border border-input"
+          />
+          <label className="text-sm" htmlFor="acceptPrivacy">
+            {pick("acceptPrivacy", "I agree to the privacy policy")}
+          </label>
+        </div>
+        <button
+          aria-disabled="true"
+          className="inline-flex h-10 w-full items-center justify-center rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground opacity-60"
+          disabled
+          type="submit"
+        >
+          {pick("submit", "Submit")}
+        </button>
+      </form>
     </Card>
   );
 }
 
-async function ContactContent({ locale }: { locale: string }) {
-  setRequestLocale(locale);
+const STATIC_MESSAGES_BY_LOCALE: Record<Locale, Record<string, unknown>> = {
+  en: mergeObjects(
+    enCriticalMessages as Record<string, unknown>,
+    enDeferredMessages as Record<string, unknown>,
+  ) as Record<string, unknown>,
+  zh: mergeObjects(
+    zhCriticalMessages as Record<string, unknown>,
+    zhDeferredMessages as Record<string, unknown>,
+  ) as Record<string, unknown>,
+};
 
-  const [page, messages, copy] = await Promise.all([
-    getPageBySlug("contact", locale as Locale),
-    getMessages({ locale }),
-    getContactCopy(locale as Locale),
-  ]);
+function getStaticMessages(locale: Locale): Record<string, unknown> {
+  return STATIC_MESSAGES_BY_LOCALE[locale];
+}
+
+function getStaticContactPage(locale: Locale): Page {
+  const entry = CONTENT_MANIFEST.byKey[`pages/${locale}/contact`];
+
+  if (entry === undefined) {
+    throw new Error(`Static contact page not found for locale: ${locale}`);
+  }
+
+  return {
+    slug: entry.slug,
+    filePath: entry.filePath,
+    metadata: entry.metadata,
+    content: entry.content,
+  } as unknown as Page;
+}
+
+function ContactContentBody({ locale }: { locale: Locale }) {
+  const page = getStaticContactPage(locale);
+  const messages = getStaticMessages(locale);
+  const copy = getContactCopyFromMessages(messages);
   const faqItems: FaqItem[] = extractFaqFromMetadata(page.metadata).map(
     (item) => ({
       ...item,
       answer: interpolateFaqAnswer(item.answer, LAYER1_FACTS),
     }),
   );
-  const contactClientMessages = pickMessages(messages, [
-    "contact",
-    "apiErrors",
-  ]);
+  const faqSectionTitle = readMessagePath(
+    messages,
+    ["faq", "sectionTitle"],
+    "FAQ",
+  );
+  const faqSchema =
+    faqItems.length > 0 ? generateFaqSchemaFromItems(faqItems, locale) : null;
 
   return (
     <main
@@ -208,6 +378,7 @@ async function ContactContent({ locale }: { locale: string }) {
       data-testid="contact-page-content"
       translate="no"
     >
+      <JsonLdGraphScript locale={locale} data={faqSchema ? [faqSchema] : []} />
       <div className="mx-auto max-w-4xl">
         <header className="mb-12 text-center">
           <h1 className="text-heading mb-4">{page.metadata.title}</h1>
@@ -223,13 +394,10 @@ async function ContactContent({ locale }: { locale: string }) {
         </article>
 
         <div className="grid gap-8 md:grid-cols-2">
-          <Suspense fallback={<ContactFormSkeleton />}>
-            <NextIntlClientProvider
-              locale={locale}
-              messages={contactClientMessages}
-            >
-              <ContactForm />
-            </NextIntlClientProvider>
+          <Suspense
+            fallback={<ContactFormStaticFallback messages={messages} />}
+          >
+            <ContactForm />
           </Suspense>
 
           <div className="space-y-6">
@@ -243,9 +411,7 @@ async function ContactContent({ locale }: { locale: string }) {
       </div>
 
       {faqItems.length > 0 ? (
-        <Suspense fallback={null}>
-          <FaqSection faqItems={faqItems} locale={locale as Locale} />
-        </Suspense>
+        <ContactFaqSection faqItems={faqItems} title={faqSectionTitle} />
       ) : null}
     </main>
   );
@@ -253,24 +419,7 @@ async function ContactContent({ locale }: { locale: string }) {
 
 export default async function ContactPage({ params }: ContactPageProps) {
   const { locale } = await params;
+  setRequestLocale(locale);
 
-  return (
-    <Suspense
-      fallback={
-        <main className="min-h-[80vh] px-4 py-16">
-          <div className="mx-auto max-w-4xl space-y-4">
-            <div className="mx-auto h-10 w-64 animate-pulse rounded bg-muted" />
-            {Array.from({ length: 6 }, (_, index) => (
-              <div
-                key={index}
-                className="h-4 w-full animate-pulse rounded bg-muted"
-              />
-            ))}
-          </div>
-        </main>
-      }
-    >
-      <ContactContent locale={locale} />
-    </Suspense>
-  );
+  return <ContactContentBody locale={locale as Locale} />;
 }

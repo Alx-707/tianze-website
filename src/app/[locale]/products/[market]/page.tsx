@@ -1,6 +1,6 @@
-import { type ComponentProps } from "react";
+import { type ComponentProps, type ReactNode } from "react";
 import type { Metadata } from "next";
-import { cacheLife, cacheTag } from "next/cache";
+import { cacheLife } from "next/cache";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import {
@@ -24,13 +24,18 @@ import {
   getRowValueTranslationKey,
 } from "@/lib/spec-table-translator";
 import { DYNAMIC_PATHS_CONFIG, SITE_CONFIG } from "@/config/paths";
-import { contentTags } from "@/lib/cache/cache-tags";
 import { getPageBySlug } from "@/lib/content";
-import { extractFaqFromMetadata } from "@/lib/content/mdx-faq";
+import {
+  extractFaqFromMetadata,
+  generateFaqSchemaFromItems,
+} from "@/lib/content/mdx-faq";
 import { generateMetadataForPath } from "@/lib/seo-metadata";
-import { JsonLdScript } from "@/components/seo";
+import { JsonLdGraphScript } from "@/components/seo";
 import { FaqSection } from "@/components/sections/faq-section";
-import { CatalogBreadcrumb } from "@/components/products/catalog-breadcrumb";
+import {
+  CatalogBreadcrumb,
+  buildCatalogBreadcrumbJsonLd,
+} from "@/components/products/catalog-breadcrumb";
 import { FamilySection } from "@/components/products/family-section";
 import {
   ProductCertifications,
@@ -58,7 +63,6 @@ function getMarketSpecs(marketSlug: string): MarketSpecs | undefined {
 async function getProductMarketFaqItems(locale: Locale): Promise<FaqItem[]> {
   "use cache";
   cacheLife("days");
-  cacheTag(contentTags.page("product-market", locale));
 
   const faqPage = await getPageBySlug("product-market", locale);
   return extractFaqFromMetadata(faqPage.metadata);
@@ -313,6 +317,99 @@ function buildProductGroupSchema({
   });
 }
 
+async function buildMarketPageJsonLdData({
+  families,
+  familySpecsMap,
+  faqItems,
+  locale,
+  market,
+  marketDescription,
+  marketLabel,
+  marketSlug,
+  marketUrl,
+  t,
+}: {
+  families: readonly ProductFamilyDefinition[];
+  familySpecsMap: Map<string, MarketSpecs["families"][number]>;
+  faqItems: FaqItem[];
+  locale: Locale;
+  market: NonNullable<ReturnType<typeof getMarketBySlug>>;
+  marketDescription: string;
+  marketLabel: string;
+  marketSlug: string;
+  marketUrl: string;
+  t: (key: string) => string;
+}) {
+  const productGroupSchema = buildProductGroupSchema({
+    families,
+    familySpecsMap,
+    marketSlug,
+    marketLabel,
+    marketDescription,
+    marketUrl,
+    t,
+  });
+  const breadcrumbSchema = await buildCatalogBreadcrumbJsonLd({
+    market,
+    marketLabel,
+  });
+  const faqSchema =
+    faqItems.length > 0 ? generateFaqSchemaFromItems(faqItems, locale) : null;
+
+  return faqSchema
+    ? [productGroupSchema, breadcrumbSchema, faqSchema]
+    : [productGroupSchema, breadcrumbSchema];
+}
+
+function renderFamilySections({
+  families,
+  familySpecsMap,
+  marketSlug,
+  t,
+}: {
+  families: readonly ProductFamilyDefinition[];
+  familySpecsMap: Map<string, MarketSpecs["families"][number]>;
+  marketSlug: string;
+  t: (key: string) => string;
+}): ReactNode {
+  return families.map((family) => {
+    const specs = familySpecsMap.get(family.slug);
+    if (!specs) return null;
+    const familyLabel = t(`families.${marketSlug}.${family.slug}.label`);
+    const familyDescription = t(
+      `families.${marketSlug}.${family.slug}.description`,
+    );
+    const translatedSpecGroups: SpecGroup[] = specs.specGroups.map(
+      (group, groupIndex) => ({
+        ...group,
+        groupLabel: t(
+          getGroupLabelTranslationKey(marketSlug, family.slug, groupIndex),
+        ),
+        columns: translateSpecColumns(group.columns, t),
+        rows: translateSpecRows(group.rows, t),
+      }),
+    );
+
+    return (
+      <FamilySection
+        key={family.slug}
+        family={family}
+        specs={{
+          ...specs,
+          highlights: specs.highlights.map((_, index) =>
+            t(
+              `specs.${marketSlug}.families.${family.slug}.highlights.${index}`,
+            ),
+          ),
+          specGroups: translatedSpecGroups,
+        }}
+        familyLabel={familyLabel}
+        familyDescription={familyDescription}
+      />
+    );
+  });
+}
+
 // --- Page component ---
 
 export default async function MarketPage({ params }: MarketPageProps) {
@@ -336,9 +433,12 @@ export default async function MarketPage({ params }: MarketPageProps) {
     marketSpecs?.families.map((fs) => [fs.slug, fs]),
   );
   const marketUrl = `${SITE_CONFIG.baseUrl}/${locale}/products/${market.slug}`;
-  const productGroupSchema = buildProductGroupSchema({
+  const jsonLdData = await buildMarketPageJsonLdData({
     families,
     familySpecsMap,
+    faqItems,
+    locale: locale as Locale,
+    market,
     marketSlug,
     marketLabel,
     marketDescription,
@@ -352,8 +452,12 @@ export default async function MarketPage({ params }: MarketPageProps) {
       data-testid="market-page-content"
       translate="no"
     >
-      <JsonLdScript data={productGroupSchema} />
-      <CatalogBreadcrumb market={market} marketLabel={marketLabel} />
+      <JsonLdGraphScript locale={locale as Locale} data={jsonLdData} />
+      <CatalogBreadcrumb
+        market={market}
+        marketLabel={marketLabel}
+        renderJsonLd={false}
+      />
 
       <MarketHero
         standardLabel={market.standardLabel}
@@ -374,54 +478,7 @@ export default async function MarketPage({ params }: MarketPageProps) {
       )}
 
       <div className="space-y-16">
-        {families.map((family) => {
-          const specs = familySpecsMap.get(family.slug);
-          if (!specs) return null;
-          const familyLabel = t(`families.${marketSlug}.${family.slug}.label`);
-          const familyDescription = t(
-            `families.${marketSlug}.${family.slug}.description`,
-          );
-          // Translate highlights from catalog keys
-          const translatedHighlights = specs.highlights.map((_, index) =>
-            t(
-              `specs.${marketSlug}.families.${family.slug}.highlights.${index}`,
-            ),
-          );
-          // Translate spec groups (column headers, group labels, row values)
-          const translatedSpecGroups: SpecGroup[] = specs.specGroups.map(
-            (group, groupIndex) => {
-              const groupLabelKey = getGroupLabelTranslationKey(
-                marketSlug,
-                family.slug,
-                groupIndex,
-              );
-              const translatedLabel = t(groupLabelKey);
-              const translatedColumns = translateSpecColumns(group.columns, t);
-              const translatedRows = translateSpecRows(group.rows, t);
-
-              return {
-                ...group,
-                groupLabel: translatedLabel,
-                columns: translatedColumns,
-                rows: translatedRows,
-              };
-            },
-          );
-          const specsWithTranslations = {
-            ...specs,
-            highlights: translatedHighlights,
-            specGroups: translatedSpecGroups,
-          };
-          return (
-            <FamilySection
-              key={family.slug}
-              family={family}
-              specs={specsWithTranslations}
-              familyLabel={familyLabel}
-              familyDescription={familyDescription}
-            />
-          );
-        })}
+        {renderFamilySections({ families, familySpecsMap, marketSlug, t })}
       </div>
 
       {!marketSpecs && (
@@ -436,7 +493,11 @@ export default async function MarketPage({ params }: MarketPageProps) {
         />
       )}
 
-      <FaqSection faqItems={faqItems} locale={locale as Locale} />
+      <FaqSection
+        faqItems={faqItems}
+        locale={locale as Locale}
+        renderJsonLd={false}
+      />
 
       <CtaSection
         heading={t("market.cta.heading", { marketLabel })}

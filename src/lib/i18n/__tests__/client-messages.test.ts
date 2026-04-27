@@ -14,11 +14,15 @@ describe("client message scoping", () => {
       navigation: { home: "Home" },
       cookie: { title: "Cookies" },
       common: { close: "Close" },
+      contact: { form: { title: "Contact" } },
+      apiErrors: { UNKNOWN_ERROR: "Unknown" },
     });
 
     expect(scoped).toEqual({
+      apiErrors: { UNKNOWN_ERROR: "Unknown" },
       language: { selectLanguage: "Select Language" },
       navigation: { home: "Home" },
+      contact: { form: { title: "Contact" } },
       cookie: { title: "Cookies" },
       common: { close: "Close" },
     });
@@ -27,7 +31,9 @@ describe("client message scoping", () => {
   it("tracks the intended namespace allowlist", () => {
     expect(getClientMessageNamespaces()).toEqual([
       "accessibility",
+      "apiErrors",
       "common",
+      "contact",
       "cookie",
       "errors",
       "language",

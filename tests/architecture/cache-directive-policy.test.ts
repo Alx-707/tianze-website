@@ -3,7 +3,6 @@ import { parse } from "@babel/parser";
 import { describe, expect, it } from "vitest";
 
 const CRITICAL_CACHE_POLICY_FILES = [
-  "src/app/[locale]/contact/page.tsx",
   "src/lib/actions/contact.ts",
   "src/app/api/inquiry/route.ts",
   "src/app/api/subscribe/route.ts",
@@ -17,8 +16,6 @@ const BANNED_NEXT_CACHE_IMPORTS = new Set<string>([
 ]);
 
 const CRITICAL_CACHE_POLICY_SOURCE_READERS = {
-  "src/app/[locale]/contact/page.tsx": () =>
-    readFileSync("src/app/[locale]/contact/page.tsx", "utf8"),
   "src/lib/actions/contact.ts": () =>
     readFileSync("src/lib/actions/contact.ts", "utf8"),
   "src/app/api/inquiry/route.ts": () =>
@@ -29,6 +26,7 @@ const CRITICAL_CACHE_POLICY_SOURCE_READERS = {
     readFileSync("src/app/api/health/route.ts", "utf8"),
 } satisfies Record<(typeof CRITICAL_CACHE_POLICY_FILES)[number], () => string>;
 
+const CONTACT_PAGE_FILE = "src/app/[locale]/contact/page.tsx";
 const PRODUCT_MARKET_PAGE_FILE = "src/app/[locale]/products/[market]/page.tsx";
 
 function readProductMarketPageSource() {
@@ -184,21 +182,34 @@ describe("cache directive policy", () => {
     }
   });
 
-  it("keeps product market page-owned MDX reads behind a Cache Components boundary", () => {
-    const source = readProductMarketPageSource();
+  it("keeps contact page on build-time static content without runtime cache invalidation", () => {
+    const source = readFileSync(CONTACT_PAGE_FILE, "utf8");
 
     expect(source).toContain(
+      'import { CONTENT_MANIFEST } from "@/lib/content-manifest.generated"',
+    );
+    expect(source).not.toContain('"use cache"');
+    expect(source).not.toContain("'use cache'");
+    expect(source).not.toContain('from "next/cache"');
+    expect(source).not.toContain("cacheTag(");
+    expect(source).not.toContain("revalidateTag(");
+    expect(source).not.toContain("revalidatePath(");
+  });
+
+  it("keeps product market page-owned MDX reads cached without tag invalidation", () => {
+    const source = readProductMarketPageSource();
+
+    expect(source).not.toContain(
       'import { cacheLife, cacheTag } from "next/cache"',
     );
-    expect(source).toContain(
+    expect(source).toContain('import { cacheLife } from "next/cache"');
+    expect(source).not.toContain(
       'import { contentTags } from "@/lib/cache/cache-tags"',
     );
     expect(source).toMatch(
       /async function getProductMarketFaqItems\([^)]*\)[\s\S]*?['"]use cache['"]/,
     );
     expect(source).toContain('cacheLife("days")');
-    expect(source).toContain(
-      'cacheTag(contentTags.page("product-market", locale))',
-    );
+    expect(source).not.toContain("cacheTag(");
   });
 });

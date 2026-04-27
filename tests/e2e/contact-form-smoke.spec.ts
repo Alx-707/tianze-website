@@ -106,7 +106,7 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
 
     // 检查是否存在表单
     const formCount = await page.locator("form").count();
-    const hasForm = formCount > 0;
+    let hasForm = formCount > 0;
 
     // 检查是否存在错误状态（Error Boundary 渲染的错误提示）
     // 使用多种选择器确保检测到错误状态
@@ -130,7 +130,8 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
       // 再次检查页面内容，可能是加载问题
       await page.waitForTimeout(2000);
       const formCountRetry = await page.locator("form").count();
-      if (formCountRetry === 0) {
+      hasForm = formCountRetry > 0;
+      if (!hasForm) {
         hasError = true;
       }
     }

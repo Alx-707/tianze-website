@@ -86,17 +86,17 @@ const AREAS = [
     ],
   },
   {
-    name: "Cache invalidation + health signals",
+    name: "Health signals + cache tag utilities",
     minimumProof: "ci-proof minimum",
     primaryOwnerRole: "Platform maintainer",
     backupOwnerRole: "Runtime maintainer",
-    crossReview: "Security review for auth/invalidation policy changes",
-    reviewCommand: "pnpm review:cache-health",
+    crossReview: "Security review for public health or cache policy changes",
+    reviewCommand: "pnpm review:health",
     patterns: [
-      "src/app/api/cache/invalidate/",
       "src/lib/cache/",
       "src/app/api/health/",
       "src/lib/api/cache-health-response.ts",
+      "tests/integration/api/health.test.ts",
     ],
   },
 ];

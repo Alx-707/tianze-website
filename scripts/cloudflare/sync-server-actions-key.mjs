@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import ts from "typescript";
 import { getPhase6ServerActionsKeyWorkerNames } from "./phase6-topology-contract.mjs";
+import { loadLocalEnv } from "./load-local-env.mjs";
 
 const ROOT_DIR = process.cwd();
 const WRANGLER_CONFIG_PATH = path.join(ROOT_DIR, "wrangler.jsonc");
@@ -10,7 +11,7 @@ const KEY_NAME = "NEXT_SERVER_ACTIONS_ENCRYPTION_KEY";
 
 function printUsage() {
   console.error(
-    "Usage: node scripts/cloudflare/sync-server-actions-key.mjs [--env <preview|production|all>] [--scope <phase5|phase6|all>] [--dry-run]",
+    "Usage: node scripts/cloudflare/sync-server-actions-key.mjs [--env <preview|production|all>] [--scope <phase5|phase6|all>] [--dry-run] [--env-file <path>]",
   );
 }
 
@@ -19,6 +20,7 @@ function parseArgs(argv) {
     env: "all",
     scope: "all",
     dryRun: false,
+    envFile: null,
   };
 
   for (let i = 2; i < argv.length; i++) {
@@ -33,6 +35,10 @@ function parseArgs(argv) {
     }
     if (arg === "--dry-run") {
       args.dryRun = true;
+      continue;
+    }
+    if (arg === "--env-file" && i + 1 < argv.length) {
+      args.envFile = argv[++i];
       continue;
     }
 
@@ -58,6 +64,46 @@ function parseArgs(argv) {
   return args;
 }
 
+function envSelectionIncludesProduction(envName) {
+  return envName === "production" || envName === "all";
+}
+
+function loadCommandEnv(args) {
+  const keyWasSetBefore = Boolean(process.env[KEY_NAME]?.trim());
+  const includesProduction = envSelectionIncludesProduction(args.env);
+  const allowDefaultLocalEnv = !includesProduction;
+
+  if (!allowDefaultLocalEnv && !args.envFile) {
+    console.log(
+      "[server-actions-key] production/all sync: repo-local .env auto-load skipped; use shell env or --env-file explicitly.",
+    );
+  }
+
+  let loadedFiles;
+  try {
+    loadedFiles = loadLocalEnv(ROOT_DIR, {
+      allowDefault: allowDefaultLocalEnv,
+      envFile: args.envFile,
+    });
+  } catch (error) {
+    console.error(`[server-actions-key] ${(error && error.message) || error}`);
+    process.exit(1);
+  }
+
+  if (loadedFiles.length > 0) {
+    console.log(
+      `[server-actions-key] loaded env file(s): ${loadedFiles.join(", ")}`,
+    );
+  }
+
+  const keySource = keyWasSetBefore
+    ? "shell environment"
+    : loadedFiles.length > 0
+      ? "loaded env file"
+      : "not set by shell or loaded env file";
+  console.log(`[server-actions-key] ${KEY_NAME} source: ${keySource}`);
+}
+
 function parseJsoncFile(filePath, content) {
   const parsed = ts.parseConfigFileTextToJson(filePath, content);
   if (parsed.error) {
@@ -81,6 +127,7 @@ function getWorkerNames(baseWorkerName, scope) {
 
 async function main() {
   const args = parseArgs(process.argv);
+  loadCommandEnv(args);
   const key = process.env[KEY_NAME]?.trim();
   if (!key) {
     console.error(

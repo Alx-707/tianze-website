@@ -13,11 +13,13 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 
-type CatalogBreadcrumbProps =
-  | { market?: undefined; marketLabel?: undefined }
-  | { market: MarketDefinition; marketLabel?: string };
+interface CatalogBreadcrumbProps {
+  market?: MarketDefinition;
+  marketLabel?: string;
+  renderJsonLd?: boolean;
+}
 
-export async function CatalogBreadcrumb({
+export async function buildCatalogBreadcrumbJsonLd({
   market,
   marketLabel,
 }: CatalogBreadcrumbProps) {
@@ -38,6 +40,16 @@ export async function CatalogBreadcrumb({
       url: `${canonicalBase}/products/${market.slug}`,
     });
   }
+
+  return buildBreadcrumbListSchema(entries);
+}
+
+export async function CatalogBreadcrumb({
+  market,
+  marketLabel,
+  renderJsonLd = true,
+}: CatalogBreadcrumbProps) {
+  const tBreadcrumb = await getTranslations("catalog.breadcrumb");
 
   return (
     <>
@@ -74,7 +86,13 @@ export async function CatalogBreadcrumb({
         </BreadcrumbList>
       </Breadcrumb>
 
-      <JsonLdScript data={buildBreadcrumbListSchema(entries)} />
+      {renderJsonLd ? (
+        <JsonLdScript
+          data={await buildCatalogBreadcrumbJsonLd(
+            market ? { market, ...(marketLabel ? { marketLabel } : {}) } : {},
+          )}
+        />
+      ) : null}
     </>
   );
 }

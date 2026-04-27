@@ -43,6 +43,11 @@ vi.mock("@/i18n/routing", () => ({
   },
 }));
 
+vi.mock("@/components/seo", () => ({
+  JsonLdGraphScript: () => <script type="application/ld+json" />,
+  JsonLdScript: () => <script type="application/ld+json" />,
+}));
+
 describe("Home Page", () => {
   describe("generateStaticParams", () => {
     it("should return params for all locales", () => {
