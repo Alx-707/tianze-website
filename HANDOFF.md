@@ -34,10 +34,18 @@ Check `git branch` for current feature branches.
 
 ## Next Steps
 
-1. 如用户决定提交，按 phase 拆 commit，不要 `git add -A`：runtime cache removal、Cloudflare topology、governance/docs、Phase B fixes/evidence。
-2. Cloudflare zone 权限补齐后，确认 SSL Full Strict、DNS root/www/preview、Resend DKIM/CNAME；Worker secrets 补齐后再跑真实询盘邮件/Airtable 链路。
-3. OEM / Bending Machines 的 no-JS 内容深度仍需后续单独处理；workers.dev 可访问，但 HTML 仍有 skeleton marker。
-4. **Legacy DO cleanup deferred**：旧 `tianze-website*` 服务名下的 `DOQueueHandler` / `DOShardedTagCache` / `BucketCachePurge` 仍未删除。完整 5 步执行步骤见 `docs/technical/deployment-notes.md` 的 "真正执行 cleanup 的步骤（独立 PR）" 段。前置条件：当前 PR merged + 生产稳定 ≥7 天 + Cloudflare zone 权限就位。**不要混进当前 PR 或任何普通 preview 收尾。**
+1. Third batch cleanup should run on a branch, not directly on `main`. Start with:
+   - `pnpm truth:check`
+   - `pnpm review:translation-quartet`
+   - `pnpm review:translate-compat`
+2. If touching runtime, Cloudflare, or phase6 scripts, also run:
+   - `pnpm clean:next-artifacts`
+   - `pnpm build`
+   - `pnpm build:cf:phase6`
+   - `node scripts/cloudflare/check-official-compare.mjs --require-generated`
+3. Cloudflare zone 权限补齐后，确认 SSL Full Strict、DNS root/www/preview、Resend DKIM/CNAME；Worker secrets 补齐后再跑真实询盘邮件/Airtable 链路。
+4. OEM / Bending Machines 的 no-JS 内容深度仍需后续单独处理；workers.dev 可访问，但 HTML 仍有 skeleton marker。
+5. **Legacy DO cleanup deferred**：旧 `tianze-website*` 服务名下的 `DOQueueHandler` / `DOShardedTagCache` / `BucketCachePurge` 仍未删除。完整执行口径见 `docs/technical/deployment-notes.md` 的 Legacy Durable Object cleanup 段。前置条件：PR #87 已 merged、production phase6 稳定运行至少 7 天、Cloudflare zone 权限就位、旧 worker tail 日志确认无流量。没有用户明确确认时，只做只读调查，不执行 cleanup deploy 或 worker delete。
 
 ## Key Files Changed Recently
 

@@ -224,21 +224,22 @@ Tianze Website 是 B2B 展示和询盘站，内容更新频率不高。运行时
 2. 增加对 header、SEO schema、图片 URL、locale 的轻量检查。
 3. 新增第三方脚本前，必须先在 production build 下测。
 
-### B5. `wrangler.jsonc` 的 paid/free tier 假设要写清楚
+### B5. Cloudflare 计划口径要保持单一
 
 外部经验：
 
-- Workers bundle size、CPU、构建分钟、Durable Objects、R2、D1 都可能影响账单。
+- Workers bundle size、CPU、构建分钟、Smart Placement、Durable Objects、R2、D1 都可能影响账单。
 
 当前状态：
 
-- `wrangler.jsonc` 注释里同时出现 "fit within free-tier 3MB" 和 "Bundle size relies on the paid Workers plan" 两类口径。
+- 当前部署口径按 Workers paid plan 能力做规划：已启用 Smart Placement，并保留 phase6 split-worker 部署链。
+- PR #87 已移除当前上线链路里的 R2 / D1 / Durable Object runtime cache 依赖；这些不再作为本轮上线成本项。
 
 建议动作：
 
-1. 明确当前部署目标到底按 free tier 还是 paid Workers 规划。
-2. 如果生产默认要 paid plan，把月度固定成本写进部署说明。
-3. 如果目标仍是 free tier，把 bundle size 和 DO/R2/D1 费用作为 release gate。
+1. 部署文档只保留 paid Workers plan 口径，不再同时承诺 free-tier bundle 目标。
+2. 如果未来重新引入 R2 / D1 / Durable Objects，必须重新做成本和行为评审。
+3. 月度账单观察放到上线后运营检查，不阻塞当前 workers.dev preview 收尾。
 
 ---
 
