@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   getPhase6DeploymentOrder,
+  getPhase6PatchPrefetchWorkerKeys,
   getPhase6ServerActionsKeyWorkerNames,
   getPhase6WorkerNames,
 } from "../../../scripts/cloudflare/phase6-topology-contract.mjs";
@@ -28,5 +29,9 @@ describe("phase6 topology contract", () => {
       "tianze-website-web",
       "tianze-website-api-lead",
     ]);
+  });
+
+  it("keeps prefetch patch targets aligned with the same catalog", () => {
+    expect(getPhase6PatchPrefetchWorkerKeys()).toEqual(["apiLead"]);
   });
 });
