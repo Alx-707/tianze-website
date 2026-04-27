@@ -224,4 +224,15 @@ describe("check-translate-compat protected surface coverage", () => {
       ]),
     );
   });
+
+  it("tracks only existing protected component surfaces", () => {
+    expect(RISK_SCAN_FILES).toEqual(
+      expect.arrayContaining([
+        "src/components/layout/mobile-navigation-interactive.tsx",
+      ]),
+    );
+    expect(RISK_SCAN_FILES).not.toEqual(
+      expect.arrayContaining(["src/components/blog/blog-newsletter.tsx"]),
+    );
+  });
 });

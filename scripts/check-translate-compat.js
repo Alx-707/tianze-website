@@ -27,7 +27,7 @@ const PROTECTED_SURFACE_RULES = [
     ],
   },
   {
-    file: "src/components/layout/mobile-navigation.tsx",
+    file: "src/components/layout/mobile-navigation-interactive.tsx",
     markers: [
       "mobile-language-switcher",
       "mobile-language-switcher-label",
@@ -61,15 +61,6 @@ const PROTECTED_SURFACE_RULES = [
       "product-inquiry-success-message",
       "product-inquiry-error-message",
       "product-inquiry-submit-label",
-      'translate="no"',
-    ],
-  },
-  {
-    file: "src/components/blog/blog-newsletter.tsx",
-    markers: [
-      "blog-newsletter-success-message",
-      "blog-newsletter-error-message",
-      "blog-newsletter-submit-label",
       'translate="no"',
     ],
   },
