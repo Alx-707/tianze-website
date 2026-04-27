@@ -3,7 +3,7 @@ import { resolve } from "node:path";
 
 const root = process.cwd();
 const targets = [".next", ".open-next", ".wrangler/tmp"];
-const trashRoot = resolve(process.env.HOME ?? root, ".Trash");
+const trashRoot = resolve(root, ".trash-next-artifacts");
 const stamp = new Date().toISOString().replace(/[-:]/g, "").replace(/\..+/, "");
 const moved = [];
 
@@ -31,5 +31,5 @@ for (const target of targets) {
 console.log(
   moved.length === 0
     ? `[clean-next-build-artifacts] no build artifacts found in ${root}`
-    : `[clean-next-build-artifacts] moved to Trash:\n${moved.join("\n")}`,
+    : `[clean-next-build-artifacts] moved to local artifact trash:\n${moved.join("\n")}`,
 );

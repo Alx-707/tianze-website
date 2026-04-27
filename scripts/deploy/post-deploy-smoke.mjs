@@ -70,10 +70,11 @@ function buildHeaders(headerName, headerValue) {
   return headers;
 }
 
-async function request(baseUrl, pathname, headers) {
+async function request(baseUrl, pathname, headers, retryEvents) {
   const url = new URL(pathname, baseUrl);
 
   let lastError;
+  let retries = 0;
 
   for (let attempt = 0; attempt <= REQUEST_RETRIES; attempt++) {
     try {
@@ -85,6 +86,16 @@ async function request(baseUrl, pathname, headers) {
       const body = await response.text();
 
       if (response.status >= 500 && attempt < REQUEST_RETRIES) {
+        retries += 1;
+        const nextAttempt = attempt + 2;
+        retryEvents.push({
+          pathname,
+          reason: `status ${response.status}`,
+          nextAttempt,
+        });
+        console.warn(
+          `[post-deploy-smoke] ${pathname} returned ${response.status}; retrying attempt ${nextAttempt}/${REQUEST_RETRIES + 1}`,
+        );
         await delay(RETRY_DELAY_MS);
         continue;
       }
@@ -94,12 +105,23 @@ async function request(baseUrl, pathname, headers) {
         status: response.status,
         location: response.headers.get("location"),
         body,
+        retries,
       };
     } catch (error) {
       lastError = error;
       if (!isRetriableFetchError(error) || attempt === REQUEST_RETRIES) {
         throw error;
       }
+      retries += 1;
+      const nextAttempt = attempt + 2;
+      retryEvents.push({
+        pathname,
+        reason: error instanceof Error ? error.message : String(error),
+        nextAttempt,
+      });
+      console.warn(
+        `[post-deploy-smoke] ${pathname} request failed; retrying attempt ${nextAttempt}/${REQUEST_RETRIES + 1}`,
+      );
       await delay(RETRY_DELAY_MS);
     }
   }
@@ -132,14 +154,16 @@ async function main() {
   const { baseUrl, headerName, headerValue } = parseArgs(process.argv);
   const headers = buildHeaders(headerName, headerValue);
   const failures = [];
+  const retryEvents = [];
 
   console.log(`[post-deploy-smoke] Probing ${baseUrl}`);
 
-  const rootResponse = await request(baseUrl, "/", headers);
+  const rootResponse = await request(baseUrl, "/", headers, retryEvents);
   const invalidLocaleResponse = await request(
     baseUrl,
     "/invalid/contact",
     headers,
+    retryEvents,
   );
   const pages = [];
   for (const pathname of [
@@ -149,7 +173,7 @@ async function main() {
     "/en/contact",
     "/zh/contact",
   ]) {
-    pages.push(await request(baseUrl, pathname, headers));
+    pages.push(await request(baseUrl, pathname, headers, retryEvents));
   }
 
   assert(
@@ -191,6 +215,15 @@ async function main() {
       console.error(`  - ${failure}`);
     }
     process.exit(1);
+  }
+
+  if (retryEvents.length > 0) {
+    console.warn("[post-deploy-smoke] Retried probes:");
+    for (const retry of retryEvents) {
+      console.warn(
+        `  - ${retry.pathname}: ${retry.reason}; next attempt ${retry.nextAttempt}/${REQUEST_RETRIES + 1}`,
+      );
+    }
   }
 
   console.log("[post-deploy-smoke] All checks passed");

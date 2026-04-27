@@ -4,6 +4,17 @@ import fs from "node:fs";
 import path from "node:path";
 
 const ROOT = process.cwd();
+const PHASE6_CONFIG_DIR = path.join(ROOT, ".open-next", "wrangler", "phase6");
+const generatedConfigForbiddenSnippets = [
+  '"WORKER_SELF_REFERENCE"',
+  '"NEXT_INC_CACHE_R2_BUCKET"',
+  '"NEXT_TAG_CACHE_D1"',
+  '"NEXT_CACHE_DO_QUEUE"',
+  '"durable_objects"',
+  '"r2_buckets"',
+  '"d1_databases"',
+  '"migrations"',
+];
 
 const checks = [
   {
@@ -103,6 +114,30 @@ for (const route of getDeclaredSplitRoutes()) {
       missing: [route],
       forbidden: [],
     });
+  }
+}
+
+if (fs.existsSync(PHASE6_CONFIG_DIR)) {
+  const phase6ConfigFiles = fs
+    .readdirSync(PHASE6_CONFIG_DIR)
+    .filter((fileName) => fileName.endsWith(".jsonc"));
+
+  for (const fileName of phase6ConfigFiles) {
+    const relPath = path.join(".open-next", "wrangler", "phase6", fileName);
+    const content = read(relPath);
+    const forbidden = generatedConfigForbiddenSnippets.filter((snippet) =>
+      content.includes(snippet),
+    );
+
+    if (forbidden.length > 0) {
+      failures.push({
+        file: relPath,
+        label:
+          "phase6 generated deploy config must not reintroduce runtime cache bindings",
+        missing: [],
+        forbidden,
+      });
+    }
   }
 }
 

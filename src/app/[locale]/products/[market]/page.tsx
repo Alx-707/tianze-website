@@ -353,9 +353,12 @@ async function buildMarketPageJsonLdData({
     market,
     marketLabel,
   });
-  const faqSchema = generateFaqSchemaFromItems(faqItems, locale);
+  const faqSchema =
+    faqItems.length > 0 ? generateFaqSchemaFromItems(faqItems, locale) : null;
 
-  return [productGroupSchema, breadcrumbSchema, faqSchema];
+  return faqSchema
+    ? [productGroupSchema, breadcrumbSchema, faqSchema]
+    : [productGroupSchema, breadcrumbSchema];
 }
 
 function renderFamilySections({

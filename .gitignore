@@ -8,6 +8,7 @@ out/
 dist/
 build/
 public/messages/
+.trash-next-artifacts/
 
 # Cache
 .eslintcache
@@ -77,6 +78,7 @@ pnpm-debug.log*
 .open-next/
 .wrangler/
 .dev.vars
+wrangler.toml
 
 # Local MCP config (may contain secrets)
 .mcp.json

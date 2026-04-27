@@ -37,6 +37,12 @@ const API_ROUTE_BINDING_RULES = [
     target: "apiLead",
   },
 ];
+const FORBIDDEN_RUNTIME_CACHE_CONFIG_KEYS = [
+  "r2_buckets",
+  "d1_databases",
+  "durable_objects",
+  "migrations",
+];
 
 function parseJsoncFile(filePath, content) {
   const parsed = ts.parseConfigFileTextToJson(filePath, content);
@@ -73,16 +79,26 @@ function withEnvSuffixedServiceName(services, envName) {
 function resolveEnvConfig(baseConfig, envName) {
   const envConfig = baseConfig.env?.[envName] ?? {};
   return {
-    r2_buckets: cloneJSON(envConfig.r2_buckets ?? baseConfig.r2_buckets ?? []),
-    d1_databases: cloneJSON(
-      envConfig.d1_databases ?? baseConfig.d1_databases ?? [],
-    ),
-    durable_objects: cloneJSON(
-      envConfig.durable_objects ?? baseConfig.durable_objects ?? undefined,
-    ),
-    migrations: cloneJSON(envConfig.migrations ?? baseConfig.migrations ?? []),
     vars: cloneJSON(envConfig.vars ?? {}),
   };
+}
+
+function assertNoRuntimeCacheConfig(config, label) {
+  for (const key of FORBIDDEN_RUNTIME_CACHE_CONFIG_KEYS) {
+    if (Object.prototype.hasOwnProperty.call(config, key)) {
+      throw new Error(
+        `[phase6] ${label} must not declare ${key}; runtime cache bindings were removed.`,
+      );
+    }
+  }
+}
+
+function assertRuntimeCacheBindingsAbsent(baseConfig) {
+  assertNoRuntimeCacheConfig(baseConfig, "wrangler.jsonc");
+
+  for (const [envName, envConfig] of Object.entries(baseConfig.env ?? {})) {
+    assertNoRuntimeCacheConfig(envConfig, `wrangler.jsonc env.${envName}`);
+  }
 }
 
 function createCommonConfig(baseConfig, name, main, { includeAssets }) {
@@ -124,19 +140,10 @@ function createServerWorkerConfig(
     },
   );
 
-  config.r2_buckets = cloneJSON(baseConfig.r2_buckets ?? []);
-  config.d1_databases = cloneJSON(baseConfig.d1_databases ?? []);
-  config.durable_objects = cloneJSON(baseConfig.durable_objects ?? undefined);
-  config.migrations = cloneJSON(baseConfig.migrations ?? []);
-
   config.env = {};
   for (const envName of envNames) {
     const envConfig = resolveEnvConfig(baseConfig, envName);
     config.env[envName] = {
-      r2_buckets: envConfig.r2_buckets,
-      d1_databases: envConfig.d1_databases,
-      durable_objects: envConfig.durable_objects,
-      migrations: envConfig.migrations,
       vars: envConfig.vars,
     };
   }
@@ -365,6 +372,7 @@ async function writeJsonFile(filePath, value) {
 async function main() {
   const wranglerText = await readFile(SOURCE_WRANGLER_CONFIG_PATH, "utf8");
   const baseConfig = parseJsoncFile(SOURCE_WRANGLER_CONFIG_PATH, wranglerText);
+  assertRuntimeCacheBindingsAbsent(baseConfig);
   const baseWorkerName = baseConfig.name ?? "tianze-website";
   const workerNames = normalizeWorkerNames(baseWorkerName);
 

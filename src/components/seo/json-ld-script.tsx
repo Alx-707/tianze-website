@@ -82,8 +82,15 @@ export async function JsonLdGraphScript({
   locale,
   data = [],
 }: JsonLdGraphScriptProps) {
-  const { organizationData, websiteData } =
-    await generatePageStructuredData(locale);
+  let identity: Awaited<ReturnType<typeof generatePageStructuredData>>;
+
+  try {
+    identity = await generatePageStructuredData(locale);
+  } catch {
+    return null;
+  }
+
+  const { organizationData, websiteData } = identity;
 
   return (
     <JsonLdScript

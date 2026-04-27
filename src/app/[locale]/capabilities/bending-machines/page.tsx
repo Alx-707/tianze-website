@@ -239,13 +239,16 @@ async function BendingMachinesContent({ locale }: { locale: string }) {
       description: spec.highlights[locale as Locale].join(", "),
     })),
   });
-  const faqSchema = generateFaqSchemaFromItems(faqItems, locale as Locale);
+  const faqSchema =
+    faqItems.length > 0
+      ? generateFaqSchemaFromItems(faqItems, locale as Locale)
+      : null;
 
   return (
     <main className="mx-auto max-w-[1080px] px-6 py-8 md:py-12">
       <JsonLdGraphScript
         locale={locale as Locale}
-        data={[equipmentSchema, faqSchema]}
+        data={faqSchema ? [equipmentSchema, faqSchema] : [equipmentSchema]}
       />
 
       <header className="mb-8 md:mb-12">

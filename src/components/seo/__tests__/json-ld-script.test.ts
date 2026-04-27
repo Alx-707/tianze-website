@@ -1,6 +1,17 @@
-import { describe, expect, it } from "vitest";
-import { createJsonLdGraphData } from "@/components/seo/json-ld-script";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  createJsonLdGraphData,
+  JsonLdGraphScript,
+} from "@/components/seo/json-ld-script";
 import { generateJSONLD } from "@/lib/structured-data";
+
+const { mockGeneratePageStructuredData } = vi.hoisted(() => ({
+  mockGeneratePageStructuredData: vi.fn(),
+}));
+
+vi.mock("@/lib/page-structured-data", () => ({
+  generatePageStructuredData: mockGeneratePageStructuredData,
+}));
 
 function graphTypes(graphData: unknown) {
   if (
@@ -26,6 +37,14 @@ function graphTypes(graphData: unknown) {
 }
 
 describe("createJsonLdGraphData", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockGeneratePageStructuredData.mockResolvedValue({
+      organizationData: { "@type": "Organization", name: "Tianze" },
+      websiteData: { "@type": "WebSite", name: "Tianze Website" },
+    });
+  });
+
   it("keeps page-level schema node types in the merged graph", () => {
     const graphData = createJsonLdGraphData([
       {
@@ -99,5 +118,13 @@ describe("createJsonLdGraphData", () => {
     expect(scriptContent).not.toContain("<script>");
     expect(scriptContent).toContain("\\u003c/script\\u003e");
     expect(() => JSON.parse(scriptContent)).not.toThrow();
+  });
+
+  it("treats identity schema failures as a non-critical enhancement", async () => {
+    mockGeneratePageStructuredData.mockRejectedValueOnce(new Error("boom"));
+
+    await expect(
+      JsonLdGraphScript({ locale: "en", data: [] }),
+    ).resolves.toBeNull();
   });
 });

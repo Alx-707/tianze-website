@@ -5,12 +5,19 @@ import {
   getContactCopyFromMessages,
 } from "@/lib/contact/getContactCopy";
 
-const { mockLoadCompleteMessages } = vi.hoisted(() => ({
+const { mockLoadCompleteMessages, mockLoggerWarn } = vi.hoisted(() => ({
   mockLoadCompleteMessages: vi.fn(),
+  mockLoggerWarn: vi.fn(),
 }));
 
 vi.mock("@/lib/load-messages", () => ({
   loadCompleteMessages: mockLoadCompleteMessages,
+}));
+
+vi.mock("@/lib/logger", () => ({
+  logger: {
+    warn: mockLoggerWarn,
+  },
 }));
 
 describe("getContactCopy", () => {
@@ -96,11 +103,12 @@ describe("getContactCopy", () => {
     expect(copy.panel.response.prepareLabel).toBe("Helpful details");
   });
 
-  it("propagates missing translation keys as-is from the static messages", () => {
+  it("falls back to user-readable copy when static messages miss keys", () => {
     const copy = getContactCopyFromMessages({});
 
-    expect(copy.header.title).toBe("title");
-    expect(copy.header.description).toBe("description");
-    expect(copy.panel.hours.closedLabel).toBe("panel.closed");
+    expect(copy.header.title).toBe("Contact Us");
+    expect(copy.header.description).toContain("Get in touch");
+    expect(copy.panel.hours.closedLabel).toBe("Closed");
+    expect(mockLoggerWarn).toHaveBeenCalled();
   });
 });

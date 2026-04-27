@@ -12,18 +12,55 @@ import { expect, test } from "@playwright/test";
  */
 
 const KEY_PAGES = [
-  { path: "/en", name: "Homepage" },
-  { path: "/en/products", name: "Products" },
-  { path: "/en/products/north-america", name: "North America Products" },
+  {
+    path: "/en",
+    name: "Homepage",
+    expectedGraphTypes: ["Organization", "WebSite"],
+  },
+  {
+    path: "/en/products",
+    name: "Products",
+    expectedGraphTypes: ["Organization", "WebSite", "BreadcrumbList"],
+  },
+  {
+    path: "/en/products/north-america",
+    name: "North America Products",
+    expectedGraphTypes: [
+      "Organization",
+      "WebSite",
+      "ProductGroup",
+      "BreadcrumbList",
+      "FAQPage",
+    ],
+  },
   {
     path: "/en/capabilities/bending-machines",
     name: "Bending Machines",
+    expectedGraphTypes: ["Organization", "WebSite", "ItemList", "FAQPage"],
   },
-  { path: "/en/contact", name: "Contact" },
-  { path: "/en/about", name: "About" },
+  {
+    path: "/en/contact",
+    name: "Contact",
+    expectedGraphTypes: ["Organization", "WebSite", "FAQPage"],
+  },
+  {
+    path: "/en/about",
+    name: "About",
+    expectedGraphTypes: ["Organization", "WebSite", "AboutPage"],
+  },
 ];
 
-for (const { path, name } of KEY_PAGES) {
+function schemaTypes(value: unknown): string[] {
+  if (typeof value === "string") {
+    return [value];
+  }
+  if (Array.isArray(value)) {
+    return value.filter((item): item is string => typeof item === "string");
+  }
+  return [];
+}
+
+for (const { path, name, expectedGraphTypes } of KEY_PAGES) {
   test.describe(`SEO: ${name} (${path})`, () => {
     test("has meaningful title", async ({ page }) => {
       await page.goto(path);
@@ -54,6 +91,15 @@ for (const { path, name } of KEY_PAGES) {
       expect(parsed["@context"]).toBe("https://schema.org");
       expect(Array.isArray(parsed["@graph"])).toBe(true);
       expect(parsed["@graph"].length).toBeGreaterThanOrEqual(2);
+
+      const graphTypes = new Set(
+        parsed["@graph"].flatMap((node: Record<string, unknown>) =>
+          schemaTypes(node["@type"]),
+        ),
+      );
+      for (const expectedType of expectedGraphTypes) {
+        expect(graphTypes).toContain(expectedType);
+      }
     });
 
     test("has Open Graph tags", async ({ page }) => {

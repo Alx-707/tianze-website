@@ -1,9 +1,7 @@
 import type { Locale } from "@/types/i18n";
+import { logger } from "@/lib/logger";
 import { loadCompleteMessages } from "@/lib/load-messages";
-import {
-  readMessagePath,
-  type MessageRecord,
-} from "@/lib/i18n/read-message-path";
+import type { MessageRecord } from "@/lib/i18n/read-message-path";
 
 export interface ContactHeaderCopy {
   title: string;
@@ -43,15 +41,64 @@ export interface ContactCopyModel {
   };
 }
 
+const CONTACT_COPY_FALLBACKS = {
+  title: "Contact Us",
+  description:
+    "Get in touch with our team for inquiries, support, or partnership opportunities.",
+  "panel.contactTitle": "Contact Methods",
+  "panel.email": "Email",
+  "panel.phone": "Phone",
+  "panel.hoursTitle": "Business Hours",
+  "panel.weekdays": "Mon - Fri",
+  "panel.saturday": "Saturday",
+  "panel.sunday": "Sunday",
+  "panel.closed": "Closed",
+  "panel.responseTitle": "What to expect",
+  "panel.responseTimeLabel": "Typical response",
+  "panel.responseTimeValue": "Within 24 business hours",
+  "panel.bestForLabel": "Best for",
+  "panel.bestForValue":
+    "RFQs, product specs, MOQ, samples, and lead-time questions",
+  "panel.prepareLabel": "Helpful details",
+  "panel.prepareValue":
+    "Share product type, size/standard, quantity, destination market, and timeline",
+} satisfies Record<string, string>;
+
+function readContactMessage(messages: MessageRecord, key: string) {
+  let current: unknown = messages;
+
+  for (const segment of [
+    "underConstruction",
+    "pages",
+    "contact",
+    ...key.split("."),
+  ]) {
+    if (
+      typeof current !== "object" ||
+      current === null ||
+      !Object.prototype.hasOwnProperty.call(current, segment)
+    ) {
+      return null;
+    }
+
+    current = (current as Record<string, unknown>)[segment];
+  }
+
+  return typeof current === "string" ? current : null;
+}
+
 export function getContactCopyFromMessages(
   messages: MessageRecord,
 ): ContactCopyModel {
-  const pick = (key: string) =>
-    readMessagePath(
-      messages,
-      ["underConstruction", "pages", "contact", ...key.split(".")],
-      key,
-    );
+  const pick = (key: keyof typeof CONTACT_COPY_FALLBACKS) => {
+    const value = readContactMessage(messages, key);
+    if (value !== null) {
+      return value;
+    }
+
+    logger.warn("Missing contact page copy; using fallback", { key });
+    return CONTACT_COPY_FALLBACKS[key];
+  };
 
   return {
     header: {
