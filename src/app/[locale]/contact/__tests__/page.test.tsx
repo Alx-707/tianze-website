@@ -131,6 +131,30 @@ describe("ContactPage MDX migration", () => {
     expect(screen.getByTestId("contact-form")).toBeInTheDocument();
   });
 
+  it("renders localized contact panel copy from the top-level contact namespace", async () => {
+    const actualContactCopy = await vi.importActual<
+      typeof import("@/lib/contact/getContactCopy")
+    >("@/lib/contact/getContactCopy");
+    mockGetContactCopyFromMessages.mockImplementation(
+      actualContactCopy.getContactCopyFromMessages,
+    );
+
+    const page = await ContactPage({
+      params: Promise.resolve({ locale: "zh" }),
+    });
+
+    await renderAsyncPage(page as React.JSX.Element);
+
+    expect(
+      screen.getByRole("heading", { name: "联系方式" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "联系后会发生什么" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("工作日 24 小时内")).toBeInTheDocument();
+    expect(screen.getByText("建议提供")).toBeInTheDocument();
+  });
+
   it("renders FAQ from MDX frontmatter", async () => {
     const page = await ContactPage({
       params: Promise.resolve({ locale: "en" }),
