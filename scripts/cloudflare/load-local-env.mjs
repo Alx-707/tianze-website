@@ -27,11 +27,16 @@ export function loadLocalEnv(
       continue;
     }
 
-    loadDotenv({
+    const result = loadDotenv({
       path: filePath,
       override: false,
       quiet: true,
     });
+    if (result.error) {
+      throw new Error(
+        `Failed to parse env file ${filePath}: ${result.error.message}`,
+      );
+    }
     loaded.push(path.relative(rootDir, filePath));
   }
 

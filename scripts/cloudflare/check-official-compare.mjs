@@ -48,6 +48,7 @@ const checks = [
       '"durable_objects"',
       '"r2_buckets"',
       '"d1_databases"',
+      '"migrations"',
     ],
   },
 ];

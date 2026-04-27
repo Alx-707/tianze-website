@@ -369,7 +369,8 @@ function ContactContentBody({ locale }: { locale: Locale }) {
     ["faq", "sectionTitle"],
     "FAQ",
   );
-  const faqSchema = generateFaqSchemaFromItems(faqItems, locale);
+  const faqSchema =
+    faqItems.length > 0 ? generateFaqSchemaFromItems(faqItems, locale) : null;
 
   return (
     <main
@@ -377,7 +378,7 @@ function ContactContentBody({ locale }: { locale: Locale }) {
       data-testid="contact-page-content"
       translate="no"
     >
-      <JsonLdGraphScript locale={locale} data={[faqSchema]} />
+      <JsonLdGraphScript locale={locale} data={faqSchema ? [faqSchema] : []} />
       <div className="mx-auto max-w-4xl">
         <header className="mb-12 text-center">
           <h1 className="text-heading mb-4">{page.metadata.title}</h1>

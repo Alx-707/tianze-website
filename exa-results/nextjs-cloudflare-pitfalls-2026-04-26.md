@@ -74,7 +74,7 @@
 **[High] 动态路由 ISR 每次加载都重建**
 - 来源：[GitHub #754](https://github.com/opennextjs/opennextjs-cloudflare/issues/754)
 - `revalidate` 对动态路由无效，需设置 `enableCacheInterception: true`
-- **我们的行动**：在 `open-next.config.ts` 中启用该标志
+- **我们的行动**：不启用 `enableCacheInterception`，也不在 Cloudflare 生产代码中使用 `cacheTag()`、`revalidateTag()` 或 `revalidatePath()`；内容更新统一走静态生成 + 重新部署
 
 ### 1.4 Workers 生产限制
 
