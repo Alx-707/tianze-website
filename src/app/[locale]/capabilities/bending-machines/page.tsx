@@ -6,7 +6,7 @@ import { generateMetadataForPath } from "@/lib/seo-metadata";
 import { getLocalizedPath } from "@/config/paths";
 import { SINGLE_SITE_BENDING_MACHINES_PAGE_EXPRESSION } from "@/config/single-site-page-expression";
 import { siteFacts } from "@/config/site-facts";
-import { JsonLdScript } from "@/components/seo";
+import { JsonLdGraphScript } from "@/components/seo";
 import { FaqSection } from "@/components/sections/faq-section";
 import { Link } from "@/i18n/routing";
 import { generateLocaleStaticParams } from "@/app/[locale]/generate-static-params";
@@ -14,6 +14,7 @@ import { getPageBySlug } from "@/lib/content";
 import {
   LAYER1_FACTS,
   extractFaqFromMetadata,
+  generateFaqSchemaFromItems,
   interpolateFaqAnswer,
 } from "@/lib/content/mdx-faq";
 import { buildEquipmentListSchema } from "@/lib/structured-data-generators";
@@ -238,10 +239,14 @@ async function BendingMachinesContent({ locale }: { locale: string }) {
       description: spec.highlights[locale as Locale].join(", "),
     })),
   });
+  const faqSchema = generateFaqSchemaFromItems(faqItems, locale as Locale);
 
   return (
     <main className="mx-auto max-w-[1080px] px-6 py-8 md:py-12">
-      <JsonLdScript data={equipmentSchema} />
+      <JsonLdGraphScript
+        locale={locale as Locale}
+        data={[equipmentSchema, faqSchema]}
+      />
 
       <header className="mb-8 md:mb-12">
         <h1 className="text-heading mb-4">{page.metadata.title}</h1>
@@ -272,7 +277,11 @@ async function BendingMachinesContent({ locale }: { locale: string }) {
       />
 
       <Suspense fallback={null}>
-        <FaqSection faqItems={faqItems} locale={locale as Locale} />
+        <FaqSection
+          faqItems={faqItems}
+          locale={locale as Locale}
+          renderJsonLd={false}
+        />
       </Suspense>
 
       <CtaSection

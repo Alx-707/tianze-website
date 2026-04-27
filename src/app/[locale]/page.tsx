@@ -4,6 +4,7 @@ import { getTranslations } from "next-intl/server";
 import { generateMetadataForPath, type Locale } from "@/lib/seo-metadata";
 import { getLocalizedPath } from "@/config/paths";
 import { GridFrame } from "@/components/grid";
+import { JsonLdGraphScript } from "@/components/seo";
 import { HeroSection } from "@/components/sections/hero-section";
 import { ChainSection } from "@/components/sections/chain-section";
 import { ProductsSection } from "@/components/sections/products-section";
@@ -83,10 +84,11 @@ export async function generateMetadata({
 
 export default async function Home({ params }: HomePageProps) {
   // Await params per Next.js async page convention
-  await params;
+  const { locale } = await params;
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <JsonLdGraphScript locale={locale as Locale} />
       <GridFrame
         crosshairs={[
           { top: 0, left: 0 },

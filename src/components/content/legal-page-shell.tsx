@@ -1,10 +1,10 @@
 import type { ReactNode } from "react";
 import { getTranslations } from "next-intl/server";
-import { JsonLdScript } from "@/components/seo";
+import { JsonLdGraphScript } from "@/components/seo";
 import type { HeadingItem } from "@/lib/content/legal-page";
 import { renderLegalContent } from "@/lib/content/render-legal-content";
 import { buildLegalPageSchema } from "@/lib/structured-data-generators";
-import type { LegalPageMetadata } from "@/types/content.types";
+import type { LegalPageMetadata, Locale } from "@/types/content.types";
 
 interface LegalPageShellProps {
   metadata: LegalPageMetadata;
@@ -43,7 +43,7 @@ export async function LegalPageShell({
 
   return (
     <>
-      <JsonLdScript data={schema} />
+      <JsonLdGraphScript locale={locale as Locale} data={[schema]} />
 
       <main className="container mx-auto px-4 py-8 md:py-12">
         <header className="mb-6 md:mb-8">

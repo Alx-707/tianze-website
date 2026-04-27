@@ -1,14 +1,16 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Locale } from "@/types/i18n";
-import { getContactCopy } from "@/lib/contact/getContactCopy";
+import {
+  getContactCopy,
+  getContactCopyFromMessages,
+} from "@/lib/contact/getContactCopy";
 
-// Hoisted mock for getTranslationsCached so that module imports pick it up.
-const { mockGetTranslationsCached } = vi.hoisted(() => ({
-  mockGetTranslationsCached: vi.fn(),
+const { mockLoadCompleteMessages } = vi.hoisted(() => ({
+  mockLoadCompleteMessages: vi.fn(),
 }));
 
-vi.mock("@/lib/i18n/server/getTranslationsCached", () => ({
-  getTranslationsCached: mockGetTranslationsCached,
+vi.mock("@/lib/load-messages", () => ({
+  loadCompleteMessages: mockLoadCompleteMessages,
 }));
 
 describe("getContactCopy", () => {
@@ -34,13 +36,37 @@ describe("getContactCopy", () => {
       "Share product type, size/standard, quantity, destination market, and timeline",
   } as const;
 
+  const defaultMessages = {
+    underConstruction: {
+      pages: {
+        contact: {
+          title: defaultTranslations.title,
+          description: defaultTranslations.description,
+          panel: {
+            contactTitle: defaultTranslations["panel.contactTitle"],
+            email: defaultTranslations["panel.email"],
+            phone: defaultTranslations["panel.phone"],
+            hoursTitle: defaultTranslations["panel.hoursTitle"],
+            weekdays: defaultTranslations["panel.weekdays"],
+            saturday: defaultTranslations["panel.saturday"],
+            sunday: defaultTranslations["panel.sunday"],
+            closed: defaultTranslations["panel.closed"],
+            responseTitle: defaultTranslations["panel.responseTitle"],
+            responseTimeLabel: defaultTranslations["panel.responseTimeLabel"],
+            responseTimeValue: defaultTranslations["panel.responseTimeValue"],
+            bestForLabel: defaultTranslations["panel.bestForLabel"],
+            bestForValue: defaultTranslations["panel.bestForValue"],
+            prepareLabel: defaultTranslations["panel.prepareLabel"],
+            prepareValue: defaultTranslations["panel.prepareValue"],
+          },
+        },
+      },
+    },
+  };
+
   beforeEach(() => {
     vi.clearAllMocks();
-
-    mockGetTranslationsCached.mockResolvedValue(
-      (key: string) =>
-        defaultTranslations[key as keyof typeof defaultTranslations] || key,
-    );
+    mockLoadCompleteMessages.mockResolvedValue(defaultMessages);
   });
 
   it("builds a structured copy model for the given locale", async () => {
@@ -48,10 +74,7 @@ describe("getContactCopy", () => {
 
     const copy = await getContactCopy(locale);
 
-    expect(mockGetTranslationsCached).toHaveBeenCalledWith({
-      locale,
-      namespace: "underConstruction.pages.contact",
-    });
+    expect(mockLoadCompleteMessages).toHaveBeenCalledWith(locale);
 
     expect(copy.header.title).toBe("Contact Us");
     expect(copy.header.description).toBe("Get in touch with our team");
@@ -73,15 +96,11 @@ describe("getContactCopy", () => {
     expect(copy.panel.response.prepareLabel).toBe("Helpful details");
   });
 
-  it("propagates missing translation keys as-is from the translation function", async () => {
-    mockGetTranslationsCached.mockResolvedValue(
-      (key: string) => `missing.${key}`,
-    );
+  it("propagates missing translation keys as-is from the static messages", () => {
+    const copy = getContactCopyFromMessages({});
 
-    const copy = await getContactCopy("en" as Locale);
-
-    expect(copy.header.title).toBe("missing.title");
-    expect(copy.header.description).toBe("missing.description");
-    expect(copy.panel.hours.closedLabel).toBe("missing.panel.closed");
+    expect(copy.header.title).toBe("title");
+    expect(copy.header.description).toBe("description");
+    expect(copy.panel.hours.closedLabel).toBe("panel.closed");
   });
 });

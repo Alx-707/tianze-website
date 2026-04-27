@@ -3,21 +3,24 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
-// Override global next-intl/server mock with FAQ-specific translations
-vi.mock("next-intl/server", () => ({
-  getTranslations: vi.fn(() =>
-    Promise.resolve((key: string) => {
-      const translations: Record<string, string> = {
+vi.mock("@/lib/load-messages", () => ({
+  loadCompleteMessages: vi.fn(() =>
+    Promise.resolve({
+      faq: {
         sectionTitle: "Frequently Asked Questions",
-        "items.moq.question": "What is the minimum order quantity (MOQ)?",
-        "items.moq.answer": "Our MOQ is typically 500 to 1,000 pieces.",
-        "items.leadTime.question": "What is the lead time?",
-        "items.leadTime.answer": "15 to 30 days.",
-      };
-      return translations[key] ?? key;
+        items: {
+          moq: {
+            question: "What is the minimum order quantity (MOQ)?",
+            answer: "Our MOQ is typically 500 to 1,000 pieces.",
+          },
+          leadTime: {
+            question: "What is the lead time?",
+            answer: "15 to 30 days.",
+          },
+        },
+      },
     }),
   ),
-  setRequestLocale: vi.fn(),
 }));
 
 vi.mock("@/lib/content/mdx-faq", () => ({

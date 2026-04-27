@@ -1,28 +1,34 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
-import { NextIntlClientProvider } from "next-intl";
-import { getMessages, setRequestLocale } from "next-intl/server";
 import { ContactForm } from "@/components/contact/contact-form";
-import { FaqSection } from "@/components/sections/faq-section";
+import { FaqAccordion } from "@/components/sections/faq-accordion";
+import { JsonLdGraphScript } from "@/components/seo";
 import { Card } from "@/components/ui/card";
+import { SectionHead } from "@/components/ui/section-head";
 import {
   generateLocaleStaticParams,
   type LocaleParam,
 } from "@/app/[locale]/generate-static-params";
 import { siteFacts } from "@/config/site-facts";
 import { COUNT_TWO } from "@/constants";
-import { getPageBySlug } from "@/lib/content";
 import {
   LAYER1_FACTS,
   extractFaqFromMetadata,
+  generateFaqSchemaFromItems,
   interpolateFaqAnswer,
 } from "@/lib/content/mdx-faq";
 import { renderLegalContent } from "@/lib/content/render-legal-content";
-import { getContactCopy } from "@/lib/contact/getContactCopy";
-import { pickMessages } from "@/lib/i18n/client-messages";
+import { getContactCopyFromMessages } from "@/lib/contact/getContactCopy";
+import { CONTENT_MANIFEST } from "@/lib/content-manifest.generated";
+import { readMessagePath } from "@/lib/i18n/read-message-path";
+import { mergeObjects } from "@/lib/merge-objects";
 import { generateMetadataForPath } from "@/lib/seo-metadata";
 import { getLocalizedPath } from "@/config/paths";
-import type { FaqItem, Locale } from "@/types/content.types";
+import type { FaqItem, Locale, Page } from "@/types/content.types";
+import enCriticalMessages from "@messages/en/critical.json";
+import enDeferredMessages from "@messages/en/deferred.json";
+import zhCriticalMessages from "@messages/zh/critical.json";
+import zhDeferredMessages from "@messages/zh/deferred.json";
 
 interface ContactPageProps {
   params: Promise<LocaleParam>;
@@ -36,14 +42,15 @@ export async function generateMetadata({
   params,
 }: ContactPageProps): Promise<Metadata> {
   const { locale } = await params;
-  const page = await getPageBySlug("contact", locale as Locale);
+  const typedLocale = locale as Locale;
+  const page = getStaticContactPage(typedLocale);
   const description =
     page.metadata.seo?.description ?? page.metadata.description;
 
   const metadata = generateMetadataForPath({
-    locale: locale as Locale,
+    locale: typedLocale,
     pageType: "contact",
-    path: getLocalizedPath("contact", locale as Locale),
+    path: getLocalizedPath("contact", typedLocale),
     config: {
       title: page.metadata.seo?.title ?? page.metadata.title,
       ...(description ? { description } : {}),
@@ -62,7 +69,7 @@ export async function generateMetadata({
 function ContactMethodsCard({
   copy,
 }: {
-  copy: Awaited<ReturnType<typeof getContactCopy>>["panel"]["contact"];
+  copy: ReturnType<typeof getContactCopyFromMessages>["panel"]["contact"];
 }) {
   return (
     <Card className="p-6">
@@ -120,8 +127,10 @@ function ResponseExpectationsCard({
   responseCopy,
   hoursCopy,
 }: {
-  responseCopy: Awaited<ReturnType<typeof getContactCopy>>["panel"]["response"];
-  hoursCopy: Awaited<ReturnType<typeof getContactCopy>>["panel"]["hours"];
+  responseCopy: ReturnType<
+    typeof getContactCopyFromMessages
+  >["panel"]["response"];
+  hoursCopy: ReturnType<typeof getContactCopyFromMessages>["panel"]["hours"];
 }) {
   return (
     <Card className="p-6">
@@ -183,24 +192,78 @@ function ContactFormSkeleton() {
   );
 }
 
-async function ContactContent({ locale }: { locale: string }) {
-  setRequestLocale(locale);
+function ContactFaqSection({
+  faqItems,
+  title,
+}: {
+  faqItems: FaqItem[];
+  title: string;
+}) {
+  const accordionItems = faqItems.map((item) => ({
+    key: item.id,
+    question: item.question,
+    answer: item.answer,
+  }));
 
-  const [page, messages, copy] = await Promise.all([
-    getPageBySlug("contact", locale as Locale),
-    getMessages({ locale }),
-    getContactCopy(locale as Locale),
-  ]);
+  return (
+    <section
+      className="section-divider py-14 md:py-[72px]"
+      data-testid="faq-section"
+    >
+      <div className="mx-auto max-w-[1080px] px-6">
+        <SectionHead title={title} />
+        <FaqAccordion items={accordionItems} />
+      </div>
+    </section>
+  );
+}
+
+const STATIC_MESSAGES_BY_LOCALE: Record<Locale, Record<string, unknown>> = {
+  en: mergeObjects(
+    enCriticalMessages as Record<string, unknown>,
+    enDeferredMessages as Record<string, unknown>,
+  ) as Record<string, unknown>,
+  zh: mergeObjects(
+    zhCriticalMessages as Record<string, unknown>,
+    zhDeferredMessages as Record<string, unknown>,
+  ) as Record<string, unknown>,
+};
+
+function getStaticMessages(locale: Locale): Record<string, unknown> {
+  return STATIC_MESSAGES_BY_LOCALE[locale];
+}
+
+function getStaticContactPage(locale: Locale): Page {
+  const entry = CONTENT_MANIFEST.byKey[`pages/${locale}/contact`];
+
+  if (entry === undefined) {
+    throw new Error(`Static contact page not found for locale: ${locale}`);
+  }
+
+  return {
+    slug: entry.slug,
+    filePath: entry.filePath,
+    metadata: entry.metadata,
+    content: entry.content,
+  } as unknown as Page;
+}
+
+function ContactContentBody({ locale }: { locale: Locale }) {
+  const page = getStaticContactPage(locale);
+  const messages = getStaticMessages(locale);
+  const copy = getContactCopyFromMessages(messages);
   const faqItems: FaqItem[] = extractFaqFromMetadata(page.metadata).map(
     (item) => ({
       ...item,
       answer: interpolateFaqAnswer(item.answer, LAYER1_FACTS),
     }),
   );
-  const contactClientMessages = pickMessages(messages, [
-    "contact",
-    "apiErrors",
-  ]);
+  const faqSectionTitle = readMessagePath(
+    messages,
+    ["faq", "sectionTitle"],
+    "FAQ",
+  );
+  const faqSchema = generateFaqSchemaFromItems(faqItems, locale);
 
   return (
     <main
@@ -208,6 +271,7 @@ async function ContactContent({ locale }: { locale: string }) {
       data-testid="contact-page-content"
       translate="no"
     >
+      <JsonLdGraphScript locale={locale} data={[faqSchema]} />
       <div className="mx-auto max-w-4xl">
         <header className="mb-12 text-center">
           <h1 className="text-heading mb-4">{page.metadata.title}</h1>
@@ -224,12 +288,7 @@ async function ContactContent({ locale }: { locale: string }) {
 
         <div className="grid gap-8 md:grid-cols-2">
           <Suspense fallback={<ContactFormSkeleton />}>
-            <NextIntlClientProvider
-              locale={locale}
-              messages={contactClientMessages}
-            >
-              <ContactForm />
-            </NextIntlClientProvider>
+            <ContactForm />
           </Suspense>
 
           <div className="space-y-6">
@@ -243,17 +302,19 @@ async function ContactContent({ locale }: { locale: string }) {
       </div>
 
       {faqItems.length > 0 ? (
-        <Suspense fallback={null}>
-          <FaqSection faqItems={faqItems} locale={locale as Locale} />
-        </Suspense>
+        <ContactFaqSection faqItems={faqItems} title={faqSectionTitle} />
       ) : null}
     </main>
   );
 }
 
-export default async function ContactPage({ params }: ContactPageProps) {
+async function ContactContent({ params }: ContactPageProps) {
   const { locale } = await params;
 
+  return <ContactContentBody locale={locale as Locale} />;
+}
+
+export default function ContactPage({ params }: ContactPageProps) {
   return (
     <Suspense
       fallback={
@@ -270,7 +331,7 @@ export default async function ContactPage({ params }: ContactPageProps) {
         </main>
       }
     >
-      <ContactContent locale={locale} />
+      <ContactContent params={params} />
     </Suspense>
   );
 }

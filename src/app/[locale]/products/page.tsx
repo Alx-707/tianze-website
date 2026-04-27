@@ -11,7 +11,11 @@ import {
 } from "@/constants/product-catalog";
 import { SINGLE_SITE_PRODUCTS_PAGE_EXPRESSION } from "@/config/single-site-page-expression";
 import { getLocalizedPath } from "@/config/paths";
-import { CatalogBreadcrumb } from "@/components/products/catalog-breadcrumb";
+import {
+  CatalogBreadcrumb,
+  buildCatalogBreadcrumbJsonLd,
+} from "@/components/products/catalog-breadcrumb";
+import { JsonLdGraphScript } from "@/components/seo";
 import { MarketSeriesCard } from "@/components/products/market-series-card";
 import { Link } from "@/i18n/routing";
 import { generateLocaleStaticParams } from "@/app/[locale]/generate-static-params";
@@ -45,6 +49,7 @@ export default async function ProductsPage({ params }: ProductsPageProps) {
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: "catalog" });
+  const breadcrumbSchema = await buildCatalogBreadcrumbJsonLd({});
 
   const pvcMarkets = PRODUCT_CATALOG.markets.filter((market) =>
     SINGLE_SITE_PRODUCTS_PAGE_EXPRESSION.standardMarketSlugs.includes(
@@ -58,7 +63,11 @@ export default async function ProductsPage({ params }: ProductsPageProps) {
 
   return (
     <main className="mx-auto max-w-[1080px] px-6 py-8 md:py-12">
-      <CatalogBreadcrumb />
+      <JsonLdGraphScript
+        locale={locale as SeoLocale}
+        data={[breadcrumbSchema]}
+      />
+      <CatalogBreadcrumb renderJsonLd={false} />
 
       <header className="mb-8 md:mb-12">
         <h1 className="text-heading mb-4">{t("overview.title")}</h1>

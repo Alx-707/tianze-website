@@ -14,6 +14,11 @@ import { expect, test } from "@playwright/test";
 const KEY_PAGES = [
   { path: "/en", name: "Homepage" },
   { path: "/en/products", name: "Products" },
+  { path: "/en/products/north-america", name: "North America Products" },
+  {
+    path: "/en/capabilities/bending-machines",
+    name: "Bending Machines",
+  },
   { path: "/en/contact", name: "Contact" },
   { path: "/en/about", name: "About" },
 ];
@@ -40,13 +45,15 @@ for (const { path, name } of KEY_PAGES) {
       await page.goto(path);
       const jsonLdScripts = page.locator('script[type="application/ld+json"]');
       const count = await jsonLdScripts.count();
-      expect(count).toBeGreaterThanOrEqual(1);
+      expect(count).toBe(1);
 
-      // Verify first JSON-LD is valid JSON with @type
+      // Verify JSON-LD is a page-level graph, not scattered scripts.
       const content = await jsonLdScripts.first().textContent();
       expect(content).toBeTruthy();
       const parsed = JSON.parse(content!);
-      expect(parsed["@type"] || parsed["@graph"]).toBeTruthy();
+      expect(parsed["@context"]).toBe("https://schema.org");
+      expect(Array.isArray(parsed["@graph"])).toBe(true);
+      expect(parsed["@graph"].length).toBeGreaterThanOrEqual(2);
     });
 
     test("has Open Graph tags", async ({ page }) => {

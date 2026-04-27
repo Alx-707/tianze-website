@@ -1,8 +1,51 @@
 import "server-only";
 import { generateJSONLD } from "@/lib/structured-data";
+import { generatePageStructuredData } from "@/lib/page-structured-data";
+import type { Locale } from "@/types/content.types";
 
 interface JsonLdScriptProps {
   readonly data: unknown;
+}
+
+interface JsonLdGraphScriptProps {
+  readonly locale: Locale;
+  readonly data?: readonly unknown[];
+}
+
+function stripSchemaContext(value: Record<string, unknown>) {
+  const { "@context": _context, ...node } = value;
+  return node;
+}
+
+function collectGraphNodes(
+  data: readonly unknown[],
+): Record<string, unknown>[] {
+  const nodes: Record<string, unknown>[] = [];
+
+  for (const item of data) {
+    if (typeof item !== "object" || item === null || Array.isArray(item)) {
+      continue;
+    }
+
+    const record = item as Record<string, unknown>;
+    const graph = record["@graph"];
+
+    if (Array.isArray(graph)) {
+      nodes.push(...collectGraphNodes(graph));
+      continue;
+    }
+
+    nodes.push(stripSchemaContext(record));
+  }
+
+  return nodes;
+}
+
+export function createJsonLdGraphData(data: readonly unknown[]) {
+  return {
+    "@context": "https://schema.org",
+    "@graph": collectGraphNodes(data),
+  };
 }
 
 /**
@@ -31,6 +74,20 @@ export function JsonLdScript({ data }: JsonLdScriptProps) {
       dangerouslySetInnerHTML={{
         __html: jsonLd,
       }}
+    />
+  );
+}
+
+export async function JsonLdGraphScript({
+  locale,
+  data = [],
+}: JsonLdGraphScriptProps) {
+  const { organizationData, websiteData } =
+    await generatePageStructuredData(locale);
+
+  return (
+    <JsonLdScript
+      data={createJsonLdGraphData([organizationData, websiteData, ...data])}
     />
   );
 }

@@ -203,7 +203,7 @@ export type GetProductStandardsCachedFn = (
  * These functions are intentionally designed to:
  * - accept only explicit, serializable parameters
  * - avoid any request-scoped APIs (cookies, headers, etc.)
- * - be compatible with future "use cache" + cacheLife()/cacheTag() usage
+ * - be compatible with future explicit cache boundaries if they are reintroduced
  */
 export type GetProductListingCachedFn = (
   locale: Locale,

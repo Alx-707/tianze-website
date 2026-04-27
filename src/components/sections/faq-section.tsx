@@ -1,9 +1,13 @@
-import { getTranslations } from "next-intl/server";
 import { JsonLdScript } from "@/components/seo";
 import { FaqAccordion } from "@/components/sections/faq-accordion";
 import { SectionHead } from "@/components/ui/section-head";
 import { siteFacts } from "@/config/site-facts";
 import { generateFaqSchemaFromItems } from "@/lib/content/mdx-faq";
+import {
+  readMessagePath,
+  type MessageRecord,
+} from "@/lib/i18n/read-message-path";
+import { loadCompleteMessages } from "@/lib/load-messages";
 import type { FaqItem, Locale } from "@/types/content.types";
 
 const FAQ_ICU_VALUES = {
@@ -18,6 +22,7 @@ interface FaqSectionKeyProps {
   title?: string;
   subtitle?: string;
   locale: Locale;
+  renderJsonLd?: boolean;
 }
 
 interface FaqSectionDirectProps {
@@ -26,16 +31,31 @@ interface FaqSectionDirectProps {
   title?: string;
   subtitle?: string;
   locale: Locale;
+  renderJsonLd?: boolean;
 }
 
 type FaqSectionProps = FaqSectionKeyProps | FaqSectionDirectProps;
 
+function readFaqMessage(messages: MessageRecord, key: string): string {
+  return readMessagePath(messages, ["faq", ...key.split(".")], key);
+}
+
+function interpolateMessage(
+  template: string,
+  values: Record<string, string | number>,
+): string {
+  return template.replace(/\{(\w+)\}/g, (match, key: string) => {
+    const value = values[key];
+    return value === undefined ? match : String(value);
+  });
+}
+
 export async function FaqSection(props: FaqSectionProps) {
-  const { title, subtitle, locale } = props;
-  const t = await getTranslations("faq");
+  const { title, subtitle, locale, renderJsonLd = true } = props;
 
   let faqData: Array<{ key: string; question: string; answer: string }>;
   let schemaData: unknown;
+  let sectionTitle = title;
 
   if ("faqItems" in props && props.faqItems) {
     faqData = props.faqItems.map((item) => ({
@@ -44,12 +64,23 @@ export async function FaqSection(props: FaqSectionProps) {
       answer: item.answer,
     }));
     schemaData = generateFaqSchemaFromItems(props.faqItems, locale);
+
+    if (sectionTitle === undefined) {
+      const messages = await loadCompleteMessages(locale);
+      sectionTitle = interpolateMessage(
+        readFaqMessage(messages, "sectionTitle"),
+        FAQ_ICU_VALUES,
+      );
+    }
   } else {
+    const messages = await loadCompleteMessages(locale);
+    const pick = (key: string) =>
+      interpolateMessage(readFaqMessage(messages, key), FAQ_ICU_VALUES);
     const keys = props.items ?? [];
     faqData = keys.map((key) => ({
       key,
-      question: t(`items.${key}.question`, FAQ_ICU_VALUES),
-      answer: t(`items.${key}.answer`, FAQ_ICU_VALUES),
+      question: pick(`items.${key}.question`),
+      answer: pick(`items.${key}.answer`),
     }));
     schemaData = generateFaqSchemaFromItems(
       faqData.map(({ key, question, answer }) => ({
@@ -59,15 +90,16 @@ export async function FaqSection(props: FaqSectionProps) {
       })),
       locale,
     );
+    sectionTitle ??= pick("sectionTitle");
   }
 
   return (
     <>
-      <JsonLdScript data={schemaData} />
+      {renderJsonLd ? <JsonLdScript data={schemaData} /> : null}
       <section className="section-divider py-14 md:py-[72px]">
         <div className="mx-auto max-w-[1080px] px-6">
           <SectionHead
-            title={title ?? t("sectionTitle")}
+            title={sectionTitle}
             {...(subtitle ? { subtitle } : {})}
           />
           <FaqAccordion items={faqData} />

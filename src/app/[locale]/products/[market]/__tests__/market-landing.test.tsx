@@ -67,7 +67,16 @@ vi.mock("@/config/paths", () => ({
 }));
 
 vi.mock("@/components/products/catalog-breadcrumb", () => ({
+  buildCatalogBreadcrumbJsonLd: vi.fn(async () => ({
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [],
+  })),
   CatalogBreadcrumb: () => <nav aria-label="breadcrumb">Breadcrumb</nav>,
+}));
+
+vi.mock("@/components/seo", () => ({
+  JsonLdGraphScript: () => <script type="application/ld+json" />,
 }));
 
 vi.mock("@/components/products/family-section", () => ({

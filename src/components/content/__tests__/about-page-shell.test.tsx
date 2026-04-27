@@ -11,11 +11,11 @@ vi.mock("@/components/mdx/mdx-content", () => ({
 }));
 
 vi.mock("@/components/seo", () => ({
-  JsonLdScript: ({ data }: { data: unknown }) => (
+  JsonLdGraphScript: ({ data }: { data: unknown[] }) => (
     <script
       data-testid="about-schema"
       type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
+      dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@graph": data }) }}
     />
   ),
 }));
@@ -196,7 +196,9 @@ describe("AboutPageShell", () => {
 
     const script = screen.getByTestId("about-schema");
     const data = JSON.parse(script.innerHTML);
-    expect(data["@type"]).toBe("AboutPage");
-    expect(data.name).toBe("About Tianze Pipe");
+    const aboutNode = data["@graph"].find(
+      (node: Record<string, unknown>) => node["@type"] === "AboutPage",
+    );
+    expect(aboutNode.name).toBe("About Tianze Pipe");
   });
 });

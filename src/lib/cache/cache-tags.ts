@@ -1,7 +1,7 @@
 /**
  * Cache Tag System for Next.js 16 Cache Components
  *
- * Provides consistent tag naming and generation for selective cache invalidation.
+ * Provides consistent tag naming and generation for cache grouping.
  * Tags follow the schema: `domain:entity:identifier[:locale]`
  */
 
