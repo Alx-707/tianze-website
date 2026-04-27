@@ -1,6 +1,6 @@
 "use client";
 
-import { loadConsent } from "@/lib/cookie-consent";
+import { loadConsent } from "@/lib/cookie-consent/storage";
 
 const UTM_STORAGE_KEY = "marketing_attribution";
 
