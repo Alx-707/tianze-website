@@ -13,6 +13,10 @@ function delay(ms) {
   });
 }
 
+function getRetryDelayMs(attempt) {
+  return RETRY_DELAY_MS * 2 ** attempt;
+}
+
 function parseArgs(argv) {
   const args = {
     baseUrl: DEFAULT_BASE_URL,
@@ -73,7 +77,6 @@ function buildHeaders(headerName, headerValue) {
 async function request(baseUrl, pathname, headers, retryEvents) {
   const url = new URL(pathname, baseUrl);
 
-  let lastError;
   let retries = 0;
 
   for (let attempt = 0; attempt <= REQUEST_RETRIES; attempt++) {
@@ -96,7 +99,7 @@ async function request(baseUrl, pathname, headers, retryEvents) {
         console.warn(
           `[post-deploy-smoke] ${pathname} returned ${response.status}; retrying attempt ${nextAttempt}/${REQUEST_RETRIES + 1}`,
         );
-        await delay(RETRY_DELAY_MS);
+        await delay(getRetryDelayMs(attempt));
         continue;
       }
 
@@ -108,7 +111,6 @@ async function request(baseUrl, pathname, headers, retryEvents) {
         retries,
       };
     } catch (error) {
-      lastError = error;
       if (!isRetriableFetchError(error) || attempt === REQUEST_RETRIES) {
         throw error;
       }
@@ -122,11 +124,11 @@ async function request(baseUrl, pathname, headers, retryEvents) {
       console.warn(
         `[post-deploy-smoke] ${pathname} request failed; retrying attempt ${nextAttempt}/${REQUEST_RETRIES + 1}`,
       );
-      await delay(RETRY_DELAY_MS);
+      await delay(getRetryDelayMs(attempt));
     }
   }
 
-  throw lastError;
+  throw new Error("post-deploy-smoke retry loop exited without a response");
 }
 
 function isRetriableFetchError(error) {
@@ -165,6 +167,8 @@ async function main() {
     headers,
     retryEvents,
   );
+  // Probe serially so Cloudflare cold-start retries stay readable and do not
+  // hammer a freshly deployed workers.dev preview.
   const pages = [];
   for (const pathname of [
     "/en",

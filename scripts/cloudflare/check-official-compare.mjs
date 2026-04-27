@@ -5,6 +5,7 @@ import path from "node:path";
 
 const ROOT = process.cwd();
 const PHASE6_CONFIG_DIR = path.join(ROOT, ".open-next", "wrangler", "phase6");
+const REQUIRE_GENERATED_CONFIG = process.argv.includes("--require-generated");
 const generatedConfigForbiddenSnippets = [
   '"WORKER_SELF_REFERENCE"',
   '"NEXT_INC_CACHE_R2_BUCKET"',
@@ -32,7 +33,7 @@ const checks = [
       "r2IncrementalCache",
       "doQueue",
       "d1NextTagCache",
-      "apiOps",
+      { match: "apiOps", type: "quoted" },
       "/api/cache/invalidate",
     ],
   },
@@ -60,23 +61,61 @@ const deployScriptChecks = [
   {
     name: "deploy:cf",
     expected: "pnpm deploy:cf:phase6:production",
+    mode: "startsWith",
   },
   {
     name: "deploy:cf:preview",
     expected: "pnpm deploy:cf:phase6:preview",
+    mode: "startsWith",
   },
   {
     name: "deploy:cf:dry-run",
     expected: "pnpm deploy:cf:phase6:dry-run",
+    mode: "startsWith",
   },
   {
     name: "preview:cf:wrangler",
     expected: "legacy-entrypoint-guard.mjs",
+    mode: "includes",
   },
 ];
 
 function read(relPath) {
   return fs.readFileSync(path.join(ROOT, relPath), "utf8");
+}
+
+function normalizeForbiddenCheck(snippet) {
+  if (typeof snippet === "string") {
+    return { match: snippet, type: "substring" };
+  }
+
+  return snippet;
+}
+
+function hasForbiddenContent(content, snippet) {
+  const check = normalizeForbiddenCheck(snippet);
+
+  if (check.type === "quoted") {
+    return (
+      content.includes(`"${check.match}"`) ||
+      content.includes(`'${check.match}'`)
+    );
+  }
+
+  if (check.type === "regex") {
+    return check.match.test(content);
+  }
+
+  return content.includes(check.match);
+}
+
+function findForbiddenSnippets(content, snippets) {
+  return snippets.filter((snippet) => hasForbiddenContent(content, snippet));
+}
+
+function formatForbiddenSnippet(snippet) {
+  const check = normalizeForbiddenCheck(snippet);
+  return check.type === "regex" ? check.match.toString() : check.match;
 }
 
 function getDeclaredSplitRoutes() {
@@ -92,9 +131,7 @@ for (const check of checks) {
   const missing = check.requiredSnippets.filter(
     (snippet) => !content.includes(snippet),
   );
-  const forbidden = check.forbiddenSnippets.filter((snippet) =>
-    content.includes(snippet),
-  );
+  const forbidden = findForbiddenSnippets(content, check.forbiddenSnippets);
 
   if (missing.length > 0 || forbidden.length > 0) {
     failures.push({
@@ -126,8 +163,9 @@ if (fs.existsSync(PHASE6_CONFIG_DIR)) {
   for (const fileName of phase6ConfigFiles) {
     const relPath = path.join(".open-next", "wrangler", "phase6", fileName);
     const content = read(relPath);
-    const forbidden = generatedConfigForbiddenSnippets.filter((snippet) =>
-      content.includes(snippet),
+    const forbidden = findForbiddenSnippets(
+      content,
+      generatedConfigForbiddenSnippets,
     );
 
     if (forbidden.length > 0) {
@@ -140,11 +178,28 @@ if (fs.existsSync(PHASE6_CONFIG_DIR)) {
       });
     }
   }
+} else if (REQUIRE_GENERATED_CONFIG) {
+  failures.push({
+    file: path.relative(ROOT, PHASE6_CONFIG_DIR),
+    label: "phase6 generated deploy config must exist for strict compare",
+    missing: ["run pnpm build:cf:phase6 before strict compare"],
+    forbidden: [],
+  });
+} else {
+  console.warn(
+    "cf-official-compare: phase6 generated config absent; run with --require-generated after pnpm build:cf:phase6 for deploy-artifact proof.",
+  );
 }
 
 for (const check of deployScriptChecks) {
   const script = scripts[check.name];
-  if (typeof script !== "string" || !script.includes(check.expected)) {
+  const matches =
+    typeof script === "string" &&
+    (check.mode === "startsWith"
+      ? script.startsWith(check.expected)
+      : script.includes(check.expected));
+
+  if (!matches) {
     failures.push({
       file: "package.json",
       label: "legacy Cloudflare deploy entrypoints must not bypass phase6",
@@ -162,7 +217,9 @@ if (failures.length > 0) {
       console.error(`  - missing snippet: ${snippet}`);
     }
     for (const snippet of failure.forbidden) {
-      console.error(`  - forbidden snippet still present: ${snippet}`);
+      console.error(
+        `  - forbidden snippet still present: ${formatForbiddenSnippet(snippet)}`,
+      );
     }
   }
   process.exit(1);

@@ -26,6 +26,9 @@ const DOMAIN_ROUTES = {
   production: [{ pattern: "tianze-pipe.com/*", zone_name: "tianze-pipe.com" }],
 };
 
+// Each matcher must be self-contained. build-phase6-workers serializes
+// rule.match with .toString() into the generated gateway worker, so a matcher
+// cannot close over external constants, regexes, or helper functions.
 const API_ROUTE_BINDING_RULES = [
   {
     match: (pathname) =>
@@ -110,6 +113,9 @@ function createCommonConfig(baseConfig, name, main, { includeAssets }) {
     alias: cloneJSON(PHASE6_ALIAS),
   };
 
+  // Keep placement as a deployment-wide intent. The current launch posture is
+  // all phase6 workers inherit wrangler.jsonc Smart Placement until production
+  // traffic proves a worker-specific placement split is better.
   if (baseConfig.placement) {
     config.placement = cloneJSON(baseConfig.placement);
   }
@@ -217,15 +223,15 @@ function createGatewayWorkerSource() {
   ).join("");
 
   return `//@ts-expect-error: Will be resolved by wrangler build
-	import { handleImageRequest } from "../cloudflare/images.js";
+import { handleImageRequest } from "../cloudflare/images.js";
 //@ts-expect-error: Will be resolved by wrangler build
 import { runWithCloudflareRequestContext } from "../cloudflare/init.js";
 //@ts-expect-error: Will be resolved by wrangler build
-	import { maybeGetSkewProtectionResponse } from "../cloudflare/skew-protection.js";
-	// @ts-expect-error: Will be resolved by wrangler build
-	import { handler as middlewareHandler } from "../middleware/handler.mjs";
-	
-	const routeRules = [
+import { maybeGetSkewProtectionResponse } from "../cloudflare/skew-protection.js";
+// @ts-expect-error: Will be resolved by wrangler build
+import { handler as middlewareHandler } from "../middleware/handler.mjs";
+
+const routeRules = [
 ${routeRulesSource}
 ];
 
@@ -328,9 +334,9 @@ export default {
 
 function createServiceWorkerSource(functionName, importPath) {
   return `//@ts-expect-error: Will be resolved by wrangler build
-	import { runWithCloudflareRequestContext } from "../cloudflare/init.js";
-	
-	let cachedHandler;
+import { runWithCloudflareRequestContext } from "../cloudflare/init.js";
+
+let cachedHandler;
 
 async function getServerHandler() {
   if (cachedHandler) {
