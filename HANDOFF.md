@@ -45,7 +45,7 @@ Check `git branch` for current feature branches.
    - `node scripts/cloudflare/check-official-compare.mjs --require-generated`
 3. Cloudflare zone 权限补齐后，确认 SSL Full Strict、DNS root/www/preview、Resend DKIM/CNAME；Worker secrets 补齐后再跑真实询盘邮件/Airtable 链路。
 4. OEM / Bending Machines 的 no-JS 内容深度仍需后续单独处理；workers.dev 可访问，但 HTML 仍有 skeleton marker。
-5. **Legacy DO cleanup deferred**：旧 `tianze-website*` 服务名下的 `DOQueueHandler` / `DOShardedTagCache` / `BucketCachePurge` 仍未删除。完整执行口径见 `docs/technical/deployment-notes.md` 的 Legacy Durable Object cleanup 段。前置条件：PR #87 已 merged、production phase6 稳定运行至少 7 天、Cloudflare zone 权限就位、旧 worker tail 日志确认无流量。没有用户明确确认时，只做只读调查，不执行 cleanup deploy 或 worker delete。
+5. **Legacy DO cleanup deferred**：旧 `tianze-website*` 服务名下的 `DOQueueHandler` / `DOShardedTagCache` / `BucketCachePurge` 仍未删除。完整执行口径见 `docs/technical/deployment-notes.md` 的 Legacy Durable Object cleanup 段，技术债登记见 `docs/technical/technical-debt.md` 的 TD-003。7 天稳定观察期只在正式域名流量切到 phase6 production 后开始计算；workers.dev preview 不启动这个计时。没有用户明确确认时，只做只读调查，不执行 cleanup deploy 或 worker delete。
 
 ## Key Files Changed Recently
 

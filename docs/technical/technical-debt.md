@@ -45,3 +45,85 @@ whether `next/image` is appropriate for a small static SVG in the critical layou
 path.
 
 **Decision trigger:** When Task 8 (logo replacement) is executed.
+
+---
+
+## TD-003: Legacy Cloudflare Durable Object cleanup after phase6 production cutover
+
+**Introduced:** Launch readiness runtime cache removal (PR #87, 2026-04-26)
+**Severity:** Medium operational debt — not a current preview blocker
+
+PR #87 removed the current runtime cache stack from the deploy path:
+
+- R2 incremental cache binding
+- D1 tag cache binding
+- Durable Object cache queue binding
+- `/api/cache/invalidate`
+- old `apiOps` split worker
+
+However, removing code and Wrangler bindings does not prove Cloudflare has deleted
+historical Durable Object classes or namespaces that may have been created under
+old Worker service names:
+
+- `tianze-website`
+- `tianze-website-preview`
+- `tianze-website-production`
+
+The current phase6 Worker names are different:
+
+- `tianze-website-gateway`
+- `tianze-website-web`
+- `tianze-website-api-lead`
+
+Cloudflare Durable Object migrations are tied to the Worker script being
+deployed. A `deleted_classes` migration on a phase6 Worker name does not prove
+that a class created under an old `tianze-website*` Worker name has been cleaned
+up. This is why phase6 generated configs intentionally do not include a
+misleading `deleted_classes` migration.
+
+**Current decision:** Defer real cleanup. During workers.dev preview and local
+readiness work, only read-only investigation is allowed.
+
+**Important timing rule:** The "stable for 7 days" clock starts only after the
+official production domain traffic is intentionally cut over to the phase6
+production Worker path. workers.dev preview availability does not start this
+clock. If the site is not formally deployed on the production domain, this debt
+stays in observation mode.
+
+**Allowed now:**
+
+- Read Worker deployment/version metadata
+- Read Durable Object namespace inventory
+- Tail old Worker logs to check whether traffic still exists
+- Improve runbooks and review prompts
+
+**Not allowed now:**
+
+- `deleted_classes` migration
+- cleanup Worker deploy
+- `wrangler delete`
+- deleting old Worker services
+- deleting Durable Object namespaces or data
+
+**Cleanup prerequisites:**
+
+1. Production domain traffic has been cut over to phase6 production Workers.
+2. Phase6 production has been stable for at least 7 days after the cutover.
+3. Cloudflare token or dashboard access can read Workers, deployments, versions,
+   logs, and Durable Object namespaces for the relevant account.
+4. Old `tianze-website*` Workers show zero real traffic in tail logs.
+5. The old Worker migration history is inspected before choosing any new
+   migration tag.
+6. The cleanup plan is reviewed in a separate maintenance PR or maintenance
+   window.
+
+**Decision trigger:** After official production-domain phase6 cutover plus 7
+days of stable operation. Until that happens, keep this item open and do not
+execute destructive cleanup.
+
+**Primary references:**
+
+- `docs/technical/deployment-notes.md` — Legacy Durable Object cleanup boundary
+- `HANDOFF.md` — Legacy DO cleanup deferred next step
+- `docs/superpowers/prompts/legacy-do-cleanup-review-swarm.md` — independent
+  review prompt for the cleanup runbook and future cleanup PR
