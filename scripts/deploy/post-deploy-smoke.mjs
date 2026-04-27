@@ -5,6 +5,13 @@ const DEFAULT_BASE_URL =
   runtimeEnv.readEnvString("DEPLOY_SMOKE_BASE_URL") || "";
 const REQUEST_TIMEOUT_MS = 30000;
 const REQUEST_RETRIES = 2;
+const RETRY_DELAY_MS = 1000;
+
+function delay(ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
 
 function parseArgs(argv) {
   const args = {
@@ -75,18 +82,25 @@ async function request(baseUrl, pathname, headers) {
         headers,
         signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
       });
+      const body = await response.text();
+
+      if (response.status >= 500 && attempt < REQUEST_RETRIES) {
+        await delay(RETRY_DELAY_MS);
+        continue;
+      }
 
       return {
         pathname,
         status: response.status,
         location: response.headers.get("location"),
-        body: await response.text(),
+        body,
       };
     } catch (error) {
       lastError = error;
       if (!isRetriableFetchError(error) || attempt === REQUEST_RETRIES) {
         throw error;
       }
+      await delay(RETRY_DELAY_MS);
     }
   }
 
@@ -94,6 +108,10 @@ async function request(baseUrl, pathname, headers) {
 }
 
 function isRetriableFetchError(error) {
+  if (error instanceof DOMException && error.name === "TimeoutError") {
+    return true;
+  }
+
   return (
     error instanceof Error &&
     "cause" in error &&
@@ -123,13 +141,16 @@ async function main() {
     "/invalid/contact",
     headers,
   );
-  const pages = await Promise.all([
-    request(baseUrl, "/en", headers),
-    request(baseUrl, "/zh", headers),
-    request(baseUrl, "/api/health", headers),
-    request(baseUrl, "/en/contact", headers),
-    request(baseUrl, "/zh/contact", headers),
-  ]);
+  const pages = [];
+  for (const pathname of [
+    "/en",
+    "/zh",
+    "/api/health",
+    "/en/contact",
+    "/zh/contact",
+  ]) {
+    pages.push(await request(baseUrl, pathname, headers));
+  }
 
   assert(
     [200, 307, 308].includes(rootResponse.status),

@@ -1,13 +1,35 @@
-import { rmSync } from "node:fs";
+import { existsSync, mkdirSync, renameSync } from "node:fs";
 import { resolve } from "node:path";
 
 const root = process.cwd();
 const targets = [".next", ".open-next", ".wrangler/tmp"];
+const trashRoot = resolve(process.env.HOME ?? root, ".Trash");
+const stamp = new Date().toISOString().replace(/[-:]/g, "").replace(/\..+/, "");
+const moved = [];
 
 for (const target of targets) {
-  rmSync(resolve(root, target), { force: true, recursive: true });
+  const source = resolve(root, target);
+  if (!existsSync(source)) {
+    continue;
+  }
+
+  mkdirSync(trashRoot, { recursive: true });
+
+  const trashName = `tianze-${target.replace(/[/.]/g, "-")}-${stamp}`;
+  let destination = resolve(trashRoot, trashName);
+  let suffix = 1;
+
+  while (existsSync(destination)) {
+    suffix += 1;
+    destination = resolve(trashRoot, `${trashName}-${suffix}`);
+  }
+
+  renameSync(source, destination);
+  moved.push(`${target} -> ${destination}`);
 }
 
 console.log(
-  `[clean-next-build-artifacts] removed ${targets.join(", ")} from ${root}`,
+  moved.length === 0
+    ? `[clean-next-build-artifacts] no build artifacts found in ${root}`
+    : `[clean-next-build-artifacts] moved to Trash:\n${moved.join("\n")}`,
 );

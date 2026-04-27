@@ -3,10 +3,13 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import ts from "typescript";
 import { getPhase6ServerActionsKeyWorkerNames } from "./phase6-topology-contract.mjs";
+import { loadLocalEnv } from "./load-local-env.mjs";
 
 const ROOT_DIR = process.cwd();
 const WRANGLER_CONFIG_PATH = path.join(ROOT_DIR, "wrangler.jsonc");
 const KEY_NAME = "NEXT_SERVER_ACTIONS_ENCRYPTION_KEY";
+
+loadLocalEnv(ROOT_DIR);
 
 function printUsage() {
   console.error(

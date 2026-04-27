@@ -2,9 +2,12 @@ import { execSync, spawnSync } from "node:child_process";
 import { access } from "node:fs/promises";
 import path from "node:path";
 import { getPhase6DeploymentOrder } from "./phase6-topology-contract.mjs";
+import { loadLocalEnv } from "./load-local-env.mjs";
 
 const ROOT_DIR = process.cwd();
 const CONFIG_DIR = path.join(ROOT_DIR, ".open-next", "wrangler", "phase6");
+
+loadLocalEnv(ROOT_DIR);
 
 const deploymentOrder = getPhase6DeploymentOrder();
 

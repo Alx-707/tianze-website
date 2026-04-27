@@ -82,24 +82,20 @@ const STRUCTURAL_CLUSTERS = [
   },
   {
     key: "cache-health",
-    name: "Cache invalidation + health signals",
-    label: "cache invalidation + health signals",
+    name: "Health signals + cache tag utilities",
+    label: "health signals + cache tag utilities",
     recommendedReview:
-      "Inspect cache invalidation orchestration, health response semantics, and shared cache guard/policy layers together",
-    command: "pnpm review:cache-health",
+      "Inspect health response semantics and shared cache tag utilities together",
+    command: "pnpm review:health",
     files: [
-      "src/app/api/cache/invalidate/route.ts",
-      "src/app/api/cache/invalidate/__tests__/route.test.ts",
       "src/app/api/health/route.ts",
       "src/lib/api/cache-health-response.ts",
-      "src/lib/cache/invalidate.ts",
       "src/lib/cache/index.ts",
-      "src/lib/cache/invalidation-policy.ts",
-      "src/lib/cache/invalidation-guards.ts",
-      "tests/integration/api/cache-health-contract.test.ts",
+      "src/lib/cache/cache-tags.ts",
+      "tests/integration/api/health.test.ts",
     ],
     pattern:
-      /^(src\/app\/api\/cache\/invalidate\/.+|src\/lib\/cache\/.+|src\/app\/api\/health\/route\.ts|src\/lib\/api\/cache-health-response\.ts|tests\/integration\/api\/cache-health-contract\.test\.ts)$/,
+      /^(src\/lib\/cache\/.+|src\/app\/api\/health\/route\.ts|src\/lib\/api\/cache-health-response\.ts|tests\/integration\/api\/health\.test\.ts)$/,
   },
 ];
 

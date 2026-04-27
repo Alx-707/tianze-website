@@ -26,7 +26,7 @@ pnpm review:tier-a
 pnpm review:clusters
 pnpm test:locale-runtime
 pnpm test:lead-family
-pnpm test:cache-health
+pnpm review:health
 pnpm validate:translations
 pnpm clean:next-artifacts
 pnpm build

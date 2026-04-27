@@ -20,8 +20,6 @@ rules:
         - "**/*.test.*"
         - "**/*.spec.*"
         - "**/src/app/api/csp-report/**"
-        - "**/src/app/api/cache/invalidate/**"
     metadata:
       category: correctness
       technology: [nextjs]
-

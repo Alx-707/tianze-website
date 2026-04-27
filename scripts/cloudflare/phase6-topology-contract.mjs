@@ -24,15 +24,6 @@ const PHASE6_WORKER_CATALOG = [
     includeInServerActionsKeySync: true,
     patchPrefetchManifest: true,
   },
-  {
-    key: "apiOps",
-    suffix: "api-ops",
-    kind: "api",
-    binding: "WORKER_API_OPS",
-    deployOrder: 30,
-    includeInServerActionsKeySync: true,
-    patchPrefetchManifest: true,
-  },
 ];
 
 const PHASE6_WORKERS_BY_KEY = Object.freeze(

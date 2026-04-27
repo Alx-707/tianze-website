@@ -29,12 +29,6 @@ const DOMAIN_ROUTES = {
 const API_ROUTE_BINDING_RULES = [
   {
     match: (pathname) =>
-      pathname === "/api/cache/invalidate" || pathname === "/api/csp-report",
-    binding: PHASE6_WORKERS_BY_KEY.apiOps.binding,
-    target: "apiOps",
-  },
-  {
-    match: (pathname) =>
       pathname === "/api/inquiry" ||
       pathname === "/api/subscribe" ||
       pathname === "/api/verify-turnstile" ||
@@ -99,6 +93,10 @@ function createCommonConfig(baseConfig, name, main, { includeAssets }) {
     main,
     alias: cloneJSON(PHASE6_ALIAS),
   };
+
+  if (baseConfig.placement) {
+    config.placement = cloneJSON(baseConfig.placement);
+  }
 
   if (includeAssets) {
     config.assets = {
@@ -212,21 +210,15 @@ function createGatewayWorkerSource() {
   ).join("");
 
   return `//@ts-expect-error: Will be resolved by wrangler build
-import { handleImageRequest } from "../cloudflare/images.js";
+	import { handleImageRequest } from "../cloudflare/images.js";
 //@ts-expect-error: Will be resolved by wrangler build
 import { runWithCloudflareRequestContext } from "../cloudflare/init.js";
 //@ts-expect-error: Will be resolved by wrangler build
-import { maybeGetSkewProtectionResponse } from "../cloudflare/skew-protection.js";
-// @ts-expect-error: Will be resolved by wrangler build
-import { handler as middlewareHandler } from "../middleware/handler.mjs";
-//@ts-expect-error: Will be resolved by wrangler build
-export { DOQueueHandler } from "../.build/durable-objects/queue.js";
-//@ts-expect-error: Will be resolved by wrangler build
-export { DOShardedTagCache } from "../.build/durable-objects/sharded-tag-cache.js";
-//@ts-expect-error: Will be resolved by wrangler build
-export { BucketCachePurge } from "../.build/durable-objects/bucket-cache-purge.js";
-
-const routeRules = [
+	import { maybeGetSkewProtectionResponse } from "../cloudflare/skew-protection.js";
+	// @ts-expect-error: Will be resolved by wrangler build
+	import { handler as middlewareHandler } from "../middleware/handler.mjs";
+	
+	const routeRules = [
 ${routeRulesSource}
 ];
 
@@ -329,15 +321,9 @@ export default {
 
 function createServiceWorkerSource(functionName, importPath) {
   return `//@ts-expect-error: Will be resolved by wrangler build
-import { runWithCloudflareRequestContext } from "../cloudflare/init.js";
-//@ts-expect-error: Will be resolved by wrangler build
-export { DOQueueHandler } from "../.build/durable-objects/queue.js";
-//@ts-expect-error: Will be resolved by wrangler build
-export { DOShardedTagCache } from "../.build/durable-objects/sharded-tag-cache.js";
-//@ts-expect-error: Will be resolved by wrangler build
-export { BucketCachePurge } from "../.build/durable-objects/bucket-cache-purge.js";
-
-let cachedHandler;
+	import { runWithCloudflareRequestContext } from "../cloudflare/init.js";
+	
+	let cachedHandler;
 
 async function getServerHandler() {
   if (cachedHandler) {

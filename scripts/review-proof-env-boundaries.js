@@ -5,16 +5,13 @@ const path = require("path");
 
 const ROOT = process.cwd();
 const TARGET_FILES = [
-  "scripts/invalidate-cache.js",
   "scripts/cloudflare/preview-smoke.mjs",
   "scripts/deploy/post-deploy-smoke.mjs",
 ];
 const GUARDED_KEYS = [
-  "CACHE_INVALIDATION_STRICT",
   "NEXT_PHASE",
   "NODE_ENV",
   "NEXT_PUBLIC_BASE_URL",
-  "CACHE_INVALIDATION_SECRET",
   "CLOUDFLARE_PREVIEW_BASE_URL",
   "DEPLOY_SMOKE_BASE_URL",
   "DEPLOY_SMOKE_HEADER_NAME",
