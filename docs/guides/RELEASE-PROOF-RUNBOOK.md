@@ -33,6 +33,7 @@
 pnpm review:docs-truth
 pnpm review:tier-a:staged
 pnpm review:clusters:staged
+pnpm review:health
 pnpm validate:translations
 pnpm type-check:source
 pnpm clean:next-artifacts

@@ -5,22 +5,24 @@
 ## 当前状态
 
 - `cacheComponents: true` 已启用
-- 数据函数级 `"use cache"` + `cacheLife()` 已使用
+- 当前只有产品市场 FAQ helper 保留一个明确的 `"use cache"` 边界，用来满足 Cache Components 构建约束
+- 当前没有 `cacheTag()` 调用方，也没有运行时 tag invalidation 入口
 - locale 传递以显式参数为主
 - `setRequestLocale` 当前仍在用
 - PPR 暂未启用
 - dynamicIO 暂未启用
-- `cacheTag()` / `revalidateTag()` 暂未引入
+- 运行时 `revalidateTag()` / `revalidatePath()` 不是上线架构的一部分
 
 ## 当前稳妥做法
 
-### 1. 缓存放在数据函数，不放在整页
+### 1. 内容更新通过重新部署
 
 当前更稳的方式是：
 
-- 在数据函数层使用 `"use cache"`
-- 页面层保持清晰
-- 不把关键转化页做成大面积缓存实验场
+- 内容、翻译、产品表达更新后重新部署
+- 不依赖运行时 tag invalidation 让线上内容变更
+- 不保留 R2 / D1 / Durable Object 运行时缓存栈作为上线依赖
+- 允许非转化页使用无 `cacheTag()` 的 Cache Components 边界解决构建约束，但不能把它变成线上内容更新机制
 
 ### 2. i18n 相关缓存必须显式传 `locale`
 
@@ -58,7 +60,7 @@
 - `src/app/[locale]/layout.tsx`
 - `src/lib/load-messages.ts`
 - `src/lib/i18n-performance.ts`
-- 任何使用 `"use cache"` 且直接碰 i18n 的函数
+- 任何新引入 `"use cache"`、`cacheLife()`、`cacheTag()` 或运行时 tag invalidation 的函数
 
 ## 当前参考来源
 

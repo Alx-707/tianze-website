@@ -72,7 +72,7 @@ flowchart TB
     E32 --> E323["订阅线索"]
 
     E --> E4["缓存与可观测性"]
-    E4 --> E41["缓存失效"]
+    E4 --> E41["缓存标签工具"]
     E4 --> E42["健康检查"]
     E4 --> E43["请求观测"]
     E4 --> E44["日志与指标"]
@@ -80,10 +80,10 @@ flowchart TB
     F --> F1["Cloudflare Turnstile"]
     F --> F2["Airtable"]
     F --> F3["Resend"]
-    F --> F4["Cloudflare 缓存基础设施"]
-    F4 --> F41["R2 增量缓存"]
-    F4 --> F42["D1 标签缓存"]
-    F4 --> F43["Durable Object 队列"]
+    F --> F4["Cloudflare 静态资源与 Worker"]
+    F4 --> F41["OpenNext Worker"]
+    F4 --> F42["静态资源绑定"]
+    F4 --> F43["API split worker"]
 
     G --> G1["Vitest 单元/集成测试"]
     G --> G2["Playwright 端到端测试"]

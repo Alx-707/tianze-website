@@ -39,6 +39,13 @@ pnpm preview:cf          # local page verification
 pnpm smoke:cf:preview    # automated page smoke
 ```
 
+Production-like deploys must go through the phase6 split-worker entrypoints.
+`deploy:cf` and `deploy:cf:preview` are aliases to phase6. Do not call raw
+`wrangler deploy --env ...` against `wrangler.jsonc`; that is the old
+single-worker entrypoint and bypasses the current topology checks.
+
+`pnpm preview:cf:wrangler` is intentionally guarded — running it fails fast via `scripts/cloudflare/legacy-entrypoint-guard.mjs`. Do not edit that guard to bypass it without an explicit architecture re-decision.
+
 ### OpenNext minify stays off
 
 In `open-next.config.ts`, keep `minify: false` for split functions and default worker. Re-enabling requires full smoke pass (`build:cf` + `preview:cf` + `smoke:cf:deploy`).
@@ -83,6 +90,16 @@ pnpm build && pnpm build:cf
 
 ## Cache Components on Cloudflare
 
+### No `cacheTag()` anywhere in production code
+
+Runtime tag invalidation (`revalidateTag` / `revalidatePath` / `cacheTag()`) was removed from the launch architecture on 2026-04-26. Do not reintroduce these calls anywhere in production code.
+
+A narrow `"use cache"` + `cacheLife()` boundary is acceptable when Next.js Cache Components needs it for build correctness (current example: `getProductMarketFaqItems` in `src/app/[locale]/products/[market]/page.tsx`), but it must not attach a `cacheTag()`.
+
+Content updates flow through redeploy, not runtime invalidation APIs. If a future requirement (e.g., CMS integration) genuinely needs runtime tag invalidation, that is an explicit architecture re-decision — not a "just add the call back" change.
+
+`tests/architecture/cache-directive-policy.test.ts` enforces this on the product market page.
+
 ### No `use cache` / `cacheLife` on conversion pages
 
 Cloudflare runtime has `setTimeout()` and Cache Components boundary issues. Contact/inquiry/subscribe pages must not use `use cache` or `cacheLife` on data-fetching functions.
@@ -108,6 +125,16 @@ text at build time.
 
 Route-level `loading.tsx` controls no-JS / slow-streaming first paint. For contact/inquiry/subscribe, either provide meaningful content or omit `loading.tsx` entirely — empty skeletons break SSR content contracts.
 
+## Runtime Cache Stack Is Out of Scope
+
+`wrangler.jsonc` must not declare `r2_buckets`, `d1_databases`, or `durable_objects`. `open-next.config.ts` must not register `incrementalCache`, `tagCache`, or `queue` overrides.
+
+`pnpm review:cf:official-compare` enforces this — it fails the build if any forbidden binding (`WORKER_SELF_REFERENCE`, `NEXT_INC_CACHE_R2_BUCKET`, `NEXT_TAG_CACHE_D1`, `NEXT_CACHE_DO_QUEUE`) reappears or any DO class (`DOQueueHandler`, `DOShardedTagCache`, `BucketCachePurge`) is re-imported. Do not bypass that script.
+
+The `apiOps` worker split is also out of scope. Only `apiLead` is allowed under `cloudflareConfig.functions`.
+
+If a future requirement reintroduces runtime cache invalidation, it must come with: (1) an explicit architecture re-decision recorded in `docs/technical/deployment-notes.md`, (2) updates to this rule file, and (3) a paired update to `pnpm review:cf:official-compare`.
+
 ## Issue Classification
 
 When Cloudflare-related failures occur, classify before debugging:
@@ -118,5 +145,7 @@ When Cloudflare-related failures occur, classify before debugging:
 | Generated artifact | `middleware-manifest.json` dynamic require | `scripts/cloudflare/patch-*.mjs` |
 | Runtime regression | Page 500 after Next.js upgrade | `pnpm smoke:cf:preview` |
 | Deployed behavior | API health fails post-deploy | `pnpm smoke:cf:deploy` |
+| Cache architecture regression | `use cache` or `cacheTag` re-introduced | `tests/architecture/cache-directive-policy.test.ts` |
+| Forbidden binding regression | `r2_buckets` / `d1_databases` / `durable_objects` reappears | `pnpm review:cf:official-compare` |
 
 Reference: `docs/guides/CLOUDFLARE-ISSUE-TAXONOMY.md`

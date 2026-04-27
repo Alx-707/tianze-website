@@ -132,7 +132,9 @@
 - **wrangler 4.79.0**
 - `pnpm build`：标准 Next.js 构建
 - `pnpm build:cf`：Cloudflare 构建
-- `pnpm preview:cf` / `pnpm deploy:cf`：本地预览与部署链
+- `pnpm preview:cf`：本地 stock preview，仅用于页面级初筛
+- `pnpm deploy:cf` / `pnpm deploy:cf:preview`：phase6 worker 拓扑部署入口
+- `pnpm deploy:cf:phase6:dry-run`：不改远端状态的 phase6 部署证明
 
 ### 额外构建与诊断工具
 
