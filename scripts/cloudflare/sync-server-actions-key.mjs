@@ -1,8 +1,8 @@
 import { spawnSync } from "node:child_process";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import ts from "typescript";
 import { getPhase6ServerActionsKeyWorkerNames } from "./phase6-topology-contract.mjs";
+import { parseJsoncText } from "./jsonc-utils.mjs";
 import { loadLocalEnv } from "./load-local-env.mjs";
 
 const ROOT_DIR = process.cwd();
@@ -104,16 +104,6 @@ function loadCommandEnv(args) {
   console.log(`[server-actions-key] ${KEY_NAME} source: ${keySource}`);
 }
 
-function parseJsoncFile(filePath, content) {
-  const parsed = ts.parseConfigFileTextToJson(filePath, content);
-  if (parsed.error) {
-    throw new Error(
-      ts.flattenDiagnosticMessageText(parsed.error.messageText, "\n"),
-    );
-  }
-  return parsed.config;
-}
-
 function getWorkerNames(baseWorkerName, scope) {
   const workers = [];
   if (scope === "phase5" || scope === "all") {
@@ -144,7 +134,7 @@ async function main() {
   }
 
   const wranglerText = await readFile(WRANGLER_CONFIG_PATH, "utf8");
-  const wranglerConfig = parseJsoncFile(WRANGLER_CONFIG_PATH, wranglerText);
+  const wranglerConfig = parseJsoncText(WRANGLER_CONFIG_PATH, wranglerText);
   const baseWorkerName = wranglerConfig.name ?? "tianze-website";
 
   const workers = getWorkerNames(baseWorkerName, args.scope);

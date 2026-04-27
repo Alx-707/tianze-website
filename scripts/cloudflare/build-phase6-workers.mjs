@@ -1,11 +1,12 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
-import ts from "typescript";
 import {
   PHASE6_WORKERS_BY_KEY,
+  getPhase6ApiRouteRules,
   getPhase6ConfigFileName,
   getPhase6WorkerNames,
 } from "./phase6-topology-contract.mjs";
+import { parseJsoncText } from "./jsonc-utils.mjs";
 
 const ROOT_DIR = process.cwd();
 const OPEN_NEXT_DIR = path.join(ROOT_DIR, ".open-next");
@@ -26,33 +27,17 @@ const DOMAIN_ROUTES = {
   production: [{ pattern: "tianze-pipe.com/*", zone_name: "tianze-pipe.com" }],
 };
 
-const API_ROUTE_BINDING_RULES = [
-  {
-    match: (pathname) =>
-      pathname === "/api/inquiry" ||
-      pathname === "/api/subscribe" ||
-      pathname === "/api/verify-turnstile" ||
-      pathname === "/api/health",
-    binding: PHASE6_WORKERS_BY_KEY.apiLead.binding,
-    target: "apiLead",
-  },
-];
+const API_ROUTE_BINDING_RULES = getPhase6ApiRouteRules().map((rule) => ({
+  match: `(pathname) => pathname === ${JSON.stringify(rule.pathname)}`,
+  binding: PHASE6_WORKERS_BY_KEY[rule.workerKey].binding,
+  target: rule.workerKey,
+}));
 const FORBIDDEN_RUNTIME_CACHE_CONFIG_KEYS = [
   "r2_buckets",
   "d1_databases",
   "durable_objects",
   "migrations",
 ];
-
-function parseJsoncFile(filePath, content) {
-  const parsed = ts.parseConfigFileTextToJson(filePath, content);
-  if (parsed.error) {
-    throw new Error(
-      ts.flattenDiagnosticMessageText(parsed.error.messageText, "\n"),
-    );
-  }
-  return parsed.config;
-}
 
 function normalizeWorkerNames(baseName) {
   return getPhase6WorkerNames(baseName);
@@ -110,6 +95,9 @@ function createCommonConfig(baseConfig, name, main, { includeAssets }) {
     alias: cloneJSON(PHASE6_ALIAS),
   };
 
+  // Keep placement as a deployment-wide intent. The current launch posture is
+  // all phase6 workers inherit wrangler.jsonc Smart Placement until production
+  // traffic proves a worker-specific placement split is better.
   if (baseConfig.placement) {
     config.placement = cloneJSON(baseConfig.placement);
   }
@@ -201,12 +189,9 @@ function createGatewayConfig(baseConfig, workerNames, envNames) {
 }
 
 function createGatewayWorkerSource() {
-  // Generate routeRules and resolver from the single source of truth (API_ROUTE_BINDING_RULES).
-  // Serialise each match function with .toString() so the generated worker stays in sync
-  // when routes are added/removed in API_ROUTE_BINDING_RULES.
   const routeRulesSource = API_ROUTE_BINDING_RULES.map(
     (rule) =>
-      `  {\n    target: "${rule.target}",\n    binding: "${rule.binding}",\n    match: ${rule.match.toString()},\n  }`,
+      `  {\n    target: "${rule.target}",\n    binding: "${rule.binding}",\n    match: ${rule.match},\n  }`,
   ).join(",\n");
 
   const routeResolver = API_ROUTE_BINDING_RULES.map(
@@ -217,15 +202,15 @@ function createGatewayWorkerSource() {
   ).join("");
 
   return `//@ts-expect-error: Will be resolved by wrangler build
-	import { handleImageRequest } from "../cloudflare/images.js";
+import { handleImageRequest } from "../cloudflare/images.js";
 //@ts-expect-error: Will be resolved by wrangler build
 import { runWithCloudflareRequestContext } from "../cloudflare/init.js";
 //@ts-expect-error: Will be resolved by wrangler build
-	import { maybeGetSkewProtectionResponse } from "../cloudflare/skew-protection.js";
-	// @ts-expect-error: Will be resolved by wrangler build
-	import { handler as middlewareHandler } from "../middleware/handler.mjs";
-	
-	const routeRules = [
+import { maybeGetSkewProtectionResponse } from "../cloudflare/skew-protection.js";
+// @ts-expect-error: Will be resolved by wrangler build
+import { handler as middlewareHandler } from "../middleware/handler.mjs";
+
+const routeRules = [
 ${routeRulesSource}
 ];
 
@@ -328,9 +313,9 @@ export default {
 
 function createServiceWorkerSource(functionName, importPath) {
   return `//@ts-expect-error: Will be resolved by wrangler build
-	import { runWithCloudflareRequestContext } from "../cloudflare/init.js";
-	
-	let cachedHandler;
+import { runWithCloudflareRequestContext } from "../cloudflare/init.js";
+
+let cachedHandler;
 
 async function getServerHandler() {
   if (cachedHandler) {
@@ -371,7 +356,7 @@ async function writeJsonFile(filePath, value) {
 
 async function main() {
   const wranglerText = await readFile(SOURCE_WRANGLER_CONFIG_PATH, "utf8");
-  const baseConfig = parseJsoncFile(SOURCE_WRANGLER_CONFIG_PATH, wranglerText);
+  const baseConfig = parseJsoncText(SOURCE_WRANGLER_CONFIG_PATH, wranglerText);
   assertRuntimeCacheBindingsAbsent(baseConfig);
   const baseWorkerName = baseConfig.name ?? "tianze-website";
   const workerNames = normalizeWorkerNames(baseWorkerName);

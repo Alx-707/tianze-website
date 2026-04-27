@@ -17,17 +17,32 @@ describe("proof lane contract", () => {
 
     expect(packageJson).toContain('"review:docs-truth"');
     expect(packageJson).toContain('"review:cf:official-compare"');
+    expect(packageJson).toContain('"review:cf:official-compare:generated"');
+    expect(packageJson).toContain('"review:cf:official-compare:source"');
     expect(packageJson).toContain('"review:derivative-readiness"');
 
     expect(ciLocalScript).toContain("pnpm review:docs-truth");
     expect(ciLocalScript).toContain("pnpm review:derivative-readiness");
-    expect(ciLocalScript).toContain("pnpm review:cf:official-compare");
+    expect(ciLocalScript).toContain("pnpm review:cf:official-compare:source");
     expect(
-      ciLocalScript.indexOf("pnpm review:cf:official-compare"),
+      ciLocalScript.indexOf("pnpm review:cf:official-compare:source"),
     ).toBeLessThan(ciLocalScript.indexOf("# 构建检查"));
 
     expect(releaseProofScript).toContain("pnpm review:docs-truth");
-    expect(releaseProofScript).toContain("pnpm review:cf:official-compare");
+    expect(releaseProofScript).toContain(
+      "pnpm review:cf:official-compare:source",
+    );
+    expect(releaseProofScript).toContain(
+      "pnpm review:cf:official-compare:generated",
+    );
+    expect(
+      releaseProofScript.indexOf("pnpm review:cf:official-compare:source"),
+    ).toBeLessThan(releaseProofScript.indexOf("pnpm deploy:cf:phase6:dry-run"));
+    expect(
+      releaseProofScript.indexOf("pnpm review:cf:official-compare:generated"),
+    ).toBeGreaterThan(
+      releaseProofScript.indexOf("pnpm deploy:cf:phase6:dry-run"),
+    );
     expect(releaseProofScript).toContain("pnpm review:derivative-readiness");
   });
 

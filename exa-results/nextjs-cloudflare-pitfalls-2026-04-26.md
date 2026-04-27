@@ -249,9 +249,9 @@
 
 ### 4.1 Middleware 限制
 
-**[High] cookies() API 在 Worker 中静默失败**
+**[High] Middleware / Proxy cookie API 用错会静默失败**
 - 来源：[lewiskori.com](https://lewiskori.com/blog/deploying-a-next-js-monorepo-to-cloudflare-workers/)
-- `next/headers` 的 `cookies()` 是 Node.js only，Worker 中必须用 `req.cookies`
+- `next/headers` 的 `cookies()` 可用于 Server Components、Server Functions 和 Route Handlers；但 Middleware / Proxy 运行在 Edge 边界，必须读取当前请求对象上的 cookies，例如 `request.cookies`
 
 **[High] Asset manifest 在 Middleware 之前检查 — 静态页面 locale 重写失败**
 - 来源：[kishormarasini.com](https://blog.kishormarasini.com.au/deploying-nextjs-to-cloudflare-workers)

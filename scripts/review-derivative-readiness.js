@@ -66,6 +66,8 @@ const CONTENT_CHECKS = [
     snippets: [
       '"review:docs-truth"',
       '"review:cf:official-compare"',
+      '"review:cf:official-compare:generated"',
+      '"review:cf:official-compare:source"',
       '"review:derivative-readiness"',
     ],
   },
