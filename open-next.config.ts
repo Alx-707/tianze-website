@@ -1,5 +1,9 @@
 import { defineCloudflareConfig } from "@opennextjs/cloudflare";
 import type { SplittedFunctionOptions } from "@opennextjs/aws/types/open-next";
+import {
+  getPhase6ApiPathnames,
+  getPhase6ApiSourceRoutes,
+} from "#phase6-topology-contract";
 
 const cloudflareConfig = defineCloudflareConfig({});
 
@@ -13,18 +17,8 @@ const splitFunctions: Record<string, SplittedFunctionOptions> = {
     // reproduced the old build-time ENOENT, but local Cloudflare preview still
     // lacks a clean proof after re-enabling minification.
     minify: false,
-    routes: [
-      "app/api/inquiry/route",
-      "app/api/subscribe/route",
-      "app/api/verify-turnstile/route",
-      "app/api/health/route",
-    ],
-    patterns: [
-      "/api/inquiry",
-      "/api/subscribe",
-      "/api/verify-turnstile",
-      "/api/health",
-    ],
+    routes: getPhase6ApiSourceRoutes("apiLead"),
+    patterns: getPhase6ApiPathnames("apiLead"),
   },
 };
 

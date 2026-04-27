@@ -76,7 +76,63 @@ describe("getContactCopy", () => {
     mockLoadCompleteMessages.mockResolvedValue(defaultMessages);
   });
 
-  it("builds a structured copy model for the given locale", async () => {
+  it("prefers the top-level contact namespace over the legacy contact copy path", () => {
+    const copy = getContactCopyFromMessages({
+      contact: {
+        title: "Top-level contact",
+        description: "Top-level description",
+        panel: {
+          contactTitle: "Top-level methods",
+          email: "Top-level email",
+          phone: "Top-level phone",
+          hoursTitle: "Top-level hours",
+          weekdays: "Top-level weekdays",
+          saturday: "Top-level saturday",
+          sunday: "Top-level sunday",
+          closed: "Top-level closed",
+          responseTitle: "Top-level response",
+          responseTimeLabel: "Top-level response label",
+          responseTimeValue: "Top-level response value",
+          bestForLabel: "Top-level best for",
+          bestForValue: "Top-level best value",
+          prepareLabel: "Top-level prepare label",
+          prepareValue: "Top-level prepare value",
+        },
+      },
+      underConstruction: {
+        pages: {
+          contact: {
+            title: "Legacy contact",
+            description: "Legacy description",
+            panel: {
+              contactTitle: "Legacy methods",
+              email: "Legacy email",
+              phone: "Legacy phone",
+              hoursTitle: "Legacy hours",
+              weekdays: "Legacy weekdays",
+              saturday: "Legacy saturday",
+              sunday: "Legacy sunday",
+              closed: "Legacy closed",
+              responseTitle: "Legacy response",
+              responseTimeLabel: "Legacy response label",
+              responseTimeValue: "Legacy response value",
+              bestForLabel: "Legacy best for",
+              bestForValue: "Legacy best value",
+              prepareLabel: "Legacy prepare label",
+              prepareValue: "Legacy prepare value",
+            },
+          },
+        },
+      },
+    });
+
+    expect(copy.header.title).toBe("Top-level contact");
+    expect(copy.header.description).toBe("Top-level description");
+    expect(copy.panel.contact.title).toBe("Top-level methods");
+    expect(copy.panel.response.prepareValue).toBe("Top-level prepare value");
+  });
+
+  it("keeps the legacy underConstruction contact namespace as a compatibility fallback", async () => {
     const locale: Locale = "en";
 
     const copy = await getContactCopy(locale);

@@ -116,6 +116,7 @@ pnpm review:locale-runtime
 - `src/app/api/health/route.ts`
 - `src/lib/api/cache-health-response.ts`
 - `tests/integration/api/health.test.ts`
+- `src/__tests__/middleware-locale-cookie.test.ts`
 
 ### Review rule
 

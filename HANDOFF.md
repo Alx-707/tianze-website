@@ -28,16 +28,25 @@ Check `git branch` for current feature branches.
 - Smart Placement 已加入 `wrangler.jsonc`，phase6 生成的 web / apiLead / gateway worker config 会继承。小样本 `/api/health` P95：开启前 320ms，开启后 321ms，暂未见明显改善也未见负面影响。
 - 2026-04-26 收尾审查后修正：`deploy:cf` / `deploy:cf:preview` / `deploy:cf:dry-run` 已改为 phase6 入口，`preview:cf:wrangler` 已禁用；phase6 生成配置不再注入误导性的 `deleted_classes` migration。旧 `tianze-website*` 服务名下历史 DO class 删除不是本 PR 已完成事项，后续需要单独 cleanup。已验证 `pnpm review:cf:official-compare`、targeted vitest、`pnpm deploy:cf:dry-run`、`pnpm release:verify` 全部通过。
 - 2026-04-26/27 PR #87 review 第一批 + 第二批已处理：Contact/Home 补 `setRequestLocale`；Contact 恢复 no-JS 表单结构；production env auto-load fail-closed；phase6 生成产物禁止 R2/D1/DO/migrations 旧字段并纳入 compare gate；JSON-LD graph 失败降级、graph node type 测试加硬；空 FAQ 不再输出 FAQPage；local artifact trash 避免跨卷 rename，并加入 ESLint ignore；Contact copy fallback 不再显示 dotted key。2026-04-26 23:28 PDT 重新跑 `pnpm release:verify` 通过，最终输出：`Release verification completed successfully.` 第三批清理项和旧 Cloudflare Worker 服务名下 DO class cleanup 保持 deferred。
+- 2026-04-27 第三批 review-swarm 保护缺口处理：`review:cf:official-compare` 默认改为 phase6 生成产物强检查，新增 `review:cf:official-compare:source` 给未构建前的源码检查；deploy alias 改为精确匹配并禁止夹带 cleanup/destructive 片段；phase6 API route 合同收敛到 topology contract 并明确禁止 `/api/cache/invalidate`；production worker deploy 输出不等于正式域名 cutover、不启动旧 DO cleanup 7 天计时。
 - 自定义域名仍未闭环：`preview.tianze-pipe.com` / root / www 当前本机 TLS 连接失败；当前 Cloudflare token 可部署 Workers，但查询 `tianze-pipe.com` zone 返回空列表，不能完成 SSL/DNS/Resend DKIM 的 zone 级确认。
 - 真实询盘链路仍未闭环：preview 三个 phase6 workers 当前 secret list 只有 `NEXT_SERVER_ACTIONS_ENCRYPTION_KEY`，缺 Resend / Airtable / Turnstile 相关 secrets。
 - 当前 worktree 有未跟踪调研/审计材料，不要使用 `git add -A`。
 
 ## Next Steps
 
-1. 如用户决定提交，按 phase 拆 commit，不要 `git add -A`：runtime cache removal、Cloudflare topology、governance/docs、Phase B fixes/evidence。
-2. Cloudflare zone 权限补齐后，确认 SSL Full Strict、DNS root/www/preview、Resend DKIM/CNAME；Worker secrets 补齐后再跑真实询盘邮件/Airtable 链路。
-3. OEM / Bending Machines 的 no-JS 内容深度仍需后续单独处理；workers.dev 可访问，但 HTML 仍有 skeleton marker。
-4. **Legacy DO cleanup deferred**：旧 `tianze-website*` 服务名下的 `DOQueueHandler` / `DOShardedTagCache` / `BucketCachePurge` 仍未删除。完整 5 步执行步骤见 `docs/technical/deployment-notes.md` 的 "真正执行 cleanup 的步骤（独立 PR）" 段。前置条件：当前 PR merged + 生产稳定 ≥7 天 + Cloudflare zone 权限就位。**不要混进当前 PR 或任何普通 preview 收尾。**
+1. Third batch cleanup should run on a branch, not directly on `main`. Start with:
+   - `pnpm truth:check`
+   - `pnpm review:translation-quartet`
+   - `pnpm review:translate-compat`
+2. If touching runtime, Cloudflare, or phase6 scripts, also run:
+   - `pnpm clean:next-artifacts`
+   - `pnpm build`
+   - `pnpm build:cf:phase6`
+   - `pnpm review:cf:official-compare`
+3. Cloudflare zone 权限补齐后，确认 SSL Full Strict、DNS root/www/preview、Resend DKIM/CNAME；Worker secrets 补齐后再跑真实询盘邮件/Airtable 链路。
+4. OEM / Bending Machines 的 no-JS 内容深度仍需后续单独处理；workers.dev 可访问，但 HTML 仍有 skeleton marker。
+5. **Legacy DO cleanup deferred**：旧 `tianze-website*` 服务名下的 `DOQueueHandler` / `DOShardedTagCache` / `BucketCachePurge` 仍未删除。完整执行口径见 `docs/technical/deployment-notes.md` 的 Legacy Durable Object cleanup 段，技术债登记见 `docs/technical/technical-debt.md` 的 TD-003。7 天稳定观察期只在正式域名流量切到 phase6 production 后开始计算；workers.dev preview 不启动这个计时。没有用户明确确认时，只做只读调查，不执行 cleanup deploy 或 worker delete。
 
 ## Key Files Changed Recently
 

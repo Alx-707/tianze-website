@@ -74,7 +74,7 @@ CI=1 pnpm test:e2e
 
 ```bash
 pnpm review:docs-truth
-pnpm review:cf:official-compare
+pnpm review:cf:official-compare:source
 pnpm review:derivative-readiness
 ```
 
@@ -83,6 +83,7 @@ pnpm review:derivative-readiness
 ```bash
 pnpm clean:next-artifacts && pnpm build
 CF_APPLY_GENERATED_PATCH=true pnpm build:cf
+pnpm review:cf:official-compare:generated
 ```
 
 这叫 **targeted proof**。

@@ -192,7 +192,7 @@ export const productTags = {
     });
   },
 
-  /** All tags for a product (includes list tags for cascading invalidation) */
+  /** Related product cache groups kept for build-time grouping; updates ship by redeploy. */
   forProduct(slug: string, locale: Locale, category?: string): string[] {
     const tags = [
       this.detail(slug, locale),

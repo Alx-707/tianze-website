@@ -97,11 +97,11 @@
 这个仓库里，常见 targeted proof 是：
 
 - `pnpm review:docs-truth`
-- `pnpm review:cf:official-compare`
+- `pnpm review:cf:official-compare:source`
 - `pnpm review:derivative-readiness`
 - 变更范围对应的 Vitest 套件
 - 串行构建，如 `pnpm clean:next-artifacts && pnpm build`
-- 如果碰到 Cloudflare / metadata / truth surface，再补 `pnpm build:cf`
+- 如果碰到 Cloudflare deploy path，再补 `pnpm clean:next-artifacts && pnpm build:cf:phase6 && pnpm review:cf:official-compare`
 
 它能证明：
 

@@ -1,7 +1,8 @@
 import { spawnSync } from "node:child_process";
-import { access } from "node:fs/promises";
+import { access, readFile } from "node:fs/promises";
 import path from "node:path";
 import { getPhase6DeploymentOrder } from "./phase6-topology-contract.mjs";
+import { parseJsoncText } from "./jsonc-utils.mjs";
 import { loadLocalEnv } from "./load-local-env.mjs";
 
 const ROOT_DIR = process.cwd();
@@ -164,6 +165,84 @@ async function ensureConfigs() {
   }
 }
 
+async function readProductionDomainRouteStatus() {
+  const gatewayConfigPath = path.join(CONFIG_DIR, "gateway.jsonc");
+
+  try {
+    const gatewayConfig = parseJsoncText(
+      gatewayConfigPath,
+      await readFile(gatewayConfigPath, "utf8"),
+    );
+    const routes = gatewayConfig.env?.production?.routes;
+    return { status: "ok", routes: Array.isArray(routes) ? routes : [] };
+  } catch (error) {
+    if (error && error.code === "ENOENT") {
+      return { status: "missing", routes: [] };
+    }
+    throw new Error(
+      `[phase6] cannot parse ${path.relative(ROOT_DIR, gatewayConfigPath)}: ${
+        (error && error.message) || error
+      }`,
+    );
+  }
+}
+
+async function printProductionCutoverBoundary() {
+  if (targetEnv !== "production") {
+    return;
+  }
+
+  let routeStatus;
+  try {
+    routeStatus = await readProductionDomainRouteStatus();
+  } catch (error) {
+    console.warn(
+      `[phase6] production worker deploy boundary warning: ${
+        (error && error.message) || error
+      }`,
+    );
+    console.log(
+      "[phase6] This deploy does not prove tianze-pipe.com cutover and does not start the legacy DO cleanup 7-day clock.",
+    );
+    return;
+  }
+
+  const { status, routes } = routeStatus;
+
+  if (status === "missing") {
+    console.log(
+      "[phase6] production worker deploy boundary: gateway.jsonc is missing, so official-domain route status cannot be assessed.",
+    );
+    console.log(
+      "[phase6] This deploy does not prove tianze-pipe.com cutover and does not start the legacy DO cleanup 7-day clock.",
+    );
+    return;
+  }
+
+  if (routes.length === 0) {
+    console.log(
+      "[phase6] production worker deploy boundary: no official-domain route is present in gateway.jsonc.",
+    );
+    console.log(
+      "[phase6] This deploy does not prove tianze-pipe.com cutover and does not start the legacy DO cleanup 7-day clock.",
+    );
+    return;
+  }
+
+  const routePatterns = routes
+    .map((route) =>
+      typeof route === "string" ? route : route.pattern || "(unlabelled route)",
+    )
+    .filter(Boolean)
+    .join(", ");
+  console.log(
+    `[phase6] production gateway includes domain route(s): ${routePatterns || "(unlabelled routes)"}.`,
+  );
+  console.log(
+    "[phase6] Legacy DO cleanup 7-day clock starts only after explicit domain-cutover evidence and deployed smoke, not from this deploy command alone.",
+  );
+}
+
 // --- Deployment ---
 
 function runDeploy(configFile) {
@@ -257,3 +336,4 @@ if (args.dryRun) {
 } else {
   console.log("[phase6] deployment complete");
 }
+await printProductionCutoverBoundary();

@@ -64,15 +64,15 @@ const CONTACT_COPY_FALLBACKS = {
     "Share product type, size/standard, quantity, destination market, and timeline",
 } satisfies Record<string, string>;
 
-function readContactMessage(messages: MessageRecord, key: string) {
+const CONTACT_MESSAGE_ROOTS = [
+  ["contact"],
+  ["underConstruction", "pages", "contact"],
+] as const;
+
+function readMessageAtPath(messages: MessageRecord, pathSegments: string[]) {
   let current: unknown = messages;
 
-  for (const segment of [
-    "underConstruction",
-    "pages",
-    "contact",
-    ...key.split("."),
-  ]) {
+  for (const segment of pathSegments) {
     if (
       typeof current !== "object" ||
       current === null ||
@@ -85,6 +85,22 @@ function readContactMessage(messages: MessageRecord, key: string) {
   }
 
   return typeof current === "string" ? current : null;
+}
+
+function readContactMessage(messages: MessageRecord, key: string) {
+  const keySegments = key.split(".");
+
+  for (const rootSegments of CONTACT_MESSAGE_ROOTS) {
+    const value = readMessageAtPath(messages, [
+      ...rootSegments,
+      ...keySegments,
+    ]);
+    if (value !== null) {
+      return value;
+    }
+  }
+
+  return null;
 }
 
 export function getContactCopyFromMessages(
@@ -134,8 +150,8 @@ export function getContactCopyFromMessages(
 /**
  * Server-side helper to build a structured copy model for the contact page.
  *
- * Depends only on the explicit `locale` parameter and the
- * `underConstruction.pages.contact` i18n namespace.
+ * Depends only on the explicit `locale` parameter. Reads `contact.*` first and
+ * falls back to the legacy `underConstruction.pages.contact.*` namespace.
  */
 export async function getContactCopy(
   locale: Locale,

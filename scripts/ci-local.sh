@@ -166,11 +166,11 @@ run_basic_checks() {
         return 1
     fi
 
-    print_step "Cloudflare 官方对照检查"
-    if pnpm review:cf:official-compare; then
-        print_success "Cloudflare 官方对照检查通过"
+    print_step "Cloudflare 官方源码对照检查"
+    if pnpm review:cf:official-compare:source; then
+        print_success "Cloudflare 官方源码对照检查通过"
     else
-        print_error "Cloudflare 官方对照检查失败"
+        print_error "Cloudflare 官方源码对照检查失败"
         return 1
     fi
 
