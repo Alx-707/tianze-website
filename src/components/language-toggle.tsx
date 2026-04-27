@@ -132,22 +132,22 @@ export const LanguageToggle = memo(({ locale }: { locale?: "en" | "zh" }) => {
             )}
           >
             <Globe
-              className="h-3.5 w-3.5 text-foreground/70"
+              className="h-3.5 w-3.5 text-muted-foreground"
               data-testid="globe-icon"
             />
             <span
-              className="text-xs font-medium text-foreground/70"
+              className="text-xs font-medium text-muted-foreground"
               data-testid="language-current-label"
               translate="no"
             >
               {currentLanguageName}
             </span>
             {isPending ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin text-foreground/70" />
+              <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
             ) : (
               <svg
                 className={cn(
-                  "h-3.5 w-3.5 text-foreground/70",
+                  "h-3.5 w-3.5 text-muted-foreground",
                   // 箭头旋转：展开180°，收起0°，160ms过渡
                   "transition-transform duration-150 ease-in-out",
                   isOpen && "rotate-180",

@@ -475,7 +475,6 @@ test.describe("Navigation System", () => {
         await checkA11y(page, sheetHandle ?? undefined, {
           detailedReport: true,
           detailedReportOptions: { html: true },
-          axeOptions: { rules: { "color-contrast": { enabled: false } } },
           includedImpacts: ["critical", "serious"],
         });
         return;
@@ -488,7 +487,6 @@ test.describe("Navigation System", () => {
       await checkA11y(page, navHandle ?? undefined, {
         detailedReport: true,
         detailedReportOptions: { html: true },
-        axeOptions: { rules: { "color-contrast": { enabled: false } } },
         includedImpacts: ["critical", "serious"],
       });
     });

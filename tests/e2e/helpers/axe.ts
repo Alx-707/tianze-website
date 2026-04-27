@@ -24,6 +24,8 @@ export interface AxeCheckOptions {
   includedImpacts?: NonNullable<ImpactValue>[];
 }
 
+const MAX_CSS_ANIMATION_SETTLE_MS = 1_200;
+
 function formatViolationNode(node: Result["nodes"][number]): string {
   const target = node.target.join(", ");
   const summary = node.failureSummary ?? node.html;
@@ -59,6 +61,42 @@ function getRelevantViolations(
   );
 }
 
+async function waitForFiniteCssAnimations(page: Page): Promise<void> {
+  await page.evaluate(async (maxWaitMs) => {
+    if (typeof document.getAnimations !== "function") {
+      return;
+    }
+
+    const activeAnimations = document
+      .getAnimations({ subtree: true })
+      .filter((animation) => {
+        if (
+          animation.playState === "finished" ||
+          animation.playState === "idle" ||
+          !animation.effect
+        ) {
+          return false;
+        }
+
+        const timing = animation.effect.getComputedTiming();
+        return timing.endTime > 0 && Number.isFinite(timing.endTime);
+      });
+
+    if (activeAnimations.length === 0) {
+      return;
+    }
+
+    await Promise.race([
+      Promise.allSettled(
+        activeAnimations.map((animation) =>
+          animation.finished.catch(() => undefined),
+        ),
+      ),
+      new Promise((resolve) => window.setTimeout(resolve, maxWaitMs)),
+    ]);
+  }, MAX_CSS_ANIMATION_SETTLE_MS);
+}
+
 /**
  * 在给定页面上运行 axe-core 可访问性检查。
  * 当前实现以“整页扫描”为主，context 与高级选项仅用于签名兼容，
@@ -69,6 +107,8 @@ export async function checkA11y(
   context?: unknown,
   options?: AxeCheckOptions,
 ): Promise<void> {
+  await waitForFiniteCssAnimations(page);
+
   const builder = new AxeBuilder({ page });
 
   if (typeof context === "string") {
