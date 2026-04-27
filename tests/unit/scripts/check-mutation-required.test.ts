@@ -1,9 +1,39 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it, vi } from "vitest";
 
 const mutationCheck =
   await import("../../../scripts/check-mutation-required.js");
 
 describe("check-mutation-required", () => {
+  describe("suggested mutation commands", () => {
+    const packageJson = JSON.parse(readFileSync("package.json", "utf8")) as {
+      scripts: Record<string, string>;
+    };
+
+    function extractPnpmScripts(command: string): string[] {
+      return command
+        .split("&&")
+        .map((part) => part.trim())
+        .map((part) => part.match(/^pnpm (?<script>[^\s]+)$/)?.groups?.script)
+        .filter((script): script is string => Boolean(script));
+    }
+
+    it.each([
+      [["src/lib/lead-pipeline/"], "lead only"],
+      [["src/lib/security/"], "security only"],
+      [["src/lib/form-schema/"], "form schema"],
+      [["src/lib/lead-pipeline/", "src/lib/security/"], "lead and security"],
+    ])("only suggests package scripts that exist for %s", (directories) => {
+      const command = mutationCheck.getSuggestedMutationCommand(directories);
+      const scripts = extractPnpmScripts(command);
+
+      expect(scripts).not.toHaveLength(0);
+      expect(scripts).toEqual(
+        scripts.filter((script) => script in packageJson.scripts),
+      );
+    });
+  });
+
   describe("getLatestRelevantChangeTimestampMs", () => {
     beforeEach(() => {
       vi.clearAllMocks();
@@ -178,7 +208,7 @@ describe("check-mutation-required", () => {
           "命中目录: src/lib/lead-pipeline/, src/lib/security/",
           "报告 mutate scope: src/lib/security/**/*.ts",
           "未覆盖目录: src/lib/lead-pipeline/",
-          "请运行 pnpm test:mutation:lead-security 并更新 reports/mutation/mutation-report.json",
+          "请运行 pnpm test:mutation:lead && pnpm test:mutation:security 并更新 reports/mutation/mutation-report.json",
         ].join("\n"),
       );
     });
