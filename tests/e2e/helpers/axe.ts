@@ -1,5 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import type { Page } from "@playwright/test";
+import type { ImpactValue, Result, RunOptions } from "axe-core";
 
 /**
  * 使用 AxeBuilder 封装的可访问性检查工具，替代旧版 checkA11y/injectAxe API。
@@ -17,10 +18,45 @@ export interface AxeCheckOptions {
   detailedReportOptions?: {
     html?: boolean;
   };
-  /** 透传给 axe-core 的运行选项，便于后续扩展（当前类型放宽为 unknown 以兼容测试调用） */
-  axeOptions?: unknown;
+  /** 透传给 axe-core 的运行选项，便于按调用点关闭已知噪音规则 */
+  axeOptions?: RunOptions;
   /** 仅关注的影响级别，例如 ['critical', 'serious'] */
-  includedImpacts?: string[];
+  includedImpacts?: NonNullable<ImpactValue>[];
+}
+
+function formatViolationNode(node: Result["nodes"][number]): string {
+  const target = node.target.join(", ");
+  const summary = node.failureSummary ?? node.html;
+
+  return `    - ${target}: ${summary}`;
+}
+
+function formatViolation(violation: Result): string {
+  const nodes = violation.nodes.slice(0, 3).map(formatViolationNode).join("\n");
+
+  return [
+    `  ${violation.id} (${violation.impact ?? "unknown"}): ${violation.help}`,
+    `    ${violation.helpUrl}`,
+    nodes,
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
+
+function getRelevantViolations(
+  violations: Result[],
+  includedImpacts?: NonNullable<ImpactValue>[],
+): Result[] {
+  if (!includedImpacts || includedImpacts.length === 0) {
+    return violations;
+  }
+
+  return violations.filter(
+    (violation) =>
+      violation.impact !== null &&
+      violation.impact !== undefined &&
+      includedImpacts.includes(violation.impact),
+  );
 }
 
 /**
@@ -30,9 +66,31 @@ export interface AxeCheckOptions {
  */
 export async function checkA11y(
   page: Page,
-  _context?: unknown,
-  _options?: AxeCheckOptions,
+  context?: unknown,
+  options?: AxeCheckOptions,
 ): Promise<void> {
   const builder = new AxeBuilder({ page });
-  await builder.analyze();
+
+  if (typeof context === "string") {
+    builder.include(context);
+  }
+
+  if (options?.axeOptions) {
+    builder.options(options.axeOptions);
+  }
+
+  const results = await builder.analyze();
+  const violations = getRelevantViolations(
+    results.violations,
+    options?.includedImpacts,
+  );
+
+  if (violations.length > 0) {
+    throw new Error(
+      [
+        `Axe accessibility violations found: ${violations.length}`,
+        ...violations.map(formatViolation),
+      ].join("\n\n"),
+    );
+  }
 }

@@ -359,20 +359,26 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
       console.log(`✅ Contact page loaded in ${loadTime}ms`);
     });
 
-    test("表单应该有正确的 ARIA 属性", async ({ page }) => {
+    test("表单字段应该有可读标签和正确输入类型", async ({ page }) => {
       await gotoContactPage(page, test.info(), "en");
 
-      // 检查表单的可访问性
       const form = page.locator("form").first();
       await expect(form).toBeVisible();
 
-      // 检查输入框有正确的 aria-describedby（用于错误提示）
-      const emailInput = page.locator('input[name="email"]');
-      const hasAriaDescribedBy =
-        await emailInput.getAttribute("aria-describedby");
+      const firstNameInput = page.getByLabel(/first name/i);
+      await expect(firstNameInput).toHaveAttribute("name", "firstName");
+      await expect(firstNameInput).toHaveAttribute("type", "text");
 
-      // 至少应该有 aria-describedby 或其他 ARIA 属性
-      expect(hasAriaDescribedBy !== null || true).toBeTruthy();
+      const emailInput = page.getByLabel(/email/i);
+      await expect(emailInput).toHaveAttribute("name", "email");
+      await expect(emailInput).toHaveAttribute("type", "email");
+
+      const messageInput = page.getByLabel(/message/i);
+      await expect(messageInput).toHaveAttribute("name", "message");
+
+      const privacyCheckbox = page.getByLabel(/privacy policy/i);
+      await expect(privacyCheckbox).toHaveAttribute("name", "acceptPrivacy");
+      await expect(privacyCheckbox).toHaveAttribute("type", "checkbox");
     });
   });
 
