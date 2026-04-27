@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import { setRequestLocale } from "next-intl/server";
-import { ContactForm } from "@/components/contact/contact-form";
+import { ContactFormIsland } from "@/components/contact/contact-form-island";
 import { FaqAccordion } from "@/components/sections/faq-accordion";
 import { JsonLdGraphScript } from "@/components/seo";
 import { Card } from "@/components/ui/card";
@@ -354,6 +354,37 @@ function getStaticContactPage(locale: Locale): Page {
   } as unknown as Page;
 }
 
+function ContactPageFallback({ locale }: { locale: Locale }) {
+  const page = getStaticContactPage(locale);
+  const messages = getStaticMessages(locale);
+
+  return (
+    <main
+      aria-busy="true"
+      className="notranslate min-h-[80vh] px-4 py-16"
+      data-testid="contact-page-fallback"
+      translate="no"
+    >
+      <div className="mx-auto max-w-4xl">
+        <header className="mb-12 text-center">
+          <h1 className="text-heading mb-4">{page.metadata.title}</h1>
+          {page.metadata.description ? (
+            <p className="text-body mx-auto max-w-2xl text-muted-foreground">
+              {page.metadata.description}
+            </p>
+          ) : null}
+        </header>
+        <ContactFormStaticFallback messages={messages} />
+      </div>
+    </main>
+  );
+}
+
+function ContactContent({ locale }: { locale: Locale }) {
+  setRequestLocale(locale);
+  return <ContactContentBody locale={locale} />;
+}
+
 function ContactContentBody({ locale }: { locale: Locale }) {
   const page = getStaticContactPage(locale);
   const messages = getStaticMessages(locale);
@@ -394,11 +425,9 @@ function ContactContentBody({ locale }: { locale: Locale }) {
         </article>
 
         <div className="grid gap-8 md:grid-cols-2">
-          <Suspense
+          <ContactFormIsland
             fallback={<ContactFormStaticFallback messages={messages} />}
-          >
-            <ContactForm />
-          </Suspense>
+          />
 
           <div className="space-y-6">
             <ContactMethodsCard copy={copy.panel.contact} />
@@ -419,7 +448,11 @@ function ContactContentBody({ locale }: { locale: Locale }) {
 
 export default async function ContactPage({ params }: ContactPageProps) {
   const { locale } = await params;
-  setRequestLocale(locale);
+  const typedLocale = locale as Locale;
 
-  return <ContactContentBody locale={locale as Locale} />;
+  return (
+    <Suspense fallback={<ContactPageFallback locale={typedLocale} />}>
+      <ContactContent locale={typedLocale} />
+    </Suspense>
+  );
 }

@@ -1,5 +1,5 @@
 import React from "react";
-import { screen } from "@testing-library/react";
+import { screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import ContactPage, { generateMetadata } from "@/app/[locale]/contact/page";
 import { renderAsyncPage } from "@/testing/render-async-page";
@@ -13,7 +13,20 @@ vi.mock("react", async () => {
 
   return {
     ...actual,
-    Suspense: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    Suspense: ({
+      children,
+      fallback,
+    }: {
+      children: React.ReactNode;
+      fallback?: React.ReactNode;
+    }) => (
+      <section data-testid="suspense-boundary">
+        {fallback ? (
+          <div data-testid="suspense-fallback">{fallback}</div>
+        ) : null}
+        {children}
+      </section>
+    ),
   };
 });
 
@@ -49,6 +62,15 @@ const contactCopy = {
 
 vi.mock("@/components/contact/contact-form", () => ({
   ContactForm: () => <div data-testid="contact-form">Contact Form</div>,
+}));
+
+vi.mock("@/components/contact/contact-form-island", () => ({
+  ContactFormIsland: ({ fallback }: { fallback: React.ReactNode }) => (
+    <section data-testid="contact-form-island">
+      {fallback}
+      <div data-testid="contact-form">Contact Form</div>
+    </section>
+  ),
 }));
 
 vi.mock("@/components/sections/faq-section", () => ({
@@ -88,10 +110,24 @@ describe("ContactPage MDX migration", () => {
 
     await renderAsyncPage(page as React.JSX.Element);
 
-    expect(await screen.findByRole("heading", { level: 1 })).toHaveTextContent(
-      "Contact Us",
-    );
+    const content = await screen.findByTestId("contact-page-content");
+
+    expect(
+      within(content).getByRole("heading", { level: 1 }),
+    ).toHaveTextContent("Contact Us");
     expect(screen.getByTestId("mdx-body")).toBeInTheDocument();
+    expect(screen.getByTestId("contact-form")).toBeInTheDocument();
+  });
+
+  it("wraps the whole contact body in a Suspense fallback for Cloudflare prerender isolation", async () => {
+    const page = await ContactPage({
+      params: Promise.resolve({ locale: "en" }),
+    });
+
+    await renderAsyncPage(page as React.JSX.Element);
+
+    expect(screen.getByTestId("contact-page-fallback")).toBeInTheDocument();
+    expect(screen.getByTestId("contact-page-content")).toBeInTheDocument();
     expect(screen.getByTestId("contact-form")).toBeInTheDocument();
   });
 
