@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
+  getPhase6ApiPathnames,
+  getPhase6ApiRouteRules,
+  getPhase6ApiSourceRoutes,
   getPhase6DeploymentOrder,
   getPhase6PatchPrefetchWorkerKeys,
   getPhase6ServerActionsKeyWorkerNames,
@@ -33,5 +36,33 @@ describe("phase6 topology contract", () => {
 
   it("keeps prefetch patch targets aligned with the same catalog", () => {
     expect(getPhase6PatchPrefetchWorkerKeys()).toEqual(["apiLead"]);
+  });
+
+  it("keeps phase6 API route split explicit and excludes old cache invalidation", () => {
+    expect(getPhase6ApiSourceRoutes("apiLead")).toEqual([
+      "app/api/inquiry/route",
+      "app/api/subscribe/route",
+      "app/api/verify-turnstile/route",
+      "app/api/health/route",
+    ]);
+
+    expect(getPhase6ApiPathnames("apiLead")).toEqual([
+      "/api/inquiry",
+      "/api/subscribe",
+      "/api/verify-turnstile",
+      "/api/health",
+    ]);
+
+    const allPathnames = getPhase6ApiPathnames();
+    expect(allPathnames).not.toContain("/api/cache/invalidate");
+    expect(getPhase6ApiRouteRules()).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          pathname: "/api/inquiry",
+          sourceRoute: "app/api/inquiry/route",
+          workerKey: "apiLead",
+        }),
+      ]),
+    );
   });
 });

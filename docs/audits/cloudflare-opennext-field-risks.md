@@ -150,9 +150,9 @@ Tianze Website 是 B2B 展示和询盘站，内容更新频率不高。运行时
 
 最小验证：
 
-- 跑 `pnpm build:cf`。
+- 跑 `pnpm build:cf:phase6`。
 - 跑 Cloudflare deployed smoke。
-- 跑 `pnpm review:cf:official-compare`，确认旧 bindings / invalidation route 没有回归。
+- 跑 `pnpm review:cf:official-compare`，确认生成后的 phase6 部署产物没有旧 bindings / invalidation route 回归。
 
 建议结论方向：
 

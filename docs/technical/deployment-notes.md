@@ -224,6 +224,17 @@ pnpm exec wrangler versions list --name tianze-website-preview --json
 pnpm exec wrangler versions list --name tianze-website-production --json
 ```
 
+Durable Object namespace inventory 也只允许读取，不允许删除或迁移：
+
+```bash
+curl -sS \
+  -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN:?set token}" \
+  "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID:?set account}/workers/durable_objects/namespaces" \
+  | jq '.result[] | {id, name, class_name, script_name}'
+```
+
+Dashboard 路径：Cloudflare Dashboard -> Workers & Pages -> Durable Objects。只记录 namespace / class / script 归属，不点 delete，不创建 migration。
+
 尾日志确认：
 
 ```bash
@@ -239,6 +250,7 @@ Cleanup 设计原则：
 3. `deleted_classes` 只能包含旧 Worker 当前实际存在且代码已不再引用的 DO class。
 4. 不要把 `new_sqlite_classes` 写进 cleanup 配置，除非当前旧 Worker 历史证明该 class 从未注册过；否则会和历史 migration 冲突。
 5. 不要直接 `wrangler delete` 旧 Worker。先完成同名 Worker 的 `deleted_classes` migration 并确认 Durable Object namespace 清空。
+6. namespace inventory、deployment history、tail 证据三者不一致时，以 live runtime 和 Cloudflare dashboard/API 的当前状态为准，不靠仓库旧配置猜测。
 
 执行动作保持单独 PR / 单独维护窗口；本第三批只允许更新 runbook 和只读调查，不执行 cleanup deploy。
 
@@ -304,7 +316,8 @@ Cleanup 设计原则：
 
 | Check | Command | Result | Decisive output |
 |---|---|---|---|
-| Cloudflare config guard | `pnpm review:cf:official-compare` | PASS | `cf-official-compare: passed` |
+| Cloudflare source config guard | `pnpm review:cf:official-compare:source` | PASS | `cf-official-compare: passed` |
+| Cloudflare generated artifact guard | `pnpm review:cf:official-compare:generated` | PASS | `cf-official-compare: passed` |
 | Targeted unit tests | `pnpm exec vitest run 'src/app/[locale]/contact/__tests__/page.test.tsx' src/components/seo/__tests__/json-ld-script.test.ts tests/unit/scripts/phase6-topology-contract.test.ts` | PASS | `Test Files 3 passed (3); Tests 9 passed (9)` |
 | Phase6 alias dry-run | `pnpm deploy:cf:dry-run` | PASS | `[phase6] dry-run complete` |
 | Legacy wrangler guard | `pnpm preview:cf:wrangler` | Expected FAIL | `preview:cf:wrangler is disabled because it uses the old single-worker Wrangler entrypoint.` |

@@ -90,6 +90,10 @@ production Worker path. workers.dev preview availability does not start this
 clock. If the site is not formally deployed on the production domain, this debt
 stays in observation mode.
 
+Running `deploy:cf:phase6:production` by itself is only a production Worker
+deploy. It does not prove the official domain has been routed to phase6 and does
+not start the 7-day cleanup clock.
+
 **Allowed now:**
 
 - Read Worker deployment/version metadata

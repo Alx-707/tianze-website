@@ -123,10 +123,10 @@ Run:
 
 ```bash
 pnpm review:docs-truth
-pnpm review:cf:official-compare
+pnpm review:cf:official-compare:source
 ```
 
-Expected: both commands exit 0. If `review:cf:official-compare` warns that generated phase6 config is absent, continue; generated config strictness is added in Task 3.
+Expected: both commands exit 0. Artifact-level Cloudflare compare now lives behind `pnpm review:cf:official-compare` and requires `pnpm build:cf:phase6` first.
 
 ---
 
@@ -401,13 +401,15 @@ Expected: all tests in that file pass.
 Near the top of `scripts/cloudflare/check-official-compare.mjs`, after `const PHASE6_CONFIG_DIR = ...`, add:
 
 ```js
-const REQUIRE_GENERATED_CONFIG = process.argv.includes("--require-generated");
+const SOURCE_ONLY = process.argv.includes("--source-only");
+const REQUIRE_GENERATED_CONFIG =
+  process.argv.includes("--require-generated") || !SOURCE_ONLY;
 ```
 
 Expected behavior:
 
-- Default `pnpm review:cf:official-compare` warns if `.open-next/wrangler/phase6` is absent.
-- `node scripts/cloudflare/check-official-compare.mjs --require-generated` fails if generated phase6 config is absent.
+- Default `pnpm review:cf:official-compare` fails if `.open-next/wrangler/phase6` is absent.
+- `pnpm review:cf:official-compare:source` is the source-only check to run before `pnpm build:cf:phase6`.
 
 - [ ] **Step 2: Replace raw forbidden-snippet checks with typed checks**
 

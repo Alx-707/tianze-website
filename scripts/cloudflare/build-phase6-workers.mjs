@@ -1,11 +1,12 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
-import ts from "typescript";
 import {
   PHASE6_WORKERS_BY_KEY,
+  getPhase6ApiRouteRules,
   getPhase6ConfigFileName,
   getPhase6WorkerNames,
 } from "./phase6-topology-contract.mjs";
+import { parseJsoncText } from "./jsonc-utils.mjs";
 
 const ROOT_DIR = process.cwd();
 const OPEN_NEXT_DIR = path.join(ROOT_DIR, ".open-next");
@@ -26,36 +27,17 @@ const DOMAIN_ROUTES = {
   production: [{ pattern: "tianze-pipe.com/*", zone_name: "tianze-pipe.com" }],
 };
 
-// Each matcher must be self-contained. build-phase6-workers serializes
-// rule.match with .toString() into the generated gateway worker, so a matcher
-// cannot close over external constants, regexes, or helper functions.
-const API_ROUTE_BINDING_RULES = [
-  {
-    match: (pathname) =>
-      pathname === "/api/inquiry" ||
-      pathname === "/api/subscribe" ||
-      pathname === "/api/verify-turnstile" ||
-      pathname === "/api/health",
-    binding: PHASE6_WORKERS_BY_KEY.apiLead.binding,
-    target: "apiLead",
-  },
-];
+const API_ROUTE_BINDING_RULES = getPhase6ApiRouteRules().map((rule) => ({
+  match: `(pathname) => pathname === ${JSON.stringify(rule.pathname)}`,
+  binding: PHASE6_WORKERS_BY_KEY[rule.workerKey].binding,
+  target: rule.workerKey,
+}));
 const FORBIDDEN_RUNTIME_CACHE_CONFIG_KEYS = [
   "r2_buckets",
   "d1_databases",
   "durable_objects",
   "migrations",
 ];
-
-function parseJsoncFile(filePath, content) {
-  const parsed = ts.parseConfigFileTextToJson(filePath, content);
-  if (parsed.error) {
-    throw new Error(
-      ts.flattenDiagnosticMessageText(parsed.error.messageText, "\n"),
-    );
-  }
-  return parsed.config;
-}
 
 function normalizeWorkerNames(baseName) {
   return getPhase6WorkerNames(baseName);
@@ -207,12 +189,9 @@ function createGatewayConfig(baseConfig, workerNames, envNames) {
 }
 
 function createGatewayWorkerSource() {
-  // Generate routeRules and resolver from the single source of truth (API_ROUTE_BINDING_RULES).
-  // Serialise each match function with .toString() so the generated worker stays in sync
-  // when routes are added/removed in API_ROUTE_BINDING_RULES.
   const routeRulesSource = API_ROUTE_BINDING_RULES.map(
     (rule) =>
-      `  {\n    target: "${rule.target}",\n    binding: "${rule.binding}",\n    match: ${rule.match.toString()},\n  }`,
+      `  {\n    target: "${rule.target}",\n    binding: "${rule.binding}",\n    match: ${rule.match},\n  }`,
   ).join(",\n");
 
   const routeResolver = API_ROUTE_BINDING_RULES.map(
@@ -377,7 +356,7 @@ async function writeJsonFile(filePath, value) {
 
 async function main() {
   const wranglerText = await readFile(SOURCE_WRANGLER_CONFIG_PATH, "utf8");
-  const baseConfig = parseJsoncFile(SOURCE_WRANGLER_CONFIG_PATH, wranglerText);
+  const baseConfig = parseJsoncText(SOURCE_WRANGLER_CONFIG_PATH, wranglerText);
   assertRuntimeCacheBindingsAbsent(baseConfig);
   const baseWorkerName = baseConfig.name ?? "tianze-website";
   const workerNames = normalizeWorkerNames(baseWorkerName);

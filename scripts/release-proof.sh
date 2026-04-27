@@ -18,7 +18,7 @@ fi
 
 echo "== Release verification flow =="
 pnpm review:docs-truth
-pnpm review:cf:official-compare
+pnpm review:cf:official-compare:source
 pnpm review:derivative-readiness
 pnpm type-check
 pnpm lint:check
@@ -33,6 +33,7 @@ pnpm build
 pnpm build:site:equipment
 pnpm build:cf
 pnpm deploy:cf:phase6:dry-run
+pnpm review:cf:official-compare:generated
 pnpm test:release-smoke
 
 echo "Cloudflare proof split:"
