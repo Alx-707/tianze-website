@@ -24,7 +24,7 @@
 
 ### 国际化
 
-- **next-intl 4.9.1**：多语言框架
+- **next-intl 4.11.0**：多语言框架
 - 当前语言：**en / zh**
 - 运行时翻译文件：`messages/en.json`、`messages/zh.json`
 - 翻译同步与校验走仓库脚本，不依赖外部 CMS
