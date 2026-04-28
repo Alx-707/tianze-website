@@ -35,7 +35,7 @@
   - 结果是：这条 release proof 现在能证明“站点 header 大概长这样”，证明不了“当前 CSP 真把当前运行时脚本约束对了”。
 
 - **[高风险][cache/release identity] 固定 `generateBuildId: () => "tianze-website"` 现在已经失去原始理由，但还在把所有发布版本伪装成同一个 build identity。**
-  - Next 本地文档明确写的是：build id 用来标识“当前正在服务的构建版本”，只有“同一个 build 跑多个容器”时才需要一致（`.next-docs/01-app/03-api-reference/05-config/01-next-config-js/generateBuildId.mdx:8-17`）
+  - Next 本地文档明确写的是：build id 用来标识“当前正在服务的构建版本”，只有“同一个 build 跑多个容器”时才需要一致（`node_modules/next/dist/docs/01-app/03-api-reference/05-config/01-next-config-js/generateBuildId.md`）
   - 代码里的理由仍然是“hash-based CSP validation depends on deterministic inline RSC payloads”（`next.config.ts:21-26`）
   - 但当前分支已经删掉 hash allowlist，连测试都明确断言“不再使用 sha256”（`src/config/__tests__/security.test.ts:37-43`）
   - 也就是说，固定 build id 现在没有对应的安全收益，却让不同发布版本共用同一个 build identity，增加 CDN/客户端拿到旧 `_next` 资产时的排障难度。

@@ -65,6 +65,7 @@ coverage/
 reports/
 playwright-report/
 test-results/
+.playwright-cli/
 
 # Logs
 *.log
