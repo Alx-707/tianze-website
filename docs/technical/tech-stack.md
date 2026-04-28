@@ -87,8 +87,8 @@
 
 ### 单元 / 集成测试
 
-- **Vitest 4.1.2**
-- **@vitest/coverage-v8 4.1.2**
+- **Vitest 4.1.5**
+- **@vitest/coverage-v8 4.1.5**
 - **Testing Library**
   - `@testing-library/react 16.3.2`
   - `@testing-library/dom 10.4.1`
