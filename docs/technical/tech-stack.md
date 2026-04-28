@@ -110,7 +110,7 @@
 
 - **ESLint 9.39.2**
 - **typescript-eslint 8.58.0**
-- **Prettier 3.8.1**
+- **Prettier 3.8.3**
 - **prettier-plugin-tailwindcss 0.7.2**
 - **@ianvs/prettier-plugin-sort-imports 4.7.1**
 - **dependency-cruiser 17.3.10**：依赖边界检查
