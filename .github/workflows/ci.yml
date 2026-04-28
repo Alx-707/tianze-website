@@ -317,7 +317,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: basic-checks
 
-    timeout-minutes: 15
+    timeout-minutes: 20
 
     steps:
       - name: 检出代码
@@ -395,7 +395,7 @@ jobs:
 
     runs-on: ubuntu-latest
     needs: basic-checks
-    timeout-minutes: 15
+    timeout-minutes: 20
 
     steps:
       - name: 检出代码
