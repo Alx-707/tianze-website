@@ -28,9 +28,9 @@ const CRITICAL_CACHE_POLICY_SOURCE_READERS = {
 
 const CONTACT_PAGE_FILE = "src/app/[locale]/contact/page.tsx";
 const PRODUCT_MARKET_PAGE_FILE = "src/app/[locale]/products/[market]/page.tsx";
-const PRODUCT_MARKET_FAQ_HELPER = ["getProductMarket", "FaqItems"].join("");
-const PRODUCT_MARKET_MDX_READ = ['getPageBySlug("product', 'market"'].join("-");
-const FAQ_SCHEMA_TYPE = ["FAQ", "Page"].join("");
+const PRODUCT_MARKET_FAQ_HELPER = "getProductMarketFaqItems";
+const PRODUCT_MARKET_MDX_READ = 'getPageBySlug("product-market"';
+const FAQ_SCHEMA_TYPE = "FAQPage";
 
 function readProductMarketPageSource() {
   return readFileSync(PRODUCT_MARKET_PAGE_FILE, "utf8");

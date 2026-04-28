@@ -50,10 +50,8 @@ vi.mock("@/lib/content/page-dates", () => ({
 }));
 
 describe("sitemap.ts", () => {
-  const retiredEquipmentUrl = [
-    "https://example.com/en/capabilities",
-    ["bending", "machines"].join("-"),
-  ].join("/");
+  const RETIRED_BENDING_MACHINES_URL =
+    "https://example.com/en/capabilities/bending-machines";
 
   describe("sitemap()", () => {
     it("should return sitemap array", async () => {
@@ -88,7 +86,7 @@ describe("sitemap.ts", () => {
       expect(urls).toContain("https://example.com/en/products");
       expect(urls).toContain("https://example.com/en/privacy");
       expect(urls).toContain("https://example.com/en/terms");
-      expect(urls).not.toContain(retiredEquipmentUrl);
+      expect(urls).not.toContain(RETIRED_BENDING_MACHINES_URL);
       expect(urls).toContain("https://example.com/en/oem-custom-manufacturing");
     });
 

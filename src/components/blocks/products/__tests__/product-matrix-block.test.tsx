@@ -8,10 +8,7 @@ vi.mock("next-intl", () => ({
 }));
 
 describe("ProductMatrixBlock", () => {
-  const retiredEquipmentPath = [
-    "/capabilities",
-    ["bending", "machines"].join("-"),
-  ].join("/");
+  const RETIRED_BENDING_MACHINES_PATH = "/capabilities/bending-machines";
 
   it("renders section header", () => {
     render(<ProductMatrixBlock />);
@@ -35,7 +32,7 @@ describe("ProductMatrixBlock", () => {
     expect(hrefs).toContain("/products");
     expect(hrefs).toContain("/products/pneumatic-tube-systems");
     expect(hrefs).toContain("/contact");
-    expect(hrefs).not.toContain(retiredEquipmentPath);
+    expect(hrefs).not.toContain(RETIRED_BENDING_MACHINES_PATH);
     expect(hrefs).not.toContain("/products/machines");
     expect(hrefs).not.toContain("/products/pvc-conduits");
     expect(hrefs).not.toContain("/products/pneumatic-tubes");
