@@ -1,3 +1,13 @@
+---
+paths:
+  - "src/lib/structured-data*.ts"
+  - "src/lib/page-structured-data.ts"
+  - "src/lib/content/mdx-faq.ts"
+  - "src/components/seo/**"
+  - "src/app/**/*.tsx"
+  - "content/pages/**/*.mdx"
+---
+
 # Structured Data / JSON-LD
 
 ## Canonical builder rule

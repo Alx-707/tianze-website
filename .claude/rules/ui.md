@@ -13,7 +13,7 @@ Check `src/components/` subdirectories (`ui/`, `blocks/`, `sections/`, `forms/`,
 
 ## Design Tokens
 
-Design values (spacing, color, typography) live in `src/app/globals.css` and design system docs — not in component code.
+Design values (spacing, color, typography) live in `src/app/globals.css`, not in component code.
 
 ```typescript
 // ❌ Hardcoded values
@@ -22,11 +22,6 @@ Design values (spacing, color, typography) live in `src/app/globals.css` and des
 // ✅ Design tokens from globals.css
 <div className="text-primary" style={{ maxWidth: 'var(--container-max)' }} />
 ```
-
-Design system references:
-- Production truth: `src/app/globals.css`
-- Page patterns: `docs/impeccable/system/PAGE-PATTERNS.md`
-- Design tokens: `docs/impeccable/system/TIANZE-DESIGN-TOKENS.md`
 
 ## Component Library
 
@@ -67,8 +62,8 @@ const colors = {
 
 ## Image
 
-Default to `next/image` for user-facing app images. Native `<img>` is only acceptable when optimization is intentionally skipped or unsupported, and the reason should be obvious in code. For API details (fill, sizes, preload/priority, placeholder), see `.next-docs/` image docs.
+Default to `next/image` for user-facing app images. Native `<img>` is only acceptable when optimization is intentionally skipped or unsupported, and the reason should be obvious in code. For API details (fill, sizes, preload/priority, placeholder), see `node_modules/next/dist/docs/`.
 
 ## Font & Metadata
 
-For `next/font` and `generateMetadata` usage, see `.next-docs/` — font and metadata docs are version-locked there.
+For `next/font` and `generateMetadata` usage, see `node_modules/next/dist/docs/` - the installed package docs are version-matched.

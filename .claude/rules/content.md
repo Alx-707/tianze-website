@@ -1,6 +1,39 @@
+---
+paths:
+  - "content/**/*"
+  - "messages/**/*.json"
+  - "src/config/single-site*.ts"
+  - "src/lib/content/**"
+  - "src/lib/content-query/**"
+  - "src/app/**/*.tsx"
+---
+
 # Content Architecture — Four-Layer Rule
 
+## Use This File When
+
+- Editing MDX page content, frontmatter, SEO metadata, FAQ content, or page copy ownership
+- Changing shared UI text in `messages/{locale}/*.json`
+- Changing single-site identity, SEO policy, or page expression config
+
+## Do Not Use This File For
+
+- General translation API usage; use `i18n.md`
+- JSON-LD generation details; use `structured-data.md`
+- Generic Next.js MDX behavior; consult `node_modules/next/dist/docs/`
+
 Every content field has exactly one canonical authoring source. Runtime-derived outputs (TOC from headings, JSON-LD from frontmatter, metadata composed from multiple layers) are not authoring duplication.
+
+## Authoring Decision Table
+
+| If changing | Edit | Do not edit |
+|-------------|------|-------------|
+| Company-wide facts | `src/config/single-site.ts` | MDX page prose |
+| Page-level prose, FAQ, or SEO metadata | `content/pages/{locale}/*.mdx` | Translation JSON |
+| Page structure switches | `src/config/single-site-page-expression.ts` | MDX body copy |
+| Crawl/indexing policy | `src/config/single-site-seo.ts` | Page components |
+| Shared labels, nav, buttons, form chrome | `messages/{locale}/*.json` | MDX frontmatter |
+| Structured reusable card/catalog data | Typed config + i18n namespace | Page prose only |
 
 ## Layer 1: Company Identity — single-site.ts
 
@@ -56,14 +89,13 @@ seo.pages.* translation keys are eliminated. Page SEO reads from MDX frontmatter
 ## MDX Directory Structure
 
 content/
-├── pages/{locale}/*.mdx    — One file per page per locale
-└── posts/{locale}/*.mdx    — Blog posts
+- pages/{locale}/*.mdx    — One file per page per locale
 
 ## Frontmatter Schema
 
 All pages: locale, title, slug, description, publishedAt, updatedAt, lastReviewed, draft, seo (title, description, keywords, ogImage).
 
-Legal pages add: layout: 'legal', showToc: true.
+Legal-style pages such as privacy and terms currently use layout: 'default' with showToc: true.
 
 Pages with FAQ add: faq[] array with { id, question, answer } items.
 

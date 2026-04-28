@@ -4,13 +4,38 @@ paths:
   - "open-next.config.ts"
   - "wrangler.jsonc"
   - "scripts/cloudflare/**"
+  - "src/app/actions.ts"
   - "src/app/**/actions.ts"
+  - "src/lib/actions/**"
   - "src/lib/security/**"
 ---
 
 # Cloudflare Deployment Constraints
 
 > Most rules in this file are **repo-specific operational constraints** for the current Next.js + OpenNext + Cloudflare stack. Keep Next.js / Cloudflare official APIs aligned, but do not mistake these repo runbooks for generic platform rules.
+
+## Use This File When
+
+- Changing Cloudflare/OpenNext build, preview, deploy, middleware, worker topology, or runtime cache behavior
+- Touching Server Actions that depend on client identity, IP detection, or request headers
+- Debugging Cloudflare preview/deploy failures or platform-only runtime behavior
+
+## Do Not Use This File For
+
+- Generic Next.js API behavior; consult `node_modules/next/dist/docs/`
+- General API validation, rate limits, or CSP policy; use `security.md`
+- General i18n key management; use `i18n.md`
+
+## Validation Decision Table
+
+| Change touches | Minimum proof |
+|----------------|---------------|
+| Standard Next.js page/runtime behavior | `pnpm build` |
+| Cloudflare/OpenNext build path | `pnpm build` then `pnpm build:cf` |
+| Cloudflare page rendering | `pnpm preview:cf` + `pnpm smoke:cf:preview` |
+| Deployed Cloudflare behavior | `pnpm smoke:cf:deploy` |
+| Client IP / Server Action identity chain | related IP/action tests + `pnpm build` + `pnpm build:cf` |
+| Cache/runtime binding architecture | `pnpm review:cf:official-compare` |
 
 ## Build Chain
 
