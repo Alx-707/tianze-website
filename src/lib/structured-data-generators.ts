@@ -28,14 +28,6 @@ interface ProductGroupInput {
   }>;
 }
 
-interface EquipmentListSchemaInput {
-  name: string;
-  items: Array<{
-    name: string;
-    description: string;
-  }>;
-}
-
 interface OemPageSchemaInput {
   name: string;
   description?: string;
@@ -256,25 +248,6 @@ export function generateProductGroupData(
       ...(product.description ? { description: product.description } : {}),
       ...(product.image ? { image: product.image } : {}),
       ...(product.url ? { url: product.url } : {}),
-    })),
-  };
-}
-
-export function buildEquipmentListSchema(
-  data: EquipmentListSchemaInput,
-): Record<string, unknown> {
-  return {
-    "@context": "https://schema.org",
-    "@type": "ItemList",
-    name: data.name,
-    itemListElement: data.items.map((item, index) => ({
-      "@type": "ListItem",
-      position: index + 1,
-      item: {
-        "@type": "Product",
-        name: item.name,
-        description: item.description,
-      },
     })),
   };
 }

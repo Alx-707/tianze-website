@@ -18,7 +18,7 @@
 - Cloudflare phase6 dry-run 已通过
 - `pnpm release:verify` 已通过
 
-有一个现实修正：产品市场 FAQ helper 保留了一个无 `cacheTag()` 的 Cache Components 边界。原因是 Next.js 16 Cache Components 开启时，完全移除该边界会让 `/[locale]/products/[market]` 构建失败。它只用于构建正确性，不作为线上内容更新机制。
+产品市场页当前不挂载共享问答，也不保留产品市场问答专用 Cache Components 边界。内容更新仍通过静态生成和重新部署完成。
 
 ### 1. 标准构建与 Cloudflare 构建要串行验证
 
@@ -140,12 +140,11 @@ workers.dev preview 抓取结果：
 | `/zh/contact` | 1 | 3 |
 | `/en/products` | 1 | 3 |
 | `/en/products/north-america` | 1 | 5 |
-| `/en/capabilities/bending-machines` | 1 | 4 |
 | `/en/oem-custom-manufacturing` | 1 | 4 |
 
 本地证明：
 
-- `pnpm exec playwright test tests/e2e/seo-validation.spec.ts --project=chromium` 通过，覆盖 6 个关键页面的 title / canonical / JSON-LD / Open Graph / hreflang。
+- `pnpm exec playwright test tests/e2e/seo-validation.spec.ts --project=chromium` 通过，覆盖关键页面的 title / canonical / JSON-LD / Open Graph / hreflang。
 - workers.dev deployed HTML 抓取也确认每个核心页面只有 1 个 `application/ld+json`。
 
 ## 2026-04-26 Smart Placement

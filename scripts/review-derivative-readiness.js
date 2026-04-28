@@ -12,6 +12,10 @@ const REQUIRED_FILES = [
   "src/config/single-site-seo.ts",
   "docs/guides/DERIVATIVE-PROJECT-REPLACEMENT-CHECKLIST.md",
   ".claude/rules/content.md",
+  "content/pages/en/about.mdx",
+  "content/pages/en/contact.mdx",
+  "content/pages/en/oem-custom-manufacturing.mdx",
+  "package.json",
 ];
 
 const CONTENT_CHECKS = [
@@ -26,7 +30,6 @@ const CONTENT_CHECKS = [
       "SINGLE_SITE_HOME_SCENARIO_ITEMS",
       "SINGLE_SITE_HOME_QUALITY_COMMITMENT_ITEMS",
       "SINGLE_SITE_PRODUCTS_PAGE_EXPRESSION",
-      "SINGLE_SITE_BENDING_MACHINES_PAGE_EXPRESSION",
       "SINGLE_SITE_OEM_PAGE_EXPRESSION",
       "SINGLE_SITE_ABOUT_STATS_ITEMS",
     ],
@@ -37,8 +40,18 @@ const CONTENT_CHECKS = [
     snippets: ["aboutSections:", "valuesTitle:", "statLabels:", "cta:"],
   },
   {
-    file: "content/pages/en/product-market.mdx",
-    label: "product market FAQ is replaceable in MDX",
+    file: "content/pages/en/about.mdx",
+    label: "about page FAQ remains page-owned in MDX",
+    snippets: ["faq:", "question:", "answer:"],
+  },
+  {
+    file: "content/pages/en/contact.mdx",
+    label: "contact page FAQ remains page-owned in MDX",
+    snippets: ["faq:", "question:", "answer:"],
+  },
+  {
+    file: "content/pages/en/oem-custom-manufacturing.mdx",
+    label: "OEM page FAQ remains page-owned in MDX",
     snippets: ["faq:", "question:", "answer:"],
   },
   {
@@ -87,6 +100,11 @@ for (const relPath of REQUIRED_FILES) {
 }
 
 for (const check of CONTENT_CHECKS) {
+  const fullPath = path.join(ROOT, check.file);
+  if (!fs.existsSync(fullPath)) {
+    failures.push(`missing required file for content check: ${check.file}`);
+    continue;
+  }
   const content = readFile(check.file);
   for (const snippet of check.snippets) {
     if (!content.includes(snippet)) {

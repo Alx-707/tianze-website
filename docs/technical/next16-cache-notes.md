@@ -5,7 +5,7 @@
 ## 当前状态
 
 - `cacheComponents: true` 已启用
-- 当前只有产品市场 FAQ helper 保留一个明确的 `"use cache"` 边界，用来满足 Cache Components 构建约束
+- 产品市场页当前不挂载共享问答，也不保留产品市场问答专用 `"use cache"` 边界
 - 当前没有 `cacheTag()` 调用方，也没有运行时 tag invalidation 入口
 - locale 传递以显式参数为主
 - `setRequestLocale` 当前仍在用

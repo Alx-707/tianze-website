@@ -23,7 +23,7 @@ Three generations of schema builders coexist:
 | FAQ-specific | `src/lib/content/mdx-faq.ts` (`generateFaqSchemaFromItems`) | Nobody — dead code |
 
 Two pages inline their own schemas instead of using helpers:
-- `bending-machines/page.tsx` — inline ItemList schema
+- Retired equipment capability page — historical inline ItemList schema
 - `oem-custom-manufacturing/page.tsx` — inline WebPage schema
 
 FAQ schema helpers exist but are never called. FaqSection component generates FAQ JSON-LD internally via the legacy `generateFAQSchema` from `structured-data-helpers.ts`.
@@ -40,8 +40,9 @@ Two injection points: layout-level `<JsonLdScript>` (Organization+WebSite) and p
 
 ### Files to Change
 
-- Create: `buildEquipmentListSchema()`, `buildOemPageSchema()` in `structured-data-generators.ts`
-- Modify: `bending-machines/page.tsx`, `oem-custom-manufacturing/page.tsx` — use builders
+- Retired: do not recreate `buildEquipmentListSchema()`; the old equipment capability page is no longer live
+- Create if still needed: `buildOemPageSchema()` in `structured-data-generators.ts`
+- Modify: `oem-custom-manufacturing/page.tsx` — use builders; the old equipment capability page is no longer live
 - Modify: `faq-section.tsx` — use `generateFaqSchemaFromItems` instead of `generateFAQSchema`
 - Delete: `generateFAQSchema` from `structured-data-helpers.ts` (after all callers migrated)
 - Delete: dead `generateBreadcrumbSchema` from `structured-data-helpers.ts` if unused

@@ -125,8 +125,8 @@
   "home": {
     "hero": {
       "eyebrow": "ISO 9001 认证 · 始于 {established}",
-      "title": "造设备的人，做管件。",
-      "subtitle": "PVC电工套管弯头及配件，从弯管设备研发到成品管件的垂直整合制造商。",
+      "title": "面向出口项目的 PVC 电工套管配件。",
+      "subtitle": "提供 PVC 电工弯管、管件、PETG 气动物流管和 OEM 制造支持，工厂内部完成成型、模具和质检。",
       "cta": {
         "primary": "获取报价",
         "secondary": "查看产品目录"
@@ -143,15 +143,15 @@
       }
     },
     "chain": {
-      "title": "全链路管控，全部自主完成。",
-      "subtitle": "我们自主设计制造弯管设备。这种上游控制力是我们从原材料到成品管件始终保持品质一致的核心。",
+      "title": "工艺、模具、成品同厂控制。",
+      "subtitle": "成型工艺、模具开发、生产和检验都在同一工厂内完成，方便稳定交付定制管件和重复订单。",
       "step1": {
-        "title": "弯管设备研发",
-        "desc": "自主设备设计与工程开发"
+        "title": "产品需求确认",
+        "desc": "报价前确认应用、标准、口径、弯头形式和包装要求"
       },
       "step2": {
-        "title": "设备制造",
-        "desc": "自主组装与精密校准"
+        "title": "模具和工艺准备",
+        "desc": "针对标准和定制管件进行内部模具与成型工艺准备"
       },
       "step3": {
         "title": "模具制造",
@@ -159,19 +159,19 @@
       },
       "step4": {
         "title": "管件生产",
-        "desc": "24/7 挤出弯管作业"
+        "desc": "24/7 挤出与成型生产"
       },
       "step5": {
         "title": "质量控制",
         "desc": "批次文档化与可追溯管理"
       },
-      "stat1": "专利弯管技术",
+      "stat1": "内部成型工艺",
       "stat2": "5步垂直整合",
       "stat3": "自有模具制造"
     },
     "products": {
       "title": "产品线",
-      "subtitle": "自主研发弯管设备的制造商，从设备研发到成品制造的全产业链垂直整合。",
+      "subtitle": "垂直整合工厂提供PVC电工套管配件、PETG气动物流管和OEM定制制造。",
       "cta": "查看全部产品",
       "item1": {
         "tag": "4大市场标准",
@@ -192,15 +192,6 @@
         "link": "/products/pneumatic-tube-systems"
       },
       "item3": {
-        "tag": "核心能力",
-        "title": "弯管设备",
-        "spec1": "全自动和半自动机型",
-        "spec2": "DN25至DN160mm管径范围",
-        "spec3": "150-200件/小时产速",
-        "standard": "自主研发",
-        "link": "/capabilities/bending-machines"
-      },
-      "item4": {
         "tag": "服务",
         "title": "OEM定制生产",
         "spec1": "您的规格，我们的产能",
@@ -315,7 +306,7 @@
     "footer": {
       "about": {
         "title": "天泽管业",
-        "desc": "PVC电工弯管与管件制造商，位于江苏省连云港市。自{established}年起设计制造弯管设备。"
+        "desc": "位于江苏连云港的 PVC 电工弯管、管件、PETG 气动物流管和 OEM 制造供应商。"
       },
       "products": {
         "title": "产品",
@@ -490,11 +481,11 @@
     },
     "overview": {
       "title": "制造能力",
-      "subtitle": "集弯管设备研发、精密模具、优质管件生产于一体的综合制造能力。",
+      "subtitle": "围绕电工套管配件的制造能力，覆盖内部成型工艺、精密模具和质量管控。",
       "features": {
         "performance": {
-          "title": "弯管系统",
-          "description": "半自动/全自动弯管机，精密控制，高产能输出。"
+          "title": "内部成型工艺",
+          "description": "用于出口项目中电工弯管和定制管件的稳定成型工艺。"
         },
         "security": {
           "title": "质量认证",
@@ -532,8 +523,8 @@
       "architecture": {
         "title": "产品线",
         "frontend": {
-          "title": "弯管设备",
-          "description": "半自动/全自动PVC弯管机，先进温控技术。"
+          "title": "PVC 电工套管配件",
+          "description": "提供电工弯管、弯头、接头、扩口和定制管件。"
         },
         "ui": {
           "title": "PVC管道系统",
@@ -546,7 +537,7 @@
       },
       "cta": {
         "title": "准备合作了吗？",
-        "description": "联系我们的团队，讨论您的弯管和管道需求。",
+        "description": "联系我们的团队，讨论您的电工管件和定制项目需求。",
         "getStarted": "获取报价",
         "viewSource": "查看产品"
       }
@@ -937,10 +928,7 @@
       "title": "产品中心",
       "description": "按国际标准生产的PVC电工套管配件。选择您的市场查看符合当地合规标准的产品。",
       "byStandard": "按市场标准",
-      "specialty": "特种产品与设备",
-      "equipmentTitle": "弯管设备",
-      "equipmentDescription": "自主研发的全自动和半自动PVC弯管机。我们的核心制造能力。",
-      "equipmentCta": "了解更多"
+      "specialty": "特种产品"
     },
     "market": {
       "familyNav": {

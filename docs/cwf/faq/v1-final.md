@@ -1,5 +1,7 @@
 # FAQ Page - v1
 
+> Historical CWF draft. Preserve for copywriting history only; do not use it as current public website positioning unless it matches the live product truth contract.
+
 ## Meta
 - Title: Frequently Asked Questions | PVC Conduit Fittings
 - Description: Answers to common questions about PVC conduit ordering, certifications, technical specifications, installation, and factory capabilities.
@@ -157,9 +159,9 @@ The minimum bending radius depends on conduit size and is specified in NEC Table
 | 40mm (1-1/2") | 350mm (14") |
 | 50mm (2") | 450mm (18") |
 
-Factory-made bends (like ours) are precision-formed using dedicated bending machines, ensuring consistent radius and wall thickness throughout the bend. This is more reliable than field-bending with a heat gun, which risks wall thinning, kinking, or uneven radius.
+Factory-made bends (like ours) are precision-formed with dedicated in-house forming tooling, ensuring consistent radius and wall thickness throughout the bend. This is more reliable than field-bending with a heat gun, which risks wall thinning, kinking, or uneven radius.
 
-As a bending machine manufacturer ourselves, we control the bending process from equipment design through finished product — ensuring every bend meets dimensional tolerances.
+Because we control the forming process, tooling, and finished-product inspection in-house, every bend can be checked against dimensional tolerances.
 
 ### What are the mechanical strength grades (heavy, medium, light)?
 
@@ -272,14 +274,14 @@ Unlike metal conduit, PVC requires no protective coatings, galvanizing, or catho
 
 We are a **direct manufacturer**. Our factory in Lianyungang, Jiangsu operates complete production lines for PVC conduit extrusion, bending, expansion, and cutting.
 
-What sets us apart: **we build the bending machines that make our products**. Before producing PVC conduit fittings, we designed and manufactured the bending equipment itself. This means:
+What sets us apart: **we control the forming process, tooling, and finished-product quality in-house**. This means:
 
 - Deep understanding of PVC forming technology and material behavior
 - Rapid tooling development for custom bend angles and radii
 - Full quality control from raw material to finished product
-- No dependence on third-party equipment suppliers for production capability
+- No dependence on third-party processing for key manufacturing capability
 
-This vertical integration — from bending machine R&D to finished conduit fittings — means the same team that designs the equipment controls the finished product quality.
+This vertical integration — from process know-how to finished conduit fittings — means the same team that understands the process also controls product quality.
 
 ### Where is your factory? Can I visit?
 
@@ -289,7 +291,7 @@ Our factory is located at:
 
 We welcome factory visits and can arrange:
 - Guided tour of production lines (extrusion, bending, expansion, cutting, QC)
-- Live demonstration of our bending machines in operation
+- Live demonstration of relevant production and quality-control processes
 - Meeting with our technical team to discuss your specific requirements
 - Video tour for buyers who cannot travel in person
 

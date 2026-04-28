@@ -4,60 +4,55 @@
 
 ## 一句话结论
 
-所有可售业务应该收口到 `/products/` 下面，形成统一产品树。  
-不要再把产品、能力、定制拆成三套平行入口。
+当前公开站先收口产品市场页，保留 `/oem-custom-manufacturing/` 作为独立 OEM 转化页。
+不要把未来产品树目标误写成当前已上线 URL。
 
 ## 当前结构存在的问题
 
-当前站点里几条线是分散的：
+当前站点里几条线仍然是分散的：
 
 - `/products/`
-- `/capabilities/bending-machines/`
 - `/oem-custom-manufacturing/`
 
 这会带来几个问题：
 
 - 买家不容易理解 Tianze 到底卖什么
-- 设备看起来像“能力展示”，不像真正产品线
-- PETG、设备、定制没有统一层级
+- PETG、定制和标准市场产品没有统一层级
 
-## 当前批准的目标结构
+## 当前公开站结构
 
 ```text
 /
 ├── /products/
-│   ├── /products/pipes/
-│   │   ├── /products/pipes/north-america/
-│   │   ├── /products/pipes/australia-new-zealand/
-│   │   ├── /products/pipes/mexico/
-│   │   ├── /products/pipes/europe/
-│   │   └── /products/pipes/pneumatic-tubes/
-│   ├── /products/equipment/
-│   │   └── /products/equipment/bending-machines/
-│   └── /products/custom-manufacturing/
+│   ├── /products/north-america/
+│   ├── /products/australia-new-zealand/
+│   ├── /products/mexico/
+│   ├── /products/europe/
+│   └── /products/pneumatic-tube-systems/
+├── /oem-custom-manufacturing/
 ├── /about/
 ├── /contact/
-├── /blog/
-├── /faq/
 ├── /privacy/
 └── /terms/
 ```
+
+未来如果把 OEM 移入 `/products/`，必须作为单独 IA migration 处理，不能在文档里提前混用两套路径。
 
 ## 结构原则
 
 ### 1. 所有 sellable line 进入统一产品树
 
-- Pipes
-- Equipment
-- Custom manufacturing
+- PVC conduit products by market standard
+- PETG pneumatic tube systems
+- OEM / custom manufacturing
 
-都属于产品层，而不是分散在不同语义目录里。
+都属于产品/制造能力叙事，但当前 URL 仍以已上线结构为准。
 
 ### 2. 首页负责分流，不负责展开所有细节
 
 首页要做的事情是：
 
-- 让买家 10 秒内知道 Tianze 的 3 条业务线
+- 让买家 10 秒内知道 Tianze 的 3 类入口
 - 把人送到正确的产品树入口
 
 ### 3. URL 结构要反映认知结构
@@ -69,4 +64,4 @@
 
 - 讨论路径时，分清 `Current path` 和 `Target path`
 - 新增市场页或新业务线，不能只改一处，要同步 IA、内容、SEO 和代码
-- 任何会打乱 `/products/` 统一树的改动，都要被当成结构性变更处理
+- 任何把 OEM 路径改入 `/products/` 的动作，都要被当成结构性变更处理

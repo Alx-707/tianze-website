@@ -10,11 +10,9 @@ const mockTranslations = {
   "markets.europe.label": "IEC Series",
   "markets.pneumatic-tube-systems.label": "PETG Pneumatic Tubes",
   "overview.byStandard": "By Market Standard",
-  "overview.specialty": "Specialty & Equipment",
+  "overview.specialty": "Specialty Products",
   "overview.title": "Products",
   "overview.description": "Our product catalog",
-  "overview.equipmentTitle": "Bending Machines",
-  "overview.equipmentDescription": "Our manufacturing equipment",
   familyCount: "3 product families",
 } as const;
 

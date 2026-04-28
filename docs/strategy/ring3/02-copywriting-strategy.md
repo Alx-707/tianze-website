@@ -45,24 +45,24 @@
 例如：
 
 - 先讲精度
-- 再讲因为自己做设备
+- 再讲内部成型工艺和模具控制
 - 再给公差、测试、工艺和样品
 
-## 三条业务线的文案重心
+## 三类买家入口的文案重心
 
-### Pipes
+### PVC conduit products
 
 - 标准
 - 规格
 - 精度
 - 样品
 
-### Equipment
+### PETG pneumatic tube systems
 
-- 产能
-- 适配范围
-- 真实工厂使用场景
-- 售后支持
+- 透明度
+- 密封性
+- 系统适配
+- 稳定供货
 
 ### Custom Manufacturing
 

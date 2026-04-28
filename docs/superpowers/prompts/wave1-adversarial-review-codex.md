@@ -41,7 +41,7 @@
   证据：`src/config/paths/types.ts:15-27`。
 
 - ❌ **Task 15 给的目标路径有一个根本不存在。**  
-  计划写“`/capabilities` 或 `/oem-custom-manufacturing`”。实际仓库没有 `/capabilities` 这个页面，只有 `/capabilities/bending-machines`。  
+  计划写“`/capabilities` 或 `/oem-custom-manufacturing`”。实际仓库没有 `/capabilities` 这个页面；当时只有一个后续已退役的设备能力页。
   证据：`src/config/paths/paths-config.ts:52-60`。
 
 ## D2: 基线覆盖完整性

@@ -94,7 +94,7 @@ pnpm build && pnpm build:cf
 
 Runtime tag invalidation (`revalidateTag` / `revalidatePath` / `cacheTag()`) was removed from the launch architecture on 2026-04-26. Do not reintroduce these calls anywhere in production code.
 
-A narrow `"use cache"` + `cacheLife()` boundary is acceptable when Next.js Cache Components needs it for build correctness (current example: `getProductMarketFaqItems` in `src/app/[locale]/products/[market]/page.tsx`), but it must not attach a `cacheTag()`.
+A narrow `"use cache"` + `cacheLife()` boundary is acceptable when Next.js Cache Components needs it for build correctness, but it must not attach a `cacheTag()`. Product market pages currently do not use a shared FAQ cache boundary.
 
 Content updates flow through redeploy, not runtime invalidation APIs. If a future requirement (e.g., CMS integration) genuinely needs runtime tag invalidation, that is an explicit architecture re-decision — not a "just add the call back" change.
 

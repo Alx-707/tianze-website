@@ -21,7 +21,7 @@ The project has no documented rule for where page content, configuration, and tr
 - Blog post references a missing OG image asset
 - Product market pages build alternates/canonical manually instead of using central helpers
 - Terms page emits weaker schema than Privacy page
-- About/OEM/Bending Machines pages lack page-specific structured data
+- About/OEM pages lacked page-specific structured data; the old equipment page is now retired
 - Sitemap timestamps use generation time instead of content-driven dates
 
 ### Proof integrity concerns
@@ -280,8 +280,8 @@ The existing implementation plan (`docs/superpowers/plans/2026-04-23-content-tru
 - Execute legal page unification as first proof of the new rules
 - Validate: tests, translation quartet, build
 
-**Batch B: FAQ Decomposition + About + Contact + OEM FAQ + Bending Machines FAQ**
-- Decompose FAQ from shared pool to per-page MDX frontmatter (all 4 consuming pages)
+**Batch B: FAQ Decomposition + About + Contact + OEM FAQ + historical equipment FAQ (archived)**
+- Decompose FAQ from shared pool to per-page MDX frontmatter for About, Contact, OEM, and archived historical equipment content
 - Execute About page MDX migration
 - Execute Contact page treatment
 - Clean up dead translation keys
@@ -321,7 +321,7 @@ Based on the SEO audit findings. Should execute after Series 1 Batch A completes
 #### Legal/About/Capability schema coverage
 - Terms page: upgrade from generic WebPage to legal-specific schema (match Privacy page)
 - About page: add appropriate page-specific schema
-- OEM and Bending Machines: add capability-appropriate schema
+- OEM: add capability-appropriate schema; old equipment page work is historical only
 
 #### Sitemap quality
 - Replace `new Date()` generation-time timestamps with content-driven `updatedAt` dates

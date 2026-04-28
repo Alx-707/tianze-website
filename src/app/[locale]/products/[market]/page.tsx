@@ -1,6 +1,5 @@
 import { type ComponentProps, type ReactNode } from "react";
 import type { Metadata } from "next";
-import { cacheLife } from "next/cache";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import {
@@ -17,21 +16,15 @@ import { MEXICO_SPECS } from "@/constants/product-specs/mexico";
 import { EUROPE_SPECS } from "@/constants/product-specs/europe";
 import { PNEUMATIC_SPECS } from "@/constants/product-specs/pneumatic-tube-systems";
 import type { MarketSpecs, SpecGroup } from "@/constants/product-specs/types";
-import type { FaqItem, Locale } from "@/types/content.types";
+import type { Locale } from "@/types/content.types";
 import {
   getColumnTranslationKey,
   getGroupLabelTranslationKey,
   getRowValueTranslationKey,
 } from "@/lib/spec-table-translator";
 import { DYNAMIC_PATHS_CONFIG, SITE_CONFIG } from "@/config/paths";
-import { getPageBySlug } from "@/lib/content";
-import {
-  extractFaqFromMetadata,
-  generateFaqSchemaFromItems,
-} from "@/lib/content/mdx-faq";
 import { generateMetadataForPath } from "@/lib/seo-metadata";
 import { JsonLdGraphScript } from "@/components/seo";
-import { FaqSection } from "@/components/sections/faq-section";
 import {
   CatalogBreadcrumb,
   buildCatalogBreadcrumbJsonLd,
@@ -58,14 +51,6 @@ const SPECS_BY_MARKET: Record<string, MarketSpecs> = {
 
 function getMarketSpecs(marketSlug: string): MarketSpecs | undefined {
   return SPECS_BY_MARKET[marketSlug];
-}
-
-async function getProductMarketFaqItems(locale: Locale): Promise<FaqItem[]> {
-  "use cache";
-  cacheLife("days");
-
-  const faqPage = await getPageBySlug("product-market", locale);
-  return extractFaqFromMetadata(faqPage.metadata);
 }
 
 // --- Static params ---
@@ -320,8 +305,6 @@ function buildProductGroupSchema({
 async function buildMarketPageJsonLdData({
   families,
   familySpecsMap,
-  faqItems,
-  locale,
   market,
   marketDescription,
   marketLabel,
@@ -331,8 +314,6 @@ async function buildMarketPageJsonLdData({
 }: {
   families: readonly ProductFamilyDefinition[];
   familySpecsMap: Map<string, MarketSpecs["families"][number]>;
-  faqItems: FaqItem[];
-  locale: Locale;
   market: NonNullable<ReturnType<typeof getMarketBySlug>>;
   marketDescription: string;
   marketLabel: string;
@@ -353,12 +334,8 @@ async function buildMarketPageJsonLdData({
     market,
     marketLabel,
   });
-  const faqSchema =
-    faqItems.length > 0 ? generateFaqSchemaFromItems(faqItems, locale) : null;
 
-  return faqSchema
-    ? [productGroupSchema, breadcrumbSchema, faqSchema]
-    : [productGroupSchema, breadcrumbSchema];
+  return [productGroupSchema, breadcrumbSchema];
 }
 
 function renderFamilySections({
@@ -423,7 +400,6 @@ export default async function MarketPage({ params }: MarketPageProps) {
   const market = getMarketBySlug(marketSlug)!;
   const families = getFamiliesForMarket(marketSlug);
   const marketSpecs = getMarketSpecs(marketSlug);
-  const faqItems = await getProductMarketFaqItems(locale as Locale);
   const t = await getTranslations({ locale, namespace: "catalog" });
   const marketLabel = t(`markets.${marketSlug}.label`);
   const marketDescription = t(`markets.${marketSlug}.description`);
@@ -436,8 +412,6 @@ export default async function MarketPage({ params }: MarketPageProps) {
   const jsonLdData = await buildMarketPageJsonLdData({
     families,
     familySpecsMap,
-    faqItems,
-    locale: locale as Locale,
     market,
     marketSlug,
     marketLabel,
@@ -492,12 +466,6 @@ export default async function MarketPage({ params }: MarketPageProps) {
           {...buildTrustSignalsSectionProps(marketSpecs, marketSlug, t)}
         />
       )}
-
-      <FaqSection
-        faqItems={faqItems}
-        locale={locale as Locale}
-        renderJsonLd={false}
-      />
 
       <CtaSection
         heading={t("market.cta.heading", { marketLabel })}

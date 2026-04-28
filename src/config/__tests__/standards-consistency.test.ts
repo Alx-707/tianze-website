@@ -83,16 +83,20 @@ describe("AS/NZS public standard wording", () => {
   });
 
   it("keeps AU/NZ and IEC wording as separate public standards", () => {
-    const enProductMarket = readProjectFile(
-      "content/pages/en/product-market.mdx",
+    const enCriticalMessages = readProjectFile("messages/en/critical.json");
+    const zhCriticalMessages = readProjectFile("messages/zh/critical.json");
+    const auNzSpecs = readProjectFile(
+      "src/constants/product-specs/australia-new-zealand.ts",
     );
-    const zhProductMarket = readProjectFile(
-      "content/pages/zh/product-market.mdx",
+    const europeSpecs = readProjectFile(
+      "src/constants/product-specs/europe.ts",
     );
 
-    expect(enProductMarket).toContain("AS/NZS 2053");
-    expect(enProductMarket).toContain("IEC 61386");
-    expect(zhProductMarket).toContain("AS/NZS 2053");
-    expect(zhProductMarket).toContain("IEC 61386");
+    expect(enCriticalMessages).toContain("AS/NZS 2053");
+    expect(enCriticalMessages).toContain("IEC 61386");
+    expect(zhCriticalMessages).toContain("AS/NZS 2053");
+    expect(zhCriticalMessages).toContain("IEC 61386");
+    expect(auNzSpecs).toContain("AS/NZS 2053");
+    expect(europeSpecs).toContain("IEC 61386");
   });
 });

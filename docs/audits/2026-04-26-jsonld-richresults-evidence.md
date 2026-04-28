@@ -23,8 +23,7 @@ workers.dev preview 已完成 deployed HTML 抓取检查；尚未完成 Google R
 | `/en/contact` | 1 | 3 | Organization, WebSite, FAQPage | PASS |
 | `/zh/contact` | 1 | 3 | Organization, WebSite, FAQPage | PASS |
 | `/en/products` | 1 | 3 | Organization, WebSite, BreadcrumbList | PASS |
-| `/en/products/north-america` | 1 | 5 | Organization, WebSite, ProductGroup, BreadcrumbList, FAQPage | PASS |
-| `/en/capabilities/bending-machines` | 1 | 4 | Organization, WebSite, ItemList, FAQPage | PASS |
+| `/en/products/north-america` | 1 | 4 | Organization, WebSite, ProductGroup, BreadcrumbList | PASS |
 | `/en/oem-custom-manufacturing` | 1 | 4 | Organization, WebSite, WebPage, FAQPage | PASS |
 
 ## 下一步

@@ -1,30 +1,28 @@
 # Tianze Products Catalog
-# Structured product data for AI retrieval
+# Historical structured product data for AI retrieval.
+# Current public website does not expose equipment as a standalone product category.
 
 categories:
 
   # ============================================
-  # Category A: Equipment (设备类)
+  # Category A: Internal manufacturing capabilities
   # ============================================
-  equipment:
-    name_cn: 设备类
-    name_en: Pipe Processing Equipment
-    description: In-house developed machinery for pipe processing
-    strategic_role: Upstream capability - differentiator from pure traders
+  manufacturing_capabilities:
+    name_cn: 内部制造能力
+    name_en: Internal Manufacturing Capabilities
+    description: In-house forming, tooling, expansion, cutting, and QC capability
+    strategic_role: Manufacturing control - differentiator from pure traders
     items:
-      - id: EQ-001
-        name_en: PVC Semi-automatic Bending Machine
-        name_cn: PVC半自动弯管机
-      - id: EQ-002
-        name_en: PVC Fully-automatic Bending Machine
-        name_cn: PVC全自动弯管机
-      - id: EQ-003
+      - id: CAP-001
+        name_en: Factory Forming Process
+        name_cn: 工厂成型工艺
+      - id: CAP-002
         name_en: Pipe Expander
         name_cn: 扩管机
-      - id: EQ-004
+      - id: CAP-003
         name_en: Pipe Cutter
         name_cn: 切管机
-      - id: EQ-005
+      - id: CAP-004
         name_en: Custom Molds
         name_cn: 定制模具
 
