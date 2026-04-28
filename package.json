@@ -282,6 +282,7 @@
       "webpack@>=5.49.0 <5.104.1": ">=5.104.1",
       "picomatch@>=4.0.0 <4.0.4": ">=4.0.4",
       "next-intl@<4.11.0": ">=4.11.0",
+      "@react-email/components>@react-email/render": "$@react-email/render",
       "postcss@<8.5.10": ">=8.5.10",
       "uuid": ">=14.0.0"
     },
