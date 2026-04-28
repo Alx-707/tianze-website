@@ -33,7 +33,7 @@
     "validate:translations": "node scripts/validate-translations.js",
     "i18n:regenerate-flat": "node scripts/regenerate-flat-translations.js",
     "type-check:tests": "tsc --noEmit -p tsconfig.test.json",
-    "lint:check": "eslint . --ext .js,.jsx,.ts,.tsx --config eslint.config.mjs --cache --cache-location .eslintcache --max-warnings 0",
+    "lint:check": "eslint . --ext .js,.jsx,.ts,.tsx --config eslint.config.mjs --cache --cache-location .eslintcache --max-warnings 0 && pnpm eslint:disable:check",
     "format:check": "prettier --check .",
     "format:write": "prettier --write .",
     "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --config eslint.config.mjs --fix --cache --cache-location .eslintcache",
