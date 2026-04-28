@@ -548,7 +548,7 @@ done
 Allowed remaining hits:
 
 - Historical docs that clearly say "archived" or "external report".
-- `.next-docs` or Next.js docs index text in `CLAUDE.md`.
+- Next.js bundled docs references in `node_modules/next/dist/docs/`.
 - `src/test/setup.next.ts` test mocks for Next cache APIs, only if still needed by unrelated tests.
 - `src/lib/load-messages.ts` using `unstable_cache`, if Cloudflare bypass behavior remains intentional.
 

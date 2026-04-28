@@ -25,7 +25,6 @@
     ".wrangler",
     ".stryker-tmp",
     ".lighthouseci",
-    ".next-docs",
     ".devtools",
     "reports",
     "coverage",

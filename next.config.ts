@@ -47,7 +47,6 @@ const nextConfig: NextConfig = {
       "./coverage/**",
       "./test-results/**",
       "./.lighthouseci/**",
-      "./.next-docs/**",
       "./tests/e2e/.playwright/**",
       "./playwright-report/**",
       "./.playwright/**",
