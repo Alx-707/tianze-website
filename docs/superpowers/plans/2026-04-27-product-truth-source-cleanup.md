@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Remove no-longer-true equipment product surfaces, remove shared product-market FAQ from live product pages, and keep the product area focused on real product markets, specifications, trust signals, and inquiry CTA.
+**Goal:** Remove no-longer-true equipment product surfaces, remove shared product-market FAQ from live product pages, and align live SEO/page copy with the current product truth: Tianze sells conduit fittings, pipes, PETG tube products, and OEM manufacturing support, not bending machines as a public product line.
 
-**Architecture:** Treat this as truth-source cleanup, not a redesign. Retire the bending-machines route and every live surface that claims equipment is a current standalone page/product line. Remove the product-market shared FAQ because a non-market-specific FAQ is not a valid product-page requirement. Keep About, Contact, and OEM FAQ intact.
+**Architecture:** Treat this as truth-source cleanup, not a redesign. Retire the bending-machines route and every live surface that claims equipment is a current standalone page/product line. Rewrite live identity, homepage, About, Contact, and SEO copy so equipment becomes at most an internal process/tooling capability, not a buyer-facing product promise. Remove the product-market shared FAQ because a non-market-specific FAQ is not a valid product-page requirement. Keep About, Contact, and OEM FAQ intact.
 
 **Tech Stack:** Next.js 16.2 App Router, React 19.2, TypeScript 5.9, next-intl 4.8, MDX content manifest, Vitest, Playwright, Cloudflare/OpenNext build chain.
 
@@ -20,11 +20,14 @@
 4. Remove equipment specification constants if no production consumer remains.
 5. Remove product-market shared FAQ from `/products/[market]`.
 6. Remove `content/pages/{locale}/product-market.mdx` from live content.
-7. Keep FAQ only on:
+7. Rewrite live site identity, homepage, About, Contact, and generated artifacts so Tianze is not publicly positioned as a bending machine/equipment supplier.
+8. Remove dead equipment structured-data builders from live schema utilities.
+9. Strengthen truth sweeps to cover broad business terms, not just the retired route slug.
+10. Keep FAQ only on:
    - About
    - Contact
    - OEM custom manufacturing
-8. Keep AS/NZS 2053 and AS/NZS 61386 as product/SEO keywords where naturally relevant, but do not create market-specific FAQ or a standards explainer in this plan.
+11. Keep AS/NZS 2053 and AS/NZS 61386 as product/SEO keywords where naturally relevant, but do not create market-specific FAQ or a standards explainer in this plan.
 
 ### Out of scope
 
@@ -35,6 +38,35 @@
 5. No quote drawer or product-specific inquiry flow.
 6. No full SEO strategy rewrite.
 7. No redirect for the old equipment URL.
+8. No public bending-machine/equipment product replacement page.
+
+### Business copy stance
+
+This plan uses the following copy contract. Do not continue until every live source follows it.
+
+Allowed live wording:
+
+- Tianze has in-house forming, tooling, mold, and process-control capability.
+- Tianze can support custom bends, fittings, sample review, and OEM manufacturing.
+- Tianze understands pipe forming from its factory process and uses that knowledge to control product quality.
+
+Not allowed in live SEO, homepage, About, Contact, product pages, sitemap metadata, or generated artifacts:
+
+- Tianze is a bending machine, pipe bending equipment, or pipe processing equipment supplier.
+- Buyer-facing CTAs asking customers to source bending machines or pipe processing equipment.
+- Product cards, route metadata, JSON-LD, FAQ, or docs that present bending machines as a current public product surface.
+
+AS/NZS 2053 and AS/NZS 61386 are still valid SEO/product terms, but they belong in product-market copy where relevant. Do not solve those keywords by adding FAQ in this plan.
+
+### Searchability rule for retired strings
+
+Do not hide retired strings by splitting them across arrays or `.join()` calls. Negative tests may use the exact literal retired path:
+
+```ts
+const RETIRED_BENDING_MACHINES_PATH = "/capabilities/bending-machines";
+```
+
+Truth checks must classify the literal as an allowed negative-test reference instead of forcing tests to evade `rg`.
 
 ### File removal rule
 
@@ -61,6 +93,7 @@ Each removal task below includes the concrete `mv` commands for its files.
 
 ### Config and metadata
 
+- Modify: `src/config/single-site.ts` — rewrite site identity, default title/description, and keywords so they no longer sell or position Tianze as a bending machine/equipment supplier.
 - Modify: `src/config/paths/paths-config.ts` — remove `bendingMachines`.
 - Modify: `src/config/paths/types.ts` — remove `bendingMachines` from `PageType`.
 - Modify: `src/config/paths/utils.ts` — remove `/capabilities/bending-machines` from `PATHNAMES`.
@@ -77,6 +110,18 @@ Each removal task below includes the concrete `mv` commands for its files.
 - Move to Trash: `content/pages/zh/product-market.mdx`.
 - Regenerate: `src/lib/content-manifest.generated.ts`.
 - Regenerate: `src/lib/mdx-importers.generated.ts`.
+- Modify: `content/pages/en/about.mdx` — rewrite About copy to product/manufacturing truth; no public equipment product promise.
+- Modify: `content/pages/zh/about.mdx` — same Chinese rewrite.
+- Modify: `content/pages/en/contact.mdx` — remove bending-machine inquiry language.
+- Modify: `content/pages/zh/contact.mdx` — same Chinese rewrite.
+
+### Structured data
+
+- Modify: `src/lib/structured-data-generators.ts` — remove dead `EquipmentListSchemaInput` and `buildEquipmentListSchema`.
+- Modify tests if present:
+  - `src/lib/__tests__/structured-data.test.ts`
+  - any test found by `rg -n "buildEquipmentListSchema|EquipmentListSchemaInput|ItemList" src tests`
+- Modify: `.claude/rules/structured-data.md` only if it still presents equipment `ItemList` as a current live schema.
 
 ### Equipment constants and assets
 
@@ -98,7 +143,7 @@ Each removal task below includes the concrete `mv` commands for its files.
   - `messages/en.json`
   - `messages/zh.json`
 
-Remove only live equipment-page/product-card translation keys. Keep generic company/manufacturing text if still used and accurate after copy review.
+Remove only live equipment-page/product-card translation keys. Rewrite homepage/company/Contact copy that still implies "we sell bending machines" or "we are a bending equipment supplier." Keep generic manufacturing capability text only if it follows the business copy stance above.
 
 ### Tests and docs
 
@@ -247,7 +292,32 @@ to:
 
 In `tests/e2e/user-journeys.spec.ts`, remove the entire `test.describe("Journey: Bending Machines Page (BC-018)", ...)` block.
 
-- [ ] **Step 8: Run the new focused tests and confirm they fail**
+- [ ] **Step 8: Keep retired URL assertions searchable**
+
+If any test needs a negative assertion for the retired URL, use this exact literal form:
+
+```ts
+const RETIRED_BENDING_MACHINES_PATH = "/capabilities/bending-machines";
+```
+
+Do not write variants like this:
+
+```ts
+const retiredEquipmentPath = [
+  "/capabilities",
+  ["bending", "machines"].join("-"),
+].join("/");
+```
+
+Expected grep check:
+
+```bash
+rg -n "\[\"bending\", \"machines\"\]|retiredEquipmentPath|join\\(\"-\"\\)" src tests
+```
+
+Expected: no output for retired bending-machines test helpers. If the literal retired path appears in negative tests, classify it as allowed later in the truth sweep.
+
+- [ ] **Step 9: Run the new focused tests and confirm they fail**
 
 Run:
 
@@ -265,7 +335,7 @@ Expected before implementation:
 - products-page test fails because equipment card is still rendered.
 - sitemap or FAQ parity may fail until route/content cleanup lands.
 
-- [ ] **Step 9: Commit test contract**
+- [ ] **Step 10: Commit test contract**
 
 ```bash
 git add \
@@ -695,7 +765,239 @@ git commit -m "fix(products): remove equipment card surface"
 
 ---
 
-## Task 5: Clean content, messages, and generated translation artifacts
+## Task 5: Rewrite live SEO and page copy to the new equipment stance
+
+**Files:**
+- Modify: `src/config/single-site.ts`
+- Modify: `messages/en/critical.json`
+- Modify: `messages/zh/critical.json`
+- Modify: `content/pages/en/about.mdx`
+- Modify: `content/pages/zh/about.mdx`
+- Modify: `content/pages/en/contact.mdx`
+- Modify: `content/pages/zh/contact.mdx`
+- Regenerate: `messages/en.json`
+- Regenerate: `messages/zh.json`
+- Regenerate: `src/lib/content-manifest.generated.ts`
+
+- [ ] **Step 1: Rewrite site-level SEO identity**
+
+In `src/config/single-site.ts`, replace the current equipment-first identity with fittings/manufacturing-first copy. Use this target shape:
+
+```ts
+description:
+  "PVC Conduit Fittings & Pipe Manufacturing for Global B2B Buyers",
+seo: {
+  titleTemplate: "%s | Tianze Pipe",
+  defaultTitle: "Tianze Pipe - PVC Conduit Fittings Manufacturer",
+  defaultDescription:
+    "PVC conduit fittings, conduit bends, PETG pneumatic tube products, and OEM manufacturing support from Tianze Pipe in Lianyungang, China.",
+  keywords: [
+    "PVC conduit fittings",
+    "PVC conduit bends",
+    "AS/NZS 2053",
+    "AS/NZS 61386",
+    "PVC pipe fittings",
+    "PETG pneumatic tube",
+    "OEM conduit fittings",
+    "PVC conduit manufacturer China",
+    "Schedule 80 conduit",
+    "hospital pneumatic tube system",
+  ],
+},
+```
+
+Expected after the edit:
+
+```bash
+rg -n "pipe bending machine|pipe bending equipment|bending machinery|bending equipment manufacturer" src/config/single-site.ts
+```
+
+Expected: no output.
+
+- [ ] **Step 2: Rewrite homepage hero and chain copy**
+
+In `messages/en/critical.json`, rewrite these keys:
+
+```json
+"home.hero.title": "PVC Conduit Fittings Made for Export Projects.",
+"home.hero.subtitle": "PVC conduit bends, fittings, PETG pneumatic tube products, and OEM manufacturing support from a factory with in-house forming, tooling, and quality control.",
+"home.chain.title": "Process Control. Tooling. Finished Products.",
+"home.chain.subtitle": "We keep forming, mold work, production, and inspection inside one factory so custom fittings and repeat orders stay consistent.",
+"home.chain.step1.title": "Product Requirement Review",
+"home.chain.step1.desc": "Application, standard, diameter, bend form, and packaging confirmed before quoting",
+"home.chain.step2.title": "Tooling and Process Setup",
+"home.chain.step2.desc": "In-house mold work and forming setup for standard and custom fittings"
+```
+
+In `messages/zh/critical.json`, rewrite the matching keys:
+
+```json
+"home.hero.title": "面向出口项目的 PVC 电工套管配件。",
+"home.hero.subtitle": "提供 PVC 电工弯管、管件、PETG 气动物流管和 OEM 制造支持，工厂内部完成成型、模具和质检。",
+"home.chain.title": "工艺、模具、成品同厂控制。",
+"home.chain.subtitle": "成型工艺、模具开发、生产和检验都在同一工厂内完成，方便稳定交付定制管件和重复订单。",
+"home.chain.step1.title": "产品需求确认",
+"home.chain.step1.desc": "报价前确认应用、标准、口径、弯头形式和包装要求",
+"home.chain.step2.title": "模具和工艺准备",
+"home.chain.step2.desc": "针对标准和定制管件进行内部模具与成型工艺准备"
+```
+
+Keep the five-step chain component. Do not add a new homepage section.
+
+- [ ] **Step 3: Rewrite footer and product-matrix copy that still sells equipment**
+
+In `messages/en/critical.json`, replace footer and overview/product-line equipment copy with fittings/manufacturing language:
+
+```json
+"home.footer.about.desc": "PVC conduit bends, fittings, PETG pneumatic tube products, and OEM manufacturing support from Lianyungang, Jiangsu, China.",
+"home.overview.subtitle": "Integrated conduit fittings manufacturing with in-house forming, precision molds, and quality-controlled production.",
+"home.overview.features.performance.title": "In-House Forming Process",
+"home.overview.features.performance.description": "Controlled forming setup for conduit bends and custom fittings used in export projects.",
+"home.overview.architecture.frontend.title": "PVC Conduit Fittings",
+"home.overview.architecture.frontend.description": "Conduit bends, elbows, couplings, bell ends, and custom fittings for electrical applications."
+```
+
+In `messages/zh/critical.json`, use the matching Chinese copy:
+
+```json
+"home.footer.about.desc": "位于江苏连云港的 PVC 电工弯管、管件、PETG 气动物流管和 OEM 制造供应商。",
+"home.overview.subtitle": "围绕电工套管配件的制造能力，覆盖内部成型工艺、精密模具和质量管控。",
+"home.overview.features.performance.title": "内部成型工艺",
+"home.overview.features.performance.description": "用于出口项目中电工弯管和定制管件的稳定成型工艺。",
+"home.overview.architecture.frontend.title": "PVC 电工套管配件",
+"home.overview.architecture.frontend.description": "提供电工弯管、弯头、接头、扩口和定制管件。"
+```
+
+Expected after the edit:
+
+```bash
+rg -n "bending machines|bending equipment|pipe processing equipment|pipe bending machine|pipe bending equipment|弯管设备|弯管机|管材加工设备" messages/en/critical.json messages/zh/critical.json
+```
+
+Expected: no output unless the hit is a clearly retained negative-test fixture. Message files should normally have no such hit.
+
+- [ ] **Step 4: Rewrite About page frontmatter and body**
+
+In `content/pages/en/about.mdx`, remove buyer-facing equipment language from frontmatter and body. Use these replacements as the target content shape:
+
+```yaml
+description:
+  'Learn how Tianze combines conduit fittings manufacturing, in-house tooling,
+  and OEM flexibility for global B2B buyers.'
+heroSubtitle: 'PVC Conduit Fittings Manufacturer'
+heroDescription: 'We combine conduit fittings manufacturing, in-house forming, tooling, and OEM flexibility — serving global B2B buyers from our Lianyungang factory.'
+seo:
+  description:
+    'Tianze Pipe manufactures PVC conduit systems, PETG pneumatic tubes,
+    and OEM conduit fittings with in-house forming and tooling capability.'
+  keywords:
+    ['Tianze Pipe', 'PVC conduit manufacturer', 'PVC conduit fittings', 'PETG pneumatic tube']
+aboutSections:
+  values:
+    innovation:
+      description: 'From forming setup to custom molds, we develop key production capability inside the factory.'
+  cta:
+    title: 'Partner With a PVC Conduit Fittings Factory'
+    description: 'Whether you need custom molds, sample review, or finished fittings, our team is ready to discuss your project.'
+```
+
+Body rewrite rules:
+
+- Replace the "Pipe Processing Equipment" section with "In-House Forming and Tooling".
+- Do not say Tianze sells or manufactures bending machines for buyers.
+- The Contact paragraph must say "conduit fittings, custom molds, or pneumatic tube products", not "pipe processing equipment".
+
+In `content/pages/zh/about.mdx`, make the same rewrite:
+
+- Replace "弯管设备能力" with "成型工艺和模具能力" where it describes internal manufacturing.
+- Replace "管材加工设备" product language with "PVC 电工套管配件" or "内部成型和模具能力".
+- Remove "弯管机" from SEO keywords.
+- Do not present "弯管设备" as a purchase category.
+
+- [ ] **Step 5: Rewrite Contact page inquiry language**
+
+In `content/pages/en/contact.mdx`, replace:
+
+```md
+Have questions about our PVC conduit fittings or bending machines? Our
+international sales team responds within 24 business hours.
+```
+
+with:
+
+```md
+Have questions about our PVC conduit fittings, PETG pneumatic tube products, or
+OEM manufacturing support? Our international sales team responds within 24
+business hours.
+```
+
+In `content/pages/zh/contact.mdx`, replace the matching sentence so it asks about:
+
+```md
+PVC 电工套管配件、PETG 气动物流管产品或 OEM 制造支持
+```
+
+not `弯管设备`.
+
+- [ ] **Step 6: Regenerate flat messages and content manifest**
+
+Run:
+
+```bash
+pnpm i18n:regenerate-flat
+tsx scripts/generate-content-manifest.ts
+```
+
+Expected:
+
+- `messages/en.json` and `messages/zh.json` match split message files.
+- `src/lib/content-manifest.generated.ts` reflects the About/Contact copy rewrite.
+
+- [ ] **Step 7: Run focused copy truth search**
+
+Run:
+
+```bash
+rg -n "bending machines|bending equipment|pipe processing equipment|pipe bending machine|pipe bending equipment|弯管设备|弯管机|管材加工设备" \
+  src/config/single-site.ts \
+  messages/en/critical.json messages/zh/critical.json messages/en.json messages/zh.json \
+  content/pages/en/about.mdx content/pages/zh/about.mdx \
+  content/pages/en/contact.mdx content/pages/zh/contact.mdx \
+  src/lib/content-manifest.generated.ts
+```
+
+Expected: no output.
+
+- [ ] **Step 8: Run translation/content checks**
+
+```bash
+pnpm validate:translations
+pnpm i18n:shape:check
+pnpm content:slug-check
+```
+
+Expected: all pass.
+
+- [ ] **Step 9: Commit**
+
+```bash
+git add \
+  src/config/single-site.ts \
+  messages/en/critical.json \
+  messages/zh/critical.json \
+  messages/en.json \
+  messages/zh.json \
+  content/pages/en/about.mdx \
+  content/pages/zh/about.mdx \
+  content/pages/en/contact.mdx \
+  content/pages/zh/contact.mdx \
+  src/lib/content-manifest.generated.ts
+git commit -m "fix(copy): align equipment stance with product truth"
+```
+
+---
+
+## Task 6: Clean content, messages, and generated translation artifacts
 
 **Files:**
 - Move to Trash: `content/pages/en/bending-machines.mdx`
@@ -795,7 +1097,128 @@ git commit -m "fix(content): remove equipment and market faq content"
 
 ---
 
-## Task 6: Update docs and review scripts truth
+## Task 7: Remove dead equipment structured-data builder
+
+**Files:**
+- Modify: `src/lib/structured-data-generators.ts`
+- Modify if present: `src/lib/__tests__/structured-data.test.ts`
+- Modify if needed: `.claude/rules/structured-data.md`
+- Modify any file found by the reference search below if it treats equipment `ItemList` as current live behavior.
+
+- [ ] **Step 1: Confirm current references**
+
+Run:
+
+```bash
+rg -n "buildEquipmentListSchema|EquipmentListSchemaInput|Equipment.*Schema|ItemList" \
+  src tests docs .claude scripts \
+  --glob '!docs/superpowers/plans/**'
+```
+
+Expected before cleanup:
+
+- `src/lib/structured-data-generators.ts` contains `EquipmentListSchemaInput`.
+- `src/lib/structured-data-generators.ts` contains `buildEquipmentListSchema`.
+- No production route should call `buildEquipmentListSchema`.
+
+If a production call exists, stop and inspect it. Do not leave equipment JSON-LD active.
+
+- [ ] **Step 2: Delete the dead input interface**
+
+In `src/lib/structured-data-generators.ts`, remove:
+
+```ts
+interface EquipmentListSchemaInput {
+  name: string;
+  items: Array<{
+    name: string;
+    description: string;
+  }>;
+}
+```
+
+- [ ] **Step 3: Delete the dead schema builder**
+
+In `src/lib/structured-data-generators.ts`, remove:
+
+```ts
+export function buildEquipmentListSchema(
+  data: EquipmentListSchemaInput,
+): Record<string, unknown> {
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: data.name,
+    itemListElement: data.items.map((item, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      item: {
+        "@type": "Product",
+        name: item.name,
+        description: item.description,
+      },
+    })),
+  };
+}
+```
+
+Do not replace it with a generic "future equipment" builder. YAGNI applies here.
+
+- [ ] **Step 4: Update structured-data tests only if they reference the deleted builder**
+
+Run:
+
+```bash
+rg -n "buildEquipmentListSchema|EquipmentListSchemaInput" src/lib/__tests__ tests src
+```
+
+If a test imports the deleted builder, remove that test case. Keep tests for current schemas such as Organization, WebSite, ProductGroup, FAQPage, AboutPage, OEM, Article, and BreadcrumbList.
+
+- [ ] **Step 5: Update structured-data rule docs if needed**
+
+Inspect:
+
+```bash
+sed -n '1,80p' .claude/rules/structured-data.md
+```
+
+If the rule says equipment `ItemList` is a current page-level schema, replace that with:
+
+```md
+Equipment ItemList schema is retired with the bending-machines page. Do not add equipment ItemList JSON-LD unless a future approved product surface brings it back.
+```
+
+Generic mention that Schema.org supports `ItemList` may remain if it is not tied to current equipment pages.
+
+- [ ] **Step 6: Verify dead builder is gone**
+
+```bash
+rg -n "buildEquipmentListSchema|EquipmentListSchemaInput" src tests
+```
+
+Expected: no output.
+
+- [ ] **Step 7: Run focused tests**
+
+```bash
+pnpm exec vitest run src/lib
+```
+
+Expected: pass. If this is too broad for the branch, run the structured-data test file found in Step 4 and record the narrower command.
+
+- [ ] **Step 8: Commit**
+
+```bash
+git add \
+  src/lib/structured-data-generators.ts \
+  src/lib/__tests__/structured-data.test.ts \
+  .claude/rules/structured-data.md
+git commit -m "fix(schema): remove retired equipment structured data"
+```
+
+---
+
+## Task 8: Update docs and review scripts truth
 
 **Files:**
 - Modify: `.claude/rules/content.md`
@@ -803,6 +1226,8 @@ git commit -m "fix(content): remove equipment and market faq content"
 - Modify: `docs/guides/CANONICAL-TRUTH-REGISTRY.md`
 - Modify: `docs/technical/next16-cache-notes.md`
 - Modify: `docs/technical/deployment-notes.md`
+- Modify: `.claude/product-marketing-context.md` if it still teaches future agents that equipment is a public product line.
+- Modify active strategy docs if they are not clearly historical and still describe bending machines as a current public product line.
 - Modify: `scripts/review-derivative-readiness.js`
 
 - [ ] **Step 1: Update content rule**
@@ -842,13 +1267,35 @@ In `docs/guides/CANONICAL-TRUTH-REGISTRY.md`:
 2. Remove product-market FAQ as a live truth surface.
 3. Keep OEM FAQ row.
 
-- [ ] **Step 4: Update cache/deployment notes**
+- [ ] **Step 4: Update active agent/product context**
+
+Inspect active context docs:
+
+```bash
+rg -n "弯管设备|弯管机|bending equipment|bending machines|pipe processing equipment" \
+  .claude/product-marketing-context.md docs/project-context.md docs/strategy \
+  --glob '!docs/strategy/ring*/**/*historical*'
+```
+
+Expected handling:
+
+- `.claude/product-marketing-context.md` must follow the new business copy stance because future agents may use it for live copy.
+- `docs/project-context.md` should not teach current contributors that bending machines are a public product category.
+- Strategy docs may keep historical business context only if the text is explicitly marked as historical or "not current public website positioning."
+
+Recommended replacement note for active context files:
+
+```md
+Current public website stance: Tianze does not present bending machines or pipe processing equipment as buyer-facing product lines. Equipment know-how may be referenced only as internal forming, tooling, and process-control capability supporting conduit fittings, PETG tube products, and OEM manufacturing.
+```
+
+- [ ] **Step 5: Update cache/deployment notes**
 
 In `docs/technical/next16-cache-notes.md`, remove statements that say the product-market FAQ helper is the current approved `use cache` boundary.
 
 In `docs/technical/deployment-notes.md`, update references that list `/en/capabilities/bending-machines` as a current live proof URL. Historical audit tables can stay only if clearly historical; current runbooks must not require the retired URL.
 
-- [ ] **Step 5: Update derivative readiness script**
+- [ ] **Step 6: Update derivative readiness script**
 
 Inspect:
 
@@ -871,7 +1318,7 @@ const REQUIRED_PAGE_CONTENT = [
 
 Use the actual script shape; do not introduce a parallel check style if the file already has a helper.
 
-- [ ] **Step 6: Run docs/review checks**
+- [ ] **Step 7: Run docs/review checks**
 
 ```bash
 pnpm review:docs-truth
@@ -881,7 +1328,7 @@ pnpm truth:check
 
 Expected: all pass.
 
-- [ ] **Step 7: Commit**
+- [ ] **Step 8: Commit**
 
 ```bash
 git add \
@@ -890,13 +1337,15 @@ git add \
   docs/guides/CANONICAL-TRUTH-REGISTRY.md \
   docs/technical/next16-cache-notes.md \
   docs/technical/deployment-notes.md \
+  .claude/product-marketing-context.md \
+  docs/project-context.md \
   scripts/review-derivative-readiness.js
 git commit -m "docs: align product truth cleanup"
 ```
 
 ---
 
-## Task 7: Sweep for remaining equipment and product-market FAQ live references
+## Task 9: Sweep for remaining equipment and product-market FAQ live references
 
 **Files:**
 - Modify any live source/test/docs file identified by the searches below.
@@ -914,9 +1363,33 @@ rg -n "capabilities/bending-machines|bendingMachines|Bending Machines|PVC Condui
   --glob '!content/_archive/**'
 ```
 
-Expected: no live source/test/rule/runbook references. Historical research/archive references may remain only under excluded paths or if clearly marked historical.
+Expected:
 
-- [ ] **Step 2: Search for product-market FAQ references**
+- No live route/config/page/product-card references.
+- Literal `/capabilities/bending-machines` may appear only in negative tests or retired notes that clearly say the page is gone.
+- Do not hide literal path references by splitting strings.
+
+- [ ] **Step 2: Search broad equipment business terms**
+
+Run:
+
+```bash
+rg -n "bending machines|bending equipment|pipe processing equipment|pipe bending machine|pipe bending equipment|弯管设备|弯管机|管材加工设备" \
+  src content messages tests scripts .claude docs \
+  --glob '!docs/superpowers/plans/**' \
+  --glob '!docs/research/**' \
+  --glob '!docs/impeccable/**' \
+  --glob '!content/_archive/**'
+```
+
+Expected classification:
+
+- `src`, `content/pages`, `messages`, and generated live artifacts: no public equipment-product or equipment-supplier positioning.
+- Tests: allowed only when asserting retired behavior; use literal strings, not split strings.
+- `.claude/product-marketing-context.md` and current project docs: must follow the new business copy stance.
+- Historical CWF/strategy material: either excluded from live proof or clearly marked as historical/not current public website positioning.
+
+- [ ] **Step 3: Search for product-market FAQ references**
 
 Run:
 
@@ -935,27 +1408,56 @@ Expected:
 - No product-market page FAQ read/render references.
 - Generic `FAQPage` references may remain for About/Contact/OEM and shared FAQ helper tests.
 
-- [ ] **Step 3: Search for equipment constants/assets references**
+- [ ] **Step 4: Search for equipment constants/assets references**
 
 Run:
 
 ```bash
-rg -n "EQUIPMENT_SPECS|getEquipmentBySlug|equipment-specs|full-auto-bending-machine" \
+rg -n "EQUIPMENT_SPECS|getEquipmentBySlug|equipment-specs|full-auto-bending-machine|semi-auto-bending-machine" \
   src content messages tests scripts public \
   --glob '!content/_archive/**'
 ```
 
 Expected: no live references unless a retained generic asset is intentionally still used.
 
-- [ ] **Step 4: Fix remaining live references**
+- [ ] **Step 5: Search for dead equipment schema references**
+
+Run:
+
+```bash
+rg -n "buildEquipmentListSchema|EquipmentListSchemaInput" src tests docs .claude scripts \
+  --glob '!docs/superpowers/plans/**'
+```
+
+Expected:
+
+- No `src` or `tests` output.
+- Historical docs may mention the old builder only if they clearly say it was retired.
+
+- [ ] **Step 6: Search for split-string hiding**
+
+Run:
+
+```bash
+rg -n "retiredEquipmentPath|\\[\"bending\", \"machines\"\\]|\\['bending', 'machines'\\]|join\\(\"-\"\\)|join\\('-'\\)" src tests
+```
+
+Expected: no output for retired bending-machines helpers. Replace with a literal constant if found:
+
+```ts
+const RETIRED_BENDING_MACHINES_PATH = "/capabilities/bending-machines";
+```
+
+- [ ] **Step 7: Fix remaining live references**
 
 For every unexpected hit:
 
 1. Decide whether it is live truth or historical artifact.
 2. If live truth, remove or rewrite it.
 3. If historical artifact under active docs, mark it clearly as historical or move the cleanup to the docs task.
+4. If it is a negative test, keep the literal string and document why it is allowed.
 
-- [ ] **Step 5: Run architecture truth checks**
+- [ ] **Step 8: Run architecture truth checks**
 
 ```bash
 pnpm review:architecture-truth
@@ -965,7 +1467,7 @@ pnpm unused:check
 
 Expected: all pass. If `unused:check` is not available in this branch, run `pnpm exec knip` and record the result in the final note.
 
-- [ ] **Step 6: Commit**
+- [ ] **Step 9: Commit**
 
 ```bash
 git add -A
@@ -974,7 +1476,7 @@ git commit -m "chore: remove retired product truth references"
 
 ---
 
-## Task 8: Final verification
+## Task 10: Final verification
 
 **Files:**
 - No planned source edits unless verification exposes a specific miss.
@@ -1009,7 +1511,8 @@ pnpm exec vitest run \
   src/config/__tests__/single-site-page-expression.test.ts \
   src/lib/__tests__/seo-metadata.test.ts \
   src/lib/content/__tests__/mdx-faq.test.ts \
-  src/constants/product-specs/__tests__/i18n-parity.test.ts
+  src/constants/product-specs/__tests__/i18n-parity.test.ts \
+  src/lib
 ```
 
 Expected: all pass.
@@ -1025,7 +1528,31 @@ pnpm truth:check
 
 Expected: all pass.
 
-- [ ] **Step 5: Standard build**
+- [ ] **Step 5: Final retired-equipment truth sweep**
+
+Run the same broad checks from Task 9:
+
+```bash
+rg -n "bending machines|bending equipment|pipe processing equipment|pipe bending machine|pipe bending equipment|弯管设备|弯管机|管材加工设备" \
+  src content messages tests scripts .claude docs \
+  --glob '!docs/superpowers/plans/**' \
+  --glob '!docs/research/**' \
+  --glob '!docs/impeccable/**' \
+  --glob '!content/_archive/**'
+
+rg -n "retiredEquipmentPath|\\[\"bending\", \"machines\"\\]|\\['bending', 'machines'\\]|join\\(\"-\"\\)|join\\('-'\\)" src tests
+
+rg -n "buildEquipmentListSchema|EquipmentListSchemaInput" src tests
+```
+
+Expected:
+
+- No live marketing/SEO/product-sales claim that Tianze sells bending machines or pipe processing equipment.
+- No split-string hiding in tests.
+- No dead equipment schema builder in live source/tests.
+- Any remaining docs hit is historical or explicitly marked as not current public website positioning.
+
+- [ ] **Step 6: Standard build**
 
 ```bash
 pnpm build
@@ -1033,7 +1560,7 @@ pnpm build
 
 Expected: pass.
 
-- [ ] **Step 6: Cloudflare build**
+- [ ] **Step 7: Cloudflare build**
 
 Run only after `pnpm build` has finished:
 
@@ -1043,7 +1570,7 @@ pnpm build:cf
 
 Expected: pass.
 
-- [ ] **Step 7: Optional E2E smoke**
+- [ ] **Step 8: Optional E2E smoke**
 
 If local browser dependencies are available:
 
@@ -1053,7 +1580,7 @@ pnpm test:release-smoke
 
 Expected: pass. If blocked by environment, record the exact blocker.
 
-- [ ] **Step 8: Final status**
+- [ ] **Step 9: Final status**
 
 Run:
 
@@ -1069,4 +1596,7 @@ Final summary must state:
 - Product market FAQ removed from live product pages.
 - About/Contact/OEM FAQ retained.
 - Product pages no longer link to `/capabilities/bending-machines`.
+- Live SEO/Home/About/Contact no longer positions Tianze as a bending machine or pipe processing equipment supplier.
+- Dead equipment structured-data builder removed.
+- Retired URL references in tests are literal and classified, not hidden by split strings.
 - Verification commands and results.
