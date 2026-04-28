@@ -17,7 +17,7 @@ const EXCLUDED_SEGMENTS = [
   `${path.sep}src${path.sep}test${path.sep}`,
   `${path.sep}src${path.sep}testing${path.sep}`,
 ];
-const EXCLUDED_FILES = new Set(["src/lib/env.ts"]);
+const EXCLUDED_FILES = new Set(["src/lib/env.ts", "src/lib/env-runtime.ts"]);
 const GUARDED_KEYS = [
   "ADMIN_API_TOKEN",
   "CACHE_INVALIDATION_SECRET",

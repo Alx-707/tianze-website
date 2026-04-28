@@ -51,9 +51,16 @@ describe("FinalCTA", () => {
     expect(within(trustList).getByText("trust")).toBeInTheDocument();
   });
 
-  it("marks both CTA labels as notranslate", async () => {
+  it("protects CTA labels without broad link protection", async () => {
     await renderAsyncComponent(FinalCTA());
 
+    expect(screen.getByRole("link", { name: "primary" })).not.toHaveClass(
+      "notranslate",
+    );
+    expect(screen.getByRole("link", { name: "primary" })).not.toHaveAttribute(
+      "translate",
+      "no",
+    );
     expect(screen.getByTestId("final-cta-primary-label")).toHaveAttribute(
       "translate",
       "no",

@@ -30,12 +30,7 @@ export async function SampleCTA() {
             </p>
           </div>
           <Button asChild size="lg" className="shrink-0">
-            <Link
-              href={HOMEPAGE_SECTION_LINKS.contact}
-              prefetch={false}
-              className="notranslate"
-              translate="no"
-            >
+            <Link href={HOMEPAGE_SECTION_LINKS.contact} prefetch={false}>
               <span data-testid="sample-cta-label" translate="no">
                 {t("sample.cta")}
               </span>

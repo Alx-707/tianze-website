@@ -95,7 +95,7 @@ describe("InquiryDrawer", () => {
     );
   });
 
-  it("protects the product header semantics from browser translation", () => {
+  it("protects product title and SKU without broad header protection", () => {
     render(
       <InquiryDrawer
         open
@@ -106,13 +106,12 @@ describe("InquiryDrawer", () => {
       />,
     );
 
-    expect(screen.getByTestId("inquiry-drawer-product-header")).toHaveClass(
+    expect(screen.getByTestId("inquiry-drawer-product-header")).not.toHaveClass(
       "notranslate",
     );
-    expect(screen.getByTestId("inquiry-drawer-product-header")).toHaveAttribute(
-      "translate",
-      "no",
-    );
+    expect(
+      screen.getByTestId("inquiry-drawer-product-header"),
+    ).not.toHaveAttribute("translate", "no");
     expect(screen.getByTestId("inquiry-drawer-product-title")).toHaveAttribute(
       "translate",
       "no",

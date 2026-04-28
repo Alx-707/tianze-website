@@ -107,6 +107,73 @@ describe("ContactPage MDX migration", () => {
     );
   });
 
+  it("renders validated product family context from Contact query params", async () => {
+    const page = await ContactPage({
+      params: Promise.resolve({ locale: "en" }),
+      searchParams: Promise.resolve({
+        intent: "product-family",
+        market: "north-america",
+        family: "couplings",
+      }),
+    });
+
+    await renderAsyncPage(page as React.JSX.Element);
+
+    expect(screen.getByText("You are asking about:")).toBeInTheDocument();
+    expect(screen.getByText(/UL \/ ASTM Series/)).toBeInTheDocument();
+    expect(screen.getByText(/Couplings/)).toBeInTheDocument();
+  });
+
+  it("ignores invalid product family context without rendering raw query text", async () => {
+    const page = await ContactPage({
+      params: Promise.resolve({ locale: "en" }),
+      searchParams: Promise.resolve({
+        intent: "product-family",
+        market: "north-america",
+        family: "<script>alert(1)</script>",
+      }),
+    });
+
+    await renderAsyncPage(page as React.JSX.Element);
+
+    expect(screen.queryByText("You are asking about:")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("<script>alert(1)</script>"),
+    ).not.toBeInTheDocument();
+    expect(screen.getByTestId("contact-form")).toBeInTheDocument();
+  });
+
+  it("keeps the product family notice in the same left column as the form", async () => {
+    const page = await ContactPage({
+      params: Promise.resolve({ locale: "en" }),
+      searchParams: Promise.resolve({
+        intent: "product-family",
+        market: "north-america",
+        family: "couplings",
+      }),
+    });
+
+    await renderAsyncPage(page as React.JSX.Element);
+
+    const formColumn = screen.getByTestId("contact-form-column");
+    expect(formColumn).toContainElement(
+      screen.getByTestId("product-family-context-notice"),
+    );
+    expect(formColumn).toContainElement(screen.getByTestId("contact-form"));
+  });
+
+  it("does not protect the entire Contact page from browser translation", async () => {
+    const page = await ContactPage({
+      params: Promise.resolve({ locale: "en" }),
+    });
+
+    await renderAsyncPage(page as React.JSX.Element);
+    const shell = screen.getByTestId("contact-page-content");
+
+    expect(shell).not.toHaveClass("notranslate");
+    expect(shell).not.toHaveAttribute("translate", "no");
+  });
+
   it("builds contact metadata from the static content manifest", async () => {
     const enMetadata = await generateMetadata({
       params: Promise.resolve({ locale: "en" }),
@@ -123,5 +190,7 @@ describe("ContactPage MDX migration", () => {
     expect(zhMetadata.description).toBe(
       "联系天泽销售团队，咨询 PVC 电工套管配件、OEM 定制制造或技术支持。通常 24 小时内响应。",
     );
+    expect(enMetadata.other).not.toMatchObject({ google: "notranslate" });
+    expect(zhMetadata.other).not.toMatchObject({ google: "notranslate" });
   });
 });

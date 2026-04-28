@@ -134,18 +134,22 @@ Notes: Required attribute presence is verified. Client-side validation UX (error
 
 ---
 
-#### BC-009: Product inquiry drawer submits to /api/inquiry
+#### BC-009: Product family inquiry handoff opens Contact with context
 
-On any /products/[market] page, clicking a product's inquiry button opens a drawer. The drawer form submits to /api/inquiry with product context (market, product name). Successful submission shows confirmation.
+On any `/products/[market]` page, each rendered product family has a server-rendered inquiry link. The route builds an i18n `Link` href object for Contact with selected market and family context preserved through validated query parameters. At runtime, next-intl localizes that internal href to the active locale path.
+
+The current critical market-page path is Contact handoff, not an in-page drawer. `/api/inquiry` remains covered by API-level tests for the legacy/future product inquiry path, but it is not the required market-page user flow for this contract.
 
 | Field | Value |
 |-------|-------|
 | Priority | Critical |
-| Test Type | E2E + Integration |
-| Test File | `src/app/api/inquiry/__tests__/inquiry-integration.test.ts` |
+| Test Type | Unit + Source Contract |
+| Test File | `src/app/[locale]/products/[market]/__tests__/market-landing.test.tsx`, `src/app/[locale]/contact/__tests__/page.test.tsx`, `src/app/[locale]/products/__tests__/interactive-islands-usage.test.ts` |
 | Status | Partial |
 
-Notes: API-level integration test exists. No E2E test covers the drawer open/fill/submit flow from the product page.
+Notes: The handoff must pass only internal slugs in the URL. Contact must validate `intent`, `market`, and `family` before displaying labels. Invalid query values are ignored and are never rendered directly.
+
+Proof boundary: component/unit tests prove the internal href object and Contact validation. A claim that the rendered browser URL is `/en/contact?...` or `/zh/contact?...` requires browser or integration smoke evidence.
 
 ---
 
@@ -397,7 +401,7 @@ All 5 market spec files contain required fields (product families, dimensions, s
 
 - **BC-001** (Partial): Hero CTA links need `href` verification for /contact and /products
 - **BC-007** (Partial): End-to-end contact form submission flow not tested (Turnstile blocker)
-- **BC-009** (Partial): Product inquiry drawer has no E2E test
+- **BC-009** (Planned): Product family Contact handoff needs implementation and tests.
 - **BC-013** (Partial): Products page market cards have no E2E test
 
 ### High-priority gaps

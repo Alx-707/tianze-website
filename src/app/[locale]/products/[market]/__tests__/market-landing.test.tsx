@@ -5,6 +5,22 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const mockNotFound = vi.fn();
 const mockGetTranslations = vi.fn();
 
+type MockHref =
+  | string
+  | {
+      pathname: string;
+      query?: Record<string, string>;
+    };
+
+function stringifyMockHref(href: MockHref) {
+  if (typeof href === "string") {
+    return href;
+  }
+
+  const query = href.query ? `?${new URLSearchParams(href.query)}` : "";
+  return `${href.pathname}${query}`;
+}
+
 vi.mock("next/navigation", () => ({
   notFound: () => {
     mockNotFound();
@@ -23,11 +39,11 @@ vi.mock("@/i18n/routing", () => ({
     children,
     className,
   }: {
-    href: string;
+    href: MockHref;
     children: React.ReactNode;
     className?: string;
   }) => (
-    <a href={href} className={className}>
+    <a href={stringifyMockHref(href)} className={className}>
       {children}
     </a>
   ),
@@ -83,10 +99,19 @@ vi.mock("@/components/products/family-section", () => ({
   FamilySection: ({
     family,
     familyLabel,
+    inquiry,
   }: {
     family: { slug: string; label: string };
     familyLabel: string;
-  }) => <div data-testid={`family-${family.slug}`}>{familyLabel}</div>,
+    inquiry?: { href: MockHref; label: string };
+  }) => (
+    <section data-testid={`family-${family.slug}`}>
+      <h2>{familyLabel}</h2>
+      {inquiry ? (
+        <a href={stringifyMockHref(inquiry.href)}>{inquiry.label}</a>
+      ) : null}
+    </section>
+  ),
 }));
 
 vi.mock("@/components/products/sticky-family-nav", () => ({
@@ -151,6 +176,11 @@ const MOCK_TRANSLATIONS: Record<string, string> = {
   "market.cta.description":
     "Request a quote or ask about specifications, MOQ, and lead times.",
   "market.cta.button": "Request a Quote",
+  "market.familyInquiry.cta": "Request quote for {familyLabel}",
+  "families.north-america.conduit-sweeps-elbows.label":
+    "Conduit Sweeps & Elbows",
+  "families.north-america.conduit-sweeps-elbows.description":
+    "PVC conduit sweeps and elbows in standard angles.",
 };
 
 describe("Market Landing Page", () => {
@@ -203,12 +233,35 @@ describe("Market Landing Page", () => {
       ).toBeInTheDocument();
     });
 
-    it("renders the protected page content wrapper", async () => {
+    it("renders server links from each family to Contact with context", async () => {
       await renderPage("north-america");
 
-      const pageContent = screen.getByTestId("market-page-content");
-      expect(pageContent).toHaveClass("notranslate");
-      expect(pageContent).toHaveAttribute("translate", "no");
+      const sweepsLink = screen.getByRole("link", {
+        name: /request quote for conduit sweeps & elbows/i,
+      });
+
+      expect(sweepsLink).toHaveAttribute(
+        "href",
+        expect.stringContaining("/contact"),
+      );
+      expect(sweepsLink).toHaveAttribute(
+        "href",
+        expect.stringContaining("intent=product-family"),
+      );
+      expect(sweepsLink).toHaveAttribute(
+        "href",
+        expect.stringContaining("market=north-america"),
+      );
+      expect(sweepsLink).toHaveAttribute(
+        "href",
+        expect.stringContaining("family=conduit-sweeps-elbows"),
+      );
+    });
+
+    it("does not render shared FAQ on market landing pages", async () => {
+      await renderPage("north-america");
+
+      expect(screen.queryByTestId("faq-section")).not.toBeInTheDocument();
     });
   });
 

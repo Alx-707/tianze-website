@@ -162,6 +162,52 @@ rules:
       cwe: 'CWE-532: Insertion of Sensitive Information into Log File'
       owasp: 'A09:2021 - Security Logging and Monitoring Failures'
 
+  - id: object-injection-untrusted-key-write
+    patterns:
+      - pattern-either:
+          - patterns:
+              - pattern: |
+                  $OBJ[$BODY.$FIELD] = $VALUE
+              - metavariable-regex:
+                  metavariable: $BODY
+                  regex: "^(body|payload|requestBody|requestJson|json)$"
+          - pattern: |
+              $OBJ[$REQ.nextUrl.searchParams.get(...)] = $VALUE
+          - pattern: |
+              $OBJ[$REQ.nextUrl.searchParams.get(...) ?? $FALLBACK] = $VALUE
+          - patterns:
+              - pattern-inside: |
+                  const $BODY = await $REQ.json()
+                  ...
+              - pattern: |
+                  $OBJ[$BODY.$FIELD] = $VALUE
+          - patterns:
+              - pattern-inside: |
+                  const $KEY = $REQ.nextUrl.searchParams.get(...)
+                  ...
+              - pattern: |
+                  $OBJ[$KEY] = $VALUE
+          - patterns:
+              - pattern-inside: |
+                  const $KEY = $URL.searchParams.get(...)
+                  ...
+              - pattern: |
+                  $OBJ[$KEY] = $VALUE
+    paths:
+      exclude:
+        - "**/__tests__/**"
+        - "**/*.test.*"
+        - "**/*.spec.*"
+        - "**/scripts/**"
+    message: "Untrusted request/query/body field is used as an object write key; validate against an explicit key allowlist first."
+    languages: [typescript, javascript]
+    severity: ERROR
+    metadata:
+      category: security
+      technology: [nodejs, nextjs]
+      cwe: "CWE-915: Improperly Controlled Modification of Dynamically-Determined Object Attributes"
+      owasp: "A03:2021 - Injection"
+
   - id: object-injection-sink-dynamic-property
     patterns:
       - pattern-either:
@@ -200,9 +246,9 @@ rules:
         - "**/src/lib/env.ts"
         - "**/src/lib/locale-detection-hooks.ts"
         - "**/src/testing/utils/theme-test-utilities.ts"
-    message: '检测到对象注入漏洞：避免使用用户输入作为对象属性键，使用白名单验证或switch语句'
+    message: '检测到动态属性访问：这是启发式风险提示；只有请求/查询/body 键写入才由 object-injection-untrusted-key-write 阻断'
     languages: [typescript, javascript]
-    severity: ERROR
+    severity: WARNING
     metadata:
       category: security
       technology: [nodejs, react, nextjs]

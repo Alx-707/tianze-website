@@ -1,5 +1,4 @@
 import * as React from "react";
-import { COUNT_TWO, ONE, ZERO } from "@/constants";
 import { COUNT_4, HEX_RADIX } from "@/constants/count";
 import { DEC_0_5 } from "@/constants/decimal";
 
@@ -8,9 +7,9 @@ import { DEC_0_5 } from "@/constants/decimal";
  */
 const ANIMATION_CONSTANTS = {
   HALF_POINT: DEC_0_5,
-  DOUBLE_MULTIPLIER: COUNT_TWO,
+  DOUBLE_MULTIPLIER: 2,
   CUBIC_MULTIPLIER: COUNT_4,
-  EASE_ADJUSTMENT: COUNT_TWO,
+  EASE_ADJUSTMENT: 2,
 } as const;
 
 /**
@@ -31,7 +30,7 @@ export const easingFunctions = {
   easeInOut: (t: number) =>
     t < ANIMATION_CONSTANTS.HALF_POINT
       ? ANIMATION_CONSTANTS.DOUBLE_MULTIPLIER * t * t
-      : -ONE +
+      : -1 +
         (ANIMATION_CONSTANTS.CUBIC_MULTIPLIER -
           ANIMATION_CONSTANTS.DOUBLE_MULTIPLIER * t) *
           t,
@@ -39,18 +38,18 @@ export const easingFunctions = {
   easeIn: (t: number) => t * t,
   easeInCubic: (t: number) => t * t * t,
   easeOutCubic: (t: number) => {
-    const adjustedT = t - ONE;
-    return adjustedT * adjustedT * adjustedT + ONE;
+    const adjustedT = t - 1;
+    return adjustedT * adjustedT * adjustedT + 1;
   },
   easeInOutCubic: (t: number) =>
     t < ANIMATION_CONSTANTS.HALF_POINT
       ? ANIMATION_CONSTANTS.CUBIC_MULTIPLIER * t * t * t
-      : (t - ONE) *
+      : (t - 1) *
           (ANIMATION_CONSTANTS.DOUBLE_MULTIPLIER * t -
             ANIMATION_CONSTANTS.DOUBLE_MULTIPLIER) *
           (ANIMATION_CONSTANTS.DOUBLE_MULTIPLIER * t -
             ANIMATION_CONSTANTS.DOUBLE_MULTIPLIER) +
-        ONE,
+        1,
 };
 
 /**
@@ -65,12 +64,7 @@ export function formatNumber(
     suffix?: string;
   } = {},
 ): string {
-  const {
-    decimals = ZERO,
-    separator = ",",
-    prefix = "",
-    suffix = "",
-  } = options;
+  const { decimals = 0, separator = ",", prefix = "", suffix = "" } = options;
 
   const formattedValue = value.toFixed(decimals);
   const [integerPart = "", fractionalPart] = formattedValue.split(".");
@@ -128,10 +122,10 @@ export function useCounterAnimation(
   targetValue: number,
   config: AnimationConfig,
 ) {
-  const [currentValue, setCurrentValue] = React.useState(ZERO);
+  const [currentValue, setCurrentValue] = React.useState(0);
   const animationRef = React.useRef<number | null>(null);
   const startTimeRef = React.useRef<number | null>(null);
-  const startValueRef = React.useRef(ZERO);
+  const startValueRef = React.useRef(0);
   // ✅ Fixed: Use ref to store callback for recursive calls
   const animateRef = React.useRef<((_timestamp: number) => void) | undefined>(
     undefined,
@@ -145,7 +139,7 @@ export function useCounterAnimation(
       }
 
       const elapsed = timestamp - startTimeRef.current;
-      const progress = Math.min(elapsed / config.duration, ONE);
+      const progress = Math.min(elapsed / config.duration, 1);
       const easedProgress = config.easing(progress);
 
       const newValue =
@@ -155,7 +149,7 @@ export function useCounterAnimation(
       setCurrentValue(newValue);
       config.onUpdate?.(newValue);
 
-      if (progress < ONE) {
+      if (progress < 1) {
         // ✅ Fixed: Use ref to access current callback
         animationRef.current = requestAnimationFrame(animateRef.current!);
       } else {

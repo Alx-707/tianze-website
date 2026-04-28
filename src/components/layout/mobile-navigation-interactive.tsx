@@ -139,11 +139,7 @@ function MobileLanguageSwitcher({
   ];
 
   return (
-    <div
-      className="notranslate space-y-1"
-      data-testid="mobile-language-switcher"
-      translate="no"
-    >
+    <div className="space-y-1" data-testid="mobile-language-switcher">
       <div
         className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-muted-foreground"
         data-testid="mobile-language-switcher-label"
@@ -166,7 +162,6 @@ function MobileLanguageSwitcher({
                 : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
             )}
             onClick={onNavigate}
-            translate="no"
           >
             <span
               data-testid={`mobile-language-option-label-${locale}`}

@@ -7,7 +7,7 @@ import { AccessibilityUtils } from "@/lib/accessibility-utils";
 import { logger } from "@/lib/logger";
 import { cn } from "@/lib/utils";
 import { animationUtils } from "@/components/ui/animated-counter-helpers";
-import { COUNT_TWO, COUNT_THREE, ONE, ZERO } from "@/constants";
+import { COUNT_THREE } from "@/constants";
 import { COUNT_4 } from "@/constants/count";
 import { DEC_0_3, DEC_0_5 } from "@/constants/decimal";
 import { ANIMATION_DURATIONS } from "@/constants/performance-constants";
@@ -31,19 +31,19 @@ const EASING_CONSTANTS = {
   /** 缓动倍数 */
   MULTIPLIER: COUNT_4,
   /** 缓动偏移 */
-  OFFSET: -COUNT_TWO,
+  OFFSET: -2,
   /** 缓动除数 */
-  DIVISOR: COUNT_TWO,
+  DIVISOR: 2,
 } as const;
 
 export const easingFunctions = {
   linear: (t: number) => t,
-  easeOut: (t: number) => ONE - (ONE - t) ** EASING_CONSTANTS.CUBIC_POWER,
+  easeOut: (t: number) => 1 - (1 - t) ** EASING_CONSTANTS.CUBIC_POWER,
   easeIn: (t: number) => t ** EASING_CONSTANTS.CUBIC_POWER,
   easeInOut: (t: number) =>
     t < EASING_CONSTANTS.THRESHOLD
       ? EASING_CONSTANTS.MULTIPLIER * t ** EASING_CONSTANTS.CUBIC_POWER
-      : ONE -
+      : 1 -
         (EASING_CONSTANTS.OFFSET * t + EASING_CONSTANTS.DIVISOR) **
           EASING_CONSTANTS.CUBIC_POWER /
           EASING_CONSTANTS.DIVISOR,
@@ -62,7 +62,7 @@ export const formatters = {
   /** 货币格式化 */
   currency: (value: number) => `$${Math.round(value).toLocaleString()}`,
   /** 小数格式化 */
-  decimal: (value: number) => value.toFixed(ONE),
+  decimal: (value: number) => value.toFixed(1),
 } as const;
 
 /**
@@ -184,14 +184,14 @@ function useAnimatedCounter({
 
     const updateValue = (currentTime: number) => {
       const elapsed = currentTime - startTime;
-      const progress = Math.min(elapsed / duration, ONE);
+      const progress = Math.min(elapsed / duration, 1);
 
       const easedProgress = easing(progress);
       const newValue = startValue + difference * easedProgress;
 
       setCurrentValue(newValue);
 
-      if (progress < ONE) {
+      if (progress < 1) {
         animationUtils.scheduleFrame(updateValue);
       } else {
         setCurrentValue(to);
@@ -208,12 +208,9 @@ function useAnimatedCounter({
     const shouldAnimate = autoStart || (triggerOnVisible && isVisible);
 
     if (shouldAnimate && !isAnimating) {
-      const safeDelay = Math.min(
-        Math.max(delay, ZERO),
-        MAX_SET_TIMEOUT_DELAY_MS,
-      );
+      const safeDelay = Math.min(Math.max(delay, 0), MAX_SET_TIMEOUT_DELAY_MS);
 
-      if (safeDelay > ZERO) {
+      if (safeDelay > 0) {
         const timer = setTimeout(animate, safeDelay);
         return () => clearTimeout(timer);
       }
@@ -235,14 +232,14 @@ export const AnimatedCounter = forwardRef<
 >(
   (
     {
-      from = ZERO,
+      from = 0,
       to,
       duration = ANIMATION_DURATIONS.COUNTER,
       formatter = formatters.default,
       easing = easingFunctions.easeOut,
       triggerOnVisible = true,
       observerOptions = {},
-      delay = ZERO,
+      delay = 0,
       autoStart = false,
       className,
       role: roleProp,

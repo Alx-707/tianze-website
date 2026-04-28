@@ -3,7 +3,6 @@
 import type { CSSProperties, ReactNode } from "react";
 import { useIntersectionObserverWithDelay } from "@/hooks/use-intersection-observer";
 import { cn } from "@/lib/utils";
-import { ZERO } from "@/constants";
 
 const DEFAULT_STAGGER_INTERVAL = 100;
 const DEFAULT_THRESHOLD = 0.15;
@@ -63,8 +62,7 @@ export function ScrollReveal({
   className,
 }: ScrollRevealProps) {
   const computedDelay =
-    delay ??
-    (staggerIndex !== undefined ? staggerIndex * staggerInterval : ZERO);
+    delay ?? (staggerIndex !== undefined ? staggerIndex * staggerInterval : 0);
 
   const observerOptions = { threshold, triggerOnce: true };
 

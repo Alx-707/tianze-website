@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { parse } from "@babel/parser";
 import { describe, expect, it } from "vitest";
 
@@ -27,10 +27,32 @@ const CRITICAL_CACHE_POLICY_SOURCE_READERS = {
 } satisfies Record<(typeof CRITICAL_CACHE_POLICY_FILES)[number], () => string>;
 
 const CONTACT_PAGE_FILE = "src/app/[locale]/contact/page.tsx";
-const PRODUCT_MARKET_PAGE_FILE = "src/app/[locale]/products/[market]/page.tsx";
+const CONTACT_PAGE_DATA_FILE = "src/app/[locale]/contact/contact-page-data.ts";
+const PRODUCT_MARKET_SOURCE_FILES = [
+  "src/app/[locale]/products/[market]/page.tsx",
+  "src/app/[locale]/products/[market]/market-jsonld.ts",
+  "src/app/[locale]/products/[market]/market-page-data.ts",
+  "src/app/[locale]/products/[market]/market-page-sections.tsx",
+  "src/app/[locale]/products/[market]/market-spec-presenter.ts",
+] as const;
 
-function readProductMarketPageSource() {
-  return readFileSync(PRODUCT_MARKET_PAGE_FILE, "utf8");
+function readProductMarketSource(filePath: string) {
+  // eslint-disable-next-line security/detect-non-literal-fs-filename -- architecture test checks repo-local allowlisted files
+  if (!existsSync(filePath)) {
+    return null;
+  }
+
+  return {
+    filePath,
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- architecture test checks repo-local allowlisted files
+    source: readFileSync(filePath, "utf8"),
+  };
+}
+
+function readProductMarketSources() {
+  return PRODUCT_MARKET_SOURCE_FILES.map(readProductMarketSource).filter(
+    (item) => item !== null,
+  );
 }
 
 type AstRecord = Record<string, unknown>;
@@ -182,34 +204,38 @@ describe("cache directive policy", () => {
     }
   });
 
-  it("keeps contact page on build-time static content without runtime cache invalidation", () => {
-    const source = readFileSync(CONTACT_PAGE_FILE, "utf8");
+  it("keeps contact static content loading in the page data module without runtime cache invalidation", () => {
+    const routeSource = readFileSync(CONTACT_PAGE_FILE, "utf8");
+    const dataSource = readFileSync(CONTACT_PAGE_DATA_FILE, "utf8");
 
-    expect(source).toContain(
+    expect(routeSource).not.toContain("CONTENT_MANIFEST");
+    expect(dataSource).toContain(
       'import { CONTENT_MANIFEST } from "@/lib/content-manifest.generated"',
     );
-    expect(source).not.toContain('"use cache"');
-    expect(source).not.toContain("'use cache'");
-    expect(source).not.toContain('from "next/cache"');
-    expect(source).not.toContain("cacheTag(");
-    expect(source).not.toContain("revalidateTag(");
-    expect(source).not.toContain("revalidatePath(");
+
+    for (const source of [routeSource, dataSource]) {
+      expect(source).not.toContain('"use cache"');
+      expect(source).not.toContain("'use cache'");
+      expect(source).not.toContain('from "next/cache"');
+      expect(source).not.toContain("cacheTag(");
+      expect(source).not.toContain("revalidateTag(");
+      expect(source).not.toContain("revalidatePath(");
+    }
   });
 
-  it("keeps product market page-owned MDX reads cached without tag invalidation", () => {
-    const source = readProductMarketPageSource();
-
-    expect(source).not.toContain(
-      'import { cacheLife, cacheTag } from "next/cache"',
-    );
-    expect(source).toContain('import { cacheLife } from "next/cache"');
-    expect(source).not.toContain(
-      'import { contentTags } from "@/lib/cache/cache-tags"',
-    );
-    expect(source).toMatch(
-      /async function getProductMarketFaqItems\([^)]*\)[\s\S]*?['"]use cache['"]/,
-    );
-    expect(source).toContain('cacheLife("days")');
-    expect(source).not.toContain("cacheTag(");
+  it("keeps product market route sources free of shared FAQ and cache workarounds", () => {
+    for (const { filePath, source } of readProductMarketSources()) {
+      expect(source, filePath).not.toContain('getPageBySlug("product-market"');
+      expect(source, filePath).not.toContain("getProductMarketFaqItems");
+      expect(source, filePath).not.toContain(
+        "@/components/sections/faq-section",
+      );
+      expect(source, filePath).not.toContain("generateFaqSchemaFromItems");
+      expect(source, filePath).not.toContain('from "next/cache"');
+      expect(source, filePath).not.toContain("cacheLife(");
+      expect(source, filePath).not.toContain("cacheTag(");
+      expect(source, filePath).not.toContain("revalidateTag(");
+      expect(source, filePath).not.toContain("revalidatePath(");
+    }
   });
 });

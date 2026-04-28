@@ -3,7 +3,6 @@
  */
 
 import { randomBytes } from "crypto";
-import { ONE, ZERO } from "@/constants";
 
 /**
  * Result of name splitting operation
@@ -33,8 +32,8 @@ export function splitName(fullName: string): SplitNameResult {
   const normalizedName = fullName.trim();
   const parts = normalizedName.split(/\s+/);
 
-  if (parts.length === ONE) {
-    return { firstName: parts[ZERO]!, lastName: "" };
+  if (parts.length === 1) {
+    return { firstName: parts[0]!, lastName: "" };
   }
 
   const lastName = parts.pop()!;
@@ -92,6 +91,6 @@ export function generateProductInquiryMessage(
 export function generateLeadReferenceId(type: string): string {
   const timestamp = Date.now().toString(36);
   const random = randomBytes(4).toString("hex");
-  const prefix = type.substring(ZERO, 3).toUpperCase();
+  const prefix = type.substring(0, 3).toUpperCase();
   return `${prefix}-${timestamp}-${random}`;
 }

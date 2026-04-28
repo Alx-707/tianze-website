@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AccessibilityUtils } from "@/lib/accessibility";
 import { logger } from "@/lib/logger";
-import { ZERO } from "@/constants";
 import { DEC_0_1 } from "@/constants/decimal";
 
 /**
@@ -241,7 +240,7 @@ export function useIntersectionObserver<T extends HTMLElement = HTMLElement>(
  */
 export function useIntersectionObserverWithDelay(
   options: IntersectionObserverOptions = {},
-  delay = ZERO,
+  delay = 0,
 ): IntersectionObserverHookReturn {
   const {
     ref,
@@ -252,7 +251,7 @@ export function useIntersectionObserverWithDelay(
 
   // ✅ Fixed: Only update state when value actually changes, use queueMicrotask to avoid synchronous setState
   useEffect(() => {
-    if (baseIsVisible && delay > ZERO) {
+    if (baseIsVisible && delay > 0) {
       const timer = setTimeout(() => {
         setIsVisible(true);
       }, delay);

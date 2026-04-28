@@ -191,7 +191,9 @@ export {
 export type { BreakpointKey } from "./breakpoints";
 
 // ============================================================================
-// 魔法数字常量 - Facade聚合入口
+// Legacy compatibility facade.
+// Prefer local literals or domain-named constants instead of generic ZERO/ONE
+// in new production code.
 // ============================================================================
 export {
   ZERO,

@@ -341,13 +341,12 @@ describe("MobileNavigation Component", () => {
       const trigger = screen.getByRole("button", { name: /menu/i });
       await user.click(trigger);
 
-      expect(screen.getByTestId("mobile-language-switcher")).toHaveClass(
+      expect(screen.getByTestId("mobile-language-switcher")).not.toHaveClass(
         "notranslate",
       );
-      expect(screen.getByTestId("mobile-language-switcher")).toHaveAttribute(
-        "translate",
-        "no",
-      );
+      expect(
+        screen.getByTestId("mobile-language-switcher"),
+      ).not.toHaveAttribute("translate", "no");
       expect(
         screen.getByTestId("mobile-language-option-label-en"),
       ).toHaveAttribute("translate", "no");

@@ -60,6 +60,9 @@
     }
   },
   "contact": {
+    "context": {
+      "productFamilyLabel": "你正在咨询："
+    },
     "form": {
       "title": "联系我们",
       "description": "与我们取得联系，我们很乐意听到您的声音。",

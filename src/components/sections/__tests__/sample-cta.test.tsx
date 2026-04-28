@@ -30,9 +30,12 @@ describe("SampleCTA", () => {
     expect(link).toHaveAttribute("href", HOMEPAGE_SECTION_LINKS.contact);
   });
 
-  it("marks the CTA label as notranslate", async () => {
+  it("protects the CTA label without broad link protection", async () => {
     await renderAsyncComponent(SampleCTA());
+    const link = screen.getByRole("link", { name: "sample.cta" });
 
+    expect(link).not.toHaveClass("notranslate");
+    expect(link).not.toHaveAttribute("translate", "no");
     expect(screen.getByTestId("sample-cta-label")).toHaveAttribute(
       "translate",
       "no",

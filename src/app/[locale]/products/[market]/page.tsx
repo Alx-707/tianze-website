@@ -1,74 +1,28 @@
-import { type ComponentProps, type ReactNode } from "react";
 import type { Metadata } from "next";
-import { cacheLife } from "next/cache";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import {
-  getMarketBySlug,
-  getFamiliesForMarket,
   getAllMarketSlugs,
+  getMarketBySlug,
   isValidMarketSlug,
-  type ProductFamilyDefinition,
 } from "@/constants/product-catalog";
 import { SINGLE_SITE_PRODUCTS_PAGE_EXPRESSION } from "@/config/single-site-page-expression";
-import { NORTH_AMERICA_SPECS } from "@/constants/product-specs/north-america";
-import { AUSTRALIA_NZ_SPECS } from "@/constants/product-specs/australia-new-zealand";
-import { MEXICO_SPECS } from "@/constants/product-specs/mexico";
-import { EUROPE_SPECS } from "@/constants/product-specs/europe";
-import { PNEUMATIC_SPECS } from "@/constants/product-specs/pneumatic-tube-systems";
-import type { MarketSpecs, SpecGroup } from "@/constants/product-specs/types";
-import type { FaqItem, Locale } from "@/types/content.types";
-import {
-  getColumnTranslationKey,
-  getGroupLabelTranslationKey,
-  getRowValueTranslationKey,
-} from "@/lib/spec-table-translator";
 import { DYNAMIC_PATHS_CONFIG, SITE_CONFIG } from "@/config/paths";
-import { getPageBySlug } from "@/lib/content";
-import {
-  extractFaqFromMetadata,
-  generateFaqSchemaFromItems,
-} from "@/lib/content/mdx-faq";
 import { generateMetadataForPath } from "@/lib/seo-metadata";
 import { JsonLdGraphScript } from "@/components/seo";
-import { FaqSection } from "@/components/sections/faq-section";
-import {
-  CatalogBreadcrumb,
-  buildCatalogBreadcrumbJsonLd,
-} from "@/components/products/catalog-breadcrumb";
-import { FamilySection } from "@/components/products/family-section";
-import {
-  ProductCertifications,
-  ProductSpecs,
-  ProductTradeInfo,
-} from "@/components/products/product-specs";
+import { CatalogBreadcrumb } from "@/components/products/catalog-breadcrumb";
 import { StickyFamilyNav } from "@/components/products/sticky-family-nav";
-import { Link, routing } from "@/i18n/routing";
-import { generateProductGroupData } from "@/lib/structured-data-generators";
-
-// --- Spec data lookup ---
-
-const SPECS_BY_MARKET: Record<string, MarketSpecs> = {
-  "north-america": NORTH_AMERICA_SPECS,
-  "australia-new-zealand": AUSTRALIA_NZ_SPECS,
-  mexico: MEXICO_SPECS,
-  europe: EUROPE_SPECS,
-  "pneumatic-tube-systems": PNEUMATIC_SPECS,
-};
-
-function getMarketSpecs(marketSlug: string): MarketSpecs | undefined {
-  return SPECS_BY_MARKET[marketSlug];
-}
-
-async function getProductMarketFaqItems(locale: Locale): Promise<FaqItem[]> {
-  "use cache";
-  cacheLife("days");
-
-  const faqPage = await getPageBySlug("product-market", locale);
-  return extractFaqFromMetadata(faqPage.metadata);
-}
-
-// --- Static params ---
+import { routing } from "@/i18n/routing";
+import type { Locale } from "@/types/content.types";
+import { buildMarketPageJsonLdData } from "@/app/[locale]/products/[market]/market-jsonld";
+import { getMarketPageData } from "@/app/[locale]/products/[market]/market-page-data";
+import {
+  CtaSection,
+  FamilySections,
+  MarketHero,
+  TrustSignalsSection,
+} from "@/app/[locale]/products/[market]/market-page-sections";
+import { buildTrustSignalsViewModel } from "@/app/[locale]/products/[market]/market-spec-presenter";
 
 export function generateStaticParams() {
   const markets = getAllMarketSlugs();
@@ -76,8 +30,6 @@ export function generateStaticParams() {
     markets.map((market) => ({ locale, market })),
   );
 }
-
-// --- Metadata ---
 
 interface MarketPageProps {
   params: Promise<{ locale: string; market: string }>;
@@ -94,6 +46,7 @@ export async function generateMetadata({
   const t = await getTranslations({ locale, namespace: "catalog" });
   const marketLabel = t(`markets.${marketSlug}.label`);
   const marketDescription = t(`markets.${marketSlug}.description`);
+
   return generateMetadataForPath({
     locale: locale as Locale,
     pageType: "products",
@@ -108,310 +61,6 @@ export async function generateMetadata({
   });
 }
 
-// --- Extracted sub-sections (keep MarketPage under 120 lines) ---
-
-interface TrustSignalsSectionProps {
-  translatedTechnical: Record<string, string>;
-  certifications: string[];
-  translatedTrade: {
-    moq: string;
-    leadTime: string;
-    supplyCapacity: string;
-    packaging: string;
-    portOfLoading: string;
-  };
-  technicalTitle: string;
-  certificationsTitle: string;
-  tradeTitle: string;
-  tradeLabels: {
-    moq: string;
-    leadTime: string;
-    supplyCapacity: string;
-    packaging: string;
-    portOfLoading: string;
-  };
-}
-
-function TrustSignalsSection({
-  translatedTechnical,
-  certifications,
-  translatedTrade,
-  technicalTitle,
-  certificationsTitle,
-  tradeTitle,
-  tradeLabels,
-}: TrustSignalsSectionProps) {
-  return (
-    <div className="mt-16 space-y-8">
-      <ProductSpecs specs={translatedTechnical} title={technicalTitle} />
-      <ProductCertifications
-        certifications={certifications}
-        title={certificationsTitle}
-      />
-      <ProductTradeInfo
-        moq={translatedTrade.moq}
-        leadTime={translatedTrade.leadTime}
-        supplyCapacity={translatedTrade.supplyCapacity}
-        packaging={translatedTrade.packaging}
-        portOfLoading={translatedTrade.portOfLoading}
-        title={tradeTitle}
-        labels={tradeLabels}
-      />
-    </div>
-  );
-}
-
-interface CtaSectionProps {
-  heading: string;
-  description: string;
-  buttonText: string;
-  href: ComponentProps<typeof Link>["href"];
-}
-
-function CtaSection({
-  heading,
-  description,
-  buttonText,
-  href,
-}: CtaSectionProps) {
-  return (
-    <section className="mt-16 rounded-lg border border-primary/20 bg-primary/5 p-8 text-center">
-      <h2 className="mb-2 text-xl font-semibold">{heading}</h2>
-      <p className="mb-6 text-muted-foreground">{description}</p>
-      <Link
-        href={href}
-        className="inline-flex items-center rounded-md bg-primary px-6 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-      >
-        {buttonText}
-      </Link>
-    </section>
-  );
-}
-
-function MarketHero({
-  standardLabel,
-  marketLabel,
-  marketDescription,
-}: {
-  standardLabel: string;
-  marketLabel: string;
-  marketDescription: string;
-}) {
-  return (
-    <header className="mb-8 md:mb-12">
-      <span className="mb-2 inline-block rounded bg-muted px-2 py-0.5 font-mono text-xs text-muted-foreground">
-        {standardLabel}
-      </span>
-      <h1 className="text-heading mb-4">{marketLabel}</h1>
-      <p className="text-body max-w-2xl text-muted-foreground">
-        {marketDescription}
-      </p>
-    </header>
-  );
-}
-
-// --- Helper functions for spec translation ---
-
-function translateSpecColumns(
-  columns: string[],
-  t: (key: string) => string,
-): string[] {
-  return columns.map((col) => {
-    const colKey = getColumnTranslationKey(col);
-    return t(colKey);
-  });
-}
-
-function translateSpecRows(
-  rows: string[][],
-  t: (key: string) => string,
-): string[][] {
-  return rows.map((row) =>
-    row.map((cell) => {
-      const cellKey = getRowValueTranslationKey(cell);
-      return cellKey ? t(cellKey) : cell;
-    }),
-  );
-}
-
-function translateTechnicalSpecs(
-  technical: Record<string, string>,
-  marketSlug: string,
-  t: (key: string) => string,
-): Record<string, string> {
-  const translated: Record<string, string> = {};
-  for (const key of Object.keys(technical)) {
-    const labelKey = `technicalLabels.${key}`;
-    const valueKey = `specs.${marketSlug}.technical.${key}`;
-    const translatedLabel = t(labelKey);
-    const translatedValue = t(valueKey);
-    translated[translatedLabel] = translatedValue;
-  }
-  return translated;
-}
-
-function buildTrustSignalsSectionProps(
-  marketSpecs: MarketSpecs,
-  marketSlug: string,
-  t: (key: string) => string,
-): TrustSignalsSectionProps {
-  return {
-    translatedTechnical: translateTechnicalSpecs(
-      marketSpecs.technical,
-      marketSlug,
-      t,
-    ),
-    certifications: marketSpecs.certifications,
-    translatedTrade: {
-      moq: t(`specs.${marketSlug}.trade.moq`),
-      leadTime: t(`specs.${marketSlug}.trade.leadTime`),
-      supplyCapacity: t(`specs.${marketSlug}.trade.supplyCapacity`),
-      packaging: t(`specs.${marketSlug}.trade.packaging`),
-      portOfLoading: t(`specs.${marketSlug}.trade.portOfLoading`),
-    },
-    technicalTitle: t("market.technical.title"),
-    certificationsTitle: t("market.certifications.title"),
-    tradeTitle: t("market.trade.title"),
-    tradeLabels: {
-      moq: t("market.trade.moq"),
-      leadTime: t("market.trade.leadTime"),
-      supplyCapacity: t("market.trade.supplyCapacity"),
-      packaging: t("market.trade.packaging"),
-      portOfLoading: t("market.trade.portOfLoading"),
-    },
-  };
-}
-
-function buildProductGroupSchema({
-  families,
-  familySpecsMap,
-  marketSlug,
-  marketLabel,
-  marketDescription,
-  marketUrl,
-  t,
-}: {
-  families: readonly ProductFamilyDefinition[];
-  familySpecsMap: Map<string, MarketSpecs["families"][number]>;
-  marketSlug: string;
-  marketLabel: string;
-  marketDescription: string;
-  marketUrl: string;
-  t: (key: string) => string;
-}) {
-  return generateProductGroupData({
-    name: marketLabel,
-    description: marketDescription,
-    url: marketUrl,
-    brand: SITE_CONFIG.name,
-    products: families.map((family) => {
-      const image = familySpecsMap.get(family.slug)?.images[0];
-
-      return {
-        name: t(`families.${marketSlug}.${family.slug}.label`),
-        description: t(`families.${marketSlug}.${family.slug}.description`),
-        ...(image ? { image: `${SITE_CONFIG.baseUrl}${image}` } : {}),
-        url: `${marketUrl}#${family.slug}`,
-      };
-    }),
-  });
-}
-
-async function buildMarketPageJsonLdData({
-  families,
-  familySpecsMap,
-  faqItems,
-  locale,
-  market,
-  marketDescription,
-  marketLabel,
-  marketSlug,
-  marketUrl,
-  t,
-}: {
-  families: readonly ProductFamilyDefinition[];
-  familySpecsMap: Map<string, MarketSpecs["families"][number]>;
-  faqItems: FaqItem[];
-  locale: Locale;
-  market: NonNullable<ReturnType<typeof getMarketBySlug>>;
-  marketDescription: string;
-  marketLabel: string;
-  marketSlug: string;
-  marketUrl: string;
-  t: (key: string) => string;
-}) {
-  const productGroupSchema = buildProductGroupSchema({
-    families,
-    familySpecsMap,
-    marketSlug,
-    marketLabel,
-    marketDescription,
-    marketUrl,
-    t,
-  });
-  const breadcrumbSchema = await buildCatalogBreadcrumbJsonLd({
-    market,
-    marketLabel,
-  });
-  const faqSchema =
-    faqItems.length > 0 ? generateFaqSchemaFromItems(faqItems, locale) : null;
-
-  return faqSchema
-    ? [productGroupSchema, breadcrumbSchema, faqSchema]
-    : [productGroupSchema, breadcrumbSchema];
-}
-
-function renderFamilySections({
-  families,
-  familySpecsMap,
-  marketSlug,
-  t,
-}: {
-  families: readonly ProductFamilyDefinition[];
-  familySpecsMap: Map<string, MarketSpecs["families"][number]>;
-  marketSlug: string;
-  t: (key: string) => string;
-}): ReactNode {
-  return families.map((family) => {
-    const specs = familySpecsMap.get(family.slug);
-    if (!specs) return null;
-    const familyLabel = t(`families.${marketSlug}.${family.slug}.label`);
-    const familyDescription = t(
-      `families.${marketSlug}.${family.slug}.description`,
-    );
-    const translatedSpecGroups: SpecGroup[] = specs.specGroups.map(
-      (group, groupIndex) => ({
-        ...group,
-        groupLabel: t(
-          getGroupLabelTranslationKey(marketSlug, family.slug, groupIndex),
-        ),
-        columns: translateSpecColumns(group.columns, t),
-        rows: translateSpecRows(group.rows, t),
-      }),
-    );
-
-    return (
-      <FamilySection
-        key={family.slug}
-        family={family}
-        specs={{
-          ...specs,
-          highlights: specs.highlights.map((_, index) =>
-            t(
-              `specs.${marketSlug}.families.${family.slug}.highlights.${index}`,
-            ),
-          ),
-          specGroups: translatedSpecGroups,
-        }}
-        familyLabel={familyLabel}
-        familyDescription={familyDescription}
-      />
-    );
-  });
-}
-
-// --- Page component ---
-
 export default async function MarketPage({ params }: MarketPageProps) {
   const { locale, market: marketSlug } = await params;
   setRequestLocale(locale);
@@ -420,84 +69,75 @@ export default async function MarketPage({ params }: MarketPageProps) {
     notFound();
   }
 
-  const market = getMarketBySlug(marketSlug)!;
-  const families = getFamiliesForMarket(marketSlug);
-  const marketSpecs = getMarketSpecs(marketSlug);
-  const faqItems = await getProductMarketFaqItems(locale as Locale);
+  const pageData = getMarketPageData(marketSlug);
   const t = await getTranslations({ locale, namespace: "catalog" });
   const marketLabel = t(`markets.${marketSlug}.label`);
   const marketDescription = t(`markets.${marketSlug}.description`);
-
-  // Build family specs lookup for FamilySection rendering and structured data.
-  const familySpecsMap = new Map(
-    marketSpecs?.families.map((fs) => [fs.slug, fs]),
-  );
-  const marketUrl = `${SITE_CONFIG.baseUrl}/${locale}/products/${market.slug}`;
+  const marketUrl = `${SITE_CONFIG.baseUrl}/${locale}/products/${pageData.market.slug}`;
   const jsonLdData = await buildMarketPageJsonLdData({
-    families,
-    familySpecsMap,
-    faqItems,
-    locale: locale as Locale,
-    market,
-    marketSlug,
-    marketLabel,
-    marketDescription,
+    data: {
+      families: pageData.families,
+      familySpecsMap: pageData.familySpecsMap,
+      market: pageData.market,
+    },
+    labels: {
+      marketLabel,
+      marketDescription,
+    },
     marketUrl,
     t,
   });
 
   return (
     <main
-      className="notranslate mx-auto max-w-[1080px] px-6 py-8 md:py-12"
+      className="mx-auto max-w-[1080px] px-6 py-8 md:py-12"
       data-testid="market-page-content"
-      translate="no"
     >
       <JsonLdGraphScript locale={locale as Locale} data={jsonLdData} />
       <CatalogBreadcrumb
-        market={market}
+        market={pageData.market}
         marketLabel={marketLabel}
         renderJsonLd={false}
       />
 
       <MarketHero
-        standardLabel={market.standardLabel}
+        standardLabel={pageData.market.standardLabel}
         marketLabel={marketLabel}
         marketDescription={marketDescription}
       />
 
-      {marketSpecs && (
+      {pageData.marketSpecs ? (
         <StickyFamilyNav
-          families={families
-            .filter((f) => familySpecsMap.has(f.slug))
-            .map((f) => ({
-              slug: f.slug,
-              label: t(`families.${marketSlug}.${f.slug}.label`),
+          families={pageData.families
+            .filter((family) => pageData.familySpecsMap.has(family.slug))
+            .map((family) => ({
+              slug: family.slug,
+              label: t(`families.${marketSlug}.${family.slug}.label`),
             }))}
           ariaLabel={t("market.familyNav.jumpTo")}
         />
-      )}
+      ) : null}
 
       <div className="space-y-16">
-        {renderFamilySections({ families, familySpecsMap, marketSlug, t })}
+        <FamilySections
+          families={pageData.families}
+          familySpecsMap={pageData.familySpecsMap}
+          marketSlug={marketSlug}
+          t={t}
+        />
       </div>
 
-      {!marketSpecs && (
+      {!pageData.marketSpecs ? (
         <section className="mb-12 rounded-lg border border-border bg-muted/30 p-8 text-center">
           <p className="text-muted-foreground">{t("market.cta.description")}</p>
         </section>
-      )}
+      ) : null}
 
-      {marketSpecs && (
+      {pageData.marketSpecs ? (
         <TrustSignalsSection
-          {...buildTrustSignalsSectionProps(marketSpecs, marketSlug, t)}
+          {...buildTrustSignalsViewModel(pageData.marketSpecs, marketSlug, t)}
         />
-      )}
-
-      <FaqSection
-        faqItems={faqItems}
-        locale={locale as Locale}
-        renderJsonLd={false}
-      />
+      ) : null}
 
       <CtaSection
         heading={t("market.cta.heading", { marketLabel })}
