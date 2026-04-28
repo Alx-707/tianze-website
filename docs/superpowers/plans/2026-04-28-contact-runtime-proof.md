@@ -145,7 +145,10 @@ const FAMILY_SLUG = "conduit-sweeps-elbows";
 const LOAD_TIMEOUT_MS = 10_000;
 const FALLBACK_DELAY_MS = 500;
 
-test.describe.configure({ mode: "serial" });
+interface ExpectedContactUrl {
+  origin: string;
+  pathname: string;
+}
 
 const localeCases = [
   {
@@ -172,8 +175,25 @@ function parseRenderedHref(page: Page, href: string): URL {
   return new URL(href, page.url());
 }
 
-function expectProductFamilyContactUrl(url: URL, pathname: string): void {
-  expect(url.pathname).toBe(pathname);
+function isProductFamilyContactUrl(
+  url: URL,
+  expected: ExpectedContactUrl,
+): boolean {
+  return (
+    url.origin === expected.origin &&
+    url.pathname === expected.pathname &&
+    url.searchParams.get("intent") === PRODUCT_FAMILY_INTENT &&
+    url.searchParams.get("market") === MARKET_SLUG &&
+    url.searchParams.get("family") === FAMILY_SLUG
+  );
+}
+
+function expectProductFamilyContactUrl(
+  url: URL,
+  expected: ExpectedContactUrl,
+): void {
+  expect(url.origin).toBe(expected.origin);
+  expect(url.pathname).toBe(expected.pathname);
   expect(url.searchParams.get("intent")).toBe(PRODUCT_FAMILY_INTENT);
   expect(url.searchParams.get("market")).toBe(MARKET_SLUG);
   expect(url.searchParams.get("family")).toBe(FAMILY_SLUG);
@@ -189,6 +209,10 @@ for (const localeCase of localeCases) {
       });
 
       await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+      const expectedContactUrl = {
+        origin: new URL(page.url()).origin,
+        pathname: localeCase.contactPath,
+      } satisfies ExpectedContactUrl;
 
       const inquiryLink = page.getByRole("link", {
         name: localeCase.inquiryLabel,
@@ -205,19 +229,12 @@ for (const localeCase of localeCases) {
 
       expectProductFamilyContactUrl(
         parseRenderedHref(page, renderedHref),
-        localeCase.contactPath,
+        expectedContactUrl,
       );
 
       await Promise.all([
         page.waitForURL(
-          (url) => {
-            return (
-              url.pathname === localeCase.contactPath &&
-              url.searchParams.get("intent") === PRODUCT_FAMILY_INTENT &&
-              url.searchParams.get("market") === MARKET_SLUG &&
-              url.searchParams.get("family") === FAMILY_SLUG
-            );
-          },
+          (url) => isProductFamilyContactUrl(url, expectedContactUrl),
           { waitUntil: "domcontentloaded" },
         ),
         inquiryLink.click(),

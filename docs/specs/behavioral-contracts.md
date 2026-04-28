@@ -4,6 +4,8 @@
 >
 > This document is the single source of truth for user-facing behavioral guarantees.
 > Every contract maps to at least one test file. If a contract has no test, it is a gap.
+>
+> When changing contact, inquiry, subscribe, health, behavioral-contract, or smoke-test behavior, update the affected contract status, proof boundary, and coverage summary in the same branch.
 
 ## Contract Format
 
@@ -390,10 +392,10 @@ All 5 market spec files contain required fields (product families, dimensions, s
 | Category | Active Total | Covered | Partial | Untested | Retired |
 |----------|--------------|---------|---------|----------|---------|
 | Navigation & Discovery | 6 | 4 | 2 | 0 | 0 |
-| Inquiry & Conversion | 6 | 1 | 5 | 0 | 0 |
+| Inquiry & Conversion | 6 | 2 | 4 | 0 | 0 |
 | Content & Information | 6 | 0 | 2 | 4 | 1 |
 | Resilience & Edge Cases | 6 | 4 | 2 | 0 | 0 |
-| **Total** | **24** | **9** | **11** | **4** | **1** |
+| **Total** | **24** | **10** | **10** | **4** | **1** |
 
 Retired contracts are kept for historical traceability but excluded from active coverage totals.
 
