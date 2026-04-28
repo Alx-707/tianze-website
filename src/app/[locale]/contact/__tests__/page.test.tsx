@@ -1,6 +1,7 @@
 import React from "react";
 import { screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { setRequestLocale } from "next-intl/server";
 import ContactPage, { generateMetadata } from "@/app/[locale]/contact/page";
 import { renderAsyncPage } from "@/testing/render-async-page";
 
@@ -129,6 +130,14 @@ describe("ContactPage MDX migration", () => {
     expect(screen.getByTestId("contact-page-fallback")).toBeInTheDocument();
     expect(screen.getByTestId("contact-page-content")).toBeInTheDocument();
     expect(screen.getByTestId("contact-form")).toBeInTheDocument();
+  });
+
+  it("sets the request locale in the page entry before rendering contact content", async () => {
+    await ContactPage({
+      params: Promise.resolve({ locale: "en" }),
+    });
+
+    expect(vi.mocked(setRequestLocale)).toHaveBeenCalledWith("en");
   });
 
   it("renders localized contact panel copy from the top-level contact namespace", async () => {

@@ -312,11 +312,6 @@ function ContactPageFallback({ locale }: { locale: Locale }) {
   );
 }
 
-function ContactContent({ locale }: { locale: Locale }) {
-  setRequestLocale(locale);
-  return <ContactContentBody locale={locale} />;
-}
-
 function ContactContentBody({ locale }: { locale: Locale }) {
   const page = getStaticContactPage(locale);
   const messages = getStaticMessages(locale);
@@ -386,10 +381,11 @@ function ContactContentBody({ locale }: { locale: Locale }) {
 export default async function ContactPage({ params }: ContactPageProps) {
   const { locale } = await params;
   const typedLocale = locale as Locale;
+  setRequestLocale(typedLocale);
 
   return (
     <Suspense fallback={<ContactPageFallback locale={typedLocale} />}>
-      <ContactContent locale={typedLocale} />
+      <ContactContentBody locale={typedLocale} />
     </Suspense>
   );
 }
