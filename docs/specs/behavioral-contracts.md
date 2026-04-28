@@ -198,7 +198,7 @@ Notes: Contact Server Action Turnstile validation is covered. Inquiry route prot
 
 #### BC-013: Products page shows all market cards with working links
 
-/products displays market cards for all 5 markets (North America, Australia & New Zealand, Mexico, Europe, Pneumatic Tube Systems) plus a link to /capabilities/bending-machines. Each card links to its /products/[market] page.
+/products displays market cards for all 5 markets (North America, Australia & New Zealand, Mexico, Europe, Pneumatic Tube Systems). Each card links to its /products/[market] page.
 
 | Field | Value |
 |-------|-------|
@@ -267,18 +267,18 @@ Notes: Navigation to /about is tested extensively (basic-navigation, navigation,
 
 ---
 
-#### BC-018: Bending machines page shows equipment specifications
+#### BC-018: Retired — Bending machines page
 
-/capabilities/bending-machines displays equipment specs and images that demonstrate upstream manufacturing capability. The page loads in both locales.
+The bending machines page was retired in the product truth-source cleanup. Equipment is no longer a standalone live product/capability surface.
 
 | Field | Value |
 |-------|-------|
 | Priority | Medium |
-| Test Type | E2E |
-| Test File | `tests/e2e/user-journeys.spec.ts` (Journey: Bending Machines Page) |
-| Status | Partial |
+| Test Type | Static Truth |
+| Test File | `src/app/__tests__/sitemap.test.ts`, `tests/e2e/user-journeys.spec.ts` |
+| Status | Retired |
 
-Notes: E2E test verifies page loads with 200 status, heading visible, and substantive content (>100 chars). Does not verify specific equipment specs or images.
+Notes: The active proof is that public navigation, sitemap, and E2E key-page coverage no longer require this retired route.
 
 ---
 
@@ -342,7 +342,7 @@ Notes: `tests/integration/api/health.test.ts` covers the route in-suite. Deploye
 
 #### BC-023: Sitemap includes all public pages in both locales
 
-/sitemap.xml lists all public pages (homepage, about, contact, products, products/[market], blog, blog/[slug], capabilities/bending-machines, oem-custom-manufacturing, privacy, terms) with hreflang alternates for en and zh.
+/sitemap.xml lists all public pages (homepage, about, contact, products, products/[market], blog, blog/[slug], oem-custom-manufacturing, privacy, terms) with hreflang alternates for en and zh.
 
 | Field | Value |
 |-------|-------|
@@ -409,5 +409,4 @@ All 5 market spec files contain required fields (product families, dimensions, s
 ### Medium-priority gaps
 
 - **BC-015, BC-016** (Untested): Blog listing and post pages
-- **BC-018** (Partial): Bending machines page — E2E verifies load + heading + content, not specific specs
 - **BC-019** (Untested): OEM page

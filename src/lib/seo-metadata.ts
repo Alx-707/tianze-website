@@ -274,15 +274,6 @@ export function createPageSEOConfig(
       type: "website" as const,
       keywords: ["Terms", "Conditions", "Legal"],
     },
-    bendingMachines: {
-      type: "website" as const,
-      keywords: [
-        "Bending Machines",
-        "Manufacturing",
-        "PVC Conduit",
-        "Equipment",
-      ],
-    },
     oem: {
       type: "website" as const,
       keywords: ["OEM", "Custom Manufacturing", "PVC Conduit", "Private Label"],
@@ -308,9 +299,6 @@ export function createPageSEOConfig(
       break;
     case "terms":
       baseConfig = baseConfigs.terms;
-      break;
-    case "bendingMachines":
-      baseConfig = baseConfigs.bendingMachines;
       break;
     case "oem":
       baseConfig = baseConfigs.oem;

@@ -4,27 +4,27 @@ import { ProductCard } from "../product-card";
 
 describe("ProductCard", () => {
   const props = {
-    image: { src: "/images/machine.jpg", alt: "弯管机" },
-    title: "弯管设备",
-    features: ["自主设计研发制造", "半自动/全自动弯管机", "服务国内一线品牌"],
+    image: { src: "/images/product.jpg", alt: "PVC 管件" },
+    title: "PVC 管件",
+    features: ["多市场标准", "稳定供应", "支持询盘"],
     buttonText: "了解更多",
-    buttonHref: "/capabilities/bending-machines",
+    buttonHref: "/products",
   };
 
   it("renders title and features", () => {
     render(<ProductCard {...props} />);
 
-    expect(screen.getByText("弯管设备")).toBeInTheDocument();
-    expect(screen.getByText("自主设计研发制造")).toBeInTheDocument();
-    expect(screen.getByText("半自动/全自动弯管机")).toBeInTheDocument();
-    expect(screen.getByText("服务国内一线品牌")).toBeInTheDocument();
+    expect(screen.getByText("PVC 管件")).toBeInTheDocument();
+    expect(screen.getByText("多市场标准")).toBeInTheDocument();
+    expect(screen.getByText("稳定供应")).toBeInTheDocument();
+    expect(screen.getByText("支持询盘")).toBeInTheDocument();
   });
 
   it("renders button with correct href", () => {
     render(<ProductCard {...props} />);
 
     const button = screen.getByRole("link", { name: /了解更多/i });
-    expect(button).toHaveAttribute("href", "/capabilities/bending-machines");
+    expect(button).toHaveAttribute("href", "/products");
   });
 
   it("renders primary button variant when isPrimary is true", () => {

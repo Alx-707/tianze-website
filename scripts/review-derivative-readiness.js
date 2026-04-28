@@ -26,7 +26,6 @@ const CONTENT_CHECKS = [
       "SINGLE_SITE_HOME_SCENARIO_ITEMS",
       "SINGLE_SITE_HOME_QUALITY_COMMITMENT_ITEMS",
       "SINGLE_SITE_PRODUCTS_PAGE_EXPRESSION",
-      "SINGLE_SITE_BENDING_MACHINES_PAGE_EXPRESSION",
       "SINGLE_SITE_OEM_PAGE_EXPRESSION",
       "SINGLE_SITE_ABOUT_STATS_ITEMS",
     ],
@@ -37,8 +36,18 @@ const CONTENT_CHECKS = [
     snippets: ["aboutSections:", "valuesTitle:", "statLabels:", "cta:"],
   },
   {
-    file: "content/pages/en/product-market.mdx",
-    label: "product market FAQ is replaceable in MDX",
+    file: "content/pages/en/about.mdx",
+    label: "about page FAQ remains page-owned in MDX",
+    snippets: ["faq:", "question:", "answer:"],
+  },
+  {
+    file: "content/pages/en/contact.mdx",
+    label: "contact page FAQ remains page-owned in MDX",
+    snippets: ["faq:", "question:", "answer:"],
+  },
+  {
+    file: "content/pages/en/oem-custom-manufacturing.mdx",
+    label: "OEM page FAQ remains page-owned in MDX",
     snippets: ["faq:", "question:", "answer:"],
   },
   {

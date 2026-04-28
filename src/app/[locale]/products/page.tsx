@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import {
   generateMetadataForPath,
@@ -17,7 +16,6 @@ import {
 } from "@/components/products/catalog-breadcrumb";
 import { JsonLdGraphScript } from "@/components/seo";
 import { MarketSeriesCard } from "@/components/products/market-series-card";
-import { Link } from "@/i18n/routing";
 import { generateLocaleStaticParams } from "@/app/[locale]/generate-static-params";
 
 export function generateStaticParams() {
@@ -98,7 +96,7 @@ export default async function ProductsPage({ params }: ProductsPageProps) {
         </div>
       </section>
 
-      {/* Section 2: Specialty & Equipment */}
+      {/* Section 2: Specialty products */}
       <section>
         <h2 className="mb-6 text-xl font-semibold">
           {t("overview.specialty")}
@@ -116,29 +114,6 @@ export default async function ProductsPage({ params }: ProductsPageProps) {
               })}
             />
           )}
-          {/* Bending Machines card — links to /capabilities/bending-machines */}
-          <Link
-            href={SINGLE_SITE_PRODUCTS_PAGE_EXPRESSION.equipmentCard.href}
-            className="group block rounded-lg border border-border bg-card p-6 shadow-sm transition-shadow hover:shadow-md"
-          >
-            <div className="relative mb-4 aspect-[16/9] w-full overflow-hidden rounded-md bg-muted">
-              <Image
-                src={
-                  SINGLE_SITE_PRODUCTS_PAGE_EXPRESSION.equipmentCard.imageSrc
-                }
-                alt={t("overview.equipmentTitle")}
-                fill
-                sizes="(max-width: 640px) 100vw, 50vw"
-                className="object-contain p-4"
-              />
-            </div>
-            <h3 className="mb-2 text-lg font-semibold text-foreground group-hover:text-primary">
-              {t("overview.equipmentTitle")}
-            </h3>
-            <p className="text-sm text-muted-foreground">
-              {t("overview.equipmentDescription")}
-            </p>
-          </Link>
         </div>
       </section>
     </main>

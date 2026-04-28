@@ -19,7 +19,6 @@ export type PageType =
   | "products"
   | "privacy"
   | "terms"
-  | "bendingMachines"
   | "oem";
 
 // 动态路由类型定义

@@ -570,7 +570,6 @@ describe("paths configuration", () => {
         "products",
         "privacy",
         "terms",
-        "bendingMachines",
         "oem",
       ];
 

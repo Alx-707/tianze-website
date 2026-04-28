@@ -4,7 +4,6 @@ import {
   SINGLE_SITE_ABOUT_PAGE_EXPRESSION,
   SINGLE_SITE_ABOUT_STATS_ITEMS,
   SINGLE_SITE_ABOUT_VALUE_ITEM_KEYS,
-  SINGLE_SITE_BENDING_MACHINES_PAGE_EXPRESSION,
   SINGLE_SITE_HOME_FINAL_TRUST_ITEMS,
   SINGLE_SITE_HOME_GRID_SECTION_ORDER,
   SINGLE_SITE_HOME_HERO_PROOF_ITEMS,
@@ -109,44 +108,10 @@ describe("single-site-page-expression", () => {
     ];
 
     expect(groupedMarketSlugs.sort()).toEqual(allMarketSlugs.sort());
-    expect(SINGLE_SITE_PRODUCTS_PAGE_EXPRESSION.equipmentCard.href).toBe(
-      "/capabilities/bending-machines",
-    );
-    expect(SINGLE_SITE_PRODUCTS_PAGE_EXPRESSION.equipmentCard.imageSrc).toBe(
-      "/images/products/full-auto-bending-machine.svg",
-    );
     expect(SINGLE_SITE_PRODUCTS_PAGE_EXPRESSION.marketLanding.ctaHref).toBe(
       "/contact",
     );
     expect(SINGLE_SITE_ABOUT_PAGE_EXPRESSION.ctaHref).toBe("/contact");
-    expect(SINGLE_SITE_BENDING_MACHINES_PAGE_EXPRESSION.ctaHref).toBe(
-      "/contact",
-    );
-    expect(SINGLE_SITE_BENDING_MACHINES_PAGE_EXPRESSION.whyCardKeys).toEqual([
-      "card1",
-      "card2",
-      "card3",
-    ]);
-    expect(SINGLE_SITE_BENDING_MACHINES_PAGE_EXPRESSION.stats).toEqual([
-      {
-        key: "monthlyCapacity",
-        valueSource: "translation",
-        translationKey: "capability.monthlyCapacity",
-        suffix: "",
-      },
-      {
-        key: "countries",
-        valueSource: "siteFacts.stats.exportCountries",
-        translationKey: "capability.countries",
-        suffix: "+",
-      },
-      {
-        key: "experience",
-        valueSource: "translation",
-        translationKey: "capability.experience",
-        suffix: "",
-      },
-    ]);
     expect(SINGLE_SITE_OEM_PAGE_EXPRESSION.ctaHref).toBe("/contact");
   });
 });

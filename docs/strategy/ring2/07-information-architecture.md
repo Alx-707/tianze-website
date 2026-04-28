@@ -12,14 +12,12 @@
 当前站点里几条线是分散的：
 
 - `/products/`
-- `/capabilities/bending-machines/`
 - `/oem-custom-manufacturing/`
 
 这会带来几个问题：
 
 - 买家不容易理解 Tianze 到底卖什么
-- 设备看起来像“能力展示”，不像真正产品线
-- PETG、设备、定制没有统一层级
+- PETG、定制和标准市场产品没有统一层级
 
 ## 当前批准的目标结构
 
@@ -32,8 +30,6 @@
 │   │   ├── /products/pipes/mexico/
 │   │   ├── /products/pipes/europe/
 │   │   └── /products/pipes/pneumatic-tubes/
-│   ├── /products/equipment/
-│   │   └── /products/equipment/bending-machines/
 │   └── /products/custom-manufacturing/
 ├── /about/
 ├── /contact/

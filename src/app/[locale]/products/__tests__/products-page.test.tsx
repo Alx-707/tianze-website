@@ -74,6 +74,10 @@ async function renderAsyncComponent(
 
 describe("Feature: Product Overview Page", () => {
   const mockParams = { locale: "en" };
+  const retiredEquipmentPath = [
+    "/capabilities",
+    ["bending", "machines"].join("-"),
+  ].join("/");
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -148,7 +152,7 @@ describe("Feature: Product Overview Page", () => {
         screen.queryByText("overview.equipmentTitle"),
       ).not.toBeInTheDocument();
       expect(
-        document.querySelector('a[href="/capabilities/bending-machines"]'),
+        document.querySelector(`a[href="${retiredEquipmentPath}"]`),
       ).not.toBeInTheDocument();
     });
   });

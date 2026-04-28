@@ -171,7 +171,7 @@
     },
     "products": {
       "title": "Product Lines",
-      "subtitle": "From the manufacturer that designs and builds its own bending machines. Full vertical integration from equipment R&D to finished product.",
+      "subtitle": "PVC conduit fittings, PETG pneumatic tubes, and OEM manufacturing from a vertically integrated factory.",
       "cta": "View All Products",
       "item1": {
         "tag": "4 Market Standards",
@@ -192,15 +192,6 @@
         "link": "/products/pneumatic-tube-systems"
       },
       "item3": {
-        "tag": "Core Capability",
-        "title": "Bending Machines",
-        "spec1": "Full-auto and semi-auto models",
-        "spec2": "DN25 to DN160mm pipe range",
-        "spec3": "150-200 pcs/hour production speed",
-        "standard": "Self-developed",
-        "link": "/capabilities/bending-machines"
-      },
-      "item4": {
         "tag": "Service",
         "title": "OEM & Custom Manufacturing",
         "spec1": "Your specifications, our production",
@@ -937,10 +928,7 @@
       "title": "Products",
       "description": "PVC conduit fittings and pipes manufactured to international standards. Select your market to view products by compliance standard.",
       "byStandard": "By Market Standard",
-      "specialty": "Specialty & Equipment",
-      "equipmentTitle": "Bending Machines",
-      "equipmentDescription": "Self-developed full-auto and semi-auto PVC conduit bending machines. Our core manufacturing capability.",
-      "equipmentCta": "Learn More"
+      "specialty": "Specialty Products"
     },
     "market": {
       "familyNav": {
@@ -1806,91 +1794,6 @@
       "governing": "Governing Law",
       "disputes": "Dispute Resolution",
       "contact": "Contact Information"
-    }
-  },
-  "capabilities": {
-    "meta": {
-      "title": "PVC Conduit Bending Machines | Tianze",
-      "description": "Self-developed full-auto and semi-auto PVC conduit bending machines. The core manufacturing technology behind our fittings."
-    },
-    "hero": {
-      "title": "PVC Conduit Bending Machines",
-      "subtitle": "Self-developed. In-house manufactured. The technology behind our fittings."
-    },
-    "why": {
-      "title": "Why It Matters",
-      "card1": {
-        "title": "We Make the Machines",
-        "desc": "As an upstream bending machine manufacturer, we control the core technology that shapes every fitting."
-      },
-      "card2": {
-        "title": "Precision Control",
-        "desc": "CNC-controlled bending ensures consistent angles, wall thickness, and finish across every production run."
-      },
-      "card3": {
-        "title": "Custom Capability",
-        "desc": "In-house mold development means we can produce non-standard sizes, angles, and specifications to your requirements."
-      }
-    },
-    "machines": {
-      "title": "Machine Lineup"
-    },
-    "equipment": {
-      "full-auto-bending-machine": {
-        "name": "Full-Automatic PVC Pipe Bending Machine",
-        "params": {
-          "pipeDiameter": "Pipe Diameter",
-          "bendingAngles": "Bending Angles",
-          "heatingZones": "Heating Zones",
-          "powerSupply": "Power Supply",
-          "productionSpeed": "Production Speed",
-          "machineWeight": "Machine Weight",
-          "controlSystem": "Control System"
-        },
-        "highlights": {
-          "0": "CNC Control System",
-          "1": "Automatic Feeding",
-          "2": "Multi-Station Design",
-          "3": "Remote Diagnostics"
-        }
-      },
-      "semi-auto-bending-machine": {
-        "name": "Semi-Automatic PVC Pipe Bending Machine",
-        "params": {
-          "pipeDiameter": "Pipe Diameter",
-          "bendingAngles": "Bending Angles",
-          "heatingMethod": "Heating Method",
-          "powerSupply": "Power Supply",
-          "productionSpeed": "Production Speed",
-          "machineWeight": "Machine Weight"
-        },
-        "highlights": {
-          "0": "Precision Temperature Control",
-          "1": "Adjustable Bending Angles",
-          "2": "Quick-Swap Mold System",
-          "3": "Safety Features"
-        }
-      }
-    },
-    "capability": {
-      "title": "Production Capability",
-      "monthlyCapacity": {
-        "value": "50,000+",
-        "label": "Fittings per Month"
-      },
-      "countries": {
-        "value": "{countries}+",
-        "label": "Countries Served"
-      },
-      "experience": {
-        "value": "10+",
-        "label": "Years of Experience"
-      }
-    },
-    "cta": {
-      "heading": "Interested in our bending technology?",
-      "description": "Whether you need OEM manufacturing or want to discuss custom specifications, we're ready to help.",
-      "button": "Contact Us"
     }
   },
   "oem": {

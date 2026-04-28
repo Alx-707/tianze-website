@@ -124,51 +124,6 @@ const _entries: ContentEntry[] = [
   {
     "type": "pages",
     "locale": "en",
-    "slug": "bending-machines",
-    "extension": ".mdx",
-    "filePath": "/content/pages/en/bending-machines.mdx",
-    "relativePath": "content/pages/en/bending-machines.mdx",
-    "metadata": {
-      "locale": "en",
-      "title": "PVC Pipe Bending Machines",
-      "description": "Full-auto and semi-auto PVC pipe bending machines designed and manufactured in-house.",
-      "slug": "bending-machines",
-      "publishedAt": "2026-03-23",
-      "updatedAt": "2026-04-01",
-      "lastReviewed": "2026-04-01",
-      "draft": false,
-      "seo": {
-        "title": "PVC Pipe Bending Machines | Tianze Equipment",
-        "description": "Industrial PVC pipe bending machines — full-auto CNC and semi-auto models. Designed and manufactured by Tianze for conduit fitting production."
-      },
-      "faq": [
-        {
-          "id": "bending-capacity",
-          "question": "What pipe sizes can your bending machines handle?",
-          "answer": "Our full-auto machine handles DN25-DN160mm. The semi-auto model covers DN20-DN110mm. Custom size ranges can be configured."
-        },
-        {
-          "id": "bending-automation",
-          "question": "What is the difference between full-auto and semi-auto?",
-          "answer": "Full-auto features CNC control with automatic feeding and multi-station design — ideal for high-volume production. Semi-auto requires manual loading but offers lower investment for smaller operations."
-        },
-        {
-          "id": "bending-support",
-          "question": "Do you provide installation and training?",
-          "answer": "Yes, we provide on-site installation, operator training, and ongoing technical support. Remote diagnostics are available for the full-auto model."
-        },
-        {
-          "id": "bending-spare-parts",
-          "question": "How do I get spare parts?",
-          "answer": "We maintain a spare parts inventory for all our machine models. Standard parts ship within 3-5 days. We also offer annual maintenance contracts."
-        }
-      ]
-    },
-    "content": "\n## Machine FAQ\n\nThis MDX file owns SEO metadata and FAQ content for the bending machines page. The visible machine cards, specifications, process steps, support copy, and CTA modules remain structured page sections powered by the translation namespace.\n"
-  },
-  {
-    "type": "pages",
-    "locale": "en",
     "slug": "contact",
     "extension": ".mdx",
     "filePath": "/content/pages/en/contact.mdx",
@@ -302,91 +257,6 @@ const _entries: ContentEntry[] = [
   {
     "type": "pages",
     "locale": "en",
-    "slug": "product-market",
-    "extension": ".mdx",
-    "filePath": "/content/pages/en/product-market.mdx",
-    "relativePath": "content/pages/en/product-market.mdx",
-    "metadata": {
-      "locale": "en",
-      "title": "Product Market FAQ",
-      "description": "Shared FAQ content for product market landing pages.",
-      "slug": "product-market",
-      "publishedAt": "2024-11-01",
-      "updatedAt": "2026-04-24",
-      "lastReviewed": "2026-04-24",
-      "author": "Tianze Pipe Team",
-      "layout": "default",
-      "draft": false,
-      "seo": {
-        "title": "Product Market FAQ",
-        "description": "FAQ content for PVC conduit market landing pages.",
-        "keywords": [
-          "pvc conduit",
-          "schedule 40",
-          "schedule 80",
-          "iec 61386",
-          "lszh",
-          "conduit faq"
-        ]
-      },
-      "faq": [
-        {
-          "id": "sch40vs80",
-          "question": "What is the difference between Schedule 40 and Schedule 80?",
-          "answer": "Schedule 40 and Schedule 80 refer to wall thickness classifications under ASTM D1785.\n\nSchedule 40 is the standard wall thickness for concealed or general electrical conduit runs. Schedule 80 is thicker, heavier, and better suited to exposed locations, high-traffic areas, and industrial projects where impact resistance matters.\n"
-        },
-        {
-          "id": "conduitSize",
-          "question": "How do I choose the right conduit size?",
-          "answer": "Conduit size depends on the number, type, and size of conductors you need to route.\n\nThe key principle is wire fill capacity. Always check your local electrical code and project drawings, then match those requirements against the conduit dimensions and market standard.\n"
-        },
-        {
-          "id": "bendingRadius",
-          "question": "What is the minimum bending radius for PVC conduit?",
-          "answer": "Minimum bending radius depends on conduit size and the applicable local standard.\n\nFactory-made bends are formed with dedicated bending machines, which helps keep radius, wall thickness, and dimensional tolerance more consistent than field bending with manual heat.\n"
-        },
-        {
-          "id": "strengthGrades",
-          "question": "What are the mechanical strength grades: heavy, medium, and light?",
-          "answer": "IEC 61386 classifies conduit by mechanical resistance.\n\nHeavy duty is used for industrial, direct-burial, or concrete-encased conditions. Medium duty is common in commercial concealed runs. Light duty is used for lower-risk residential or protected installations.\n"
-        },
-        {
-          "id": "lszh",
-          "question": "What is LSZH and when is it needed?",
-          "answer": "LSZH means Low Smoke Zero Halogen.\n\nIt is used where fire-safety rules require lower smoke and no halogen gas release, such as public buildings, rail transit, data centers, hospitals, and high-occupancy enclosed spaces.\n"
-        },
-        {
-          "id": "standardsDifference",
-          "question": "What is the difference between UL 651, IEC 61386, and AS/NZS 61386?",
-          "answer": "These are regional standard families with different testing and classification rules.\n\nNorth American standards commonly classify by Schedule 40 or Schedule 80 wall thickness. IEC-based standards classify by mechanical strength. AS/NZS uses IEC-style requirements with local additions for Australia and New Zealand.\n"
-        },
-        {
-          "id": "directBurial",
-          "question": "Can PVC conduit be direct-buried or encased in concrete?",
-          "answer": "Yes. PVC conduit can be used for direct burial and concrete encasement when the selected product and installation method match the local code.\n\nFor direct burial or exposed risk areas, heavier grades such as Schedule 80 or heavy-duty IEC conduit are normally preferred.\n"
-        },
-        {
-          "id": "indoorOutdoor",
-          "question": "What is the difference between indoor and outdoor installation?",
-          "answer": "Outdoor conduit needs more attention to UV exposure, temperature movement, moisture, and physical damage.\n\nIndoor runs are usually protected and more stable. Outdoor exposed runs often require Schedule 80, wet-location fittings, expansion allowances, and UV-resistant material or coating.\n"
-        },
-        {
-          "id": "solarDataCenter",
-          "question": "Is your conduit suitable for solar farm or data center projects?",
-          "answer": "Yes. Solar projects commonly need durable underground and outdoor conduit. Data centers often need clean cable paths, LSZH options, and stable quality for repeat installation.\n\nSend the project standard, size list, and installation environment so we can match the correct product type.\n"
-        },
-        {
-          "id": "corrosion",
-          "question": "How does PVC conduit perform in corrosive environments?",
-          "answer": "PVC has strong chemical and corrosion resistance compared with metal conduit.\n\nIt is often used in coastal, agricultural, chemical, wastewater, and other environments where rust or galvanic corrosion is a concern.\n"
-        }
-      ]
-    },
-    "content": "\nThis MDX file owns FAQ content for product market landing pages. Product catalog labels, family specifications, and market standards remain in typed product/catalog configuration because they are structured product data rather than page prose.\n"
-  },
-  {
-    "type": "pages",
-    "locale": "en",
     "slug": "terms",
     "extension": ".mdx",
     "filePath": "/content/pages/en/terms.mdx",
@@ -511,51 +381,6 @@ const _entries: ContentEntry[] = [
       ]
     },
     "content": "\n## 我们是谁\n\nTianze Pipe 专注于 **PVC 电工套管配件**、**管材加工设备** 和\n**PETG 气动物流管系统**。我们的核心差异不只是卖产品，而是我们也掌握这些产品背后的弯管设备、模具和工艺。\n\n这种上游能力让我们在非标规格、模具开发、打样速度和量产稳定性上，比单纯贸易型供应商更有主动权。\n\n## 我们做什么\n\n### PVC 电工套管及配件\n\n我们提供直管、弯头、接头、扩口、双承口等电工套管产品，覆盖多个市场标准。\n\n### 管材加工设备\n\n我们自主研发和制造半自动、全自动弯管机、扩管机、切管机以及配套模具，并将这些能力直接用于自身生产体系。\n\n### PETG 气动物流管系统\n\n我们同时供应用于医院与物流场景的高透明 PETG 气动物流管、弯管和连接件。\n\n## 为什么客户会选择天泽\n\n### 设备、工艺、管件同链路控制\n\n因为我们理解产品成型过程本身，所以在复杂规格、模具调整和产线切换上响应更快。\n\n### OEM 与非标定制更灵活\n\n我们支持客户规格定制、贴牌包装、定向开发弯头和样品测试，再进入批量交付。\n\n### 稳定出口供货\n\n天泽目前服务 **20+ 国家** 的 B2B 客户，重点面向电工套管和工业管材应用场景。\n\n## 公司概况\n\n- **开始运营：** 2018 年\n- **正式注册：** 2023 年\n- **团队规模：** 60 人\n- **厂区面积：** 100 亩\n- **体系认证：** ISO 9001:2015\n\n## 我们如何合作\n\n### 1. 先确认需求\n\n先确认应用场景、目标标准、弯头形式、尺寸范围和包装要求，再判断最合适的供货方式。\n\n### 2. 再确认工艺和模具\n\n标准产品直接匹配现有产能；非标项目先做模具和工艺可行性评估，再进入样品阶段。\n\n### 3. 样品确认后进入量产\n\n样品确认后，我们再安排稳定生产、批次管控和交期计划。\n\n## 我们重视什么\n\n- 实事求是的沟通\n- 快速响应技术问题\n- 明确告知可行与不可行\n- 重复订单中的品质一致性\n\n## 联系我们\n\n如果您正在采购电工套管配件、弯管设备或气动物流管产品，欢迎直接带着图纸、目标市场或产品清单联系天泽。\n\n- **邮箱：** sales@tianze-pipe.com\n- **官网：** https://tianze-pipe.com\n\n_适合那些真正关心工艺和稳定交付，而不只看单价的采购项目。_\n"
-  },
-  {
-    "type": "pages",
-    "locale": "zh",
-    "slug": "bending-machines",
-    "extension": ".mdx",
-    "filePath": "/content/pages/zh/bending-machines.mdx",
-    "relativePath": "content/pages/zh/bending-machines.mdx",
-    "metadata": {
-      "locale": "zh",
-      "title": "PVC 管材弯管机",
-      "description": "自主设计制造的全自动和半自动 PVC 管材弯管设备。",
-      "slug": "bending-machines",
-      "publishedAt": "2026-03-23",
-      "updatedAt": "2026-04-01",
-      "lastReviewed": "2026-04-01",
-      "draft": false,
-      "seo": {
-        "title": "PVC 管材弯管机 | Tianze Equipment",
-        "description": "工业级 PVC 管材弯管设备，包括全自动 CNC 和半自动机型，由天泽为电工套管管件生产自主设计制造。"
-      },
-      "faq": [
-        {
-          "id": "bending-capacity",
-          "question": "你们的弯管机可加工哪些管径？",
-          "answer": "全自动机型可处理 DN25-DN160mm，半自动机型覆盖 DN20-DN110mm。特殊尺寸范围可按需求配置。"
-        },
-        {
-          "id": "bending-automation",
-          "question": "全自动和半自动有什么区别？",
-          "answer": "全自动机型采用 CNC 控制、自动送料和多工位设计，适合大批量生产；半自动机型需要人工上料，但投入更低，适合中小规模产线。"
-        },
-        {
-          "id": "bending-support",
-          "question": "你们提供安装和培训吗？",
-          "answer": "提供。我们可提供现场安装、操作培训和持续技术支持；全自动机型也支持远程诊断。"
-        },
-        {
-          "id": "bending-spare-parts",
-          "question": "备件如何购买？",
-          "answer": "我们为所有机型保留备件库存。常规备件 3-5 天内发出，也可提供年度维护服务。"
-        }
-      ]
-    },
-    "content": "\n## 设备 FAQ\n\n本 MDX 文件负责弯管机页面 SEO 元数据和 FAQ 内容。页面可见的设备卡片、规格参数、流程步骤、支持说明和 CTA 模块仍由结构化页面组件与翻译命名空间驱动。\n"
   },
   {
     "type": "pages",
@@ -693,91 +518,6 @@ const _entries: ContentEntry[] = [
   {
     "type": "pages",
     "locale": "zh",
-    "slug": "product-market",
-    "extension": ".mdx",
-    "filePath": "/content/pages/zh/product-market.mdx",
-    "relativePath": "content/pages/zh/product-market.mdx",
-    "metadata": {
-      "locale": "zh",
-      "title": "产品市场 FAQ",
-      "description": "产品市场落地页共用 FAQ 内容。",
-      "slug": "product-market",
-      "publishedAt": "2024-11-01",
-      "updatedAt": "2026-04-24",
-      "lastReviewed": "2026-04-24",
-      "author": "Tianze Pipe 团队",
-      "layout": "default",
-      "draft": false,
-      "seo": {
-        "title": "产品市场 FAQ",
-        "description": "PVC 电工套管市场落地页 FAQ 内容。",
-        "keywords": [
-          "PVC电工套管",
-          "Schedule 40",
-          "Schedule 80",
-          "IEC 61386",
-          "LSZH",
-          "套管常见问题"
-        ]
-      },
-      "faq": [
-        {
-          "id": "sch40vs80",
-          "question": "Schedule 40 和 Schedule 80 有什么区别？",
-          "answer": "Schedule 40 和 Schedule 80 是 ASTM D1785 标准下的壁厚等级。\n\nSchedule 40 是常规壁厚，适合隐蔽敷设或一般电气套管项目。Schedule 80 壁厚更厚、重量更大，更适合明装、高人流区域和工业项目等需要更高抗冲击能力的场景。\n"
-        },
-        {
-          "id": "conduitSize",
-          "question": "如何选择合适的套管尺寸？",
-          "answer": "套管尺寸取决于需要穿设的导线数量、类型和截面积。\n\n核心原则是穿线填充率。应先确认当地电气规范和项目图纸要求，再按套管尺寸和适用市场标准匹配产品。\n"
-        },
-        {
-          "id": "bendingRadius",
-          "question": "PVC 套管的最小弯曲半径是多少？",
-          "answer": "最小弯曲半径取决于管径和适用的当地标准。\n\n工厂预制弯管使用专用弯管设备成型，比现场手工热弯更容易保持弯曲半径、壁厚和尺寸公差的一致性。\n"
-        },
-        {
-          "id": "strengthGrades",
-          "question": "机械强度等级：重型、中型、轻型如何区分？",
-          "answer": "IEC 61386 按机械抗压能力对套管进行分类。\n\n重型适合工业、直埋或混凝土包封场景。中型常用于商业建筑隐蔽敷设。轻型适合低风险住宅或受保护安装环境。\n"
-        },
-        {
-          "id": "lszh",
-          "question": "什么是 LSZH？哪些场合需要使用？",
-          "answer": "LSZH 指低烟无卤材料。\n\n在公共建筑、轨道交通、数据中心、医院和高人员密度封闭空间等消防要求更高的场景，通常会要求使用低烟、无卤气体释放的材料。\n"
-        },
-        {
-          "id": "standardsDifference",
-          "question": "UL 651、IEC 61386 和 AS/NZS 61386 有什么区别？",
-          "answer": "它们是不同区域常用的标准体系，测试和分类方式不同。\n\n北美标准通常按 Schedule 40 或 Schedule 80 壁厚分类。IEC 系标准按机械强度分类。AS/NZS 基于 IEC 体系，并叠加澳大利亚和新西兰本地要求。\n"
-        },
-        {
-          "id": "directBurial",
-          "question": "PVC 套管是否适合直埋或混凝土包封安装？",
-          "answer": "适合，但需要选用符合当地规范和安装方式的产品。\n\n直埋或明装风险较高的场景，通常更建议使用 Schedule 80 或 IEC 重型套管。\n"
-        },
-        {
-          "id": "indoorOutdoor",
-          "question": "室内安装和室外安装有何不同？",
-          "answer": "室外安装需要重点考虑紫外线、温度变化、潮湿环境和物理损伤。\n\n室内环境通常更稳定。室外明装一般更适合 Schedule 80、湿润场所接头、伸缩补偿，以及抗紫外线材料或涂层。\n"
-        },
-        {
-          "id": "solarDataCenter",
-          "question": "你们的套管适用于光伏电站或数据中心项目吗？",
-          "answer": "适用。光伏项目通常需要耐久的地下和户外套管。数据中心则更关注干净顺滑的走线通道、LSZH 选项，以及批量安装的一致性。\n\n请提供项目标准、尺寸清单和安装环境，我们可以帮助匹配合适的产品类型。\n"
-        },
-        {
-          "id": "corrosion",
-          "question": "PVC 套管在腐蚀性环境下表现如何？",
-          "answer": "与金属套管相比，PVC 具有较好的化学耐受性和防腐蚀能力。\n\n在沿海、农业、化工、污水处理等容易生锈或发生电化学腐蚀的环境中，PVC 套管经常被采用。\n"
-        }
-      ]
-    },
-    "content": "\n本 MDX 文件负责产品市场落地页 FAQ 内容。产品目录标签、规格表和市场标准仍保留在类型化产品/目录配置中，因为它们属于结构化产品数据，而不是普通页面文案。\n"
-  },
-  {
-    "type": "pages",
-    "locale": "zh",
     "slug": "terms",
     "extension": ".mdx",
     "filePath": "/content/pages/zh/terms.mdx",
@@ -812,19 +552,15 @@ const _entries: ContentEntry[] = [
 
 const _byKeyIndex: Record<string, number> = {
   "pages/en/about": 0,
-  "pages/en/bending-machines": 1,
-  "pages/en/contact": 2,
-  "pages/en/oem-custom-manufacturing": 3,
-  "pages/en/privacy": 4,
-  "pages/en/product-market": 5,
-  "pages/en/terms": 6,
-  "pages/zh/about": 7,
-  "pages/zh/bending-machines": 8,
-  "pages/zh/contact": 9,
-  "pages/zh/oem-custom-manufacturing": 10,
-  "pages/zh/privacy": 11,
-  "pages/zh/product-market": 12,
-  "pages/zh/terms": 13
+  "pages/en/contact": 1,
+  "pages/en/oem-custom-manufacturing": 2,
+  "pages/en/privacy": 3,
+  "pages/en/terms": 4,
+  "pages/zh/about": 5,
+  "pages/zh/contact": 6,
+  "pages/zh/oem-custom-manufacturing": 7,
+  "pages/zh/privacy": 8,
+  "pages/zh/terms": 9
 };
 
 const _byKey: Record<string, ContentEntry> = Object.fromEntries(

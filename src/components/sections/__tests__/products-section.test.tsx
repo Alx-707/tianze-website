@@ -30,26 +30,26 @@ describe("ProductsSection", () => {
     expect(ctaLink).toHaveAttribute("href", HOMEPAGE_SECTION_LINKS.products);
   });
 
-  it("renders 4 product cards with tags, titles, and standards", async () => {
+  it("renders 3 live product cards with tags, titles, and standards", async () => {
     await renderAsyncComponent(ProductsSection());
 
-    for (let i = 1; i <= 4; i++) {
+    for (let i = 1; i <= 3; i++) {
       const key = `item${i}`;
       expect(screen.getByText(`products.${key}.tag`)).toBeInTheDocument();
       expect(screen.getByText(`products.${key}.standard`)).toBeInTheDocument();
     }
   });
 
-  it("renders 4 product card h3 headings", async () => {
+  it("renders 3 product card h3 headings", async () => {
     await renderAsyncComponent(ProductsSection());
     const headings = screen.getAllByRole("heading", { level: 3 });
-    expect(headings).toHaveLength(4);
+    expect(headings).toHaveLength(3);
   });
 
   it("renders 3 specs per product card", async () => {
     await renderAsyncComponent(ProductsSection());
 
-    for (let i = 1; i <= 4; i++) {
+    for (let i = 1; i <= 3; i++) {
       const key = `item${i}`;
       for (let j = 1; j <= 3; j++) {
         expect(

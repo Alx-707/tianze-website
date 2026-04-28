@@ -49,7 +49,7 @@
 
 ### P1-a: 结构化数据统一
 - 在 src/lib/structured-data-generators.ts 中新增 buildEquipmentListSchema() 和 buildOemPageSchema()
-- 修改 bending-machines/page.tsx 和 oem-custom-manufacturing/page.tsx 使用新的 builder
+- 修改 OEM 页面使用新的 builder；旧设备能力页已退役，不再作为当前目标
 - 修改 faq-section.tsx 使用 generateFaqSchemaFromItems 替代 generateFAQSchema
 - 迁移完成后删除 structured-data-helpers.ts 中的 generateFAQSchema（确认无其他调用者）
 - 检查 generateBreadcrumbSchema 是否有调用者，无则删除

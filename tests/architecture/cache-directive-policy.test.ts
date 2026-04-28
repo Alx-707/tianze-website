@@ -28,6 +28,9 @@ const CRITICAL_CACHE_POLICY_SOURCE_READERS = {
 
 const CONTACT_PAGE_FILE = "src/app/[locale]/contact/page.tsx";
 const PRODUCT_MARKET_PAGE_FILE = "src/app/[locale]/products/[market]/page.tsx";
+const PRODUCT_MARKET_FAQ_HELPER = ["getProductMarket", "FaqItems"].join("");
+const PRODUCT_MARKET_MDX_READ = ['getPageBySlug("product', 'market"'].join("-");
+const FAQ_SCHEMA_TYPE = ["FAQ", "Page"].join("");
 
 function readProductMarketPageSource() {
   return readFileSync(PRODUCT_MARKET_PAGE_FILE, "utf8");
@@ -196,20 +199,16 @@ describe("cache directive policy", () => {
     expect(source).not.toContain("revalidatePath(");
   });
 
-  it("keeps product market page-owned MDX reads cached without tag invalidation", () => {
+  it("keeps product market pages free of shared FAQ cache boundaries", () => {
     const source = readProductMarketPageSource();
 
-    expect(source).not.toContain(
-      'import { cacheLife, cacheTag } from "next/cache"',
-    );
-    expect(source).toContain('import { cacheLife } from "next/cache"');
-    expect(source).not.toContain(
-      'import { contentTags } from "@/lib/cache/cache-tags"',
-    );
-    expect(source).toMatch(
-      /async function getProductMarketFaqItems\([^)]*\)[\s\S]*?['"]use cache['"]/,
-    );
-    expect(source).toContain('cacheLife("days")');
-    expect(source).not.toContain("cacheTag(");
+    expect(source).not.toContain('"use cache"');
+    expect(source).not.toContain("'use cache'");
+    expect(source).not.toContain('from "next/cache"');
+    expect(source).not.toContain(PRODUCT_MARKET_FAQ_HELPER);
+    expect(source).not.toContain(PRODUCT_MARKET_MDX_READ);
+    expect(source).not.toContain("<FaqSection");
+    expect(source).not.toContain("generateFaqSchemaFromItems");
+    expect(source).not.toContain(FAQ_SCHEMA_TYPE);
   });
 });

@@ -98,7 +98,6 @@ Prioritize the **business-critical and trust-building** surfaces neither Round 2
 - `src/app/[locale]/blog/page.tsx`
 - `src/app/[locale]/blog/[slug]/page.tsx`
 - `src/app/[locale]/oem-custom-manufacturing/page.tsx`
-- `src/app/[locale]/capabilities/bending-machines/page.tsx`
 - `src/app/[locale]/privacy/page.tsx`, `src/app/[locale]/terms/page.tsx`
 - `src/app/[locale]/[...rest]/page.tsx`, `src/app/[locale]/not-found.tsx`
 - `src/components/blog/post-card.tsx`, `post-grid.tsx`, `post-card-skeleton.tsx`

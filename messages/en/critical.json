@@ -171,7 +171,7 @@
     },
     "products": {
       "title": "Product Lines",
-      "subtitle": "From the manufacturer that designs and builds its own bending machines. Full vertical integration from equipment R&D to finished product.",
+      "subtitle": "PVC conduit fittings, PETG pneumatic tubes, and OEM manufacturing from a vertically integrated factory.",
       "cta": "View All Products",
       "item1": {
         "tag": "4 Market Standards",
@@ -192,15 +192,6 @@
         "link": "/products/pneumatic-tube-systems"
       },
       "item3": {
-        "tag": "Core Capability",
-        "title": "Bending Machines",
-        "spec1": "Full-auto and semi-auto models",
-        "spec2": "DN25 to DN160mm pipe range",
-        "spec3": "150-200 pcs/hour production speed",
-        "standard": "Self-developed",
-        "link": "/capabilities/bending-machines"
-      },
-      "item4": {
         "tag": "Service",
         "title": "OEM & Custom Manufacturing",
         "spec1": "Your specifications, our production",
@@ -937,10 +928,7 @@
       "title": "Products",
       "description": "PVC conduit fittings and pipes manufactured to international standards. Select your market to view products by compliance standard.",
       "byStandard": "By Market Standard",
-      "specialty": "Specialty & Equipment",
-      "equipmentTitle": "Bending Machines",
-      "equipmentDescription": "Self-developed full-auto and semi-auto PVC conduit bending machines. Our core manufacturing capability.",
-      "equipmentCta": "Learn More"
+      "specialty": "Specialty Products"
     },
     "market": {
       "familyNav": {

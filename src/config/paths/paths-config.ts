@@ -44,11 +44,6 @@ export const PATHS_CONFIG = Object.freeze({
     zh: "/terms",
   }),
 
-  bendingMachines: Object.freeze({
-    en: "/capabilities/bending-machines",
-    zh: "/capabilities/bending-machines",
-  }),
-
   oem: Object.freeze({
     en: "/oem-custom-manufacturing",
     zh: "/oem-custom-manufacturing",
