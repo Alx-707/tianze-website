@@ -1,0 +1,137 @@
+{
+  "audit_name": "full-project-health-v2",
+  "method_skill": "$repo-health-audit",
+  "audit_root": "docs/audits/full-project-health-v2",
+  "target_base": "origin/main",
+  "run_posture": "read-only",
+  "business_code_globs": [
+    "src/**",
+    "content/**",
+    "messages/**",
+    "package.json",
+    "pnpm-lock.yaml",
+    "next.config.*",
+    "open-next.config.*",
+    "wrangler.*",
+    ".github/workflows/**",
+    "public/**"
+  ],
+  "allowed_write_globs": [
+    "docs/audits/full-project-health-v2/runs/**",
+    ".context/audits/full-project-health-v2/**"
+  ],
+  "forbidden_write_globs": [
+    "src/**",
+    "content/**",
+    "messages/**",
+    "package.json",
+    "pnpm-lock.yaml",
+    "next.config.*",
+    "open-next.config.*",
+    "wrangler.*",
+    ".github/workflows/**",
+    "public/**"
+  ],
+  "report_files": [
+    "00-final-report.md",
+    "01-quality-map.md",
+    "02-findings.json",
+    "03-evidence-log.md",
+    "04-process-retro.md"
+  ],
+  "lanes": [
+    {
+      "id": "00",
+      "name": "Baseline / runtime truth",
+      "output": "lanes/00-baseline-runtime.md",
+      "evidence": "evidence/00-baseline-runtime/"
+    },
+    {
+      "id": "01",
+      "name": "Architecture / coupling",
+      "output": "lanes/01-architecture-coupling.md",
+      "evidence": "evidence/01-architecture-coupling/"
+    },
+    {
+      "id": "02",
+      "name": "Security / trust boundary",
+      "output": "lanes/02-security-trust-boundary.md",
+      "evidence": "evidence/02-security-trust-boundary/"
+    },
+    {
+      "id": "03",
+      "name": "UI / performance / accessibility",
+      "output": "lanes/03-ui-performance-accessibility.md",
+      "evidence": "evidence/03-ui-performance-accessibility/"
+    },
+    {
+      "id": "04",
+      "name": "SEO / content / conversion",
+      "output": "lanes/04-seo-content-conversion.md",
+      "evidence": "evidence/04-seo-content-conversion/"
+    },
+    {
+      "id": "05",
+      "name": "Tests / AI smell / dead code",
+      "output": "lanes/05-tests-ai-smell-dead-code.md",
+      "evidence": "evidence/05-tests-ai-smell-dead-code/"
+    }
+  ],
+  "commands": {
+    "required": [
+      "git fetch origin",
+      "git rev-parse origin/main",
+      "git rev-parse HEAD",
+      "git status --short --branch",
+      "node -v",
+      "pnpm -v",
+      "pnpm run",
+      "pnpm type-check",
+      "pnpm lint:check",
+      "pnpm test",
+      "pnpm build"
+    ],
+    "optional": [
+      "pnpm build:cf",
+      "pnpm truth:check",
+      "pnpm dep:check",
+      "pnpm unused:check",
+      "pnpm security:semgrep",
+      "pnpm security:audit",
+      "pnpm quality:gate:fast",
+      "pnpm arch:conformance",
+      "pnpm review:architecture-truth",
+      "pnpm perf:lighthouse"
+    ],
+    "credential_blocked": [
+      "pnpm proof:cf:preview-deployed",
+      "pnpm smoke:cf:preview",
+      "pnpm smoke:cf:preview:strict",
+      "pnpm test:e2e:post-deploy"
+    ]
+  },
+  "credential_blockers": [
+    "Cloudflare deploy token and account context",
+    "Cloudflare worker tail access",
+    "Google Search Console",
+    "URL Inspection API",
+    "CrUX or PageSpeed API quota",
+    "Resend dashboard or API key",
+    "Airtable dashboard or API key",
+    "Owner-provided public phone number",
+    "Owner-provided real product family images"
+  ],
+  "stop_lines": [
+    "base branch or commit unclear",
+    "unexpected business-code diff in read-only audit",
+    "audit adapter incomplete or uncommitted before dispatch",
+    "planned command references a missing package script",
+    "Node or pnpm version incompatible with project rules",
+    "build failure cannot be classified",
+    "P0/P1 lacks fresh evidence",
+    "credential-dependent claim lacks credential access",
+    "worker tries to fix business code",
+    "worker crosses lane scope",
+    "worker tries to permanently delete files"
+  ]
+}
