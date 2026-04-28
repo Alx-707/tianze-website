@@ -67,7 +67,7 @@ function scanEnvBoundaries() {
         file: relPath,
         line: getLineNumber(content, match.index),
         detail:
-          "App/component layer should read NEXT_PUBLIC_* through '@/lib/env' instead of direct process.env access.",
+          "App/component layer should read NEXT_PUBLIC_* through '@/lib/public-env' instead of direct process.env access.",
       });
     }
   }

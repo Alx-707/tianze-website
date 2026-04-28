@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { FIVE_MINUTES_MS } from "@/constants";
 import { useCurrentTime } from "@/hooks/use-current-time";
-import { getRuntimeEnvNumber } from "@/lib/env";
+import { getPublicRuntimeEnvNumber } from "@/lib/public-env";
 
 /**
  * 获取配置的冷却时间（毫秒）
@@ -11,7 +11,8 @@ import { getRuntimeEnvNumber } from "@/lib/env";
  */
 function getConfiguredCooldownMs(): number {
   const envValue =
-    getRuntimeEnvNumber("NEXT_PUBLIC_CONTACT_FORM_COOLDOWN_MS") ?? Number.NaN;
+    getPublicRuntimeEnvNumber("NEXT_PUBLIC_CONTACT_FORM_COOLDOWN_MS") ??
+    Number.NaN;
 
   if (Number.isFinite(envValue) && envValue > 0) {
     return envValue;

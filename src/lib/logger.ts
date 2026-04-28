@@ -6,8 +6,6 @@
  * - debug/log: Development only
  */
 
-import { getRuntimeEnvString } from "@/lib/env";
-
 type LogArgs = [message?: unknown, ...optionalParams: unknown[]];
 
 type LogLevel = "error" | "warn" | "info" | "debug";
@@ -21,8 +19,7 @@ const LOG_LEVELS: Record<LogLevel, number> = {
 
 function isDev(): boolean {
   return (
-    getRuntimeEnvString("NODE_ENV") === "development" ||
-    getRuntimeEnvString("NODE_ENV") === "test"
+    process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test"
   );
 }
 
@@ -31,7 +28,7 @@ function isValidLogLevel(value: string): value is LogLevel {
 }
 
 function getLogLevel(): LogLevel {
-  const rawLevel = getRuntimeEnvString("LOG_LEVEL");
+  const rawLevel = process.env.LOG_LEVEL;
   // Normalize to lowercase for case-insensitive matching
   const level = rawLevel?.toLowerCase() as LogLevel | undefined;
   if (level && isValidLogLevel(level)) {

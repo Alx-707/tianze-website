@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect } from "react";
-import { isRuntimeDevelopment } from "@/lib/env";
+import { isPublicRuntimeDevelopment } from "@/lib/public-env";
 
 export function ReactGrabLoader() {
   useEffect(() => {
-    if (isRuntimeDevelopment()) {
+    if (isPublicRuntimeDevelopment()) {
       import("react-grab").catch((err) => {
         console.error("Failed to load react-grab:", err);
       });

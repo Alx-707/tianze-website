@@ -5,7 +5,10 @@ import dynamic from "next/dynamic";
 import { usePathname, useSearchParams } from "next/navigation";
 import Script from "next/script";
 import { useCookieConsentOptional } from "@/lib/cookie-consent";
-import { getRuntimeEnvString, isRuntimeProduction } from "@/lib/env";
+import {
+  getPublicRuntimeEnvString,
+  isPublicRuntimeProduction,
+} from "@/lib/public-env";
 
 const Analytics = dynamic(
   () => import("@vercel/analytics/next").then((mod) => mod.Analytics),
@@ -36,10 +39,12 @@ function ensureGa4QueueInitialized(measurementId: string): void {
 export function EnterpriseAnalyticsIsland() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const isProd = isRuntimeProduction();
-  const gaMeasurementId = getRuntimeEnvString("NEXT_PUBLIC_GA_MEASUREMENT_ID");
+  const isProd = isPublicRuntimeProduction();
+  const gaMeasurementId = getPublicRuntimeEnvString(
+    "NEXT_PUBLIC_GA_MEASUREMENT_ID",
+  );
   const isVercel =
-    getRuntimeEnvString("NEXT_PUBLIC_DEPLOYMENT_PLATFORM") === "vercel";
+    getPublicRuntimeEnvString("NEXT_PUBLIC_DEPLOYMENT_PLATFORM") === "vercel";
   const cookieConsent = useCookieConsentOptional();
 
   const analyticsAllowed = cookieConsent

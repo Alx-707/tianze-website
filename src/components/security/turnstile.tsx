@@ -2,8 +2,12 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Turnstile } from "@marsidev/react-turnstile";
-import { env, isRuntimeDevelopment } from "@/lib/env";
 import { logger } from "@/lib/logger";
+import {
+  getPublicRuntimeEnvBoolean,
+  getPublicRuntimeEnvString,
+  isPublicRuntimeDevelopment,
+} from "@/lib/public-env";
 
 /**
  * 使用全局 logger（开发环境输出，生产环境静默）
@@ -36,12 +40,14 @@ export function TurnstileWidget({
   size = "normal",
   tabIndex,
   id,
-  action = env.NEXT_PUBLIC_TURNSTILE_ACTION || "contact_form",
+  action = getPublicRuntimeEnvString("NEXT_PUBLIC_TURNSTILE_ACTION") ||
+    "contact_form",
   cData,
 }: TurnstileProps) {
-  const siteKey = env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+  const siteKey = getPublicRuntimeEnvString("NEXT_PUBLIC_TURNSTILE_SITE_KEY");
   const isBypassMode =
-    isRuntimeDevelopment() && env.NEXT_PUBLIC_TURNSTILE_BYPASS;
+    isPublicRuntimeDevelopment() &&
+    getPublicRuntimeEnvBoolean("NEXT_PUBLIC_TURNSTILE_BYPASS") === true;
   const bypassTriggeredRef = useRef(false);
 
   // All hooks must be called before any conditional returns
@@ -95,7 +101,7 @@ export function TurnstileWidget({
     );
   }
 
-  if (env.NEXT_PUBLIC_TEST_MODE) {
+  if (getPublicRuntimeEnvBoolean("NEXT_PUBLIC_TEST_MODE") === true) {
     return (
       <div
         className={`turnstile-mock ${className ?? ""}`}

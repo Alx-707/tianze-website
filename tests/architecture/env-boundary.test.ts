@@ -6,6 +6,7 @@ const SOURCE_EXTENSIONS = new Set([".ts", ".tsx"]);
 const ENV_FACADE = "src/lib/env.ts";
 const ENV_SCHEMAS = "src/lib/env-schemas.ts";
 const ENV_RUNTIME = "src/lib/env-runtime.ts";
+const PUBLIC_ENV = "src/lib/public-env.ts";
 
 function read(repoPath: string) {
   // eslint-disable-next-line security/detect-non-literal-fs-filename -- architecture test reads repo-local files from a fixed allowlist
@@ -63,7 +64,9 @@ describe("env module boundaries", () => {
 
   it("keeps app code on the public env import instead of internal modules", () => {
     const offenders = walkSourceFiles("src").filter((repoPath) => {
-      if ([ENV_FACADE, ENV_SCHEMAS, ENV_RUNTIME].includes(repoPath)) {
+      if (
+        [ENV_FACADE, ENV_SCHEMAS, ENV_RUNTIME, PUBLIC_ENV].includes(repoPath)
+      ) {
         return false;
       }
 
@@ -73,6 +76,34 @@ describe("env module boundaries", () => {
         source.includes("@/lib/env-schemas") ||
         source.includes("./env-runtime") ||
         source.includes("./env-schemas")
+      );
+    });
+
+    expect(offenders).toEqual([]);
+  });
+
+  it("keeps browser env helpers free of server-only env names and dynamic process.env reads", () => {
+    const source = read(PUBLIC_ENV);
+
+    expect(source).toContain("process.env.NEXT_PUBLIC_");
+    expect(source).toContain("process.env.NODE_ENV");
+    expect(source).not.toContain("process.env[");
+    expect(source).not.toContain("DATABASE_URL");
+    expect(source).not.toContain("NEXTAUTH_SECRET");
+    expect(source).not.toContain("ADMIN_API_TOKEN");
+    expect(source).not.toContain("TURNSTILE_SECRET_KEY");
+  });
+
+  it("keeps Client Components off the server env facade", () => {
+    const offenders = walkSourceFiles("src").filter((repoPath) => {
+      const source = read(repoPath);
+      const isClientComponent =
+        source.includes('"use client"') || source.includes("'use client'");
+
+      return (
+        isClientComponent &&
+        (source.includes('from "@/lib/env"') ||
+          source.includes("from '@/lib/env'"))
       );
     });
 
