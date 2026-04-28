@@ -1,6 +1,6 @@
-# Audit Framework v2
+# Full Project Health Audit v2 Framework
 
-This folder records how this repo uses the global `$repo-health-audit` skill.
+This file records how this repo uses the global `$repo-health-audit` skill.
 
 The generic method lives outside the repo as a local Codex skill:
 
@@ -8,7 +8,7 @@ The generic method lives outside the repo as a local Codex skill:
 /Users/Data/.codex/skills/repo-health-audit/
 ```
 
-This repo should not duplicate the whole skill. It should keep only project-specific adapters and run outputs under:
+This repo should not duplicate the whole skill. It keeps only project-specific adapters and run outputs under this directory:
 
 ```text
 docs/audits/full-project-health-v2/
