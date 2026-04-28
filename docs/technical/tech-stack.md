@@ -3,6 +3,8 @@
 这份文档只讲**当前正在用的技术栈真相**。  
 版本和能力以 `package.json`、`engines`、现有脚本为准，不再复述历史升级过程。
 
+升级边界和当前 hold 清单见 `docs/technical/dependency-upgrade-policy.md`。
+
 ## 1. 核心运行层
 
 ### 前端框架
@@ -146,6 +148,7 @@
 - **postcss 8.5.12**
 - **@tailwindcss/postcss 4.2.4**
 - **tsx 4.21.0**
+- **react-grab 0.1.32 + @react-grab/mcp 0.1.32**：仅开发环境加载的页面上下文选取辅助
 - **Babel AST 工具链**
   - `@babel/parser 7.29.2`
   - `@babel/traverse 7.29.0`

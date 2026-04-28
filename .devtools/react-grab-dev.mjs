@@ -1,5 +1,5 @@
 /**
- * react-grab Claude Code agent server (dev helper)
+ * react-grab MCP agent server (dev helper)
  *
  * Intentionally decoupled from `next.config.ts` to avoid side effects in
  * Next.js build/start critical paths, and to keep `pnpm unused:production`
@@ -7,14 +7,14 @@
  */
 
 try {
-  const mod = await import("@react-grab/claude-code/server");
-  if (typeof mod.startServer !== "function") {
+  const mod = await import("@react-grab/mcp/server");
+  if (typeof mod.startMcpServer !== "function") {
     throw new Error(
-      "Expected @react-grab/claude-code/server to export startServer()",
+      "Expected @react-grab/mcp/server to export startMcpServer()",
     );
   }
 
-  await mod.startServer();
+  await mod.startMcpServer();
 } catch (error) {
   const err = error instanceof Error ? error : new Error(String(error));
   const isMissingModule =
@@ -27,7 +27,7 @@ try {
       [
         "react-grab dev server not started: missing dependency.",
         "Install it with:",
-        "  pnpm add -D @react-grab/claude-code",
+        "  pnpm add -D @react-grab/mcp",
       ].join("\n"),
     );
     process.exitCode = 1;

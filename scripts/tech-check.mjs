@@ -1,6 +1,11 @@
 import { readFileSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 
+import {
+  canTreatOutdatedResultAsReviewed,
+  partitionDependencyUpdates,
+} from "./dependency-update-policy.mjs";
+
 function printOutput(text, writer = process.stdout) {
   if (!text) {
     return;
@@ -99,6 +104,7 @@ function parseOutdated(stdout) {
       name: details.name,
       current: details.current,
       latest: details.latest,
+      isDeprecated: details.isDeprecated === true,
       dependencyType: details.dependencyType,
     }));
   }
@@ -107,6 +113,7 @@ function parseOutdated(stdout) {
     name,
     current: details.current,
     latest: details.latest,
+    isDeprecated: details.isDeprecated === true,
     dependencyType: details.dependencyType,
   }));
 }
@@ -339,23 +346,38 @@ const needsUpdate = updateSummary.map((pkg) => ({
   name: pkg.name,
   current: pkg.current,
   latest: pkg.latest,
+  isDeprecated: pkg.isDeprecated,
   dependencyType: pkg.dependencyType,
   vulnerability: pkg.vulnerability,
   risk: classifyUpdateRisk(pkg.current, pkg.latest),
 }));
 
-const recommendedUpdate = needsUpdate.filter(
+const { actionableUpdates, heldUpdates } =
+  partitionDependencyUpdates(needsUpdate);
+
+const recommendedUpdate = actionableUpdates.filter(
   (item) => item.risk === "recommended_update",
 );
-const breakingChangeRisk = needsUpdate.filter(
+const breakingChangeRisk = actionableUpdates.filter(
   (item) => item.risk === "breaking_change_risk",
 );
-const runtimeAlignmentRisk = needsUpdate
+const runtimeAlignmentRisk = actionableUpdates
   .map((item) => detectRuntimeAlignmentRisk(item, supportedNodeMajors))
   .filter(Boolean);
+const dependencyUpdatesReviewed = canTreatOutdatedResultAsReviewed(
+  outdatedResult,
+  needsUpdate,
+);
 
 const failedChecks = stepResults
-  .filter((step) => !step.ok)
+  .filter(
+    (step) =>
+      !step.ok &&
+      !(
+        step.label === "dependency updates" &&
+        dependencyUpdatesReviewed === true
+      ),
+  )
   .map((step) => step.label);
 
 if (nodeRuntimeWithinPolicy === false) {
@@ -382,7 +404,12 @@ const needsInvestigation = stepResults
   .map((step) => step.label);
 
 const passedChecks = stepResults
-  .filter((step) => step.ok)
+  .filter(
+    (step) =>
+      step.ok ||
+      (step.label === "dependency updates" &&
+        dependencyUpdatesReviewed === true),
+  )
   .map((step) => step.label);
 const vulnerableModules = unique(vulnerabilities.map((item) => item.module));
 
@@ -401,11 +428,15 @@ if (nodeEngineRange && currentNodeVersion) {
   ]);
 }
 
-printList("needs_update", needsUpdate, (item) => {
+printList("needs_update", actionableUpdates, (item) => {
   const securityNote = item.vulnerability
     ? `, security=${item.vulnerability.severity}`
     : "";
   return `${item.name} ${item.current} -> ${item.latest} (${item.dependencyType}${securityNote})`;
+});
+printList("held_updates", heldUpdates, (item) => {
+  const deprecatedNote = item.isDeprecated ? ", deprecated" : "";
+  return `${item.name} ${item.current} -> ${item.latest} (${item.dependencyType}${deprecatedNote}, ${item.hold.status})`;
 });
 printList("recommended_update", recommendedUpdate, (item) => {
   const securityNote = item.vulnerability
@@ -434,6 +465,9 @@ printList("vulnerable_modules", vulnerableModules);
 console.log("\nclassification:");
 console.log(
   "- `needs_update` means package versions should be reviewed or upgraded.",
+);
+console.log(
+  "- `held_updates` means the package was reviewed and intentionally kept out of the current upgrade lane.",
 );
 console.log(
   "- `recommended_update` means patch/minor upgrades with lower compatibility risk.",
