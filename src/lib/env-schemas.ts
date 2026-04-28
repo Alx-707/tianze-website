@@ -242,7 +242,6 @@ export const clientEnvSchema = {
     .transform((val) => val === "true"),
 
   // Security
-  NEXT_PUBLIC_CSP_NONCE: z.string().optional(),
   NEXT_PUBLIC_SECURITY_MODE: z
     .enum(["strict", "moderate", "relaxed"])
     .default("strict"),

@@ -94,6 +94,12 @@ describe("env module boundaries", () => {
     expect(source).not.toContain("TURNSTILE_SECRET_KEY");
   });
 
+  it("keeps CSP nonce out of public env contracts", () => {
+    for (const repoPath of [PUBLIC_ENV, ENV_SCHEMAS, ENV_RUNTIME]) {
+      expect(read(repoPath), repoPath).not.toContain("NEXT_PUBLIC_CSP_NONCE");
+    }
+  });
+
   it("keeps Client Components off the server env facade", () => {
     const offenders = walkSourceFiles("src").filter((repoPath) => {
       const source = read(repoPath);
