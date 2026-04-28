@@ -109,15 +109,15 @@
 ### 静态质量工具
 
 - **ESLint 9.39.2**
-- **typescript-eslint 8.58.0**
+- **typescript-eslint 8.59.1**
 - **Prettier 3.8.3**
 - **prettier-plugin-tailwindcss 0.7.2**
 - **@ianvs/prettier-plugin-sort-imports 4.7.1**
 - **dependency-cruiser 17.3.10**：依赖边界检查
 - **knip 6.7.0**：未使用代码扫描
 - **Stryker 9.6.1**：变异测试工具，主要覆盖 lead/security/form-schema/idempotency 高风险逻辑
-- **commitlint 20.5.0**
-- **lefthook 2.1.4**
+- **commitlint 20.5.2**
+- **lefthook 2.1.6**
 
 ## 6. 构建、部署与运行环境
 
@@ -140,7 +140,7 @@
 ### 额外构建与诊断工具
 
 - **@next/bundle-analyzer 16.2.4**
-- **dotenv 17.3.1**
+- **dotenv 17.4.2**
 - **glob 13.0.6**
 - **postcss 8.5.12**
 - **@tailwindcss/postcss 4.2.4**
