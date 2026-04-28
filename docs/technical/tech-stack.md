@@ -80,7 +80,7 @@
 
 ### 安全与防刷
 
-- **@marsidev/react-turnstile 1.5.0**：Cloudflare Turnstile
+- **@marsidev/react-turnstile 1.5.1**：Cloudflare Turnstile
 - 表单提交以 **Server Actions + Zod + Turnstile** 为主组合
 
 ## 5. 测试与质量门禁
