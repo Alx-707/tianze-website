@@ -127,6 +127,12 @@ Constants by domain:
 - ESLint: Zero warnings
 - Build: No errors
 
+## Unused Code Scanning
+
+Knip upgrades can change unused-file or unused-dependency detection. Keep Knip
+upgrades in their own dependency lane, update `docs/technical/tech-stack.md`,
+and prove the change with `pnpm unused:check` before merging.
+
 ## ESLint Disable Usage
 
 ```typescript
