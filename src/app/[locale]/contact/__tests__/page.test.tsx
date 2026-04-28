@@ -127,7 +127,18 @@ describe("ContactPage MDX migration", () => {
 
     await renderAsyncPage(page as React.JSX.Element);
 
-    expect(screen.getByTestId("contact-page-fallback")).toBeInTheDocument();
+    const fallback = screen.getByTestId("contact-page-fallback");
+
+    expect(fallback).toBeInTheDocument();
+    expect(
+      within(fallback).getByRole("form", { name: "Contact Us" }),
+    ).toBeInTheDocument();
+    expect(
+      within(fallback).queryByRole("heading", {
+        level: 2,
+        name: "Contact Us",
+      }),
+    ).not.toBeInTheDocument();
     expect(screen.getByTestId("contact-page-content")).toBeInTheDocument();
     expect(screen.getByTestId("contact-form")).toBeInTheDocument();
   });
