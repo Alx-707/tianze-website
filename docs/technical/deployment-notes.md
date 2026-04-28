@@ -9,6 +9,28 @@
 
 ## 当前关键事实
 
+### 2026-04-28 Next / OpenNext / Wrangler patch refresh
+
+本轮只升级已验证的部署主链补丁面：
+
+- `next` / `@next/mdx` / `@next/bundle-analyzer` / `@next/eslint-plugin-next` / `eslint-config-next`: `16.2.3` -> `16.2.4`
+- `@opennextjs/cloudflare`: `1.18.0` -> `1.19.4`
+- `wrangler`: `4.79.0` -> `4.85.0`
+
+`wrangler 4.86.0` 在本轮执行当天已经可用，但属于同日新版本；为了降低部署链风险，本轮固定在 `4.85.0`，后续再作为单独 patch 验证。`@opennextjs/cloudflare` 也按部署关键包处理，固定为 `1.19.4`，避免 patch 漂移影响 Cloudflare 构建链。
+
+本轮证明：
+
+- `pnpm type-check`
+- `pnpm lint:check`
+- `pnpm security:audit`
+- `pnpm build`
+- `pnpm build:cf:phase6`
+- `pnpm review:cf:official-compare`
+- `pnpm release:verify`
+
+`middleware` deprecated warning 仍然是已知状态；本轮不做 `middleware.ts` -> `proxy.ts` 迁移。
+
 ### 0. 2026-04-26 runtime cache removal proof
 
 本轮已选择“静态生成 + 重新部署”作为上线内容更新路径：
