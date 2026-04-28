@@ -285,7 +285,7 @@
       },
       "standards": {
         "astm": "ASTM D1785 / UL 651",
-        "asnzs": "AS/NZS 61386",
+        "asnzs": "AS/NZS 2053",
         "iec": "IEC 61386",
         "nom": "NOM-001-SEDE"
       },
@@ -1501,6 +1501,26 @@
     }
   },
   "contact": {
+    "title": "联系我们",
+    "description": "联系我们的团队进行咨询、支持或合作机会。",
+    "features": "多种联系方式，获得您需要的支持",
+    "panel": {
+      "contactTitle": "联系方式",
+      "email": "邮箱",
+      "phone": "电话",
+      "hoursTitle": "营业时间",
+      "weekdays": "周一 - 周五",
+      "saturday": "周六",
+      "sunday": "周日",
+      "closed": "休息",
+      "responseTitle": "联系后会发生什么",
+      "responseTimeLabel": "通常回复时间",
+      "responseTimeValue": "工作日 24 小时内",
+      "bestForLabel": "适合咨询",
+      "bestForValue": "报价、规格、MOQ、样品和交期问题",
+      "prepareLabel": "建议提供",
+      "prepareValue": "产品类型、尺寸/标准、数量、目标市场和项目时间"
+    },
     "form": {
       "title": "联系我们",
       "description": "与我们取得联系，我们很乐意听到您的声音。",
@@ -1527,6 +1547,8 @@
       "submitError": "消息发送失败，请稍后再试。",
       "success": "谢谢！您的消息已成功发送。我们会尽快回复您。",
       "error": "抱歉，发送消息时出现错误。请稍后重试。",
+      "loadError": "安全询盘表单暂时无法加载。请重试，或使用本页右侧联系方式。",
+      "retryLoad": "重新加载表单",
       "rateLimitMessage": "您刚刚提交过表单，请稍候再尝试。",
       "errors": {
         "generic": "请检查标记的字段后再试一次。",

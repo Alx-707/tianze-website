@@ -1,0 +1,18 @@
+
+ RUN  v4.1.2 /Users/Data/conductor/workspaces/tianze-website/miami
+
+ ✓ src/app/api/csp-report/__tests__/route-rate-limit.test.ts (2 tests) 336ms
+       ✓ should allow requests within rate limit  332ms
+ ✓ src/app/api/verify-turnstile/__tests__/route.test.ts (16 tests) 35ms
+ ✓ src/app/api/csp-report/__tests__/route-post-core.test.ts (11 tests) 48ms
+ ✓ src/app/api/csp-report/__tests__/route-post-security.test.ts (7 tests) 52ms
+ ✓ src/app/api/inquiry/__tests__/inquiry-integration.test.ts (10 tests) 83ms
+ ✓ src/app/api/inquiry/__tests__/route.test.ts (18 tests) 94ms
+
+ Test Files  6 passed (6)
+      Tests  64 passed (64)
+   Start at  04:08:13
+   Duration  2.91s (transform 1.33s, setup 1.93s, import 2.02s, tests 649ms, environment 9.95s)
+
+JSON report written to /Users/Data/conductor/workspaces/tianze-website/miami/reports/test-results.json
+exit=0

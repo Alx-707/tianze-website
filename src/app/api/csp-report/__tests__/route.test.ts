@@ -93,6 +93,100 @@ describe("CSP Report API Route", () => {
       );
     });
 
+    it("应该清理并限制攻击者可控的CSP日志字段", async () => {
+      const longValue = `before\nmiddle\rend\tline\u2028separator\u2029${"x".repeat(600)}`;
+      const longUserAgent = `TestBrowser/${"x".repeat(600)}`;
+      const invalidUrlValue = `notaurl\nforged\tline\u2028${"u".repeat(600)}?token=secret#frag`;
+      const request = new NextRequest("http://localhost:3000/api/csp-report", {
+        method: "POST",
+        body: JSON.stringify({
+          "csp-report": {
+            ...validCSPReport["csp-report"],
+            "document-uri": invalidUrlValue,
+            referrer: invalidUrlValue,
+            "violated-directive": longValue,
+            "effective-directive": longValue,
+            "original-policy": longValue,
+            disposition: longValue,
+            "blocked-uri": invalidUrlValue,
+            "source-file": invalidUrlValue,
+            "script-sample": longValue,
+          },
+        }),
+        headers: {
+          "content-type": "application/csp-report",
+          "user-agent": longUserAgent,
+        },
+      });
+
+      const response = await callPOST(request);
+
+      expect(response.status).toBe(200);
+      expect(console.warn).toHaveBeenCalledWith(
+        "CSP Violation Report",
+        expect.objectContaining({
+          violatedDirective: expect.not.stringMatching(/[\r\n]/u),
+          effectiveDirective: expect.not.stringMatching(/[\r\n]/u),
+          originalPolicy: expect.not.stringMatching(/[\r\n]/u),
+          disposition: expect.not.stringMatching(/[\r\n]/u),
+          userAgent: expect.not.stringMatching(/[\r\n]/u),
+          documentUri: expect.not.stringMatching(/[\r\n]/u),
+          referrer: expect.not.stringMatching(/[\r\n]/u),
+          blockedUri: expect.not.stringMatching(/[\r\n]/u),
+          sourceFile: expect.not.stringMatching(/[\r\n]/u),
+          scriptSample: expect.not.stringMatching(/[\r\n]/u),
+        }),
+      );
+
+      const [, logData] = vi
+        .mocked(console.warn)
+        .mock.calls.find(([message]) => message === "CSP Violation Report") ?? [
+        "",
+        {},
+      ];
+
+      expect(logData).toEqual(
+        expect.objectContaining({
+          violatedDirective: expect.any(String),
+          effectiveDirective: expect.any(String),
+          originalPolicy: expect.any(String),
+          disposition: expect.any(String),
+          userAgent: expect.any(String),
+          documentUri: expect.any(String),
+          referrer: expect.any(String),
+          blockedUri: expect.any(String),
+          sourceFile: expect.any(String),
+          scriptSample: expect.any(String),
+        }),
+      );
+      const boundedLogData = logData as Record<string, string>;
+      for (const key of [
+        "documentUri",
+        "referrer",
+        "violatedDirective",
+        "effectiveDirective",
+        "originalPolicy",
+        "blockedUri",
+        "sourceFile",
+        "scriptSample",
+        "disposition",
+        "userAgent",
+      ]) {
+        expect(boundedLogData[key]).not.toMatch(/[\r\n\t\u2028\u2029]/u);
+      }
+
+      expect(boundedLogData.documentUri).toHaveLength(500);
+      expect(boundedLogData.referrer).toHaveLength(500);
+      expect(boundedLogData.violatedDirective).toHaveLength(200);
+      expect(boundedLogData.effectiveDirective).toHaveLength(200);
+      expect(boundedLogData.originalPolicy).toHaveLength(500);
+      expect(boundedLogData.blockedUri).toHaveLength(500);
+      expect(boundedLogData.sourceFile).toHaveLength(500);
+      expect(boundedLogData.scriptSample).toHaveLength(200);
+      expect(boundedLogData.disposition).toHaveLength(200);
+      expect(boundedLogData.userAgent).toHaveLength(200);
+    });
+
     it("应该拒绝无效的Content-Type", async () => {
       const request = new NextRequest("http://localhost:3000/api/csp-report", {
         method: "POST",

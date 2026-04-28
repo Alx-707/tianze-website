@@ -1,0 +1,415 @@
+{
+  "metadata": {
+    "generatedAt": "2026-04-27T11:04:55.690Z",
+    "version": "1.0.0",
+    "windowDays": 180,
+    "includedPrefixes": [
+      "src/",
+      "messages/",
+      "scripts/",
+      ".github/workflows/",
+      "package.json",
+      "next.config.ts",
+      "open-next.config.ts",
+      "wrangler.jsonc",
+      "vercel.json",
+      "lefthook.yml"
+    ]
+  },
+  "windowDays": 180,
+  "summary": {
+    "commitsAnalyzed": 167,
+    "uniqueFilesTouched": 1096,
+    "hotspots": [
+      {
+        "file": "package.json",
+        "commits": 47
+      },
+      {
+        "file": "messages/en/critical.json",
+        "commits": 22
+      },
+      {
+        "file": "messages/zh/critical.json",
+        "commits": 22
+      },
+      {
+        "file": "messages/en.json",
+        "commits": 20
+      },
+      {
+        "file": "messages/zh.json",
+        "commits": 20
+      },
+      {
+        "file": "src/app/[locale]/contact/page.tsx",
+        "commits": 18
+      },
+      {
+        "file": "src/app/[locale]/products/[market]/page.tsx",
+        "commits": 17
+      },
+      {
+        "file": "src/app/[locale]/layout.tsx",
+        "commits": 15
+      },
+      {
+        "file": "src/app/api/contact/route.ts",
+        "commits": 15
+      },
+      {
+        "file": "src/app/api/inquiry/route.ts",
+        "commits": 15
+      },
+      {
+        "file": "src/app/api/subscribe/route.ts",
+        "commits": 15
+      },
+      {
+        "file": "src/app/api/contact/__tests__/route.test.ts",
+        "commits": 14
+      },
+      {
+        "file": "src/app/globals.css",
+        "commits": 14
+      },
+      {
+        "file": "src/lib/idempotency.ts",
+        "commits": 14
+      },
+      {
+        "file": "scripts/quality-gate.js",
+        "commits": 13
+      },
+      {
+        "file": "src/lib/security/client-ip.ts",
+        "commits": 13
+      },
+      {
+        "file": ".github/workflows/ci.yml",
+        "commits": 12
+      },
+      {
+        "file": "messages/en/deferred.json",
+        "commits": 12
+      },
+      {
+        "file": "messages/zh/deferred.json",
+        "commits": 12
+      },
+      {
+        "file": "next.config.ts",
+        "commits": 12
+      },
+      {
+        "file": "src/app/__tests__/actions.test.ts",
+        "commits": 12
+      },
+      {
+        "file": "src/app/[locale]/products/page.tsx",
+        "commits": 12
+      },
+      {
+        "file": "src/lib/actions/contact.ts",
+        "commits": 12
+      },
+      {
+        "file": "src/lib/load-messages.ts",
+        "commits": 12
+      },
+      {
+        "file": "src/app/[locale]/contact/__tests__/page.test.tsx",
+        "commits": 11
+      }
+    ],
+    "directories": [
+      {
+        "directory": "src/components",
+        "touches": 940
+      },
+      {
+        "directory": "src/lib",
+        "touches": 809
+      },
+      {
+        "directory": "src/app",
+        "touches": 602
+      },
+      {
+        "directory": "src/types",
+        "touches": 121
+      },
+      {
+        "directory": "src/config",
+        "touches": 115
+      },
+      {
+        "directory": "src/constants",
+        "touches": 92
+      },
+      {
+        "directory": "scripts/cloudflare",
+        "touches": 61
+      },
+      {
+        "directory": "src/test",
+        "touches": 48
+      },
+      {
+        "directory": "package.json",
+        "touches": 47
+      },
+      {
+        "directory": "messages/en",
+        "touches": 34
+      },
+      {
+        "directory": "messages/zh",
+        "touches": 34
+      },
+      {
+        "directory": ".github/workflows",
+        "touches": 31
+      },
+      {
+        "directory": "src/sites",
+        "touches": 25
+      },
+      {
+        "directory": "src/hooks",
+        "touches": 24
+      },
+      {
+        "directory": "messages/en.json",
+        "touches": 20
+      }
+    ],
+    "couplings": [
+      {
+        "left": "messages/en/critical.json",
+        "right": "messages/zh/critical.json",
+        "coChanges": 22,
+        "leftTouches": 22,
+        "rightTouches": 22,
+        "support": 1,
+        "jaccard": 1
+      },
+      {
+        "left": "messages/en.json",
+        "right": "messages/zh.json",
+        "coChanges": 20,
+        "leftTouches": 20,
+        "rightTouches": 20,
+        "support": 1,
+        "jaccard": 1
+      },
+      {
+        "left": "messages/en.json",
+        "right": "messages/en/critical.json",
+        "coChanges": 18,
+        "leftTouches": 20,
+        "rightTouches": 22,
+        "support": 0.9,
+        "jaccard": 0.75
+      },
+      {
+        "left": "messages/en.json",
+        "right": "messages/zh/critical.json",
+        "coChanges": 18,
+        "leftTouches": 20,
+        "rightTouches": 22,
+        "support": 0.9,
+        "jaccard": 0.75
+      },
+      {
+        "left": "messages/en/critical.json",
+        "right": "messages/zh.json",
+        "coChanges": 18,
+        "leftTouches": 22,
+        "rightTouches": 20,
+        "support": 0.9,
+        "jaccard": 0.75
+      },
+      {
+        "left": "messages/zh.json",
+        "right": "messages/zh/critical.json",
+        "coChanges": 18,
+        "leftTouches": 20,
+        "rightTouches": 22,
+        "support": 0.9,
+        "jaccard": 0.75
+      },
+      {
+        "left": "src/app/api/inquiry/route.ts",
+        "right": "src/app/api/subscribe/route.ts",
+        "coChanges": 15,
+        "leftTouches": 15,
+        "rightTouches": 15,
+        "support": 1,
+        "jaccard": 1
+      },
+      {
+        "left": "messages/en/deferred.json",
+        "right": "messages/zh/deferred.json",
+        "coChanges": 12,
+        "leftTouches": 12,
+        "rightTouches": 12,
+        "support": 1,
+        "jaccard": 1
+      },
+      {
+        "left": "src/app/api/contact/route.ts",
+        "right": "src/app/api/inquiry/route.ts",
+        "coChanges": 12,
+        "leftTouches": 15,
+        "rightTouches": 15,
+        "support": 0.8,
+        "jaccard": 0.667
+      },
+      {
+        "left": "src/app/api/contact/route.ts",
+        "right": "src/app/api/subscribe/route.ts",
+        "coChanges": 12,
+        "leftTouches": 15,
+        "rightTouches": 15,
+        "support": 0.8,
+        "jaccard": 0.667
+      },
+      {
+        "left": "src/components/sections/final-cta.tsx",
+        "right": "src/components/sections/hero-section.tsx",
+        "coChanges": 10,
+        "leftTouches": 11,
+        "rightTouches": 11,
+        "support": 0.909,
+        "jaccard": 0.833
+      },
+      {
+        "left": "package.json",
+        "right": "scripts/ci-local.sh",
+        "coChanges": 9,
+        "leftTouches": 47,
+        "rightTouches": 9,
+        "support": 1,
+        "jaccard": 0.191
+      },
+      {
+        "left": "src/app/[locale]/products/[market]/__tests__/market-landing.test.tsx",
+        "right": "src/app/[locale]/products/[market]/page.tsx",
+        "coChanges": 9,
+        "leftTouches": 9,
+        "rightTouches": 17,
+        "support": 1,
+        "jaccard": 0.529
+      },
+      {
+        "left": "src/components/sections/final-cta.tsx",
+        "right": "src/components/sections/sample-cta.tsx",
+        "coChanges": 9,
+        "leftTouches": 11,
+        "rightTouches": 9,
+        "support": 1,
+        "jaccard": 0.818
+      },
+      {
+        "left": "package.json",
+        "right": "src/lib/env.ts",
+        "coChanges": 9,
+        "leftTouches": 47,
+        "rightTouches": 10,
+        "support": 0.9,
+        "jaccard": 0.188
+      },
+      {
+        "left": "scripts/cloudflare/build-phase6-workers.mjs",
+        "right": "scripts/cloudflare/deploy-phase6.mjs",
+        "coChanges": 9,
+        "leftTouches": 10,
+        "rightTouches": 10,
+        "support": 0.9,
+        "jaccard": 0.818
+      },
+      {
+        "left": "src/app/api/contact/__tests__/contact-api-validation.test.ts",
+        "right": "src/app/api/contact/route.ts",
+        "coChanges": 9,
+        "leftTouches": 10,
+        "rightTouches": 15,
+        "support": 0.9,
+        "jaccard": 0.563
+      },
+      {
+        "left": "src/app/api/contact/__tests__/route-post.test.ts",
+        "right": "src/app/api/contact/__tests__/route.test.ts",
+        "coChanges": 9,
+        "leftTouches": 10,
+        "rightTouches": 14,
+        "support": 0.9,
+        "jaccard": 0.6
+      },
+      {
+        "left": "src/components/sections/quality-section.tsx",
+        "right": "src/components/sections/scenarios-section.tsx",
+        "coChanges": 9,
+        "leftTouches": 10,
+        "rightTouches": 11,
+        "support": 0.9,
+        "jaccard": 0.75
+      },
+      {
+        "left": "src/lib/idempotency.ts",
+        "right": "src/lib/security/distributed-rate-limit.ts",
+        "coChanges": 9,
+        "leftTouches": 14,
+        "rightTouches": 10,
+        "support": 0.9,
+        "jaccard": 0.6
+      },
+      {
+        "left": "messages/en/critical.json",
+        "right": "messages/en/deferred.json",
+        "coChanges": 9,
+        "leftTouches": 22,
+        "rightTouches": 12,
+        "support": 0.75,
+        "jaccard": 0.36
+      },
+      {
+        "left": "messages/en/critical.json",
+        "right": "messages/zh/deferred.json",
+        "coChanges": 9,
+        "leftTouches": 22,
+        "rightTouches": 12,
+        "support": 0.75,
+        "jaccard": 0.36
+      },
+      {
+        "left": "messages/en/deferred.json",
+        "right": "messages/zh/critical.json",
+        "coChanges": 9,
+        "leftTouches": 12,
+        "rightTouches": 22,
+        "support": 0.75,
+        "jaccard": 0.36
+      },
+      {
+        "left": "messages/zh/critical.json",
+        "right": "messages/zh/deferred.json",
+        "coChanges": 9,
+        "leftTouches": 22,
+        "rightTouches": 12,
+        "support": 0.75,
+        "jaccard": 0.36
+      },
+      {
+        "left": "next.config.ts",
+        "right": "package.json",
+        "coChanges": 9,
+        "leftTouches": 12,
+        "rightTouches": 47,
+        "support": 0.75,
+        "jaccard": 0.18
+      }
+    ]
+  }
+}

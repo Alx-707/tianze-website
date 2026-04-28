@@ -1,0 +1,37 @@
+   300	      });
+   301
+
+   302	      // Verify core content is still visible
+   303	      const heroSection = page.getByTestId("hero-section");
+   304	      await expect(heroSection).toBeVisible();
+   305
+
+   306	      // Verify core content loaded despite slow network
+   307	      const heroTitle = page.getByRole("heading", { level: 1 });
+   308	      await expect(heroTitle).toBeVisible();
+   309	    });
+   310	  });
+   311
+
+   312	  test.describe("Accessibility Tests", () => {
+   313	    test("should pass automated accessibility checks", async ({ page }) => {
+   314	      await injectAxe(page);
+   315
+
+   316	      // Run axe-core accessibility checks
+   317	      await checkA11y(page, undefined, {
+   318	        detailedReport: true,
+   319	        detailedReportOptions: { html: true },
+   320	      });
+   321	    });
+   322
+
+   323	    test("should support keyboard navigation", async ({ page }) => {
+   324	      // Verify interactive elements exist and can receive focus.
+   325	      // Direct Tab-key navigation is unreliable in headless Chromium, so
+   326	      // instead verify that the first link/button is focusable via JS.
+   327	      const firstLink = page.getByRole("link").first();
+   328	      await expect(firstLink).toBeVisible();
+   329
+
+   330	      await firstLink.focus();

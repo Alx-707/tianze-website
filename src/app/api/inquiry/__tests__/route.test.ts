@@ -41,24 +41,8 @@ vi.mock("@/lib/lead-pipeline", () => ({
     }),
   ),
   LEAD_TYPES: {
-    PRODUCT: "PRODUCT",
-    CONTACT: "CONTACT",
-  },
-}));
-
-vi.mock("@/lib/lead-pipeline/lead-schema", () => ({
-  LEAD_TYPES: {
-    PRODUCT: "PRODUCT",
-    CONTACT: "CONTACT",
-  },
-  productLeadSchema: {
-    safeParse: vi.fn((input: Record<string, unknown>) => ({
-      success: true,
-      data: {
-        ...input,
-        type: "PRODUCT",
-      },
-    })),
+    PRODUCT: "product",
+    CONTACT: "contact",
   },
 }));
 
@@ -143,7 +127,17 @@ describe("/api/inquiry route", () => {
       expect(response.status).toBe(200);
       expect(data.success).toBe(true);
       expect(data.data.referenceId).toBe("ref-123");
-      expect(processLead).toHaveBeenCalled();
+      expect(processLead).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "product",
+          email: "john@example.com",
+          productSlug: "example-product",
+          productName: "Example Product",
+        }),
+        expect.objectContaining({
+          requestId: expect.any(String),
+        }),
+      );
     });
 
     it("should apply CORS headers on POST response when Origin is present", async () => {
@@ -254,6 +248,53 @@ describe("/api/inquiry route", () => {
       expect(data.errorCode).toBe(API_ERROR_CODES.INQUIRY_SECURITY_REQUIRED);
     });
 
+    it("should reject invalid email before turnstile and lead processing", async () => {
+      const request = createInquiryRequest(
+        JSON.stringify({ ...validInquiryData, email: "not-an-email" }),
+      );
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(400);
+      expect(data.success).toBe(false);
+      expect(data.errorCode).toBe(API_ERROR_CODES.INQUIRY_VALIDATION_FAILED);
+      expect(verifyTurnstileDetailed).not.toHaveBeenCalled();
+      expect(processLead).not.toHaveBeenCalled();
+    });
+
+    it("should reject a missing product identity before lead processing", async () => {
+      const request = createInquiryRequest(
+        JSON.stringify({
+          ...validInquiryData,
+          productSlug: "",
+          productName: "",
+        }),
+      );
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(400);
+      expect(data.success).toBe(false);
+      expect(data.errorCode).toBe(API_ERROR_CODES.INQUIRY_VALIDATION_FAILED);
+      expect(processLead).not.toHaveBeenCalled();
+    });
+
+    it("should reject a non-positive numeric quantity", async () => {
+      const request = createInquiryRequest(
+        JSON.stringify({ ...validInquiryData, quantity: "0" }),
+      );
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(400);
+      expect(data.success).toBe(false);
+      expect(data.errorCode).toBe(API_ERROR_CODES.INQUIRY_VALIDATION_FAILED);
+      expect(processLead).not.toHaveBeenCalled();
+    });
+
     it("should return 400 when turnstile verification fails", async () => {
       vi.mocked(verifyTurnstile).mockResolvedValueOnce(false);
       vi.mocked(verifyTurnstileDetailed).mockResolvedValueOnce({
@@ -348,14 +389,14 @@ describe("/api/inquiry route", () => {
       expect(data.errorCode).toBe(API_ERROR_CODES.INQUIRY_PROCESSING_ERROR);
     });
 
-    it("should pass lead type PRODUCT to processLead", async () => {
+    it("should pass lead type product to processLead", async () => {
       const request = createInquiryRequest(JSON.stringify(validInquiryData));
 
       await POST(request);
 
       expect(processLead).toHaveBeenCalledWith(
         expect.objectContaining({
-          type: "PRODUCT",
+          type: "product",
         }),
         expect.objectContaining({
           requestId: expect.any(String),
@@ -367,7 +408,7 @@ describe("/api/inquiry route", () => {
       const request = createInquiryRequest(
         JSON.stringify({
           ...validInquiryData,
-          type: "CONTACT",
+          type: "contact",
         }),
       );
 
@@ -375,7 +416,7 @@ describe("/api/inquiry route", () => {
 
       expect(processLead).toHaveBeenCalledWith(
         expect.objectContaining({
-          type: "PRODUCT",
+          type: "product",
         }),
         expect.objectContaining({
           requestId: expect.any(String),

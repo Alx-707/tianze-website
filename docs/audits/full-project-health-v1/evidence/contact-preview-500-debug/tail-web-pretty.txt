@@ -1,0 +1,7 @@
+Raw Cloudflare web worker pretty tail was redacted before committing.
+
+Summary:
+- Baseline contact-route requests reproduced the blocking-route exception on the web worker.
+- Raw request URLs, headers, worker identifiers, and runtime correlation fields were intentionally removed from repo evidence.
+
+See docs/audits/full-project-health-v1/06-contact-preview-500-debug.md.

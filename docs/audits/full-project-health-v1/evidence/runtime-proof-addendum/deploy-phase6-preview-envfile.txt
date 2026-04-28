@@ -1,0 +1,8 @@
+Raw preview deploy log was redacted before committing.
+
+Summary:
+- Preview phase6 deploy completed for the web, api-lead, and gateway workers.
+- The Server Actions encryption key was synced without printing secret values.
+- Worker names, account-specific workers.dev URLs, local env-file paths, wrangler binding tables, version IDs, and raw runtime details were intentionally removed from repo evidence.
+
+See docs/audits/full-project-health-v1/05-runtime-proof-addendum.md and docs/audits/full-project-health-v1/07-repair-closure.md.

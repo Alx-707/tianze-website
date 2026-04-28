@@ -73,7 +73,7 @@ export const SINGLE_SITE_DEFINITION: SiteDefinition = {
         "PVC conduit fittings",
         "PVC conduit bends",
         "AS/NZS 2053",
-        "AS/NZS 61386",
+        "IEC 61386",
         "PVC pipe fittings",
         "PETG pneumatic tube",
         "OEM conduit fittings",
@@ -110,7 +110,6 @@ export const SINGLE_SITE_DEFINITION: SiteDefinition = {
       {
         name: "ISO 9001:2015",
         certificateNumber: "240021Q09730R0S",
-        file: "/certs/iso9001.pdf",
         validUntil: "2027-03",
       },
     ],

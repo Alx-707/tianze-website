@@ -36,24 +36,33 @@ vi.mock("@/lib/lead-pipeline", () => ({
     referenceId: "lead-ref-001",
   })),
   LEAD_TYPES: {
-    PRODUCT: "PRODUCT",
-    CONTACT: "CONTACT",
-    NEWSLETTER: "NEWSLETTER",
+    PRODUCT: "product",
+    CONTACT: "contact",
+    NEWSLETTER: "newsletter",
   },
 }));
 
 vi.mock("@/lib/lead-pipeline/lead-schema", () => ({
   LEAD_TYPES: {
-    PRODUCT: "PRODUCT",
-    CONTACT: "CONTACT",
-    NEWSLETTER: "NEWSLETTER",
+    PRODUCT: "product",
+    CONTACT: "contact",
+    NEWSLETTER: "newsletter",
   },
   productLeadSchema: {
     safeParse: vi.fn((input: Record<string, unknown>) => ({
       success: true,
       data: {
         ...input,
-        type: "PRODUCT",
+        type: "product",
+      },
+    })),
+  },
+  newsletterLeadSchema: {
+    safeParse: vi.fn((input: Record<string, unknown>) => ({
+      success: true,
+      data: {
+        ...input,
+        type: "newsletter",
       },
     })),
   },
