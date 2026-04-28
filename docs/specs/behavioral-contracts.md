@@ -143,13 +143,13 @@ The current critical market-page path is Contact handoff, not an in-page drawer.
 | Field | Value |
 |-------|-------|
 | Priority | Critical |
-| Test Type | Unit + Source Contract |
-| Test File | `src/app/[locale]/products/[market]/__tests__/market-landing.test.tsx`, `src/app/[locale]/contact/__tests__/page.test.tsx`, `src/app/[locale]/products/__tests__/interactive-islands-usage.test.ts` |
-| Status | Partial |
+| Test Type | E2E + Unit + Source Contract |
+| Test File | `tests/e2e/product-family-contact-handoff.spec.ts`, `src/app/[locale]/products/[market]/__tests__/market-landing.test.tsx`, `src/app/[locale]/contact/__tests__/page.test.tsx`, `src/app/[locale]/products/__tests__/interactive-islands-usage.test.ts` |
+| Status | Covered |
 
 Notes: The handoff must pass only internal slugs in the URL. Contact must validate `intent`, `market`, and `family` before displaying labels. Invalid query values are ignored and are never rendered directly.
 
-Proof boundary: component/unit tests prove the internal href object and Contact validation. A claim that the rendered browser URL is `/en/contact?...` or `/zh/contact?...` requires browser or integration smoke evidence.
+Proof boundary: component/unit tests prove the internal href object and Contact validation. `tests/e2e/product-family-contact-handoff.spec.ts` proves local browser runtime renders `/en/contact?...` and `/zh/contact?...` URLs for the North America product family handoff and that clicking the links displays the validated Contact context notice. This is local browser/runtime proof, not Cloudflare deployed proof.
 
 ---
 
@@ -403,7 +403,6 @@ Retired contracts are kept for historical traceability but excluded from active 
 
 - **BC-001** (Partial): Hero CTA links need `href` verification for /contact and /products
 - **BC-007** (Partial): End-to-end contact form submission flow not tested (Turnstile blocker)
-- **BC-009** (Partial): Product family Contact handoff has source and unit proof for internal href construction plus Contact query validation; localized browser URL smoke remains the unproven boundary.
 - **BC-013** (Partial): Products page market cards have no E2E test
 
 ### High-priority gaps
