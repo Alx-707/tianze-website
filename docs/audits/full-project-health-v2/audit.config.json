@@ -8,13 +8,25 @@
     "src/**",
     "content/**",
     "messages/**",
+    "public/**"
+  ],
+  "source_truth_globs": [
+    "AGENTS.md",
+    "CLAUDE.md",
+    ".claude/**",
     "package.json",
     "pnpm-lock.yaml",
+    "tsconfig*.json",
+    "eslint.config.*",
+    ".dependency-cruiser.*",
+    "vitest.config.*",
+    "playwright.config.*",
+    "postcss.config.*",
+    "tailwind.config.*",
     "next.config.*",
     "open-next.config.*",
     "wrangler.*",
-    ".github/workflows/**",
-    "public/**"
+    ".github/workflows/**"
   ],
   "allowed_write_globs": [
     "docs/audits/full-project-health-v2/runs/**",
@@ -26,11 +38,21 @@
     "messages/**",
     "package.json",
     "pnpm-lock.yaml",
+    "tsconfig*.json",
+    "eslint.config.*",
+    ".dependency-cruiser.*",
+    "vitest.config.*",
+    "playwright.config.*",
+    "postcss.config.*",
+    "tailwind.config.*",
     "next.config.*",
     "open-next.config.*",
     "wrangler.*",
     ".github/workflows/**",
-    "public/**"
+    "public/**",
+    "AGENTS.md",
+    "CLAUDE.md",
+    ".claude/**"
   ],
   "report_files": [
     "00-final-report.md",
@@ -85,12 +107,12 @@
       "git status --short --branch",
       "node -v",
       "pnpm -v",
-      "pnpm run",
       "pnpm type-check",
       "pnpm lint:check",
       "pnpm test",
       "pnpm build"
     ],
+    "diagnostic": ["pnpm run"],
     "optional": [
       "pnpm build:cf",
       "pnpm truth:check",

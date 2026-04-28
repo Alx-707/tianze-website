@@ -2,17 +2,28 @@
 
 Use the global `$repo-health-audit` skill as the method source, then apply this Tianze adapter.
 
+Set `REPO_HEALTH_AUDIT_SKILL` to the installed skill copy for the agent running the audit:
+
+```bash
+# Codex
+export REPO_HEALTH_AUDIT_SKILL="$HOME/.codex/skills/repo-health-audit"
+
+# Claude Code
+export REPO_HEALTH_AUDIT_SKILL="$HOME/.claude/skills/repo-health-audit"
+```
+
 ## Required reading order
 
-1. `/Users/Data/.codex/skills/repo-health-audit/SKILL.md`
-2. `/Users/Data/.codex/skills/repo-health-audit/references/lifecycle.md`
-3. `/Users/Data/.codex/skills/repo-health-audit/references/evidence-contract.md`
-4. `/Users/Data/.codex/skills/repo-health-audit/references/lane-contracts.md`
+1. `<REPO_HEALTH_AUDIT_SKILL>/SKILL.md`
+2. `<REPO_HEALTH_AUDIT_SKILL>/references/lifecycle.md`
+3. `<REPO_HEALTH_AUDIT_SKILL>/references/evidence-contract.md`
+4. `<REPO_HEALTH_AUDIT_SKILL>/references/lane-contracts.md`
 5. `docs/audits/full-project-health-v2/audit.config.json`
 6. `docs/audits/full-project-health-v2/project-profile.md`
-7. `AGENTS.md`
-8. `CLAUDE.md`
-9. relevant `.claude/rules/*`
+7. `docs/audits/full-project-health-v2/framework.md`
+8. `AGENTS.md`
+9. `CLAUDE.md`
+10. relevant `.claude/rules/*`
 
 ## Preflight only, before audit
 
@@ -36,8 +47,9 @@ git rev-parse HEAD
 git status --short --branch
 node -v
 pnpm -v
-pnpm run
-python3 /Users/Data/.codex/skills/repo-health-audit/scripts/validate_audit_config.py docs/audits/full-project-health-v2/audit.config.json
+pnpm run # script inventory only; not a validation command
+test -f "$REPO_HEALTH_AUDIT_SKILL/SKILL.md"
+PYTHONDONTWRITEBYTECODE=1 python3 "$REPO_HEALTH_AUDIT_SKILL/scripts/validate_audit_config.py" docs/audits/full-project-health-v2/audit.config.json
 ```
 
 For a read-only audit run, business-code diff against `origin/main` must be zero unless the user names a checkpoint commit.
@@ -93,7 +105,7 @@ Validate findings:
 
 ```bash
 jq . docs/audits/full-project-health-v2/runs/<run-id>/02-findings.json
-python3 /Users/Data/.codex/skills/repo-health-audit/scripts/validate_findings.py docs/audits/full-project-health-v2/runs/<run-id>/02-findings.json
+PYTHONDONTWRITEBYTECODE=1 python3 "$REPO_HEALTH_AUDIT_SKILL/scripts/validate_findings.py" docs/audits/full-project-health-v2/runs/<run-id>/02-findings.json
 ```
 
 JSON syntax is not enough. The orchestrator must manually check that P0/P1 findings have fresh confirmed evidence and are not blocked or low confidence.
@@ -105,7 +117,7 @@ Audit output and business-code repair should be separate PRs by default.
 Repair planning should use:
 
 ```text
-/Users/Data/.codex/skills/repo-health-audit/assets/templates/repair-wave.md
+<REPO_HEALTH_AUDIT_SKILL>/assets/templates/repair-wave.md
 ```
 
 Every repair item needs a regression guard and a verification command or runtime proof.

@@ -2,10 +2,11 @@
 
 This file records how this repo uses the global `$repo-health-audit` skill.
 
-The generic method lives outside the repo as a local Codex skill:
+The generic method lives outside the repo as an installed local skill. Use the installed copy for the agent running the audit:
 
 ```text
-/Users/Data/.codex/skills/repo-health-audit/
+Codex: $HOME/.codex/skills/repo-health-audit/
+Claude Code: $HOME/.claude/skills/repo-health-audit/
 ```
 
 This repo should not duplicate the whole skill. It keeps only project-specific adapters and run outputs under this directory:
