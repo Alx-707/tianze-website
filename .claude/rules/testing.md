@@ -6,6 +6,30 @@ paths:
 
 # Testing Standards
 
+## Use This File When
+
+- Adding, changing, or reviewing Vitest, Playwright, mocks, fixtures, coverage gates, or test utilities
+- Changing behavior that needs regression coverage or contract proof
+- Updating test commands, skipped tests, or source/test synchronization
+
+## Do Not Use This File For
+
+- General TypeScript style; use `coding-standards.md`
+- API security controls; use `security.md`
+- Next.js rendering/API rules; use `conventions.md` and `node_modules/next/dist/docs/`
+- Content ownership or translation source decisions; use `content.md` or `i18n.md`
+
+## Test Strategy Decision Table
+
+| Change type | Preferred proof |
+|-------------|-----------------|
+| User-visible behavior | Behavioral contract + focused integration/E2E or component test |
+| Pure utility logic | Unit test |
+| Form submission path | Validation rejection + happy path + anti-abuse/idempotency coverage when applicable |
+| Route/navigation/locale behavior | Playwright or route-level integration proof |
+| Schema validation behavior | `vi.unmock("zod")` before assertions |
+| Source component prop/DOM change | Update the paired test first, then run related tests |
+
 ## Framework
 
 - **Unit/Integration**: Vitest + React Testing Library

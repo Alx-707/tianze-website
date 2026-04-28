@@ -1,13 +1,42 @@
 ---
 paths:
   - "src/app/api/**/*"
+  - "src/app/actions.ts"
+  - "src/app/**/actions.ts"
   - "src/lib/security/**/*"
-  - "src/lib/validations.ts"
+  - "src/lib/api/**"
+  - "src/lib/actions/**"
+  - "src/lib/lead-pipeline/lead-schema.ts"
+  - "src/lib/security-validation.ts"
+  - "src/config/security.ts"
 ---
 
 # Security Implementation
 
 > This file mixes framework-backed security behavior with repo security policy. Repo-specific rules are labeled where the framework does not prescribe one exact approach.
+
+## Use This File When
+
+- Creating or changing API routes, public write endpoints, Server Actions, validation, rate limits, CSP, or sensitive server code
+- Changing environment variable contracts or client/server exposure boundaries
+- Reviewing contact, inquiry, subscribe, Turnstile, health, or CSP report behavior
+
+## Do Not Use This File For
+
+- Cloudflare build/runtime topology; use `cloudflare.md`
+- General test mocking rules; use `testing.md`
+- General TypeScript style; use `coding-standards.md`
+
+## Endpoint Decision Table
+
+| Endpoint type | Required protection |
+|---------------|---------------------|
+| Browser-exposed public write endpoint | Zod validation + body size gate + rate limit + anti-abuse check |
+| Side-effectful public write endpoint | Above protections + idempotency |
+| Lead-family endpoint | `src/lib/lead-pipeline/lead-schema.ts` + pipeline-specific tests |
+| CSP report endpoint | Rate limit + body size gate; never trust payload content |
+| Health endpoint | No sensitive data, credentials, config dumps, or environment details |
+| Authenticated/session endpoint in future | Route-level authn/authz + cookie/CSRF rules added in the same branch |
 
 ## Server Code Protection
 
@@ -18,35 +47,27 @@ paths:
 
 When creating a public write endpoint (POST/PUT/PATCH/DELETE):
 
-1. Define Zod schema in `src/lib/validations.ts`
+1. Define or reuse a Zod schema in the relevant domain schema module. Lead-family endpoints use `src/lib/lead-pipeline/lead-schema.ts`.
 2. Add rate limit preset in `src/lib/security/distributed-rate-limit.ts`
-3. Write the route handler with this skeleton:
+3. Write the route handler using the shared API helpers:
 
 ```typescript
 import 'server-only';
 import { NextRequest } from 'next/server';
 import { API_ERROR_CODES } from '@/constants/api-error-codes';
-import { HTTP_TOO_MANY_REQUESTS } from '@/constants';
-import { checkDistributedRateLimit } from '@/lib/security/distributed-rate-limit';
-import { getClientIP } from '@/lib/security/client-ip';
-import { safeParseJson } from '@/lib/api/safe-parse-json';
 import {
   createApiErrorResponse,
   createApiSuccessResponse,
 } from '@/lib/api/api-response';
-import { mySchema } from '@/lib/validations';
+import { readAndHashJsonBody } from '@/lib/api/read-and-hash-body';
+import { withRateLimit, type RateLimitContext } from '@/lib/api/with-rate-limit';
+import { mySchema } from '@/lib/my-domain/schema';
 
-export async function POST(request: NextRequest) {
-  const clientIP = getClientIP(request);
-  const rateResult = await checkDistributedRateLimit(clientIP, 'my-endpoint');
-  if (!rateResult.allowed) {
-    return createApiErrorResponse(
-      API_ERROR_CODES.RATE_LIMIT_EXCEEDED,
-      HTTP_TOO_MANY_REQUESTS,
-    );
-  }
-
-  const body = await safeParseJson(request);
+async function handlePost(
+  request: NextRequest,
+  { clientIP }: RateLimitContext,
+) {
+  const body = await readAndHashJsonBody(request, { route: '/api/my-route' });
   if (!body.ok) {
     return createApiErrorResponse(body.errorCode, body.statusCode);
   }
@@ -59,6 +80,8 @@ export async function POST(request: NextRequest) {
   // Business logic here
   return createApiSuccessResponse({ /* result */ });
 }
+
+export const POST = withRateLimit('my-endpoint', handlePost);
 ```
 
 4. Add endpoint to the "Known API Endpoints" table below
@@ -106,9 +129,9 @@ Rate limit utility: `src/lib/security/distributed-rate-limit.ts`
 
 | Endpoint | Required Protection | Status |
 |----------|---------------------|--------|
-| Contact page Server Action | Rate Limit + validation + idempotency on the canonical lead path | ✅ |
+| Contact page Server Action | Turnstile + Rate Limit + validation + idempotency on the canonical lead path | ✅ |
 | `/api/inquiry` | Turnstile + Rate Limit + Idempotency + JSON body size gate | ✅ |
-| `/api/subscribe` | Rate Limit + Idempotency + JSON body size gate | ✅ |
+| `/api/subscribe` | Turnstile + Rate Limit + Idempotency + JSON body size gate | ✅ |
 | `/api/csp-report` | Rate Limit + Body size gate | ✅ |
 | `/api/verify-turnstile` | JSON body size gate | ✅ |
 | `/api/health` | (Public healthcheck) | - |

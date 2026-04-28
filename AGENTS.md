@@ -1,54 +1,110 @@
 # AGENTS.md
 
-> Cross-tool agent instructions. Codex, Copilot, Gemini, and other AI code tools: read this file.
-
 ## Project
 
-**Tianze (天泽管业)** — PVC conduit fittings manufacturer, Lianyungang, Jiangsu. Exports to 20+ countries.
+**Tianze** - PVC conduit fittings manufacturer.
 
-Goal: Inquiry conversion + product showcase for overseas B2B buyers.
+**Goal**: Inquiry conversion + product showcase for overseas distributors, helping them evaluate suppliers during product selection.
 
-Stack: Next.js 16.2 (App Router, Cache Components) + React 19.2 + TypeScript 5.9 + Tailwind CSS 4.2 + next-intl 4.8
-
-## Coding Constraints
-
-All coding constraints live in `CLAUDE.md` and `.claude/rules/`. Follow them as-is:
-
-| File | Scope |
-|------|-------|
-| `CLAUDE.md` | Project overview, stack, structure, commands, design context |
-| `.claude/rules/cloudflare.md` | Build chain, middleware entry, Server Action IP, Cache Components |
-| `.claude/rules/coding-standards.md` | TypeScript strict, naming, imports, logging |
-| `.claude/rules/code-quality.md` | Complexity limits, magic numbers, ESLint |
-| `.claude/rules/conventions.md` | Hydration pitfalls, use-client boundary, route deletion |
-| `.claude/rules/content.md` | MDX vs TypeScript content strategy |
-| `.claude/rules/i18n.md` | next-intl, Cache Components compatibility |
-| `.claude/rules/security.md` | API route skeleton, rate limit, CSP, validation |
-| `.claude/rules/testing.md` | Vitest/Playwright, mock system, BDD |
-| `.claude/rules/ui.md` | Component reuse, Tailwind v4, design tokens, shadcn/ui |
-
-## Next.js API Reference
-
-Version-locked Next.js docs live in `.next-docs/`. The index is at the bottom of `CLAUDE.md`. Consult before writing Next.js code — training data may be outdated.
+Production project, solo development.
 
 ## Communication
 
-Owner is non-technical. All reporting uses business language.
+The owner is non-technical. Communicate in business language, not technical jargon.
 
-- Describe **what changed and what effect it has**, not which files were modified
-- Use analogies, not jargon. First occurrence of a technical term gets a plain-language gloss
-- Structure updates as: conclusion, practical impact, remaining risk, next step
-- Do not default-assume the reader knows Next.js, Cloudflare, RSC, or build tooling terms
+## Stack
 
-## Build Validation
+Next.js 16.2.3 (App Router, Cache Components) + React 19.2.5 + TypeScript 5.9.3 + Tailwind CSS 4.2.2 + next-intl 4.9.1
 
-```bash
-pnpm ci:local          # Full local CI
-pnpm build             # Standard build
-pnpm build:cf          # Cloudflare build (run AFTER pnpm build, never in parallel)
-pnpm type-check        # TypeScript
-pnpm lint:check        # ESLint
-pnpm test              # Vitest
+## Structure
+
+```
+src/
+- app/[locale]/       # Localized App Router pages
+- app/api/            # Route handlers for inquiry, subscribe, Turnstile, CSP report, and health
+- components/         # UI components, sections, forms, product blocks, layout, and shared UI
+- config/             # Runtime and project configuration
+- constants/          # Shared constants and product specs
+- emails/             # Email templates and email-related code
+- hooks/              # React hooks
+- i18n/               # next-intl configuration
+- lib/                # Utilities, integrations, security, cache, content, forms, and lead pipeline
+- services/           # Service-layer modules
+- styles/             # Shared styles
+- templates/          # Reusable templates
+- test/, testing/     # Test fixtures, setup helpers, and test utilities
+- types/              # TypeScript definitions
+
+content/
+- pages/en/           # English content pages
+- pages/zh/           # Chinese content pages
+- config/             # Content configuration
+- _archive/           # Archived content
+
+messages/
+- en/                 # English translation JSON
+- zh/                 # Chinese translation JSON
 ```
 
-`pnpm build` and `pnpm build:cf` write to the same `.next` directory — never run them in parallel.
+## Reference Sources
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# Next.js: ALWAYS read docs before coding
+
+Before any Next.js work, find and read the relevant doc in `node_modules/next/dist/docs/`. Your training data may be outdated; the installed package docs are the source of truth.
+
+<!-- END:nextjs-agent-rules -->
+
+For other dependency-specific work, prefer Context7 for current API guidance. If Context7 is unavailable, use official docs or version-locked local docs.
+
+Verify dependency APIs from current docs before editing.
+
+## Commands
+
+```bash
+pnpm dev          # Dev server
+pnpm build        # Production build
+pnpm type-check   # TypeScript
+pnpm lint:check   # ESLint
+pnpm test         # Vitest
+pnpm ci:local     # Full CI
+pnpm build:cf     # Cloudflare/OpenNext build
+pnpm tech:check   # Stack-wide dependency/config/build check
+```
+
+`pnpm build` and `pnpm build:cf` write to the same `.next` directory - never run them in parallel.
+
+Use the smallest validation that proves the change:
+- Type-only changes: `pnpm type-check`
+- Lint-sensitive edits: `pnpm lint:check`
+- Unit-tested logic: `pnpm test`
+- Next.js/runtime changes: `pnpm build`
+- Cloudflare/OpenNext changes: run `pnpm build` before `pnpm build:cf`
+- Broad or release-facing changes: `pnpm ci:local`
+
+## Constraints
+
+1. **TypeScript strict** - No `any`, default `interface` for object shapes
+2. **Server Components first** - `"use client"` only for interactivity
+3. **i18n required** - All user-facing text via translation keys
+4. **Git** - GitHub Flow: `main` is the only long-lived branch; feature branches merge through pull requests.
+
+## Rule Routing
+
+`AGENTS.md` is the cross-tool entry point. Do not assume non-Claude tools understand `.claude/rules/` frontmatter or path triggers.
+
+Before editing, use this routing table and read only the matching files under `.claude/rules/`:
+
+| Task touches | Read |
+|-------------|------|
+| Next.js routing, layouts, metadata, images, fonts, caching, Server Components | `conventions.md` + `node_modules/next/dist/docs/` |
+| Cloudflare/OpenNext build, preview, deploy, middleware/proxy, runtime behavior | `cloudflare.md` |
+| TypeScript style, imports, naming, logging | `coding-standards.md` |
+| Magic numbers, ESLint disables, complexity, import boundaries | `code-quality.md` |
+| i18n, translations, locale routing, message loading | `i18n.md` |
+| API routes, forms, validation, rate limits, CSP, sensitive server code | `security.md` |
+| UI components, Tailwind, shadcn/ui, `next/image`, `next/font` | `ui.md` |
+| MDX, page content, content ownership, frontmatter | `content.md` |
+| Tests, mocks, Vitest, Playwright, coverage gates | `testing.md` |
+| JSON-LD, schema.org, structured data builders | `structured-data.md` |

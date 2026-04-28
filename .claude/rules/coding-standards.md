@@ -1,3 +1,12 @@
+---
+paths:
+  - "src/**/*.{ts,tsx}"
+  - "tests/**/*.{ts,tsx}"
+  - "scripts/**/*.{js,mjs,ts}"
+  - "*config.{js,ts,mjs,mts}"
+  - "eslint.config.mjs"
+---
+
 # Coding Standards
 
 ## TypeScript

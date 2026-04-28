@@ -1,3 +1,13 @@
+---
+paths:
+  - "src/**/*.{ts,tsx}"
+  - "tests/**/*.{ts,tsx}"
+  - "**/*.{test,spec}.{ts,tsx}"
+  - "*config.{js,ts,mjs,mts}"
+  - "eslint.config.mjs"
+  - "stryker.config.json"
+---
+
 # Code Quality Constraints
 
 ## Complexity Limits
