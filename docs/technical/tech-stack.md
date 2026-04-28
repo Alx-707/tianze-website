@@ -99,9 +99,9 @@
 
 ### E2E / 可访问性 / 性能
 
-- **Playwright 1.59.0**
-- **@axe-core/playwright 4.11.1**
-- **axe-core 4.11.2**
+- **Playwright 1.59.1**
+- **@axe-core/playwright 4.11.2**
+- **axe-core 4.11.3**
 - **Lighthouse CI**
   - `@lhci/cli 0.15.1`
   - `lighthouse 12.8.2`
