@@ -9,13 +9,15 @@
     "src/app/**/{page,layout,template,loading,error,not-found,route,head}.{ts,tsx}",
     "src/app/api/**/*.{ts,tsx}",
     "src/constants/index.ts",
-    "scripts/**/*.{ts,tsx,js}",
+    "scripts/**/*.{ts,tsx,js,mjs}",
+    ".devtools/**/*.{js,mjs}",
     "tests/**/*.{ts,tsx}",
   ],
   // 项目扫描范围：聚焦源代码、脚本与测试，不扫描生成物/文档。
   "project": [
     "src/**/*.{ts,tsx}",
-    "scripts/**/*.{ts,tsx,js}",
+    "scripts/**/*.{ts,tsx,js,mjs}",
+    ".devtools/**/*.{js,mjs}",
     "tests/**/*.{ts,tsx}",
   ],
   // 对“在同一文件内已被消费”的导出不再视为未用，
@@ -23,8 +25,6 @@
   "ignoreExportsUsedInFile": true,
   // 跳过模板/测试脚手架文件，避免误报（所有问题类型）。
   "ignore": [
-    // 预留的性能测试常量文件，用于后续性能基准/回归测试构建
-    ".devtools/react-grab-dev.mjs",
     "src/constants/test-performance-constants.ts",
     "src/components/blocks/_templates/**",
     // Known inactive components surfaced after removing broad component/lib entrypoints.
