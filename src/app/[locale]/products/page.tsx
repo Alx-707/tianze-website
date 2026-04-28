@@ -96,14 +96,12 @@ export default async function ProductsPage({ params }: ProductsPageProps) {
         </div>
       </section>
 
-      {/* Section 2: Specialty products */}
-      <section>
-        <h2 className="mb-6 text-xl font-semibold">
-          {t("overview.specialty")}
-        </h2>
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          {/* PETG Pneumatic Tubes card */}
-          {pneumaticMarket && (
+      {pneumaticMarket && (
+        <section>
+          <h2 className="mb-6 text-xl font-semibold">
+            {t("overview.specialty")}
+          </h2>
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <MarketSeriesCard
               slug={pneumaticMarket.slug}
               label={t(`markets.${pneumaticMarket.slug}.label`)}
@@ -113,9 +111,9 @@ export default async function ProductsPage({ params }: ProductsPageProps) {
                 count: getFamiliesForMarket(pneumaticMarket.slug).length,
               })}
             />
-          )}
-        </div>
-      </section>
+          </div>
+        </section>
+      )}
     </main>
   );
 }

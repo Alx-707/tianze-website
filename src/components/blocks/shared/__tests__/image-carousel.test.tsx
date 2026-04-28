@@ -13,9 +13,15 @@ describe("ImageCarousel", () => {
   it("renders all images", () => {
     render(<ImageCarousel images={images} />);
 
-    expect(screen.getByAltText("成型工艺")).toBeInTheDocument();
-    expect(screen.getByAltText("扩管机")).toBeInTheDocument();
-    expect(screen.getByAltText("生产线")).toBeInTheDocument();
+    const renderedImages = screen.getAllByRole("img");
+    expect(renderedImages).toHaveLength(images.length);
+
+    for (const image of images) {
+      const renderedImage = screen.getByAltText(image.alt);
+      const renderedSrc = renderedImage.getAttribute("src") ?? "";
+      expect(decodeURIComponent(renderedSrc)).toContain(image.src);
+      expect(renderedImage).toHaveAttribute("alt", image.alt);
+    }
   });
 
   it("applies horizontal scroll on mobile", () => {

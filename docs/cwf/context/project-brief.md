@@ -1,8 +1,9 @@
 # Tianze Website - Project Brief
 
-> **定位**：网站项目的唯一工作文档，c-wf / d-wf / i-wf 的共同输入。
+> **定位**：历史 CWF 输入文档，仅供审计和回溯；不是 c-wf / d-wf / i-wf 的当前唯一输入。
+> **当前公开站 truth source**：以 `src/config/single-site.ts`、live routes、messages 和 MDX 页面事实为准。
 > **原始素材主入口**：`docs/cwf/context/company/`
-> **当前事实说明**：这是历史 CWF 输入文档。当前公开网站不把设备作为独立产品线；继续使用前必须按 live product truth contract 改写。
+> **当前事实说明**：当前公开网站不把设备作为独立产品线；继续使用本文前必须按 live product truth contract 改写。
 
 ---
 

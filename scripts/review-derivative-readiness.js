@@ -12,6 +12,10 @@ const REQUIRED_FILES = [
   "src/config/single-site-seo.ts",
   "docs/guides/DERIVATIVE-PROJECT-REPLACEMENT-CHECKLIST.md",
   ".claude/rules/content.md",
+  "content/pages/en/about.mdx",
+  "content/pages/en/contact.mdx",
+  "content/pages/en/oem-custom-manufacturing.mdx",
+  "package.json",
 ];
 
 const CONTENT_CHECKS = [
@@ -96,6 +100,11 @@ for (const relPath of REQUIRED_FILES) {
 }
 
 for (const check of CONTENT_CHECKS) {
+  const fullPath = path.join(ROOT, check.file);
+  if (!fs.existsSync(fullPath)) {
+    failures.push(`missing required file for content check: ${check.file}`);
+    continue;
+  }
   const content = readFile(check.file);
   for (const snippet of check.snippets) {
     if (!content.includes(snippet)) {

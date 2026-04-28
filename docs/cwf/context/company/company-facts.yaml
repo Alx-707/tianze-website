@@ -1,6 +1,10 @@
 # Tianze Pipe Industry - Company Facts
-# Structured data for AI retrieval. Single source of truth for company facts.
+# Generated/planning-only context for audit and retrieval.
+# Not an authoring source: company identity fields must be authored in src/config/single-site.ts.
 # Current public website does not expose equipment as a standalone product line.
+
+purpose: audit-only
+source_of_truth: src/config/single-site.ts
 
 identity:
   name_cn: 连云港天泽管业有限公司

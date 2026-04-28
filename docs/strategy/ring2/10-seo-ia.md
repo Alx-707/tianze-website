@@ -12,16 +12,16 @@
 
 ## 当前 SEO 主线
 
-### 1. 产品树必须和 SEO 结构一致
+### 1. SEO 结构必须和当前公开 URL 一致
 
-SEO 页面结构要和产品树一致：
+SEO 页面结构先跟随当前已上线 URL：
 
 - `/products/`
 - `/products/{market}/`
 - `/products/pneumatic-tube-systems/`
 - `/oem-custom-manufacturing/`
 
-不要出现页面结构和 SEO 结构各讲一套。
+`/oem-custom-manufacturing/` 当前是独立转化页，不要在 SEO 文档里同时写成 `/products/oem-custom-manufacturing/`。未来若迁入产品树，需要单独做 IA migration。
 
 ### 2. 市场页优先，博客配合
 

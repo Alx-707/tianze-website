@@ -280,8 +280,8 @@ The existing implementation plan (`docs/superpowers/plans/2026-04-23-content-tru
 - Execute legal page unification as first proof of the new rules
 - Validate: tests, translation quartet, build
 
-**Batch B: FAQ Decomposition + About + Contact + OEM FAQ + historical equipment FAQ**
-- Decompose FAQ from shared pool to per-page MDX frontmatter (all 4 consuming pages)
+**Batch B: FAQ Decomposition + About + Contact + OEM FAQ + historical equipment FAQ (archived)**
+- Decompose FAQ from shared pool to per-page MDX frontmatter for About, Contact, OEM, and archived historical equipment content
 - Execute About page MDX migration
 - Execute Contact page treatment
 - Clean up dead translation keys

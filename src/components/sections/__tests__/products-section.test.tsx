@@ -36,6 +36,7 @@ describe("ProductsSection", () => {
     for (let i = 1; i <= 3; i++) {
       const key = `item${i}`;
       expect(screen.getByText(`products.${key}.tag`)).toBeInTheDocument();
+      expect(screen.getByText(`products.${key}.title`)).toBeInTheDocument();
       expect(screen.getByText(`products.${key}.standard`)).toBeInTheDocument();
     }
   });

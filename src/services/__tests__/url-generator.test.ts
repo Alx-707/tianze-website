@@ -155,6 +155,13 @@ describe("URLGenerator", () => {
 
       // 7 live page types x 2 languages = 14 entries (/blog and bending-machines are retired)
       expect(entries).toHaveLength(14);
+      expect(
+        entries.some(
+          (entry) =>
+            entry.loc.includes("/blog") ||
+            entry.loc.includes("/bending-machines"),
+        ),
+      ).toBe(false);
 
       // 检查是否包含主页条目
       const homeEntries = entries.filter(

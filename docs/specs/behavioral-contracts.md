@@ -14,7 +14,7 @@
 | Priority | Critical / High / Medium |
 | Test Type | E2E / Integration / Static Truth / Unit |
 | Test File | Path to test file(s) that verify this contract |
-| Status | Untested / Covered / Partial |
+| Status | Untested / Covered / Partial / Retired |
 
 ## Contracts
 
@@ -383,13 +383,15 @@ All 5 market spec files contain required fields (product families, dimensions, s
 
 ## Coverage Summary
 
-| Category | Total | Covered | Partial | Untested |
-|----------|-------|---------|---------|----------|
-| Navigation & Discovery | 6 | 4 | 2 | 0 |
-| Inquiry & Conversion | 6 | 1 | 5 | 0 |
-| Content & Information | 7 | 0 | 3 | 4 |
-| Resilience & Edge Cases | 6 | 4 | 2 | 0 |
-| **Total** | **25** | **9** | **12** | **4** |
+| Category | Active Total | Covered | Partial | Untested | Retired |
+|----------|--------------|---------|---------|----------|---------|
+| Navigation & Discovery | 6 | 4 | 2 | 0 | 0 |
+| Inquiry & Conversion | 6 | 1 | 5 | 0 | 0 |
+| Content & Information | 6 | 0 | 2 | 4 | 1 |
+| Resilience & Edge Cases | 6 | 4 | 2 | 0 | 0 |
+| **Total** | **24** | **9** | **11** | **4** | **1** |
+
+Retired contracts are kept for historical traceability but excluded from active coverage totals.
 
 ## Priority Gap Analysis
 

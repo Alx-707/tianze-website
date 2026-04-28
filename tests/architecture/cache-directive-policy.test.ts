@@ -29,8 +29,13 @@ const CRITICAL_CACHE_POLICY_SOURCE_READERS = {
 const CONTACT_PAGE_FILE = "src/app/[locale]/contact/page.tsx";
 const PRODUCT_MARKET_PAGE_FILE = "src/app/[locale]/products/[market]/page.tsx";
 const PRODUCT_MARKET_FAQ_HELPER = "getProductMarketFaqItems";
-const PRODUCT_MARKET_MDX_READ = 'getPageBySlug("product-market"';
+const USE_CACHE_DIRECTIVE_PATTERN = /["'`]\s*use\s+cache\s*["'`]/i;
+const NEXT_CACHE_IMPORT_PATTERN = /from\s+["'`]\s*next\/cache\s*["'`]/i;
+const PRODUCT_MARKET_FAQ_HELPER_PATTERN = /\bgetProductMarketFaqItems\b/;
+const PRODUCT_MARKET_MDX_READ_PATTERN =
+  /\bgetPageBySlug\s*\(\s*["'`]product-market["'`]/i;
 const FAQ_SCHEMA_TYPE = "FAQPage";
+const FAQ_SCHEMA_TYPE_PATTERN = /\bFAQPage\b/;
 
 function readProductMarketPageSource() {
   return readFileSync(PRODUCT_MARKET_PAGE_FILE, "utf8");
@@ -191,9 +196,8 @@ describe("cache directive policy", () => {
     expect(source).toContain(
       'import { CONTENT_MANIFEST } from "@/lib/content-manifest.generated"',
     );
-    expect(source).not.toContain('"use cache"');
-    expect(source).not.toContain("'use cache'");
-    expect(source).not.toContain('from "next/cache"');
+    expect(source).not.toMatch(USE_CACHE_DIRECTIVE_PATTERN);
+    expect(source).not.toMatch(NEXT_CACHE_IMPORT_PATTERN);
     expect(source).not.toContain("cacheTag(");
     expect(source).not.toContain("revalidateTag(");
     expect(source).not.toContain("revalidatePath(");
@@ -202,13 +206,16 @@ describe("cache directive policy", () => {
   it("keeps product market pages free of shared FAQ cache boundaries", () => {
     const source = readProductMarketPageSource();
 
-    expect(source).not.toContain('"use cache"');
-    expect(source).not.toContain("'use cache'");
-    expect(source).not.toContain('from "next/cache"');
-    expect(source).not.toContain(PRODUCT_MARKET_FAQ_HELPER);
-    expect(source).not.toContain(PRODUCT_MARKET_MDX_READ);
+    expect(source).not.toMatch(USE_CACHE_DIRECTIVE_PATTERN);
+    expect(source).not.toMatch(NEXT_CACHE_IMPORT_PATTERN);
+    expect(PRODUCT_MARKET_FAQ_HELPER).toMatch(
+      PRODUCT_MARKET_FAQ_HELPER_PATTERN,
+    );
+    expect(source).not.toMatch(PRODUCT_MARKET_FAQ_HELPER_PATTERN);
+    expect(source).not.toMatch(PRODUCT_MARKET_MDX_READ_PATTERN);
     expect(source).not.toContain("<FaqSection");
     expect(source).not.toContain("generateFaqSchemaFromItems");
-    expect(source).not.toContain(FAQ_SCHEMA_TYPE);
+    expect(FAQ_SCHEMA_TYPE).toMatch(FAQ_SCHEMA_TYPE_PATTERN);
+    expect(source).not.toMatch(FAQ_SCHEMA_TYPE_PATTERN);
   });
 });

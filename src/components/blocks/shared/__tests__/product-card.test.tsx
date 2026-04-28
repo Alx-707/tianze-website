@@ -15,9 +15,11 @@ describe("ProductCard", () => {
     render(<ProductCard {...props} />);
 
     expect(screen.getByText("PVC 管件")).toBeInTheDocument();
-    expect(screen.getByText("多市场标准")).toBeInTheDocument();
-    expect(screen.getByText("稳定供应")).toBeInTheDocument();
-    expect(screen.getByText("支持询盘")).toBeInTheDocument();
+    const featureItems = screen.getAllByRole("listitem");
+    expect(featureItems).toHaveLength(props.features.length);
+    for (const feature of props.features) {
+      expect(screen.getByText(feature)).toBeInTheDocument();
+    }
   });
 
   it("renders button with correct href", () => {
