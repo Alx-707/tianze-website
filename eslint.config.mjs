@@ -31,7 +31,6 @@ export default [
       "performance-audit/**",
       "reports/**",
       ".next/**",
-      ".worktrees/**",
       ".trash-next-artifacts/**",
       ".context/**",
       ".stryker-tmp/**",
