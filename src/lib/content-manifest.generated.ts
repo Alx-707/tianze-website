@@ -36,7 +36,7 @@ const _entries: ContentEntry[] = [
     "metadata": {
       "locale": "en",
       "title": "About Tianze Pipe",
-      "description": "Learn how Tianze combines bending equipment know-how, conduit production, and OEM flexibility for global B2B buyers.",
+      "description": "Learn how Tianze combines conduit fittings manufacturing, in-house tooling, and OEM flexibility for global B2B buyers.",
       "slug": "about",
       "publishedAt": "2024-01-10",
       "updatedAt": "2026-04-01",
@@ -46,15 +46,15 @@ const _entries: ContentEntry[] = [
       "lastReviewed": "2026-04-01",
       "draft": false,
       "heroTitle": "About Tianze Pipe",
-      "heroSubtitle": "Pipe Bending Experts",
-      "heroDescription": "We combine bending equipment know-how, conduit production, and OEM flexibility — serving global B2B buyers from our Lianyungang factory.",
+      "heroSubtitle": "PVC Conduit Fittings Manufacturer",
+      "heroDescription": "We combine conduit fittings manufacturing, in-house forming, tooling, and OEM flexibility from our Lianyungang factory.",
       "seo": {
         "title": "About Tianze Pipe",
-        "description": "Tianze Pipe is a manufacturer of PVC conduit systems, PETG pneumatic tubes, and pipe processing equipment with in-house bending capability.",
+        "description": "Tianze Pipe manufactures PVC conduit systems, PETG pneumatic tubes, and OEM conduit fittings with in-house forming and tooling capability.",
         "keywords": [
           "Tianze Pipe",
           "PVC conduit manufacturer",
-          "pipe bending machine",
+          "PVC conduit fittings",
           "PETG pneumatic tube"
         ],
         "ogImage": "/images/about-og.jpg"
@@ -68,7 +68,7 @@ const _entries: ContentEntry[] = [
           },
           "innovation": {
             "title": "In-House R&D",
-            "description": "From bending machines to custom molds, we develop key production capability inside the factory."
+            "description": "From forming setup to custom molds, we develop key production capability inside the factory."
           },
           "service": {
             "title": "Technical Support",
@@ -86,8 +86,8 @@ const _entries: ContentEntry[] = [
           "productsDelivered": "Factory Area (Acres)"
         },
         "cta": {
-          "title": "Partner With Pipe Bending Experts",
-          "description": "Whether you need bending machines, custom molds, or finished fittings, our team is ready to discuss your project.",
+          "title": "Partner With a PVC Conduit Fittings Factory",
+          "description": "Whether you need custom molds, sample review, or finished fittings, our team is ready to discuss your project.",
           "button": "Request Quote"
         }
       },
@@ -119,7 +119,7 @@ const _entries: ContentEntry[] = [
         }
       ]
     },
-    "content": "\n## Who We Are\n\nTianze Pipe is a manufacturer focused on **PVC conduit fittings**, **pipe\nprocessing equipment**, and **PETG pneumatic tube systems**. Our advantage is\nsimple: we do not only sell pipe products, we also build the machines and molds\nbehind them.\n\nThat upstream control lets us respond faster on tooling, keep quality more\nstable, and support custom projects that are hard for pure traders to handle.\n\n## What We Make\n\n### PVC Conduit Fittings and Pipes\n\nWe produce conduit bends, straight pipes, couplings, bell ends, double-socket\nparts, and related fittings for multiple market standards.\n\n### Pipe Processing Equipment\n\nOur team develops and manufactures semi-automatic and fully automatic pipe\nbending machines, pipe expanders, cutters, and molds used in our own production\nworkflow.\n\n### PETG Pneumatic Tube Systems\n\nWe also supply high-transparency pneumatic tube products for hospital and\nlogistics applications, including straight tubes, bends, and connectors.\n\n## Why Buyers Work With Tianze\n\n### Equipment + Process + Fittings in One Chain\n\nBecause we understand the forming process from the equipment side, we can move\nfaster on difficult specifications, tooling changes, and production setup.\n\n### Flexible OEM and Custom Support\n\nWe support customer specifications, private label packaging, bend development,\nand pilot sample work before larger production.\n\n### Stable Export Supply\n\nTianze currently serves buyers in **20+ countries** with a focus on electrical\nconduit and industrial pipe applications.\n\n## Company Snapshot\n\n- **Operations started:** 2018\n- **Formal registration:** 2023\n- **Team size:** 60 employees\n- **Factory footprint:** 100 mu\n- **Certification:** ISO 9001:2015\n\n## How We Work\n\n### 1. Understand the Requirement\n\nWe review the application, standard, bend form, diameter range, and packaging\nrequirement before proposing a solution.\n\n### 2. Confirm Feasibility and Tooling\n\nFor standard products, we match existing production capability. For custom\nparts, we review tooling, mold, and process requirements first.\n\n### 3. Sample and Production\n\nAfter sample confirmation, we move into stable production with batch control and\ndelivery planning.\n\n## What We Care About\n\n- Practical communication\n- Fast response on technical questions\n- Honest feasibility feedback\n- Quality consistency in repeat orders\n\n## Contact\n\nIf you are sourcing conduit fittings, pipe processing equipment, or pneumatic\ntube products, contact us with your drawing, target market, or product list.\n\n- **Email:** sales@tianze-pipe.com\n- **Website:** https://tianze-pipe.com\n\n_Built for buyers who care about process control, not just unit price._\n"
+    "content": "\n## Who We Are\n\nTianze Pipe is a manufacturer focused on **PVC conduit fittings**, **PVC conduit\nsystems**, and **PETG pneumatic tube products**. Our advantage is practical: we\nkeep forming setup, mold work, and production control inside the factory.\n\nThat upstream control lets us respond faster on tooling, keep quality more\nstable, and support custom projects that are hard for pure traders to handle.\n\n## What We Make\n\n### PVC Conduit Fittings and Pipes\n\nWe produce conduit bends, straight pipes, couplings, bell ends, double-socket\nparts, and related fittings for multiple market standards.\n\n### In-House Forming and Tooling\n\nOur team prepares forming processes, custom molds, expanders, cutters, and\nproduction fixtures used in our own conduit fittings workflow.\n\n### PETG Pneumatic Tube Systems\n\nWe also supply high-transparency pneumatic tube products for hospital and\nlogistics applications, including straight tubes, bends, and connectors.\n\n## Why Buyers Work With Tianze\n\n### Process + Tooling + Fittings in One Chain\n\nBecause we control forming setup and tooling inside the factory, we can move\nfaster on difficult specifications, mold changes, and production setup.\n\n### Flexible OEM and Custom Support\n\nWe support customer specifications, private label packaging, bend development,\nand pilot sample work before larger production.\n\n### Stable Export Supply\n\nTianze currently serves buyers in **20+ countries** with a focus on electrical\nconduit and industrial pipe applications.\n\n## Company Snapshot\n\n- **Operations started:** 2018\n- **Formal registration:** 2023\n- **Team size:** 60 employees\n- **Factory footprint:** 100 mu\n- **Certification:** ISO 9001:2015\n\n## How We Work\n\n### 1. Understand the Requirement\n\nWe review the application, standard, bend form, diameter range, and packaging\nrequirement before proposing a solution.\n\n### 2. Confirm Feasibility and Tooling\n\nFor standard products, we match existing production capability. For custom\nparts, we review tooling, mold, and process requirements first.\n\n### 3. Sample and Production\n\nAfter sample confirmation, we move into stable production with batch control and\ndelivery planning.\n\n## What We Care About\n\n- Practical communication\n- Fast response on technical questions\n- Honest feasibility feedback\n- Quality consistency in repeat orders\n\n## Contact\n\nIf you are sourcing conduit fittings, custom molds, or pneumatic tube products,\ncontact us with your drawing, target market, or product list.\n\n- **Email:** sales@tianze-pipe.com\n- **Website:** https://tianze-pipe.com\n\n_Built for buyers who care about process control, not just unit price._\n"
   },
   {
     "type": "pages",
@@ -169,7 +169,7 @@ const _entries: ContentEntry[] = [
         }
       ]
     },
-    "content": "\n## Get in Touch\n\nHave questions about our PVC conduit fittings or bending machines? Our\ninternational sales team responds within 24 business hours.\n\n## Response Expectations\n\n- **Email inquiries**: Response within 24 hours on business days\n- **Quote requests**: Detailed quotation within 48 hours\n- **Technical questions**: Our engineering team will respond within 2 business days\n- **Sample requests**: Confirmation and shipping details within 3 business days\n"
+    "content": "\n## Get in Touch\n\nHave questions about our PVC conduit fittings, PETG pneumatic tube products, or\nOEM manufacturing support? Our international sales team responds within 24\nbusiness hours.\n\n## Response Expectations\n\n- **Email inquiries**: Response within 24 hours on business days\n- **Quote requests**: Detailed quotation within 48 hours\n- **Technical questions**: Our engineering team will respond within 2 business days\n- **Sample requests**: Confirmation and shipping details within 3 business days\n"
   },
   {
     "type": "pages",
@@ -297,7 +297,7 @@ const _entries: ContentEntry[] = [
     "metadata": {
       "locale": "zh",
       "title": "关于 Tianze Pipe",
-      "description": "了解天泽如何把弯管设备能力、管件制造能力和 OEM 灵活性结合在一起，服务全球 B2B 客户。",
+      "description": "了解天泽如何把电工套管配件制造、内部模具能力和 OEM 灵活性结合在一起，服务全球 B2B 客户。",
       "slug": "about",
       "publishedAt": "2024-01-10",
       "updatedAt": "2026-04-01",
@@ -307,15 +307,15 @@ const _entries: ContentEntry[] = [
       "lastReviewed": "2026-04-01",
       "draft": false,
       "heroTitle": "关于 Tianze Pipe",
-      "heroSubtitle": "弯管制造专家",
-      "heroDescription": "我们把弯管设备能力、管件制造能力和 OEM 灵活性结合在一起，从连云港工厂服务全球 B2B 客户。",
+      "heroSubtitle": "PVC 电工套管配件制造商",
+      "heroDescription": "我们把电工套管配件制造、内部成型工艺、模具能力和 OEM 灵活性结合在一起，从连云港工厂服务全球 B2B 客户。",
       "seo": {
         "title": "关于 Tianze Pipe",
-        "description": "天泽专注于 PVC 电工套管、PETG 气动物流管以及管材加工设备，核心优势来自自主弯管设备与模具能力。",
+        "description": "天泽专注于 PVC 电工套管系统、PETG 气动物流管和 OEM 电工套管配件制造，工厂内部具备成型工艺与模具能力。",
         "keywords": [
           "天泽管业",
           "PVC 电工套管",
-          "弯管机",
+          "PVC 电工套管配件",
           "PETG 气动物流管"
         ],
         "ogImage": "/images/about-og.jpg"
@@ -329,7 +329,7 @@ const _entries: ContentEntry[] = [
           },
           "innovation": {
             "title": "自主研发",
-            "description": "从弯管机到定制模具，关键生产能力在工厂内部沉淀，方便快速响应规格变化。"
+            "description": "从成型工艺到定制模具，关键生产能力在工厂内部沉淀，方便快速响应规格变化。"
           },
           "service": {
             "title": "技术支持",
@@ -347,8 +347,8 @@ const _entries: ContentEntry[] = [
           "productsDelivered": "工厂面积（亩）"
         },
         "cta": {
-          "title": "与弯管专家合作",
-          "description": "无论您需要弯管设备、定制模具还是成品管件，我们都可以根据项目需求继续沟通。",
+          "title": "与 PVC 电工套管配件工厂合作",
+          "description": "无论您需要定制模具、样品确认还是成品管件，我们都可以根据项目需求继续沟通。",
           "button": "获取报价"
         }
       },
@@ -380,7 +380,7 @@ const _entries: ContentEntry[] = [
         }
       ]
     },
-    "content": "\n## 我们是谁\n\nTianze Pipe 专注于 **PVC 电工套管配件**、**管材加工设备** 和\n**PETG 气动物流管系统**。我们的核心差异不只是卖产品，而是我们也掌握这些产品背后的弯管设备、模具和工艺。\n\n这种上游能力让我们在非标规格、模具开发、打样速度和量产稳定性上，比单纯贸易型供应商更有主动权。\n\n## 我们做什么\n\n### PVC 电工套管及配件\n\n我们提供直管、弯头、接头、扩口、双承口等电工套管产品，覆盖多个市场标准。\n\n### 管材加工设备\n\n我们自主研发和制造半自动、全自动弯管机、扩管机、切管机以及配套模具，并将这些能力直接用于自身生产体系。\n\n### PETG 气动物流管系统\n\n我们同时供应用于医院与物流场景的高透明 PETG 气动物流管、弯管和连接件。\n\n## 为什么客户会选择天泽\n\n### 设备、工艺、管件同链路控制\n\n因为我们理解产品成型过程本身，所以在复杂规格、模具调整和产线切换上响应更快。\n\n### OEM 与非标定制更灵活\n\n我们支持客户规格定制、贴牌包装、定向开发弯头和样品测试，再进入批量交付。\n\n### 稳定出口供货\n\n天泽目前服务 **20+ 国家** 的 B2B 客户，重点面向电工套管和工业管材应用场景。\n\n## 公司概况\n\n- **开始运营：** 2018 年\n- **正式注册：** 2023 年\n- **团队规模：** 60 人\n- **厂区面积：** 100 亩\n- **体系认证：** ISO 9001:2015\n\n## 我们如何合作\n\n### 1. 先确认需求\n\n先确认应用场景、目标标准、弯头形式、尺寸范围和包装要求，再判断最合适的供货方式。\n\n### 2. 再确认工艺和模具\n\n标准产品直接匹配现有产能；非标项目先做模具和工艺可行性评估，再进入样品阶段。\n\n### 3. 样品确认后进入量产\n\n样品确认后，我们再安排稳定生产、批次管控和交期计划。\n\n## 我们重视什么\n\n- 实事求是的沟通\n- 快速响应技术问题\n- 明确告知可行与不可行\n- 重复订单中的品质一致性\n\n## 联系我们\n\n如果您正在采购电工套管配件、弯管设备或气动物流管产品，欢迎直接带着图纸、目标市场或产品清单联系天泽。\n\n- **邮箱：** sales@tianze-pipe.com\n- **官网：** https://tianze-pipe.com\n\n_适合那些真正关心工艺和稳定交付，而不只看单价的采购项目。_\n"
+    "content": "\n## 我们是谁\n\nTianze Pipe 专注于 **PVC 电工套管配件**、**PVC 电工套管系统** 和\n**PETG 气动物流管产品**。我们的核心差异是把成型工艺、模具开发和生产管控留在工厂内部。\n\n这种上游能力让我们在非标规格、模具开发、打样速度和量产稳定性上，比单纯贸易型供应商更有主动权。\n\n## 我们做什么\n\n### PVC 电工套管及配件\n\n我们提供直管、弯头、接头、扩口、双承口等电工套管产品，覆盖多个市场标准。\n\n### 内部成型和模具能力\n\n我们在内部完成成型工艺准备、定制模具、扩口、切管和生产工装，并将这些能力直接用于自身管件生产体系。\n\n### PETG 气动物流管系统\n\n我们同时供应用于医院与物流场景的高透明 PETG 气动物流管、弯管和连接件。\n\n## 为什么客户会选择天泽\n\n### 工艺、模具、管件同链路控制\n\n因为成型准备和模具调整都在工厂内部完成，所以在复杂规格、模具调整和产线切换上响应更快。\n\n### OEM 与非标定制更灵活\n\n我们支持客户规格定制、贴牌包装、定向开发弯头和样品测试，再进入批量交付。\n\n### 稳定出口供货\n\n天泽目前服务 **20+ 国家** 的 B2B 客户，重点面向电工套管和工业管材应用场景。\n\n## 公司概况\n\n- **开始运营：** 2018 年\n- **正式注册：** 2023 年\n- **团队规模：** 60 人\n- **厂区面积：** 100 亩\n- **体系认证：** ISO 9001:2015\n\n## 我们如何合作\n\n### 1. 先确认需求\n\n先确认应用场景、目标标准、弯头形式、尺寸范围和包装要求，再判断最合适的供货方式。\n\n### 2. 再确认工艺和模具\n\n标准产品直接匹配现有产能；非标项目先做模具和工艺可行性评估，再进入样品阶段。\n\n### 3. 样品确认后进入量产\n\n样品确认后，我们再安排稳定生产、批次管控和交期计划。\n\n## 我们重视什么\n\n- 实事求是的沟通\n- 快速响应技术问题\n- 明确告知可行与不可行\n- 重复订单中的品质一致性\n\n## 联系我们\n\n如果您正在采购电工套管配件、定制模具或气动物流管产品，欢迎直接带着图纸、目标市场或产品清单联系天泽。\n\n- **邮箱：** sales@tianze-pipe.com\n- **官网：** https://tianze-pipe.com\n\n_适合那些真正关心工艺和稳定交付，而不只看单价的采购项目。_\n"
   },
   {
     "type": "pages",
@@ -430,7 +430,7 @@ const _entries: ContentEntry[] = [
         }
       ]
     },
-    "content": "\n## 联系方式\n\n如果您正在了解 PVC 电工套管配件或弯管设备，欢迎直接联系。我们的外贸\n销售团队通常会在 24 个工作小时内回复。\n\n## 响应预期\n\n- **邮件咨询**：工作日 24 小时内回复\n- **报价请求**：48 小时内提供详细报价\n- **技术问题**：工程团队会在 2 个工作日内回复\n- **样品请求**：3 个工作日内确认样品和发货安排\n"
+    "content": "\n## 联系方式\n\n如果您正在了解 PVC 电工套管配件、PETG 气动物流管产品或 OEM 制造支持，\n欢迎直接联系。我们的外贸销售团队通常会在 24 个工作小时内回复。\n\n## 响应预期\n\n- **邮件咨询**：工作日 24 小时内回复\n- **报价请求**：48 小时内提供详细报价\n- **技术问题**：工程团队会在 2 个工作日内回复\n- **样品请求**：3 个工作日内确认样品和发货安排\n"
   },
   {
     "type": "pages",

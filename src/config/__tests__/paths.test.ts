@@ -149,7 +149,7 @@ describe("paths configuration", () => {
 
     it("should have basic site information", () => {
       expect(SITE_CONFIG.name).toBe("Tianze Pipe");
-      expect(SITE_CONFIG.description).toContain("Pipe Bending Experts");
+      expect(SITE_CONFIG.description).toContain("PVC Conduit Fittings");
     });
 
     it("should use environment variable for baseUrl", () => {
