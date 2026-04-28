@@ -19,6 +19,9 @@ vi.stubEnv("NODE_ENV", "test");
 vi.stubEnv("APP_ENV", "local");
 vi.stubEnv("NEXT_PUBLIC_BASE_URL", "https://example.com");
 vi.stubEnv("NEXT_PUBLIC_VERCEL_URL", "example.vercel.app");
+vi.stubEnv("NEXT_PUBLIC_TURNSTILE_SITE_KEY", "test-site-key-12345");
+vi.stubEnv("NEXT_PUBLIC_DEPLOYMENT_PLATFORM", "vercel");
+vi.stubEnv("NEXT_PUBLIC_TEST_MODE", "false");
 
 // Suppress info/debug logs in tests - only warn and error are output
 vi.stubEnv("LOG_LEVEL", "warn");

@@ -142,10 +142,9 @@ function CenterNav({
 
   return (
     <nav
-      className="header-nav-center notranslate"
+      className="header-nav-center"
       aria-label={NAVIGATION_ARIA.mainNav}
       data-testid="header-desktop-nav"
-      translate="no"
     >
       <ul className="header-desktop-only items-center gap-1">
         {mainNavItems.map((item) => (
@@ -153,7 +152,6 @@ function CenterNav({
             <Link
               href={item.href as "/"}
               prefetch={false}
-              translate="no"
               className={cn(
                 "relative inline-flex items-center rounded-full bg-transparent px-3 py-2 text-sm font-medium tracking-[0.01em]",
                 "text-muted-foreground hover:text-foreground",
@@ -211,8 +209,6 @@ function HeaderUtilityControls({
               href={SINGLE_SITE_HOME_LINK_TARGETS.contact}
               prefetch={false}
               data-testid="header-cta"
-              className="notranslate"
-              translate="no"
             >
               <span data-testid="header-contact-sales-label" translate="no">
                 {contactSalesLabel}

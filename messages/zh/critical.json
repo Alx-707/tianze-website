@@ -953,6 +953,9 @@
         "heading": "需要{marketLabel}电工套管配件？",
         "description": "获取报价或咨询规格、起订量和交期。",
         "button": "获取报价"
+      },
+      "familyInquiry": {
+        "cta": "咨询 {familyLabel}"
       }
     },
     "specTable": {

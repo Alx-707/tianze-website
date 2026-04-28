@@ -8,14 +8,14 @@ const traverse = require("@babel/traverse").default;
 const ROOT = process.cwd();
 const REPORT_DIR = path.join(ROOT, "reports", "translation-compat");
 
-const PROTECTED_SURFACE_RULES = [
+const TRANSLATION_LEAF_RULES = [
   {
-    file: "src/app/[locale]/contact/page.tsx",
-    markers: ["contact-page-content", "notranslate", 'translate="no"'],
+    file: "src/app/[locale]/contact/contact-form-static-fallback.tsx",
+    markers: ["data-contact-form-fallback", 'translate="no"'],
   },
   {
-    file: "src/app/[locale]/products/[market]/page.tsx",
-    markers: ["market-page-content", "notranslate", 'translate="no"'],
+    file: "src/components/contact/product-family-context-notice.tsx",
+    markers: ["product-family-context-notice", 'translate="no"'],
   },
   {
     file: "src/components/language-toggle.tsx",
@@ -31,6 +31,7 @@ const PROTECTED_SURFACE_RULES = [
     markers: [
       "mobile-language-switcher",
       "mobile-language-switcher-label",
+      "mobile-language-option-label-",
       'translate="no"',
     ],
   },
@@ -115,7 +116,7 @@ const PROTECTED_SURFACE_RULES = [
   },
 ];
 
-const RISK_SCAN_FILES = PROTECTED_SURFACE_RULES.map((rule) => rule.file).filter(
+const RISK_SCAN_FILES = TRANSLATION_LEAF_RULES.map((rule) => rule.file).filter(
   (file) => file.endsWith(".tsx"),
 );
 
@@ -341,6 +342,44 @@ function hasLiteralAttribute(openingElement, name, value) {
   });
 }
 
+function getAttributeStringValues(attribute) {
+  if (attribute.value?.type === "StringLiteral") {
+    return [attribute.value.value];
+  }
+
+  if (attribute.value?.type !== "JSXExpressionContainer") {
+    return [];
+  }
+
+  const expression = unwrapExpression(attribute.value.expression);
+
+  if (expression?.type === "StringLiteral") {
+    return [expression.value];
+  }
+
+  if (expression?.type === "TemplateLiteral") {
+    return expression.quasis
+      .map((quasi) => quasi.value.cooked)
+      .filter((value) => typeof value === "string" && value.length > 0);
+  }
+
+  return [];
+}
+
+function getAttributeValues(openingElement, name) {
+  return openingElement.attributes.flatMap((attribute) => {
+    if (
+      attribute.type !== "JSXAttribute" ||
+      attribute.name?.type !== "JSXIdentifier" ||
+      attribute.name.name !== name
+    ) {
+      return [];
+    }
+
+    return getAttributeStringValues(attribute);
+  });
+}
+
 function hasNotranslateClass(openingElement) {
   return openingElement.attributes.some((attribute) => {
     if (
@@ -377,6 +416,10 @@ function hasProtectedAncestor(pathRef) {
   }
 
   return false;
+}
+
+function hasTranslateNo(openingElement) {
+  return hasLiteralAttribute(openingElement, "translate", "no");
 }
 
 function collectRiskFindingsFromSource(source, repoPath) {
@@ -477,6 +520,7 @@ function collectMarkerTokensFromSource(source) {
       }
 
       const attributeName = attribute.name.name;
+      tokens.add(attributeName);
 
       if (attribute.value?.type === "StringLiteral") {
         tokens.add(attribute.value.value);
@@ -521,6 +565,31 @@ function collectMarkerTokensFromSource(source) {
   return tokens;
 }
 
+function collectProtectedLeavesFromSource(source) {
+  const ast = parser.parse(source, {
+    sourceType: "module",
+    plugins: ["typescript", "jsx"],
+  });
+
+  const leaves = [];
+
+  traverse(ast, {
+    JSXElement(elementPath) {
+      const openingElement = elementPath.node.openingElement;
+      const testIds = getAttributeValues(openingElement, "data-testid");
+
+      for (const testId of testIds) {
+        leaves.push({
+          testId,
+          translateNo: hasTranslateNo(openingElement),
+        });
+      }
+    },
+  });
+
+  return leaves;
+}
+
 function markerMatchesToken(marker, token) {
   if (!token) {
     return false;
@@ -543,8 +612,55 @@ function markerMatchesToken(marker, token) {
 
 function collectMissingMarkersFromSource(source, repoPath, markers) {
   const tokens = collectMarkerTokensFromSource(source);
+  const protectedLeaves = collectProtectedLeavesFromSource(source);
+  const leafMarkers = markers.filter((marker) => marker.endsWith("-"));
+  const leafTranslationFailures = new Set();
 
   return markers.flatMap((marker) => {
+    if (marker.endsWith("-")) {
+      const matchedLeaves = protectedLeaves.filter((leaf) =>
+        leaf.testId.startsWith(marker),
+      );
+
+      if (matchedLeaves.length === 0) {
+        return [
+          {
+            file: repoPath,
+            marker,
+            message:
+              "Protected translation compatibility marker is missing from a guarded surface.",
+          },
+        ];
+      }
+
+      if (matchedLeaves.some((leaf) => !leaf.translateNo)) {
+        leafTranslationFailures.add(marker);
+        return [
+          {
+            file: repoPath,
+            marker: 'translate="no"',
+            message:
+              'Protected translation leaf marker exists but is missing translate="no" on the same JSX element.',
+          },
+        ];
+      }
+
+      return [];
+    }
+
+    if (
+      marker === 'translate="no"' &&
+      leafMarkers.length > 0 &&
+      leafTranslationFailures.size === 0 &&
+      leafMarkers.every((leafMarker) =>
+        protectedLeaves.some(
+          (leaf) => leaf.testId.startsWith(leafMarker) && leaf.translateNo,
+        ),
+      )
+    ) {
+      return [];
+    }
+
     const present = Array.from(tokens).some((token) =>
       markerMatchesToken(marker, token),
     );
@@ -584,7 +700,7 @@ function scanForRiskPatterns(repoPath) {
 function collectMissingMarkers() {
   const missing = [];
 
-  for (const rule of PROTECTED_SURFACE_RULES) {
+  for (const rule of TRANSLATION_LEAF_RULES) {
     const source = readFile(rule.file);
     if (source === null) {
       missing.push({

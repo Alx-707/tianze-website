@@ -10,7 +10,7 @@ import {
 } from "@/lib/accessibility-types";
 import { checkContrastCompliance, type OKLCHColor } from "@/lib/colors";
 import { logger } from "@/lib/logger";
-import { COUNT_THREE, ONE, ZERO } from "@/constants";
+import { COUNT_THREE } from "@/constants";
 import { OPACITY_CONSTANTS } from "@/constants/app-constants";
 
 /**
@@ -172,7 +172,7 @@ export class AccessibilityUtils {
       return null;
     }
 
-    const content = trimmed.slice(OKLCH_PREFIX_LENGTH, -ONE); // 移除 'oklch(' 和 ')'
+    const content = trimmed.slice(OKLCH_PREFIX_LENGTH, -1); // 移除 'oklch(' 和 ')'
     // Use safe string splitting instead of regex to avoid ReDoS attacks
     const parts = content.split(" ").filter((part) => part.trim() !== "");
 
@@ -184,13 +184,13 @@ export class AccessibilityUtils {
     // 安全地获取alpha值，使用at方法避免对象注入
     const alphaPart = parts.at(MIN_OKLCH_PARTS);
     const alphaValue =
-      alphaPart && alphaPart.startsWith("/") ? alphaPart.slice(ONE) : undefined;
+      alphaPart && alphaPart.startsWith("/") ? alphaPart.slice(1) : undefined;
 
     return {
-      l: lValue ? parseFloat(lValue) : ZERO,
-      c: cValue ? parseFloat(cValue) : ZERO,
-      h: hValue ? parseFloat(hValue) : ZERO,
-      alpha: alphaValue ? parseFloat(alphaValue) : ONE,
+      l: lValue ? parseFloat(lValue) : 0,
+      c: cValue ? parseFloat(cValue) : 0,
+      h: hValue ? parseFloat(hValue) : 0,
+      alpha: alphaValue ? parseFloat(alphaValue) : 1,
     };
   }
 
@@ -216,18 +216,18 @@ export class AccessibilityUtils {
       case "white":
       case "#ffffff":
       case "#fff":
-        return { l: ONE, c: ZERO, h: ZERO, alpha: ONE };
+        return { l: 1, c: 0, h: 0, alpha: 1 };
       case "black":
       case "#000000":
       case "#000":
-        return { l: ZERO, c: ZERO, h: ZERO, alpha: ONE };
+        return { l: 0, c: 0, h: 0, alpha: 1 };
       default:
         // 默认返回中等灰色
         return {
           l: OPACITY_CONSTANTS.MEDIUM_OPACITY,
-          c: ZERO,
-          h: ZERO,
-          alpha: ONE,
+          c: 0,
+          h: 0,
+          alpha: 1,
         };
     }
   }

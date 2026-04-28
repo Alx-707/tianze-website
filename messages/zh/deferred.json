@@ -60,6 +60,9 @@
     }
   },
   "contact": {
+    "context": {
+      "productFamilyLabel": "你正在咨询："
+    },
     "title": "联系我们",
     "description": "联系我们的团队进行咨询、支持或合作机会。",
     "features": "多种联系方式，获得您需要的支持",

@@ -29,6 +29,29 @@ vi.mock("next/image", () => ({
   ),
 }));
 
+vi.mock("@/i18n/routing", () => ({
+  Link: ({
+    href,
+    children,
+    className,
+  }: {
+    href: string | { pathname: string; query?: Record<string, string> };
+    children: React.ReactNode;
+    className?: string;
+  }) => {
+    const resolvedHref =
+      typeof href === "string"
+        ? href
+        : `${href.pathname}?${new URLSearchParams(href.query)}`;
+
+    return (
+      <a href={resolvedHref} className={className}>
+        {children}
+      </a>
+    );
+  },
+}));
+
 // Mock SpecTable to keep tests focused on FamilySection behavior
 vi.mock("../spec-table", () => ({
   SpecTable: ({ specGroups }: { specGroups: unknown[] }) => (
@@ -157,6 +180,38 @@ describe("Feature: Market Family Page — Product Family Section", () => {
 
       const section = container.querySelector("section#conduit-sweeps-elbows");
       expect(section).toBeInTheDocument();
+    });
+
+    it("renders an optional inquiry CTA", async () => {
+      const FamilySection = await importComponent();
+      render(
+        <FamilySection
+          family={mockFamily}
+          specs={mockSpecs}
+          familyLabel="Conduit Sweeps & Elbows"
+          familyDescription="PVC conduit sweeps and elbows in standard angles."
+          inquiry={{
+            href: {
+              pathname: "/contact",
+              query: {
+                intent: "product-family",
+                market: "north-america",
+                family: "conduit-sweeps-elbows",
+              },
+            },
+            label: "Request quote for Conduit Sweeps & Elbows",
+          }}
+        />,
+      );
+
+      expect(
+        screen.getByRole("link", {
+          name: "Request quote for Conduit Sweeps & Elbows",
+        }),
+      ).toHaveAttribute(
+        "href",
+        "/contact?intent=product-family&market=north-america&family=conduit-sweeps-elbows",
+      );
     });
   });
 });

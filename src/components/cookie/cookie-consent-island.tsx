@@ -2,7 +2,7 @@
 
 import { Suspense } from "react";
 import { CookieConsentProvider } from "@/lib/cookie-consent";
-import { isRuntimeProduction } from "@/lib/env";
+import { isPublicRuntimeProduction } from "@/lib/public-env";
 import { LazyCookieBanner } from "@/components/cookie/lazy-cookie-banner";
 import { EnterpriseAnalyticsIsland } from "@/components/monitoring/enterprise-analytics-island";
 
@@ -17,7 +17,7 @@ import { EnterpriseAnalyticsIsland } from "@/components/monitoring/enterprise-an
  * - EnterpriseAnalyticsIsland: conditionally loads analytics based on consent
  */
 export function CookieConsentIsland() {
-  const isProd = isRuntimeProduction();
+  const isProd = isPublicRuntimeProduction();
 
   return (
     <CookieConsentProvider>

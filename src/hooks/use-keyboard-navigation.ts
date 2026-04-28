@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
-import { ONE, ZERO } from "@/constants";
 
 export interface KeyboardNavigationOptions {
   enabled?: boolean;
@@ -106,7 +105,7 @@ function handleTabKey(args: {
   const direction = event.shiftKey ? "previous" : "next";
   const elements = getFocusableElements();
   const currentIndex = getCurrentFocusIndex();
-  const indexDelta = event.shiftKey ? -ONE : ONE;
+  const indexDelta = event.shiftKey ? -1 : 1;
   const targetIndex = currentIndex + indexDelta;
 
   // 使用 Array.prototype.at 进行安全索引，避免触发对象注入类规则
@@ -143,7 +142,7 @@ function useFocusManagement(
     (index: number): void => {
       const elements = getFocusableElements();
       // 安全的数组访问，避免对象注入
-      if (index >= ZERO && index < elements.length && Array.isArray(elements)) {
+      if (index >= 0 && index < elements.length && Array.isArray(elements)) {
         const element = elements.at(index);
         if (element) {
           element.focus();
@@ -173,21 +172,21 @@ function useNavigationActions(args: {
   const { getFocusableElements, getCurrentFocusIndex, setFocusIndex, config } =
     args;
   const focusFirst = useCallback((): void => {
-    setFocusIndex(ZERO);
+    setFocusIndex(0);
   }, [setFocusIndex]);
 
   const focusLast = useCallback((): void => {
     const elements = getFocusableElements();
-    setFocusIndex(elements.length - ONE);
+    setFocusIndex(elements.length - 1);
   }, [getFocusableElements, setFocusIndex]);
 
   const focusNext = useCallback((): void => {
     const elements = getFocusableElements();
     const currentIndex = getCurrentFocusIndex();
-    let nextIndex = currentIndex + ONE;
+    let nextIndex = currentIndex + 1;
 
     if (nextIndex >= elements.length) {
-      nextIndex = config.loop ? ZERO : elements.length - ONE;
+      nextIndex = config.loop ? 0 : elements.length - 1;
     }
 
     setFocusIndex(nextIndex);
@@ -196,10 +195,10 @@ function useNavigationActions(args: {
   const focusPrevious = useCallback((): void => {
     const elements = getFocusableElements();
     const currentIndex = getCurrentFocusIndex();
-    let prevIndex = currentIndex - ONE;
+    let prevIndex = currentIndex - 1;
 
-    if (prevIndex < ZERO) {
-      prevIndex = config.loop ? elements.length - ONE : ZERO;
+    if (prevIndex < 0) {
+      prevIndex = config.loop ? elements.length - 1 : 0;
     }
 
     setFocusIndex(prevIndex);

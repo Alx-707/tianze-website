@@ -225,8 +225,8 @@ describe("VercelNavigation", () => {
 
       const nav = screen.getByTestId("vercel-navigation-root");
       expect(nav).toHaveClass("header-desktop-only");
-      expect(nav).toHaveClass("notranslate");
-      expect(nav).toHaveAttribute("translate", "no");
+      expect(nav).not.toHaveClass("notranslate");
+      expect(nav).not.toHaveAttribute("translate", "no");
     });
   });
 
@@ -270,7 +270,7 @@ describe("VercelNavigation", () => {
       const trigger = screen.getByTestId("navigation-menu-trigger");
       expect(trigger).toBeInTheDocument();
       expect(trigger).toHaveTextContent("Products");
-      expect(trigger).toHaveAttribute("translate", "no");
+      expect(trigger).not.toHaveAttribute("translate", "no");
       expect(
         screen.getByTestId("vercel-navigation-trigger-label-products"),
       ).toHaveAttribute("translate", "no");

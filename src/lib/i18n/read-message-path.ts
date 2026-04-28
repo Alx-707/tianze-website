@@ -1,10 +1,10 @@
 export type MessageRecord = Record<string, unknown>;
 
-export function readMessagePath(
-  messages: MessageRecord,
-  path: readonly string[],
-  fallback: string,
-): string {
+function formatMessagePath(path: readonly string[]): string {
+  return path.join(".");
+}
+
+function readPathValue(messages: MessageRecord, path: readonly string[]) {
   let current: unknown = messages;
 
   for (const segment of path) {
@@ -13,11 +13,34 @@ export function readMessagePath(
       current === null ||
       !(segment in current)
     ) {
-      return fallback;
+      return undefined;
     }
 
     current = (current as Record<string, unknown>)[segment];
   }
 
-  return typeof current === "string" ? current : fallback;
+  return current;
+}
+
+export function readMessagePath(
+  messages: MessageRecord,
+  path: readonly string[],
+  fallback: string,
+): string {
+  const value = readPathValue(messages, path);
+
+  return typeof value === "string" ? value : fallback;
+}
+
+export function readRequiredMessagePath(
+  messages: MessageRecord,
+  path: readonly string[],
+): string {
+  const value = readPathValue(messages, path);
+
+  if (typeof value !== "string") {
+    throw new Error(`Missing required message: ${formatMessagePath(path)}`);
+  }
+
+  return value;
 }

@@ -148,7 +148,7 @@ describe("Header Integration Tests", () => {
       expect(screen.getByTestId("language-toggle")).toBeInTheDocument();
     });
 
-    it("should mark desktop navigation and CTA labels as notranslate", async () => {
+    it("should protect desktop navigation and CTA labels without broad wrappers", async () => {
       await renderAsyncComponent(
         Header({
           locale: "en",
@@ -156,10 +156,10 @@ describe("Header Integration Tests", () => {
         }),
       );
 
-      expect(screen.getByTestId("header-desktop-nav")).toHaveClass(
+      expect(screen.getByTestId("header-desktop-nav")).not.toHaveClass(
         "notranslate",
       );
-      expect(screen.getByTestId("header-desktop-nav")).toHaveAttribute(
+      expect(screen.getByTestId("header-desktop-nav")).not.toHaveAttribute(
         "translate",
         "no",
       );

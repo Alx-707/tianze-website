@@ -953,6 +953,9 @@
         "heading": "Need {marketLabel} conduit fittings?",
         "description": "Request a quote or ask about specifications, MOQ, and lead times.",
         "button": "Request a Quote"
+      },
+      "familyInquiry": {
+        "cta": "Request quote for {familyLabel}"
       }
     },
     "specTable": {

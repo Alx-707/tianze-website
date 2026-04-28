@@ -44,9 +44,8 @@ function DrawerProductHeader({
 }) {
   return (
     <div
-      className="notranslate flex items-start gap-4"
+      className="flex items-start gap-4"
       data-testid="inquiry-drawer-product-header"
-      translate="no"
     >
       {productImage && (
         <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-md border bg-muted">

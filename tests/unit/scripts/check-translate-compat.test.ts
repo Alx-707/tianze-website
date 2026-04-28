@@ -173,6 +173,47 @@ describe("check-translate-compat marker scanning", () => {
     expect(missing).toEqual([]);
   });
 
+  it("does not require broad container notranslate when leaf labels are protected", () => {
+    const missing = collectMissingMarkersFromSource(
+      `
+        export function Example() {
+          return (
+            <nav data-testid="header-desktop-nav">
+              <span data-testid="header-nav-label-products" translate="no">
+                Products
+              </span>
+            </nav>
+          );
+        }
+      `,
+      "src/components/layout/header.tsx",
+      ["header-nav-label-", 'translate="no"'],
+    );
+
+    expect(missing).toEqual([]);
+  });
+
+  it("does not let an unrelated translate guard satisfy a protected leaf label", () => {
+    const missing = collectMissingMarkersFromSource(
+      `
+        export function Example() {
+          return (
+            <nav data-testid="header-desktop-nav">
+              <span data-testid="header-nav-label-products">Products</span>
+              <span translate="no">Other protected copy</span>
+            </nav>
+          );
+        }
+      `,
+      "src/components/layout/header.tsx",
+      ["header-nav-label-", 'translate="no"'],
+    );
+
+    expect(missing).toEqual([
+      expect.objectContaining({ marker: 'translate="no"' }),
+    ]);
+  });
+
   it("requires FAQ markers to include the translation guard", () => {
     const missing = collectMissingMarkersFromSource(
       `
@@ -216,12 +257,18 @@ describe("check-translate-compat marker scanning", () => {
 });
 
 describe("check-translate-compat protected surface coverage", () => {
-  it("risk-scans protected page surfaces in src/app", () => {
+  it("risk-scans only pages that still have targeted translation protection contracts", () => {
     expect(RISK_SCAN_FILES).toEqual(
       expect.arrayContaining([
-        "src/app/[locale]/contact/page.tsx",
-        "src/app/[locale]/products/[market]/page.tsx",
+        "src/app/[locale]/contact/contact-form-static-fallback.tsx",
+        "src/components/contact/product-family-context-notice.tsx",
       ]),
+    );
+    expect(RISK_SCAN_FILES).not.toEqual(
+      expect.arrayContaining(["src/app/[locale]/contact/page.tsx"]),
+    );
+    expect(RISK_SCAN_FILES).not.toEqual(
+      expect.arrayContaining(["src/app/[locale]/products/[market]/page.tsx"]),
     );
   });
 

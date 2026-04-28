@@ -5,7 +5,7 @@ import {
   loadCompleteMessagesFromSource,
 } from "@/lib/load-messages";
 import { coerceLocale } from "@/i18n/locale-utils";
-import { COUNT_FIVE, ONE } from "@/constants";
+import { COUNT_FIVE } from "@/constants";
 
 // 辅助函数：获取格式配置
 function getFormats(locale: string) {
@@ -33,7 +33,7 @@ function getFormats(locale: string) {
       },
       percentage: {
         style: "percent" as const,
-        minimumFractionDigits: ONE,
+        minimumFractionDigits: 1,
       },
     },
     list: {

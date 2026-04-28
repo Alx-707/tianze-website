@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { parse } from "@babel/parser";
 import { describe, expect, it } from "vitest";
 
@@ -27,18 +27,38 @@ const CRITICAL_CACHE_POLICY_SOURCE_READERS = {
 } satisfies Record<(typeof CRITICAL_CACHE_POLICY_FILES)[number], () => string>;
 
 const CONTACT_PAGE_FILE = "src/app/[locale]/contact/page.tsx";
-const PRODUCT_MARKET_PAGE_FILE = "src/app/[locale]/products/[market]/page.tsx";
-const PRODUCT_MARKET_FAQ_HELPER = "getProductMarketFaqItems";
+const CONTACT_PAGE_DATA_FILE = "src/app/[locale]/contact/contact-page-data.ts";
+const PRODUCT_MARKET_SOURCE_FILES = [
+  "src/app/[locale]/products/[market]/page.tsx",
+  "src/app/[locale]/products/[market]/market-jsonld.ts",
+  "src/app/[locale]/products/[market]/market-page-data.ts",
+  "src/app/[locale]/products/[market]/market-page-sections.tsx",
+  "src/app/[locale]/products/[market]/market-spec-presenter.ts",
+] as const;
 const USE_CACHE_DIRECTIVE_PATTERN = /["'`]\s*use\s+cache\s*["'`]/i;
 const NEXT_CACHE_IMPORT_PATTERN = /from\s+["'`]\s*next\/cache\s*["'`]/i;
+const PRODUCT_MARKET_FAQ_HELPER = "getProductMarketFaqItems";
 const PRODUCT_MARKET_FAQ_HELPER_PATTERN = /\bgetProductMarketFaqItems\b/;
 const PRODUCT_MARKET_MDX_READ_PATTERN =
   /\bgetPageBySlug\s*\(\s*["'`]product-market["'`]/i;
 const FAQ_SCHEMA_TYPE = "FAQPage";
 const FAQ_SCHEMA_TYPE_PATTERN = /\bFAQPage\b/;
 
-function readProductMarketPageSource() {
-  return readFileSync(PRODUCT_MARKET_PAGE_FILE, "utf8");
+function readProductMarketSource(filePath: string) {
+  // eslint-disable-next-line security/detect-non-literal-fs-filename -- architecture test checks repo-local allowlisted files
+  if (!existsSync(filePath)) {
+    throw new Error(`Missing product market source file: ${filePath}`);
+  }
+
+  return {
+    filePath,
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- architecture test checks repo-local allowlisted files
+    source: readFileSync(filePath, "utf8"),
+  };
+}
+
+function readProductMarketSources() {
+  return PRODUCT_MARKET_SOURCE_FILES.map(readProductMarketSource);
 }
 
 type AstRecord = Record<string, unknown>;
@@ -190,32 +210,42 @@ describe("cache directive policy", () => {
     }
   });
 
-  it("keeps contact page on build-time static content without runtime cache invalidation", () => {
-    const source = readFileSync(CONTACT_PAGE_FILE, "utf8");
+  it("keeps contact static content loading in the page data module without runtime cache invalidation", () => {
+    const routeSource = readFileSync(CONTACT_PAGE_FILE, "utf8");
+    const dataSource = readFileSync(CONTACT_PAGE_DATA_FILE, "utf8");
 
-    expect(source).toContain(
+    expect(routeSource).not.toContain("CONTENT_MANIFEST");
+    expect(dataSource).toContain(
       'import { CONTENT_MANIFEST } from "@/lib/content-manifest.generated"',
     );
-    expect(source).not.toMatch(USE_CACHE_DIRECTIVE_PATTERN);
-    expect(source).not.toMatch(NEXT_CACHE_IMPORT_PATTERN);
-    expect(source).not.toContain("cacheTag(");
-    expect(source).not.toContain("revalidateTag(");
-    expect(source).not.toContain("revalidatePath(");
+
+    for (const source of [routeSource, dataSource]) {
+      expect(source).not.toMatch(USE_CACHE_DIRECTIVE_PATTERN);
+      expect(source).not.toMatch(NEXT_CACHE_IMPORT_PATTERN);
+      expect(source).not.toContain("cacheTag(");
+      expect(source).not.toContain("revalidateTag(");
+      expect(source).not.toContain("revalidatePath(");
+    }
   });
 
-  it("keeps product market pages free of shared FAQ cache boundaries", () => {
-    const source = readProductMarketPageSource();
-
-    expect(source).not.toMatch(USE_CACHE_DIRECTIVE_PATTERN);
-    expect(source).not.toMatch(NEXT_CACHE_IMPORT_PATTERN);
+  it("keeps product market route sources free of shared FAQ and cache workarounds", () => {
     expect(PRODUCT_MARKET_FAQ_HELPER).toMatch(
       PRODUCT_MARKET_FAQ_HELPER_PATTERN,
     );
-    expect(source).not.toMatch(PRODUCT_MARKET_FAQ_HELPER_PATTERN);
-    expect(source).not.toMatch(PRODUCT_MARKET_MDX_READ_PATTERN);
-    expect(source).not.toContain("<FaqSection");
-    expect(source).not.toContain("generateFaqSchemaFromItems");
     expect(FAQ_SCHEMA_TYPE).toMatch(FAQ_SCHEMA_TYPE_PATTERN);
-    expect(source).not.toMatch(FAQ_SCHEMA_TYPE_PATTERN);
+
+    for (const { filePath, source } of readProductMarketSources()) {
+      expect(source, filePath).not.toMatch(USE_CACHE_DIRECTIVE_PATTERN);
+      expect(source, filePath).not.toMatch(NEXT_CACHE_IMPORT_PATTERN);
+      expect(source, filePath).not.toMatch(PRODUCT_MARKET_FAQ_HELPER_PATTERN);
+      expect(source, filePath).not.toMatch(PRODUCT_MARKET_MDX_READ_PATTERN);
+      expect(source, filePath).not.toContain("<FaqSection");
+      expect(source, filePath).not.toContain("generateFaqSchemaFromItems");
+      expect(source, filePath).not.toMatch(FAQ_SCHEMA_TYPE_PATTERN);
+      expect(source, filePath).not.toContain("cacheLife(");
+      expect(source, filePath).not.toContain("cacheTag(");
+      expect(source, filePath).not.toContain("revalidateTag(");
+      expect(source, filePath).not.toContain("revalidatePath(");
+    }
   });
 });

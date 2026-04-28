@@ -1,6 +1,8 @@
 import Image from "next/image";
 import type { ProductFamilyDefinition } from "@/constants/product-catalog";
 import type { FamilySpecs } from "@/constants/product-specs/types";
+import { Link } from "@/i18n/routing";
+import type { LinkHref } from "@/lib/i18n/route-parsing";
 import { cn } from "@/lib/utils";
 import { SpecTable } from "@/components/products/spec-table";
 
@@ -9,6 +11,10 @@ export interface FamilySectionProps {
   specs: FamilySpecs;
   familyLabel: string;
   familyDescription: string;
+  inquiry?: {
+    href: LinkHref;
+    label: string;
+  };
   className?: string;
 }
 
@@ -17,6 +23,7 @@ export function FamilySection({
   specs,
   familyLabel,
   familyDescription,
+  inquiry,
   className,
 }: FamilySectionProps) {
   const firstImage = specs.images[0] ?? "/images/products/pvc-conduit-bend.svg";
@@ -57,6 +64,15 @@ export function FamilySection({
               </li>
             ))}
           </ul>
+
+          {inquiry ? (
+            <Link
+              href={inquiry.href}
+              className="inline-flex w-fit items-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            >
+              {inquiry.label}
+            </Link>
+          ) : null}
         </div>
       </div>
 

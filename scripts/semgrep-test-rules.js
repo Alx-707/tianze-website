@@ -27,6 +27,12 @@ const FILE_CONTRACT_FIXTURES = [
     target: "tests/semgrep/targets/src/app/api/subscribe/route.ts",
     expectedFindings: 0,
   },
+  {
+    ruleId: "object-injection-untrusted-key-write",
+    config: "tests/semgrep/rules/object-injection-untrusted-key-write.yaml",
+    target: "tests/semgrep/targets/object-injection-untrusted-key-write.ts",
+    expectedFindings: 3,
+  },
 ];
 
 function parseSemgrepJson(result, description) {

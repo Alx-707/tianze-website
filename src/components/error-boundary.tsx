@@ -11,7 +11,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ZERO } from "@/constants";
 
 interface ErrorBoundaryState {
   hasError: boolean;
@@ -106,7 +105,7 @@ function ErrorFallback({ onReset, error: _error }: ErrorFallbackProps) {
             variant="outline"
             className="gap-2"
             data-testid="error-boundary-button"
-            tabIndex={ZERO}
+            tabIndex={0}
           >
             <span className="h-4 w-4" data-testid="refresh-icon">
               🔄
