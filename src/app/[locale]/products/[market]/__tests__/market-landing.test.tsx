@@ -298,6 +298,14 @@ describe("Market Landing Page", () => {
     });
   });
 
+  describe("Scenario: Product market FAQ is not mounted", () => {
+    it("does not render a shared FAQ section on market pages", async () => {
+      await renderPage("north-america");
+
+      expect(screen.queryByTestId("faq-section")).not.toBeInTheDocument();
+    });
+  });
+
   describe("Scenario 1.10: Invalid market slug calls notFound", () => {
     it("calls notFound for invalid market slug", async () => {
       await expect(renderPage("invalid-market")).rejects.toThrow(

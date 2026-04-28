@@ -120,7 +120,7 @@ describe("Feature: Product Overview Page", () => {
     });
   });
 
-  describe("Scenario 2.2: Buyer sees specialty and equipment products", () => {
+  describe("Scenario 2.2: Buyer sees specialty products only", () => {
     it("renders a 'Specialty & Equipment' section heading", async () => {
       await renderAsyncComponent(
         ProductsPage({ params: Promise.resolve(mockParams) }),
@@ -139,16 +139,17 @@ describe("Feature: Product Overview Page", () => {
       ).toBeInTheDocument();
     });
 
-    it("equipment card links to /capabilities/bending-machines", async () => {
+    it("does not render a bending machines equipment card", async () => {
       await renderAsyncComponent(
         ProductsPage({ params: Promise.resolve(mockParams) }),
       );
 
-      // The equipment card is an <a> wrapping the equipment title
-      const equipmentHeading = screen.getByText("overview.equipmentTitle");
-      const link = equipmentHeading.closest("a");
-      expect(link).not.toBeNull();
-      expect(link).toHaveAttribute("href", "/capabilities/bending-machines");
+      expect(
+        screen.queryByText("overview.equipmentTitle"),
+      ).not.toBeInTheDocument();
+      expect(
+        document.querySelector('a[href="/capabilities/bending-machines"]'),
+      ).not.toBeInTheDocument();
     });
   });
 

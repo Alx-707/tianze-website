@@ -61,7 +61,6 @@ describe("FAQ locale parity", () => {
     "about",
     "contact",
     "oem-custom-manufacturing",
-    "bending-machines",
   ] as const;
 
   for (const slug of FAQ_PAGE_SLUGS) {

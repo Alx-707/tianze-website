@@ -16,7 +16,6 @@ import {
  * BC-005: 404 for invalid routes
  * BC-013: Products page shows market cards
  * BC-014: Market page shows product specs
- * BC-018: Bending machines page shows equipment specs
  * BC-020: All internal links point to real routes
  */
 
@@ -81,10 +80,6 @@ test.describe("Journey: Navigate All Pages (BC-002)", () => {
     {
       path: "/en/oem-custom-manufacturing",
       titlePattern: /OEM|Custom|Tianze/i,
-    },
-    {
-      path: "/en/capabilities/bending-machines",
-      titlePattern: /Bending|Machine|Tianze/i,
     },
     { path: "/en/privacy", titlePattern: /Privacy|Tianze/i },
     { path: "/en/terms", titlePattern: /Terms|Tianze/i },
@@ -173,22 +168,5 @@ test.describe("Journey: Language Parity (BC-003)", () => {
       const zhResponse = await page.goto(`/zh${path}`);
       expect(zhResponse?.status()).toBe(200);
     }
-  });
-});
-
-test.describe("Journey: Bending Machines Page (BC-018)", () => {
-  test("equipment page loads with specs content", async ({ page }) => {
-    const response = await page.goto("/en/capabilities/bending-machines");
-    expect(response?.status()).toBe(200);
-
-    // Should have a heading
-    const heading = page.locator("h1").first();
-    await expect(heading).toBeVisible({ timeout: 10_000 });
-
-    // Should have content sections with equipment info
-    const mainContent = page.locator("main").first();
-    await expect(mainContent).toBeVisible();
-    const textContent = await mainContent.textContent();
-    expect(textContent?.length).toBeGreaterThan(100); // Substantive content
   });
 });

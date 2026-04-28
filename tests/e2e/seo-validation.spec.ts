@@ -30,13 +30,7 @@ const KEY_PAGES = [
       "WebSite",
       "ProductGroup",
       "BreadcrumbList",
-      "FAQPage",
     ],
-  },
-  {
-    path: "/en/capabilities/bending-machines",
-    name: "Bending Machines",
-    expectedGraphTypes: ["Organization", "WebSite", "ItemList", "FAQPage"],
   },
   {
     path: "/en/contact",
