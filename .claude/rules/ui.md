@@ -33,6 +33,11 @@ Design values (spacing, color, typography) live in `src/app/globals.css`, not in
 
 Config via `@theme inline` in `globals.css` (no `tailwind.config.ts`).
 
+When upgrading Tailwind CSS, keep `tailwindcss` and `@tailwindcss/postcss` on
+the same patch version in the same branch. Treat `postcss` as part of the same
+style-build validation lane. Prove the upgrade with a production build plus a
+browser-facing smoke or visual check when styles could be affected.
+
 ### `cn()` for conditional classes
 
 ```typescript

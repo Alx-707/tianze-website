@@ -10,7 +10,7 @@
 - **Next.js 16.2.4**：主框架，使用 App Router
 - **React 19.2.5**：UI 运行时
 - **TypeScript 5.9.3**：类型系统
-- **Tailwind CSS 4.2.2**：样式系统
+- **Tailwind CSS 4.2.4**：样式系统
 
 ### 当前页面与数据执行方式
 
@@ -142,8 +142,8 @@
 - **@next/bundle-analyzer 16.2.4**
 - **dotenv 17.3.1**
 - **glob 13.0.6**
-- **postcss 8.5.10**
-- **@tailwindcss/postcss 4.2.2**
+- **postcss 8.5.12**
+- **@tailwindcss/postcss 4.2.4**
 - **tsx 4.21.0**
 - **Babel AST 工具链**
   - `@babel/parser 7.29.2`
