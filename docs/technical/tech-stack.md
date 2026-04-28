@@ -63,7 +63,7 @@
 - **clsx 2.1.1**
 - **tailwind-merge 3.5.0**
 - **next-themes 0.4.6**：主题切换
-- **lucide-react 1.7.0**：图标
+- **lucide-react 1.12.0**：图标
 - **nextjs-toploader 3.9.17**：页面切换进度条
 - **tailwindcss-animate 1.0.7**：动画扩展
 - **@tailwindcss/typography 0.5.19**：排版增强
