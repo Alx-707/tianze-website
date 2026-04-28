@@ -1,0 +1,502 @@
+
+> b2b-web-template@0.1.0 test /Users/Data/conductor/workspaces/tianze-website/miami
+> vitest run
+
+
+ RUN  v4.1.2 /Users/Data/conductor/workspaces/tianze-website/miami
+
+ ✓ src/lib/security/__tests__/rate-limit-store.test.ts (47 tests) 87ms
+ ✓ src/lib/__tests__/colors.test.ts (56 tests) 40ms
+ ✓ src/lib/__tests__/idempotency.contracts.test.ts (25 tests) 60ms
+ ✓ src/lib/security/__tests__/distributed-rate-limit.test.ts (64 tests) 121ms
+ ✓ src/components/ui/__tests__/navigation-menu.test.tsx (35 tests) 1451ms
+       ✓ handles click interactions  447ms
+ ✓ src/lib/__tests__/structured-data.test.ts (33 tests) 241ms
+ ✓ src/lib/security/__tests__/client-ip.test.ts (59 tests) 117ms
+ ✓ src/components/layout/__tests__/mobile-navigation.test.tsx (43 tests) 2386ms
+       ✓ renders mobile navigation trigger  354ms
+ ✓ src/components/products/__tests__/product-inquiry-form.test.tsx (33 tests) 2197ms
+       ✓ disables submit button when turnstile not completed  373ms
+ ✓ src/lib/__tests__/content-parser.test.ts (32 tests) 93ms
+ ✓ src/lib/lead-pipeline/__tests__/pipeline-observability.test.ts (16 tests) 41ms
+ ✓ src/lib/__tests__/server-action-utils.test.ts (55 tests) 97ms
+ ✓ src/hooks/__tests__/use-intersection-observer.test.ts (14 tests) 124ms
+ ✓ src/config/__tests__/paths.test.ts (55 tests) 194ms
+ ✓ src/lib/lead-pipeline/__tests__/metrics.test.ts (26 tests) 78ms
+ ✓ src/lib/__tests__/content-utils.test.ts (38 tests) 133ms
+ ✓ src/components/ui/__tests__/animated-counter.test.tsx (47 tests) 611ms
+ ✓ src/lib/__tests__/resend.test.ts (26 tests) 2893ms
+       ✓ should initialize successfully with valid API key  1285ms
+ ✓ src/lib/security/__tests__/rate-limit-key-strategies.test.ts (41 tests) 172ms
+ ✓ src/hooks/__tests__/use-breakpoint.test.ts (18 tests) 178ms
+ ✓ src/app/__tests__/actions.test.ts (20 tests) 243ms
+ ✓ src/app/api/verify-turnstile/__tests__/route.test.ts (16 tests) 144ms
+ ✓ tests/integration/components/language-toggle.test.tsx (14 tests) 1922ms
+       ✓ should apply translate protection to the switcher and language labels  500ms
+       ✓ should normalize pathnames with locale prefixes  306ms
+ ✓ src/lib/security/__tests__/idempotency-store.test.ts (26 tests) 118ms
+ ✓ src/lib/api/__tests__/with-rate-limit.test.ts (16 tests) 24ms
+ ✓ src/lib/security/__tests__/object-guards.test.ts (52 tests) 166ms
+ ✓ src/components/ui/__tests__/badge-accessibility-interactions.test.tsx (42 tests) 788ms
+       ✓ supports role attribute  378ms
+ ✓ src/lib/__tests__/validations.test.ts (38 tests) 120ms
+ ✓ src/components/layout/__tests__/mobile-navigation-items-accessibility.test.tsx (26 tests) 4575ms
+       ✓ should handle complex keyboard navigation patterns  1265ms
+       ✓ should handle performance optimization in complex scenarios  318ms
+ ✓ src/components/ui/__tests__/social-icons-accessibility-integration.test.tsx (18 tests) 1038ms
+       ✓ handles advanced accessibility patterns with screen readers  527ms
+ ✓ src/components/ui/__tests__/card-basic-components.test.tsx (54 tests) 271ms
+ ✓ src/lib/__tests__/seo-metadata.test.ts (27 tests) 187ms
+ ✓ src/lib/lead-pipeline/__tests__/lead-schema.test.ts (30 tests) 113ms
+ ✓ src/constants/__tests__/app-constants.test.ts (27 tests) 104ms
+ ✓ src/components/ui/__tests__/animated-counter-formatters.test.tsx (20 tests) 843ms
+       ✓ linear easing function works correctly  377ms
+ ✓ tests/unit/scripts/mdx-slug-sync.test.ts (22 tests) 98ms
+ ✓ src/components/ui/__tests__/badge-basic-variants.test.tsx (43 tests) 592ms
+ ✓ src/components/ui/__tests__/card-integration-scenarios.test.tsx (14 tests) 940ms
+       ✓ works with form elements  368ms
+ ✓ src/components/forms/__tests__/contact-form-submission.test.tsx (9 tests) 1246ms
+       ✓ 没有 Turnstile token 时不应该提交  522ms
+ ✓ src/services/__tests__/url-generator.test.ts (41 tests) 50ms
+ ✓ src/components/forms/__tests__/contact-form-container.test.tsx (12 tests) 1128ms
+       ✓ 应该显示正确的状态消息样式  501ms
+ ✓ src/app/api/inquiry/__tests__/route.test.ts (18 tests) 158ms
+ ✓ src/components/ui/__tests__/label-validation-scenarios.test.tsx (5 tests) 2150ms
+       ✓ handles form state management  703ms
+       ✓ handles complex validation scenarios  577ms
+       ✓ handles async validation  686ms
+ ✓ src/lib/__tests__/utm.test.ts (37 tests) 24ms
+ ✓ src/lib/__tests__/security-validation.test.ts (54 tests) 203ms
+ ✓ src/components/ui/__tests__/social-icons.test.tsx (32 tests) 432ms
+ ✓ src/components/ui/__tests__/animated-counter-performance.test.tsx (19 tests) 807ms
+       ✓ efficiently handles animation state updates  449ms
+ ✓ src/lib/lead-pipeline/__tests__/contact-processor.test.ts (10 tests) 29ms
+ ✓ src/lib/lead-pipeline/__tests__/process-lead.test.ts (14 tests) 76ms
+ ✓ src/components/forms/__tests__/contact-form-container-core.test.tsx (10 tests) 1448ms
+       ✓ 应该正确渲染联系表单  553ms
+ ✓ src/components/__tests__/accessibility.test.tsx (16 tests) 296ms
+ ✓ src/components/layout/__tests__/mobile-navigation-responsive.test.tsx (23 tests) 3262ms
+       ✓ is hidden on desktop screens  408ms
+       ✓ maintains performance during animations  358ms
+       ✓ updates active navigation item on route change  314ms
+       ✓ handles rapid interactions efficiently  700ms
+ ✓ src/lib/__tests__/content-validation.test.ts (27 tests) 149ms
+ ✓ src/lib/__tests__/security-crypto.test.ts (44 tests) 451ms
+ ✓ src/lib/security/__tests__/safe-third-party-fetch.test.ts (18 tests) 31ms
+ ✓ tests/integration/components/header.test.tsx (19 tests) 1094ms
+       ✓ should have correct default structure and classes  448ms
+ ✓ src/components/ui/__tests__/label.test.tsx (30 tests) 850ms
+       ✓ associates with input using htmlFor  471ms
+ ✓ src/components/ui/__tests__/social-icons-accessibility-integration-core.test.tsx (18 tests) 1503ms
+       ✓ provides accessible names for social links  540ms
+ ✓ src/lib/__tests__/idempotency-result-utils.test.ts (10 tests) 21ms
+ ✓ src/lib/__tests__/airtable-error-handling.test.ts (13 tests) 542ms
+ ✓ src/components/ui/__tests__/input-props-events.test.tsx (36 tests) 1027ms
+ ✓ tests/unit/scripts/quality-gate-diff-coverage.test.ts (19 tests) 17ms
+ ✓ src/lib/__tests__/airtable.test.ts (12 tests) 595ms
+ ✓ tests/unit/middleware.test.ts (11 tests) 115ms
+ ✓ src/components/ui/__tests__/label-form-basic-integration-core.test.tsx (7 tests) 1404ms
+       ✓ handles complex multi-step form scenarios  563ms
+       ✓ handles multiple forms on same page  322ms
+ ✓ src/components/ui/__tests__/animated-counter-animation.test.tsx (16 tests) 938ms
+ ✓ src/app/api/csp-report/__tests__/route.test.ts (14 tests) 463ms
+ ✓ src/components/__tests__/language-toggle.test.tsx (14 tests) 416ms
+ ✓ src/components/theme/__tests__/theme-menu-item.test.tsx (26 tests) 801ms
+ ✓ src/components/ui/__tests__/social-icons-accessibility-i18n.test.tsx (19 tests) 253ms
+ ✓ src/app/__tests__/contact-integration.test.ts (10 tests) 174ms
+ ✓ src/components/ui/__tests__/label-component-composition.test.tsx (12 tests) 632ms
+ ✓ src/components/layout/__tests__/vercel-navigation.test.tsx (20 tests) 1022ms
+       ✓ renders navigation element with aria-label  455ms
+ ✓ src/components/ui/__tests__/input-file-edge-cases.test.tsx (29 tests) 874ms
+       ✓ handles form reset  497ms
+ ✓ src/components/ui/__tests__/card-structure-components.test.tsx (14 tests) 352ms
+ ✓ src/components/cookie/__tests__/cookie-banner.test.tsx (25 tests) 2710ms
+       ✓ renders when ready and not consented  445ms
+ ✓ src/components/products/__tests__/product-gallery.test.tsx (27 tests) 1753ms
+       ✓ renders thumbnail buttons with aria-label  667ms
+ ✓ src/components/products/__tests__/product-card.test.tsx (22 tests) 1392ms
+       ✓ renders as article element  505ms
+ ✓ src/components/layout/__tests__/mobile-navigation-items-accessibility-core.test.tsx (19 tests) 2699ms
+       ✓ should render mobile navigation toggle button  341ms
+       ✓ should open menu when toggle button is clicked  330ms
+ ✓ src/components/ui/__tests__/input-states-accessibility.test.tsx (31 tests) 1196ms
+       ✓ handles focus state changes  533ms
+ ✓ src/components/products/__tests__/product-specs.test.tsx (34 tests) 564ms
+ ✓ src/components/layout/__tests__/mobile-navigation-responsive-basic.test.tsx (21 tests) 3643ms
+       ✓ is hidden on desktop screens  633ms
+       ✓ maintains functionality across breakpoints  350ms
+       ✓ updates active navigation item on route change  457ms
+       ✓ handles rapid interactions efficiently  515ms
+ ✓ src/lib/__tests__/navigation.test.ts (36 tests) 114ms
+ ✓ src/lib/__tests__/airtable-create-operations.test.ts (9 tests) 157ms
+ ✓ src/components/ui/__tests__/label-responsive-behavior.test.tsx (25 tests) 322ms
+ ✓ src/lib/__tests__/airtable-read-operations.test.ts (13 tests) 233ms
+ ✓ src/components/ui/__tests__/badge-custom-props.test.tsx (24 tests) 814ms
+       ✓ supports complex style objects  424ms
+ ✓ src/components/layout/__tests__/mobile-navigation-basic.test.tsx (25 tests) 2888ms
+       ✓ renders mobile navigation trigger  560ms
+ ✓ src/app/[locale]/products/[market]/__tests__/market-landing.test.tsx (17 tests) 1151ms
+       ✓ renders the market title as h1 and standard label badge  635ms
+ ✓ src/components/ui/__tests__/social-icons-basic.test.tsx (35 tests) 367ms
+ ✓ src/components/ui/__tests__/dropdown-menu-complex.test.tsx (5 tests) 1523ms
+     ✓ renders complete menu with all components  888ms
+ ✓ src/components/layout/__tests__/mobile-navigation-basic-core.test.tsx (25 tests) 2449ms
+       ✓ renders mobile navigation trigger  514ms
+ ✓ src/components/ui/__tests__/badge-basic-rendering.test.tsx (33 tests) 231ms
+ ✓ src/components/forms/__tests__/contact-form-fields-core.test.tsx (21 tests) 1354ms
+       ✓ should handle checkbox interactions  400ms
+ ✓ src/lib/__tests__/idempotency-utils.test.ts (20 tests) 258ms
+ ✓ src/components/ui/__tests__/navigation-menu-integration.test.tsx (8 tests) 2134ms
+       ✓ opens dropdown menu on trigger click  668ms
+       ✓ closes dropdown menu on second trigger click  391ms
+       ✓ handles multiple dropdown menus independently  382ms
+       ✓ maintains consistent state across navigation items  416ms
+ ✓ src/components/ui/__tests__/social-icons-accessibility-basic.test.tsx (18 tests) 1006ms
+       ✓ supports keyboard navigation between links  674ms
+ ✓ src/components/ui/__tests__/input.test.tsx (35 tests) 1146ms
+       ✓ renders input with default props  443ms
+ ✓ src/components/ui/__tests__/animated-counter-accessibility.test.tsx (30 tests) 1995ms
+       ✓ supports ARIA attributes  452ms
+ ✓ src/components/ui/__tests__/card-accessibility-features-core.test.tsx (18 tests) 1281ms
+       ✓ supports semantic HTML structure  515ms
+ ✓ src/lib/__tests__/i18n-validation-edge-cases.test.ts (11 tests) 1791ms
+       ✓ should handle circular references  829ms
+       ✓ should handle memory pressure scenarios  947ms
+ ✓ tests/unit/i18n.test.ts (15 tests) 97ms
+ ✓ src/app/api/inquiry/__tests__/inquiry-integration.test.ts (10 tests) 205ms
+ ✓ src/components/__tests__/responsive-navigation.test.tsx (17 tests) 406ms
+ ✓ src/components/ui/__tests__/label-events.test.tsx (21 tests) 1401ms
+       ✓ handles click events  536ms
+ ✓ src/lib/__tests__/airtable-operations.test.ts (16 tests) 184ms
+ ✓ src/components/ui/__tests__/label-form-integration.test.tsx (7 tests) 1822ms
+       ✓ works in complete form structure  1106ms
+ ✓ src/components/ui/__tests__/dropdown-menu-radio.test.tsx (9 tests) 2379ms
+       ✓ renders radio group  777ms
+       ✓ supports controlled radio group  329ms
+ ✓ src/components/products/__tests__/product-actions.test.tsx (25 tests) 1197ms
+       ✓ renders request quote buttons (main CTA and sticky bar)  484ms
+ ✓ src/lib/__tests__/content-validation-advanced.test.ts (19 tests) 80ms
+ ✓ src/components/ui/__tests__/dropdown-menu-layout.test.tsx (17 tests) 2953ms
+       ✓ renders label  747ms
+ ✓ src/components/ui/__tests__/label-form-association-core.test.tsx (20 tests) 1397ms
+       ✓ associates with input using htmlFor  456ms
+ ✓ src/components/ui/__tests__/card.test.tsx (26 tests) 1157ms
+       ✓ renders a complete card with all components  471ms
+ ✓ src/lib/__tests__/colors-oklch-conversion.test.ts (27 tests) 154ms
+ ✓ src/lib/__tests__/airtable-configuration.test.ts (17 tests) 210ms
+ ✓ src/components/ui/__tests__/label-form-association.test.tsx (14 tests) 1747ms
+       ✓ handles dynamic form generation with labels  776ms
+ ✓ src/components/ui/__tests__/social-icons-mapper.test.tsx (28 tests) 264ms
+ ✓ src/components/ui/__tests__/social-icons-accessibility-features.test.tsx (17 tests) 713ms
+       ✓ should support keyboard navigation  372ms
+ ✓ src/components/ui/__tests__/label-form-basic-integration-essential.test.tsx (11 tests) 1363ms
+       ✓ works in simple form structure  676ms
+ ✓ src/config/__tests__/security.test.ts (27 tests) 64ms
+ ✓ src/components/ui/__tests__/label-form-basic-integration.test.tsx (8 tests) 1569ms
+       ✓ works in complete form structure  1041ms
+ ✓ src/app/__tests__/global-error.test.tsx (22 tests) 371ms
+ ✓ src/components/ui/__tests__/label-state-management-core.test.tsx (19 tests) 936ms
+       ✓ disables associated input when label is disabled  482ms
+ ✓ src/components/ui/__tests__/input-basic.test.tsx (31 tests) 663ms
+       ✓ renders input with default props  303ms
+ ✓ src/components/ui/__tests__/sheet-text-components.test.tsx (15 tests) 1669ms
+       ✓ renders sheet title  574ms
+ ✓ src/components/ui/__tests__/label-state-management.test.tsx (21 tests) 735ms
+       ✓ disables associated input when label is disabled  383ms
+ ✓ src/config/paths/__tests__/site-config.test.ts (25 tests) 66ms
+ ✓ src/components/ui/__tests__/social-icons-mapper-links.test.tsx (25 tests) 660ms
+       ✓ handles keyboard navigation  397ms
+ ✓ src/components/ui/__tests__/button.test.tsx (27 tests) 1250ms
+       ✓ renders button with default props  449ms
+ ✓ src/components/layout/__tests__/mobile-navigation-edge-cases-advanced.test.tsx (17 tests) 1300ms
+       ✓ 处理高频更新  924ms
+ ✓ src/components/security/__tests__/turnstile.test.tsx (20 tests) 253ms
+ ✓ src/components/ui/__tests__/social-icons-integration-scenarios.test.tsx (14 tests) 264ms
+ ✓ src/lib/__tests__/accessibility-manager-static-methods.test.ts (18 tests) 80ms
+ ✓ src/components/ui/__tests__/card-accessibility-features.test.tsx (17 tests) 1161ms
+       ✓ supports semantic HTML structure  496ms
+ ✓ src/components/ui/__tests__/badge-custom-props-core.test.tsx (24 tests) 1066ms
+       ✓ applies inline styles  482ms
+ ✓ src/app/__tests__/sitemap.test.ts (20 tests) 166ms
+ ✓ src/components/ui/__tests__/social-icons-integration-scenarios-basic-core.test.tsx (13 tests) 285ms
+ ✓ src/lib/__tests__/i18n-validation.test.ts (16 tests) 130ms
+ ✓ src/components/ui/__tests__/sheet-basic.test.tsx (16 tests) 2058ms
+       ✓ renders with default props  507ms
+ ✓ src/components/ui/__tests__/navigation-menu-complex.test.tsx (5 tests) 1232ms
+     ✓ handles dynamic content updates  670ms
+ ✓ src/components/ui/__tests__/tabs-integration.test.tsx (8 tests) 3129ms
+       ✓ works with complex tab structure  1308ms
+       ✓ handles form interactions within tabs  1433ms
+ ✓ src/components/ui/__tests__/badge-content-special.test.tsx (35 tests) 241ms
+ ✓ src/components/ui/__tests__/label-form-advanced-integration-core.test.tsx (7 tests) 1766ms
+       ✓ works with dynamic form fields  981ms
+       ✓ works with complex nested form structures  472ms
+ ✓ src/lib/__tests__/i18n-validation-advanced-scenarios.test.ts (7 tests) 108ms
+ ✓ src/hooks/__tests__/use-reduced-motion.test.ts (14 tests) 99ms
+ ✓ src/lib/__tests__/colors-theme-validation.test.ts (27 tests) 77ms
+ ✓ src/components/ui/__tests__/label-basic.test.tsx (29 tests) 557ms
+       ✓ supports custom style  321ms
+ ✓ src/components/ui/__tests__/card-structure-accessibility-core.test.tsx (18 tests) 295ms
+ ✓ src/components/ui/__tests__/social-icons-link-basic.test.tsx (19 tests) 715ms
+       ✓ handles keyboard navigation  496ms
+ ✓ src/components/ui/__tests__/dropdown-menu-basic.test.tsx (15 tests) 2477ms
+       ✓ accepts defaultOpen prop  634ms
+       ✓ supports different alignments  320ms
+ ✓ tests/integration/i18n-components.test.tsx (8 tests) 107ms
+ ✓ src/lib/__tests__/i18n-validation-basic.test.ts (15 tests) 154ms
+ ✓ src/lib/__tests__/colors-contrast-compliance.test.ts (22 tests) 20ms
+ ✓ src/lib/__tests__/content-validation-basic.test.ts (19 tests) 30ms
+ ✓ src/components/ui/__tests__/badge.test.tsx (26 tests) 548ms
+       ✓ works as a status indicator  334ms
+ ✓ src/components/ui/__tests__/label-edge-cases.test.tsx (21 tests) 904ms
+       ✓ handles rapid state changes  570ms
+ ✓ src/components/ui/__tests__/navigation-menu-interactions.test.tsx (11 tests) 1401ms
+       ✓ handles click interactions  674ms
+ ✓ src/components/layout/__tests__/mobile-navigation-edge-cases-core.test.tsx (18 tests) 1891ms
+       ✓ 处理快速开关交互  890ms
+       ✓ 处理并发状态更新  338ms
+ ✓ src/components/ui/__tests__/social-icons-link.test.tsx (20 tests) 577ms
+       ✓ handles keyboard navigation  368ms
+ ✓ src/hooks/__tests__/use-keyboard-navigation-advanced.test.ts (14 tests) 276ms
+ ✓ src/components/__tests__/responsive-layout.test.tsx (16 tests) 181ms
+ ✓ src/components/ui/__tests__/label-event-handling-basic.test.tsx (14 tests) 701ms
+       ✓ handles click events  302ms
+ ✓ src/components/theme/__tests__/theme-menu-item-rendering.test.tsx (23 tests) 326ms
+ ✓ src/components/ui/__tests__/tabs-accessibility.test.tsx (6 tests) 778ms
+ ✓ src/i18n/__tests__/routing.test.ts (23 tests) 41ms
+ ✓ src/components/ui/__tests__/label-event-handling.test.tsx (14 tests) 509ms
+ ✓ src/components/theme/__tests__/theme-menu-item-interactions.test.tsx (17 tests) 624ms
+ ✓ src/components/ui/__tests__/label-edge-cases-basic.test.tsx (22 tests) 572ms
+       ✓ handles rapid state changes  420ms
+ ✓ src/components/layout/__tests__/header.test.tsx (14 tests) 338ms
+ ✓ src/components/ui/__tests__/badge-content-basic.test.tsx (30 tests) 165ms
+ ✓ src/components/ui/__tests__/animated-counter-basic.test.tsx (25 tests) 539ms
+ ✓ src/components/ui/__tests__/sheet-edge-cases.test.tsx (10 tests) 832ms
+ ✓ src/app/api/csp-report/__tests__/route-get-options.test.ts (21 tests) 86ms
+ ✓ src/constants/product-specs/__tests__/i18n-parity.test.ts (6 tests) 22ms
+ ✓ tests/integration/api/subscribe.test.ts (11 tests) 148ms
+ ✓ src/components/ui/__tests__/dropdown-menu-accessibility.test.tsx (10 tests) 968ms
+     ✓ supports keyboard navigation  369ms
+ ✓ src/components/ui/__tests__/label-responsive-basic-core.test.tsx (17 tests) 129ms
+ ✓ src/components/lazy/__tests__/idle.test.tsx (15 tests) 203ms
+ ✓ src/hooks/__tests__/use-keyboard-navigation-dom.test.ts (8 tests) 84ms
+ ✓ src/components/layout/__tests__/mobile-navigation-responsive-edge-cases.test.tsx (14 tests) 801ms
+ ✓ src/components/ui/__tests__/separator.test.tsx (23 tests) 176ms
+ ✓ src/app/[locale]/contact/__tests__/error.test.tsx (18 tests) 188ms
+ ✓ src/components/products/__tests__/product-grid.test.tsx (18 tests) 147ms
+ ✓ src/components/layout/__tests__/logo.test.tsx (31 tests) 490ms
+ ✓ src/app/api/csp-report/__tests__/route-post-core.test.ts (11 tests) 76ms
+ ✓ src/lib/__tests__/contact-field-validators.test.ts (6 tests) 19ms
+ ✓ src/components/ui/__tests__/label-integration.test.tsx (10 tests) 511ms
+ ✓ src/lib/__tests__/i18n-validation-advanced.test.ts (8 tests) 22ms
+ ✓ src/components/theme/__tests__/theme-menu-item-interactions-basic-core.test.tsx (17 tests) 553ms
+ ✓ src/__tests__/middleware-locale-cookie.test.ts (10 tests) 50ms
+ ✓ src/lib/__tests__/env.test.ts (31 tests) 19ms
+ ✓ src/components/ui/__tests__/sheet-accessibility.test.tsx (5 tests) 744ms
+ ✓ src/lib/lead-pipeline/__tests__/settle-service.test.ts (9 tests) 16ms
+ ✓ src/lib/__tests__/accessibility-manager-exports.test.ts (11 tests) 18ms
+ ✓ src/components/ui/__tests__/sheet-content.test.tsx (11 tests) 902ms
+ ✓ src/components/ui/__tests__/sheet-integration.test.tsx (3 tests) 896ms
+     ✓ works with complete sheet structure  561ms
+ ✓ src/components/ui/__tests__/navigation-menu-basic.test.tsx (12 tests) 149ms
+ ✓ src/app/api/csp-report/__tests__/route-post-advanced.test.ts (10 tests) 80ms
+ ✓ src/app/api/verify-turnstile/__tests__/route-core.test.ts (7 tests) 43ms
+ ✓ src/hooks/__tests__/use-keyboard-navigation-events.test.ts (10 tests) 40ms
+ ✓ src/components/layout/__tests__/nav-switcher.test.tsx (11 tests) 67ms
+ ✓ src/components/ui/__tests__/navigation-menu-accessibility.test.tsx (6 tests) 640ms
+ ✓ src/components/ui/__tests__/social-icons-integration-scenarios-basic.test.tsx (9 tests) 72ms
+ ✓ tests/unit/scripts/check-translate-compat.test.ts (11 tests) 50ms
+ ✓ src/components/ui/__tests__/label-accessibility.test.tsx (16 tests) 449ms
+ ✓ src/hooks/__tests__/use-keyboard-navigation-basic.test.ts (13 tests) 104ms
+ ✓ tests/unit/scripts/check-mutation-required.test.ts (7 tests) 13ms
+ ✓ tests/integration/api/lead-family-contract.test.ts (5 tests) 51ms
+ ✓ src/lib/lead-pipeline/__tests__/process-lead-observability.test.ts (5 tests) 23ms
+ ✓ src/components/lazy/__tests__/lazy-top-loader.test.tsx (11 tests) 108ms
+ ✓ src/components/ui/__tests__/tabs-trigger.test.tsx (6 tests) 473ms
+ ✓ src/lib/__tests__/contact-get-contact-copy.test.ts (3 tests) 14ms
+ ✓ src/components/ui/__tests__/navigation-menu-keyboard.test.tsx (6 tests) 583ms
+ ✓ src/lib/__tests__/accessibility-manager-core.test.ts (11 tests) 31ms
+ ✓ src/app/[locale]/__tests__/layout.test.tsx (4 tests) 47ms
+ ✓ src/components/forms/__tests__/contact-form-validation.test.tsx (5 tests) 176ms
+ ✓ src/app/[locale]/products/__tests__/products-page.test.tsx (11 tests) 245ms
+ ✓ src/lib/security/__tests__/ip-range.test.ts (13 tests) 21ms
+ ✓ src/lib/__tests__/idempotency.test.ts (4 tests) 82ms
+ ✓ src/components/emails/__tests__/ProductInquiryEmail.test.tsx (19 tests) 194ms
+ ✓ src/components/layout/__tests__/header-client.test.tsx (12 tests) 75ms
+ ✓ src/components/forms/__tests__/contact-form-fields.test.tsx (14 tests) 356ms
+ ✓ src/lib/api/__tests__/cors-utils.test.ts (11 tests) 68ms
+ ✓ src/lib/__tests__/sitemap-utils.test.ts (16 tests) 29ms
+ ✓ src/components/ui/__tests__/tabs-content.test.tsx (8 tests) 679ms
+ ✓ src/config/__tests__/cors.test.ts (17 tests) 53ms
+ ✓ src/components/forms/__tests__/lazy-turnstile.test.tsx (5 tests) 72ms
+ ✓ src/components/trust/__tests__/trust-sections.test.tsx (8 tests) 438ms
+ ✓ src/app/api/csp-report/__tests__/route-post-security.test.ts (7 tests) 57ms
+ ✓ src/components/sections/__tests__/faq-section.test.tsx (11 tests) 1000ms
+       ✓ displays the section title  406ms
+ ✓ tests/unit/scripts/validate-production-config.test.ts (9 tests) 12ms
+ ✓ tests/architecture/cache-directive-policy.test.ts (4 tests) 188ms
+ ✓ src/lib/__tests__/airtable-advanced.test.ts (3 tests) 82ms
+ ✓ src/components/__tests__/language-toggle-timer.test.tsx (1 test) 63ms
+ ✓ src/lib/lead-pipeline/__tests__/utils.test.ts (26 tests) 60ms
+ ✓ tests/integration/api/lead-family-protection.test.ts (3 tests) 60ms
+ ✓ src/components/content/__tests__/about-page-shell.test.tsx (8 tests) 537ms
+     ✓ renders hero section with metadata  335ms
+ ✓ src/components/ui/__tests__/dropdown-menu-advanced.test.tsx (5 tests) 638ms
+       ✓ renders sub menu  348ms
+ ✓ src/components/ui/__tests__/tabs-basic.test.tsx (7 tests) 531ms
+ ✓ src/lib/security/__tests__/turnstile-config.test.ts (8 tests) 51ms
+ ✓ src/lib/i18n/__tests__/route-parsing.test.ts (25 tests) 27ms
+ ✓ src/components/products/__tests__/family-section.test.tsx (6 tests) 292ms
+ ✓ src/components/ui/__tests__/label-form-advanced-integration.test.tsx (2 tests) 520ms
+       ✓ handles form validation with custom error messages  480ms
+ ✓ src/config/__tests__/single-site-page-expression.test.ts (3 tests) 9ms
+ ✓ src/lib/lead-pipeline/__tests__/product-processor.test.ts (2 tests) 8ms
+ ✓ src/lib/cookie-consent/__tests__/context.test.tsx (3 tests) 195ms
+ ✓ src/components/forms/__tests__/contact-form-accessibility.test.tsx (2 tests) 336ms
+ ✓ src/lib/lead-pipeline/__tests__/a-lead-schema-mutation-fast.test.ts (6 tests) 13ms
+ ✓ src/app/[locale]/about/__tests__/page.test.tsx (5 tests) 173ms
+ ✓ src/lib/__tests__/idempotency-runtime-cache.test.ts (7 tests) 141ms
+ ✓ src/constants/__tests__/index.test.ts (11 tests) 40ms
+ ✓ src/components/__tests__/attribution-bootstrap.test.tsx (5 tests) 127ms
+ ✓ src/lib/lead-pipeline/__tests__/lead-schema.property.test.ts (3 tests) 96ms
+ ✓ src/components/monitoring/__tests__/enterprise-analytics-island.test.tsx (4 tests) 125ms
+ ✓ src/app/[locale]/products/__tests__/page.test.tsx (3 tests) 429ms
+ ✓ src/app/api/csp-report/__tests__/route-rate-limit.test.ts (2 tests) 83ms
+ ✓ src/lib/content/__tests__/legal-page.test.ts (7 tests) 16ms
+ ✓ src/lib/lead-pipeline/__tests__/retry-async.test.ts (7 tests) 45ms
+ ✓ tests/unit/scripts/content-slug-sync.test.ts (9 tests) 1942ms
+       ✓ should support quiet mode  408ms
+ ✓ src/i18n/__tests__/request.test.ts (8 tests) 112ms
+ ✓ src/app/[locale]/capabilities/bending-machines/__tests__/page.test.tsx (7 tests) 589ms
+     ✓ renders the hero section with title  329ms
+ ✓ src/app/[locale]/__tests__/page.test.tsx (6 tests) 101ms
+ ✓ src/components/ui/__tests__/section.test.tsx (9 tests) 134ms
+ ✓ src/components/products/__tests__/catalog-breadcrumb.test.tsx (3 tests) 179ms
+ ✓ src/components/ui/__tests__/scroll-reveal.test.tsx (10 tests) 62ms
+ ✓ src/app/[locale]/contact/__tests__/page.test.tsx (3 tests) 564ms
+     ✓ renders hero and body from MDX while keeping the form  458ms
+ ✓ src/lib/security/__tests__/ip-parsing.test.ts (8 tests) 17ms
+ ✓ tests/unit/scripts/quality-gate-performance.test.ts (4 tests) 18ms
+ ✓ tests/unit/scripts/static-truth-check.test.ts (3 tests) 15ms
+ ✓ src/components/seo/__tests__/json-ld-script.test.ts (4 tests) 16ms
+ ✓ src/app/[locale]/oem-custom-manufacturing/__tests__/page.test.tsx (8 tests) 611ms
+     ✓ renders the hero section with title  333ms
+ ✓ src/components/grid/__tests__/grid-section.test.tsx (8 tests) 142ms
+ ✓ src/components/products/__tests__/market-series-card.test.tsx (7 tests) 311ms
+ ✓ src/app/[locale]/privacy/__tests__/page.test.tsx (2 tests) 50ms
+ ✓ src/components/footer/__tests__/Footer.test.tsx (8 tests) 379ms
+ ✓ src/app/[locale]/terms/__tests__/page.test.tsx (3 tests) 47ms
+ ✓ src/components/theme/__tests__/theme-menu-item-interactions-basic.test.tsx (3 tests) 304ms
+ ✓ src/components/ui/__tests__/label-responsive-basic.test.tsx (6 tests) 43ms
+ ✓ src/app/[locale]/__tests__/not-found.test.tsx (10 tests) 301ms
+ ✓ src/app/api/csp-report/__tests__/route-post.test.ts (2 tests) 23ms
+ ✓ src/config/__tests__/contact-form-config.test.ts (4 tests) 15ms
+ ✓ tests/unit/components/footer-new.test.tsx (3 tests) 678ms
+     ✓ 渲染默认四列导航并暴露可访问性元数据  560ms
+ ✓ src/lib/lead-pipeline/__tests__/service-result.test.ts (9 tests) 10ms
+ ✓ src/components/products/__tests__/inquiry-drawer.test.tsx (3 tests) 45ms
+ ✓ src/components/ui/__tests__/theme-switcher.test.tsx (3 tests) 295ms
+ ✓ src/components/sections/__tests__/hero-section.test.tsx (7 tests) 394ms
+ ✓ tests/integration/api/verify-turnstile.test.ts (4 tests) 53ms
+ ✓ src/constants/product-specs/__tests__/pneumatic-tube-systems.test.ts (10 tests) 39ms
+ ✓ src/lib/lead-pipeline/__tests__/newsletter-processor.test.ts (2 tests) 12ms
+ ✓ src/components/ui/__tests__/container.test.tsx (7 tests) 71ms
+ ✓ src/lib/__tests__/logger.test.ts (4 tests) 11ms
+ ✓ src/components/grid/__tests__/grid-frame.test.tsx (6 tests) 92ms
+ ✓ tests/unit/scripts/proof-lane-contract.test.ts (2 tests) 15ms
+ ✓ src/app/[locale]/__tests__/layout-structured-data.test.ts (4 tests) 9ms
+ ✓ src/lib/__tests__/security.test.ts (9 tests) 11ms
+ ✓ src/lib/__tests__/load-messages-runtime.test.ts (4 tests) 49ms
+ ✓ src/lib/lead-pipeline/__tests__/with-timeout.test.ts (6 tests) 17ms
+ ✓ src/components/sections/__tests__/homepage-cluster-contract.test.tsx (2 tests) 451ms
+     ✓ preserves hero and final/sample CTA hierarchy  343ms
+ ✓ src/lib/__tests__/merge-objects.test.ts (5 tests) 11ms
+ ✓ src/app/__tests__/robots.test.ts (8 tests) 17ms
+ ✓ src/lib/__tests__/utils.test.ts (12 tests) 21ms
+ ✓ tests/unit/scripts/current-truth-docs.test.ts (2 tests) 15ms
+ ✓ src/app/[locale]/__tests__/layout-fonts.test.ts (11 tests) 20ms
+ ✓ src/lib/content/__tests__/mdx-faq.test.ts (9 tests) 51ms
+ ✓ src/lib/__tests__/idempotency.property.test.ts (2 tests) 87ms
+ ✓ src/components/blocks/tech/__tests__/tech-tabs-block.test.tsx (3 tests) 813ms
+     ✓ should render without errors  374ms
+     ✓ renders package versions that match the current repo baseline  363ms
+ ✓ src/components/ui/__tests__/card-structure-accessibility.test.tsx (3 tests) 59ms
+ ✓ src/lib/image/__tests__/blur-placeholder.test.ts (8 tests) 9ms
+ ✓ src/components/products/__tests__/spec-table.test.tsx (5 tests) 483ms
+       ✓ renders column headers in table head  358ms
+ ✓ src/components/sections/__tests__/quality-section.test.tsx (7 tests) 522ms
+     ✓ renders without crashing  373ms
+ ✓ src/constants/product-specs/__tests__/north-america.test.ts (8 tests) 12ms
+ ✓ src/lib/lead-pipeline/__tests__/index.test.ts (2 tests) 7ms
+ ✓ src/lib/security/__tests__/a-rate-limit-key-strategies-mutation-fast.test.ts (2 tests) 25ms
+ ✓ src/components/ui/__tests__/lazy-theme-switcher.test.tsx (2 tests) 85ms
+ ✓ src/components/cookie/__tests__/cookie-consent-island.test.tsx (4 tests) 142ms
+ ✓ src/components/trust/__tests__/animated-stat-item.test.tsx (3 tests) 145ms
+ ✓ src/lib/__tests__/load-messages.fallback.test.ts (6 tests) 51ms
+ ✓ src/constants/product-specs/__tests__/australia-new-zealand.test.ts (8 tests) 34ms
+ ✓ src/lib/observability/__tests__/system-observability.test.ts (2 tests) 7ms
+ ✓ src/components/sections/__tests__/final-cta.test.tsx (6 tests) 304ms
+ ✓ src/components/sections/__tests__/products-section.test.tsx (6 tests) 348ms
+ ✓ tests/unit/scripts/phase6-topology-contract.test.ts (5 tests) 11ms
+ ✓ src/components/ui/__tests__/accordion-basic.test.tsx (3 tests) 386ms
+ ✓ src/lib/i18n/__tests__/route-parsing.property.test.ts (5 tests) 178ms
+ ✓ src/app/[locale]/__tests__/layout-metadata.test.ts (2 tests) 8ms
+ ✓ src/lib/__tests__/i18n-performance.test.ts (5 tests) 16ms
+ ✓ src/constants/product-specs/__tests__/mexico.test.ts (8 tests) 19ms
+ ✓ src/app/[locale]/privacy/__tests__/page-async.test.tsx (1 test) 75ms
+ ✓ src/lib/security/__tests__/a-client-ip-mutation-fast.test.ts (2 tests) 15ms
+ ✓ src/components/sections/__tests__/chain-section.test.tsx (6 tests) 375ms
+ ✓ src/components/grid/__tests__/grid-system.test.tsx (5 tests) 107ms
+ ✓ src/constants/product-specs/__tests__/europe.test.ts (7 tests) 21ms
+ ✓ src/components/grid/__tests__/hero-guide-overlay.test.tsx (6 tests) 125ms
+ ✓ src/lib/__tests__/idempotency-key.test.ts (4 tests) 15ms
+ ✓ src/constants/__tests__/equipment-specs.test.ts (6 tests) 9ms
+ ✓ src/app/[locale]/terms/__tests__/page-async.test.tsx (1 test) 183ms
+ ✓ src/constants/product-specs/__tests__/types.test.ts (3 tests) 9ms
+ ✓ tests/unit/content-page-placeholders.test.ts (1 test) 16ms
+ ✓ src/components/cookie/__tests__/lazy-cookie-consent-island.test.tsx (3 tests) 85ms
+ ✓ src/lib/i18n/__tests__/client-messages.test.ts (3 tests) 14ms
+ ✓ src/lib/i18n/server/__tests__/getTranslationsCached.test.ts (2 tests) 23ms
+ ✓ src/components/sections/__tests__/resources-section.test.tsx (5 tests) 391ms
+ ✓ src/components/grid/__tests__/grid-block.test.tsx (5 tests) 52ms
+ ✓ tests/unit/security/security-validation.test.ts (4 tests) 8ms
+ ✓ src/lib/security/__tests__/a-ip-parsing-mutation-fast.test.ts (5 tests) 14ms
+ ✓ src/config/__tests__/single-site-seo.test.ts (3 tests) 13ms
+ ✓ src/components/cookie/__tests__/lazy-cookie-banner.test.tsx (1 test) 38ms
+ ✓ src/components/sections/__tests__/scenarios-section.test.tsx (4 tests) 365ms
+ ✓ src/components/products/__tests__/sticky-family-nav.test.tsx (3 tests) 157ms
+ ✓ src/components/trust/__tests__/trust-stats.test.tsx (2 tests) 263ms
+ ✓ src/lib/__tests__/a-idempotency-utils-mutation-fast.test.ts (2 tests) 35ms
+ ✓ src/components/blocks/products/__tests__/product-matrix-block.test.tsx (4 tests) 428ms
+ ✓ src/components/blocks/shared/__tests__/product-card.test.tsx (3 tests) 361ms
+ ✓ src/components/products/__tests__/grid-utils.test.ts (9 tests) 23ms
+ ✓ src/components/layout/__tests__/viewport-client-gate.test.tsx (2 tests) 26ms
+ ✓ src/components/sections/__tests__/sample-cta.test.tsx (4 tests) 289ms
+ ✓ src/types/__tests__/content-types.test.ts (3 tests) 9ms
+ ✓ src/components/grid/__tests__/desktop-decoration-gate.test.tsx (2 tests) 39ms
+ ✓ src/config/__tests__/footer-links.test.ts (1 test) 32ms
+ ✓ src/config/__tests__/site-facts.test.ts (1 test) 5ms
+ ✓ src/components/blocks/shared/__tests__/stat-bar.test.tsx (2 tests) 103ms
+ ✓ src/lib/i18n/__tests__/product-keys.test.ts (2 tests) 10ms
+ ✓ src/components/blocks/shared/__tests__/image-carousel.test.tsx (2 tests) 114ms
+ ✓ src/constants/__tests__/product-catalog.test.ts (2 tests) 6ms
+ ✓ tests/integration/api/health.test.ts (1 test) 13ms
+ ✓ src/app/[locale]/contact/__tests__/page-i18n-basic.test.tsx (2 tests) 28ms
+ ✓ src/app/[locale]/contact/__tests__/page-i18n.test.tsx (1 test) 36ms
+ ✓ src/app/[locale]/products/__tests__/interactive-islands-usage.test.ts (1 test) 6ms
+ ✓ src/components/blocks/shared/__tests__/section-header.test.tsx (2 tests) 86ms
+ ✓ src/lib/content/__tests__/render-legal-content.test.tsx (1 test) 22ms
+ ✓ src/app/[locale]/__tests__/head.test.tsx (1 test) 49ms
+ ✓ src/components/blocks/features/__tests__/features-grid-block.test.tsx (1 test) 72ms
+ ✓ src/app/[locale]/contact/__tests__/page-rendering.test.tsx (1 test) 9ms
+ ✓ src/app/[locale]/contact/__tests__/page-rendering-basic-core.test.tsx (1 test) 10ms
+ ✓ src/app/[locale]/contact/__tests__/page-rendering-basic.test.tsx (1 test) 12ms
+ ✓ src/__tests__/i18n-ast-scanner.smoke.test.ts (1 test) 1504ms
+     ✓ should pass (no object-key misuse, no scanner errors)  1502ms
+
+ Test Files  376 passed (376)
+      Tests  5208 passed (5208)
+   Start at  04:05:35
+   Duration  124.25s (transform 7.90s, setup 72.60s, import 78.87s, tests 175.05s, environment 462.86s)
+
+JSON report written to /Users/Data/conductor/workspaces/tianze-website/miami/reports/test-results.json

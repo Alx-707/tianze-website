@@ -156,6 +156,7 @@
     "test:mutation:idempotency": "stryker run --mutate 'src/lib/idempotency/**/*.ts'",
     "test:mutation:security": "stryker run --mutate 'src/lib/security/**/*.ts'",
     "test:mutation:lead": "stryker run --mutate 'src/lib/lead-pipeline/**/*.ts'",
+    "test:mutation:lead-security": "stryker run --mutate 'src/lib/lead-pipeline/**/*.ts,src/lib/security/**/*.ts'",
     "test:mutation:form-schema": "stryker run --mutate 'src/lib/form-schema/**/*.ts'",
     "review:mutation:critical": "node scripts/review-mutation-critical.js",
     "proof:cf:preview-deployed": "node scripts/cloudflare/proof-preview-deployed.mjs"

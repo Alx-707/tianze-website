@@ -1,0 +1,62 @@
+{
+  "metadata": {
+    "timestamp": "2026-04-27T11:04:54.254Z",
+    "version": "1.0.0",
+    "project": "b2b-web-template"
+  },
+  "metrics": {
+    "timestamp": "2026-04-27T11:04:54.254Z",
+    "exportStarCount": 1,
+    "exportStarByDomain": {
+      "other": 1
+    },
+    "typeScriptErrors": 0,
+    "eslintIssues": 0,
+    "totalFiles": 742,
+    "i18nFiles": 2,
+    "circularDependencies": 0,
+    "crossDomainDependencies": 0,
+    "fileSizeStats": {
+      "min": 57,
+      "max": 74492,
+      "median": 3982,
+      "p75": 8661,
+      "p90": 11805,
+      "p95": 14262,
+      "average": 5716.61590296496
+    },
+    "domainStats": {}
+  },
+  "thresholds": {
+    "exportStar": {
+      "target": 30,
+      "aspirational": 0
+    },
+    "tsErrors": {
+      "target": 0
+    },
+    "eslintIssues": {
+      "target": 0
+    },
+    "totalFiles": {
+      "reviewTarget": 700,
+      "aspirational": 500
+    }
+  },
+  "historicalBaselines": {
+    "exportStar": 97,
+    "tsErrors": 2759,
+    "eslintIssues": 2075,
+    "totalFiles": 644
+  },
+  "analysis": {
+    "meetsCurrentTargets": true,
+    "qualityTrend": {
+      "exportStarProgress": 98.96907216494846,
+      "tsErrorProgress": 100,
+      "eslintProgress": 100,
+      "fileCountDeltaFromHistorical": 98
+    },
+    "recommendations": []
+  }
+}

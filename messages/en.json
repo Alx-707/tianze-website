@@ -294,7 +294,7 @@
       },
       "standards": {
         "astm": "ASTM D1785 / UL 651",
-        "asnzs": "AS/NZS 61386",
+        "asnzs": "AS/NZS 2053",
         "iec": "IEC 61386",
         "nom": "NOM-001-SEDE"
       },
@@ -1513,6 +1513,26 @@
     }
   },
   "contact": {
+    "title": "Contact Us",
+    "description": "Get in touch with our team for inquiries, support, or partnership opportunities.",
+    "features": "Multiple ways to reach us and get the support you need",
+    "panel": {
+      "contactTitle": "Contact Methods",
+      "email": "Email",
+      "phone": "Phone",
+      "hoursTitle": "Business Hours",
+      "weekdays": "Mon - Fri",
+      "saturday": "Saturday",
+      "sunday": "Sunday",
+      "closed": "Closed",
+      "responseTitle": "What to expect",
+      "responseTimeLabel": "Typical response",
+      "responseTimeValue": "Within 24 business hours",
+      "bestForLabel": "Best for",
+      "bestForValue": "RFQs, product specs, MOQ, samples, and lead-time questions",
+      "prepareLabel": "Helpful details",
+      "prepareValue": "Share product type, size/standard, quantity, destination market, and timeline"
+    },
     "form": {
       "title": "Contact Us",
       "description": "Get in touch with us. We'd love to hear from you.",
@@ -1539,6 +1559,8 @@
       "submitError": "We couldn't send your message. Please try again shortly.",
       "success": "Thank you! Your message has been sent successfully. We will get back to you soon.",
       "error": "Sorry, there was an error sending your message. Please try again later.",
+      "loadError": "The secure inquiry form could not load. Retry, or use the contact methods on this page.",
+      "retryLoad": "Retry loading form",
       "rateLimitMessage": "You've recently contacted us. Please wait a moment before sending another message.",
       "errors": {
         "generic": "Please review the highlighted fields and try again.",

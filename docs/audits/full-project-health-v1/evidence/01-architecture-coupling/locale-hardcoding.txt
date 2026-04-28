@@ -1,0 +1,260 @@
+src/i18n/locale-utils.ts:4:  return (routing.locales as readonly string[]).includes(input);
+src/app/global-error.tsx:20:  en: {
+src/app/global-error.tsx:28:  zh: {
+src/app/global-error.tsx:37:function getLocaleFromBrowser(): "en" | "zh" {
+src/app/global-error.tsx:41:  return coerceLocale(browserLang.startsWith("zh") ? "zh" : "en");
+src/app/global-error.tsx:46:  // Safe: locale is strictly typed as 'en' | 'zh' from getLocaleFromBrowser()
+src/i18n/__tests__/routing.test.ts:23:    locales: ["en", "zh"],
+src/i18n/__tests__/routing.test.ts:24:    defaultLocale: "en",
+src/i18n/__tests__/routing.test.ts:61:        locales: ["en", "zh"],
+src/i18n/__tests__/routing.test.ts:62:        defaultLocale: "en",
+src/i18n/__tests__/routing.test.ts:113:          locales: ["en", "zh"],
+src/i18n/__tests__/routing.test.ts:114:          defaultLocale: "en",
+src/i18n/__tests__/routing.test.ts:134:      const expectedLocales: Locale[] = ["en", "zh"];
+src/i18n/__tests__/routing.test.ts:137:        expect(["en", "zh"]).toContain(locale);
+src/i18n/__tests__/routing.test.ts:197:      expect(config.locales).toEqual(["en", "zh"]);
+src/i18n/__tests__/routing.test.ts:202:      expect(config.defaultLocale).toBe("en");
+src/i18n/__tests__/request.test.ts:11:      locales: ["en", "zh"],
+src/i18n/__tests__/request.test.ts:12:      defaultLocale: "en",
+src/i18n/__tests__/request.test.ts:59:    const result = (await runConfig("en")) as any;
+src/i18n/__tests__/request.test.ts:61:    expect(result.locale).toBe("en");
+src/i18n/__tests__/request.test.ts:69:    const result = (await runConfig("zh")) as any;
+src/i18n/__tests__/request.test.ts:71:    expect(result.locale).toBe("zh");
+src/i18n/__tests__/request.test.ts:80:    expect(result.locale).toBe("en");
+src/i18n/__tests__/request.test.ts:86:    expect(result.locale).toBe("en");
+src/i18n/__tests__/request.test.ts:95:    await runConfig("en");
+src/i18n/__tests__/request.test.ts:108:    const result = (await runConfig("en")) as any;
+src/i18n/__tests__/request.test.ts:126:    const result = (await runConfig("en")) as any;
+src/i18n/__tests__/request.test.ts:129:    expect(result.locale).toBe("en");
+src/config/__tests__/paths.test.ts:26:      const enLocale: Locale = "en";
+src/config/__tests__/paths.test.ts:27:      const zhLocale: Locale = "zh";
+src/config/__tests__/paths.test.ts:29:      expect(enLocale).toBe("en");
+src/config/__tests__/paths.test.ts:30:      expect(zhLocale).toBe("zh");
+src/config/__tests__/paths.test.ts:50:        en: "/test",
+src/config/__tests__/paths.test.ts:51:        zh: "/test",
+src/config/__tests__/paths.test.ts:54:      expect(path.en).toBe("/test");
+src/config/__tests__/paths.test.ts:55:      expect(path.zh).toBe("/test");
+src/config/__tests__/paths.test.ts:77:        expect(paths).toHaveProperty("en");
+src/config/__tests__/paths.test.ts:78:        expect(paths).toHaveProperty("zh");
+src/config/__tests__/paths.test.ts:79:        expect(typeof paths.en).toBe("string");
+src/config/__tests__/paths.test.ts:80:        expect(typeof paths.zh).toBe("string");
+src/config/__tests__/paths.test.ts:88:          expect(paths.en).toMatch(/^\/[a-z/-]+$/);
+src/config/__tests__/paths.test.ts:89:          expect(paths.zh).toMatch(/^\/[a-z/-]+$/);
+src/config/__tests__/paths.test.ts:91:          expect(paths.en).toBe("/");
+src/config/__tests__/paths.test.ts:92:          expect(paths.zh).toBe("/");
+src/config/__tests__/paths.test.ts:100:        expect(paths.en).toBe(paths.zh);
+src/config/__tests__/paths.test.ts:107:        PATHS_CONFIG.home.en = "/changed";
+src/config/__tests__/paths.test.ts:114:      expect(LOCALES_CONFIG.locales).toEqual(["en", "zh"]);
+src/config/__tests__/paths.test.ts:115:      expect(LOCALES_CONFIG.defaultLocale).toBe("en");
+src/config/__tests__/paths.test.ts:119:      expect(LOCALES_CONFIG.prefixes.en).toBe("");
+src/config/__tests__/paths.test.ts:120:      expect(LOCALES_CONFIG.prefixes.zh).toBe("/zh");
+src/config/__tests__/paths.test.ts:124:      expect(LOCALES_CONFIG.displayNames.en).toBe("English");
+src/config/__tests__/paths.test.ts:125:      expect(LOCALES_CONFIG.displayNames.zh).toBe("中文");
+src/config/__tests__/paths.test.ts:129:      expect(LOCALES_CONFIG.timeZones.en).toBe("UTC");
+src/config/__tests__/paths.test.ts:130:      expect(LOCALES_CONFIG.timeZones.zh).toBe("Asia/Shanghai");
+src/config/__tests__/paths.test.ts:136:        LOCALES_CONFIG.defaultLocale = "zh";
+src/config/__tests__/paths.test.ts:190:      expect(getLocalizedPath("home", "en")).toBe("/");
+src/config/__tests__/paths.test.ts:191:      expect(getLocalizedPath("home", "zh")).toBe("/");
+src/config/__tests__/paths.test.ts:192:      expect(getLocalizedPath("about", "en")).toBe("/about");
+src/config/__tests__/paths.test.ts:193:      expect(getLocalizedPath("about", "zh")).toBe("/about");
+src/config/__tests__/paths.test.ts:199:        getLocalizedPath("invalid", "en");
+src/config/__tests__/paths.test.ts:238:      expect(getPageTypeFromPath("/", "en")).toBe("home");
+src/config/__tests__/paths.test.ts:239:      expect(getPageTypeFromPath("", "en")).toBe("home");
+src/config/__tests__/paths.test.ts:240:      expect(getPageTypeFromPath("/about", "en")).toBe("about");
+src/config/__tests__/paths.test.ts:241:      expect(getPageTypeFromPath("/contact", "zh")).toBe("contact");
+src/config/__tests__/paths.test.ts:245:      expect(getPageTypeFromPath("/invalid", "en")).toBeNull();
+src/config/__tests__/paths.test.ts:246:      expect(getPageTypeFromPath("/nonexistent", "zh")).toBeNull();
+src/config/__tests__/paths.test.ts:250:      expect(getPageTypeFromPath("/products", "en")).toBe("products");
+src/config/__tests__/paths.test.ts:251:      expect(getPageTypeFromPath("/products", "zh")).toBe("products");
+src/config/__tests__/paths.test.ts:276:      expect(config.locales).toEqual(["en", "zh"]);
+src/config/__tests__/paths.test.ts:277:      expect(config.defaultLocale).toBe("en");
+src/config/__tests__/paths.test.ts:309:      const locales: Locale[] = ["en", "zh"];
+src/config/__tests__/paths.test.ts:323:      expect(getPageTypeFromPath("", "en")).toBe("home");
+src/config/__tests__/paths.test.ts:324:      expect(getPageTypeFromPath("", "zh")).toBe("home");
+src/config/__tests__/paths.test.ts:328:      expect(getPageTypeFromPath("/about/", "en")).toBeNull();
+src/config/__tests__/paths.test.ts:329:      expect(getPageTypeFromPath("/contact/", "zh")).toBeNull();
+src/config/__tests__/paths.test.ts:333:      expect(getPageTypeFromPath("/about?param=value", "en")).toBeNull();
+src/config/__tests__/paths.test.ts:334:      expect(getPageTypeFromPath("/contact#section", "zh")).toBeNull();
+src/config/__tests__/paths.test.ts:338:      expect(getPageTypeFromPath("/About", "en")).toBeNull();
+src/config/__tests__/paths.test.ts:339:      expect(getPageTypeFromPath("/CONTACT", "zh")).toBeNull();
+src/config/__tests__/paths.test.ts:345:        getPageTypeFromPath(null, "en");
+src/config/__tests__/paths.test.ts:356:      expect(getPageTypeFromPath(longPath, "en")).toBeNull();
+src/config/__tests__/paths.test.ts:368:        expect(getPageTypeFromPath(path, "en")).toBeNull();
+src/config/__tests__/paths.test.ts:428:        getLocalizedPath("home", "en");
+src/config/__tests__/paths.test.ts:430:        getPageTypeFromPath("/about", "en");
+src/config/__tests__/paths.test.ts:452:        getLocalizedPath("about", "en");
+src/config/__tests__/paths.test.ts:453:        getPageTypeFromPath("/contact", "zh");
+src/config/__tests__/paths.test.ts:474:        getLocalizedPath("nonexistent" as PageType, "en");
+src/config/__tests__/paths.test.ts:489:        getLocalizedPath(maliciousPageType, "en");
+src/config/__tests__/paths.test.ts:509:          getLocalizedPath(input as PageType, "en");
+src/config/__tests__/paths.test.ts:588:      const expectedLocales: Locale[] = ["en", "zh"];
+src/i18n/request.ts:32:        currency: locale === "zh" ? "CNY" : "USD",
+src/i18n/request.ts:68:    timeZone: locale === "zh" ? "Asia/Shanghai" : "UTC",
+src/i18n/request.ts:82:    timeZone: locale === "zh" ? "Asia/Shanghai" : "UTC",
+src/lib/content-utils.ts:51:  defaultLocale: "en",
+src/lib/content-utils.ts:52:  supportedLocales: ["en", "zh"],
+src/i18n/routing-config.ts:14:  locales: ["en", "zh"],
+src/i18n/routing-config.ts:17:  defaultLocale: "en",
+src/i18n/routing-config.ts:41:export type Locale = (typeof routing.locales)[number];
+src/lib/mdx-importers.generated.ts:20:  en: {
+src/lib/mdx-importers.generated.ts:22:  zh: {
+src/lib/mdx-importers.generated.ts:27:  en: {
+src/lib/mdx-importers.generated.ts:28:    'about': () => import('@content/pages/en/about.mdx'),
+src/lib/mdx-importers.generated.ts:29:    'bending-machines': () => import('@content/pages/en/bending-machines.mdx'),
+src/lib/mdx-importers.generated.ts:30:    'contact': () => import('@content/pages/en/contact.mdx'),
+src/lib/mdx-importers.generated.ts:31:    'oem-custom-manufacturing': () => import('@content/pages/en/oem-custom-manufacturing.mdx'),
+src/lib/mdx-importers.generated.ts:32:    'privacy': () => import('@content/pages/en/privacy.mdx'),
+src/lib/mdx-importers.generated.ts:33:    'product-market': () => import('@content/pages/en/product-market.mdx'),
+src/lib/mdx-importers.generated.ts:34:    'terms': () => import('@content/pages/en/terms.mdx'),
+src/lib/mdx-importers.generated.ts:36:  zh: {
+src/lib/mdx-importers.generated.ts:37:    'about': () => import('@content/pages/zh/about.mdx'),
+src/lib/mdx-importers.generated.ts:38:    'bending-machines': () => import('@content/pages/zh/bending-machines.mdx'),
+src/lib/mdx-importers.generated.ts:39:    'contact': () => import('@content/pages/zh/contact.mdx'),
+src/lib/mdx-importers.generated.ts:40:    'oem-custom-manufacturing': () => import('@content/pages/zh/oem-custom-manufacturing.mdx'),
+src/lib/mdx-importers.generated.ts:41:    'privacy': () => import('@content/pages/zh/privacy.mdx'),
+src/lib/mdx-importers.generated.ts:42:    'product-market': () => import('@content/pages/zh/product-market.mdx'),
+src/lib/mdx-importers.generated.ts:43:    'terms': () => import('@content/pages/zh/terms.mdx'),
+src/lib/mdx-importers.generated.ts:48:  en: {
+src/lib/mdx-importers.generated.ts:50:  zh: {
+src/config/paths/paths-config.ts:16:    en: "/",
+src/config/paths/paths-config.ts:17:    zh: "/",
+src/config/paths/paths-config.ts:22:    en: "/about",
+src/config/paths/paths-config.ts:23:    zh: "/about",
+src/config/paths/paths-config.ts:27:    en: "/contact",
+src/config/paths/paths-config.ts:28:    zh: "/contact",
+src/config/paths/paths-config.ts:32:    en: "/products",
+src/config/paths/paths-config.ts:33:    zh: "/products",
+src/config/paths/paths-config.ts:38:    en: "/privacy",
+src/config/paths/paths-config.ts:39:    zh: "/privacy",
+src/config/paths/paths-config.ts:43:    en: "/terms",
+src/config/paths/paths-config.ts:44:    zh: "/terms",
+src/config/paths/paths-config.ts:48:    en: "/capabilities/bending-machines",
+src/config/paths/paths-config.ts:49:    zh: "/capabilities/bending-machines",
+src/config/paths/paths-config.ts:53:    en: "/oem-custom-manufacturing",
+src/config/paths/paths-config.ts:54:    zh: "/oem-custom-manufacturing",
+src/lib/i18n/__tests__/route-parsing.property.test.ts:13:  "/en/about",
+src/lib/i18n/__tests__/route-parsing.property.test.ts:14:  "/zh/contact",
+src/lib/i18n/__tests__/route-parsing.property.test.ts:26:    input: "/zh/products/europe",
+src/config/paths/utils.ts:119:  const pathsByLocale: Record<Locale, Set<string>> = {
+src/config/paths/utils.ts:120:    en: new Set(),
+src/config/paths/utils.ts:121:    zh: new Set(),
+src/config/paths/utils.ts:168:    locales: LOCALES_CONFIG.locales,
+src/lib/i18n/__tests__/route-parsing.test.ts:11:    it("matches /en prefix", () => {
+src/lib/i18n/__tests__/route-parsing.test.ts:12:      expect("/en/about".replace(LOCALE_PREFIX_RE, "")).toBe("/about");
+src/lib/i18n/__tests__/route-parsing.test.ts:15:    it("matches /zh prefix", () => {
+src/lib/i18n/__tests__/route-parsing.test.ts:16:      expect("/zh/products/europe".replace(LOCALE_PREFIX_RE, "")).toBe(
+src/lib/i18n/__tests__/route-parsing.test.ts:26:      expect("/en".replace(LOCALE_PREFIX_RE, "")).toBe("");
+src/lib/i18n/__tests__/route-parsing.test.ts:65:    it("strips /en locale prefix", () => {
+src/lib/i18n/__tests__/route-parsing.test.ts:66:      expect(normalizePathnameForLink("/en/about")).toBe("/about");
+src/lib/i18n/__tests__/route-parsing.test.ts:69:    it("strips /zh locale prefix", () => {
+src/lib/i18n/__tests__/route-parsing.test.ts:70:      expect(normalizePathnameForLink("/zh/products/europe")).toBe(
+src/lib/i18n/__tests__/route-parsing.test.ts:80:      expect(normalizePathnameForLink("/en")).toBe("/");
+src/lib/i18n/__tests__/route-parsing.test.ts:81:      expect(normalizePathnameForLink("/zh")).toBe("/");
+src/lib/i18n/__tests__/route-parsing.test.ts:93:      expect(normalizePathnameForLink("/en/products/europe/boxes")).toBe(
+src/lib/i18n/__tests__/route-parsing.test.ts:102:        expect(parsePathnameForLink("/en/about")).toBe("/about");
+src/lib/i18n/__tests__/route-parsing.test.ts:106:        expect(parsePathnameForLink("/zh/contact")).toBe("/contact");
+src/lib/i18n/__tests__/route-parsing.test.ts:110:        expect(parsePathnameForLink("/en")).toBe("/");
+src/lib/i18n/__tests__/route-parsing.test.ts:120:        expect(parsePathnameForLink("/en/products/north-america")).toEqual({
+src/lib/i18n/__tests__/route-parsing.test.ts:144:        expect(parsePathnameForLink("/en/blog")).toBe("/blog");
+src/lib/i18n/__tests__/route-parsing.test.ts:148:        expect(parsePathnameForLink("/zh/products")).toBe("/products");
+src/lib/content/__tests__/mdx-faq.test.ts:52:    const schema = generateFaqSchemaFromItems(items, "en");
+src/lib/content/__tests__/mdx-faq.test.ts:68:    it(`${slug} keeps identical FAQ IDs in en and zh`, async () => {
+src/lib/content/__tests__/mdx-faq.test.ts:69:      const enPage = await getPageBySlug(slug, "en");
+src/lib/content/__tests__/mdx-faq.test.ts:70:      const zhPage = await getPageBySlug(slug, "zh");
+src/config/paths/locales-config.ts:7:  locales: Object.freeze(["en", "zh"] as const),
+src/config/paths/locales-config.ts:8:  defaultLocale: "en" as const,
+src/config/paths/locales-config.ts:12:    en: "", // 默认语言不需要前缀
+src/config/paths/locales-config.ts:13:    zh: "/zh",
+src/config/paths/locales-config.ts:18:    en: "English",
+src/config/paths/locales-config.ts:19:    zh: "中文",
+src/config/paths/locales-config.ts:24:    en: "UTC",
+src/config/paths/locales-config.ts:25:    zh: "Asia/Shanghai",
+src/lib/content/__tests__/legal-page.test.ts:30:      filePath: "content/pages/en/privacy.mdx",
+src/lib/content/__tests__/legal-page.test.ts:33:    const result = await loadLegalPage("privacy", "en");
+src/lib/content/__tests__/legal-page.test.ts:50:      filePath: "content/pages/en/terms.mdx",
+src/lib/content/__tests__/legal-page.test.ts:53:    const result = await loadLegalPage("terms", "en");
+src/lib/content/__tests__/legal-page.test.ts:66:      filePath: "content/pages/en/terms.mdx",
+src/lib/content/__tests__/legal-page.test.ts:69:    const result = await loadLegalPage("terms", "en");
+src/lib/content/page-dates.ts:26:    routing.locales.map(async (locale) => {
+src/config/single-site-seo.ts:27:  (paths) => (paths.en === "/" ? "" : paths.en),
+src/lib/i18n/server/__tests__/getTranslationsCached.test.ts:51:      locale: "en",
+src/lib/i18n/route-parsing.ts:78: * "/en/about".replace(LOCALE_PREFIX_RE, "") // → "/about"
+src/lib/i18n/route-parsing.ts:79: * "/zh/products/europe".replace(LOCALE_PREFIX_RE, "") // → "/products/europe"
+src/lib/i18n/route-parsing.ts:86:const LOCALE_PREFIX_PATTERN = routing.locales
+src/lib/i18n/route-parsing.ts:104: * normalizePathnameForLink("/en/about")  // → "/about"
+src/lib/i18n/route-parsing.ts:105: * normalizePathnameForLink("/zh/")       // → "/"
+src/lib/i18n/route-parsing.ts:130: * parsePathnameForLink("/en/about")
+src/lib/i18n/route-parsing.ts:134: * parsePathnameForLink("/zh/products/europe")
+src/lib/content-parser.ts:309:  // (e.g. content/pages/en, content/posts/zh). This matches the actual
+src/lib/content-parser.ts:338:      // locale in the filename (e.g. about.mdx under /en). We still keep the
+src/lib/content-parser.ts:350:        !normalized.includes(".en.") && !normalized.includes(".zh.");
+src/constants/equipment-specs.ts:9:  highlights: Record<Locale, string[]>;
+src/constants/equipment-specs.ts:28:      en: [
+src/constants/equipment-specs.ts:34:      zh: ["CNC 控制系统", "自动送料", "多工位设计", "远程诊断"],
+src/constants/equipment-specs.ts:50:      en: [
+src/constants/equipment-specs.ts:56:      zh: ["精密温控", "可调弯管角度", "快换模具系统", "安全防护功能"],
+src/lib/content-manifest.generated.ts:31:    "locale": "en",
+src/lib/content-manifest.generated.ts:34:    "filePath": "/content/pages/en/about.mdx",
+src/lib/content-manifest.generated.ts:35:    "relativePath": "content/pages/en/about.mdx",
+src/lib/content-manifest.generated.ts:37:      "locale": "en",
+src/lib/content-manifest.generated.ts:126:    "locale": "en",
+src/lib/content-manifest.generated.ts:129:    "filePath": "/content/pages/en/bending-machines.mdx",
+src/lib/content-manifest.generated.ts:130:    "relativePath": "content/pages/en/bending-machines.mdx",
+src/lib/content-manifest.generated.ts:132:      "locale": "en",
+src/lib/content-manifest.generated.ts:171:    "locale": "en",
+src/lib/content-manifest.generated.ts:174:    "filePath": "/content/pages/en/contact.mdx",
+src/lib/content-manifest.generated.ts:175:    "relativePath": "content/pages/en/contact.mdx",
+src/lib/content-manifest.generated.ts:177:      "locale": "en",
+src/lib/content-manifest.generated.ts:221:    "locale": "en",
+src/lib/content-manifest.generated.ts:224:    "filePath": "/content/pages/en/oem-custom-manufacturing.mdx",
+src/lib/content-manifest.generated.ts:225:    "relativePath": "content/pages/en/oem-custom-manufacturing.mdx",
+src/lib/content-manifest.generated.ts:227:      "locale": "en",
+src/lib/content-manifest.generated.ts:271:    "locale": "en",
+src/lib/content-manifest.generated.ts:274:    "filePath": "/content/pages/en/privacy.mdx",
+src/lib/content-manifest.generated.ts:275:    "relativePath": "content/pages/en/privacy.mdx",
+src/lib/content-manifest.generated.ts:277:      "locale": "en",
+src/lib/content-manifest.generated.ts:304:    "locale": "en",
+src/lib/content-manifest.generated.ts:307:    "filePath": "/content/pages/en/product-market.mdx",
+src/lib/content-manifest.generated.ts:308:    "relativePath": "content/pages/en/product-market.mdx",
+src/lib/content-manifest.generated.ts:310:      "locale": "en",
+src/lib/content-manifest.generated.ts:389:    "locale": "en",
+src/lib/content-manifest.generated.ts:392:    "filePath": "/content/pages/en/terms.mdx",
+src/lib/content-manifest.generated.ts:393:    "relativePath": "content/pages/en/terms.mdx",
+src/lib/content-manifest.generated.ts:395:      "locale": "en",
+src/lib/content-manifest.generated.ts:422:    "locale": "zh",
+src/lib/content-manifest.generated.ts:425:    "filePath": "/content/pages/zh/about.mdx",
+src/lib/content-manifest.generated.ts:426:    "relativePath": "content/pages/zh/about.mdx",
+src/lib/content-manifest.generated.ts:428:      "locale": "zh",
+src/lib/content-manifest.generated.ts:517:    "locale": "zh",
+src/lib/content-manifest.generated.ts:520:    "filePath": "/content/pages/zh/bending-machines.mdx",
+src/lib/content-manifest.generated.ts:521:    "relativePath": "content/pages/zh/bending-machines.mdx",
+src/lib/content-manifest.generated.ts:523:      "locale": "zh",
+src/lib/content-manifest.generated.ts:562:    "locale": "zh",
+src/lib/content-manifest.generated.ts:565:    "filePath": "/content/pages/zh/contact.mdx",
+src/lib/content-manifest.generated.ts:566:    "relativePath": "content/pages/zh/contact.mdx",
+src/lib/content-manifest.generated.ts:568:      "locale": "zh",
+src/lib/content-manifest.generated.ts:612:    "locale": "zh",
+src/lib/content-manifest.generated.ts:615:    "filePath": "/content/pages/zh/oem-custom-manufacturing.mdx",
+src/lib/content-manifest.generated.ts:616:    "relativePath": "content/pages/zh/oem-custom-manufacturing.mdx",
+src/lib/content-manifest.generated.ts:618:      "locale": "zh",
+src/lib/content-manifest.generated.ts:662:    "locale": "zh",
+src/lib/content-manifest.generated.ts:665:    "filePath": "/content/pages/zh/privacy.mdx",
+src/lib/content-manifest.generated.ts:666:    "relativePath": "content/pages/zh/privacy.mdx",
+src/lib/content-manifest.generated.ts:668:      "locale": "zh",
+src/lib/content-manifest.generated.ts:695:    "locale": "zh",
+src/lib/content-manifest.generated.ts:698:    "filePath": "/content/pages/zh/product-market.mdx",
+src/lib/content-manifest.generated.ts:699:    "relativePath": "content/pages/zh/product-market.mdx",
+src/lib/content-manifest.generated.ts:701:      "locale": "zh",
+src/lib/content-manifest.generated.ts:780:    "locale": "zh",
+src/lib/content-manifest.generated.ts:783:    "filePath": "/content/pages/zh/terms.mdx",
+src/lib/content-manifest.generated.ts:784:    "relativePath": "content/pages/zh/terms.mdx",
+src/lib/content-manifest.generated.ts:786:      "locale": "zh",
+src/lib/content-manifest.generated.ts:814:  "pages/en/about": 0,
+src/lib/content-manifest.generated.ts:815:  "pages/en/bending-machines": 1,
+src/lib/content-manifest.generated.ts:816:  "pages/en/contact": 2,
+src/lib/content-manifest.generated.ts:817:  "pages/en/oem-custom-manufacturing": 3,
+src/lib/content-manifest.generated.ts:818:  "pages/en/privacy": 4,
+src/lib/content-manifest.generated.ts:819:  "pages/en/product-market": 5,
+src/lib/content-manifest.generated.ts:820:  "pages/en/terms": 6,
+src/lib/content-manifest.generated.ts:821:  "pages/zh/about": 7,
+src/lib/content-manifest.generated.ts:822:  "pages/zh/bending-machines": 8,

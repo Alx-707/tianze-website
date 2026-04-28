@@ -1,9 +1,45 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it, vi } from "vitest";
 
 const mutationCheck =
   await import("../../../scripts/check-mutation-required.js");
 
 describe("check-mutation-required", () => {
+  describe("suggested mutation commands", () => {
+    const packageJson = JSON.parse(readFileSync("package.json", "utf8")) as {
+      scripts: Record<string, string>;
+    };
+
+    function extractPnpmScripts(command: string): string[] {
+      return command
+        .split("&&")
+        .map((part) => part.trim())
+        .map((part) => part.match(/^pnpm (?<script>[^\s]+)$/)?.groups?.script)
+        .filter((script): script is string => Boolean(script));
+    }
+
+    it.each([
+      [["src/lib/lead-pipeline/"], "lead only"],
+      [["src/lib/security/"], "security only"],
+      [["src/lib/form-schema/"], "form schema"],
+      [["src/lib/lead-pipeline/", "src/lib/security/"], "lead and security"],
+    ])("only suggests package scripts that exist for %s", (directories) => {
+      const command = mutationCheck.getSuggestedMutationCommand(directories);
+      const scripts = extractPnpmScripts(command);
+
+      expect(scripts).not.toHaveLength(0);
+      expect(scripts).toEqual(
+        scripts.filter((script) => script in packageJson.scripts),
+      );
+    });
+
+    it("uses one comma-separated mutate scope for the combined lead-security script", () => {
+      expect(packageJson.scripts["test:mutation:lead-security"]).toBe(
+        "stryker run --mutate 'src/lib/lead-pipeline/**/*.ts,src/lib/security/**/*.ts'",
+      );
+    });
+  });
+
   describe("getLatestRelevantChangeTimestampMs", () => {
     beforeEach(() => {
       vi.clearAllMocks();

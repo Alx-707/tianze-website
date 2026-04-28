@@ -1,0 +1,4 @@
+/en/products 200 text/html; charset=utf-8
+/zh/products 200 text/html; charset=utf-8
+/en/products/north-america 200 text/html; charset=utf-8
+/zh/products/north-america 200 text/html; charset=utf-8

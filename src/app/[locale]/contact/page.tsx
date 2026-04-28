@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import { setRequestLocale } from "next-intl/server";
-import { ContactForm } from "@/components/contact/contact-form";
+import { ContactFormIsland } from "@/components/contact/contact-form-island";
 import { FaqAccordion } from "@/components/sections/faq-accordion";
 import { JsonLdGraphScript } from "@/components/seo";
 import { Card } from "@/components/ui/card";
@@ -228,10 +228,14 @@ function ContactFormStaticFallback({
     <Card className="mx-auto w-full max-w-2xl">
       <form
         aria-busy="true"
+        aria-label={pick("title", "Contact form")}
         className="space-y-6 p-6"
         data-contact-form-fallback="static"
         noValidate
       >
+        <p className="text-sm text-muted-foreground">
+          {pick("description", "Loading the secure inquiry form.")}
+        </p>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div className="space-y-2">
             <label className="text-sm" htmlFor="firstName">
@@ -354,10 +358,52 @@ function getStaticContactPage(locale: Locale): Page {
   } as unknown as Page;
 }
 
+function ContactPageHeader({ page }: { page: Page }) {
+  return (
+    <header className="mb-12 text-center">
+      <h1 className="text-heading mb-4">{page.metadata.title}</h1>
+      {page.metadata.description ? (
+        <p className="text-body mx-auto max-w-2xl text-muted-foreground">
+          {page.metadata.description}
+        </p>
+      ) : null}
+    </header>
+  );
+}
+
+function ContactPageFallback({ locale }: { locale: Locale }) {
+  const page = getStaticContactPage(locale);
+  const messages = getStaticMessages(locale);
+
+  return (
+    <main
+      aria-busy="true"
+      className="notranslate min-h-[80vh] px-4 py-16"
+      data-testid="contact-page-fallback"
+      translate="no"
+    >
+      <div className="mx-auto max-w-4xl">
+        <ContactPageHeader page={page} />
+        <ContactFormStaticFallback messages={messages} />
+      </div>
+    </main>
+  );
+}
+
 function ContactContentBody({ locale }: { locale: Locale }) {
   const page = getStaticContactPage(locale);
   const messages = getStaticMessages(locale);
   const copy = getContactCopyFromMessages(messages);
+  const formLoadError = pickContactFormCopy(
+    messages,
+    "loadError",
+    "The secure inquiry form could not load. Retry, or use the contact methods on this page.",
+  );
+  const formRetryLabel = pickContactFormCopy(
+    messages,
+    "retryLoad",
+    "Retry loading form",
+  );
   const faqItems: FaqItem[] = extractFaqFromMetadata(page.metadata).map(
     (item) => ({
       ...item,
@@ -380,25 +426,18 @@ function ContactContentBody({ locale }: { locale: Locale }) {
     >
       <JsonLdGraphScript locale={locale} data={faqSchema ? [faqSchema] : []} />
       <div className="mx-auto max-w-4xl">
-        <header className="mb-12 text-center">
-          <h1 className="text-heading mb-4">{page.metadata.title}</h1>
-          {page.metadata.description ? (
-            <p className="text-body mx-auto max-w-2xl text-muted-foreground">
-              {page.metadata.description}
-            </p>
-          ) : null}
-        </header>
+        <ContactPageHeader page={page} />
 
         <article className="prose mb-12 max-w-none">
           {renderLegalContent(page.content)}
         </article>
 
         <div className="grid gap-8 md:grid-cols-2">
-          <Suspense
+          <ContactFormIsland
+            errorMessage={formLoadError}
             fallback={<ContactFormStaticFallback messages={messages} />}
-          >
-            <ContactForm />
-          </Suspense>
+            retryLabel={formRetryLabel}
+          />
 
           <div className="space-y-6">
             <ContactMethodsCard copy={copy.panel.contact} />
@@ -419,7 +458,12 @@ function ContactContentBody({ locale }: { locale: Locale }) {
 
 export default async function ContactPage({ params }: ContactPageProps) {
   const { locale } = await params;
-  setRequestLocale(locale);
+  const typedLocale = locale as Locale;
+  setRequestLocale(typedLocale);
 
-  return <ContactContentBody locale={locale as Locale} />;
+  return (
+    <Suspense fallback={<ContactPageFallback locale={typedLocale} />}>
+      <ContactContentBody locale={typedLocale} />
+    </Suspense>
+  );
 }

@@ -1,5 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import type { Page } from "@playwright/test";
+import type { ImpactValue, Result, RunOptions } from "axe-core";
 
 /**
  * 使用 AxeBuilder 封装的可访问性检查工具，替代旧版 checkA11y/injectAxe API。
@@ -17,22 +18,136 @@ export interface AxeCheckOptions {
   detailedReportOptions?: {
     html?: boolean;
   };
-  /** 透传给 axe-core 的运行选项，便于后续扩展（当前类型放宽为 unknown 以兼容测试调用） */
-  axeOptions?: unknown;
+  /** 透传给 axe-core 的运行选项，便于按调用点关闭已知噪音规则 */
+  axeOptions?: RunOptions;
   /** 仅关注的影响级别，例如 ['critical', 'serious'] */
-  includedImpacts?: string[];
+  includedImpacts?: NonNullable<ImpactValue>[];
 }
 
-/**
- * 在给定页面上运行 axe-core 可访问性检查。
- * 当前实现以“整页扫描”为主，context 与高级选项仅用于签名兼容，
- * 后续如需更精细的范围控制可以在此基础上扩展。
- */
+const MAX_CSS_ANIMATION_SETTLE_MS = 1_200;
+
+function formatViolationNode(node: Result["nodes"][number]): string {
+  const target = node.target.join(", ");
+  const summary = node.failureSummary ?? node.html;
+
+  return `    - ${target}: ${summary}`;
+}
+
+function formatViolation(violation: Result): string {
+  const nodes = violation.nodes.slice(0, 3).map(formatViolationNode).join("\n");
+
+  return [
+    `  ${violation.id} (${violation.impact ?? "unknown"}): ${violation.help}`,
+    `    ${violation.helpUrl}`,
+    nodes,
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
+
+function getRelevantViolations(
+  violations: Result[],
+  includedImpacts?: NonNullable<ImpactValue>[],
+): Result[] {
+  if (!includedImpacts || includedImpacts.length === 0) {
+    return violations;
+  }
+
+  return violations.filter(
+    (violation) =>
+      violation.impact !== null &&
+      violation.impact !== undefined &&
+      includedImpacts.includes(violation.impact),
+  );
+}
+
+async function waitForFiniteCssAnimations(
+  page: Page,
+  context?: string,
+): Promise<void> {
+  await page.evaluate(
+    async ({ maxWaitMs, context }) => {
+      if (typeof document.getAnimations !== "function") {
+        return;
+      }
+
+      const animationRoots = context
+        ? Array.from(document.querySelectorAll(context))
+        : [document];
+      if (animationRoots.length === 0) {
+        return;
+      }
+
+      const animations = new Set<Animation>();
+      for (const animationRoot of animationRoots) {
+        for (const animation of animationRoot.getAnimations({
+          subtree: true,
+        })) {
+          animations.add(animation);
+        }
+      }
+
+      const activeAnimations = Array.from(animations).filter((animation) => {
+        if (
+          animation.playState === "finished" ||
+          animation.playState === "idle" ||
+          !animation.effect
+        ) {
+          return false;
+        }
+
+        const endTime = animation.effect.getComputedTiming().endTime;
+        return (
+          typeof endTime === "number" && endTime > 0 && Number.isFinite(endTime)
+        );
+      });
+
+      if (activeAnimations.length === 0) {
+        return;
+      }
+
+      await Promise.race([
+        Promise.allSettled(
+          activeAnimations.map((animation) =>
+            animation.finished.catch(() => undefined),
+          ),
+        ),
+        new Promise((resolve) => window.setTimeout(resolve, maxWaitMs)),
+      ]);
+    },
+    { context, maxWaitMs: MAX_CSS_ANIMATION_SETTLE_MS },
+  );
+}
+
 export async function checkA11y(
   page: Page,
-  _context?: unknown,
-  _options?: AxeCheckOptions,
+  context?: string,
+  options?: AxeCheckOptions,
 ): Promise<void> {
+  await waitForFiniteCssAnimations(page, context);
+
   const builder = new AxeBuilder({ page });
-  await builder.analyze();
+
+  if (context) {
+    builder.include(context);
+  }
+
+  if (options?.axeOptions) {
+    builder.options(options.axeOptions);
+  }
+
+  const results = await builder.analyze();
+  const violations = getRelevantViolations(
+    results.violations,
+    options?.includedImpacts,
+  );
+
+  if (violations.length > 0) {
+    throw new Error(
+      [
+        `Axe accessibility violations found: ${violations.length}`,
+        ...violations.map(formatViolation),
+      ].join("\n\n"),
+    );
+  }
 }

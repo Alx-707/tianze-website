@@ -1,0 +1,16 @@
+messages/en/critical.json:692:  "underConstruction": {
+messages/zh/critical.json:692:  "underConstruction": {
+src/test/utils.tsx:99: * - `underConstruction`: 施工中页面 (title, subtitle, comingSoon, etc.)
+src/test/utils.tsx:113: *   underConstructionMessages,
+src/test/constants/mock-messages-zh.ts:295:export const underConstructionMessages = {
+src/test/constants/mock-messages-zh.ts:326:  underConstruction: underConstructionMessages,
+src/test/constants/mock-messages-zh.ts:341:export type UnderConstructionMessagesZh = typeof underConstructionMessages;
+src/test/constants/mock-messages.ts:315:export const underConstructionMessages = {
+src/test/constants/mock-messages.ts:349:  underConstruction: underConstructionMessages,
+src/test/constants/mock-messages.ts:364:export type UnderConstructionMessages = typeof underConstructionMessages;
+src/lib/i18n/server/__tests__/getTranslationsCached.test.ts:52:      namespace: "underConstruction.pages.contact",
+src/lib/contact/getContactCopy.ts:69:  ["underConstruction", "pages", "contact"],
+src/lib/contact/getContactCopy.ts:154: * falls back to the legacy `underConstruction.pages.contact.*` namespace.
+src/lib/__tests__/contact-get-contact-copy.test.ts:47:    underConstruction: {
+src/lib/__tests__/contact-get-contact-copy.test.ts:102:      underConstruction: {
+src/lib/__tests__/contact-get-contact-copy.test.ts:135:  it("keeps the legacy underConstruction contact namespace as a compatibility fallback", async () => {

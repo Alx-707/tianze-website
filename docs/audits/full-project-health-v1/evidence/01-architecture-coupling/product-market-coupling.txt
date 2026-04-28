@@ -1,0 +1,220 @@
+messages/en/critical.json:192:        "link": "/products/pneumatic-tube-systems"
+messages/en/critical.json:987:      "north-america": {
+messages/en/critical.json:991:      "australia-new-zealand": {
+messages/en/critical.json:1003:      "pneumatic-tube-systems": {
+messages/en/critical.json:1009:      "north-america": {
+messages/en/critical.json:1023:      "australia-new-zealand": {
+messages/en/critical.json:1069:      "pneumatic-tube-systems": {
+messages/en/critical.json:1093:      "north-america": {
+messages/en/critical.json:1157:      "australia-new-zealand": {
+messages/en/critical.json:1374:      "pneumatic-tube-systems": {
+messages/zh/critical.json:192:        "link": "/products/pneumatic-tube-systems"
+messages/zh/critical.json:998:      "australia-new-zealand": {
+messages/zh/critical.json:1044:      "north-america": {
+messages/zh/critical.json:1058:      "pneumatic-tube-systems": {
+messages/zh/critical.json:1070:      "australia-new-zealand": {
+messages/zh/critical.json:1082:      "north-america": {
+messages/zh/critical.json:1086:      "pneumatic-tube-systems": {
+messages/zh/critical.json:1111:      "australia-new-zealand": {
+messages/zh/critical.json:1328:      "north-america": {
+messages/zh/critical.json:1392:      "pneumatic-tube-systems": {
+messages/en.json:192:        "link": "/products/pneumatic-tube-systems"
+messages/en.json:987:      "north-america": {
+messages/en.json:991:      "australia-new-zealand": {
+messages/en.json:1003:      "pneumatic-tube-systems": {
+messages/en.json:1009:      "north-america": {
+messages/en.json:1023:      "australia-new-zealand": {
+messages/en.json:1069:      "pneumatic-tube-systems": {
+messages/en.json:1093:      "north-america": {
+messages/en.json:1157:      "australia-new-zealand": {
+messages/en.json:1374:      "pneumatic-tube-systems": {
+messages/zh.json:192:        "link": "/products/pneumatic-tube-systems"
+messages/zh.json:998:      "australia-new-zealand": {
+messages/zh.json:1044:      "north-america": {
+messages/zh.json:1058:      "pneumatic-tube-systems": {
+messages/zh.json:1070:      "australia-new-zealand": {
+messages/zh.json:1082:      "north-america": {
+messages/zh.json:1086:      "pneumatic-tube-systems": {
+messages/zh.json:1111:      "australia-new-zealand": {
+messages/zh.json:1328:      "north-america": {
+messages/zh.json:1392:      "pneumatic-tube-systems": {
+src/config/single-site-product-catalog.ts:9:    slug: "north-america",
+src/config/single-site-product-catalog.ts:19:    slug: "australia-new-zealand",
+src/config/single-site-product-catalog.ts:49:    slug: "pneumatic-tube-systems",
+src/config/single-site-product-catalog.ts:66:    marketSlug: "north-america",
+src/config/single-site-product-catalog.ts:73:    marketSlug: "north-america",
+src/config/single-site-product-catalog.ts:80:    marketSlug: "north-america",
+src/config/single-site-product-catalog.ts:87:    marketSlug: "australia-new-zealand",
+src/config/single-site-product-catalog.ts:94:    marketSlug: "australia-new-zealand",
+src/config/single-site-product-catalog.ts:101:    marketSlug: "australia-new-zealand",
+src/config/single-site-product-catalog.ts:108:    marketSlug: "australia-new-zealand",
+src/config/single-site-product-catalog.ts:153:    marketSlug: "pneumatic-tube-systems",
+src/config/single-site-product-catalog.ts:159:    marketSlug: "pneumatic-tube-systems",
+src/constants/product-specs/europe.ts:3:export const EUROPE_SPECS = {
+src/constants/product-specs/pneumatic-tube-systems.ts:3:export const PNEUMATIC_SPECS = {
+src/lib/i18n/__tests__/route-parsing.property.test.ts:19:    input: "/products/north-america",
+src/lib/i18n/__tests__/route-parsing.property.test.ts:22:      params: { market: "north-america" },
+src/constants/product-specs/__tests__/pneumatic-tube-systems.test.ts:2:import { PNEUMATIC_SPECS } from "../pneumatic-tube-systems";
+src/constants/product-specs/__tests__/pneumatic-tube-systems.test.ts:8:      const specs: MarketSpecs = PNEUMATIC_SPECS;
+src/constants/product-specs/__tests__/pneumatic-tube-systems.test.ts:13:      expect(PNEUMATIC_SPECS.technical).toHaveProperty("material");
+src/constants/product-specs/__tests__/pneumatic-tube-systems.test.ts:14:      expect(PNEUMATIC_SPECS.technical.material).toMatch(/PETG/i);
+src/constants/product-specs/__tests__/pneumatic-tube-systems.test.ts:18:      expect(PNEUMATIC_SPECS.certifications).toContain("ISO 9001:2015");
+src/constants/product-specs/__tests__/pneumatic-tube-systems.test.ts:22:      expect(PNEUMATIC_SPECS.trade.moq).toMatch(/meter/i);
+src/constants/product-specs/__tests__/pneumatic-tube-systems.test.ts:23:      expect(PNEUMATIC_SPECS.trade.leadTime).toBeDefined();
+src/constants/product-specs/__tests__/pneumatic-tube-systems.test.ts:24:      expect(PNEUMATIC_SPECS.trade.portOfLoading).toBeDefined();
+src/constants/product-specs/__tests__/pneumatic-tube-systems.test.ts:28:      expect(PNEUMATIC_SPECS.families).toHaveLength(2);
+src/constants/product-specs/__tests__/pneumatic-tube-systems.test.ts:29:      const slugs = PNEUMATIC_SPECS.families.map((f) => f.slug);
+src/constants/product-specs/__tests__/pneumatic-tube-systems.test.ts:35:      const petgTubes = PNEUMATIC_SPECS.families.find(
+src/constants/product-specs/__tests__/pneumatic-tube-systems.test.ts:44:      const fittings = PNEUMATIC_SPECS.families.find(
+src/constants/product-specs/__tests__/pneumatic-tube-systems.test.ts:52:      const petgTubes = PNEUMATIC_SPECS.families.find(
+src/constants/product-specs/__tests__/pneumatic-tube-systems.test.ts:61:      for (const family of PNEUMATIC_SPECS.families) {
+src/constants/product-specs/__tests__/pneumatic-tube-systems.test.ts:71:      expect(PNEUMATIC_SPECS.technical).toHaveProperty("transparency");
+src/constants/product-specs/__tests__/pneumatic-tube-systems.test.ts:72:      expect(PNEUMATIC_SPECS.technical).toHaveProperty("maxWorkingPressure");
+src/constants/product-specs/__tests__/pneumatic-tube-systems.test.ts:73:      expect(PNEUMATIC_SPECS.technical).toHaveProperty("temperatureRange");
+src/config/__tests__/single-site-seo.test.ts:27:    expect(SINGLE_SITE_SITEMAP_PAGE_CONFIG.productMarket).toEqual({
+src/lib/i18n/__tests__/route-parsing.test.ts:39:        p.pattern.test("/products/north-america"),
+src/lib/i18n/__tests__/route-parsing.test.ts:42:      const match = "/products/north-america".match(marketPattern!.pattern)!;
+src/lib/i18n/__tests__/route-parsing.test.ts:45:        params: { market: "north-america" },
+src/lib/i18n/__tests__/route-parsing.test.ts:58:        p.pattern.test("/products/north-america/bends/extra"),
+src/lib/i18n/__tests__/route-parsing.test.ts:120:        expect(parsePathnameForLink("/en/products/north-america")).toEqual({
+src/lib/i18n/__tests__/route-parsing.test.ts:122:          params: { market: "north-america" },
+src/config/__tests__/single-site-page-expression.test.ts:118:    expect(SINGLE_SITE_PRODUCTS_PAGE_EXPRESSION.marketLanding.ctaHref).toBe(
+src/constants/product-specs/__tests__/mexico.test.ts:2:import { MEXICO_SPECS } from "../mexico";
+src/constants/product-specs/__tests__/mexico.test.ts:7:    const specs: MarketSpecs = MEXICO_SPECS;
+src/constants/product-specs/__tests__/mexico.test.ts:12:    expect(MEXICO_SPECS.certifications).toContain("NOM-001-SEDE");
+src/constants/product-specs/__tests__/mexico.test.ts:16:    const firstFamily = MEXICO_SPECS.families[0]!;
+src/constants/product-specs/__tests__/mexico.test.ts:22:    const bends = MEXICO_SPECS.families.find(
+src/constants/product-specs/__tests__/mexico.test.ts:31:    const slugs = MEXICO_SPECS.families.map((f) => f.slug);
+src/constants/product-specs/__tests__/mexico.test.ts:36:    expect(MEXICO_SPECS.families).toHaveLength(3);
+src/constants/product-specs/__tests__/mexico.test.ts:37:    const slugs = MEXICO_SPECS.families.map((f) => f.slug);
+src/constants/product-specs/__tests__/mexico.test.ts:44:    const bends = MEXICO_SPECS.families.find(
+src/constants/product-specs/__tests__/mexico.test.ts:51:    for (const family of MEXICO_SPECS.families) {
+src/lib/i18n/route-parsing.ts:42:  productMarket: (match) => ({
+src/lib/i18n/route-parsing.ts:43:    pathname: DYNAMIC_PATHS_CONFIG.productMarket.pattern,
+src/config/paths/paths-config.ts:60:  productMarket: Object.freeze({
+src/constants/product-specs/__tests__/north-america.test.ts:2:import { NORTH_AMERICA_SPECS } from "../north-america";
+src/constants/product-specs/__tests__/north-america.test.ts:8:      const specs: MarketSpecs = NORTH_AMERICA_SPECS;
+src/constants/product-specs/__tests__/north-america.test.ts:13:      expect(NORTH_AMERICA_SPECS.technical).toHaveProperty("material");
+src/constants/product-specs/__tests__/north-america.test.ts:14:      expect(NORTH_AMERICA_SPECS.technical).toHaveProperty("temperatureRange");
+src/constants/product-specs/__tests__/north-america.test.ts:18:      expect(NORTH_AMERICA_SPECS.certifications).toContain("UL 651");
+src/constants/product-specs/__tests__/north-america.test.ts:19:      expect(NORTH_AMERICA_SPECS.certifications).toContain("ASTM D1785");
+src/constants/product-specs/__tests__/north-america.test.ts:23:      expect(NORTH_AMERICA_SPECS.trade.moq).toBeDefined();
+src/constants/product-specs/__tests__/north-america.test.ts:24:      expect(NORTH_AMERICA_SPECS.trade.leadTime).toBeDefined();
+src/constants/product-specs/__tests__/north-america.test.ts:25:      expect(NORTH_AMERICA_SPECS.trade.portOfLoading).toBeDefined();
+src/constants/product-specs/__tests__/north-america.test.ts:29:      expect(NORTH_AMERICA_SPECS.families).toHaveLength(3);
+src/constants/product-specs/__tests__/north-america.test.ts:30:      const slugs = NORTH_AMERICA_SPECS.families.map((f) => f.slug);
+src/constants/product-specs/__tests__/north-america.test.ts:37:      const sweeps = NORTH_AMERICA_SPECS.families.find(
+src/constants/product-specs/__tests__/north-america.test.ts:46:      for (const family of NORTH_AMERICA_SPECS.families) {
+src/constants/product-specs/__tests__/north-america.test.ts:52:      for (const family of NORTH_AMERICA_SPECS.families) {
+src/config/paths/types.ts:26:export type DynamicPageType = "productMarket";
+src/constants/product-specs/__tests__/i18n-parity.test.ts:3:import { NORTH_AMERICA_SPECS } from "@/constants/product-specs/north-america";
+src/constants/product-specs/__tests__/i18n-parity.test.ts:4:import { AUSTRALIA_NZ_SPECS } from "@/constants/product-specs/australia-new-zealand";
+src/constants/product-specs/__tests__/i18n-parity.test.ts:5:import { MEXICO_SPECS } from "@/constants/product-specs/mexico";
+src/constants/product-specs/__tests__/i18n-parity.test.ts:6:import { EUROPE_SPECS } from "@/constants/product-specs/europe";
+src/constants/product-specs/__tests__/i18n-parity.test.ts:7:import { PNEUMATIC_SPECS } from "@/constants/product-specs/pneumatic-tube-systems";
+src/constants/product-specs/__tests__/i18n-parity.test.ts:19: * Example: getNestedValue(obj, "catalog.markets.north-america.label")
+src/constants/product-specs/__tests__/i18n-parity.test.ts:39:const SPECS_BY_MARKET: Record<string, MarketSpecs> = {
+src/constants/product-specs/__tests__/i18n-parity.test.ts:40:  "north-america": NORTH_AMERICA_SPECS,
+src/constants/product-specs/__tests__/i18n-parity.test.ts:41:  "australia-new-zealand": AUSTRALIA_NZ_SPECS,
+src/constants/product-specs/__tests__/i18n-parity.test.ts:42:  mexico: MEXICO_SPECS,
+src/constants/product-specs/__tests__/i18n-parity.test.ts:43:  europe: EUROPE_SPECS,
+src/constants/product-specs/__tests__/i18n-parity.test.ts:44:  "pneumatic-tube-systems": PNEUMATIC_SPECS,
+src/constants/product-specs/__tests__/i18n-parity.test.ts:109:      for (const specs of Object.values(SPECS_BY_MARKET)) {
+src/constants/product-specs/__tests__/i18n-parity.test.ts:133:      for (const [marketSlug, specs] of Object.entries(SPECS_BY_MARKET)) {
+src/constants/product-specs/__tests__/i18n-parity.test.ts:155:      for (const [marketSlug, specs] of Object.entries(SPECS_BY_MARKET)) {
+src/constants/product-specs/__tests__/europe.test.ts:2:import { EUROPE_SPECS } from "../europe";
+src/constants/product-specs/__tests__/europe.test.ts:7:    const specs: MarketSpecs = EUROPE_SPECS;
+src/constants/product-specs/__tests__/europe.test.ts:12:    expect(EUROPE_SPECS.certifications).toContain("IEC 61386");
+src/constants/product-specs/__tests__/europe.test.ts:16:    const firstFamily = EUROPE_SPECS.families[0]!;
+src/constants/product-specs/__tests__/europe.test.ts:22:    const bends = EUROPE_SPECS.families.find(
+src/constants/product-specs/__tests__/europe.test.ts:32:    expect(EUROPE_SPECS.families).toHaveLength(3);
+src/constants/product-specs/__tests__/europe.test.ts:33:    const slugs = EUROPE_SPECS.families.map((f) => f.slug);
+src/constants/product-specs/__tests__/europe.test.ts:40:    const bends = EUROPE_SPECS.families.find(
+src/constants/product-specs/__tests__/europe.test.ts:47:    for (const family of EUROPE_SPECS.families) {
+src/config/single-site-page-expression.ts:15: * - `products/[market]/page.tsx` `SPECS_BY_MARKET`
+src/config/single-site-page-expression.ts:116:const PNEUMATIC_MARKET_SLUG = "pneumatic-tube-systems" as const;
+src/config/single-site-page-expression.ts:120:  .filter((slug) => slug !== PNEUMATIC_MARKET_SLUG);
+src/config/single-site-page-expression.ts:124:  specialtyMarketSlug: PNEUMATIC_MARKET_SLUG,
+src/config/single-site-page-expression.ts:125:  marketLanding: {
+src/constants/product-specs/__tests__/australia-new-zealand.test.ts:2:import { AUSTRALIA_NZ_SPECS } from "../australia-new-zealand";
+src/constants/product-specs/__tests__/australia-new-zealand.test.ts:7:    const specs: MarketSpecs = AUSTRALIA_NZ_SPECS;
+src/constants/product-specs/__tests__/australia-new-zealand.test.ts:12:    expect(AUSTRALIA_NZ_SPECS.certifications).toContain("AS/NZS 2053");
+src/constants/product-specs/__tests__/australia-new-zealand.test.ts:16:    const firstFamily = AUSTRALIA_NZ_SPECS.families[0]!;
+src/constants/product-specs/__tests__/australia-new-zealand.test.ts:22:    const bends = AUSTRALIA_NZ_SPECS.families.find(
+src/constants/product-specs/__tests__/australia-new-zealand.test.ts:31:    const slugs = AUSTRALIA_NZ_SPECS.families.map((f) => f.slug);
+src/constants/product-specs/__tests__/australia-new-zealand.test.ts:36:    const bellmouths = AUSTRALIA_NZ_SPECS.families.find(
+src/constants/product-specs/__tests__/australia-new-zealand.test.ts:43:    expect(AUSTRALIA_NZ_SPECS.families).toHaveLength(4);
+src/constants/product-specs/__tests__/australia-new-zealand.test.ts:44:    const slugs = AUSTRALIA_NZ_SPECS.families.map((f) => f.slug);
+src/constants/product-specs/__tests__/australia-new-zealand.test.ts:52:    for (const family of AUSTRALIA_NZ_SPECS.families) {
+src/config/single-site-seo.ts:45:  productMarket: { changeFrequency: "weekly", priority: 0.8 },
+src/config/single-site-seo.ts:58:  "/products/north-america": "2026-04-26T00:00:00Z",
+src/config/single-site-seo.ts:59:  "/products/australia-new-zealand": "2026-04-26T00:00:00Z",
+src/config/single-site-seo.ts:62:  "/products/pneumatic-tube-systems": "2026-04-26T00:00:00Z",
+src/constants/product-specs/australia-new-zealand.ts:3:export const AUSTRALIA_NZ_SPECS = {
+src/app/__tests__/sitemap.test.ts:25:      "/products/north-america": new Date("2024-11-01T00:00:00Z"),
+src/app/__tests__/sitemap.test.ts:26:      "/products/australia-new-zealand": new Date("2024-11-01T00:00:00Z"),
+src/app/__tests__/sitemap.test.ts:29:      "/products/pneumatic-tube-systems": new Date("2024-11-01T00:00:00Z"),
+src/app/__tests__/sitemap.test.ts:106:      expect(urls).toContain("https://example.com/en/products/north-america");
+src/app/__tests__/sitemap.test.ts:108:        "https://example.com/en/products/australia-new-zealand",
+src/app/__tests__/sitemap.test.ts:110:      expect(urls).toContain("https://example.com/zh/products/north-america");
+src/app/__tests__/sitemap.test.ts:118:        "https://example.com/en/products/north-america/conduit-sweeps-elbows",
+src/app/__tests__/sitemap.test.ts:229:          entry.url === "https://example.com/en/products/north-america",
+src/app/__tests__/sitemap.test.ts:237:        "/products/north-america",
+src/constants/product-specs/mexico.ts:3:export const MEXICO_SPECS = {
+src/constants/product-specs/north-america.ts:3:export const NORTH_AMERICA_SPECS = {
+src/constants/__tests__/product-catalog.test.ts:16:    expect(getMarketBySlug("north-america")?.standardLabel).toBe(
+src/constants/__tests__/product-catalog.test.ts:19:    expect(getAllMarketSlugs()).toContain("pneumatic-tube-systems");
+src/constants/__tests__/product-catalog.test.ts:21:      getFamiliesForMarket("north-america").map((family) => family.slug),
+src/app/sitemap.ts:105:  const marketConfig = getPageConfig("productMarket");
+src/app/[locale]/products/[market]/page.tsx:14:import { NORTH_AMERICA_SPECS } from "@/constants/product-specs/north-america";
+src/app/[locale]/products/[market]/page.tsx:15:import { AUSTRALIA_NZ_SPECS } from "@/constants/product-specs/australia-new-zealand";
+src/app/[locale]/products/[market]/page.tsx:16:import { MEXICO_SPECS } from "@/constants/product-specs/mexico";
+src/app/[locale]/products/[market]/page.tsx:17:import { EUROPE_SPECS } from "@/constants/product-specs/europe";
+src/app/[locale]/products/[market]/page.tsx:18:import { PNEUMATIC_SPECS } from "@/constants/product-specs/pneumatic-tube-systems";
+src/app/[locale]/products/[market]/page.tsx:51:const SPECS_BY_MARKET: Record<string, MarketSpecs> = {
+src/app/[locale]/products/[market]/page.tsx:52:  "north-america": NORTH_AMERICA_SPECS,
+src/app/[locale]/products/[market]/page.tsx:53:  "australia-new-zealand": AUSTRALIA_NZ_SPECS,
+src/app/[locale]/products/[market]/page.tsx:54:  mexico: MEXICO_SPECS,
+src/app/[locale]/products/[market]/page.tsx:55:  europe: EUROPE_SPECS,
+src/app/[locale]/products/[market]/page.tsx:56:  "pneumatic-tube-systems": PNEUMATIC_SPECS,
+src/app/[locale]/products/[market]/page.tsx:60:  return SPECS_BY_MARKET[marketSlug];
+src/app/[locale]/products/[market]/page.tsx:100:    path: DYNAMIC_PATHS_CONFIG.productMarket.pattern.replace(
+src/app/[locale]/products/[market]/page.tsx:506:        href={SINGLE_SITE_PRODUCTS_PAGE_EXPRESSION.marketLanding.ctaHref}
+src/app/[locale]/products/[market]/__tests__/market-landing.test.tsx:60:    productMarket: {
+src/app/[locale]/products/[market]/__tests__/market-landing.test.tsx:127:  "markets.north-america.label": "UL / ASTM Series",
+src/app/[locale]/products/[market]/__tests__/market-landing.test.tsx:128:  "markets.north-america.description":
+src/app/[locale]/products/[market]/__tests__/market-landing.test.tsx:130:  "markets.australia-new-zealand.label": "AS/NZS 2053 Series",
+src/app/[locale]/products/[market]/__tests__/market-landing.test.tsx:131:  "markets.australia-new-zealand.description":
+src/app/[locale]/products/[market]/__tests__/market-landing.test.tsx:139:  "markets.pneumatic-tube-systems.label": "PETG Pneumatic Tubes",
+src/app/[locale]/products/[market]/__tests__/market-landing.test.tsx:140:  "markets.pneumatic-tube-systems.description":
+src/app/[locale]/products/[market]/__tests__/market-landing.test.tsx:191:      await renderPage("north-america");
+src/app/[locale]/products/[market]/__tests__/market-landing.test.tsx:199:      await renderPage("north-america");
+src/app/[locale]/products/[market]/__tests__/market-landing.test.tsx:207:      await renderPage("north-america");
+src/app/[locale]/products/[market]/__tests__/market-landing.test.tsx:217:      const metadata = await generatePageMetadata("north-america");
+src/app/[locale]/products/[market]/__tests__/market-landing.test.tsx:224:          canonical: "https://www.tianze-pipe.com/en/products/north-america",
+src/app/[locale]/products/[market]/__tests__/market-landing.test.tsx:226:            en: "https://www.tianze-pipe.com/en/products/north-america",
+src/app/[locale]/products/[market]/__tests__/market-landing.test.tsx:227:            zh: "https://www.tianze-pipe.com/zh/products/north-america",
+src/app/[locale]/products/[market]/__tests__/market-landing.test.tsx:229:              "https://www.tianze-pipe.com/en/products/north-america",
+src/app/[locale]/products/[market]/__tests__/market-landing.test.tsx:237:    it("renders 3 family sections for north-america", async () => {
+src/app/[locale]/products/[market]/__tests__/market-landing.test.tsx:238:      await renderPage("north-america");
+src/app/[locale]/products/[market]/__tests__/market-landing.test.tsx:248:      await renderPage("north-america");
+src/app/[locale]/products/[market]/__tests__/market-landing.test.tsx:255:      await renderPage("north-america");
+src/app/[locale]/products/[market]/__tests__/market-landing.test.tsx:262:      await renderPage("north-america");
+src/app/[locale]/products/[market]/__tests__/market-landing.test.tsx:269:      await renderPage("north-america");
+src/app/[locale]/products/[market]/__tests__/market-landing.test.tsx:286:      await renderPage("north-america");
+src/app/[locale]/products/[market]/__tests__/market-landing.test.tsx:293:      await renderPage("north-america");
+src/app/[locale]/products/[market]/__tests__/market-landing.test.tsx:312:      await renderPage("north-america");
+src/app/[locale]/products/[market]/__tests__/market-landing.test.tsx:319:      await renderPage("australia-new-zealand");
+src/app/[locale]/products/[market]/__tests__/market-landing.test.tsx:326:      await renderPage("australia-new-zealand");
+src/app/[locale]/products/[market]/__tests__/market-landing.test.tsx:334:      await renderPage("australia-new-zealand");
+src/app/[locale]/products/__tests__/products-page.test.tsx:98:        screen.getByTestId("market-card-north-america"),
+src/app/[locale]/products/__tests__/products-page.test.tsx:101:        screen.getByTestId("market-card-australia-new-zealand"),
+src/app/[locale]/products/__tests__/products-page.test.tsx:107:    it("does NOT render pneumatic-tube-systems in the PVC section", async () => {
+src/app/[locale]/products/__tests__/products-page.test.tsx:112:      // The PVC section must have exactly 4 cards (no pneumatic-tube-systems)
+src/app/[locale]/products/__tests__/products-page.test.tsx:138:        screen.getByTestId("market-card-pneumatic-tube-systems"),
+src/app/[locale]/products/__tests__/page.test.tsx:7:  "markets.north-america.label": "UL / ASTM Series",
+src/app/[locale]/products/__tests__/page.test.tsx:8:  "markets.australia-new-zealand.label": "AS/NZS 2053 Series",
+src/app/[locale]/products/__tests__/page.test.tsx:11:  "markets.pneumatic-tube-systems.label": "PETG Pneumatic Tubes",
+src/app/[locale]/products/__tests__/page.test.tsx:121:    expect(hrefs).toContain("/products/north-america");
+src/app/[locale]/products/__tests__/page.test.tsx:122:    expect(hrefs).toContain("/products/australia-new-zealand");
+src/app/[locale]/products/__tests__/page.test.tsx:125:    expect(hrefs).toContain("/products/pneumatic-tube-systems");

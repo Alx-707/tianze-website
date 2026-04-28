@@ -651,15 +651,10 @@ test.describe("Internationalization (i18n)", () => {
       // 导航后需再次注入 axe（window 上下文已刷新）
       await injectAxe(page);
 
-      // Check Chinese accessibility（放宽易受主题/对比度影响的规则，聚焦严重问题）
+      // Check Chinese accessibility with the same axe rules used on English.
       await checkA11y(page, 'main, nav[aria-label="Main navigation"]', {
         detailedReport: true,
         detailedReportOptions: { html: true },
-        axeOptions: {
-          rules: {
-            "color-contrast": { enabled: false },
-          },
-        },
         includedImpacts: ["critical", "serious"],
       });
     });

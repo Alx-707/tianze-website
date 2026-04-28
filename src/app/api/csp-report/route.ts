@@ -17,6 +17,9 @@ import {
 
 const MAX_CSP_REPORT_BODY_BYTES = 16 * 1024; // 16 KB — CSP reports should be tiny; prevents body-based DoS
 const MAX_SCRIPT_SAMPLE_LENGTH = 200;
+const MAX_CSP_LOG_FIELD_LENGTH = 200;
+const MAX_CSP_POLICY_LOG_LENGTH = 500;
+const MAX_CSP_URL_LOG_LENGTH = 500;
 
 /** Zod schema for CSP report validation (all fields optional per browser behavior) */
 const cspReportInnerSchema = z.object({
@@ -52,22 +55,35 @@ const isContentTypeValid = (ct: string | null) =>
     (ct.includes("application/csp-report") || ct.includes("application/json")),
   );
 
+function sanitizeLoggedText(
+  value: string | null | undefined,
+  maxLength = MAX_CSP_LOG_FIELD_LENGTH,
+): string | null | undefined {
+  if (!value) return value;
+  return value.replace(/[\r\n\t\u2028\u2029]/gu, " ").slice(0, maxLength);
+}
+
 function sanitizeLoggedUrl(value: string | undefined): string | undefined {
   if (!value) return undefined;
 
   try {
     const url = new URL(value);
-    return url.protocol === "http:" || url.protocol === "https:"
-      ? `${url.origin}${url.pathname}`
-      : `${url.protocol}${url.pathname}`;
+    const normalized =
+      url.protocol === "http:" || url.protocol === "https:"
+        ? `${url.origin}${url.pathname}`
+        : `${url.protocol}${url.pathname}`;
+    return sanitizeLoggedText(normalized, MAX_CSP_URL_LOG_LENGTH) ?? undefined;
   } catch {
-    return value.split(/[?#]/u, 1)[0];
+    return (
+      sanitizeLoggedText(value.split(/[?#]/u, 1)[0], MAX_CSP_URL_LOG_LENGTH) ??
+      undefined
+    );
   }
 }
 
 function sanitizeScriptSample(value: string | undefined): string | undefined {
   if (!value) return undefined;
-  return value.slice(0, MAX_SCRIPT_SAMPLE_LENGTH);
+  return sanitizeLoggedText(value, MAX_SCRIPT_SAMPLE_LENGTH) ?? undefined;
 }
 
 const buildViolationData = (
@@ -78,17 +94,20 @@ const buildViolationData = (
   timestamp: new Date().toISOString(),
   documentUri: sanitizeLoggedUrl(cspReport["document-uri"]),
   referrer: sanitizeLoggedUrl(cspReport.referrer),
-  violatedDirective: cspReport["violated-directive"],
-  effectiveDirective: cspReport["effective-directive"],
-  originalPolicy: cspReport["original-policy"],
+  violatedDirective: sanitizeLoggedText(cspReport["violated-directive"]),
+  effectiveDirective: sanitizeLoggedText(cspReport["effective-directive"]),
+  originalPolicy: sanitizeLoggedText(
+    cspReport["original-policy"],
+    MAX_CSP_POLICY_LOG_LENGTH,
+  ),
   blockedUri: sanitizeLoggedUrl(cspReport["blocked-uri"]),
   lineNumber: cspReport["line-number"],
   columnNumber: cspReport["column-number"],
   sourceFile: sanitizeLoggedUrl(cspReport["source-file"]),
   statusCode: cspReport["status-code"],
   scriptSample: sanitizeScriptSample(cspReport["script-sample"]),
-  disposition: cspReport.disposition,
-  userAgent: request.headers.get("user-agent"),
+  disposition: sanitizeLoggedText(cspReport.disposition),
+  userAgent: sanitizeLoggedText(request.headers.get("user-agent")),
   ip: clientIP,
 });
 const isSuspiciousReport = (csp: CSPReport["csp-report"]) => {

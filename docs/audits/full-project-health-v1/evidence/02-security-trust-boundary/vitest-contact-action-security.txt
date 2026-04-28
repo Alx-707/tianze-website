@@ -1,0 +1,13 @@
+
+ RUN  v4.1.2 /Users/Data/conductor/workspaces/tianze-website/miami
+
+ ✓ src/app/__tests__/contact-integration.test.ts (10 tests) 56ms
+ ✓ src/app/__tests__/actions.test.ts (20 tests) 101ms
+
+ Test Files  2 passed (2)
+      Tests  30 passed (30)
+   Start at  04:08:13
+   Duration  2.96s (transform 638ms, setup 631ms, import 871ms, tests 158ms, environment 3.46s)
+
+JSON report written to /Users/Data/conductor/workspaces/tianze-website/miami/reports/test-results.json
+exit=0

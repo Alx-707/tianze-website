@@ -1,0 +1,132 @@
+
+> b2b-web-template@0.1.0 prebuild /Users/Data/conductor/workspaces/tianze-website/miami
+> node scripts/copy-translations.js && tsx scripts/generate-content-manifest.ts && pnpm content:slug-check && pnpm validate:config
+
+📦 Copying translation files to public directory...
+
+✅ Copied en/critical.json (53728 → 39833 bytes, saved 25.9%)
+✅ Copied en/deferred.json (17992 → 14119 bytes, saved 21.5%)
+✅ Copied zh/critical.json (50260 → 36365 bytes, saved 27.6%)
+✅ Copied zh/deferred.json (16637 → 12764 bytes, saved 23.3%)
+
+📊 Summary:
+   Total source size: 138617 bytes
+   Total output size: 103081 bytes
+   Total saved: 35536 bytes (25.6%)
+
+✅ All translation files copied successfully!
+Generating content manifest and import map...
+Generated manifest with 14 entries
+Output 1: /Users/Data/conductor/workspaces/tianze-website/miami/reports/content-manifest.json
+Output 2: /Users/Data/conductor/workspaces/tianze-website/miami/src/lib/mdx-importers.generated.ts
+Output 3: /Users/Data/conductor/workspaces/tianze-website/miami/src/lib/content-manifest.generated.ts
+
+Summary:
+  pages/en: 7 files
+  pages/zh: 7 files
+
+> b2b-web-template@0.1.0 content:slug-check /Users/Data/conductor/workspaces/tianze-website/miami
+> node scripts/content-slug-sync.js
+
+
+🔍 MDX Slug Sync Validation
+==========================
+
+📁 Collections: posts, pages, products
+🌍 Locales: en, zh
+📄 Total files: 14
+🔗 Total pairs: 7
+
+✅ All slug validations passed!
+
+💡 All MDX content files have consistent slugs across locales.
+
+
+> b2b-web-template@0.1.0 validate:config /Users/Data/conductor/workspaces/tianze-website/miami
+> tsx scripts/validate-production-config.ts
+
+✅ Production configuration validated successfully.
+
+> b2b-web-template@0.1.0 build /Users/Data/conductor/workspaces/tianze-website/miami
+> next build
+
+▲ Next.js 16.2.3 (Turbopack)
+- Cache Components enabled
+- Experiments (use with caution):
+  · optimizePackageImports
+
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+  Creating an optimized production build ...
+✓ Compiled successfully in 5.1s
+  Running TypeScript ...
+  Finished TypeScript in 4.3s ...
+  Collecting page data using 7 workers ...
+  Generating static pages using 7 workers (0/53) ...
+  Generating static pages using 7 workers (13/53)
+
+  Generating static pages using 7 workers (26/53)
+
+  Generating static pages using 7 workers (39/53)
+
+✓ Generating static pages using 7 workers (53/53) in 1231ms
+  Finalizing page optimization ...
+
+Route (app)                                  Revalidate  Expire
+┌ ○ /_not-found
+├ ◐ /[locale]
+│ ├ /[locale]
+│ ├ /en
+│ └ /zh
+├ ◐ /[locale]/[...rest]
+│ ├ /[locale]/[...rest]
+│ ├ /en/[...rest]
+│ ├ /en/__not-found-placeholder
+│ └ [+2 more paths]
+├ ◐ /[locale]/about
+│ ├ /[locale]/about
+│ ├ /en/about
+│ └ /zh/about
+├ ◐ /[locale]/capabilities/bending-machines
+│ ├ /[locale]/capabilities/bending-machines
+│ ├ /en/capabilities/bending-machines
+│ └ /zh/capabilities/bending-machines
+├ ◐ /[locale]/contact
+│ ├ /[locale]/contact
+│ ├ /en/contact
+│ └ /zh/contact
+├ ◐ /[locale]/oem-custom-manufacturing
+│ ├ /[locale]/oem-custom-manufacturing
+│ ├ /en/oem-custom-manufacturing
+│ └ /zh/oem-custom-manufacturing
+├ ◐ /[locale]/privacy
+│ ├ /[locale]/privacy
+│ ├ /en/privacy
+│ └ /zh/privacy
+├ ◐ /[locale]/products
+│ ├ /[locale]/products
+│ ├ /en/products
+│ └ /zh/products
+├ ◐ /[locale]/products/[market]                      1d      1w
+│ ├ /[locale]/products/[market]                      1d      1w
+│ ├ /en/products/[market]
+│ ├ /en/products/north-america                       1d      1w
+│ └ [+10 more paths]
+├ ◐ /[locale]/terms
+│ ├ /[locale]/terms
+│ ├ /en/terms
+│ └ /zh/terms
+├ ƒ /api/csp-report
+├ ƒ /api/health
+├ ƒ /api/inquiry
+├ ƒ /api/subscribe
+├ ƒ /api/verify-turnstile
+├ ○ /apple-icon.png
+├ ○ /robots.txt
+└ ƒ /sitemap.xml
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)             prerendered as static content
+◐  (Partial Prerender)  prerendered as static HTML with dynamic server-streamed content
+ƒ  (Dynamic)            server-rendered on demand

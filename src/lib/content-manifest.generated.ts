@@ -357,8 +357,8 @@ const _entries: ContentEntry[] = [
         },
         {
           "id": "standardsDifference",
-          "question": "What is the difference between UL 651, IEC 61386, and AS/NZS 61386?",
-          "answer": "These are regional standard families with different testing and classification rules.\n\nNorth American standards commonly classify by Schedule 40 or Schedule 80 wall thickness. IEC-based standards classify by mechanical strength. AS/NZS uses IEC-style requirements with local additions for Australia and New Zealand.\n"
+          "question": "What is the difference between UL 651, IEC 61386, and AS/NZS 2053?",
+          "answer": "These are regional standard families with different testing and classification rules.\n\nNorth American standards commonly classify by Schedule 40 or Schedule 80 wall thickness. IEC 61386 classifies conduit by mechanical strength. AS/NZS 2053 is the Australia/New Zealand conduit system standard used for that market.\n"
         },
         {
           "id": "directBurial",
@@ -748,8 +748,8 @@ const _entries: ContentEntry[] = [
         },
         {
           "id": "standardsDifference",
-          "question": "UL 651、IEC 61386 和 AS/NZS 61386 有什么区别？",
-          "answer": "它们是不同区域常用的标准体系，测试和分类方式不同。\n\n北美标准通常按 Schedule 40 或 Schedule 80 壁厚分类。IEC 系标准按机械强度分类。AS/NZS 基于 IEC 体系，并叠加澳大利亚和新西兰本地要求。\n"
+          "question": "UL 651、IEC 61386 和 AS/NZS 2053 有什么区别？",
+          "answer": "它们是不同区域常用的标准体系，测试和分类方式不同。\n\n北美标准通常按 Schedule 40 或 Schedule 80 壁厚分类。IEC 61386 按机械强度分类。AS/NZS 2053 是澳大利亚和新西兰市场常用的电工套管系统标准。\n"
         },
         {
           "id": "directBurial",

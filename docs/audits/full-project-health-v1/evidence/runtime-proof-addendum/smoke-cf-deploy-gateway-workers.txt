@@ -1,0 +1,7 @@
+
+Command:
+pnpm smoke:cf:deploy -- --base-url <redacted-workers-dev-gateway-url>
+
+Result:
+[post-deploy-smoke] Probing <redacted-workers-dev-gateway-url>
+[post-deploy-smoke] All checks passed

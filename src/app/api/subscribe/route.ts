@@ -24,7 +24,10 @@ import {
 } from "@/lib/api/with-rate-limit";
 import { createRequestFingerprint, withIdempotency } from "@/lib/idempotency";
 import { processLead, type LeadResult } from "@/lib/lead-pipeline";
-import { LEAD_TYPES } from "@/lib/lead-pipeline/lead-schema";
+import {
+  LEAD_TYPES,
+  newsletterLeadSchema,
+} from "@/lib/lead-pipeline/lead-schema";
 import { logger, sanitizeEmail } from "@/lib/logger";
 import { HTTP_BAD_REQUEST } from "@/constants";
 import { API_ERROR_CODES } from "@/constants/api-error-codes";
@@ -90,7 +93,7 @@ function handlePost(
   return (async () => {
     const observability = getRequestObservability(request, "lead-family");
     const parsedBody = await readAndHashJsonBody<{
-      email?: string;
+      email?: unknown;
       pageType?: string;
       turnstileToken?: string;
     }>(request, { route: "/api/subscribe" });
@@ -115,6 +118,17 @@ function handlePost(
           );
         }
 
+        const leadValidation = newsletterLeadSchema.safeParse({
+          type: LEAD_TYPES.NEWSLETTER,
+          email,
+        });
+        if (!leadValidation.success) {
+          return createApiErrorResponse(
+            API_ERROR_CODES.SUBSCRIBE_VALIDATION_EMAIL_INVALID,
+            HTTP_BAD_REQUEST,
+          );
+        }
+
         const turnstileError = await validateLeadTurnstileToken({
           token: turnstileToken,
           clientIP,
@@ -126,19 +140,17 @@ function handlePost(
         });
         if (turnstileError) return turnstileError;
 
-        // Prepare lead input for newsletter subscription
-        const leadInput = {
-          type: LEAD_TYPES.NEWSLETTER,
-          email,
-        };
-
         // Process via unified Lead Pipeline
-        const result = await processLead(leadInput, {
+        const result = await processLead(leadValidation.data, {
           requestId: observability.requestId,
         });
 
         return result.success
-          ? createSuccessResponse(result, email, observability)
+          ? createSuccessResponse(
+              result,
+              leadValidation.data.email,
+              observability,
+            )
           : createErrorResponse(result, observability);
       },
       {

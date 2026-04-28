@@ -1,0 +1,227 @@
+# Lane 04 conversion and trust evidence scan
+
+## Placeholder and contact trust signals
+messages/zh/critical.json:297:        "asnzs": "AS/NZS 61386",
+messages/zh/critical.json:810:      "phone": "+86-518-0000-0000",
+messages/zh/critical.json:1004:          "description": "标准角度的PVC电工弯管。提供直口和喇叭口选项，适用于AS/NZS 2053标准安装。",
+messages/zh/critical.json:1012:          "description": "AS/NZS 2053电工套管用PVC接头。提供双承口和喇叭形连接器选项。",
+messages/zh/critical.json:1071:        "description": "按AS/NZS 2053标准制造的PVC电工套管配件，用于澳大利亚和新西兰电气安装。提供中型和重型规格。",
+messages/zh/critical.json:1072:        "label": "AS/NZS 2053系列"
+messages/zh/critical.json:1124:              "1": "AS/NZS 2053认证",
+messages/zh/critical.json:1138:              "0": "AS/NZS 2053认证",
+messages/zh/critical.json:1169:              "1": "AS/NZS 2053认证",
+messages/zh/critical.json:1178:          "standard": "AS/NZS 2053",
+public/images/products/sample-product.svg:35:    Replace this image with your real product photo
+messages/en/critical.json:251:        "quote": "\"The bends arrived ready to install. Saved us 2 days on site.\" — Project Manager, UAE"
+messages/en/critical.json:256:        "quote": "\"Consistent quality across 3 data center builds.\" — Project Director, UAE"
+messages/en/critical.json:261:        "quote": "\"Big pipes, tight tolerances. They delivered.\" — City Engineer, Southeast Asia"
+messages/en/critical.json:297:        "asnzs": "AS/NZS 61386",
+messages/en/critical.json:303:        "note": "ISO 9001 documentation, QC records, and project references are available during RFQ review.",
+messages/en/critical.json:810:      "phone": "+86-518-0000-0000",
+messages/en/critical.json:992:        "label": "AS/NZS 2053 Series",
+messages/en/critical.json:993:        "description": "PVC conduit fittings manufactured to AS/NZS 2053 standards for Australian and New Zealand electrical installations. Medium and heavy duty ratings."
+messages/en/critical.json:1026:          "description": "PVC conduit bends in standard angles. Plain and bell end options for AS/NZS 2053 installations."
+messages/en/critical.json:1034:          "description": "PVC conduit couplings for AS/NZS 2053 conduit systems. Double-bell and flared connector options."
+messages/en/critical.json:1165:          "standard": "AS/NZS 2053"
+messages/en/critical.json:1177:              "0": "AS/NZS 2053 Certified",
+messages/en/critical.json:1193:              "1": "AS/NZS 2053 Compliant",
+messages/en/critical.json:1208:              "1": "AS/NZS 2053 Compliant",
+content/pages/zh/about.mdx:57:    answer: "我们的产品符合 AS/NZS 2053、ASTM D1785、IEC 61386、NOM 等国际标准，并保持 ISO 9001:2015 质量管理体系认证。"
+content/pages/zh/product-market.mdx:48:    question: 'UL 651、IEC 61386 和 AS/NZS 61386 有什么区别？'
+content/pages/zh/terms.mdx:288:电话：+86-518-0000-0000
+content/pages/en/about.mdx:62:    answer: "Our products comply with international standards including AS/NZS 2053, ASTM D1785, IEC 61386, and NOM. We maintain ISO 9001:2015 quality management certification."
+content/pages/zh/oem-custom-manufacturing.mdx:25:    answer: "我们可按 AS/NZS 2053、ASTM D1785、IEC 61386、NOM 及其他区域标准生产，也可配合您的自定义规格。"
+src/constants/time.ts:32:export const MILLISECONDS_PER_MINUTE = 60000;
+src/constants/time.ts:33:export const MILLISECONDS_PER_HOUR = 3600000 as const;
+src/constants/time.ts:56:export const TEN_SECONDS_MS = 10000;
+src/constants/time.ts:57:export const THIRTY_SECONDS_MS = 30000;
+src/constants/time.ts:58:export const MINUTE_MS = 60000;
+src/constants/time.ts:59:export const FIVE_MINUTES_MS = 300000;
+src/constants/time.ts:60:export const TEN_MINUTES_MS = 600000;
+src/config/single-site-product-catalog.ts:20:    label: "AS/NZS 2053 Series",
+src/config/single-site-product-catalog.ts:21:    standardLabel: "AS/NZS 2053",
+src/config/single-site-product-catalog.ts:23:      "PVC conduit fittings manufactured to AS/NZS 2053 standards for Australian and New Zealand electrical installations. Medium and heavy duty ratings.",
+src/config/single-site-product-catalog.ts:86:      "PVC conduit bends in standard angles. Plain and bell end options for AS/NZS 2053 installations.",
+src/config/single-site-product-catalog.ts:100:      "PVC conduit couplings for AS/NZS 2053 conduit systems. Double-bell and flared connector options.",
+src/constants/units.ts:4:const MS_PER_HOUR = 3600000 as const; // 1 hour in milliseconds
+content/pages/en/product-market.mdx:48:    question: 'What is the difference between UL 651, IEC 61386, and AS/NZS 61386?'
+src/config/single-site.ts:50:  phone: "+86-518-0000-0000",
+src/config/single-site.ts:113:        file: "/certs/iso9001.pdf",
+content/pages/en/oem-custom-manufacturing.mdx:25:    answer: "We manufacture to AS/NZS 2053, ASTM D1785, IEC 61386, NOM, and other regional standards. We can also work with your custom specifications."
+src/constants/test-constants.ts:79:  /** 大基数 - 200000 */
+src/constants/test-constants.ts:80:  LARGE_BASE: 200000,
+src/constants/test-constants.ts:210:  /** 极长测试超时 - 10000ms */
+src/constants/test-constants.ts:211:  VERY_LONG: 10000,
+src/constants/test-constants.ts:396:  /** 性能报告间隔 - 30000ms */
+src/constants/test-constants.ts:397:  REPORTING_INTERVAL: 30000,
+content/pages/en/terms.mdx:288:Phone: +86-518-0000-0000
+src/constants/index.ts:137:  COUNT_300000,
+src/config/__tests__/paths.test.ts:451:      for (let i = 0; i < 10000; i++) {
+src/constants/security-constants.ts:42:  PBKDF2_ITERATIONS: 100000,
+src/constants/product-specs/europe.ts:72:      images: ["/images/products/sample-product.svg"],
+src/constants/product-specs/europe.ts:118:      images: ["/images/products/sample-product.svg"],
+src/constants/app-constants.ts:228:  /** 大数值基准 - 200000 */
+src/constants/app-constants.ts:229:  LARGE_NUMBER_BASE: 200000,
+src/constants/app-constants.ts:234:  /** 大数值增量 - 300000 */
+src/constants/app-constants.ts:235:  LARGE_INCREMENT: 300000,
+src/constants/app-constants.ts:240:  /** 十六进制大数 - 0x80000000 */
+src/constants/app-constants.ts:241:  HEX_LARGE_NUMBER: 0x80000000,
+src/config/single-site-page-expression.ts:162:    "AS/NZS 2053",
+src/constants/validation-limits.ts:46:export const PBKDF2_ITERATIONS = 100000 as const;
+src/components/ui/animated-counter.tsx:117: *   to={50000}
+src/constants/test-app-constants.ts:94:  /** 大基数 - 200000 */
+src/constants/test-app-constants.ts:95:  LARGE_BASE: 200000,
+src/constants/test-app-constants.ts:100:  /** 超大值 - 300000 */
+src/constants/test-app-constants.ts:101:  EXTRA_LARGE: 300000,
+src/constants/product-specs/pneumatic-tube-systems.ts:71:      images: ["/images/products/sample-product.svg"],
+src/components/layout/__tests__/language-switcher/setup.tsx:13:  LONG_TIMEOUT: 10000,
+src/constants/count.ts:92:export const COUNT_300000 = 300000 as const;
+src/constants/count.ts:101:export const MS_PER_HOUR = 3600000 as const;
+src/constants/product-specs/north-america.ts:73:      images: ["/images/products/sample-product.svg"],
+src/constants/product-specs/north-america.ts:114:      images: ["/images/products/sample-product.svg"],
+src/constants/product-specs/__tests__/australia-new-zealand.test.ts:11:  it("includes AS/NZS 2053 certification", () => {
+src/constants/product-specs/__tests__/australia-new-zealand.test.ts:12:    expect(AUSTRALIA_NZ_SPECS.certifications).toContain("AS/NZS 2053");
+src/components/products/__tests__/product-grid.test.tsx:55:    supplyCapacity: "10000/month",
+src/constants/product-specs/australia-new-zealand.ts:11:    standard: "AS/NZS 2053",
+src/constants/product-specs/australia-new-zealand.ts:14:  certifications: ["AS/NZS 2053", "ISO 9001:2015"],
+src/constants/product-specs/australia-new-zealand.ts:29:        "AS/NZS 2053 Certified",
+src/constants/product-specs/australia-new-zealand.ts:70:      images: ["/images/products/sample-product.svg"],
+src/constants/product-specs/australia-new-zealand.ts:73:        "AS/NZS 2053 Compliant",
+src/constants/product-specs/australia-new-zealand.ts:107:      images: ["/images/products/sample-product.svg"],
+src/constants/product-specs/australia-new-zealand.ts:110:        "AS/NZS 2053 Compliant",
+src/constants/product-specs/australia-new-zealand.ts:144:      images: ["/images/products/sample-product.svg"],
+src/constants/performance-constants.ts:43:  /** 1分钟 = 60000毫秒 */
+src/constants/performance-constants.ts:45:  /** 1小时 = 3600000毫秒 */
+src/components/products/__tests__/product-card.test.tsx:165:    supplyCapacity: "10000/month",
+src/components/products/__tests__/product-card.test.tsx:290:      const product = createMockProduct({ supplyCapacity: "50000/month" });
+src/components/products/__tests__/product-card.test.tsx:293:      expect(screen.getByText("50000/month")).toBeInTheDocument();
+src/components/products/__tests__/product-card.test.tsx:301:        supplyCapacity: "10000/month",
+src/components/products/__tests__/product-card.test.tsx:325:        supplyCapacity: "10000",
+src/components/products/__tests__/product-card.test.tsx:365:        supplyCapacity: "10000",
+src/constants/product-specs/mexico.ts:65:      images: ["/images/products/sample-product.svg"],
+src/constants/product-specs/mexico.ts:98:      images: ["/images/products/sample-product.svg"],
+src/constants/test-ui-constants.ts:164:  LARGE_INTEGER: 1000000,
+src/constants/test-ui-constants.ts:195:  /** 十六进制大数 - 0x80000000 */
+src/constants/test-ui-constants.ts:196:  HEX_LARGE_NUMBER: 0x80000000,
+src/constants/test-performance-constants.ts:54:  ANALYSIS_WINDOW: 30000, // 分析窗口 (毫秒)
+src/constants/test-performance-constants.ts:60:  REPORT_INTERVAL: 60000, // 报告间隔 (毫秒)
+src/constants/test-performance-constants.ts:63:  RETENTION_PERIOD: 86400000, // 保留期 (24小时，毫秒)
+src/constants/test-performance-constants.ts:66:  PERFORMANCE_BUDGET_JS: 170000, // JavaScript 预算 (字节)
+src/constants/test-performance-constants.ts:67:  PERFORMANCE_BUDGET_CSS: 50000, // CSS 预算 (字节)
+src/constants/test-performance-constants.ts:68:  PERFORMANCE_BUDGET_IMAGES: 500000, // 图片预算 (字节)
+src/constants/test-performance-constants.ts:69:  PERFORMANCE_BUDGET_FONTS: 100000, // 字体预算 (字节)
+src/constants/test-performance-constants.ts:74:  NETWORK_TIMEOUT: 10000, // 网络超时 (毫秒)
+src/constants/test-performance-constants.ts:84:  TEST_DURATION: 30000, // 测试持续时间 (毫秒)
+src/constants/test-performance-constants.ts:153:  REPORT_INTERVAL: 30000, // 报告间隔 (毫秒)
+src/constants/test-performance-constants.ts:154:  SESSION_TIMEOUT: 1800000, // 会话超时 (30分钟)
+src/constants/test-performance-constants.ts:158:  MAX_SESSION_DURATION: 3600000, // 最大会话时长 (1小时)
+src/components/ui/__tests__/animated-counter.test.tsx:574:          to={0.000001}
+src/components/blocks/products/product-matrix-block.tsx:64:      src: "/images/products/sample-product.svg",
+src/components/ui/__tests__/animated-counter-basic.test.tsx:103:      render(<AnimatedCounter to={1000000} autoStart />);
+src/components/ui/__tests__/animated-counter-basic.test.tsx:106:      expect(counter).toHaveTextContent("1000000");
+src/components/ui/__tests__/animated-counter-animation.test.tsx:376:      render(<AnimatedCounter to={100} duration={10000} autoStart={true} />);
+src/components/ui/__tests__/input-file-edge-cases.test.tsx:91:        <Input type="file" data-max-size="5000000" data-testid="file-input" />,
+src/components/ui/__tests__/input-file-edge-cases.test.tsx:95:      expect(input).toHaveAttribute("data-max-size", "5000000");
+src/components/ui/__tests__/animated-counter-formatters.test.tsx:341:        if (to < 1000000) return `${(to / 1000).toFixed(1)}K`;
+src/components/ui/__tests__/animated-counter-formatters.test.tsx:342:        return `${(to / 1000000).toFixed(1)}M`;
+src/components/ui/__tests__/animated-counter-formatters.test.tsx:435:          to={1500000000}
+
+## Product CTA usage
+src/config/__tests__/single-site-page-expression.test.ts:118:    expect(SINGLE_SITE_PRODUCTS_PAGE_EXPRESSION.marketLanding.ctaHref).toBe(
+src/config/single-site-page-expression.ts:125:  marketLanding: {
+src/components/products/product-inquiry-form.tsx:35:export interface ProductInquiryFormProps {
+src/components/products/product-inquiry-form.tsx:290:export function ProductInquiryForm({
+src/components/products/product-inquiry-form.tsx:295:}: ProductInquiryFormProps) {
+src/components/products/inquiry-drawer.tsx:7:import { ProductInquiryForm } from "@/components/products/product-inquiry-form";
+src/components/products/inquiry-drawer.tsx:16:export interface InquiryDrawerProps {
+src/components/products/inquiry-drawer.tsx:91:export function InquiryDrawer({
+src/components/products/inquiry-drawer.tsx:99:}: InquiryDrawerProps) {
+src/components/products/inquiry-drawer.tsx:128:            <ProductInquiryForm
+src/components/products/index.ts:46:  ProductInquiryForm,
+src/components/products/index.ts:47:  type ProductInquiryFormProps,
+src/components/products/index.ts:50:  InquiryDrawer,
+src/components/products/index.ts:51:  type InquiryDrawerProps,
+src/components/products/__tests__/inquiry-drawer.test.tsx:7:import { InquiryDrawer } from "../inquiry-drawer";
+src/components/products/__tests__/inquiry-drawer.test.tsx:30:  ProductInquiryForm: ({ productName }: { productName: string }) => (
+src/components/products/__tests__/inquiry-drawer.test.tsx:66:describe("InquiryDrawer", () => {
+src/components/products/__tests__/inquiry-drawer.test.tsx:69:      <InquiryDrawer
+src/components/products/__tests__/inquiry-drawer.test.tsx:82:      <InquiryDrawer
+src/components/products/__tests__/inquiry-drawer.test.tsx:100:      <InquiryDrawer
+src/components/products/__tests__/product-inquiry-form.test.tsx:3: * Tests for ProductInquiryForm component
+src/components/products/__tests__/product-inquiry-form.test.tsx:8:import { ProductInquiryForm } from "../product-inquiry-form";
+src/components/products/__tests__/product-inquiry-form.test.tsx:96:describe("ProductInquiryForm", () => {
+src/components/products/__tests__/product-inquiry-form.test.tsx:114:        <ProductInquiryForm
+src/components/products/__tests__/product-inquiry-form.test.tsx:128:        <ProductInquiryForm
+src/components/products/__tests__/product-inquiry-form.test.tsx:139:        <ProductInquiryForm
+src/components/products/__tests__/product-inquiry-form.test.tsx:155:        <ProductInquiryForm
+src/components/products/__tests__/product-inquiry-form.test.tsx:174:        <ProductInquiryForm
+src/components/products/__tests__/product-inquiry-form.test.tsx:185:        <ProductInquiryForm
+src/components/products/__tests__/product-inquiry-form.test.tsx:198:        <ProductInquiryForm
+src/components/products/__tests__/product-inquiry-form.test.tsx:210:        <ProductInquiryForm
+src/components/products/__tests__/product-inquiry-form.test.tsx:223:        <ProductInquiryForm
+src/components/products/__tests__/product-inquiry-form.test.tsx:235:        <ProductInquiryForm
+src/components/products/__tests__/product-inquiry-form.test.tsx:247:        <ProductInquiryForm
+src/components/products/__tests__/product-inquiry-form.test.tsx:259:        <ProductInquiryForm
+src/components/products/__tests__/product-inquiry-form.test.tsx:271:        <ProductInquiryForm
+src/components/products/__tests__/product-inquiry-form.test.tsx:292:        <ProductInquiryForm
+src/components/products/__tests__/product-inquiry-form.test.tsx:306:        <ProductInquiryForm
+src/components/products/__tests__/product-inquiry-form.test.tsx:324:        <ProductInquiryForm
+src/components/products/__tests__/product-inquiry-form.test.tsx:339:        <ProductInquiryForm
+src/components/products/__tests__/product-inquiry-form.test.tsx:355:        <ProductInquiryForm
+src/components/products/__tests__/product-inquiry-form.test.tsx:367:        <ProductInquiryForm
+src/components/products/__tests__/product-inquiry-form.test.tsx:379:        <ProductInquiryForm
+src/components/products/__tests__/product-inquiry-form.test.tsx:393:        <ProductInquiryForm
+src/components/products/__tests__/product-inquiry-form.test.tsx:419:        <ProductInquiryForm
+src/components/products/__tests__/product-inquiry-form.test.tsx:438:        <ProductInquiryForm
+src/components/products/__tests__/product-inquiry-form.test.tsx:453:        <ProductInquiryForm
+src/components/products/__tests__/product-inquiry-form.test.tsx:464:        <ProductInquiryForm
+src/components/products/__tests__/product-inquiry-form.test.tsx:484:        <ProductInquiryForm
+src/components/products/__tests__/product-inquiry-form.test.tsx:539:        <ProductInquiryForm
+src/components/products/__tests__/product-inquiry-form.test.tsx:577:        <ProductInquiryForm
+src/components/products/__tests__/product-inquiry-form.test.tsx:625:        <ProductInquiryForm
+src/components/products/__tests__/product-inquiry-form.test.tsx:662:        <ProductInquiryForm
+src/components/products/__tests__/product-inquiry-form.test.tsx:705:        <ProductInquiryForm
+src/components/products/__tests__/product-inquiry-form.test.tsx:745:        <ProductInquiryForm
+src/components/products/__tests__/product-inquiry-form.test.tsx:785:        <ProductInquiryForm
+src/components/products/__tests__/product-actions.test.tsx:50:// Mock InquiryDrawer
+src/components/products/__tests__/product-actions.test.tsx:52:  InquiryDrawer: ({
+src/components/products/__tests__/product-actions.test.tsx:91:      render(<ProductActions {...defaultProps} />);
+src/components/products/__tests__/product-actions.test.tsx:99:      render(<ProductActions {...defaultProps} />);
+src/components/products/__tests__/product-actions.test.tsx:106:    it("renders InquiryDrawer component", () => {
+src/components/products/__tests__/product-actions.test.tsx:107:      render(<ProductActions {...defaultProps} />);
+src/components/products/__tests__/product-actions.test.tsx:113:      render(<ProductActions {...defaultProps} />);
+src/components/products/__tests__/product-actions.test.tsx:123:        <ProductActions
+src/components/products/__tests__/product-actions.test.tsx:138:        <ProductActions {...defaultProps} downloadPdfLabel="Download PDF" />,
+src/components/products/__tests__/product-actions.test.tsx:145:      render(<ProductActions {...defaultProps} pdfHref="/product.pdf" />);
+src/components/products/__tests__/product-actions.test.tsx:154:        <ProductActions
+src/components/products/__tests__/product-actions.test.tsx:167:        <ProductActions
+src/components/products/__tests__/product-actions.test.tsx:181:        <ProductActions
+src/components/products/__tests__/product-actions.test.tsx:196:      render(<ProductActions {...defaultProps} />);
+src/components/products/__tests__/product-actions.test.tsx:206:      render(<ProductActions {...defaultProps} />);
+src/components/products/__tests__/product-actions.test.tsx:214:      render(<ProductActions {...defaultProps} />);
+src/components/products/__tests__/product-actions.test.tsx:235:      render(<ProductActions {...defaultProps} />);
+src/components/products/__tests__/product-actions.test.tsx:241:      const { unmount } = render(<ProductActions {...defaultProps} />);
+src/components/products/__tests__/product-actions.test.tsx:251:      const { container } = render(<ProductActions {...defaultProps} />);
+src/components/products/__tests__/product-actions.test.tsx:259:      render(<ProductActions {...defaultProps} productName="Widget Pro" />);
+src/components/products/__tests__/product-actions.test.tsx:268:      const { container } = render(<ProductActions {...defaultProps} />);
+src/components/products/__tests__/product-actions.test.tsx:278:        <ProductActions {...defaultProps} className="custom-actions-class" />,
+src/components/products/__tests__/product-actions.test.tsx:288:      render(<ProductActions {...defaultProps} />);
+src/components/products/__tests__/product-actions.test.tsx:296:        <ProductActions
+src/components/products/__tests__/product-actions.test.tsx:311:        <ProductActions
+src/components/products/__tests__/product-actions.test.tsx:325:      render(<ProductActions {...defaultProps} productName={longName} />);
+src/components/products/__tests__/product-actions.test.tsx:331:      render(<ProductActions {...defaultProps} />);
+src/components/products/__tests__/product-actions.test.tsx:339:        <ProductActions
+src/components/products/product-actions.tsx:6:import { InquiryDrawer } from "@/components/products/inquiry-drawer";
+src/components/products/product-actions.tsx:121:export function ProductActions({
+src/components/products/product-actions.tsx:199:        <InquiryDrawer
+src/app/[locale]/oem-custom-manufacturing/page.tsx:177:function CtaSection({
+src/app/[locale]/oem-custom-manufacturing/page.tsx:279:      <CtaSection
+src/app/[locale]/capabilities/bending-machines/page.tsx:185:function CtaSection({
+src/app/[locale]/capabilities/bending-machines/page.tsx:290:      <CtaSection
+src/app/[locale]/products/__tests__/interactive-islands-usage.test.ts:6:  "InquiryDrawer",
+src/app/[locale]/products/__tests__/interactive-islands-usage.test.ts:7:  "ProductInquiryForm",
+src/app/[locale]/products/[market]/page.tsx:164:interface CtaSectionProps {
+src/app/[locale]/products/[market]/page.tsx:171:function CtaSection({
+src/app/[locale]/products/[market]/page.tsx:176:}: CtaSectionProps) {
+src/app/[locale]/products/[market]/page.tsx:502:      <CtaSection
+src/app/[locale]/products/[market]/page.tsx:506:        href={SINGLE_SITE_PRODUCTS_PAGE_EXPRESSION.marketLanding.ctaHref}
