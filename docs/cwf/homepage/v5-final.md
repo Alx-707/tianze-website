@@ -3,6 +3,7 @@
 > **Status:** 定稿
 > **Based on:** V4.1 + 用户评审优化
 > **Date:** 2026-02-05
+> **Current truth note:** historical CWF draft only. Do not reuse equipment-as-product positioning for the current public website.
 
 ---
 
@@ -70,7 +71,7 @@ Exporting to 20+ countries · ISO 9001:2015 Certified
 **图片配置：**
 | 位置 | 尺寸 | 内容 | 作用 |
 |------|------|------|------|
-| 主图 | 85% width × 75% height | 弯管机设备 | 核心差异化展示 |
+| 主图 | 85% width × 75% height | 成型工艺与生产现场 | 核心差异化展示 |
 | 副图 | 50% width × 40% height | 生产线全景 | 规模感 |
 | 小图 | 浮动小方块 | 弯管近景细节 | 产品质量细节 |
 
@@ -94,13 +95,13 @@ Exporting to 20+ countries · ISO 9001:2015 Certified
 ### Process Flow (技术链路图标条)
 
 ```
-[R&D Icon] ──→ [Machine Icon] ──→ [Mold Icon] ──→ [Production Icon] ──→ [QC Icon]
- Bending Machine    Equipment        Mold           Conduit            Quality
- R&D               Manufacturing    Fabrication    Production         Control
+[Process Icon] ──→ [Tooling Icon] ──→ [Mold Icon] ──→ [Production Icon] ──→ [QC Icon]
+ Forming             Tooling           Mold           Conduit            Quality
+ Know-how            Control           Fabrication    Production         Control
 ```
 
 ### Supporting Copy
-We design and build our own bending machines. That's how we guarantee ±0.3mm tolerances.
+We control forming, tooling, and finished-product inspection in-house. That's how we maintain dimensional consistency.
 
 ### Stats Row
 | Metric | Value |
@@ -385,7 +386,7 @@ Have questions? [See FAQs →]
 PVC Conduit Bends & Fittings Manufacturer | Factory Direct | Tianze
 
 ### Meta Description
-PVC conduit bends, bell end fittings, and custom solutions from the factory that builds bending machines. 16-168mm range. ISO 9001 certified. Get a factory-direct quote.
+PVC conduit bends, bell end fittings, and custom solutions from a factory with in-house forming and tooling control. 16-168mm range. ISO 9001 certified. Get a factory-direct quote.
 
 > *优化 (Phase 3.3 SEO): 添加 CTA "Get a factory-direct quote" 替代 "Ships to 20+ countries"*
 

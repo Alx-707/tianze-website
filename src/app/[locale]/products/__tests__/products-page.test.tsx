@@ -140,7 +140,7 @@ describe("Feature: Product Overview Page", () => {
       ).toBeInTheDocument();
     });
 
-    it("does not render a bending machines equipment card", async () => {
+    it("does not render the retired equipment card", async () => {
       await renderAsyncComponent(
         ProductsPage({ params: Promise.resolve(mockParams) }),
       );

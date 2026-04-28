@@ -48,7 +48,7 @@
 - 运行相关测试确认无回归
 
 ### P1-a: 结构化数据统一
-- 在 src/lib/structured-data-generators.ts 中新增 buildEquipmentListSchema() 和 buildOemPageSchema()
+- 在 src/lib/structured-data-generators.ts 中只保留当前 live 页面需要的 builder；旧设备能力页已退役，不要重新新增 buildEquipmentListSchema()
 - 修改 OEM 页面使用新的 builder；旧设备能力页已退役，不再作为当前目标
 - 修改 faq-section.tsx 使用 generateFaqSchemaFromItems 替代 generateFAQSchema
 - 迁移完成后删除 structured-data-helpers.ts 中的 generateFAQSchema（确认无其他调用者）

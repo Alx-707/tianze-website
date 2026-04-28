@@ -1,12 +1,12 @@
 # Value Propositions & Marketing Copy
 
-> AI Retrieval Guide: Use this file for marketing messaging, taglines, and positioning content.
+> AI Retrieval Guide: historical CWF copy only. Do not use equipment-as-product positioning for current public website messaging.
 
 ## Core Differentiator
 
-**Not just a pipe seller — upstream bending machine manufacturer.**
+**Not just a pipe seller — factory-controlled forming, tooling, and OEM manufacturing partner.**
 
-Tianze builds the machines that make the pipes. This engineering DNA means:
+Tianze controls the forming process, tooling, and production flow behind the pipes. This manufacturing DNA means:
 - Deep technical expertise in pipe forming
 - Rapid mold development capability
 - Flexible customization for non-standard specs
@@ -67,11 +67,11 @@ Complete supply chain: **Equipment → Mold → Process → Fittings**
 - Non-standard products at scale (bell-end bends, double-socket, large-arc cable pipes)
 - Proven OEM capacity for tier-1 domestic brands
 
-### 2. Equipment R&D Manufacturing
+### 2. Internal Forming and Tooling Capability
 
-- Self-designed and manufactured bending machines, expanders
-- Wide application in domestic and international PVC pipe processing
-- Integrated expertise in equipment control, temperature control, mold systems
+- In-house forming, expansion, and tooling know-how
+- Practical experience across PVC conduit and fitting production
+- Integrated expertise in process control, temperature control, mold systems
 
 ### 3. Non-standard Customization & Fast Prototyping
 
@@ -101,7 +101,7 @@ Complete supply chain: **Equipment → Mold → Process → Fittings**
 |---------|---------|
 | Bell End / Socket | 管端扩口 / 喇叭口 |
 | Double Socket Pipe | 双承口连接管 |
-| Pipe Bending Machine | 弯管机 |
+| Factory Forming Process | 工厂成型工艺 |
 | Pipe Expander | 扩管机 |
 | Pneumatic Tube | 气动物流管道 |
 | MOQ | 最小起订量 |

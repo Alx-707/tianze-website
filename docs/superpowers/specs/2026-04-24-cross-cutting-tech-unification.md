@@ -40,7 +40,8 @@ Two injection points: layout-level `<JsonLdScript>` (Organization+WebSite) and p
 
 ### Files to Change
 
-- Create: `buildEquipmentListSchema()`, `buildOemPageSchema()` in `structured-data-generators.ts`
+- Retired: do not recreate `buildEquipmentListSchema()`; the old equipment capability page is no longer live
+- Create if still needed: `buildOemPageSchema()` in `structured-data-generators.ts`
 - Modify: `oem-custom-manufacturing/page.tsx` — use builders; the old equipment capability page is no longer live
 - Modify: `faq-section.tsx` — use `generateFaqSchemaFromItems` instead of `generateFAQSchema`
 - Delete: `generateFAQSchema` from `structured-data-helpers.ts` (after all callers migrated)
