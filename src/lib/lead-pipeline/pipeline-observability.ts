@@ -11,7 +11,7 @@ import {
 } from "@/lib/lead-pipeline/service-result";
 import { logger } from "@/lib/logger";
 
-// eslint-disable-next-line max-params -- requestId is required to correlate route and pipeline signals
+// eslint-disable-next-line max-params -- guardrail-exception GSE-20260428-pipeline-service-metrics: requestId ties route-level and pipeline-level service metrics in one correlation boundary
 export function emitServiceMetrics(
   emailResult: ServiceResult,
   crmResult: ServiceResult,

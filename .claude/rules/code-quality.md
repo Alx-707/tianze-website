@@ -48,6 +48,39 @@ Valid fix examples:
 - moving spec translation into a presenter module
 - keeping a justified exception when splitting would harm readability
 
+### Production structural exceptions
+
+Production structural guardrails still fail by default. This includes:
+
+- `max-lines`
+- `max-lines-per-function`
+- `complexity`
+- `max-depth`
+- `max-params`
+- `max-statements`
+- `max-nested-callbacks`
+
+Use an exception only when a split would damage the real boundary, reading
+order, test value, or business/security expression.
+
+Required format:
+
+```typescript
+// eslint-disable-next-line max-statements -- guardrail-exception GSE-YYYYMMDD-short-slug: route/security/presenter boundary reason
+```
+
+Rules for exceptions:
+
+- use the smallest possible disable scope
+- name the exact ESLint rule
+- include `guardrail-exception <ID>: <real boundary and why splitting harms it>`
+- register the same ID in `docs/guides/GUARDRAIL-SIDE-EFFECTS.md`
+- include verification evidence in the registry row
+
+`pnpm eslint:disable:check`, `pnpm lint:check`, and `pnpm quality:gate` enforce
+the registry requirement. Do not use broad file-level disables as a substitute
+for a real boundary decision.
+
 ### Additional Limits
 
 | Rule | Production | Test |
@@ -56,7 +89,7 @@ Valid fix examples:
 | `max-statements` | 20 | 50 |
 
 ### Exemptions
-- Config files: `*.config.{js,ts,mjs}`
+- Config files: `*.config.{js,ts,mjs,mts}`
 - Dev tools: `src/components/dev-tools/**`, `src/app/**/dev-tools/**`
 
 ## Magic Numbers

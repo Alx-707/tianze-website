@@ -96,7 +96,7 @@ function checkTurnstileConfigured(): NextResponse | null {
  * to ensure the user has passed the bot protection challenge.
  * Uses the shared verifyTurnstile function for consistency.
  */
-// eslint-disable-next-line max-statements -- Sequential security gates (config→rate→parse→validate→verify→respond) require multiple statements
+// eslint-disable-next-line max-statements -- guardrail-exception GSE-20260428-turnstile-security-gates: security route keeps config/rate/parse/validate/verify/respond gates in request order
 async function handlePost(request: NextRequest) {
   try {
     const configError = checkTurnstileConfigured();

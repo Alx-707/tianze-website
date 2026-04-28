@@ -207,7 +207,7 @@ export class LeadPipelineMetrics {
   /**
    * Record a failure metric with error details
    */
-  // eslint-disable-next-line max-params -- requestId is part of the correlation envelope for failure metrics
+  // eslint-disable-next-line max-params -- guardrail-exception GSE-20260428-lead-failure-metric: requestId stays in the failure metric correlation boundary
   recordFailure(
     service: MetricService,
     latencyMs: number,

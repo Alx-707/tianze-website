@@ -217,7 +217,7 @@ function validateDataTypes(
 /**
  * Validate products-specific requirements
  */
-// eslint-disable-next-line complexity, max-statements -- validation logic requires multiple checks
+// eslint-disable-next-line complexity, max-statements -- guardrail-exception GSE-20260428-products-metadata-validation: product metadata validation keeps required-field checks in one input boundary
 function validateProductsSpecific(
   metadata: Record<string, unknown>,
   config: ValidationConfig,

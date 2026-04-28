@@ -79,6 +79,21 @@ function parseEslintJsonOutput(rawOutput) {
   return JSON.parse(jsonText);
 }
 
+function parseEslintDisableUsageIssueCount(rawOutput) {
+  const violationSummary = rawOutput.match(
+    /\[eslint-disable-check\]\s+Violations:\s+(\d+)/,
+  );
+  if (violationSummary) {
+    return Number.parseInt(violationSummary[1], 10);
+  }
+
+  const issueLineCount = rawOutput
+    .split("\n")
+    .filter((line) => line.trim().startsWith("- ")).length;
+
+  return issueLineCount > 0 ? issueLineCount : 1;
+}
+
 function runEslintWithJson() {
   const result = spawnSync(
     process.execPath,
@@ -247,6 +262,7 @@ class QualityGate {
           thresholds: {
             eslintErrors: 0,
             eslintWarnings: 10,
+            eslintDisableUsageErrors: 0,
             typeErrors: 0,
             reviewHygieneErrors: 0,
           },
@@ -884,6 +900,9 @@ class QualityGate {
       // ESLint 检查
       gate.checks.eslint = await this.runESLintCheck();
 
+      // ESLint disable exception registry check
+      gate.checks.eslintDisableUsage = await this.runEslintDisableUsageCheck();
+
       // Review hygiene 检查
       gate.checks.reviewHygiene = await this.runReviewHygieneCheck();
 
@@ -892,6 +911,8 @@ class QualityGate {
         gate.checks.typeCheck.errors > 0 ||
         gate.checks.eslint.errors >
           this.config.gates.codeQuality.thresholds.eslintErrors ||
+        gate.checks.eslintDisableUsage.errors >
+          this.config.gates.codeQuality.thresholds.eslintDisableUsageErrors ||
         gate.checks.reviewHygiene.errors >
           this.config.gates.codeQuality.thresholds.reviewHygieneErrors;
 
@@ -906,6 +927,13 @@ class QualityGate {
           gate.issues.push(
             ...gate.checks.reviewHygiene.issues.map(
               (issue) => `review hygiene: ${issue}`,
+            ),
+          );
+        }
+        if (gate.checks.eslintDisableUsage.errors > 0) {
+          gate.issues.push(
+            ...gate.checks.eslintDisableUsage.issues.map(
+              (issue) => `eslint disable usage: ${issue}`,
             ),
           );
         }
@@ -1505,6 +1533,45 @@ class QualityGate {
         message: error.message,
       };
     }
+  }
+
+  async runEslintDisableUsageCheck() {
+    const result = spawnSync(
+      process.execPath,
+      [path.join(process.cwd(), "scripts", "check-eslint-disable-usage.js")],
+      {
+        encoding: "utf8",
+        maxBuffer: 10 * 1024 * 1024,
+      },
+    );
+
+    if (result.error) {
+      return {
+        errors: 1,
+        status: "error",
+        issues: [result.error.message],
+      };
+    }
+
+    const rawOutput = (result.stdout || result.stderr || "").toString().trim();
+    if (result.status === 0) {
+      return {
+        errors: 0,
+        status: "passed",
+        issues: [],
+      };
+    }
+
+    const issueCount = parseEslintDisableUsageIssueCount(rawOutput);
+
+    return {
+      errors: issueCount,
+      status: "failed",
+      issues:
+        rawOutput.length > 0
+          ? rawOutput.split("\n").filter(Boolean).slice(0, 20)
+          : ["ESLint disable usage check failed without output"],
+    };
   }
 
   async runReviewHygieneCheck() {

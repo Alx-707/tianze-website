@@ -10,6 +10,27 @@ This document tracks places where a quality rule started rewarding bad structure
 | Architecture contract | Protects an explicit source boundary and states what it proves | Fail when boundary is broken |
 | Heuristic / smell | Numeric limits, complexity, params, magic numbers, broad pattern scans | Flag for review; do not force cosmetic rewrites |
 
+## Production structural exception workflow
+
+Production structural guardrails still fail by default. A narrow exception is allowed only when splitting would make the real boundary harder to read, harder to test, or less faithful to the business/security flow.
+
+Exception comments must use this shape:
+
+```ts
+// eslint-disable-next-line max-statements -- guardrail-exception GSE-YYYYMMDD-short-slug: real boundary and why splitting harms it
+```
+
+Each ID must be registered below. `pnpm eslint:disable:check`, `pnpm lint:check`, and `pnpm quality:gate` enforce the registry.
+
+## Active production structural exceptions
+
+| ID | File | Rule(s) | Real boundary preserved | Why exception is better than split | Verification |
+|----|------|---------|-------------------------|------------------------------------|--------------|
+| GSE-20260428-products-metadata-validation | `src/lib/content-validation.ts` | `complexity`, `max-statements` | product metadata input validation | Required-field checks stay in one validator, so errors and warnings are reviewed in the same input boundary instead of helper piles. | `src/lib/__tests__/content-validation*.test.ts` plus `pnpm eslint:disable:check` |
+| GSE-20260428-turnstile-security-gates | `src/app/api/verify-turnstile/route.ts` | `max-statements` | Turnstile API security gate order | Config, rate limit, parse, validate, verify, and response mapping stay in request order; splitting would hide fail-closed flow. | `src/app/api/verify-turnstile/__tests__/route*.test.ts`, `tests/integration/api/verify-turnstile.test.ts`, plus `pnpm eslint:disable:check` |
+| GSE-20260428-lead-failure-metric | `src/lib/lead-pipeline/metrics.ts` | `max-params` | lead failure metric correlation envelope | `requestId` is part of failure correlation; hiding it inside a bag would weaken call-site clarity. | `src/lib/lead-pipeline/__tests__/metrics.test.ts` plus `pnpm eslint:disable:check` |
+| GSE-20260428-pipeline-service-metrics | `src/lib/lead-pipeline/pipeline-observability.ts` | `max-params` | route-to-pipeline metric correlation | `requestId` ties route-level and service-level signals; keeping it explicit preserves observability call order. | `src/lib/lead-pipeline/__tests__/pipeline-observability.test.ts` plus `pnpm eslint:disable:check` |
+
 ## Confirmed side effects
 
 | Area | Triggering rule | Evidence | Bad incentive | Treatment |
