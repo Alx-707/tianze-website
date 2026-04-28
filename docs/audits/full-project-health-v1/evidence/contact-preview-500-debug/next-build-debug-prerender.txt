@@ -1,0 +1,83 @@
+⚠ Prerendering is running in debug mode with NODE_ENV='development'. This will affect performance and should not be used for production.
+▲ Next.js 16.2.3 (Turbopack)
+- Cache Components enabled
+- Experiments (use with caution):
+  ✓ allowDevelopmentBuild (enabled by `--debug-prerender`)
+  · optimizePackageImports
+  ⨯ prerenderEarlyExit (disabled by `--debug-prerender`)
+  ✓ serverSourceMaps (enabled by `--debug-prerender`)
+  ⨯ turbopackMinify (disabled by `--debug-prerender`)
+
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+  Creating an optimized production build ...
+✓ Compiled successfully in 5.0s
+  Running TypeScript ...
+  Finished TypeScript in 4.7s ...
+  Collecting page data using 7 workers ...
+  Generating static pages using 7 workers (0/53) ...
+  Generating static pages using 7 workers (13/53) 
+  Generating static pages using 7 workers (26/53) 
+  Generating static pages using 7 workers (39/53) 
+✓ Generating static pages using 7 workers (53/53) in 8.1s
+  Finalizing page optimization ...
+
+Route (app)                                  Revalidate  Expire
+┌ ○ /_not-found
+├ ◐ /[locale]
+│ ├ /[locale]
+│ ├ /en
+│ └ /zh
+├ ◐ /[locale]/[...rest]
+│ ├ /[locale]/[...rest]
+│ ├ /en/[...rest]
+│ ├ /en/__not-found-placeholder
+│ └ [+2 more paths]
+├ ◐ /[locale]/about
+│ ├ /[locale]/about
+│ ├ /en/about
+│ └ /zh/about
+├ ◐ /[locale]/capabilities/bending-machines
+│ ├ /[locale]/capabilities/bending-machines
+│ ├ /en/capabilities/bending-machines
+│ └ /zh/capabilities/bending-machines
+├ ◐ /[locale]/contact
+│ ├ /[locale]/contact
+│ ├ /en/contact
+│ └ /zh/contact
+├ ◐ /[locale]/oem-custom-manufacturing
+│ ├ /[locale]/oem-custom-manufacturing
+│ ├ /en/oem-custom-manufacturing
+│ └ /zh/oem-custom-manufacturing
+├ ◐ /[locale]/privacy
+│ ├ /[locale]/privacy
+│ ├ /en/privacy
+│ └ /zh/privacy
+├ ◐ /[locale]/products
+│ ├ /[locale]/products
+│ ├ /en/products
+│ └ /zh/products
+├ ◐ /[locale]/products/[market]                      1d      1w
+│ ├ /[locale]/products/[market]                      1d      1w
+│ ├ /en/products/[market]
+│ ├ /en/products/north-america                       1d      1w
+│ └ [+10 more paths]
+├ ◐ /[locale]/terms
+│ ├ /[locale]/terms
+│ ├ /en/terms
+│ └ /zh/terms
+├ ƒ /api/csp-report
+├ ƒ /api/health
+├ ƒ /api/inquiry
+├ ƒ /api/subscribe
+├ ƒ /api/verify-turnstile
+├ ○ /apple-icon.png
+├ ○ /robots.txt
+└ ƒ /sitemap.xml
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)             prerendered as static content
+◐  (Partial Prerender)  prerendered as static HTML with dynamic server-streamed content
+ƒ  (Dynamic)            server-rendered on demand
+

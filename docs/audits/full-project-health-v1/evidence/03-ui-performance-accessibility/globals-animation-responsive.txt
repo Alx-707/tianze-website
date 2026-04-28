@@ -1,0 +1,789 @@
+     1	@import "tailwindcss" source(none);
+     2	@source "../app";
+     3	@source "../components";
+     4	@source "../lib/content";
+     5	@source "../../content";
+     6	@source "../../mdx-components.tsx";
+     7	
+     8	/* Tailwind v4 Plugins (order: animate before typography)
+     9	   - tailwindcss-animate: UI animation keyframes (animate-in, fade-in, slide-in-*)
+    10	   - @tailwindcss/typography: prose styles for MDX/rich content */
+    11	@plugin 'tailwindcss-animate';
+    12	@plugin '@tailwindcss/typography';
+    13	
+    14	@custom-variant dark (&:is(.dark *));
+    15	
+    16	/* ==================== PRIMITIVE TOKENS ==================== */
+    17	/* Design System: Swagelok structure + Vercel craft
+    18	   Primary: #004D9E — Source: docs/impeccable/system/TIANZE-DESIGN-TOKENS.md */
+    19	
+    20	:root {
+    21	  /* Gray Scale — Neutral */
+    22	  --gray-50: #fafafa;
+    23	  --gray-100: #f0f1f3;
+    24	  --gray-200: #e2e5e9;
+    25	  --gray-300: #c8cdd2;
+    26	  --gray-400: #8d969d;
+    27	  --gray-500: #5f6b73;
+    28	  --gray-600: #4a545b;
+    29	  --gray-700: #36424a;
+    30	  --gray-800: #2c353b;
+    31	  --gray-900: #1e2529;
+    32	  --gray-950: #141a1e;
+    33	
+    34	  /* Brand: Tianze Blue (#004D9E) */
+    35	  --blue-50: #f0f6ff;
+    36	  --blue-100: #e8f0fe;
+    37	  --blue-200: #bfdbfe;
+    38	  --blue-300: #7bb5f5;
+    39	  --blue-400: #3b8fe8;
+    40	  --blue-500: #004d9e;
+    41	  --blue-600: #003b7a;
+    42	  --blue-700: #002f63;
+    43	  --blue-800: #00234a;
+    44	  --blue-900: #001833;
+    45	  --blue-950: #001025;
+    46	
+    47	  /* Border Radius — 8px base (Vercel precision) */
+    48	  --radius: 0.5rem;
+    49	  --radius-none: 0;
+    50	  --radius-sharp: 0.125rem;
+    51	  --radius-base: 0.25rem;
+    52	  --radius-soft: 0.375rem;
+    53	  --radius-round: 9999px;
+    54	
+    55	  /* Foundation */
+    56	  --background: #fafafa;
+    57	  --foreground: #36424a;
+    58	
+    59	  /* Surfaces */
+    60	  --card: #ffffff;
+    61	  --card-foreground: #36424a;
+    62	  --popover: #ffffff;
+    63	  --popover-foreground: #36424a;
+    64	
+    65	  /* Brand Primary — #004D9E */
+    66	  --primary: #004d9e;
+    67	  --primary-foreground: #ffffff;
+    68	  --primary-dark: #003b7a;
+    69	  --primary-light: #e8f0fe;
+    70	  --primary-50: #f0f6ff;
+    71	
+    72	  /* Secondary — Outlined/bordered */
+    73	  --secondary: #ffffff;
+    74	  --secondary-foreground: #36424a;
+    75	
+    76	  /* Accent */
+    77	  --accent: #f0f6ff;
+    78	  --accent-foreground: #004d9e;
+    79	
+    80	  /* Muted */
+    81	  --muted: #f0f1f3;
+    82	  --muted-foreground: #5f6b73;
+    83	
+    84	  /* Destructive */
+    85	  --destructive: #dc2626;
+    86	  --destructive-foreground: #ffffff;
+    87	
+    88	  /* Borders & Inputs */
+    89	  --border: #e2e5e9;
+    90	  --border-light: #f0f1f3;
+    91	  --input: #ffffff;
+    92	  --ring: #004d9e;
+    93	
+    94	  /* Status Colors */
+    95	  --success: #0f7b5f;
+    96	  --success-foreground: #ffffff;
+    97	  --success-light: #eefbf4;
+    98	  --warning: #d97706;
+    99	  --warning-foreground: #1e2529;
+   100	  --error: #dc2626;
+   101	  --error-foreground: #ffffff;
+   102	  --info: #004d9e;
+   103	  --info-foreground: #ffffff;
+   104	
+   105	  /* Charts */
+   106	  --chart-1: #004d9e;
+   107	  --chart-2: #0f7b5f;
+   108	  --chart-3: #d97706;
+   109	  --chart-4: #7c3aed;
+   110	  --chart-5: #dc2626;
+   111	
+   112	  /* Selection */
+   113	  --selection-background: rgba(0, 77, 158, 0.2);
+   114	  --selection-foreground: #36424a;
+   115	
+   116	  /* Sidebar */
+   117	  --sidebar: #ffffff;
+   118	  --sidebar-foreground: #36424a;
+   119	  --sidebar-primary: #004d9e;
+   120	  --sidebar-primary-foreground: #ffffff;
+   121	  --sidebar-accent: #f0f6ff;
+   122	  --sidebar-accent-foreground: #004d9e;
+   123	  --sidebar-border: #e2e5e9;
+   124	  --sidebar-ring: #004d9e;
+   125	
+   126	  /* Shadows — Visible, subtle */
+   127	  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+   128	  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.03);
+   129	  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.06), 0 2px 4px rgba(0, 0, 0, 0.03);
+   130	  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.06), 0 4px 6px rgba(0, 0, 0, 0.03);
+   131	  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.06), 0 8px 10px rgba(0, 0, 0, 0.03);
+   132	  --shadow-inset: inset 0 1px 2px rgba(0, 0, 0, 0.04);
+   133	  --shadow-accent: 0 0 0 3px rgba(0, 77, 158, 0.2);
+   134	
+   135	  /* Shadow-Border (Vercel technique: shadow as border for smooth transitions) */
+   136	  --shadow-card-active:
+   137	    0 0 0 1px var(--primary), 0 0 0 4px rgba(0, 77, 158, 0.12);
+   138	
+   139	  /* Section Divider (Vercel-style) */
+   140	  --divider: #ebebeb;
+   141	
+   142	  /* Grid System (component phase — Task 9) */
+   143	  --grid-guide: rgba(0, 0, 0, 0.05);
+   144	  --grid-divider: rgb(235, 235, 235);
+   145	  --grid-crosshair: rgb(168, 168, 168);
+   146	
+   147	  /* Animation */
+   148	  --duration-instant: 50ms;
+   149	  --duration-fast: 150ms;
+   150	  --duration-normal: 200ms;
+   151	  --duration-slow: 300ms;
+   152	  --duration-slower: 400ms;
+   153	
+   154	  --ease-linear: linear;
+   155	  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+   156	  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+   157	  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+   158	  --ease-smooth: cubic-bezier(0.25, 0.1, 0.25, 1);
+   159	
+   160	  /* Scroll reveal — consumed by scroll-reveal.tsx via inline style + CSS var() */
+   161	  --scroll-reveal-distance: 24px;
+   162	  --scroll-reveal-duration: 700ms;
+   163	  --scroll-reveal-stagger: 100ms;
+   164	
+   165	  --transition-colors:
+   166	    color var(--duration-fast) var(--ease-out),
+   167	    background-color var(--duration-fast) var(--ease-out),
+   168	    border-color var(--duration-fast) var(--ease-out);
+   169	  --transition-opacity: opacity var(--duration-normal) var(--ease-smooth);
+   170	  --transition-transform: transform var(--duration-normal) var(--ease-out);
+   171	  --transition-shadow: box-shadow var(--duration-fast) var(--ease-out);
+   172	  --transition-all: all var(--duration-normal) var(--ease-smooth);
+   173	
+   174	  /* Typography — Figtree + monospace fallback */
+   175	  --font-sans:
+   176	    var(--font-figtree), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+   177	    "Helvetica Neue", Arial, sans-serif;
+   178	  --font-mono:
+   179	    var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, "SF Mono", Menlo,
+   180	    Consolas, "Liberation Mono", monospace;
+   181	  --font-chinese:
+   182	    "Source Han Sans SC", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+   183	    "Microsoft YaHei", sans-serif;
+   184	
+   185	  /* Container */
+   186	  --container-max: 1080px;
+   187	  --nav-h: 56px;
+   188	
+   189	  /* Footer Dark Surface */
+   190	  --footer-bg: #2c353b;
+   191	  --footer-text: #c1cad0;
+   192	  --footer-heading: #8a969e;
+   193	  --footer-link: #b4bec6;
+   194	  --footer-divider: rgba(255, 255, 255, 0.08);
+   195	}
+   196	
+   197	/* ==================== COMPONENT TOKENS ==================== */
+   198	
+   199	:root {
+   200	  /* Button — 6px radius, 150ms */
+   201	  --button-radius: 6px;
+   202	  --button-font-weight: 600;
+   203	
+   204	  --button-primary-bg: var(--primary);
+   205	  --button-primary-fg: var(--primary-foreground);
+   206	  --button-primary-hover-bg: var(--primary-dark);
+   207	
+   208	  --button-accent-bg: var(--accent);
+   209	  --button-accent-fg: var(--accent-foreground);
+   210	  --button-accent-hover-bg: #e0ecfd;
+   211	
+   212	  --button-secondary-bg: var(--secondary);
+   213	  --button-secondary-fg: var(--secondary-foreground);
+   214	  --button-secondary-border: var(--border);
+   215	
+   216	  --button-outline-bg: transparent;
+   217	  --button-outline-fg: var(--primary);
+   218	  --button-outline-border: var(--primary);
+   219	  --button-outline-hover-bg: rgba(0, 77, 158, 0.1);
+   220	
+   221	  --button-ghost-bg: transparent;
+   222	  --button-ghost-fg: var(--foreground);
+   223	  --button-ghost-hover-bg: var(--accent);
+   224	
+   225	  --button-destructive-bg: var(--destructive);
+   226	  --button-destructive-fg: var(--destructive-foreground);
+   227	
+   228	  /* Card — 8px radius */
+   229	  --card-radius: var(--radius);
+   230	  --card-padding: 1.5rem;
+   231	  --card-default-shadow: none;
+   232	  --card-elevated-shadow: var(--shadow-md);
+   233	
+   234	  /* Input */
+   235	  --input-height: 2.5rem;
+   236	  --input-padding-x: 1rem;
+   237	  --input-radius: var(--radius);
+   238	
+   239	  /* Table */
+   240	  --table-radius: var(--radius-soft);
+   241	  --table-header-bg: #f0f1f3;
+   242	  --table-row-hover-bg: rgba(0, 77, 158, 0.08);
+   243	
+   244	  /* Badge */
+   245	  --badge-radius: var(--radius-round);
+   246	  --badge-padding-x: 0.75rem;
+   247	  --badge-padding-y: 0.25rem;
+   248	}
+   249	
+   250	/* ==================== TAILWIND THEME BINDINGS ==================== */
+   251	
+   252	@theme inline {
+   253	  --color-background: var(--background);
+   254	  --color-foreground: var(--foreground);
+   255	  --font-sans: var(--font-sans);
+   256	  --font-mono: var(--font-mono);
+   257	  --font-chinese: var(--font-chinese);
+   258	  --color-sidebar-ring: var(--sidebar-ring);
+   259	  --color-sidebar-border: var(--sidebar-border);
+   260	  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+   261	  --color-sidebar-accent: var(--sidebar-accent);
+   262	  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+   263	  --color-sidebar-primary: var(--sidebar-primary);
+   264	  --color-sidebar-foreground: var(--sidebar-foreground);
+   265	  --color-sidebar: var(--sidebar);
+   266	  --color-chart-5: var(--chart-5);
+   267	  --color-chart-4: var(--chart-4);
+   268	  --color-chart-3: var(--chart-3);
+   269	  --color-chart-2: var(--chart-2);
+   270	  --color-chart-1: var(--chart-1);
+   271	  --color-ring: var(--ring);
+   272	  --color-input: var(--input);
+   273	  --color-border: var(--border);
+   274	  --color-destructive: var(--destructive);
+   275	  --color-accent-foreground: var(--accent-foreground);
+   276	  --color-accent: var(--accent);
+   277	  --color-muted-foreground: var(--muted-foreground);
+   278	  --color-muted: var(--muted);
+   279	  --color-secondary-foreground: var(--secondary-foreground);
+   280	  --color-secondary: var(--secondary);
+   281	  --color-primary-foreground: var(--primary-foreground);
+   282	  --color-primary: var(--primary);
+   283	  --color-popover-foreground: var(--popover-foreground);
+   284	  --color-popover: var(--popover);
+   285	  --color-card-foreground: var(--card-foreground);
+   286	  --color-card: var(--card);
+   287	  /* 8px base radius */
+   288	  --radius-sm: calc(var(--radius) - 4px);
+   289	  --radius-md: calc(var(--radius) - 2px);
+   290	  --radius-lg: var(--radius);
+   291	  --radius-xl: calc(var(--radius) + 4px);
+   292	  --radius-2xl: calc(var(--radius) + 8px);
+   293	
+   294	  /* Shadow-Border System (Vercel technique: box-shadow as border for smooth transitions) */
+   295	  --shadow-border: 0 0 0 1px rgba(0, 0, 0, 0.08);
+   296	  --shadow-card:
+   297	    0 0 0 1px rgba(0, 0, 0, 0.08), 0px 1px 1px rgba(0, 0, 0, 0.02),
+   298	    0px 4px 8px rgba(0, 0, 0, 0.04);
+   299	  --shadow-card-hover:
+   300	    0 0 0 1px rgba(0, 0, 0, 0.12), 0px 2px 4px rgba(0, 0, 0, 0.04),
+   301	    0px 8px 16px -4px rgba(0, 0, 0, 0.06);
+   302	}
+   303	
+   304	/* ==================== BASE LAYER ==================== */
+   305	
+   306	@layer base {
+   307	  * {
+   308	    @apply border-border outline-ring/50;
+   309	  }
+   310	  body {
+   311	    @apply bg-background text-foreground;
+   312	    font-family: var(--font-sans), var(--font-chinese);
+   313	  }
+   314	
+   315	  /* Text selection */
+   316	  ::selection {
+   317	    background-color: var(--selection-background);
+   318	    color: var(--selection-foreground);
+   319	  }
+   320	
+   321	  ::-moz-selection {
+   322	    background-color: var(--selection-background);
+   323	    color: var(--selection-foreground);
+   324	  }
+   325	
+   326	  /* System font: PingFang SC */
+   327	  @font-face {
+   328	    font-family: "PingFang SC";
+   329	    src: local("PingFang SC Regular"), local("PingFangSC-Regular");
+   330	    font-display: swap;
+   331	    font-weight: 400;
+   332	    font-style: normal;
+   333	    unicode-range: U+4E00-9FFF;
+   334	  }
+   335	
+   336	  /* Chinese font optimization */
+   337	  .font-chinese {
+   338	    font-family: var(--font-chinese);
+   339	    font-feature-settings: "kern" 1;
+   340	    text-rendering: optimizeLegibility;
+   341	    font-display: swap;
+   342	  }
+   343	
+   344	  /* View Transitions API */
+   345	  @supports (view-transition-name: none) {
+   346	    :root {
+   347	      view-transition-name: root;
+   348	    }
+   349	
+   350	    ::view-transition-old(root),
+   351	    ::view-transition-new(root) {
+   352	      animation-duration: 0.4s;
+   353	      animation-timing-function: ease-in-out;
+   354	    }
+   355	
+   356	    @media (prefers-reduced-motion: reduce) {
+   357	      ::view-transition-old(root),
+   358	      ::view-transition-new(root) {
+   359	        animation-duration: 0.1s;
+   360	      }
+   361	    }
+   362	
+   363	    @media (prefers-contrast: high) {
+   364	      ::view-transition-old(root),
+   365	      ::view-transition-new(root) {
+   366	        animation-timing-function: linear;
+   367	      }
+   368	    }
+   369	  }
+   370	
+   371	  /* Reduced motion */
+   372	  @media (prefers-reduced-motion: reduce) {
+   373	    :root {
+   374	      --duration-instant: 0.01ms;
+   375	      --duration-fast: 0.01ms;
+   376	      --duration-normal: 0.01ms;
+   377	      --duration-slow: 0.01ms;
+   378	      --duration-slower: 0.01ms;
+   379	    }
+   380	
+   381	    *,
+   382	    *::before,
+   383	    *::after {
+   384	      animation-duration: 0.01ms !important;
+   385	      animation-iteration-count: 1 !important;
+   386	      transition-duration: 0.01ms !important;
+   387	      scroll-behavior: auto !important;
+   388	    }
+   389	  }
+   390	
+   391	  /* High contrast mode */
+   392	  @media (prefers-contrast: high) {
+   393	    :root {
+   394	      --border: #4a545b;
+   395	      --ring: #003b7a;
+   396	    }
+   397	
+   398	    *:focus-visible {
+   399	      outline: 3px solid var(--ring) !important;
+   400	      outline-offset: 2px !important;
+   401	    }
+   402	
+   403	    button,
+   404	    [role="button"] {
+   405	      border-width: 2px !important;
+   406	    }
+   407	  }
+   408	
+   409	  /* Screen reader only */
+   410	  .sr-only {
+   411	    position: absolute;
+   412	    width: 1px;
+   413	    height: 1px;
+   414	    padding: 0;
+   415	    margin: -1px;
+   416	    overflow: hidden;
+   417	    clip: rect(0, 0, 0, 0);
+   418	    white-space: nowrap;
+   419	    border: 0;
+   420	  }
+   421	
+   422	  /* Focus management */
+   423	  *:focus-visible {
+   424	    outline: 2px solid var(--ring);
+   425	    outline-offset: 2px;
+   426	  }
+   427	
+   428	  /* Skip link */
+   429	  .skip-link {
+   430	    position: absolute;
+   431	    top: -40px;
+   432	    left: 6px;
+   433	    background: var(--background);
+   434	    color: var(--foreground);
+   435	    padding: 8px;
+   436	    text-decoration: none;
+   437	    border-radius: 4px;
+   438	    border: 2px solid var(--border);
+   439	    z-index: 1000;
+   440	  }
+   441	
+   442	  .skip-link:focus {
+   443	    top: 6px;
+   444	  }
+   445	}
+   446	
+   447	/* ==================== CLS OPTIMIZATION ==================== */
+   448	
+   449	.cls-optimized {
+   450	  min-height: 1rem;
+   451	  contain: layout style;
+   452	}
+   453	
+   454	.image-container {
+   455	  position: relative;
+   456	  overflow: hidden;
+   457	  aspect-ratio: 16 / 9;
+   458	}
+   459	
+   460	.image-container img {
+   461	  position: absolute;
+   462	  top: 0;
+   463	  left: 0;
+   464	  width: 100%;
+   465	  height: 100%;
+   466	  object-fit: cover;
+   467	}
+   468	
+   469	.dynamic-component-container {
+   470	  min-height: 2rem;
+   471	  contain: layout;
+   472	}
+   473	
+   474	.dev-tools-container {
+   475	  position: fixed;
+   476	  pointer-events: none;
+   477	}
+   478	
+   479	.dev-tools-container > * {
+   480	  pointer-events: auto;
+   481	}
+   482	
+   483	/* ==================== CONTENT VISIBILITY ==================== */
+   484	
+   485	.cv-auto {
+   486	  content-visibility: auto;
+   487	  contain-intrinsic-size: 1px 800px;
+   488	  contain-intrinsic-size: auto 800px;
+   489	}
+   490	
+   491	.cv-600 {
+   492	  content-visibility: auto;
+   493	  contain-intrinsic-size: 1px 600px;
+   494	  contain-intrinsic-size: auto 600px;
+   495	}
+   496	
+   497	.cv-800 {
+   498	  content-visibility: auto;
+   499	  contain-intrinsic-size: 1px 800px;
+   500	  contain-intrinsic-size: auto 800px;
+   501	}
+   502	
+   503	.cv-1000 {
+   504	  content-visibility: auto;
+   505	  contain-intrinsic-size: 1px 1000px;
+   506	  contain-intrinsic-size: auto 1000px;
+   507	}
+   508	
+   509	/* ==================== FONT OPTIMIZATION ==================== */
+   510	
+   511	.font-chinese,
+   512	[lang="zh"] {
+   513	  font-family: var(--font-chinese);
+   514	  font-feature-settings:
+   515	    "kern" 1,
+   516	    "liga" 1,
+   517	    "calt" 1;
+   518	  text-rendering: optimizeLegibility;
+   519	  -webkit-font-smoothing: antialiased;
+   520	  -moz-osx-font-smoothing: grayscale;
+   521	}
+   522	
+   523	.zh-firstframe-title {
+   524	  font-family:
+   525	    system-ui,
+   526	    -apple-system,
+   527	    BlinkMacSystemFont,
+   528	    "Segoe UI",
+   529	    "PingFang SC",
+   530	    "Hiragino Sans GB",
+   531	    "Source Han Sans SC",
+   532	    "Noto Sans CJK SC",
+   533	    "Microsoft YaHei",
+   534	    Arial,
+   535	    sans-serif;
+   536	  font-weight: 600;
+   537	}
+   538	
+   539	:root[lang="zh"] [data-fast-lcp-zh="1"] h1[data-lcp-title="1"] {
+   540	  font-family:
+   541	    system-ui,
+   542	    -apple-system,
+   543	    BlinkMacSystemFont,
+   544	    "Segoe UI",
+   545	    "PingFang SC",
+   546	    "Hiragino Sans GB",
+   547	    "Source Han Sans SC",
+   548	    "Noto Sans CJK SC",
+   549	    "Microsoft YaHei",
+   550	    Arial,
+   551	    sans-serif;
+   552	  font-weight: 600;
+   553	}
+   554	
+   555	.font-loading {
+   556	  font-display: swap;
+   557	  font-synthesis: none;
+   558	}
+   559	
+   560	.font-fallback {
+   561	  font-family: "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+   562	  letter-spacing: 0.01em;
+   563	  line-height: 1.6;
+   564	}
+   565	
+   566	/* ==================== UTILITY CLASSES ==================== */
+   567	
+   568	@layer utilities {
+   569	  /* Section divider — Vercel style */
+   570	  .section-divider {
+   571	    @apply border-t;
+   572	    border-color: var(--divider);
+   573	  }
+   574	
+   575	  .column-divider {
+   576	    @apply divide-x divide-border/30;
+   577	  }
+   578	
+   579	  .card-border {
+   580	    @apply border border-border;
+   581	    border-radius: var(--radius);
+   582	  }
+   583	
+   584	  @media (min-width: 768px) {
+   585	    .md\:section-divider {
+   586	      @apply border-t;
+   587	      border-color: var(--divider);
+   588	    }
+   589	  }
+   590	
+   591	  /* Line separator utilities */
+   592	  .line-divider {
+   593	    @apply border-t;
+   594	    border-color: var(--divider);
+   595	  }
+   596	
+   597	  .line-divider-vertical {
+   598	    @apply border-l;
+   599	    border-color: var(--divider);
+   600	  }
+   601	
+   602	  /* Gradient line (fades at edges) */
+   603	  .line-gradient {
+   604	    background: linear-gradient(
+   605	      90deg,
+   606	      transparent 0%,
+   607	      var(--divider) 20%,
+   608	      var(--divider) 80%,
+   609	      transparent 100%
+   610	    );
+   611	    height: 1px;
+   612	  }
+   613	}
+   614	
+   615	/* ==================== ANIMATION UTILITIES ==================== */
+   616	
+   617	@layer utilities {
+   618	  /* Hover lift effect (subtle) */
+   619	  .hover-lift {
+   620	    transition:
+   621	      transform var(--duration-fast) var(--ease-out),
+   622	      box-shadow var(--duration-fast) var(--ease-out);
+   623	  }
+   624	
+   625	  .hover-lift:hover {
+   626	    transform: translateY(-2px);
+   627	    box-shadow: var(--shadow-md);
+   628	  }
+   629	
+   630	  /* Fade in animation */
+   631	  .animate-fade-in {
+   632	    animation: fadeIn var(--duration-normal) var(--ease-out) forwards;
+   633	  }
+   634	
+   635	  /* Slide up animation */
+   636	  .animate-slide-up {
+   637	    animation: slideUp var(--duration-slow) var(--ease-out) forwards;
+   638	  }
+   639	
+   640	  /* Slide down animation */
+   641	  .animate-slide-down {
+   642	    animation: slideDown var(--duration-slow) var(--ease-out) forwards;
+   643	  }
+   644	
+   645	  /* Scale in animation */
+   646	  .animate-scale-in {
+   647	    animation: scaleIn var(--duration-normal) var(--ease-spring) forwards;
+   648	  }
+   649	
+   650	  /* Hero stagger — mount-triggered entrance sequence
+   651	     Duration: 700ms with spring easing for organic feel
+   652	     Stagger: 100ms intervals for clear cascading perception */
+   653	  .hero-stagger-1 {
+   654	    animation: slideUp 700ms var(--ease-spring) 0ms both;
+   655	  }
+   656	  .hero-stagger-2 {
+   657	    animation: slideUp 700ms var(--ease-spring) 100ms both;
+   658	  }
+   659	  .hero-stagger-3 {
+   660	    animation: slideUp 700ms var(--ease-spring) 200ms both;
+   661	  }
+   662	  .hero-stagger-4 {
+   663	    animation: slideUp 700ms var(--ease-spring) 300ms both;
+   664	  }
+   665	  .hero-stagger-5 {
+   666	    animation: slideUp 700ms var(--ease-spring) 400ms both;
+   667	  }
+   668	  .hero-stagger-6 {
+   669	    animation: scaleIn 800ms var(--ease-spring) 250ms both;
+   670	  }
+   671	}
+   672	
+   673	@keyframes fadeIn {
+   674	  from {
+   675	    opacity: 0;
+   676	  }
+   677	  to {
+   678	    opacity: 1;
+   679	  }
+   680	}
+   681	
+   682	@keyframes slideUp {
+   683	  from {
+   684	    opacity: 0;
+   685	    transform: translateY(24px);
+   686	  }
+   687	  to {
+   688	    opacity: 1;
+   689	    transform: translateY(0);
+   690	  }
+   691	}
+   692	
+   693	@keyframes slideDown {
+   694	  from {
+   695	    opacity: 0;
+   696	    transform: translateY(-24px);
+   697	  }
+   698	  to {
+   699	    opacity: 1;
+   700	    transform: translateY(0);
+   701	  }
+   702	}
+   703	
+   704	@keyframes scaleIn {
+   705	  from {
+   706	    opacity: 0;
+   707	    transform: scale(0.9);
+   708	  }
+   709	  to {
+   710	    opacity: 1;
+   711	    transform: scale(1);
+   712	  }
+   713	}
+   714	
+   715	/* ==================== HEADER RESPONSIVE CONTRACT ==================== */
+   716	/* Retained for existing layout components — will be refactored with nav redesign */
+   717	
+   718	@layer utilities {
+   719	  .header-mobile-only {
+   720	    @apply block;
+   721	    @media (min-width: 1024px) {
+   722	      @apply hidden;
+   723	    }
+   724	  }
+   725	
+   726	  .header-desktop-only {
+   727	    @apply hidden;
+   728	    @media (min-width: 1024px) {
+   729	      @apply flex;
+   730	    }
+   731	  }
+   732	
+   733	  .header-nav-more-only {
+   734	    @apply hidden;
+   735	    @media (min-width: 1024px) {
+   736	      @apply block;
+   737	    }
+   738	    @media (min-width: 1280px) {
+   739	      @apply hidden;
+   740	    }
+   741	  }
+   742	
+   743	  .header-nav-secondary-only {
+   744	    @apply hidden;
+   745	    @media (min-width: 1280px) {
+   746	      @apply block;
+   747	    }
+   748	  }
+   749	
+   750	  .header-cta-desktop-only {
+   751	    @apply hidden;
+   752	    @media (min-width: 1280px) {
+   753	      @apply inline-flex;
+   754	    }
+   755	  }
+   756	
+   757	  .header-logo-text-desktop-only {
+   758	    @apply hidden;
+   759	    @media (min-width: 1280px) {
+   760	      @apply block;
+   761	    }
+   762	  }
+   763	
+   764	  .header-nav-layout {
+   765	    @apply grid h-16 grid-cols-[1fr_auto_1fr] items-center;
+   766	  }
+   767	
+   768	  .header-nav-left {
+   769	    @apply col-start-1 flex min-w-0 items-center gap-4;
+   770	  }
+   771	
+   772	  .header-nav-center {
+   773	    @apply col-start-2 flex min-w-0 items-center justify-center;
+   774	  }
+   775	
+   776	  .header-nav-right {
+   777	    @apply col-start-3 flex min-w-0 items-center justify-end gap-2;
+   778	  }
+   779	
+   780	  /* Hide scrollbar for horizontal scroll containers */
+   781	  .scrollbar-hide {
+   782	    -ms-overflow-style: none;
+   783	    scrollbar-width: none;
+   784	  }
+   785	
+   786	  .scrollbar-hide::-webkit-scrollbar {
+   787	    display: none;
+   788	  }
+   789	}

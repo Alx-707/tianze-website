@@ -1,0 +1,96 @@
+$ git status --short --untracked-files=all
+?? docs/audits/full-project-health-v1/evidence/00-baseline-runtime/baseline-env.txt
+?? docs/audits/full-project-health-v1/evidence/00-baseline-runtime/clean-baseline-proof.txt
+?? docs/audits/full-project-health-v1/evidence/00-baseline-runtime/pnpm-build-cf.txt
+?? docs/audits/full-project-health-v1/evidence/00-baseline-runtime/pnpm-build.txt
+?? docs/audits/full-project-health-v1/evidence/00-baseline-runtime/pnpm-dep-check.txt
+?? docs/audits/full-project-health-v1/evidence/00-baseline-runtime/pnpm-lint-check.txt
+?? docs/audits/full-project-health-v1/evidence/00-baseline-runtime/pnpm-quality-gate-fast.txt
+?? docs/audits/full-project-health-v1/evidence/00-baseline-runtime/pnpm-security-semgrep.txt
+?? docs/audits/full-project-health-v1/evidence/00-baseline-runtime/pnpm-test.txt
+?? docs/audits/full-project-health-v1/evidence/00-baseline-runtime/pnpm-truth-check.txt
+?? docs/audits/full-project-health-v1/evidence/00-baseline-runtime/pnpm-type-check.txt
+?? docs/audits/full-project-health-v1/evidence/00-baseline-runtime/pnpm-unused-check.txt
+?? docs/audits/full-project-health-v1/evidence/00-baseline-runtime/post-build-artifacts.txt
+?? docs/audits/full-project-health-v1/evidence/01-architecture-coupling/architecture-metrics.json
+?? docs/audits/full-project-health-v1/evidence/01-architecture-coupling/architecture-metrics.md
+?? docs/audits/full-project-health-v1/evidence/01-architecture-coupling/barrel-and-reexports.txt
+?? docs/audits/full-project-health-v1/evidence/01-architecture-coupling/cache-client-boundaries.txt
+?? docs/audits/full-project-health-v1/evidence/01-architecture-coupling/dependency-conformance.json
+?? docs/audits/full-project-health-v1/evidence/01-architecture-coupling/dependency-conformance.md
+?? docs/audits/full-project-health-v1/evidence/01-architecture-coupling/largest-src-files.txt
+?? docs/audits/full-project-health-v1/evidence/01-architecture-coupling/locale-hardcoding.txt
+?? docs/audits/full-project-health-v1/evidence/01-architecture-coupling/pnpm-arch-conformance.txt
+?? docs/audits/full-project-health-v1/evidence/01-architecture-coupling/pnpm-arch-hotspots.txt
+?? docs/audits/full-project-health-v1/evidence/01-architecture-coupling/pnpm-arch-metrics.txt
+?? docs/audits/full-project-health-v1/evidence/01-architecture-coupling/pnpm-dep-check.txt
+?? docs/audits/full-project-health-v1/evidence/01-architecture-coupling/product-market-coupling.txt
+?? docs/audits/full-project-health-v1/evidence/01-architecture-coupling/route-config-coupling.txt
+?? docs/audits/full-project-health-v1/evidence/01-architecture-coupling/runtime-cloudflare-coupling.txt
+?? docs/audits/full-project-health-v1/evidence/01-architecture-coupling/src-topology.txt
+?? docs/audits/full-project-health-v1/evidence/01-architecture-coupling/structural-hotspots.json
+?? docs/audits/full-project-health-v1/evidence/01-architecture-coupling/structural-hotspots.md
+?? docs/audits/full-project-health-v1/evidence/02-security-trust-boundary/lint-pii.txt
+?? docs/audits/full-project-health-v1/evidence/02-security-trust-boundary/security-audit.txt
+?? docs/audits/full-project-health-v1/evidence/02-security-trust-boundary/security-csp-check.txt
+?? docs/audits/full-project-health-v1/evidence/02-security-trust-boundary/security-semgrep.txt
+?? docs/audits/full-project-health-v1/evidence/02-security-trust-boundary/semgrep-error-1777287984901.json
+?? docs/audits/full-project-health-v1/evidence/02-security-trust-boundary/semgrep-warning-1777287984901.json
+?? docs/audits/full-project-health-v1/evidence/02-security-trust-boundary/validate-config-production-env.txt
+?? docs/audits/full-project-health-v1/evidence/02-security-trust-boundary/vitest-api-security.txt
+?? docs/audits/full-project-health-v1/evidence/02-security-trust-boundary/vitest-contact-action-security.txt
+?? docs/audits/full-project-health-v1/evidence/02-security-trust-boundary/vitest-security-core.txt
+?? docs/audits/full-project-health-v1/evidence/03-ui-performance-accessibility/button-touch-targets.txt
+?? docs/audits/full-project-health-v1/evidence/03-ui-performance-accessibility/e2e-axe-helper.txt
+?? docs/audits/full-project-health-v1/evidence/03-ui-performance-accessibility/globals-animation-responsive.txt
+?? docs/audits/full-project-health-v1/evidence/03-ui-performance-accessibility/hero-section-animation-usage.txt
+?? docs/audits/full-project-health-v1/evidence/03-ui-performance-accessibility/homepage-axe-usage.txt
+?? docs/audits/full-project-health-v1/evidence/03-ui-performance-accessibility/image-usage-scan.txt
+?? docs/audits/full-project-health-v1/evidence/03-ui-performance-accessibility/lighthouserc-current.txt
+?? docs/audits/full-project-health-v1/evidence/03-ui-performance-accessibility/local-port-3000-check.txt
+?? docs/audits/full-project-health-v1/evidence/03-ui-performance-accessibility/mobile-navigation-interactive.txt
+?? docs/audits/full-project-health-v1/evidence/03-ui-performance-accessibility/mobile-navigation-touch-targets.txt
+?? docs/audits/full-project-health-v1/evidence/03-ui-performance-accessibility/navigation-axe-usage.txt
+?? docs/audits/full-project-health-v1/evidence/03-ui-performance-accessibility/next-artifacts-scan.txt
+?? docs/audits/full-project-health-v1/evidence/03-ui-performance-accessibility/public-assets-list.txt
+?? docs/audits/full-project-health-v1/evidence/03-ui-performance-accessibility/sticky-family-nav-touch-targets.txt
+?? docs/audits/full-project-health-v1/evidence/03-ui-performance-accessibility/targeted-vitest-a11y-responsive.txt
+?? docs/audits/full-project-health-v1/evidence/03-ui-performance-accessibility/touch-target-static-scan.txt
+?? docs/audits/full-project-health-v1/evidence/04-seo-content-conversion/conversion-trust-static-scan.txt
+?? docs/audits/full-project-health-v1/evidence/04-seo-content-conversion/public-asset-existence.txt
+?? docs/audits/full-project-health-v1/evidence/04-seo-content-conversion/static-seo-implementation-scan.txt
+?? docs/audits/full-project-health-v1/evidence/04-seo-content-conversion/targeted-seo-vitest.txt
+?? docs/audits/full-project-health-v1/evidence/05-tests-ai-smell-dead-code/check-mutation-required.txt
+?? docs/audits/full-project-health-v1/evidence/05-tests-ai-smell-dead-code/pnpm-quality-gate-fast.txt
+?? docs/audits/full-project-health-v1/evidence/05-tests-ai-smell-dead-code/pnpm-test.txt
+?? docs/audits/full-project-health-v1/evidence/05-tests-ai-smell-dead-code/pnpm-unused-check.txt
+?? docs/audits/full-project-health-v1/evidence/preflight.md
+?? docs/audits/full-project-health-v1/run-metadata.md
+
+$ git diff --name-only -- src/lib/mdx-importers.generated.ts src/lib/content-manifest.generated.ts public/locales reports .next .open-next .trash-next-artifacts
+
+$ du -sh .next .open-next 2>/dev/null
+385M	.next
+ 33M	.open-next
+
+$ find .open-next -maxdepth 2 -type f | head -20
+.open-next/.build/open-next.config.edge.mjs
+.open-next/.build/composable-cache.cjs
+.open-next/.build/cache.cjs
+.open-next/.build/open-next.config.mjs
+.open-next/middleware/handler.mjs
+.open-next/middleware/open-next.config.mjs
+.open-next/worker.js
+.open-next/cloudflare/next-env.mjs
+.open-next/cloudflare/cache-assets-manifest.sql
+.open-next/cloudflare/skew-protection.js
+.open-next/cloudflare/init.js
+.open-next/cloudflare/images.js
+.open-next/dynamodb-provider/dynamodb-cache.json
+.open-next/dynamodb-provider/open-next.config.mjs
+.open-next/assets/favicon.ico
+.open-next/assets/BUILD_ID
+.open-next/assets/next.svg
+.open-next/assets/security-policy.txt
+.open-next/cloudflare-templates/skew-protection.d.ts
+.open-next/cloudflare-templates/worker.js

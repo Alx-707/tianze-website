@@ -1,0 +1,79 @@
+     1	import type { ComponentProps } from "react";
+     2	import { useTranslations } from "next-intl";
+     3	import { SINGLE_SITE_HOME_LINK_TARGETS } from "@/config/single-site-page-expression";
+     4	import {
+     5	  isActivePath,
+     6	  mobileNavigation,
+     7	  NAVIGATION_ARIA,
+     8	} from "@/lib/navigation";
+     9	import { cn } from "@/lib/utils";
+    10	import { Link } from "@/i18n/routing";
+    11	
+    12	export interface MobileNavigationLinksProps extends Omit<
+    13	  ComponentProps<"nav">,
+    14	  "children"
+    15	> {
+    16	  contactSalesLabel?: string;
+    17	  currentPathname?: string;
+    18	  onNavigate?: () => void;
+    19	}
+    20	
+    21	export function MobileNavigationLinks({
+    22	  className,
+    23	  contactSalesLabel,
+    24	  currentPathname,
+    25	  onNavigate,
+    26	  ...props
+    27	}: MobileNavigationLinksProps) {
+    28	  const t = useTranslations();
+    29	  const resolvedContactSalesLabel =
+    30	    contactSalesLabel ?? t("navigation.contactSales");
+    31	
+    32	  return (
+    33	    <nav
+    34	      aria-label={NAVIGATION_ARIA.mobileMenu}
+    35	      className={cn("flex flex-col space-y-1", className)}
+    36	      {...props}
+    37	    >
+    38	      <ul className="space-y-1">
+    39	        {mobileNavigation.map((item) => {
+    40	          const isActive =
+    41	            typeof currentPathname === "string" &&
+    42	            isActivePath(currentPathname, item.href);
+    43	
+    44	          return (
+    45	            <li key={item.key}>
+    46	              <Link
+    47	                href={item.href as "/"}
+    48	                prefetch={false}
+    49	                className={cn(
+    50	                  "flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors duration-200",
+    51	                  isActive
+    52	                    ? "bg-accent text-accent-foreground"
+    53	                    : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
+    54	                )}
+    55	                aria-current={isActive ? "page" : undefined}
+    56	                onClick={onNavigate}
+    57	              >
+    58	                {t(item.translationKey)}
+    59	              </Link>
+    60	            </li>
+    61	          );
+    62	        })}
+    63	        <li className="pt-4">
+    64	          <Link
+    65	            href={{
+    66	              pathname: SINGLE_SITE_HOME_LINK_TARGETS.contact,
+    67	              query: { source: "mobile_nav_cta" },
+    68	            }}
+    69	            prefetch={false}
+    70	            className="flex items-center rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground transition-colors duration-200 hover:bg-primary/90"
+    71	            onClick={onNavigate}
+    72	          >
+    73	            {resolvedContactSalesLabel}
+    74	          </Link>
+    75	        </li>
+    76	      </ul>
+    77	    </nav>
+    78	  );
+    79	}

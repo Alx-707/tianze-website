@@ -1,0 +1,7 @@
+
+> b2b-web-template@0.1.0 arch:conformance /Users/Data/conductor/workspaces/tianze-website/miami
+> node scripts/dependency-conformance.js
+
+Dependency conformance report written: reports/architecture/dependency-conformance-1777287900537.json
+Dependency conformance summary: reports/architecture/dependency-conformance-1777287900537.md
+Total violations: 1

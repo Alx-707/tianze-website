@@ -1,0 +1,276 @@
+{
+    "wallTime": 90,
+    "cpuTime": 77,
+    "truncated": false,
+    "executionModel": "stateless",
+    "outcome": "ok",
+    "scriptTags": [
+        "cf:service=tianze-website-web",
+        "cf:environment=preview"
+    ],
+    "scriptVersion": {
+        "id": "7758abad-e434-46e3-9772-84d708a46ab8"
+    },
+    "scriptName": "tianze-website-web-preview",
+    "diagnosticsChannelEvents": [],
+    "exceptions": [],
+    "logs": [],
+    "eventTimestamp": 1777293362778,
+    "event": {
+        "request": {
+            "url": "https://tianze-website-gateway-preview.kei-tang.workers.dev/en/products",
+            "method": "GET",
+            "headers": {
+                "accept": "*/*",
+                "accept-encoding": "gzip, br",
+                "cf-connecting-ip": "13.250.202.233",
+                "cf-ipcountry": "SG",
+                "cf-ray": "9f2ddedd3f9ef8c8",
+                "cf-visitor": "{\"scheme\":\"https\"}",
+                "connection": "Keep-Alive",
+                "host": "tianze-website-gateway-preview.kei-tang.workers.dev",
+                "user-agent": "curl/8.7.1",
+                "x-forwarded-host": "tianze-website-gateway-preview.kei-tang.workers.dev",
+                "x-forwarded-proto": "https",
+                "x-middleware-response-content-security-policy": "default-src 'self'; script-src 'self' 'nonce-81afef6189be4d35adeba8bc2506b98e' https://va.vercel-scripts.com https://challenges.cloudflare.com https://www.googletagmanager.com https://www.google-analytics.com; script-src-elem 'self' 'unsafe-inline' https://va.vercel-scripts.com https://challenges.cloudflare.com https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' 'nonce-81afef6189be4d35adeba8bc2506b98e' https://fonts.googleapis.com; style-src-elem 'self' 'unsafe-inline' https://fonts.googleapis.com; style-src-attr 'unsafe-inline'; img-src 'self' data: https: https://va.vercel-scripts.com https://images.unsplash.com https://via.placeholder.com https://www.google-analytics.com https://www.googletagmanager.com; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://vitals.vercel-insights.com https://api.resend.com https://www.google-analytics.com https://analytics.google.com https://region1.google-analytics.com; frame-src https://challenges.cloudflare.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; report-uri /api/csp-report; upgrade-insecure-requests",
+                "x-middleware-response-cross-origin-embedder-policy": "unsafe-none, unsafe-none",
+                "x-middleware-response-cross-origin-opener-policy": "same-origin, same-origin",
+                "x-middleware-response-cross-origin-resource-policy": "cross-origin, cross-origin",
+                "x-middleware-response-link": "<https://tianze-website-gateway-preview.kei-tang.workers.dev/en/products>; rel=\"alternate\"; hreflang=\"en\", <https://tianze-website-gateway-preview.kei-tang.workers.dev/zh/products>; rel=\"alternate\"; hreflang=\"zh\", <https://tianze-website-gateway-preview.kei-tang.workers.dev/products>; rel=\"alternate\"; hreflang=\"x-default\"",
+                "x-middleware-response-permissions-policy": "camera=(), microphone=(), geolocation=(), interest-cohort=(), payment=(), usb=(), camera=(), microphone=(), geolocation=(), interest-cohort=(), payment=(), usb=()",
+                "x-middleware-response-referrer-policy": "strict-origin-when-cross-origin, strict-origin-when-cross-origin",
+                "x-middleware-response-set-cookie": "NEXT_LOCALE=en; Path=/; Expires=Tue, 27 Apr 2027 12:36:02 GMT; Max-Age=31536000; Secure; HttpOnly; SameSite=lax",
+                "x-middleware-response-strict-transport-security": "max-age=63072000; includeSubDomains; preload, max-age=63072000; includeSubDomains; preload",
+                "x-middleware-response-x-content-type-options": "nosniff, nosniff",
+                "x-middleware-response-x-frame-options": "DENY, DENY",
+                "x-next-intl-locale": "en",
+                "x-nonce": "81afef6189be4d35adeba8bc2506b98e",
+                "x-open-next-city": "Singapore",
+                "x-open-next-country": "SG",
+                "x-open-next-latitude": "1.28967",
+                "x-open-next-longitude": "103.85007",
+                "x-opennext-initial-url": "https://tianze-website-gateway-preview.kei-tang.workers.dev/en/products",
+                "x-opennext-request-id": "0.80td4x30jn",
+                "x-opennext-resolved-routes": "[{\"route\":\"/[locale]/products\",\"type\":\"app\"},{\"route\":\"/en/[...rest]\",\"type\":\"page\"},{\"route\":\"/[locale]/[...rest]\",\"type\":\"app\"}]",
+                "x-opennext-rewrite-status-code": "undefined",
+                "x-real-ip": "13.250.202.233",
+                "x-vercel-ip-city": "Singapore",
+                "x-vercel-ip-country": "SG",
+                "x-vercel-ip-latitude": "1.28967",
+                "x-vercel-ip-longitude": "103.85007"
+            }
+        },
+        "response": {
+            "status": 200
+        }
+    }
+}
+{
+    "wallTime": 488,
+    "cpuTime": 436,
+    "truncated": false,
+    "executionModel": "stateless",
+    "outcome": "ok",
+    "scriptTags": [
+        "cf:service=tianze-website-web",
+        "cf:environment=preview"
+    ],
+    "scriptVersion": {
+        "id": "7758abad-e434-46e3-9772-84d708a46ab8"
+    },
+    "scriptName": "tianze-website-web-preview",
+    "diagnosticsChannelEvents": [],
+    "exceptions": [
+        {
+            "stack": "    at H3 (web.js:31361:23)\n    at lq (web.js:40826:33)\n    at async lA (web.js:40201:163)\n    at async q4 (web.js:106861:26)\n    at async nr2.handleRevalidate (web.js:36715:27)\n    at async web.js:36600:29",
+            "name": "Error",
+            "message": "",
+            "timestamp": 1777293361868
+        }
+    ],
+    "logs": [
+        {
+            "message": [
+                "Next.js cannot guarantee that Cache Components will run as expected due to the current runtime's implementation of `setTimeout()`.\nPlease report a github issue here: https://github.com/vercel/next.js/issues/new/"
+            ],
+            "level": "warn",
+            "timestamp": 1777293361868
+        },
+        {
+            "message": [
+                "Error: Route \"/[locale]/contact\": Uncached data was accessed outside of <Suspense>. This delays the entire page from rendering, resulting in a slow user experience. Learn more: https://nextjs.org/docs/messages/blocking-route"
+            ],
+            "level": "error",
+            "timestamp": 1777293361868
+        },
+        {
+            "message": [
+                "To get a more detailed stack trace and pinpoint the issue, try one of the following:\n  - Start the app in development mode by running `next dev`, then open \"/[locale]/contact\" in your browser to investigate the error.\n  - Rerun the production build with `next build --debug-prerender` to generate better stack traces."
+            ],
+            "level": "error",
+            "timestamp": 1777293361868
+        },
+        {
+            "message": [
+                "Error: Route \"/[locale]/contact\": Uncached data was accessed outside of <Suspense>. This delays the entire page from rendering, resulting in a slow user experience. Learn more: https://nextjs.org/docs/messages/blocking-route"
+            ],
+            "level": "error",
+            "timestamp": 1777293361868
+        },
+        {
+            "message": [
+                "To get a more detailed stack trace and pinpoint the issue, try one of the following:\n  - Start the app in development mode by running `next dev`, then open \"/[locale]/contact\" in your browser to investigate the error.\n  - Rerun the production build with `next build --debug-prerender` to generate better stack traces."
+            ],
+            "level": "error",
+            "timestamp": 1777293361868
+        },
+        {
+            "message": [
+                "Error: Route \"/[locale]/contact\": Uncached data was accessed outside of <Suspense>. This delays the entire page from rendering, resulting in a slow user experience. Learn more: https://nextjs.org/docs/messages/blocking-route"
+            ],
+            "level": "error",
+            "timestamp": 1777293361868
+        },
+        {
+            "message": [
+                "To get a more detailed stack trace and pinpoint the issue, try one of the following:\n  - Start the app in development mode by running `next dev`, then open \"/[locale]/contact\" in your browser to investigate the error.\n  - Rerun the production build with `next build --debug-prerender` to generate better stack traces."
+            ],
+            "level": "error",
+            "timestamp": 1777293361868
+        },
+        {
+            "message": [
+                "Error: Route \"/[locale]/contact\": Uncached data was accessed outside of <Suspense>. This delays the entire page from rendering, resulting in a slow user experience. Learn more: https://nextjs.org/docs/messages/blocking-route"
+            ],
+            "level": "error",
+            "timestamp": 1777293361868
+        },
+        {
+            "message": [
+                "To get a more detailed stack trace and pinpoint the issue, try one of the following:\n  - Start the app in development mode by running `next dev`, then open \"/[locale]/contact\" in your browser to investigate the error.\n  - Rerun the production build with `next build --debug-prerender` to generate better stack traces."
+            ],
+            "level": "error",
+            "timestamp": 1777293361868
+        },
+        {
+            "message": [
+                "Error: Route \"/[locale]/contact\": Uncached data was accessed outside of <Suspense>. This delays the entire page from rendering, resulting in a slow user experience. Learn more: https://nextjs.org/docs/messages/blocking-route"
+            ],
+            "level": "error",
+            "timestamp": 1777293361868
+        },
+        {
+            "message": [
+                "To get a more detailed stack trace and pinpoint the issue, try one of the following:\n  - Start the app in development mode by running `next dev`, then open \"/[locale]/contact\" in your browser to investigate the error.\n  - Rerun the production build with `next build --debug-prerender` to generate better stack traces."
+            ],
+            "level": "error",
+            "timestamp": 1777293361868
+        },
+        {
+            "message": [
+                "Error: Route \"/[locale]/contact\": Uncached data was accessed outside of <Suspense>. This delays the entire page from rendering, resulting in a slow user experience. Learn more: https://nextjs.org/docs/messages/blocking-route"
+            ],
+            "level": "error",
+            "timestamp": 1777293361868
+        },
+        {
+            "message": [
+                "To get a more detailed stack trace and pinpoint the issue, try one of the following:\n  - Start the app in development mode by running `next dev`, then open \"/[locale]/contact\" in your browser to investigate the error.\n  - Rerun the production build with `next build --debug-prerender` to generate better stack traces."
+            ],
+            "level": "error",
+            "timestamp": 1777293361868
+        },
+        {
+            "message": [
+                "Error: Route \"/[locale]/contact\": Uncached data was accessed outside of <Suspense>. This delays the entire page from rendering, resulting in a slow user experience. Learn more: https://nextjs.org/docs/messages/blocking-route"
+            ],
+            "level": "error",
+            "timestamp": 1777293361868
+        },
+        {
+            "message": [
+                "To get a more detailed stack trace and pinpoint the issue, try one of the following:\n  - Start the app in development mode by running `next dev`, then open \"/[locale]/contact\" in your browser to investigate the error.\n  - Rerun the production build with `next build --debug-prerender` to generate better stack traces."
+            ],
+            "level": "error",
+            "timestamp": 1777293361868
+        },
+        {
+            "message": [
+                "Error: Route \"/[locale]/contact\": Uncached data was accessed outside of <Suspense>. This delays the entire page from rendering, resulting in a slow user experience. Learn more: https://nextjs.org/docs/messages/blocking-route"
+            ],
+            "level": "error",
+            "timestamp": 1777293361868
+        },
+        {
+            "message": [
+                "To get a more detailed stack trace and pinpoint the issue, try one of the following:\n  - Start the app in development mode by running `next dev`, then open \"/[locale]/contact\" in your browser to investigate the error.\n  - Rerun the production build with `next build --debug-prerender` to generate better stack traces."
+            ],
+            "level": "error",
+            "timestamp": 1777293361868
+        },
+        {
+            "message": [
+                "Error"
+            ],
+            "level": "error",
+            "timestamp": 1777293361868
+        },
+        {
+            "message": [
+                "⨯",
+                "Error"
+            ],
+            "level": "error",
+            "timestamp": 1777293361868
+        }
+    ],
+    "eventTimestamp": 1777293361558,
+    "event": {
+        "request": {
+            "url": "https://tianze-website-gateway-preview.kei-tang.workers.dev/en/contact",
+            "method": "GET",
+            "headers": {
+                "accept": "*/*",
+                "accept-encoding": "gzip, br",
+                "cf-connecting-ip": "13.250.202.233",
+                "cf-ipcountry": "SG",
+                "cf-ray": "9f2dded52ebe46a3",
+                "cf-visitor": "{\"scheme\":\"https\"}",
+                "connection": "Keep-Alive",
+                "host": "tianze-website-gateway-preview.kei-tang.workers.dev",
+                "user-agent": "curl/8.7.1",
+                "x-forwarded-host": "tianze-website-gateway-preview.kei-tang.workers.dev",
+                "x-forwarded-proto": "https",
+                "x-middleware-response-content-security-policy": "default-src 'self'; script-src 'self' 'nonce-043b4ffc074a47d7b5c953ac0b2050ad' https://va.vercel-scripts.com https://challenges.cloudflare.com https://www.googletagmanager.com https://www.google-analytics.com; script-src-elem 'self' 'unsafe-inline' https://va.vercel-scripts.com https://challenges.cloudflare.com https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' 'nonce-043b4ffc074a47d7b5c953ac0b2050ad' https://fonts.googleapis.com; style-src-elem 'self' 'unsafe-inline' https://fonts.googleapis.com; style-src-attr 'unsafe-inline'; img-src 'self' data: https: https://va.vercel-scripts.com https://images.unsplash.com https://via.placeholder.com https://www.google-analytics.com https://www.googletagmanager.com; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://vitals.vercel-insights.com https://api.resend.com https://www.google-analytics.com https://analytics.google.com https://region1.google-analytics.com; frame-src https://challenges.cloudflare.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; report-uri /api/csp-report; upgrade-insecure-requests",
+                "x-middleware-response-cross-origin-embedder-policy": "unsafe-none, unsafe-none",
+                "x-middleware-response-cross-origin-opener-policy": "same-origin, same-origin",
+                "x-middleware-response-cross-origin-resource-policy": "cross-origin, cross-origin",
+                "x-middleware-response-link": "<https://tianze-website-gateway-preview.kei-tang.workers.dev/en/contact>; rel=\"alternate\"; hreflang=\"en\", <https://tianze-website-gateway-preview.kei-tang.workers.dev/zh/contact>; rel=\"alternate\"; hreflang=\"zh\", <https://tianze-website-gateway-preview.kei-tang.workers.dev/contact>; rel=\"alternate\"; hreflang=\"x-default\"",
+                "x-middleware-response-permissions-policy": "camera=(), microphone=(), geolocation=(), interest-cohort=(), payment=(), usb=(), camera=(), microphone=(), geolocation=(), interest-cohort=(), payment=(), usb=()",
+                "x-middleware-response-referrer-policy": "strict-origin-when-cross-origin, strict-origin-when-cross-origin",
+                "x-middleware-response-set-cookie": "NEXT_LOCALE=en; Path=/; Expires=Tue, 27 Apr 2027 12:36:01 GMT; Max-Age=31536000; Secure; HttpOnly; SameSite=lax",
+                "x-middleware-response-strict-transport-security": "max-age=63072000; includeSubDomains; preload, max-age=63072000; includeSubDomains; preload",
+                "x-middleware-response-x-content-type-options": "nosniff, nosniff",
+                "x-middleware-response-x-frame-options": "DENY, DENY",
+                "x-next-intl-locale": "en",
+                "x-nonce": "043b4ffc074a47d7b5c953ac0b2050ad",
+                "x-open-next-city": "Singapore",
+                "x-open-next-country": "SG",
+                "x-open-next-latitude": "1.28967",
+                "x-open-next-longitude": "103.85007",
+                "x-opennext-initial-url": "https://tianze-website-gateway-preview.kei-tang.workers.dev/en/contact",
+                "x-opennext-request-id": "0.stg1aavztw",
+                "x-opennext-resolved-routes": "[{\"route\":\"/[locale]/contact\",\"type\":\"app\"},{\"route\":\"/en/[...rest]\",\"type\":\"page\"},{\"route\":\"/[locale]/[...rest]\",\"type\":\"app\"}]",
+                "x-opennext-rewrite-status-code": "undefined",
+                "x-real-ip": "13.250.202.233",
+                "x-vercel-ip-city": "Singapore",
+                "x-vercel-ip-country": "SG",
+                "x-vercel-ip-latitude": "1.28967",
+                "x-vercel-ip-longitude": "103.85007"
+            }
+        },
+        "response": {
+            "status": 500
+        }
+    }
+}

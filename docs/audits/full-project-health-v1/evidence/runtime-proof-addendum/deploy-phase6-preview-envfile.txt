@@ -1,0 +1,163 @@
+[phase6] loaded env file(s): ../../../../Warehouse/Pipe/tianze-website/.env.local
+[phase6] CLOUDFLARE_API_TOKEN source: loaded env file
+[phase6] preflight: checking wrangler authentication...
+[phase6] │ Account Name                   │ Account ID                       │
+[phase6] preflight: syncing server-actions encryption key...
+[server-actions-key] loaded env file(s): ../../../../Warehouse/Pipe/tianze-website/.env.local
+[server-actions-key] NEXT_SERVER_ACTIONS_ENCRYPTION_KEY source: shell environment
+[server-actions-key] target workers: tianze-website-gateway, tianze-website-web, tianze-website-api-lead | envs: preview
+[server-actions-key] syncing NEXT_SERVER_ACTIONS_ENCRYPTION_KEY -> worker=tianze-website-gateway env=preview
+
+ ⛅️ wrangler 4.79.0 (update available 4.85.0)
+─────────────────────────────────────────────
+🌀 Creating the secret for the Worker "tianze-website-gateway-preview" 
+✨ Success! Uploaded secret NEXT_SERVER_ACTIONS_ENCRYPTION_KEY
+[server-actions-key] syncing NEXT_SERVER_ACTIONS_ENCRYPTION_KEY -> worker=tianze-website-web env=preview
+
+ ⛅️ wrangler 4.79.0 (update available 4.85.0)
+─────────────────────────────────────────────
+🌀 Creating the secret for the Worker "tianze-website-web-preview" 
+✨ Success! Uploaded secret NEXT_SERVER_ACTIONS_ENCRYPTION_KEY
+[server-actions-key] syncing NEXT_SERVER_ACTIONS_ENCRYPTION_KEY -> worker=tianze-website-api-lead env=preview
+
+ ⛅️ wrangler 4.79.0 (update available 4.85.0)
+─────────────────────────────────────────────
+🌀 Creating the secret for the Worker "tianze-website-api-lead-preview" 
+✨ Success! Uploaded secret NEXT_SERVER_ACTIONS_ENCRYPTION_KEY
+[server-actions-key] sync complete
+[phase6] wrangler version: 4.79.0
+[phase6] deploying 3 worker(s) to preview
+[phase6] deploying web.jsonc (preview)
+
+ ⛅️ wrangler 4.79.0 (update available 4.85.0)
+─────────────────────────────────────────────
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mUsing direct eval with a bundler is not recommended and may cause problems[0m [direct-eval]
+
+    ../../server-functions/default/handler.mjs:2689:8:
+[37m      2689 │ }());`),[32meval[37m(str)||{}}catch(err){if(wrap!==!1&&/(unexpected|iden...
+           ╵         [32m~~~~[0m
+
+  You can read more about direct eval and bundling here: [4mhttps://esbuild.github.io/link/direct-eval[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mComparison with -0 using the "===" operator will also match 0[0m [equals-negative-zero]
+
+    ../../server-functions/default/handler.mjs:3326:52854:
+[37m      3326 │ ...<0)x3+=moduloVal;else if(x3===[32m-0[37m)return 0}return x3}}conversi...
+           ╵                                  [32m~~[0m
+
+  Floating-point equality is defined such that 0 and -0 are equal, so "x === -0" returns true for both 0 and -0. You need to use "Object.is(x, -0)" instead to test for -0.
+
+
+🌀 Building list of assets...
+✨ Read 140 files from the assets directory /Users/Data/conductor/workspaces/tianze-website/miami/.open-next/assets
+🌀 Starting asset upload...
+🌀 Found 21 new or modified static assets to upload. Proceeding with upload...
++ /BUILD_ID
++ /_next/static/chunks/app/[locale]/terms/page-17d8da351c3f7df2.js
++ /_next/static/chunks/app/[locale]/contact/error-46653aa495e400bc.js
++ /_next/static/chunks/app/[locale]/products/page-1e1c5207f98f533b.js
++ /_next/static/chunks/webpack-5fe2061054d547ae.js
++ /_next/static/chunks/7112-c70b3ebb75b59574.js
++ /_next/static/chunks/app/[locale]/layout-cc6b1adb790c0a2d.js
++ /_next/static/chunks/app/[locale]/about/page-238cacbcd79062b0.js
++ /_next/static/chunks/app/[locale]/terms/page-17d8da351c3f7df2.js
++ /_next/static/chunks/app/[locale]/products/error-24b3f958ceffca54.js
++ /_next/static/chunks/app/[locale]/page-90d43995a4321ff0.js
++ /_next/static/chunks/app/[locale]/not-found-bd7b40475b7c1e6e.js
++ /_next/static/chunks/app/[locale]/capabilities/bending-machines/page-35b1c9cce209ad58.js
++ /_next/static/chunks/app/[locale]/contact/page-af50e6e3c2055212.js
++ /_next/static/chunks/app/[locale]/products/[market]/page-f658ed1f07c23d5d.js
++ /_next/static/chunks/app/[locale]/terms/page-17d8da351c3f7df2.js
++ /_next/static/chunks/main-app-3186260b544d67cb.js
++ /_next/static/chunks/app/_not-found/page-394c04b1b6a448c5.js
++ /_next/static/chunks/app/[locale]/oem-custom-manufacturing/page-67c9e3b6ab8ec206.js
++ /_next/static/chunks/app/global-error-14296a52759c8b68.js
++ /_next/static/css/7fd9f66e10961b1a.css
+Uploaded 7 of 21 assets
+Uploaded 14 of 21 assets
+Uploaded 21 of 21 assets
+✨ Success! Uploaded 21 files (76 already uploaded) (2.41 sec)
+
+Total Upload: 11288.40 KiB / gzip: 2385.84 KiB
+Worker Startup Time: 21 ms
+Your Worker has access to the following bindings:
+Binding                                                                      Resource                  
+env.ASSETS                                                                   Assets                    
+env.APP_ENV ("preview")                                                      Environment Variable      
+env.DEPLOYMENT_PLATFORM ("cloudflare")                                       Environment Variable      
+env.NEXT_PUBLIC_BASE_URL ("https://preview.tianze-pipe.com")                 Environment Variable      
+env.NEXT_PUBLIC_DEPLOYMENT_PLATFORM ("cloudflare")                           Environment Variable      
+
+Uploaded tianze-website-web-preview (15.94 sec)
+Deployed tianze-website-web-preview triggers (2.67 sec)
+  https://tianze-website-web-preview.kei-tang.workers.dev
+Current Version ID: 7758abad-e434-46e3-9772-84d708a46ab8
+[phase6] deploying api-lead.jsonc (preview)
+
+ ⛅️ wrangler 4.79.0 (update available 4.85.0)
+─────────────────────────────────────────────
+Total Upload: 14219.77 KiB / gzip: 2763.09 KiB
+Worker Startup Time: 24 ms
+Your Worker has access to the following bindings:
+Binding                                                                      Resource                  
+env.APP_ENV ("preview")                                                      Environment Variable      
+env.DEPLOYMENT_PLATFORM ("cloudflare")                                       Environment Variable      
+env.NEXT_PUBLIC_BASE_URL ("https://preview.tianze-pipe.com")                 Environment Variable      
+env.NEXT_PUBLIC_DEPLOYMENT_PLATFORM ("cloudflare")                           Environment Variable      
+
+Uploaded tianze-website-api-lead-preview (12.20 sec)
+Deployed tianze-website-api-lead-preview triggers (2.76 sec)
+  https://tianze-website-api-lead-preview.kei-tang.workers.dev
+Current Version ID: 242e6566-56c9-4285-89d8-4236048f44ae
+[phase6] deploying gateway.jsonc (preview)
+
+ ⛅️ wrangler 4.79.0 (update available 4.85.0)
+─────────────────────────────────────────────
+🌀 Building list of assets...
+✨ Read 140 files from the assets directory /Users/Data/conductor/workspaces/tianze-website/miami/.open-next/assets
+🌀 Starting asset upload...
+🌀 Found 21 new or modified static assets to upload. Proceeding with upload...
++ /BUILD_ID
++ /_next/static/chunks/app/[locale]/terms/page-17d8da351c3f7df2.js
++ /_next/static/chunks/app/[locale]/contact/error-46653aa495e400bc.js
++ /_next/static/chunks/app/[locale]/products/page-1e1c5207f98f533b.js
++ /_next/static/chunks/webpack-5fe2061054d547ae.js
++ /_next/static/chunks/7112-c70b3ebb75b59574.js
++ /_next/static/chunks/app/[locale]/layout-cc6b1adb790c0a2d.js
++ /_next/static/chunks/app/[locale]/about/page-238cacbcd79062b0.js
++ /_next/static/chunks/app/[locale]/terms/page-17d8da351c3f7df2.js
++ /_next/static/chunks/app/[locale]/products/error-24b3f958ceffca54.js
++ /_next/static/chunks/app/[locale]/page-90d43995a4321ff0.js
++ /_next/static/chunks/app/[locale]/not-found-bd7b40475b7c1e6e.js
++ /_next/static/chunks/app/[locale]/capabilities/bending-machines/page-35b1c9cce209ad58.js
++ /_next/static/chunks/app/[locale]/contact/page-af50e6e3c2055212.js
++ /_next/static/chunks/app/[locale]/products/[market]/page-f658ed1f07c23d5d.js
++ /_next/static/chunks/app/[locale]/terms/page-17d8da351c3f7df2.js
++ /_next/static/chunks/main-app-3186260b544d67cb.js
++ /_next/static/chunks/app/_not-found/page-394c04b1b6a448c5.js
++ /_next/static/chunks/app/[locale]/oem-custom-manufacturing/page-67c9e3b6ab8ec206.js
++ /_next/static/chunks/app/global-error-14296a52759c8b68.js
++ /_next/static/css/7fd9f66e10961b1a.css
+Uploaded 7 of 21 assets
+Uploaded 14 of 21 assets
+Uploaded 21 of 21 assets
+✨ Success! Uploaded 21 files (76 already uploaded) (2.24 sec)
+
+Total Upload: 709.45 KiB / gzip: 152.87 KiB
+Worker Startup Time: 19 ms
+Your Worker has access to the following bindings:
+Binding                                                                      Resource                  
+env.WORKER_WEB (tianze-website-web-preview)                                  Worker                    
+env.WORKER_API_LEAD (tianze-website-api-lead-preview)                        Worker                    
+env.ASSETS                                                                   Assets                    
+env.APP_ENV ("preview")                                                      Environment Variable      
+env.DEPLOYMENT_PLATFORM ("cloudflare")                                       Environment Variable      
+env.NEXT_PUBLIC_BASE_URL ("https://preview.tianze-pipe.com")                 Environment Variable      
+env.NEXT_PUBLIC_DEPLOYMENT_PLATFORM ("cloudflare")                           Environment Variable      
+
+Uploaded tianze-website-gateway-preview (11.75 sec)
+Deployed tianze-website-gateway-preview triggers (2.55 sec)
+  https://tianze-website-gateway-preview.kei-tang.workers.dev
+Current Version ID: b76a2b20-8c51-42b1-9ed2-7b07681f3497
+[phase6] deployment complete

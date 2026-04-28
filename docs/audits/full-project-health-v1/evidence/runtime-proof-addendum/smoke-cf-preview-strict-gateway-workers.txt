@@ -1,0 +1,19 @@
+
+> b2b-web-template@0.1.0 smoke:cf:preview:strict /Users/Data/conductor/workspaces/tianze-website/miami
+> node scripts/cloudflare/preview-smoke.mjs --include-api-health -- --base-url https://tianze-website-gateway-preview.kei-tang.workers.dev
+
+[cf-preview-smoke] Probing https://tianze-website-gateway-preview.kei-tang.workers.dev (strict mode)
+[cf-preview-smoke] Unexpected error: TypeError: fetch failed
+    at node:internal/deps/undici/undici:13502:13
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async request (file:///Users/Data/conductor/workspaces/tianze-website/miami/scripts/cloudflare/preview-smoke.mjs:49:20)
+    at async Promise.all (index 2)
+    at async main (file:///Users/Data/conductor/workspaces/tianze-website/miami/scripts/cloudflare/preview-smoke.mjs:86:25) {
+  [cause]: ConnectTimeoutError: Connect Timeout Error (attempted address: tianze-website-gateway-preview.kei-tang.workers.dev:443, timeout: 10000ms)
+      at onConnectTimeout (node:internal/deps/undici/undici:2602:28)
+      at Immediate._onImmediate (node:internal/deps/undici/undici:2583:11)
+      at process.processImmediate (node:internal/timers:483:21) {
+    code: 'UND_ERR_CONNECT_TIMEOUT'
+  }
+}
+ ELIFECYCLE  Command failed with exit code 1.

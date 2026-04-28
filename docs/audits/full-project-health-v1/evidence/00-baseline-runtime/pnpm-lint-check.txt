@@ -1,0 +1,4 @@
+
+> b2b-web-template@0.1.0 lint:check /Users/Data/conductor/workspaces/tianze-website/miami
+> eslint . --ext .js,.jsx,.ts,.tsx --config eslint.config.mjs --cache --cache-location .eslintcache --max-warnings 0
+

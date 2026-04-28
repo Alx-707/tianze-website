@@ -1,0 +1,4 @@
+
+> b2b-web-template@0.1.0 type-check /Users/Data/conductor/workspaces/tianze-website/miami
+> tsc --noEmit
+

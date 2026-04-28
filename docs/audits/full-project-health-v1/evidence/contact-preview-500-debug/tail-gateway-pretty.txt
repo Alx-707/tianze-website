@@ -1,0 +1,10 @@
+
+ ⛅️ wrangler 4.79.0 (update available 4.85.0)
+─────────────────────────────────────────────
+Successfully created tail, expires at 2026-04-27T18:13:21Z
+Connected to tianze-website-gateway-preview, waiting for logs...
+GET https://tianze-website-gateway-preview.kei-tang.workers.dev/en/contact - Ok @ 4/27/2026, 5:26:14 AM
+GET https://tianze-website-gateway-preview.kei-tang.workers.dev/en - Ok @ 4/27/2026, 5:26:16 AM
+GET https://tianze-website-gateway-preview.kei-tang.workers.dev/zh/contact - Ok @ 4/27/2026, 5:26:16 AM
+GET https://tianze-website-gateway-preview.kei-tang.workers.dev/zh - Ok @ 4/27/2026, 5:26:16 AM
+GET https://tianze-website-gateway-preview.kei-tang.workers.dev/api/health - Ok @ 4/27/2026, 5:26:16 AM

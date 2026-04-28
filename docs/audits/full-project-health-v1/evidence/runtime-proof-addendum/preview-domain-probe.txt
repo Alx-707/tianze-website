@@ -1,0 +1,3 @@
+https://preview.tianze-pipe.com/ error=TypeError fetch failed
+https://preview.tianze-pipe.com/en error=TypeError fetch failed
+https://preview.tianze-pipe.com/api/health error=TypeError fetch failed
