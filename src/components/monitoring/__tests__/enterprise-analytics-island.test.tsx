@@ -48,6 +48,10 @@ vi.mock("next/dynamic", () => ({
   },
 }));
 
+vi.mock("next/script", () => ({
+  default: () => null,
+}));
+
 function createCookieConsentValue(
   overrides: Partial<Pick<CookieConsentContextValue, "ready" | "consent">> = {},
 ): CookieConsentContextValue {

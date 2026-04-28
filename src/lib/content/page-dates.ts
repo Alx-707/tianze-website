@@ -8,7 +8,6 @@ const MDX_PAGE_SLUGS: Record<string, string> = {
   "/contact": "contact",
   "/privacy": "privacy",
   "/terms": "terms",
-  "/capabilities/bending-machines": "bending-machines",
   "/oem-custom-manufacturing": "oem-custom-manufacturing",
 };
 

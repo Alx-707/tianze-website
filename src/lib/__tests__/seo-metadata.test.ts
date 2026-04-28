@@ -283,7 +283,6 @@ describe("SEO Metadata", () => {
         "products",
         "privacy",
         "terms",
-        "bendingMachines",
         "oem",
       ];
 

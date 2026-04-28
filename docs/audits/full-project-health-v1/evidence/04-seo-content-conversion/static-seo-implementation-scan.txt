@@ -1,0 +1,85 @@
+# Lane 04 static evidence scan
+
+## SEO implementation
+26:export const SINGLE_SITE_PUBLIC_STATIC_PAGES = Object.values(PATHS_CONFIG).map(
+30:export const SINGLE_SITE_SITEMAP_PAGE_CONFIG = {
+53:export const SINGLE_SITE_STATIC_PAGE_LASTMOD = {
+65:export const SINGLE_SITE_ROBOTS_DISALLOW_PATHS = [
+75:    Object.prototype.hasOwnProperty.call(SINGLE_SITE_SITEMAP_PAGE_CONFIG, path)
+77:    return SINGLE_SITE_SITEMAP_PAGE_CONFIG[
+78:      path as keyof typeof SINGLE_SITE_SITEMAP_PAGE_CONFIG
+38:function buildAlternateLanguages(path: string): Record<string, string> {
+52:  alternates: Record<string, string>;
+56:function createSitemapEntry(
+64:    alternates: {
+65:      languages: params.alternates,
+71:async function generateStaticPageEntries(): Promise<MetadataRoute.Sitemap> {
+86:      const alternates = buildAlternateLanguages(page);
+92:        createSitemapEntry({ url, lastModified, config, alternates }),
+101:function generateCatalogEntries(): MetadataRoute.Sitemap {
+112:        createSitemapEntry({
+116:          alternates: buildAlternateLanguages(path),
+127: * Includes static pages and product catalog pages with i18n alternates.
+130:  const staticEntries = await generateStaticPageEntries();
+131:  const catalogEntries = generateCatalogEntries();
+src/app/robots.ts:9: * Dynamic robots.txt generation for Next.js.
+src/app/robots.ts:12:export default function robots(): MetadataRoute.Robots {
+src/lib/seo-metadata.ts:55:function buildCanonicalForPath(locale: Locale, path: string): string {
+src/lib/seo-metadata.ts:64:function buildLanguagesForPath(path: string): Record<string, string> {
+src/lib/seo-metadata.ts:150:    openGraph: {
+src/lib/seo-metadata.ts:172:    alternates: {
+src/lib/seo-metadata.ts:178:    robots: {
+src/lib/seo-metadata.ts:191:    verification: {
+src/lib/seo-metadata.ts:204: * `alternates` or `openGraph.url`, it may inherit those fields from a parent layout.
+src/lib/seo-metadata.ts:215:export function generateMetadataForPath(
+src/lib/seo-metadata.ts:223:  const canonical = buildCanonicalForPath(locale, path);
+src/lib/seo-metadata.ts:224:  const languages = buildLanguagesForPath(path);
+src/lib/seo-metadata.ts:226:  metadata.alternates = {
+src/lib/seo-metadata.ts:231:  const { openGraph } = metadata;
+src/lib/seo-metadata.ts:232:  if (openGraph && typeof openGraph === "object") {
+src/lib/seo-metadata.ts:233:    (openGraph as { url?: string | URL }).url = canonical;
+src/lib/seo-metadata.ts:234:    metadata.openGraph = openGraph;
+src/lib/seo-metadata.ts:236:    metadata.openGraph = {
+src/lib/seo-metadata.ts:238:    } as unknown as Metadata["openGraph"];
+src/app/[locale]/layout-metadata.ts:10: * `alternates` or `openGraph` may inherit those fields from layouts.
+src/app/[locale]/layout-metadata.ts:12: * This function intentionally avoids returning `alternates` / `openGraph` to
+src/app/[locale]/layout-metadata.ts:14: * path-aware helpers (see `generateMetadataForPath`).
+src/app/[locale]/layout-metadata.ts:23:  const metadataBaseUrl = SITE_CONFIG.baseUrl || "http://localhost:3000";
+src/app/[locale]/layout-metadata.ts:26:    metadataBase: new URL(metadataBaseUrl),
+src/app/[locale]/layout-metadata.ts:32:    robots: {
+src/app/[locale]/layout-metadata.ts:43:    verification: {
+
+## Structured data
+src/lib/structured-data-generators.ts:84:export function generateOrganizationData(
+src/lib/structured-data-generators.ts:126:export function generateWebSiteData(
+src/lib/structured-data-generators.ts:240:export function generateProductGroupData(
+src/lib/structured-data-generators.ts:295:export function buildAboutPageSchema(
+src/lib/structured-data-generators.ts:342:export function buildLocalBusinessSchema(
+src/components/seo/index.ts:2:  JsonLdGraphScript,
+src/components/seo/__tests__/json-ld-script.test.ts:4:  JsonLdGraphScript,
+src/components/seo/__tests__/json-ld-script.test.ts:127:      JsonLdGraphScript({ locale: "en", data: [] }),
+src/components/seo/json-ld-script.tsx:10:interface JsonLdGraphScriptProps {
+src/components/seo/json-ld-script.tsx:81:export async function JsonLdGraphScript({
+src/components/seo/json-ld-script.tsx:84:}: JsonLdGraphScriptProps) {
+src/app/[locale]/page.tsx:7:import { JsonLdGraphScript } from "@/components/seo";
+src/app/[locale]/page.tsx:92:      <JsonLdGraphScript locale={locale as Locale} />
+src/app/[locale]/oem-custom-manufacturing/page.tsx:6:import { JsonLdGraphScript } from "@/components/seo";
+src/app/[locale]/oem-custom-manufacturing/page.tsx:249:      <JsonLdGraphScript
+src/app/[locale]/capabilities/bending-machines/page.tsx:9:import { JsonLdGraphScript } from "@/components/seo";
+src/app/[locale]/capabilities/bending-machines/page.tsx:249:      <JsonLdGraphScript
+src/app/[locale]/__tests__/page.test.tsx:47:  JsonLdGraphScript: () => <script type="application/ld+json" />,
+src/app/[locale]/products/page.tsx:18:import { JsonLdGraphScript } from "@/components/seo";
+src/app/[locale]/products/page.tsx:66:      <JsonLdGraphScript
+src/app/[locale]/__tests__/layout-structured-data.test.ts:19:  generateOrganizationData: mockGenerateOrganizationData,
+src/app/[locale]/__tests__/layout-structured-data.test.ts:20:  generateWebSiteData: mockGenerateWebSiteData,
+src/app/[locale]/contact/page.tsx:6:import { JsonLdGraphScript } from "@/components/seo";
+src/app/[locale]/contact/page.tsx:381:      <JsonLdGraphScript locale={locale} data={faqSchema ? [faqSchema] : []} />
+src/app/[locale]/products/[market]/page.tsx:33:import { JsonLdGraphScript } from "@/components/seo";
+src/app/[locale]/products/[market]/page.tsx:47:import { generateProductGroupData } from "@/lib/structured-data-generators";
+src/app/[locale]/products/[market]/page.tsx:302:  return generateProductGroupData({
+src/app/[locale]/products/[market]/page.tsx:320:async function buildMarketPageJsonLdData({
+src/app/[locale]/products/[market]/page.tsx:436:  const jsonLdData = await buildMarketPageJsonLdData({
+src/app/[locale]/products/[market]/page.tsx:455:      <JsonLdGraphScript locale={locale as Locale} data={jsonLdData} />
+src/app/[locale]/products/[market]/__tests__/market-landing.test.tsx:79:  JsonLdGraphScript: () => <script type="application/ld+json" />,
+src/app/[locale]/products/__tests__/page.test.tsx:74:  JsonLdGraphScript: () => <script type="application/ld+json" />,
+src/app/[locale]/products/__tests__/products-page.test.tsx:40:  JsonLdGraphScript: () => <script type="application/ld+json" />,

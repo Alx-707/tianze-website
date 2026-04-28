@@ -1,7 +1,9 @@
 # Tianze Website - Project Brief
 
-> **定位**：网站项目的唯一工作文档，c-wf / d-wf / i-wf 的共同输入。
+> **定位**：历史 CWF 输入文档，仅供审计和回溯；不是 c-wf / d-wf / i-wf 的当前唯一输入。
+> **当前公开站 truth source**：以 `src/config/single-site.ts`、live routes、messages 和 MDX 页面事实为准。
 > **原始素材主入口**：`docs/cwf/context/company/`
+> **当前事实说明**：当前公开网站不把设备作为独立产品线；继续使用本文前必须按 live product truth contract 改写。
 
 ---
 
@@ -17,9 +19,9 @@
 
 ### 核心差异化
 
-> **Not just a pipe seller — upstream bending machine manufacturer.**
+> **Not just a pipe seller — factory-controlled forming, tooling, and OEM manufacturing partner.**
 
-天泽造的是弯管机，然后用自己的机器生产管材。这意味着：
+天泽在工厂内部掌握成型工艺、模具和生产控制。这意味着：
 - 深厚的管材成型技术积累
 - 快速模具开发能力
 - 非标规格灵活定制
@@ -63,8 +65,8 @@
 
 | 时期 | 里程碑 |
 |------|--------|
-| 2018-2021 | PVC 弯管机研发与制造 |
-| 2021-至今 | 扩展至管材配件生产（设备+配件双模式） |
+| 2018-2021 | PVC 成型工艺与模具能力积累 |
+| 2021-至今 | 扩展至管材配件生产与 OEM 定制 |
 
 ---
 
@@ -113,8 +115,8 @@
    - 快速模具开发、快速产线部署
    - 非标产品规模化（喇叭口弯管、双承口、大弧度电缆管）
 
-2. **设备研发制造**
-   - 自研弯管机、扩管机
+2. **内部工艺与模具能力**
+   - 掌握成型、扩口和模具开发
    - 集成控制、温控、模具系统
 
 3. **非标定制 + 快速打样**
@@ -142,21 +144,21 @@
 | **Tier 1** | PETG 气动传输管 | 差异化、高毛利 | 重点打造 |
 | **Tier 2** | PVC 电工套管 (美标) | 走量、标准化 | 完整覆盖 |
 | Tier 3 | PVC 给水管 | 补充品类 | 基础展示 |
-| 特殊 | 弯管设备 | 信任背书（不主推销售） | 故事化展示 |
+| 特殊 | 内部成型与模具能力 | 信任背书（不作为公开产品线） | 故事化展示 |
 
 ### 产品详情
 
-#### A. 弯管设备（Equipment）
+#### A. 内部制造能力
 
-> 战略角色：上游能力，区别于纯贸易商
+> 战略角色：制造控制力，区别于纯贸易商
 
-| ID | 产品 |
+| ID | 能力 |
 |----|------|
-| EQ-001 | PVC 半自动弯管机 |
-| EQ-002 | PVC 全自动弯管机 |
-| EQ-003 | 扩管机 |
-| EQ-004 | 切管机 |
-| EQ-005 | 定制模具 |
+| CAP-001 | 成型工艺控制 |
+| CAP-002 | 扩口工序 |
+| CAP-003 | 切割工序 |
+| CAP-004 | 定制模具 |
+| CAP-005 | 样品打样 |
 
 #### B. PVC 电工套管系统（Electrical Conduit）
 
@@ -427,7 +429,7 @@ i-wf (开发实现)
 |---------|---------|
 | Bell End / Socket | 管端扩口 / 喇叭口 |
 | Double Socket Pipe | 双承口连接管 |
-| Pipe Bending Machine | 弯管机 |
+| Factory Forming Process | 工厂成型工艺 |
 | Pipe Expander | 扩管机 |
 | Pneumatic Tube | 气动物流管道 |
 | MOQ | 最小起订量 |

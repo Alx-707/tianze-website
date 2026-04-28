@@ -4,6 +4,10 @@ const MAIN_NAV_ROLE_OPTIONS = {
   name: /main navigation/i,
 } as const;
 
+export const MAIN_NAV_SELECTOR = 'nav[aria-label="Main navigation"]';
+export const MOBILE_MENU_CONTENT_SELECTOR =
+  '[data-testid="mobile-menu-content"]';
+
 const HEADER_MOBILE_MENU_BUTTON_TESTID = "header-mobile-menu-button";
 
 /**

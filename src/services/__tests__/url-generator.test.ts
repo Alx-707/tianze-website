@@ -153,8 +153,15 @@ describe("URLGenerator", () => {
     it("should generate entries for all pages and languages", () => {
       const entries = generator.generateAllSitemapEntries();
 
-      // 应该有 8个页面类型 × 2种语言 = 16个条目（/blog 已下线）
-      expect(entries).toHaveLength(16);
+      // 7 live page types x 2 languages = 14 entries (/blog and bending-machines are retired)
+      expect(entries).toHaveLength(14);
+      expect(
+        entries.some(
+          (entry) =>
+            entry.loc.includes("/blog") ||
+            entry.loc.includes("/bending-machines"),
+        ),
+      ).toBe(false);
 
       // 检查是否包含主页条目
       const homeEntries = entries.filter(

@@ -4,7 +4,7 @@ const { mockLoadConsent } = vi.hoisted(() => ({
   mockLoadConsent: vi.fn(),
 }));
 
-vi.mock("@/lib/cookie-consent", () => ({
+vi.mock("@/lib/cookie-consent/storage", () => ({
   loadConsent: mockLoadConsent,
 }));
 

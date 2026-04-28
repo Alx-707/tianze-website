@@ -8,11 +8,13 @@ import {
 } from "@/config/single-site-seo";
 
 describe("single-site-seo", () => {
+  const RETIRED_BENDING_MACHINES_PATH = "/capabilities/bending-machines";
+
   it("keeps the public static sitemap pages explicit", () => {
     expect(SINGLE_SITE_PUBLIC_STATIC_PAGES).toContain("/about");
     expect(SINGLE_SITE_PUBLIC_STATIC_PAGES).toContain("/contact");
-    expect(SINGLE_SITE_PUBLIC_STATIC_PAGES).toContain(
-      "/capabilities/bending-machines",
+    expect(SINGLE_SITE_PUBLIC_STATIC_PAGES).not.toContain(
+      RETIRED_BENDING_MACHINES_PATH,
     );
     expect(SINGLE_SITE_PUBLIC_STATIC_PAGES).toContain(
       "/oem-custom-manufacturing",

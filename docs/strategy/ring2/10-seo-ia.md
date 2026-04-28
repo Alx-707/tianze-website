@@ -6,21 +6,22 @@
 
 天泽做 SEO 的优势不在“词更多”，而在：
 
-> **大多数竞争对手用认证堆信任，几乎没人用“我们自己做设备”这条制造叙事来占主题权威。**
+> **大多数竞争对手用认证和产品目录堆信任，少有人把内部成型工艺、模具和过程控制讲成主题权威。**
 
 所以当前 SEO 不该只是追产品词，还要围绕这条差异化叙事做结构。
 
 ## 当前 SEO 主线
 
-### 1. 产品树必须和 SEO 结构一致
+### 1. SEO 结构必须和当前公开 URL 一致
 
-SEO 页面结构要和产品树一致：
+SEO 页面结构先跟随当前已上线 URL：
 
-- `/products/pipes/...`
-- `/products/equipment/...`
-- `/products/custom-manufacturing/`
+- `/products/`
+- `/products/{market}/`
+- `/products/pneumatic-tube-systems/`
+- `/oem-custom-manufacturing/`
 
-不要出现页面结构和 SEO 结构各讲一套。
+`/oem-custom-manufacturing/` 当前是独立转化页，不要在 SEO 文档里同时写成 `/products/oem-custom-manufacturing/`。未来若迁入产品树，需要单独做 IA migration。
 
 ### 2. 市场页优先，博客配合
 
@@ -36,8 +37,8 @@ SEO 页面结构要和产品树一致：
 
 除了常规产品词，还应布局：
 
-- 设备制造能力
-- 工艺理解
+- 内部成型工艺
+- 模具和打样能力
 - 精度与过程控制
 - 工厂直供与定制能力
 

@@ -64,10 +64,7 @@ const CONTACT_COPY_FALLBACKS = {
     "Share product type, size/standard, quantity, destination market, and timeline",
 } satisfies Record<string, string>;
 
-const CONTACT_MESSAGE_ROOTS = [
-  ["contact"],
-  ["underConstruction", "pages", "contact"],
-] as const;
+const CONTACT_MESSAGE_ROOTS = [["contact"]] as const;
 
 function readMessageAtPath(messages: MessageRecord, pathSegments: string[]) {
   let current: unknown = messages;
@@ -150,8 +147,7 @@ export function getContactCopyFromMessages(
 /**
  * Server-side helper to build a structured copy model for the contact page.
  *
- * Depends only on the explicit `locale` parameter. Reads `contact.*` first and
- * falls back to the legacy `underConstruction.pages.contact.*` namespace.
+ * Depends only on the explicit `locale` parameter and reads `contact.*`.
  */
 export async function getContactCopy(
   locale: Locale,

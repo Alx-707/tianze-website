@@ -1,3 +1,5 @@
+import { existsSync } from "node:fs";
+import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { SINGLE_SITE_FACTS } from "@/config/single-site";
 import { siteFacts } from "@/config/site-facts";
@@ -20,5 +22,27 @@ describe("site-facts", () => {
     expect(Array.isArray(siteFacts.certifications)).toBe(true);
     expect(typeof siteFacts.stats).toBe("object");
     expect(typeof siteFacts.social).toBe("object");
+  });
+
+  it("only exposes certification files that exist in public", () => {
+    const missingCertificationFiles = siteFacts.certifications
+      .flatMap((certification) =>
+        certification.file
+          ? [{ file: certification.file, name: certification.name }]
+          : [],
+      )
+      .filter(({ file }) => {
+        const publicRelativePath = file.replace(/^\//, "");
+        const publicFilePath = path.resolve(
+          process.cwd(),
+          "public",
+          publicRelativePath,
+        );
+
+        // eslint-disable-next-line security/detect-non-literal-fs-filename -- Certification paths come from siteFacts and must be checked as declared.
+        return !existsSync(publicFilePath);
+      });
+
+    expect(missingCertificationFiles).toEqual([]);
   });
 });

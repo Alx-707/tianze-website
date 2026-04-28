@@ -1,0 +1,6 @@
+
+> b2b-web-template@0.1.0 security:audit /Users/Data/conductor/workspaces/tianze-website/miami
+> pnpm audit --prod --audit-level moderate --ignore-registry-errors
+
+No known vulnerabilities found
+exit=0

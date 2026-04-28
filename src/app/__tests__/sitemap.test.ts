@@ -43,7 +43,6 @@ vi.mock("@/lib/content/page-dates", () => ({
       "/contact",
       "/privacy",
       "/terms",
-      "/capabilities/bending-machines",
       "/oem-custom-manufacturing",
     ].includes(path),
   ),
@@ -51,6 +50,9 @@ vi.mock("@/lib/content/page-dates", () => ({
 }));
 
 describe("sitemap.ts", () => {
+  const RETIRED_BENDING_MACHINES_URL =
+    "https://example.com/en/capabilities/bending-machines";
+
   describe("sitemap()", () => {
     it("should return sitemap array", async () => {
       const result = await sitemap();
@@ -84,9 +86,7 @@ describe("sitemap.ts", () => {
       expect(urls).toContain("https://example.com/en/products");
       expect(urls).toContain("https://example.com/en/privacy");
       expect(urls).toContain("https://example.com/en/terms");
-      expect(urls).toContain(
-        "https://example.com/en/capabilities/bending-machines",
-      );
+      expect(urls).not.toContain(RETIRED_BENDING_MACHINES_URL);
       expect(urls).toContain("https://example.com/en/oem-custom-manufacturing");
     });
 
@@ -263,13 +263,6 @@ describe("sitemap.ts", () => {
 
     it("should include standalone pages with correct config", async () => {
       const result = await sitemap();
-      const bendingMachines = result.find(
-        (entry) =>
-          entry.url === "https://example.com/en/capabilities/bending-machines",
-      );
-      expect(bendingMachines).toBeDefined();
-      expect(bendingMachines?.priority).toBe(0.8);
-      expect(bendingMachines?.changeFrequency).toBe("monthly");
 
       const oem = result.find(
         (entry) =>

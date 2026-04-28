@@ -44,29 +44,25 @@ describe("getContactCopy", () => {
   } as const;
 
   const defaultMessages = {
-    underConstruction: {
-      pages: {
-        contact: {
-          title: defaultTranslations.title,
-          description: defaultTranslations.description,
-          panel: {
-            contactTitle: defaultTranslations["panel.contactTitle"],
-            email: defaultTranslations["panel.email"],
-            phone: defaultTranslations["panel.phone"],
-            hoursTitle: defaultTranslations["panel.hoursTitle"],
-            weekdays: defaultTranslations["panel.weekdays"],
-            saturday: defaultTranslations["panel.saturday"],
-            sunday: defaultTranslations["panel.sunday"],
-            closed: defaultTranslations["panel.closed"],
-            responseTitle: defaultTranslations["panel.responseTitle"],
-            responseTimeLabel: defaultTranslations["panel.responseTimeLabel"],
-            responseTimeValue: defaultTranslations["panel.responseTimeValue"],
-            bestForLabel: defaultTranslations["panel.bestForLabel"],
-            bestForValue: defaultTranslations["panel.bestForValue"],
-            prepareLabel: defaultTranslations["panel.prepareLabel"],
-            prepareValue: defaultTranslations["panel.prepareValue"],
-          },
-        },
+    contact: {
+      title: defaultTranslations.title,
+      description: defaultTranslations.description,
+      panel: {
+        contactTitle: defaultTranslations["panel.contactTitle"],
+        email: defaultTranslations["panel.email"],
+        phone: defaultTranslations["panel.phone"],
+        hoursTitle: defaultTranslations["panel.hoursTitle"],
+        weekdays: defaultTranslations["panel.weekdays"],
+        saturday: defaultTranslations["panel.saturday"],
+        sunday: defaultTranslations["panel.sunday"],
+        closed: defaultTranslations["panel.closed"],
+        responseTitle: defaultTranslations["panel.responseTitle"],
+        responseTimeLabel: defaultTranslations["panel.responseTimeLabel"],
+        responseTimeValue: defaultTranslations["panel.responseTimeValue"],
+        bestForLabel: defaultTranslations["panel.bestForLabel"],
+        bestForValue: defaultTranslations["panel.bestForValue"],
+        prepareLabel: defaultTranslations["panel.prepareLabel"],
+        prepareValue: defaultTranslations["panel.prepareValue"],
       },
     },
   };
@@ -74,6 +70,22 @@ describe("getContactCopy", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockLoadCompleteMessages.mockResolvedValue(defaultMessages);
+  });
+
+  it("loads contact copy from the top-level contact namespace", async () => {
+    const locale: Locale = "en";
+
+    const copy = await getContactCopy(locale);
+
+    expect(mockLoadCompleteMessages).toHaveBeenCalledWith(locale);
+
+    expect(copy.header.title).toBe("Contact Us");
+    expect(copy.header.description).toBe("Get in touch with our team");
+    expect(copy.panel.contact.title).toBe("Contact Methods");
+    expect(copy.panel.response.prepareValue).toBe(
+      "Share product type, size/standard, quantity, destination market, and timeline",
+    );
+    expect(mockLoggerWarn).not.toHaveBeenCalled();
   });
 
   it("prefers the top-level contact namespace over the legacy contact copy path", () => {
@@ -132,15 +144,39 @@ describe("getContactCopy", () => {
     expect(copy.panel.response.prepareValue).toBe("Top-level prepare value");
   });
 
-  it("keeps the legacy underConstruction contact namespace as a compatibility fallback", async () => {
-    const locale: Locale = "en";
-
-    const copy = await getContactCopy(locale);
-
-    expect(mockLoadCompleteMessages).toHaveBeenCalledWith(locale);
+  it("does not read the legacy underConstruction contact namespace as a production fallback", () => {
+    const copy = getContactCopyFromMessages({
+      underConstruction: {
+        pages: {
+          contact: {
+            title: "Legacy contact",
+            description: "Legacy description",
+            panel: {
+              contactTitle: "Legacy methods",
+              email: "Legacy email",
+              phone: "Legacy phone",
+              hoursTitle: "Legacy hours",
+              weekdays: "Legacy weekdays",
+              saturday: "Legacy saturday",
+              sunday: "Legacy sunday",
+              closed: "Legacy closed",
+              responseTitle: "Legacy response",
+              responseTimeLabel: "Legacy response label",
+              responseTimeValue: "Legacy response value",
+              bestForLabel: "Legacy best for",
+              bestForValue: "Legacy best value",
+              prepareLabel: "Legacy prepare label",
+              prepareValue: "Legacy prepare value",
+            },
+          },
+        },
+      },
+    });
 
     expect(copy.header.title).toBe("Contact Us");
-    expect(copy.header.description).toBe("Get in touch with our team");
+    expect(copy.header.description).toBe(
+      "Get in touch with our team for inquiries, support, or partnership opportunities.",
+    );
 
     expect(copy.panel.contact.title).toBe("Contact Methods");
     expect(copy.panel.contact.emailLabel).toBe("Email");
@@ -157,6 +193,11 @@ describe("getContactCopy", () => {
     );
     expect(copy.panel.response.bestForLabel).toBe("Best for");
     expect(copy.panel.response.prepareLabel).toBe("Helpful details");
+    expect(mockLoggerWarn).toHaveBeenCalled();
+    expect(mockLoggerWarn).toHaveBeenCalledWith(
+      "Missing contact page copy; using fallback",
+      { key: "title" },
+    );
   });
 
   it("falls back to user-readable copy when static messages miss keys", () => {

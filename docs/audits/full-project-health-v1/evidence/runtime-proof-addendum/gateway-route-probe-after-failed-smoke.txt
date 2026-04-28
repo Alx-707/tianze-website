@@ -1,0 +1,26 @@
+--- /
+status=307 location=/en content-type=
+
+--- /en
+status=200 location= content-type=text/html; charset=utf-8
+<!DOCTYPE html><html lang="en" class="__variable_7229dd --font-jetbrains-mono"><head><meta charSet="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="preload" href="/images/logo.svg" as="image"/><link rel="stylesheet" href="/_next/static/css/7fd9f66e10961b1a.css" nonce="<redacted-nonce>" data-precedence="next"/><link rel="stylesheet" href="/_next/static/css/d3eb1b04de2a6d3a.css" nonce="<redacted-nonce>" data-precedence="next"/
+--- /zh
+status=200 location= content-type=text/html; charset=utf-8
+<!DOCTYPE html><html lang="zh" class="__variable_7229dd --font-jetbrains-mono"><head><meta charSet="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="preload" href="/images/logo.svg" as="image"/><link rel="stylesheet" href="/_next/static/css/7fd9f66e10961b1a.css" nonce="<redacted-nonce>" data-precedence="next"/><link rel="stylesheet" href="/_next/static/css/d3eb1b04de2a6d3a.css" nonce="<redacted-nonce>" data-precedence="next"/
+--- /api/health
+status=200 location= content-type=application/json
+{"status":"ok"}
+--- /en/contact
+status=500 location= content-type=text/plain
+Internal Server Error
+--- /zh/contact
+status=500 location= content-type=text/plain
+Internal Server Error
+--- /en/products
+status=200 location= content-type=text/html; charset=utf-8
+<!DOCTYPE html><html lang="en" class="__variable_7229dd --font-jetbrains-mono"><head><meta charSet="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="preload" href="/images/logo.svg" as="image"/><link rel="stylesheet" href="/_next/static/css/7fd9f66e10961b1a.css" nonce="<redacted-nonce>" data-precedence="next"/><link rel="stylesheet" href="/_next/static/css/d3eb1b04de2a6d3a.css" nonce="<redacted-nonce>" data-precedence="next"/
+--- /en/products/north-america
+status=200 location= content-type=text/html; charset=utf-8
+<!DOCTYPE html><html lang="en" class="__variable_7229dd --font-jetbrains-mono"><head><meta charSet="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="preload" href="/images/logo.svg" as="image"/><link rel="stylesheet" href="/_next/static/css/7fd9f66e10961b1a.css" nonce="<redacted-nonce>" data-precedence="next"/><link rel="stylesheet" href="/_next/static/css/d3eb1b04de2a6d3a.css" nonce="<redacted-nonce>" data-precedence="next"/
+--- /invalid/contact
+status=307 location=/en/contact content-type=

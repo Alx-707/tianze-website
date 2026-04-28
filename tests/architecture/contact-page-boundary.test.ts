@@ -27,7 +27,7 @@ describe("Contact page source boundaries", () => {
     const source = read(CONTACT_ROUTE);
 
     expect(source).toContain("ContactFormWithFallback");
-    expect(source).toContain("./contact-page-sections");
+    expect(source).toContain("contact-page-sections");
     expect(source).not.toContain("ContactFormStaticFallback");
     expect(source).not.toContain("contact-form-static-fallback");
     expect(source).not.toContain('data-contact-form-fallback="static"');
@@ -37,7 +37,7 @@ describe("Contact page source boundaries", () => {
     const source = read(CONTACT_SECTIONS);
 
     expect(source).toContain("ContactFormStaticFallback");
-    expect(source).toContain("./contact-form-static-fallback");
+    expect(source).toContain("contact-form-static-fallback");
     expect(source).toContain(
       "fallback={<ContactFormStaticFallback messages={messages} />}",
     );

@@ -1,0 +1,176 @@
+{
+  "timestamp": "2026-04-27T11:08:25.334Z",
+  "config": {
+    "fastMode": true,
+    "ciGateMode": false,
+    "fullMode": false,
+    "jsonOutput": false,
+    "silent": false,
+    "gates": {
+      "coverage": {
+        "enabled": false,
+        "thresholds": {
+          "lines": 65,
+          "functions": 65,
+          "branches": 65,
+          "statements": 65
+        },
+        "blocking": true,
+        "diffBlockingThreshold": 70,
+        "diffCoverageThreshold": 90,
+        "diffMinStatements": 10,
+        "diffWarningThreshold": 1.5,
+        "diffCoverageExclude": [
+          "src/middleware.ts",
+          "src/components/forms/use-rate-limit.ts",
+          "src/components/ui/badge.tsx",
+          "src/components/ui/button.tsx",
+          "src/components/ui/card.tsx",
+          "src/components/ui/container.tsx",
+          "src/components/ui/input.tsx",
+          "src/components/ui/label.tsx",
+          "src/components/ui/section-head.tsx",
+          "src/components/ui/section.tsx",
+          "src/components/ui/separator.tsx",
+          "src/components/ui/textarea.tsx",
+          "src/types/react19.ts",
+          "src/types/i18n.ts"
+        ],
+        "diffCoverageExcludeGlobs": [
+          "**/*.generated.*",
+          "**/*.d.ts",
+          "**/*-types.ts",
+          "**/*.types.ts",
+          "**/*.test.*",
+          "**/*.spec.*",
+          "**/__tests__/**",
+          "src/test/**",
+          "src/testing/**",
+          "src/components/blocks/_templates/**",
+          "src/components/dev-tools/**",
+          "src/app/**/dev-tools/**",
+          "src/templates/**",
+          "src/constants/**",
+          "src/config/**",
+          "src/app/**/error.tsx",
+          "src/app/**/loading.tsx"
+        ]
+      },
+      "codeQuality": {
+        "enabled": true,
+        "thresholds": {
+          "eslintErrors": 0,
+          "eslintWarnings": 10,
+          "typeErrors": 0,
+          "reviewHygieneErrors": 0
+        },
+        "blocking": true
+      },
+      "performance": {
+        "enabled": false,
+        "thresholds": {
+          "buildTime": 120000,
+          "testTime": 180000
+        },
+        "blocking": false
+      },
+      "security": {
+        "enabled": true,
+        "thresholds": {
+          "vulnerabilities": 0,
+          "highSeverity": 0,
+          "semgrepErrors": 0
+        },
+        "blocking": true
+      }
+    },
+    "environment": "development",
+    "ciMode": false,
+    "branch": "unknown",
+    "pilotDomain": {
+      "prefix": "src/lib/web-vitals/",
+      "testGlobs": [
+        "**/*.test.{ts,tsx}",
+        "**/*.spec.{ts,tsx}",
+        "**/__tests__/**/*.{ts,tsx}"
+      ]
+    },
+    "diffBaseRef": "origin/main"
+  },
+  "results": {
+    "gates": {
+      "codeQuality": {
+        "name": "Code Quality",
+        "status": "passed",
+        "checks": {
+          "typeCheck": {
+            "errors": 0,
+            "status": "passed"
+          },
+          "eslint": {
+            "errors": 0,
+            "warnings": 0,
+            "status": "passed"
+          },
+          "reviewHygiene": {
+            "errors": 0,
+            "status": "passed",
+            "issues": []
+          }
+        },
+        "blocking": true,
+        "issues": []
+      },
+      "coverage": {
+        "name": "Coverage",
+        "status": "skipped",
+        "checks": {},
+        "blocking": false,
+        "issues": [
+          "覆盖率门禁已禁用（fast 模式或显式禁用）"
+        ]
+      },
+      "performance": {
+        "name": "Performance",
+        "status": "skipped",
+        "checks": {},
+        "blocking": false,
+        "issues": [
+          "快速模式下跳过性能计时"
+        ]
+      },
+      "security": {
+        "name": "Security",
+        "status": "passed",
+        "checks": {
+          "audit": {
+            "vulnerabilities": 0,
+            "high": 0,
+            "critical": 0,
+            "status": "completed"
+          },
+          "semgrep": {
+            "errors": 0,
+            "warnings": 2,
+            "exitCode": 0,
+            "status": "completed",
+            "reports": {
+              "error": "reports/semgrep-error-latest.json",
+              "warning": "reports/semgrep-warning-latest.json"
+            },
+            "output": "> b2b-web-template@0.1.0 security:semgrep /Users/Data/conductor/workspaces/tianze-website/miami\n> node scripts/semgrep-scan.js\n\nSemgrep ERROR findings: 0 (reports/semgrep-error-1777288098159.json)\nSemgrep WARNING findings: 2 (reports/semgrep-warning-1777288098159.json)"
+          }
+        },
+        "blocking": true,
+        "issues": []
+      }
+    },
+    "summary": {
+      "passed": 2,
+      "failed": 0,
+      "warnings": 0,
+      "blocked": false,
+      "skipped": 2
+    }
+  }
+}

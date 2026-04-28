@@ -1,0 +1,20 @@
+# Lane 04 targeted SEO test command
+
+$ pnpm exec vitest run src/app/__tests__/sitemap.test.ts src/app/__tests__/robots.test.ts src/lib/__tests__/seo-metadata.test.ts src/config/__tests__/single-site-seo.test.ts 'src/app/[locale]/__tests__/layout-metadata.test.ts' 'src/app/[locale]/__tests__/layout-structured-data.test.ts'
+
+
+ RUN  v4.1.2 /Users/Data/conductor/workspaces/tianze-website/miami
+
+ ✓ src/app/[locale]/__tests__/layout-structured-data.test.ts (4 tests) 9ms
+ ✓ src/config/__tests__/single-site-seo.test.ts (3 tests) 12ms
+ ✓ src/app/__tests__/robots.test.ts (8 tests) 13ms
+ ✓ src/app/__tests__/sitemap.test.ts (20 tests) 23ms
+ ✓ src/app/[locale]/__tests__/layout-metadata.test.ts (2 tests) 6ms
+ ✓ src/lib/__tests__/seo-metadata.test.ts (27 tests) 21ms
+
+ Test Files  6 passed (6)
+      Tests  64 passed (64)
+   Start at  04:09:13
+   Duration  1.33s (transform 498ms, setup 934ms, import 475ms, tests 84ms, environment 5.00s)
+
+JSON report written to /Users/Data/conductor/workspaces/tianze-website/miami/reports/test-results.json

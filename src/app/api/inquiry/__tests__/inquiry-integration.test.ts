@@ -62,24 +62,8 @@ vi.mock("@/lib/lead-pipeline", () => ({
     }),
   ),
   LEAD_TYPES: {
-    PRODUCT: "PRODUCT",
-    CONTACT: "CONTACT",
-  },
-}));
-
-vi.mock("@/lib/lead-pipeline/lead-schema", () => ({
-  LEAD_TYPES: {
-    PRODUCT: "PRODUCT",
-    CONTACT: "CONTACT",
-  },
-  productLeadSchema: {
-    safeParse: vi.fn((input: Record<string, unknown>) => ({
-      success: true,
-      data: {
-        ...input,
-        type: "PRODUCT",
-      },
-    })),
+    PRODUCT: "product",
+    CONTACT: "contact",
   },
 }));
 
@@ -155,7 +139,7 @@ describe("/api/inquiry — integration (protection chain)", () => {
       );
       expect(processLead).toHaveBeenCalledWith(
         expect.objectContaining({
-          type: "PRODUCT",
+          type: "product",
           email: "bob@example.com",
         }),
         expect.objectContaining({

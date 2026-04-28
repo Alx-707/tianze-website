@@ -6,13 +6,10 @@ import { MEXICO_SPECS } from "@/constants/product-specs/mexico";
 import { EUROPE_SPECS } from "@/constants/product-specs/europe";
 import { PNEUMATIC_SPECS } from "@/constants/product-specs/pneumatic-tube-systems";
 import type { MarketSpecs } from "@/constants/product-specs/types";
-import { EQUIPMENT_SPECS } from "@/constants/equipment-specs";
 
 // Import translation JSON files
 import enCritical from "../../../../messages/en/critical.json";
 import zhCritical from "../../../../messages/zh/critical.json";
-import enDeferred from "../../../../messages/en/deferred.json";
-import zhDeferred from "../../../../messages/zh/deferred.json";
 
 /**
  * Helper: Traverse nested objects using dot-separated paths.
@@ -172,49 +169,6 @@ describe("Feature: Product Translation Key Parity", () => {
             ).toBeDefined();
           }
         }
-      }
-    });
-  });
-
-  describe("Scenario: Equipment specifications have translations", () => {
-    it("every equipment spec has name, param labels, and highlights in both locales", () => {
-      for (const equipment of EQUIPMENT_SPECS) {
-        // Check equipment name key
-        const enNameKey = `capabilities.equipment.${equipment.slug}.name`;
-        const zhNameKey = `capabilities.equipment.${equipment.slug}.name`;
-
-        expect(
-          getNestedValue(enDeferred, enNameKey),
-          `missing en: ${enNameKey}`,
-        ).toBeDefined();
-        expect(
-          getNestedValue(zhDeferred, zhNameKey),
-          `missing zh: ${zhNameKey}`,
-        ).toBeDefined();
-
-        // Check equipment param labels
-        for (const paramKey of Object.keys(equipment.params)) {
-          const enParamKey = `capabilities.equipment.${equipment.slug}.params.${paramKey}`;
-          const zhParamKey = `capabilities.equipment.${equipment.slug}.params.${paramKey}`;
-
-          expect(
-            getNestedValue(enDeferred, enParamKey),
-            `missing en: ${enParamKey}`,
-          ).toBeDefined();
-          expect(
-            getNestedValue(zhDeferred, zhParamKey),
-            `missing zh: ${zhParamKey}`,
-          ).toBeDefined();
-        }
-
-        expect(
-          equipment.highlights.en,
-          `${equipment.slug} missing English highlights`,
-        ).not.toHaveLength(0);
-        expect(
-          equipment.highlights.zh,
-          `${equipment.slug} highlights must keep en/zh parity`,
-        ).toHaveLength(equipment.highlights.en.length);
       }
     });
   });

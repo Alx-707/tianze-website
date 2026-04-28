@@ -1,0 +1,7 @@
+{
+  "generatedAt": "2026-04-27T11:13:48.025Z",
+  "findingCount": 1,
+  "findings": [
+    "src/lib/contact/getContactCopy.ts:154: * falls back to the legacy `underConstruction.pages.contact.*` namespace."
+  ]
+}

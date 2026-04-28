@@ -23,20 +23,6 @@ interface ProductConfig {
 const PRODUCTS: readonly ProductConfig[] = [
   {
     image: {
-      src: "/images/products/full-auto-bending-machine.svg",
-      altKey: "machines.image",
-    },
-    titleKey: "machines.title",
-    featureKeys: [
-      "machines.feature1",
-      "machines.feature2",
-      "machines.feature3",
-    ],
-    buttonKey: "machines.button",
-    href: "/capabilities/bending-machines",
-  },
-  {
-    image: {
       src: "/images/products/pvc-conduit-bend.svg",
       altKey: "pvc.image",
     },

@@ -1,0 +1,37 @@
+     1	import { cn } from "@/lib/utils";
+     2
+
+     3	export interface StickyFamilyNavProps {
+     4	  families: { slug: string; label: string }[];
+     5	  ariaLabel?: string;
+     6	  className?: string;
+     7	}
+     8
+
+     9	export function StickyFamilyNav({
+    10	  families,
+    11	  ariaLabel = "Product families",
+    12	  className,
+    13	}: StickyFamilyNavProps) {
+    14	  return (
+    15	    <nav
+    16	      className={cn(
+    17	        "sticky top-14 z-10 -mx-6 mb-8 border-b border-border bg-background/95 px-6 backdrop-blur supports-[backdrop-filter]:bg-background/60",
+    18	        className,
+    19	      )}
+    20	      aria-label={ariaLabel}
+    21	    >
+    22	      <div className="flex gap-1 overflow-x-auto py-2">
+    23	        {families.map((family) => (
+    24	          <a
+    25	            key={family.slug}
+    26	            href={`#${family.slug}`}
+    27	            className="shrink-0 rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+    28	          >
+    29	            {family.label}
+    30	          </a>
+    31	        ))}
+    32	      </div>
+    33	    </nav>
+    34	  );
+    35	}

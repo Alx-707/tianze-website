@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { ContactForm } from "@/components/contact/contact-form";
+import { ContactFormIsland } from "@/components/contact/contact-form-island";
 import { ProductFamilyContextNotice } from "@/components/contact/product-family-context-notice";
 import { FaqAccordion } from "@/components/sections/faq-accordion";
 import { Card } from "@/components/ui/card";
@@ -169,6 +169,16 @@ async function ContactFormColumn({
     ["contact", "context", "productFamilyLabel"],
     "You are asking about:",
   );
+  const formLoadError = readMessagePath(
+    messages,
+    ["contact", "form", "loadError"],
+    "The secure inquiry form could not load. Retry, or use the contact methods on this page.",
+  );
+  const formRetryLabel = readMessagePath(
+    messages,
+    ["contact", "form", "retryLoad"],
+    "Retry loading form",
+  );
 
   return (
     <div className="space-y-6" data-testid="contact-form-column">
@@ -176,7 +186,11 @@ async function ContactFormColumn({
         context={productFamilyContext}
         label={productFamilyContextLabel}
       />
-      <ContactForm />
+      <ContactFormIsland
+        errorMessage={formLoadError}
+        fallback={<ContactFormStaticFallback messages={messages} />}
+        retryLabel={formRetryLabel}
+      />
     </div>
   );
 }

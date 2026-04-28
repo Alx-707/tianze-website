@@ -21,6 +21,7 @@ export function ContactFormStaticFallback({
     <Card className="mx-auto w-full max-w-2xl">
       <form
         aria-busy="true"
+        aria-label={pick("title", "Contact form")}
         className="space-y-6 p-6"
         data-contact-form-fallback="static"
         noValidate

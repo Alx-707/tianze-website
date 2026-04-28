@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { HomepageSectionShell } from "@/components/sections/homepage-section-shell";
 import { HOMEPAGE_SECTION_LINKS } from "@/components/sections/homepage-section-links";
 
-const PRODUCT_COUNT = 4;
+const PRODUCT_COUNT = 3;
 const SPECS_PER_PRODUCT = 3;
 
 function ProductCard({

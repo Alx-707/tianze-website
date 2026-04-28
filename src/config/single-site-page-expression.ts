@@ -125,35 +125,6 @@ export const SINGLE_SITE_PRODUCTS_PAGE_EXPRESSION = {
   marketLanding: {
     ctaHref: "/contact",
   },
-  equipmentCard: {
-    href: "/capabilities/bending-machines",
-    imageSrc: "/images/products/full-auto-bending-machine.svg",
-  },
-} as const;
-
-export const SINGLE_SITE_BENDING_MACHINES_PAGE_EXPRESSION = {
-  whyCardKeys: ["card1", "card2", "card3"],
-  stats: [
-    {
-      key: "monthlyCapacity",
-      valueSource: "translation",
-      translationKey: "capability.monthlyCapacity",
-      suffix: "",
-    },
-    {
-      key: "countries",
-      valueSource: "siteFacts.stats.exportCountries",
-      translationKey: "capability.countries",
-      suffix: "+",
-    },
-    {
-      key: "experience",
-      valueSource: "translation",
-      translationKey: "capability.experience",
-      suffix: "",
-    },
-  ],
-  ctaHref: "/contact",
 } as const;
 
 export const SINGLE_SITE_OEM_PAGE_EXPRESSION = {

@@ -17,7 +17,6 @@
 - 首页
 - `/products/`
 - 各市场产品页
-- `/capabilities/bending-machines`
 - `/oem-custom-manufacturing`
 - `/about`
 - `/contact`
@@ -33,15 +32,14 @@
 ### 明显需要重做或新建
 
 - `/products/pipes/`
-- `/products/equipment/`
 - `/faq/`
 - 真正可用的 Blog 内容
 
 ## 当前最大内容缺口
 
-### 1. 设备线内容太薄
+### 1. 产品市场页内容仍需要更具体
 
-这是当前最明显的结构性缺口之一。
+特别是市场标准、应用场景、规格证明和询盘触发点，还需要继续加强。
 
 ### 2. PETG 线内容不够像独立业务线
 

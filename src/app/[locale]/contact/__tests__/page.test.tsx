@@ -1,6 +1,7 @@
 import React from "react";
-import { screen } from "@testing-library/react";
+import { screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { setRequestLocale } from "next-intl/server";
 import ContactPage, { generateMetadata } from "@/app/[locale]/contact/page";
 import { renderAsyncPage } from "@/testing/render-async-page";
 
@@ -13,7 +14,20 @@ vi.mock("react", async () => {
 
   return {
     ...actual,
-    Suspense: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    Suspense: ({
+      children,
+      fallback,
+    }: {
+      children: React.ReactNode;
+      fallback?: React.ReactNode;
+    }) => (
+      <section data-testid="suspense-boundary">
+        {fallback ? (
+          <div data-testid="suspense-fallback">{fallback}</div>
+        ) : null}
+        {children}
+      </section>
+    ),
   };
 });
 
@@ -49,6 +63,15 @@ const contactCopy = {
 
 vi.mock("@/components/contact/contact-form", () => ({
   ContactForm: () => <div data-testid="contact-form">Contact Form</div>,
+}));
+
+vi.mock("@/components/contact/contact-form-island", () => ({
+  ContactFormIsland: ({ fallback }: { fallback: React.ReactNode }) => (
+    <section data-testid="contact-form-island">
+      {fallback}
+      <div data-testid="contact-form">Contact Form</div>
+    </section>
+  ),
 }));
 
 vi.mock("@/components/sections/faq-section", () => ({
@@ -88,11 +111,65 @@ describe("ContactPage MDX migration", () => {
 
     await renderAsyncPage(page as React.JSX.Element);
 
-    expect(await screen.findByRole("heading", { level: 1 })).toHaveTextContent(
-      "Contact Us",
-    );
+    const content = await screen.findByTestId("contact-page-content");
+
+    expect(
+      within(content).getByRole("heading", { level: 1 }),
+    ).toHaveTextContent("Contact Us");
     expect(screen.getByTestId("mdx-body")).toBeInTheDocument();
     expect(screen.getByTestId("contact-form")).toBeInTheDocument();
+  });
+
+  it("keeps the static Suspense fallback scoped to the form column", async () => {
+    const page = await ContactPage({
+      params: Promise.resolve({ locale: "en" }),
+    });
+
+    await renderAsyncPage(page as React.JSX.Element);
+
+    const fallback = screen.getByTestId("suspense-fallback");
+
+    expect(fallback).toBeInTheDocument();
+    expect(
+      within(fallback).getByRole("form", { name: "Contact Us" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByTestId("contact-page-fallback"),
+    ).not.toBeInTheDocument();
+    expect(screen.getByTestId("contact-page-content")).toBeInTheDocument();
+    expect(screen.getByTestId("contact-form")).toBeInTheDocument();
+  });
+
+  it("sets the request locale in the page entry before rendering contact content", async () => {
+    await ContactPage({
+      params: Promise.resolve({ locale: "en" }),
+    });
+
+    expect(vi.mocked(setRequestLocale)).toHaveBeenCalledWith("en");
+  });
+
+  it("renders localized contact panel copy from the top-level contact namespace", async () => {
+    const actualContactCopy = await vi.importActual<
+      typeof import("@/lib/contact/getContactCopy")
+    >("@/lib/contact/getContactCopy");
+    mockGetContactCopyFromMessages.mockImplementation(
+      actualContactCopy.getContactCopyFromMessages,
+    );
+
+    const page = await ContactPage({
+      params: Promise.resolve({ locale: "zh" }),
+    });
+
+    await renderAsyncPage(page as React.JSX.Element);
+
+    expect(
+      screen.getByRole("heading", { name: "联系方式" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "联系后会发生什么" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("工作日 24 小时内")).toBeInTheDocument();
+    expect(screen.getByText("建议提供")).toBeInTheDocument();
   });
 
   it("renders FAQ from MDX frontmatter", async () => {

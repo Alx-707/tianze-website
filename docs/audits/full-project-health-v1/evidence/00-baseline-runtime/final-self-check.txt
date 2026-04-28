@@ -1,0 +1,28 @@
+$ test -f lane report
+passed
+
+$ find evidence files
+docs/audits/full-project-health-v1/evidence/00-baseline-runtime/baseline-env.txt
+docs/audits/full-project-health-v1/evidence/00-baseline-runtime/clean-baseline-proof.txt
+docs/audits/full-project-health-v1/evidence/00-baseline-runtime/credential-presence.txt
+docs/audits/full-project-health-v1/evidence/00-baseline-runtime/generated-report-index.txt
+docs/audits/full-project-health-v1/evidence/00-baseline-runtime/pnpm-build-cf.txt
+docs/audits/full-project-health-v1/evidence/00-baseline-runtime/pnpm-build.txt
+docs/audits/full-project-health-v1/evidence/00-baseline-runtime/pnpm-dep-check.txt
+docs/audits/full-project-health-v1/evidence/00-baseline-runtime/pnpm-lint-check.txt
+docs/audits/full-project-health-v1/evidence/00-baseline-runtime/pnpm-quality-gate-fast.txt
+docs/audits/full-project-health-v1/evidence/00-baseline-runtime/pnpm-security-semgrep.txt
+docs/audits/full-project-health-v1/evidence/00-baseline-runtime/pnpm-test.txt
+docs/audits/full-project-health-v1/evidence/00-baseline-runtime/pnpm-truth-check.txt
+docs/audits/full-project-health-v1/evidence/00-baseline-runtime/pnpm-type-check.txt
+docs/audits/full-project-health-v1/evidence/00-baseline-runtime/pnpm-unused-check.txt
+docs/audits/full-project-health-v1/evidence/00-baseline-runtime/post-build-artifacts.txt
+docs/audits/full-project-health-v1/evidence/00-baseline-runtime/post-build-clean-baseline-proof.txt
+docs/audits/full-project-health-v1/evidence/00-baseline-runtime/quality-gate-fast.json
+docs/audits/full-project-health-v1/evidence/00-baseline-runtime/semgrep-error-latest.json
+docs/audits/full-project-health-v1/evidence/00-baseline-runtime/semgrep-warning-latest.json
+docs/audits/full-project-health-v1/evidence/00-baseline-runtime/vitest-test-results.json
+
+$ rg placeholders / invalid obvious leftovers
+
+$ clean baseline proof after report write

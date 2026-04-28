@@ -1,0 +1,11 @@
+
+> b2b-web-template@0.1.0 smoke:cf:preview:strict /Users/Data/conductor/workspaces/tianze-website/miami
+> node scripts/cloudflare/preview-smoke.mjs --include-api-health
+
+[cf-preview-smoke] Probing http://127.0.0.1:8787 (strict mode)
+[cf-preview-smoke] Failures detected:
+  - Expected /en to return 200, got 500
+  - Expected /zh to return 200, got 500
+  - Expected /en/contact to return 200, got 500
+  - Expected /zh/contact to return 200, got 500
+ ELIFECYCLE  Command failed with exit code 1.

@@ -125,8 +125,8 @@
   "home": {
     "hero": {
       "eyebrow": "ISO 9001 Certified · Est. {established}",
-      "title": "We Build the Machines That Make the Pipes.",
-      "subtitle": "PVC conduit bends & fittings, factory direct from a bending equipment manufacturer. Full vertical integration from R&D to finished product.",
+      "title": "PVC Conduit Fittings Made for Export Projects.",
+      "subtitle": "PVC conduit bends, fittings, PETG pneumatic tube products, and OEM manufacturing support from a factory with in-house forming, tooling, and quality control.",
       "cta": {
         "primary": "Get a Quote",
         "secondary": "View Product Catalog"
@@ -143,15 +143,15 @@
       }
     },
     "chain": {
-      "title": "Full-Chain Control. All In-House.",
-      "subtitle": "We design and build our own bending machines. That upstream control is how we maintain consistent quality from raw material to finished conduit.",
+      "title": "Process Control. Tooling. Finished Products.",
+      "subtitle": "We keep forming, mold work, production, and inspection inside one factory so custom fittings and repeat orders stay consistent.",
       "step1": {
-        "title": "Bending Machine R&D",
-        "desc": "Proprietary equipment design and engineering"
+        "title": "Product Requirement Review",
+        "desc": "Application, standard, diameter, bend form, and packaging confirmed before quoting"
       },
       "step2": {
-        "title": "Equipment Manufacturing",
-        "desc": "In-house assembly and precision calibration"
+        "title": "Tooling and Process Setup",
+        "desc": "In-house mold work and forming setup for standard and custom fittings"
       },
       "step3": {
         "title": "Mold Fabrication",
@@ -159,19 +159,19 @@
       },
       "step4": {
         "title": "Conduit Production",
-        "desc": "24/7 extrusion and bending operations"
+        "desc": "24/7 extrusion and forming production"
       },
       "step5": {
         "title": "Quality Control",
         "desc": "Batch documentation and traceability"
       },
-      "stat1": "Patented bending technology",
+      "stat1": "In-house forming process",
       "stat2": "5-step vertical integration",
       "stat3": "In-house mold manufacturing"
     },
     "products": {
       "title": "Product Lines",
-      "subtitle": "From the manufacturer that designs and builds its own bending machines. Full vertical integration from equipment R&D to finished product.",
+      "subtitle": "PVC conduit fittings, PETG pneumatic tubes, and OEM manufacturing from a vertically integrated factory.",
       "cta": "View All Products",
       "item1": {
         "tag": "4 Market Standards",
@@ -192,15 +192,6 @@
         "link": "/products/pneumatic-tube-systems"
       },
       "item3": {
-        "tag": "Core Capability",
-        "title": "Bending Machines",
-        "spec1": "Full-auto and semi-auto models",
-        "spec2": "DN25 to DN160mm pipe range",
-        "spec3": "150-200 pcs/hour production speed",
-        "standard": "Self-developed",
-        "link": "/capabilities/bending-machines"
-      },
-      "item4": {
         "tag": "Service",
         "title": "OEM & Custom Manufacturing",
         "spec1": "Your specifications, our production",
@@ -294,7 +285,7 @@
       },
       "standards": {
         "astm": "ASTM D1785 / UL 651",
-        "asnzs": "AS/NZS 61386",
+        "asnzs": "AS/NZS 2053",
         "iec": "IEC 61386",
         "nom": "NOM-001-SEDE"
       },
@@ -315,7 +306,7 @@
     "footer": {
       "about": {
         "title": "Tianze Pipe Industry",
-        "desc": "PVC conduit bends and fittings manufacturer based in Lianyungang, Jiangsu, China. Designing and manufacturing bending equipment since {established}."
+        "desc": "PVC conduit bends, fittings, PETG pneumatic tube products, and OEM manufacturing support from Lianyungang, Jiangsu, China."
       },
       "products": {
         "title": "Products",
@@ -490,11 +481,11 @@
     },
     "overview": {
       "title": "Manufacturing Excellence",
-      "subtitle": "Integrated pipe bending capability with equipment development, precision molds, and quality fittings production.",
+      "subtitle": "Integrated conduit fittings manufacturing with in-house forming, precision molds, and quality-controlled production.",
       "features": {
         "performance": {
-          "title": "Pipe Bending Systems",
-          "description": "Semi-auto and full-auto bending machines with precision control and high throughput."
+          "title": "In-House Forming Process",
+          "description": "Controlled forming setup for conduit bends and custom fittings used in export projects."
         },
         "security": {
           "title": "Quality Certified",
@@ -532,8 +523,8 @@
       "architecture": {
         "title": "Product Lines",
         "frontend": {
-          "title": "Bending Equipment",
-          "description": "Semi-auto and full-auto PVC pipe bending machines with advanced temperature control."
+          "title": "PVC Conduit Fittings",
+          "description": "Conduit bends, elbows, couplings, bell ends, and custom fittings for electrical applications."
         },
         "ui": {
           "title": "PVC Conduit System",
@@ -546,7 +537,7 @@
       },
       "cta": {
         "title": "Ready to Partner?",
-        "description": "Contact our team to discuss your pipe bending and conduit requirements.",
+        "description": "Contact our team to discuss your conduit fitting and custom project requirements.",
         "getStarted": "Request Quote",
         "viewSource": "View Products"
       }
@@ -937,10 +928,7 @@
       "title": "Products",
       "description": "PVC conduit fittings and pipes manufactured to international standards. Select your market to view products by compliance standard.",
       "byStandard": "By Market Standard",
-      "specialty": "Specialty & Equipment",
-      "equipmentTitle": "Bending Machines",
-      "equipmentDescription": "Self-developed full-auto and semi-auto PVC conduit bending machines. Our core manufacturing capability.",
-      "equipmentCta": "Learn More"
+      "specialty": "Specialty Products"
     },
     "market": {
       "familyNav": {

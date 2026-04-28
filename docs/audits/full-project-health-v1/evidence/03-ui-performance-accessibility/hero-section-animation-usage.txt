@@ -1,0 +1,126 @@
+     1	import { getTranslations } from "next-intl/server";
+     2
+
+     3	import { Button } from "@/components/ui/button";
+     4	import { DesktopDecorationGate } from "@/components/grid/desktop-decoration-gate";
+     5	import { HeroGuideOverlay } from "@/components/grid";
+     6	import { Link } from "@/i18n/routing";
+     7	import { SINGLE_SITE_HOME_HERO_PROOF_ITEMS } from "@/config/single-site-page-expression";
+     8	import { siteFacts } from "@/config/site-facts";
+     9	import { HOMEPAGE_SECTION_LINKS } from "@/components/sections/homepage-section-links";
+    10	import { HomepageTrustStrip } from "@/components/sections/homepage-trust-strip";
+    11
+
+    12	function HeroEyebrow({ text }: { text: string }) {
+    13	  return (
+    14	    <div className="hero-stagger-1 flex items-center gap-2">
+    15	      <span className="h-2 w-2 rounded-full bg-primary" aria-hidden="true" />
+    16	      <span className="text-[13px] font-semibold uppercase tracking-[0.04em] text-primary">
+    17	        {text}
+    18	      </span>
+    19	    </div>
+    20	  );
+    21	}
+    22
+
+    23	function HeroVisual() {
+    24	  return (
+    25	    <div className="hero-stagger-6 grid grid-cols-2 grid-rows-[180px_160px] gap-3">
+    26	      <div className="col-span-2 rounded-lg bg-card shadow-border" />
+    27	      <div className="rounded-lg bg-card shadow-border" />
+    28	      <div className="rounded-lg bg-card shadow-border" />
+    29	    </div>
+    30	  );
+    31	}
+    32
+
+    33	export async function HeroSection() {
+    34	  const t = await getTranslations("home");
+    35	  const proofItems = SINGLE_SITE_HOME_HERO_PROOF_ITEMS.map((item) => {
+    36	    switch (item) {
+    37	      case "est":
+    38	        return {
+    39	          value: t("hero.proof.est", {
+    40	            established: siteFacts.company.established,
+    41	          }),
+    42	          label: t("hero.proof.estLabel"),
+    43	        };
+    44	      case "countries":
+    45	        return {
+    46	          value: t("hero.proof.countries", {
+    47	            countries: siteFacts.stats.exportCountries,
+    48	          }),
+    49	          label: t("hero.proof.countriesLabel"),
+    50	        };
+    51	      case "range":
+    52	        return {
+    53	          value: t("hero.proof.range"),
+    54	          label: t("hero.proof.rangeLabel"),
+    55	        };
+    56	      case "production":
+    57	        return {
+    58	          value: t("hero.proof.production"),
+    59	          label: t("hero.proof.productionLabel"),
+    60	        };
+    61	      default:
+    62	        return null;
+    63	    }
+    64	  }).filter((item) => item !== null);
+    65
+
+    66	  return (
+    67	    <section
+    68	      data-testid="hero-section"
+    69	      className="relative px-6 py-10 pb-14 md:py-16 md:pb-[72px]"
+    70	    >
+    71	      <DesktopDecorationGate>
+    72	        <HeroGuideOverlay />
+    73	      </DesktopDecorationGate>
+    74	      <div className="relative z-[1] mx-auto grid max-w-[1080px] grid-cols-1 items-center gap-12 md:grid-cols-2">
+    75	        {/* Left column — Copy */}
+    76	        <div className="flex flex-col">
+    77	          <HeroEyebrow
+    78	            text={t("hero.eyebrow", {
+    79	              established: siteFacts.company.established,
+    80	            })}
+    81	          />
+    82
+
+    83	          <h1 className="hero-stagger-2 mt-4 text-[36px] font-extrabold leading-[1.1] tracking-[-0.03em] md:text-[48px] md:leading-[1.0] md:tracking-[-0.05em]">
+    84	            {t("hero.title")}
+    85	          </h1>
+    86
+
+    87	          <p className="hero-stagger-3 mt-4 max-w-[480px] text-lg text-muted-foreground">
+    88	            {t("hero.subtitle")}
+    89	          </p>
+    90
+
+    91	          <div className="hero-stagger-4 mt-7 flex flex-wrap gap-3">
+    92	            <Button asChild>
+    93	              <Link href={HOMEPAGE_SECTION_LINKS.contact} prefetch={false}>
+    94	                {t("hero.cta.primary")}
+    95	              </Link>
+    96	            </Button>
+    97	            <Button variant="secondary" asChild>
+    98	              <Link href={HOMEPAGE_SECTION_LINKS.products} prefetch={false}>
+    99	                {t("hero.cta.secondary")}
+   100	              </Link>
+   101	            </Button>
+   102	          </div>
+   103
+
+   104	          <HomepageTrustStrip
+   105	            ariaLabel="Homepage proof facts"
+   106	            className="hero-stagger-5 mt-7 border-t border-border-light pt-5 font-mono text-[13px] text-muted-foreground"
+   107	            items={proofItems}
+   108	          />
+   109	        </div>
+   110
+
+   111	        {/* Right column — Visual grid */}
+   112	        <HeroVisual />
+   113	      </div>
+   114	    </section>
+   115	  );
+   116	}

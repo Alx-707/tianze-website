@@ -34,10 +34,6 @@ export const SINGLE_SITE_SITEMAP_PAGE_CONFIG = {
   "/products": { changeFrequency: "weekly", priority: 0.9 },
   "/privacy": { changeFrequency: "monthly", priority: 0.7 },
   "/terms": { changeFrequency: "monthly", priority: 0.7 },
-  "/capabilities/bending-machines": {
-    changeFrequency: "monthly",
-    priority: 0.8,
-  },
   "/oem-custom-manufacturing": {
     changeFrequency: "monthly",
     priority: 0.8,

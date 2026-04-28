@@ -1,0 +1,167 @@
+
+> b2b-web-template@0.1.0 build:cf /Users/Data/conductor/workspaces/tianze-website/miami
+> node scripts/cloudflare/build-webpack.mjs
+
+[clean-next-build-artifacts] moved to local artifact trash:
+.next -> /Users/Data/conductor/workspaces/tianze-website/miami/.trash-next-artifacts/tianze--next-20260427T110854
+
+> b2b-web-template@0.1.0 prebuild /Users/Data/conductor/workspaces/tianze-website/miami
+> node scripts/copy-translations.js && tsx scripts/generate-content-manifest.ts && pnpm content:slug-check && pnpm validate:config
+
+📦 Copying translation files to public directory...
+
+✅ Copied en/critical.json (53728 → 39833 bytes, saved 25.9%)
+✅ Copied en/deferred.json (17992 → 14119 bytes, saved 21.5%)
+✅ Copied zh/critical.json (50260 → 36365 bytes, saved 27.6%)
+✅ Copied zh/deferred.json (16637 → 12764 bytes, saved 23.3%)
+
+📊 Summary:
+   Total source size: 138617 bytes
+   Total output size: 103081 bytes
+   Total saved: 35536 bytes (25.6%)
+
+✅ All translation files copied successfully!
+Generating content manifest and import map...
+Generated manifest with 14 entries
+Output 1: /Users/Data/conductor/workspaces/tianze-website/miami/reports/content-manifest.json
+Output 2: /Users/Data/conductor/workspaces/tianze-website/miami/src/lib/mdx-importers.generated.ts
+Output 3: /Users/Data/conductor/workspaces/tianze-website/miami/src/lib/content-manifest.generated.ts
+
+Summary:
+  pages/en: 7 files
+  pages/zh: 7 files
+
+> b2b-web-template@0.1.0 content:slug-check /Users/Data/conductor/workspaces/tianze-website/miami
+> node scripts/content-slug-sync.js
+
+
+🔍 MDX Slug Sync Validation
+==========================
+
+📁 Collections: posts, pages, products
+🌍 Locales: en, zh
+📄 Total files: 14
+🔗 Total pairs: 7
+
+✅ All slug validations passed!
+
+💡 All MDX content files have consistent slugs across locales.
+
+
+> b2b-web-template@0.1.0 validate:config /Users/Data/conductor/workspaces/tianze-website/miami
+> tsx scripts/validate-production-config.ts
+
+✅ Production configuration validated successfully.
+▲ Next.js 16.2.3 (webpack)
+- Cache Components enabled
+- Experiments (use with caution):
+  · optimizePackageImports
+
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+  Creating an optimized production build ...
+✓ Compiled successfully in 12.4s
+  Running TypeScript ...
+  Finished TypeScript in 4.2s ...
+  Collecting page data using 7 workers ...
+  Generating static pages using 7 workers (0/53) ...
+  Generating static pages using 7 workers (13/53)
+
+  Generating static pages using 7 workers (26/53)
+
+  Generating static pages using 7 workers (39/53)
+
+✓ Generating static pages using 7 workers (53/53) in 1661ms
+  Finalizing page optimization ...
+  Collecting build traces ...
+
+Route (app)                                  Revalidate  Expire
+┌ ○ /_not-found
+├ ◐ /[locale]
+│ ├ /[locale]
+│ ├ /en
+│ └ /zh
+├ ◐ /[locale]/[...rest]
+│ ├ /[locale]/[...rest]
+│ ├ /en/[...rest]
+│ ├ /en/__not-found-placeholder
+│ └ [+2 more paths]
+├ ◐ /[locale]/about
+│ ├ /[locale]/about
+│ ├ /en/about
+│ └ /zh/about
+├ ◐ /[locale]/capabilities/bending-machines
+│ ├ /[locale]/capabilities/bending-machines
+│ ├ /en/capabilities/bending-machines
+│ └ /zh/capabilities/bending-machines
+├ ◐ /[locale]/contact
+│ ├ /[locale]/contact
+│ ├ /en/contact
+│ └ /zh/contact
+├ ◐ /[locale]/oem-custom-manufacturing
+│ ├ /[locale]/oem-custom-manufacturing
+│ ├ /en/oem-custom-manufacturing
+│ └ /zh/oem-custom-manufacturing
+├ ◐ /[locale]/privacy
+│ ├ /[locale]/privacy
+│ ├ /en/privacy
+│ └ /zh/privacy
+├ ◐ /[locale]/products
+│ ├ /[locale]/products
+│ ├ /en/products
+│ └ /zh/products
+├ ◐ /[locale]/products/[market]                      1d      1w
+│ ├ /[locale]/products/[market]                      1d      1w
+│ ├ /en/products/[market]
+│ ├ /en/products/north-america                       1d      1w
+│ └ [+10 more paths]
+├ ◐ /[locale]/terms
+│ ├ /[locale]/terms
+│ ├ /en/terms
+│ └ /zh/terms
+├ ƒ /api/csp-report
+├ ƒ /api/health
+├ ƒ /api/inquiry
+├ ƒ /api/subscribe
+├ ƒ /api/verify-turnstile
+├ ○ /apple-icon.png
+├ ○ /robots.txt
+└ ○ /sitemap.xml
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)             prerendered as static content
+◐  (Partial Prerender)  prerendered as static HTML with dynamic server-streamed content
+ƒ  (Dynamic)            server-rendered on demand
+
+
+┌─────────────────────────────┐
+│ OpenNext — Cloudflare build │
+└─────────────────────────────┘
+
+App directory: /Users/Data/conductor/workspaces/tianze-website/miami
+Next.js version : 16.2.3
+@opennextjs/cloudflare version: 1.18.0
+@opennextjs/aws version: 3.9.16
+WARN Skipping Next.js build
+
+┌──────────────────────────────┐
+│ OpenNext — Generating bundle │
+└──────────────────────────────┘
+
+Bundling middleware function...
+Bundling static assets...
+Bundling cache assets...
+Building server function: apiLead...
+Applying code patches: 160.634ms
+Building server function: default...
+Applying code patches: 194.529ms
+# copyPackageTemplateFiles
+[35m⚙️ Bundling the OpenNext server...
+[0m
+[35mWorker saved in `.open-next/worker.js` 🚀
+[0m
+OpenNext build complete.
+[cf-prefetch-patch] upstream manifest handling already present; no manifest-guard patch needed
+[cf-prefetch-patch] patched middleware manifest loader
+[cf-prefetch-patch] patched cache handler paths in .open-next/server-functions/apiLead/index.mjs

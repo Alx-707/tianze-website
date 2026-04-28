@@ -63,6 +63,26 @@
     "context": {
       "productFamilyLabel": "You are asking about:"
     },
+    "title": "Contact Us",
+    "description": "Get in touch with our team for inquiries, support, or partnership opportunities.",
+    "features": "Multiple ways to reach us and get the support you need",
+    "panel": {
+      "contactTitle": "Contact Methods",
+      "email": "Email",
+      "phone": "Phone",
+      "hoursTitle": "Business Hours",
+      "weekdays": "Mon - Fri",
+      "saturday": "Saturday",
+      "sunday": "Sunday",
+      "closed": "Closed",
+      "responseTitle": "What to expect",
+      "responseTimeLabel": "Typical response",
+      "responseTimeValue": "Within 24 business hours",
+      "bestForLabel": "Best for",
+      "bestForValue": "RFQs, product specs, MOQ, samples, and lead-time questions",
+      "prepareLabel": "Helpful details",
+      "prepareValue": "Share product type, size/standard, quantity, destination market, and timeline"
+    },
     "form": {
       "title": "Contact Us",
       "description": "Get in touch with us. We'd love to hear from you.",
@@ -89,6 +109,8 @@
       "submitError": "We couldn't send your message. Please try again shortly.",
       "success": "Thank you! Your message has been sent successfully. We will get back to you soon.",
       "error": "Sorry, there was an error sending your message. Please try again later.",
+      "loadError": "The secure inquiry form could not load. Retry, or use the contact methods on this page.",
+      "retryLoad": "Retry loading form",
       "rateLimitMessage": "You've recently contacted us. Please wait a moment before sending another message.",
       "errors": {
         "generic": "Please review the highlighted fields and try again.",
@@ -356,91 +378,6 @@
       "governing": "Governing Law",
       "disputes": "Dispute Resolution",
       "contact": "Contact Information"
-    }
-  },
-  "capabilities": {
-    "meta": {
-      "title": "PVC Conduit Bending Machines | Tianze",
-      "description": "Self-developed full-auto and semi-auto PVC conduit bending machines. The core manufacturing technology behind our fittings."
-    },
-    "hero": {
-      "title": "PVC Conduit Bending Machines",
-      "subtitle": "Self-developed. In-house manufactured. The technology behind our fittings."
-    },
-    "why": {
-      "title": "Why It Matters",
-      "card1": {
-        "title": "We Make the Machines",
-        "desc": "As an upstream bending machine manufacturer, we control the core technology that shapes every fitting."
-      },
-      "card2": {
-        "title": "Precision Control",
-        "desc": "CNC-controlled bending ensures consistent angles, wall thickness, and finish across every production run."
-      },
-      "card3": {
-        "title": "Custom Capability",
-        "desc": "In-house mold development means we can produce non-standard sizes, angles, and specifications to your requirements."
-      }
-    },
-    "machines": {
-      "title": "Machine Lineup"
-    },
-    "equipment": {
-      "full-auto-bending-machine": {
-        "name": "Full-Automatic PVC Pipe Bending Machine",
-        "params": {
-          "pipeDiameter": "Pipe Diameter",
-          "bendingAngles": "Bending Angles",
-          "heatingZones": "Heating Zones",
-          "powerSupply": "Power Supply",
-          "productionSpeed": "Production Speed",
-          "machineWeight": "Machine Weight",
-          "controlSystem": "Control System"
-        },
-        "highlights": {
-          "0": "CNC Control System",
-          "1": "Automatic Feeding",
-          "2": "Multi-Station Design",
-          "3": "Remote Diagnostics"
-        }
-      },
-      "semi-auto-bending-machine": {
-        "name": "Semi-Automatic PVC Pipe Bending Machine",
-        "params": {
-          "pipeDiameter": "Pipe Diameter",
-          "bendingAngles": "Bending Angles",
-          "heatingMethod": "Heating Method",
-          "powerSupply": "Power Supply",
-          "productionSpeed": "Production Speed",
-          "machineWeight": "Machine Weight"
-        },
-        "highlights": {
-          "0": "Precision Temperature Control",
-          "1": "Adjustable Bending Angles",
-          "2": "Quick-Swap Mold System",
-          "3": "Safety Features"
-        }
-      }
-    },
-    "capability": {
-      "title": "Production Capability",
-      "monthlyCapacity": {
-        "value": "50,000+",
-        "label": "Fittings per Month"
-      },
-      "countries": {
-        "value": "{countries}+",
-        "label": "Countries Served"
-      },
-      "experience": {
-        "value": "10+",
-        "label": "Years of Experience"
-      }
-    },
-    "cta": {
-      "heading": "Interested in our bending technology?",
-      "description": "Whether you need OEM manufacturing or want to discuss custom specifications, we're ready to help.",
-      "button": "Contact Us"
     }
   },
   "oem": {

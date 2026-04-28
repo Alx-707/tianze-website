@@ -24,7 +24,6 @@ workers.dev preview 已完成 deployed HTML 验证。
 | `/zh/contact` | 3 | yes | PASS |
 | `/en/products` | 3 | yes | PASS |
 | `/en/products/north-america` | 3 | yes | PASS |
-| `/en/capabilities/bending-machines` | 3 | yes | PASS |
 | `/en/oem-custom-manufacturing` | 3 | yes | PASS |
 
 ## 仍需线上确认

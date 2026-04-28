@@ -40,10 +40,10 @@
 
 ### Phase C：业务线逐页推进
 
-- Pipes
-- PETG
-- Equipment
-- Custom manufacturing
+- PVC conduit products by market
+- PETG pneumatic tube systems
+- OEM / custom manufacturing
+- Internal process and tooling proof
 
 ### Phase D：支撑层补齐
 
