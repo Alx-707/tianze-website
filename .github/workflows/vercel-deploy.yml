@@ -32,7 +32,7 @@ jobs:
 
     steps:
       - name: 检出代码
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           persist-credentials: false
 
@@ -51,7 +51,7 @@ jobs:
 
       # 确保先安装 pnpm，再启用 setup-node 的 pnpm 缓存，避免缓存阶段找不到 pnpm
       - name: 设置 pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v5
         with:
           version: 10.13.1
           run_install: false
@@ -59,14 +59,14 @@ jobs:
 
       - name: 设置 Node.js（启用 pnpm 缓存）
         if: steps.vercel_secrets.outputs.configured == 'true'
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "20.19.0"
           cache: "pnpm"
 
       - name: 设置 Node.js（跳过 pnpm 缓存）
         if: steps.vercel_secrets.outputs.configured != 'true'
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "20.19.0"
 
@@ -149,7 +149,7 @@ jobs:
 
       - name: 上传 Vercel 构建日志
         if: always() && steps.vercel_secrets.outputs.configured == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: vercel_build.log
           path: vercel_build.log
@@ -221,7 +221,7 @@ jobs:
 
     steps:
       - name: 检出代码
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           submodules: false
           persist-credentials: false
@@ -238,7 +238,7 @@ jobs:
           fi
 
       - name: 设置 pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v5
         with:
           version: 10.13.1
           run_install: false
@@ -246,14 +246,14 @@ jobs:
 
       - name: 设置 Node.js（启用 pnpm 缓存）
         if: steps.vercel_secrets.outputs.configured == 'true'
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "20.19.0"
           cache: "pnpm"
 
       - name: 设置 Node.js（跳过 pnpm 缓存）
         if: steps.vercel_secrets.outputs.configured != 'true'
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "20.19.0"
 
@@ -308,7 +308,7 @@ jobs:
 
       - name: 上传 Vercel 构建日志（prod）
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: vercel_build_prod.log
           path: vercel_build_prod.log
@@ -367,7 +367,7 @@ jobs:
 
     steps:
       - name: 检出代码
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           submodules: false
           persist-credentials: false
@@ -537,7 +537,7 @@ jobs:
 
     steps:
       - name: 检出代码
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           submodules: false
           persist-credentials: false

@@ -31,6 +31,22 @@
 
 `middleware` deprecated warning 仍然是已知状态；本轮不做 `middleware.ts` -> `proxy.ts` 迁移。
 
+### 2026-04-28 GitHub Actions Node 24 runtime refresh
+
+GitHub Actions 在合并后提示：`actions/checkout@v4`、`actions/setup-node@v4`、`pnpm/action-setup@v4`、`actions/upload-artifact@v4`、`actions/download-artifact@v4` 等 action runtime 仍在 Node.js 20，GitHub 将在 2026-06-02 默认强制切到 Node 24。
+
+本轮只升级 workflow action 自身版本，不改变项目运行 Node baseline：
+
+- `actions/checkout`: `v4` -> `v6`
+- `actions/setup-node`: `v4` -> `v6`
+- `actions/cache`: `v4` -> `v5`
+- `actions/upload-artifact`: `v4` -> `v7`
+- `actions/download-artifact`: `v4` -> `v8`
+- `pnpm/action-setup`: `v4` -> `v5`
+- `github/codeql-action/upload-sarif`: `v3` -> `v4`
+
+这些版本的 `action.yml` 已核对为 `runs: node24`，且现有 workflow 使用到的输入项仍存在。项目自己的 Node baseline 仍保持 `20.19.0`，不要把这次 workflow runtime 刷新误读成应用运行时升级。
+
 ### 0. 2026-04-26 runtime cache removal proof
 
 本轮已选择“静态生成 + 重新部署”作为上线内容更新路径：
