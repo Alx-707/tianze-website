@@ -7,8 +7,8 @@
 
 ### 前端框架
 
-- **Next.js 16.2.3**：主框架，使用 App Router
-- **React 19.2.4**：UI 运行时
+- **Next.js 16.2.4**：主框架，使用 App Router
+- **React 19.2.5**：UI 运行时
 - **TypeScript 5.9.3**：类型系统
 - **Tailwind CSS 4.2.2**：样式系统
 
@@ -31,7 +31,7 @@
 
 ### 内容管理
 
-- **@next/mdx 16.2.3**
+- **@next/mdx 16.2.4**
 - **@mdx-js/loader 3.1.1**
 - **@mdx-js/react 3.1.1**
 - **gray-matter 4.0.3**
@@ -128,8 +128,8 @@
 
 ### Cloudflare 构建链
 
-- **@opennextjs/cloudflare 1.18.0**
-- **wrangler 4.79.0**
+- **@opennextjs/cloudflare 1.19.4**
+- **wrangler 4.85.0**
 - `pnpm build`：标准 Next.js 构建
 - `pnpm build:cf`：Cloudflare 构建
 - `pnpm preview:cf`：本地 stock preview，仅用于页面级初筛
@@ -138,10 +138,10 @@
 
 ### 额外构建与诊断工具
 
-- **@next/bundle-analyzer 16.2.3**
+- **@next/bundle-analyzer 16.2.4**
 - **dotenv 17.3.1**
 - **glob 13.0.6**
-- **postcss 8.5.8**
+- **postcss 8.5.10**
 - **@tailwindcss/postcss 4.2.2**
 - **tsx 4.21.0**
 - **Babel AST 工具链**
