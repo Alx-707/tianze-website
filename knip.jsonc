@@ -51,12 +51,10 @@
   "ignoreDependencies": [
     // Prettier plugins are auto-loaded by Prettier when installed; knip may not detect usage reliably.
     "@ianvs/prettier-plugin-sort-imports",
-    "@react-email/preview-server",
     "@tailwindcss/typography",
     "@next/eslint-plugin-next",
     // Explicit support deps kept for the Cloudflare phase6 / split-worker chain.
     // They are intentionally present even though knip cannot trace the runtime linkage.
-    "axe-core",
     "critters",
     "eslint-plugin-react",
     "eslint-plugin-react-hooks",
