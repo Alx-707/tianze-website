@@ -31,6 +31,7 @@ export default [
       "performance-audit/**",
       "reports/**",
       ".next/**",
+      ".worktrees/**",
       ".trash-next-artifacts/**",
       ".context/**",
       ".stryker-tmp/**",
@@ -1055,6 +1056,7 @@ export default [
       "*.d.ts",
       "reports/**",
       "backups/**", // 忽略备份文件，减少非目标代码噪声
+      ".worktrees/**", // local dependency-lane worktrees and their generated build output
       "jest.setup.js",
       "jest.config.js",
       "tina/__generated__/**", // 忽略TinaCMS生成的文件
