@@ -23,6 +23,9 @@ const REPO_ROOT = process.cwd();
 const GUARDRAIL_REGISTER_PATH = "docs/guides/GUARDRAIL-SIDE-EFFECTS.md";
 const GUARDRAIL_EXCEPTION_PATTERN =
   /\bguardrail-exception\s+(GSE-\d{8}-[a-z0-9-]+):\s*(\S.+)$/i;
+const ACTIVE_GUARDRAIL_EXCEPTION_HEADING =
+  /^## Active production structural exceptions\s*$/im;
+const CONFIG_FILE_PATTERN = /(?:^|\/)[^/]+\.config\.(?:js|ts|mjs|mts)$/i;
 const STRUCTURAL_GUARDRAIL_RULES = new Set([
   "complexity",
   "max-depth",
@@ -81,10 +84,19 @@ function isTestFile(filePath) {
   return false;
 }
 
+function isStructuralGuardrailExemptPath(filePath) {
+  if (CONFIG_FILE_PATTERN.test(filePath)) return true;
+  if (filePath.startsWith("src/components/dev-tools/")) return true;
+  if (/^src\/app\/.+\/dev-tools\//.test(filePath)) return true;
+
+  return false;
+}
+
 function isProductionFile(filePath) {
   if (!filePath.startsWith("src/")) return false;
   if (isTestFile(filePath)) return false;
   if (filePath.startsWith("src/scripts/")) return false;
+  if (isStructuralGuardrailExemptPath(filePath)) return false;
 
   return true;
 }
@@ -102,14 +114,32 @@ function stripTrailingCommentEnd(text) {
   return text.replace(/\*\/\s*\}?$/, "").trim();
 }
 
+function getActiveGuardrailExceptionSection(registerContent) {
+  const headingMatch = registerContent.match(
+    ACTIVE_GUARDRAIL_EXCEPTION_HEADING,
+  );
+  if (!headingMatch || headingMatch.index === undefined) return "";
+
+  const sectionStart = headingMatch.index + headingMatch[0].length;
+  const sectionContent = registerContent.slice(sectionStart);
+  const nextHeadingIndex = sectionContent.search(/^##\s+/m);
+
+  return nextHeadingIndex === -1
+    ? sectionContent
+    : sectionContent.slice(0, nextHeadingIndex);
+}
+
 function collectRegisteredGuardrailExceptionIds(registerContent) {
   const ids = new Set();
+  const activeSection = getActiveGuardrailExceptionSection(registerContent);
+  if (activeSection.length === 0) return ids;
+
   const idPattern = /\|\s*(GSE-\d{8}-[a-z0-9-]+)\s*\|/gi;
-  let match = idPattern.exec(registerContent);
+  let match = idPattern.exec(activeSection);
 
   while (match) {
-    ids.add(match[1]);
-    match = idPattern.exec(registerContent);
+    ids.add(match[1].toLowerCase());
+    match = idPattern.exec(activeSection);
   }
 
   return ids;
@@ -135,7 +165,7 @@ function parseGuardrailException(reason) {
   if (!match) return null;
 
   return {
-    id: match[1],
+    id: match[1].toLowerCase(),
     detail: match[2].trim(),
   };
 }
@@ -300,6 +330,8 @@ module.exports = {
   analyzeFile,
   analyzeSource,
   collectRegisteredGuardrailExceptionIds,
+  getActiveGuardrailExceptionSection,
+  isStructuralGuardrailExemptPath,
   isProductionFile,
   isTestFile,
   parseGuardrailException,

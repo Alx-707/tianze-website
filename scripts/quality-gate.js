@@ -79,6 +79,21 @@ function parseEslintJsonOutput(rawOutput) {
   return JSON.parse(jsonText);
 }
 
+function parseEslintDisableUsageIssueCount(rawOutput) {
+  const violationSummary = rawOutput.match(
+    /\[eslint-disable-check\]\s+Violations:\s+(\d+)/,
+  );
+  if (violationSummary) {
+    return Number.parseInt(violationSummary[1], 10);
+  }
+
+  const issueLineCount = rawOutput
+    .split("\n")
+    .filter((line) => line.trim().startsWith("- ")).length;
+
+  return issueLineCount > 0 ? issueLineCount : 1;
+}
+
 function runEslintWithJson() {
   const result = spawnSync(
     process.execPath,
@@ -1547,8 +1562,10 @@ class QualityGate {
       };
     }
 
+    const issueCount = parseEslintDisableUsageIssueCount(rawOutput);
+
     return {
-      errors: 1,
+      errors: issueCount,
       status: "failed",
       issues:
         rawOutput.length > 0

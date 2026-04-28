@@ -14,6 +14,22 @@ const REGISTER_WITH_CONTACT_EXCEPTION = `
 | GSE-20260428-contact-flow | src/app/[locale]/contact/page.tsx | max-lines-per-function | route orchestration | Keeping the order visible is safer than helper piles. | page tests |
 `;
 
+const REGISTER_WITH_HISTORICAL_EXCEPTION = `
+# Guardrail Side Effects Register
+
+## Active production structural exceptions
+
+| ID | File | Rule(s) | Real boundary preserved | Why exception is better than split | Verification |
+|----|------|---------|-------------------------|------------------------------------|--------------|
+| GSE-20260428-contact-flow | src/app/[locale]/contact/page.tsx | max-lines-per-function | route orchestration | Keeping the order visible is safer than helper piles. | page tests |
+
+## Confirmed side effects
+
+| Area | Triggering rule | Evidence |
+|------|-----------------|----------|
+| Historical page | max-lines-per-function | GSE-20260428-old-flow |
+`;
+
 describe("check-eslint-disable-usage guardrail exceptions", () => {
   it("allows a registered production structural guardrail exception", () => {
     const findings = analyzeSource(
@@ -32,6 +48,50 @@ export default function ContactPage() {
     );
 
     expect(findings).toEqual([]);
+  });
+
+  it("matches guardrail exception IDs case-insensitively", () => {
+    const findings = analyzeSource(
+      "src/app/[locale]/contact/page.tsx",
+      `
+// eslint-disable-next-line max-lines-per-function -- guardrail-exception GSE-20260428-CONTACT-FLOW: route orchestration keeps request-to-render order visible
+export default function ContactPage() {
+  return null;
+}
+      `,
+      {
+        registeredGuardrailExceptionIds: collectRegisteredGuardrailExceptionIds(
+          REGISTER_WITH_CONTACT_EXCEPTION,
+        ),
+      },
+    );
+
+    expect(findings).toEqual([]);
+  });
+
+  it("ignores historical IDs outside the active exception section", () => {
+    const findings = analyzeSource(
+      "src/app/[locale]/contact/page.tsx",
+      `
+// eslint-disable-next-line max-lines-per-function -- guardrail-exception GSE-20260428-old-flow: archived example should not validate active production code
+export default function ContactPage() {
+  return null;
+}
+      `,
+      {
+        registeredGuardrailExceptionIds: collectRegisteredGuardrailExceptionIds(
+          REGISTER_WITH_HISTORICAL_EXCEPTION,
+        ),
+      },
+    );
+
+    expect(findings).toEqual([
+      expect.objectContaining({
+        violations: expect.arrayContaining([
+          expect.stringContaining("unregistered guardrail exception id"),
+        ]),
+      }),
+    ]);
   });
 
   it("flags a production structural guardrail disable without exception id", () => {
@@ -100,6 +160,33 @@ const value = parsed.data.value!;
 
     expect(findings).toEqual([]);
   });
+
+  it.each([
+    ["config file", "some.config.ts"],
+    ["component dev-tools file", "src/components/dev-tools/example.tsx"],
+    ["app dev-tools route", "src/app/[locale]/dev-tools/page.tsx"],
+  ])(
+    "does not require guardrail registry entries for %s",
+    (_label, filePath) => {
+      const findings = analyzeSource(
+        filePath,
+        `
+// eslint-disable-next-line max-lines-per-function -- local tooling flow stays readable in one place
+export function Example() {
+  return null;
+}
+      `,
+        {
+          registeredGuardrailExceptionIds:
+            collectRegisteredGuardrailExceptionIds(
+              REGISTER_WITH_CONTACT_EXCEPTION,
+            ),
+        },
+      );
+
+      expect(findings).toEqual([]);
+    },
+  );
 
   it("does not require guardrail registry entries for test files", () => {
     const findings = analyzeSource(

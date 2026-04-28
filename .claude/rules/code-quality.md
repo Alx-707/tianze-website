@@ -89,7 +89,7 @@ for a real boundary decision.
 | `max-statements` | 20 | 50 |
 
 ### Exemptions
-- Config files: `*.config.{js,ts,mjs}`
+- Config files: `*.config.{js,ts,mjs,mts}`
 - Dev tools: `src/components/dev-tools/**`, `src/app/**/dev-tools/**`
 
 ## Magic Numbers
