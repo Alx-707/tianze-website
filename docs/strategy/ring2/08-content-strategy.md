@@ -20,7 +20,7 @@
 首页的任务不是塞满信息，而是完成三件事：
 
 1. 讲清天泽是谁
-2. 讲清三条业务线
+2. 讲清三类买家入口
 3. 把人送到正确入口
 
 ### `/products/`
@@ -28,9 +28,9 @@
 这是分流页。  
 作用是让买家快速选到：
 
-- Pipes
-- Equipment
-- Custom manufacturing
+- PVC conduit products by market standard
+- PETG pneumatic tube systems
+- OEM / custom manufacturing
 
 ### Pipes 相关页面
 
@@ -42,14 +42,14 @@
 - 样品
 - MOQ / 交期 / 询价逻辑
 
-### Equipment 页面
+### Manufacturing capability / OEM 页面
 
 重点回答：
 
-- 设备能做什么
-- 产能和适配范围
-- 投资逻辑
-- 售后与支持
+- 来图能不能做
+- 模具和打样怎么推进
+- 内部成型工艺和质检怎么支撑定制
+- MOQ 是否灵活
 
 ### Custom/OEM 页面
 
@@ -60,11 +60,11 @@
 - MOQ 是否灵活
 - 质量和保密怎么控制
 
-### About / Contact / FAQ / Blog
+### About / Contact / OEM FAQ / Blog
 
 - `About`：建立可信度
 - `Contact`：完成转化
-- `FAQ`：提前消除疑问
+- `OEM FAQ`：提前消除定制合作疑问；当前不设独立 FAQ 页
 - `Blog`：承担 SEO 入口，不是为了写而写
 
 ## 当前内容优先级

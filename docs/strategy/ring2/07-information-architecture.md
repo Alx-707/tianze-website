@@ -43,9 +43,9 @@
 
 ### 1. 所有 sellable line 进入统一产品树
 
-- Pipes
-- Equipment
-- Custom manufacturing
+- PVC conduit products by market standard
+- PETG pneumatic tube systems
+- OEM / custom manufacturing
 
 都属于产品层，而不是分散在不同语义目录里。
 
@@ -53,7 +53,7 @@
 
 首页要做的事情是：
 
-- 让买家 10 秒内知道 Tianze 的 3 条业务线
+- 让买家 10 秒内知道 Tianze 的 3 类入口
 - 把人送到正确的产品树入口
 
 ### 3. URL 结构要反映认知结构

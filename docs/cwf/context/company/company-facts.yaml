@@ -1,5 +1,6 @@
 # Tianze Pipe Industry - Company Facts
-# Structured data for AI retrieval. Single source of truth.
+# Structured data for AI retrieval. Single source of truth for company facts.
+# Current public website does not expose equipment as a standalone product line.
 
 identity:
   name_cn: 连云港天泽管业有限公司
@@ -19,9 +20,9 @@ timeline:
   formal_registration: 2023
   milestones:
     - year: 2018-2021
-      event: PVC bending machine R&D and manufacturing
+      event: PVC forming process and tooling capability development
     - year: 2021-present
-      event: Expanded to pipe fittings production (Equipment + Fittings dual model)
+      event: Expanded to conduit fittings, PETG tubes, and OEM production
 
 scale:
   employees_total: 60
@@ -29,7 +30,7 @@ scale:
   factory_area_mu: 100 # 亩
   production_lines:
     - PVC extrusion line
-    - Pipe bending line
+    - PVC forming line
     - Pipe expansion line
 
 certifications:

@@ -1,5 +1,7 @@
 # Product Truth Source Cleanup Implementation Plan
 
+> **Execution status (2026-04-28): completed.** This file is now a historical execution record for branch `Alx-707/truth-cleanup-finish`, not the current backlog. The unchecked boxes below preserve the original plan shape; do not rerun them as open tasks without first checking the branch commits and current truth sweeps. Implemented commits: `5360f90`, `db71a4b`, `b6e1aed`, `220b2e9`, `f0516b9`, `87187ca`.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Remove no-longer-true equipment product surfaces, remove shared product-market FAQ from live product pages, and align live SEO/page copy with the current product truth: Tianze sells conduit fittings, pipes, PETG tube products, and OEM manufacturing support, not bending machines as a public product line.

@@ -116,7 +116,8 @@ export const SINGLE_SITE_DEFINITION: SiteDefinition = {
     ],
     stats: {
       exportCountries: 20,
-      annualCapacity: "Integrated pipe, fitting, and machine production",
+      annualCapacity:
+        "Integrated conduit fitting, pipe, PETG tube, and OEM production",
       clientsServed: 60,
       factoryAreaAcres: 100,
       onTimeDeliveryRate: 98,

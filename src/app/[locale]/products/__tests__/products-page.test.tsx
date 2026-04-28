@@ -122,7 +122,7 @@ describe("Feature: Product Overview Page", () => {
   });
 
   describe("Scenario 2.2: Buyer sees specialty products only", () => {
-    it("renders a 'Specialty & Equipment' section heading", async () => {
+    it("renders a specialty products section heading", async () => {
       await renderAsyncComponent(
         ProductsPage({ params: Promise.resolve(mockParams) }),
       );

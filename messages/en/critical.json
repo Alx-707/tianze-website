@@ -159,13 +159,13 @@
       },
       "step4": {
         "title": "Conduit Production",
-        "desc": "24/7 extrusion and bending operations"
+        "desc": "24/7 extrusion and forming production"
       },
       "step5": {
         "title": "Quality Control",
         "desc": "Batch documentation and traceability"
       },
-      "stat1": "Patented bending technology",
+      "stat1": "In-house forming process",
       "stat2": "5-step vertical integration",
       "stat3": "In-house mold manufacturing"
     },
@@ -537,7 +537,7 @@
       },
       "cta": {
         "title": "Ready to Partner?",
-        "description": "Contact our team to discuss your pipe bending and conduit requirements.",
+        "description": "Contact our team to discuss your conduit fitting and custom project requirements.",
         "getStarted": "Request Quote",
         "viewSource": "View Products"
       }
