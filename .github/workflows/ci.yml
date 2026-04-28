@@ -395,7 +395,7 @@ jobs:
 
     runs-on: ubuntu-latest
     needs: basic-checks
-    timeout-minutes: 8
+    timeout-minutes: 15
 
     steps:
       - name: 检出代码
