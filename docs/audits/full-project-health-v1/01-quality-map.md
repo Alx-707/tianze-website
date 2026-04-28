@@ -5,14 +5,14 @@
 | Zone | Verdict | Why |
 | --- | --- | --- |
 | Local build/test baseline | Green | type-check, lint, unit tests, Next build, Cloudflare/OpenNext build all passed |
-| Public buyer trust | Red | placeholder phone, missing ISO PDF, sample product images, AS/NZS inconsistency |
-| Inquiry proof chain | Yellow/Red | production may be fine, but `/api/inquiry` route tests mock the schema they claim to prove |
-| Security boundary | Yellow | no P0/P1, but subscribe route order/tests and CSP proof need tightening |
+| Public buyer trust | Yellow/Red | phone and product images still need owner assets; ISO link and AS/NZS wording were repaired |
+| Inquiry proof chain | Yellow | route tests now use the real schema, but external Resend/Airtable/Turnstile delivery still needs staging credentials |
+| Security boundary | Yellow | no P0/P1, subscribe route order was repaired; CSP proof still needs runtime follow-up |
 | Architecture/change cost | Yellow | product market, locale, route truth, and cache abstractions raise edit cost |
-| UI/accessibility | Yellow | mobile tap density and false-green browser a11y checks |
+| UI/accessibility | Yellow | mobile tap density remains follow-up; false-green browser a11y checks were tightened |
 | SEO implementation | Yellow/Green | local metadata/sitemap/robots tests pass, but Google-side facts are blocked |
 | Dead-code / AI smell | Yellow | broad Knip entries, fake-green assertions, over-expanded primitive tests |
-| Deployment truth | Red | preview deploy can run, but workers.dev smoke fails on /en/contact and /zh/contact |
+| Deployment truth | Yellow/Green | preview deploy and route smoke now pass; production domain and external lead delivery remain unproved |
 
 ## P0/P1 map
 
@@ -31,7 +31,7 @@ Findings:
 
 - FPH-000 Cloudflare preview contact 500
 
-Repair style: **Needs proof first**. Keep deployed preview smoke and worker tail as the failing proof, then fix the Contact route runtime boundary. Do not call preview ready until both `/en/contact` and `/zh/contact` return 200.
+Repair style: **Needs proof first**. This was repaired after the baseline audit; deployed preview smoke now requires both `/en/contact` and `/zh/contact` to return 200.
 
 ### Cluster A - Buyer trust assets are modeled before proof exists
 
@@ -49,9 +49,9 @@ Repair style: **Needs proof first, then delete/simplify**. Do not patch with mor
 Findings:
 
 - FPH-005 mocked inquiry schema
-- FPH-011 false-green accessibility checks
+- FPH-011 baseline false-green accessibility checks (repair wave tightened helper)
 - FPH-012 broad Knip entries
-- FPH-013 missing mutation script recommendation
+- FPH-013 baseline missing mutation script recommendation (repair wave added script)
 
 Repair style: **Delete fake assertions, simplify proof scripts**. Green checks that do not prove behavior are worse than no checks.
 
@@ -93,8 +93,9 @@ Repair style: **Move proof budget from primitives to buyer flows**.
 | Gate | Findings | Meaning |
 | --- | --- | --- |
 | Keep | FPH-021 | Do not touch unless runtime performance data proves harm |
-| Simplify | FPH-004, FPH-005, FPH-006, FPH-007, FPH-009, FPH-010, FPH-012, FPH-013, FPH-014, FPH-015, FPH-019, FPH-020 | Reduce duplicated truth or make proof match real behavior |
-| Delete | FPH-008, FPH-011, FPH-018, FPH-022 | Remove compatibility/fake proof/future abstractions rather than patching them |
+| Simplify | FPH-006, FPH-007, FPH-009, FPH-010, FPH-012, FPH-014, FPH-015, FPH-019, FPH-020 | Reduce duplicated truth or make proof match real behavior |
+| Delete | FPH-008, FPH-018, FPH-022 | Remove compatibility/future abstractions rather than patching them |
+| Keep after repair | FPH-004, FPH-005, FPH-011, FPH-013 | Baseline issue was real; repair wave changed proof/content and should now be preserved |
 | Needs proof | FPH-000, FPH-001, FPH-002, FPH-003, FPH-016, FPH-017 | Do not guess; provide real business/runtime proof or remove claim |
 
 ## Change-cost map
@@ -114,7 +115,7 @@ Repair style: **Move proof budget from primitives to buyer flows**.
 1. Add a launch-content gate for phone placeholders, missing proof assets, sample images, and standards vocabulary.
 2. Add product inquiry route tests with real schema validation.
 3. Add subscribe route security tests.
-4. Make Playwright axe helper fail on violations.
+4. Keep Playwright axe helper failing on violations, including selector-scoped checks.
 5. Add strict production reachability mode for Knip.
 6. Add CSP proof step after build, not inside a lane that cannot build.
 7. Add deployed preview smoke and web-worker tail proof for `/en/contact` and `/zh/contact`.

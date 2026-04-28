@@ -1,27 +1,33 @@
-   450	
+   450
+
    451	      // Forward to Home
    452	      await page.goForward();
    453	      await page.waitForURL("**/en");
    454	      await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
    455	    });
    456	  });
-   457	
+   457
+
    458	  test.describe("Accessibility Tests", () => {
    459	    test("should pass navigation accessibility checks", async ({ page }) => {
    460	      await injectAxe(page);
-   461	
+   461
+
    462	      const isMobile = await isHeaderInMobileMode(page);
-   463	
+   463
+
    464	      if (isMobile) {
    465	        const mobileMenuButton = getHeaderMobileMenuButton(page);
    466	        await expect(mobileMenuButton).toBeVisible();
    467	        await mobileMenuButton.click();
-   468	
+   468
+
    469	        const mobileNavSheet = page.getByRole("dialog", {
    470	          name: /mobile navigation/i,
    471	        });
    472	        await expect(mobileNavSheet).toBeVisible();
-   473	
+   473
+
    474	        const sheetHandle = await mobileNavSheet.elementHandle();
    475	        await checkA11y(page, sheetHandle ?? undefined, {
    476	          detailedReport: true,
@@ -31,11 +37,13 @@
    480	        });
    481	        return;
    482	      }
-   483	
+   483
+
    484	      const nav = page.locator('nav[aria-label="Main navigation"]');
    485	      await expect(nav).toHaveCount(1);
    486	      const navHandle = await nav.elementHandle();
-   487	
+   487
+
    488	      await checkA11y(page, navHandle ?? undefined, {
    489	        detailedReport: true,
    490	        detailedReportOptions: { html: true },
@@ -43,7 +51,8 @@
    492	        includedImpacts: ["critical", "serious"],
    493	      });
    494	    });
-   495	
+   495
+
    496	    test("should have proper ARIA attributes", async ({ page }) => {
    497	      const isMobile = await isHeaderInMobileMode(page);
    498	      if (isMobile) {

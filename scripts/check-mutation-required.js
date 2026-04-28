@@ -114,7 +114,7 @@ function getSuggestedMutationCommand(touchedDirectories) {
   }
 
   if (touchesLead && touchesSecurity) {
-    return "pnpm test:mutation:lead && pnpm test:mutation:security";
+    return "pnpm test:mutation:lead-security";
   }
 
   if (touchesSecurity) {

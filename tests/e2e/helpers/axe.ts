@@ -61,15 +61,33 @@ function getRelevantViolations(
   );
 }
 
-async function waitForFiniteCssAnimations(page: Page): Promise<void> {
-  await page.evaluate(async (maxWaitMs) => {
-    if (typeof document.getAnimations !== "function") {
-      return;
-    }
+async function waitForFiniteCssAnimations(
+  page: Page,
+  context?: string,
+): Promise<void> {
+  await page.evaluate(
+    async ({ maxWaitMs, context }) => {
+      if (typeof document.getAnimations !== "function") {
+        return;
+      }
 
-    const activeAnimations = document
-      .getAnimations({ subtree: true })
-      .filter((animation) => {
+      const animationRoots = context
+        ? Array.from(document.querySelectorAll(context))
+        : [document];
+      if (animationRoots.length === 0) {
+        return;
+      }
+
+      const animations = new Set<Animation>();
+      for (const animationRoot of animationRoots) {
+        for (const animation of animationRoot.getAnimations({
+          subtree: true,
+        })) {
+          animations.add(animation);
+        }
+      }
+
+      const activeAnimations = Array.from(animations).filter((animation) => {
         if (
           animation.playState === "finished" ||
           animation.playState === "idle" ||
@@ -82,36 +100,33 @@ async function waitForFiniteCssAnimations(page: Page): Promise<void> {
         return timing.endTime > 0 && Number.isFinite(timing.endTime);
       });
 
-    if (activeAnimations.length === 0) {
-      return;
-    }
+      if (activeAnimations.length === 0) {
+        return;
+      }
 
-    await Promise.race([
-      Promise.allSettled(
-        activeAnimations.map((animation) =>
-          animation.finished.catch(() => undefined),
+      await Promise.race([
+        Promise.allSettled(
+          activeAnimations.map((animation) =>
+            animation.finished.catch(() => undefined),
+          ),
         ),
-      ),
-      new Promise((resolve) => window.setTimeout(resolve, maxWaitMs)),
-    ]);
-  }, MAX_CSS_ANIMATION_SETTLE_MS);
+        new Promise((resolve) => window.setTimeout(resolve, maxWaitMs)),
+      ]);
+    },
+    { context, maxWaitMs: MAX_CSS_ANIMATION_SETTLE_MS },
+  );
 }
 
-/**
- * 在给定页面上运行 axe-core 可访问性检查。
- * 当前实现以“整页扫描”为主，context 与高级选项仅用于签名兼容，
- * 后续如需更精细的范围控制可以在此基础上扩展。
- */
 export async function checkA11y(
   page: Page,
-  context?: unknown,
+  context?: string,
   options?: AxeCheckOptions,
 ): Promise<void> {
-  await waitForFiniteCssAnimations(page);
+  await waitForFiniteCssAnimations(page, context);
 
   const builder = new AxeBuilder({ page });
 
-  if (typeof context === "string") {
+  if (context) {
     builder.include(context);
   }
 

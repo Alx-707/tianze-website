@@ -125,7 +125,7 @@ Notes:
 - Verification needed: Adjust Knip config in a repair branch, run `pnpm unused:check` and `pnpm unused:production`, then manually inspect any newly surfaced unused files before deleting or moving to Trash.
 - Suggested Linus Gate: Simplify
 
-### FPH-L05-003: Mutation freshness guard can recommend a package script that does not exist
+### FPH-L05-003: Baseline mutation freshness guard could recommend a package script that did not exist
 
 - Severity: P2
 - Evidence level: Confirmed by static evidence
@@ -135,21 +135,22 @@ Notes:
 - Evidence:
   - type: file
     reference: `scripts/check-mutation-required.js:107-128`
-    summary: When both `src/lib/lead-pipeline/` and `src/lib/security/` are touched, the helper recommends `pnpm test:mutation:lead-security`.
+    summary: At baseline, when both `src/lib/lead-pipeline/` and `src/lib/security/` are touched, the helper recommended `pnpm test:mutation:lead-security`.
   - type: file
     reference: `tests/unit/scripts/check-mutation-required.test.ts:155-184`
-    summary: The unit test locks in the same missing command recommendation.
+    summary: The baseline unit test locked in the same missing command recommendation.
   - type: file
     reference: `docs/audits/full-project-health-v1/evidence/05-tests-ai-smell-dead-code/package-mutation-scripts.txt`
-    summary: Existing package mutation scripts are `test:mutation`, `test:mutation:form-schema`, `test:mutation:idempotency`, `test:mutation:lead`, and `test:mutation:security`; no `test:mutation:lead-security` exists.
+    summary: Baseline package mutation scripts were `test:mutation`, `test:mutation:form-schema`, `test:mutation:idempotency`, `test:mutation:lead`, and `test:mutation:security`; no `test:mutation:lead-security` existed.
   - type: command
     reference: `node scripts/check-mutation-required.js`, output in `docs/audits/full-project-health-v1/evidence/05-tests-ai-smell-dead-code/check-mutation-required.txt`
     summary: Current clean baseline skips freshness enforcement because protected source dirs were not changed, so the missing-command path did not execute in this run.
-- Business impact: The next branch that changes both lead-pipeline and security code can fail the mutation freshness guard with an instruction the team cannot run. That turns a useful safety gate into friction at exactly the high-risk moment.
-- Root cause: The helper's suggested command drifted from `package.json`. The test verifies the drift instead of preventing it.
-- Recommended fix: Either add a real `test:mutation:lead-security` script, or change the helper to recommend existing commands, for example `pnpm test:mutation:lead && pnpm test:mutation:security` or `pnpm test:mutation`.
+- Business impact: At baseline, the next branch that changed both lead-pipeline and security code could fail the mutation freshness guard with an instruction the team could not run.
+- Root cause: The helper's suggested command drifted from `package.json`. The test verified the drift instead of preventing it.
+- Recommended fix: Add a real `test:mutation:lead-security` script or change the helper to recommend existing commands.
 - Verification needed: Add a test that compares suggested commands against `package.json` scripts, then run `pnpm exec vitest run tests/unit/scripts/check-mutation-required.test.ts` and `node scripts/check-mutation-required.js`.
-- Suggested Linus Gate: Simplify
+- Repair status: Fixed in repair wave by adding a real `test:mutation:lead-security` script with a comma-separated Stryker mutate list.
+- Suggested Linus Gate: Keep after repair
 
 ### FPH-L05-004: Contact form Playwright smoke has an accessibility assertion that always passes
 

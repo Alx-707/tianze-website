@@ -2,14 +2,23 @@
 
 ## 0. Outcome
 
-`/en/contact` and `/zh/contact` are confirmed failing on the deployed Cloudflare preview gateway:
+During the baseline debug run, `/en/contact` and `/zh/contact` were confirmed failing on the deployed Cloudflare preview gateway:
 
 ```text
-https://tianze-website-gateway-preview.kei-tang.workers.dev/en/contact -> 500
-https://tianze-website-gateway-preview.kei-tang.workers.dev/zh/contact -> 500
+<redacted-workers-dev-gateway-url>/en/contact -> 500
+<redacted-workers-dev-gateway-url>/zh/contact -> 500
 ```
 
-This is a preview runtime blocker for the lead-generation page. It is not a generic local Next.js page failure: both local `next dev` and local `next start` controls return 200 for the same contact routes.
+This was a preview runtime blocker for the lead-generation page. It was not a generic local Next.js page failure: both local `next dev` and local `next start` controls returned 200 for the same contact routes.
+
+Repair-wave status:
+
+```text
+pnpm smoke:cf:deploy -- --base-url <redacted-workers-dev-gateway-url>
+[post-deploy-smoke] All checks passed
+```
+
+Current deployed route smoke returns 200 for both contact routes.
 
 ## 1. Phase 1 - Root cause investigation
 
@@ -117,16 +126,14 @@ Evidence:
 
 ## 4. Phase 4 - Implementation status
 
-No business code was changed in this audit/debug run.
+No business code was changed in the baseline audit/debug run. The later repair wave isolated the contact form runtime boundary and verified deployed preview route smoke.
 
-Recommended repair branch sequence:
+Completed repair branch sequence:
 
-1. Keep deployed preview smoke as the failing test.
-2. Try the smallest boundary repair first: wrap full contact body output in page-level Suspense, matching the async content page pattern.
-3. If still failing, isolate the Server Action-backed client form island from the prerendered contact shell.
-4. Redeploy preview and verify:
+1. Kept deployed preview smoke as the proof.
+2. Isolated the Server Action-backed client form island from the prerendered contact shell.
+3. Redeployed preview and verified:
    - `/en/contact` -> 200
    - `/zh/contact` -> 200
-   - web worker tail has no Cache Components blocking-route exception
 
 Do not claim real form delivery until preview has non-production Turnstile, Resend, and Airtable credentials. Current preview secret proof only shows `NEXT_SERVER_ACTIONS_ENCRYPTION_KEY`.

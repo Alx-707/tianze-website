@@ -2,7 +2,7 @@
   {
     "id": "FPH-000",
     "source_finding_ids": ["RUNTIME-CONTACT-001"],
-    "title": "Cloudflare preview gateway returns 500 on contact pages",
+    "title": "Baseline Cloudflare preview gateway returned 500 on contact pages",
     "severity": "P1",
     "domain": "runtime",
     "source_lane": "runtime-proof-addendum",
@@ -12,12 +12,12 @@
       {
         "type": "command",
         "reference": "docs/audits/full-project-health-v1/evidence/contact-preview-500-debug/live-gateway-contact-reprobe.txt",
-        "summary": "Workers.dev gateway returns 500 for /en/contact and /zh/contact while /en, /zh, and /api/health return 200."
+        "summary": "Baseline preview gateway returned 500 for /en/contact and /zh/contact while /en, /zh, and /api/health returned 200."
       },
       {
         "type": "command",
         "reference": "docs/audits/full-project-health-v1/evidence/contact-preview-500-debug/tail-web-json.txt:83-101,230-263",
-        "summary": "tianze-website-web-preview records an exception and logs Next Cache Components blocking-route for /[locale]/contact; /en/products in the same tail has no exception."
+        "summary": "<redacted-web-preview-worker> records an exception and logs Next Cache Components blocking-route for /[locale]/contact; /en/products in the same tail has no exception."
       },
       {
         "type": "command",
@@ -35,11 +35,12 @@
         "summary": "The contact route registers contactFormAction into its page server-reference manifest; the form hook binds it with useActionState and the action reads request headers when executed."
       }
     ],
-    "impact": "The preview contact page is the main lead-generation page. Buyers cannot reach the form page on the deployed Cloudflare preview, so the preview runtime is not release-ready.",
+    "impact": "At baseline, the preview contact page was the main lead-generation runtime blocker. Repair-wave deployed smoke now passes both contact routes.",
     "root_cause": "Confirmed root-cause class: Cloudflare/OpenNext trips Next Cache Components blocking-route while rendering /[locale]/contact. The exact source line is not yet source-mapped because Cloudflare tail stack is minified and next build --debug-prerender did not reproduce the error. Strongest correlated boundary is the contact route's Server Action/PPR setup and incomplete full-page Suspense isolation compared with other async content pages.",
-    "recommended_fix": "Treat as a release blocker. In a repair branch, first keep the deployed preview smoke as the failing test, then isolate the contact route's dynamic islands: wrap the full contact body or every uncached/dynamic server child in Suspense and/or split the Server Action-backed client form out of the prerendered contact shell. Redeploy preview and re-smoke both locales.",
-    "verification_needed": "Workers.dev gateway returns 200 for /en/contact and /zh/contact; tianze-website-web-preview tail has no blocking-route exception for those requests. Real form delivery still needs separate Resend/Airtable/Turnstile secrets before it can be claimed.",
-    "linus_gate": "Needs proof"
+    "recommended_fix": "Keep deployed preview smoke as a permanent route proof for both contact locales. Do not claim real form delivery until Resend/Airtable/Turnstile credentials are present in a safe staging or production environment.",
+    "verification_needed": "Preview route smoke must continue returning 200 for /en/contact and /zh/contact. Real form delivery still needs separate Resend/Airtable/Turnstile secrets before it can be claimed.",
+    "repair_status": "Fixed in repair wave; see docs/audits/full-project-health-v1/07-repair-closure.md.",
+    "linus_gate": "Keep"
   },
   {
     "id": "FPH-001",
@@ -369,7 +370,7 @@
   {
     "id": "FPH-011",
     "source_finding_ids": ["FPH-L03-002", "FPH-L05-004"],
-    "title": "Accessibility proof has false-green browser checks",
+    "title": "Baseline accessibility proof had false-green browser checks",
     "severity": "P2",
     "domain": "tests",
     "source_lane": "03-ui-performance-accessibility;05-tests-ai-smell-dead-code",
@@ -379,24 +380,25 @@
       {
         "type": "file",
         "reference": "tests/e2e/helpers/axe.ts:31-37",
-        "summary": "checkA11y calls builder.analyze() but does not assert violations and ignores context/options."
+        "summary": "Baseline checkA11y called builder.analyze() but did not assert violations and ignored context/options."
       },
       {
         "type": "file",
         "reference": "tests/e2e/homepage.spec.ts:314-317; tests/e2e/navigation.spec.ts:460-491",
-        "summary": "Homepage and navigation tests call the helper, so they can pass despite axe violations."
+        "summary": "Homepage and navigation tests called the baseline helper, so they could pass despite axe violations."
       },
       {
         "type": "file",
         "reference": "tests/e2e/contact-form-smoke.spec.ts:362-376",
-        "summary": "Contact form ARIA assertion uses hasAriaDescribedBy !== null || true, which always passes."
+        "summary": "Baseline contact form ARIA assertion used hasAriaDescribedBy !== null || true, which always passed."
       }
     ],
-    "impact": "The project may believe lead-page and navigation accessibility are protected when the browser tests are not actually failing on violations.",
+    "impact": "At baseline, the project could believe lead-page and navigation accessibility were protected when browser tests were not actually failing on violations.",
     "root_cause": "A11y helpers and smoke assertions were left as wrappers instead of executable behavior checks.",
-    "recommended_fix": "Make checkA11y assert unapproved violations and apply context/options; replace or delete the tautological contact-form ARIA assertion.",
-    "verification_needed": "Use a known failing fixture to prove the helper fails, then run the relevant Playwright accessibility/contact smoke tests.",
-    "linus_gate": "Delete"
+    "recommended_fix": "Keep checkA11y asserting unapproved violations and applying context/options; do not reintroduce tautological contact-form ARIA assertions.",
+    "verification_needed": "Run tests/unit/e2e-helpers/axe.test.ts plus relevant Playwright accessibility/contact smoke tests when browser runtime is available.",
+    "repair_status": "Fixed in repair wave; checkA11y now filters/asserts violations and selector-scoped calls pass context/options.",
+    "linus_gate": "Keep"
   },
   {
     "id": "FPH-012",
@@ -433,7 +435,7 @@
   {
     "id": "FPH-013",
     "source_finding_ids": ["FPH-L05-003"],
-    "title": "Mutation freshness guard can recommend a missing package script",
+    "title": "Baseline mutation freshness guard could recommend a missing package script",
     "severity": "P2",
     "domain": "tests",
     "source_lane": "05-tests-ai-smell-dead-code",
@@ -443,24 +445,25 @@
       {
         "type": "file",
         "reference": "scripts/check-mutation-required.js:107-128",
-        "summary": "Guard can recommend pnpm test:mutation:lead-security when lead-pipeline and security are both touched."
+        "summary": "Baseline guard could recommend pnpm test:mutation:lead-security when lead-pipeline and security are both touched."
       },
       {
         "type": "file",
         "reference": "tests/unit/scripts/check-mutation-required.test.ts:155-184",
-        "summary": "Unit test locks in the same missing command recommendation."
+        "summary": "Baseline unit test locked in the same missing command recommendation."
       },
       {
         "type": "file",
         "reference": "docs/audits/full-project-health-v1/evidence/05-tests-ai-smell-dead-code/package-mutation-scripts.txt",
-        "summary": "Existing mutation scripts do not include test:mutation:lead-security."
+        "summary": "Baseline mutation scripts did not include test:mutation:lead-security."
       }
     ],
-    "impact": "A high-risk future branch can get a mutation instruction the team cannot run.",
-    "root_cause": "The helper's suggested command drifted from package.json and tests verify the drift.",
-    "recommended_fix": "Add the missing script or change the helper to recommend existing lead/security scoped commands; add a test that validates suggestions against package.json scripts.",
+    "impact": "At baseline, a high-risk future branch could get a mutation instruction the team could not run.",
+    "root_cause": "The helper's suggested command drifted from package.json and tests verified the drift.",
+    "recommended_fix": "Keep the combined lead-security mutation script and the unit test that validates suggested commands against package.json scripts.",
     "verification_needed": "Run tests/unit/scripts/check-mutation-required.test.ts and node scripts/check-mutation-required.js.",
-    "linus_gate": "Simplify"
+    "repair_status": "Fixed in repair wave; package.json now includes test:mutation:lead-security using Stryker's comma-separated mutate list.",
+    "linus_gate": "Keep"
   },
   {
     "id": "FPH-014",

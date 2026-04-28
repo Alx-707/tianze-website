@@ -4,6 +4,8 @@ import {
   getHeaderMobileMenuButton,
   getNav,
   isHeaderInMobileMode,
+  MAIN_NAV_SELECTOR,
+  MOBILE_MENU_CONTENT_SELECTOR,
 } from "./helpers/navigation";
 import {
   removeInterferingElements,
@@ -314,7 +316,7 @@ test.describe("Navigation System", () => {
 
       const clickedAbout = await safeClick(
         page,
-        '[data-testid="mobile-menu-content"] a[href="/en/about"]',
+        `${MOBILE_MENU_CONTENT_SELECTOR} a[href="/en/about"]`,
       );
       expect(clickedAbout).toBe(true);
 
@@ -345,9 +347,7 @@ test.describe("Navigation System", () => {
       await expect(mobileNavSheet).toBeVisible();
 
       // Test swipe to close (if implemented)
-      const sheetContent = mobileNavSheet.locator(
-        '[data-testid="mobile-menu-content"]',
-      );
+      const sheetContent = mobileNavSheet.locator(MOBILE_MENU_CONTENT_SELECTOR);
       if (await sheetContent.isVisible()) {
         // Simulate swipe gesture
         await sheetContent.hover();
@@ -471,8 +471,7 @@ test.describe("Navigation System", () => {
         });
         await expect(mobileNavSheet).toBeVisible();
 
-        const sheetHandle = await mobileNavSheet.elementHandle();
-        await checkA11y(page, sheetHandle ?? undefined, {
+        await checkA11y(page, MOBILE_MENU_CONTENT_SELECTOR, {
           detailedReport: true,
           detailedReportOptions: { html: true },
           includedImpacts: ["critical", "serious"],
@@ -480,11 +479,10 @@ test.describe("Navigation System", () => {
         return;
       }
 
-      const nav = page.locator('nav[aria-label="Main navigation"]');
+      const nav = getNav(page);
       await expect(nav).toHaveCount(1);
-      const navHandle = await nav.elementHandle();
 
-      await checkA11y(page, navHandle ?? undefined, {
+      await checkA11y(page, MAIN_NAV_SELECTOR, {
         detailedReport: true,
         detailedReportOptions: { html: true },
         includedImpacts: ["critical", "serious"],

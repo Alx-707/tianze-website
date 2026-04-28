@@ -1559,6 +1559,8 @@
       "submitError": "We couldn't send your message. Please try again shortly.",
       "success": "Thank you! Your message has been sent successfully. We will get back to you soon.",
       "error": "Sorry, there was an error sending your message. Please try again later.",
+      "loadError": "The secure inquiry form could not load. Retry, or use the contact methods on this page.",
+      "retryLoad": "Retry loading form",
       "rateLimitMessage": "You've recently contacted us. Please wait a moment before sending another message.",
       "errors": {
         "generic": "Please review the highlighted fields and try again.",

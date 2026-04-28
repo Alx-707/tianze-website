@@ -32,7 +32,7 @@ wrangler.jsonc:20:    "next/dist/compiled/@vercel/og/index.edge.js": "./scripts/
 wrangler.jsonc:25:    "directory": ".open-next/assets",
 wrangler.jsonc:34:        "APP_ENV": "preview",
 wrangler.jsonc:35:        "DEPLOYMENT_PLATFORM": "cloudflare",
-wrangler.jsonc:36:        "NEXT_PUBLIC_BASE_URL": "https://preview.tianze-pipe.com",
+wrangler.jsonc:36:        "NEXT_PUBLIC_BASE_URL": "<redacted-preview-domain>",
 wrangler.jsonc:37:        "NEXT_PUBLIC_DEPLOYMENT_PLATFORM": "cloudflare",
 wrangler.jsonc:42:        "APP_ENV": "production",
 wrangler.jsonc:43:        "DEPLOYMENT_PLATFORM": "cloudflare",

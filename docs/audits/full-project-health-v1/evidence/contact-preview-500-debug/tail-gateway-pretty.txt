@@ -1,10 +1,8 @@
+Raw Cloudflare gateway worker tail was redacted before committing.
 
- ⛅️ wrangler 4.79.0 (update available 4.85.0)
-─────────────────────────────────────────────
-Successfully created tail, expires at 2026-04-27T18:13:21Z
-Connected to tianze-website-gateway-preview, waiting for logs...
-GET https://tianze-website-gateway-preview.kei-tang.workers.dev/en/contact - Ok @ 4/27/2026, 5:26:14 AM
-GET https://tianze-website-gateway-preview.kei-tang.workers.dev/en - Ok @ 4/27/2026, 5:26:16 AM
-GET https://tianze-website-gateway-preview.kei-tang.workers.dev/zh/contact - Ok @ 4/27/2026, 5:26:16 AM
-GET https://tianze-website-gateway-preview.kei-tang.workers.dev/zh - Ok @ 4/27/2026, 5:26:16 AM
-GET https://tianze-website-gateway-preview.kei-tang.workers.dev/api/health - Ok @ 4/27/2026, 5:26:16 AM
+Summary:
+- Baseline gateway received contact-route requests successfully.
+- The failure localized to the web worker render path.
+- Raw request URLs, worker identifiers, and runtime correlation fields were intentionally removed from repo evidence.
+
+See docs/audits/full-project-health-v1/06-contact-preview-500-debug.md.

@@ -62,9 +62,12 @@ Summary:
   Finished TypeScript in 4.3s ...
   Collecting page data using 7 workers ...
   Generating static pages using 7 workers (0/53) ...
-  Generating static pages using 7 workers (13/53) 
-  Generating static pages using 7 workers (26/53) 
-  Generating static pages using 7 workers (39/53) 
+  Generating static pages using 7 workers (13/53)
+
+  Generating static pages using 7 workers (26/53)
+
+  Generating static pages using 7 workers (39/53)
+
 ✓ Generating static pages using 7 workers (53/53) in 1231ms
   Finalizing page optimization ...
 
@@ -127,4 +130,3 @@ Route (app)                                  Revalidate  Expire
 ○  (Static)             prerendered as static content
 ◐  (Partial Prerender)  prerendered as static HTML with dynamic server-streamed content
 ƒ  (Dynamic)            server-rendered on demand
-

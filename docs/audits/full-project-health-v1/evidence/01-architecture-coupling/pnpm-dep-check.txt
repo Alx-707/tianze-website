@@ -6,4 +6,3 @@
   warn no-barrel-export-dependencies: src/lib/utm.ts → src/lib/cookie-consent/index.ts
 
 x 1 dependency violations (0 errors, 1 warnings). 418 modules, 1052 dependencies cruised.
-

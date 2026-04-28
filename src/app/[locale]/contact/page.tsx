@@ -225,101 +225,27 @@ function ContactFormStaticFallback({
     pickContactFormCopy(messages, key, fallback);
 
   return (
-    <Card className="mx-auto w-full max-w-2xl">
-      <form
-        aria-busy="true"
-        className="space-y-6 p-6"
-        data-contact-form-fallback="static"
-        noValidate
-      >
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <div className="space-y-2">
-            <label className="text-sm" htmlFor="firstName">
-              {pick("firstName", "First Name")}
-            </label>
-            <input
-              id="firstName"
-              name="firstName"
-              type="text"
-              disabled
-              required
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm" htmlFor="lastName">
-              {pick("lastName", "Last Name")}
-            </label>
-            <input
-              id="lastName"
-              name="lastName"
-              type="text"
-              disabled
-              required
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm" htmlFor="email">
-              {pick("email", "Email")}
-            </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              disabled
-              required
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm" htmlFor="company">
-              {pick("company", "Company Name")}
-            </label>
-            <input
-              id="company"
-              name="company"
-              type="text"
-              disabled
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-            />
-          </div>
+    <Card
+      aria-busy="true"
+      className="mx-auto w-full max-w-2xl p-6"
+      data-contact-form-fallback="loading"
+    >
+      <div className="space-y-4" role="status">
+        <div>
+          <h2 className="text-xl font-semibold">
+            {pick("title", "Contact Form")}
+          </h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {pick("description", "Loading the secure inquiry form.")}
+          </p>
         </div>
-        <div className="space-y-2">
-          <label className="text-sm" htmlFor="message">
-            {pick("message", "Message")}
-          </label>
-          <textarea
-            id="message"
-            name="message"
-            disabled
-            required
-            rows={4}
-            className="flex min-h-[96px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-          />
+        <div aria-hidden="true" className="space-y-3">
+          <div className="h-10 rounded-md bg-muted" />
+          <div className="h-10 rounded-md bg-muted" />
+          <div className="h-24 rounded-md bg-muted" />
+          <div className="h-10 rounded-md bg-muted" />
         </div>
-        <div className="flex items-center space-x-2">
-          <input
-            id="acceptPrivacy"
-            name="acceptPrivacy"
-            type="checkbox"
-            disabled
-            required
-            className="h-4 w-4 rounded border border-input"
-          />
-          <label className="text-sm" htmlFor="acceptPrivacy">
-            {pick("acceptPrivacy", "I agree to the privacy policy")}
-          </label>
-        </div>
-        <button
-          aria-disabled="true"
-          className="inline-flex h-10 w-full items-center justify-center rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground opacity-60"
-          disabled
-          type="submit"
-        >
-          {pick("submit", "Submit")}
-        </button>
-      </form>
+      </div>
     </Card>
   );
 }
@@ -354,6 +280,19 @@ function getStaticContactPage(locale: Locale): Page {
   } as unknown as Page;
 }
 
+function ContactPageHeader({ page }: { page: Page }) {
+  return (
+    <header className="mb-12 text-center">
+      <h1 className="text-heading mb-4">{page.metadata.title}</h1>
+      {page.metadata.description ? (
+        <p className="text-body mx-auto max-w-2xl text-muted-foreground">
+          {page.metadata.description}
+        </p>
+      ) : null}
+    </header>
+  );
+}
+
 function ContactPageFallback({ locale }: { locale: Locale }) {
   const page = getStaticContactPage(locale);
   const messages = getStaticMessages(locale);
@@ -366,14 +305,7 @@ function ContactPageFallback({ locale }: { locale: Locale }) {
       translate="no"
     >
       <div className="mx-auto max-w-4xl">
-        <header className="mb-12 text-center">
-          <h1 className="text-heading mb-4">{page.metadata.title}</h1>
-          {page.metadata.description ? (
-            <p className="text-body mx-auto max-w-2xl text-muted-foreground">
-              {page.metadata.description}
-            </p>
-          ) : null}
-        </header>
+        <ContactPageHeader page={page} />
         <ContactFormStaticFallback messages={messages} />
       </div>
     </main>
@@ -389,6 +321,16 @@ function ContactContentBody({ locale }: { locale: Locale }) {
   const page = getStaticContactPage(locale);
   const messages = getStaticMessages(locale);
   const copy = getContactCopyFromMessages(messages);
+  const formLoadError = pickContactFormCopy(
+    messages,
+    "loadError",
+    "The secure inquiry form could not load. Retry, or use the contact methods on this page.",
+  );
+  const formRetryLabel = pickContactFormCopy(
+    messages,
+    "retryLoad",
+    "Retry loading form",
+  );
   const faqItems: FaqItem[] = extractFaqFromMetadata(page.metadata).map(
     (item) => ({
       ...item,
@@ -411,14 +353,7 @@ function ContactContentBody({ locale }: { locale: Locale }) {
     >
       <JsonLdGraphScript locale={locale} data={faqSchema ? [faqSchema] : []} />
       <div className="mx-auto max-w-4xl">
-        <header className="mb-12 text-center">
-          <h1 className="text-heading mb-4">{page.metadata.title}</h1>
-          {page.metadata.description ? (
-            <p className="text-body mx-auto max-w-2xl text-muted-foreground">
-              {page.metadata.description}
-            </p>
-          ) : null}
-        </header>
+        <ContactPageHeader page={page} />
 
         <article className="prose mb-12 max-w-none">
           {renderLegalContent(page.content)}
@@ -426,7 +361,9 @@ function ContactContentBody({ locale }: { locale: Locale }) {
 
         <div className="grid gap-8 md:grid-cols-2">
           <ContactFormIsland
+            errorMessage={formLoadError}
             fallback={<ContactFormStaticFallback messages={messages} />}
+            retryLabel={formRetryLabel}
           />
 
           <div className="space-y-6">

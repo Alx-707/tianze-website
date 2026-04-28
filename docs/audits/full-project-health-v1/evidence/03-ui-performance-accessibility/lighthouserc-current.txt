@@ -18,17 +18,20 @@
     18	 *
     19	 * 更新时间：2025-12-04 (Phase 3 实施)
     20	 */
-    21	
+    21
+
     22	// 关键URL优先策略：CI_DAILY=true时运行全部URL，否则仅运行关键3个URL
     23	// 这将CI耗时从15分钟优化至5-8分钟
     24	const isDaily = process.env.CI_DAILY === "true";
-    25	
+    25
+
     26	// Root path redirects to the locale entry page. Lighthouse can audit it now, but
     27	// still reports the redirect as a warning and adds redirect latency noise.
     28	// `/en` and `/zh` exercise the real rendered entry pages directly and keep CI
     29	// signals stable.
     30	const criticalUrls = ["http://localhost:3000/en", "http://localhost:3000/zh"];
-    31	
+    31
+
     32	const allUrls = [
     33	  ...criticalUrls,
     34	  // Localized routes – the app uses /[locale]/... paths
@@ -46,7 +49,8 @@
     46	  "http://localhost:3000/en/blog/welcome",
     47	  "http://localhost:3000/zh/blog/welcome",
     48	];
-    49	
+    49
+
     50	module.exports = {
     51	  ci: {
     52	    collect: {
@@ -87,17 +91,21 @@
     87	        // 'first-meaningful-paint' 已废弃，Lighthouse 不再产出该数值，移除以避免 NaN 断言
     88	        // CI冷启动下TTI波动较大，允许最高6s，线下优化后可再收紧
     89	        interactive: ["error", { maxNumericValue: 6000 }],
-    90	
+    90
+
     91	        // ==================== Bundle 大小监控（替代 size-limit）====================
     92	        // Phase 3：总传输大小收紧至 490KB（允许正常波动，实测中位数 ~474-486KB）
     93	        "total-byte-weight": ["warn", { maxNumericValue: 490000 }],
-    94	
+    94
+
     95	        // JavaScript 启动时间：4s 阈值（解析、编译、执行时间）
     96	        "bootup-time": ["warn", { maxNumericValue: 4000 }],
-    97	
+    97
+
     98	        // 未使用的 JavaScript：150KB 警告阈值（帮助识别 tree-shaking 问题）
     99	        "unused-javascript": ["warn", { maxNumericValue: 153600 }],
-   100	
+   100
+
    101	        // 主线程工作时间：4s 阈值
    102	        "mainthread-work-breakdown": ["warn", { maxNumericValue: 4000 }],
    103	      },

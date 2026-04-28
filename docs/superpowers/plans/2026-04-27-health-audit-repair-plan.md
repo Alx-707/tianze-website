@@ -18,9 +18,9 @@
 - Do not run `pnpm build` and `pnpm build:cf` in parallel. They both write `.next`.
 - Deployed Cloudflare proof is separate from local preview proof. A local green check does not close `FPH-000`.
 - Preview deployment commands use the env file that contains Cloudflare credentials:
-  - `/Users/Data/Warehouse/Pipe/tianze-website/.env.local`
+  - `<redacted-main-repo-env-file>`
 - Current preview smoke target:
-  - `https://tianze-website-gateway-preview.kei-tang.workers.dev`
+  - `<redacted-workers-dev-gateway-url>`
 - Preview can prove pages and API shape. It cannot prove final lead delivery if Resend, Airtable, or Turnstile secrets are absent.
 
 ## Findings map
@@ -228,7 +228,7 @@ Run `pnpm build:cf` only after `pnpm build` finishes:
 
 ```bash
 pnpm build:cf
-node scripts/cloudflare/deploy-phase6.mjs --env preview --env-file /Users/Data/Warehouse/Pipe/tianze-website/.env.local
+node scripts/cloudflare/deploy-phase6.mjs --env preview --env-file <redacted-main-repo-env-file>
 ```
 
 Expected: Cloudflare preview deploy succeeds for the gateway and web worker.
@@ -238,9 +238,9 @@ Expected: Cloudflare preview deploy succeeds for the gateway and web worker.
 Run:
 
 ```bash
-pnpm smoke:cf:deploy -- --base-url https://tianze-website-gateway-preview.kei-tang.workers.dev
-curl -I https://tianze-website-gateway-preview.kei-tang.workers.dev/en/contact
-curl -I https://tianze-website-gateway-preview.kei-tang.workers.dev/zh/contact
+pnpm smoke:cf:deploy -- --base-url <redacted-workers-dev-gateway-url>
+curl -I <redacted-workers-dev-gateway-url>/en/contact
+curl -I <redacted-workers-dev-gateway-url>/zh/contact
 ```
 
 Expected:
@@ -253,7 +253,7 @@ Expected:
 Run this in a separate terminal, trigger `/en/contact` and `/zh/contact`, then stop tailing:
 
 ```bash
-pnpm exec wrangler tail tianze-website-web-preview --format=json --env-file /Users/Data/Warehouse/Pipe/tianze-website/.env.local
+pnpm exec wrangler tail <redacted-web-preview-worker> --format=json --env-file <redacted-main-repo-env-file>
 ```
 
 Expected:
@@ -1111,11 +1111,12 @@ git commit -m "fix: remove legacy contact copy fallback"
 
 Expected: one commit containing contact copy helper and tests.
 
-## Task 8: FPH-013 - stop recommending the missing mutation script
+## Task 8: FPH-013 - make the combined mutation recommendation runnable
 
 **Files:**
 - Modify: `scripts/check-mutation-required.js`
 - Modify: `tests/unit/scripts/check-mutation-required.test.ts`
+- Modify: `package.json`
 
 - [ ] **Step 1: Add a test that suggested commands exist**
 
@@ -1164,11 +1165,21 @@ Run:
 pnpm exec vitest run tests/unit/scripts/check-mutation-required.test.ts
 ```
 
-Expected: FAIL because `test:mutation:lead-security` is not in `package.json`.
+Expected before repair: FAIL because `test:mutation:lead-security` is not in `package.json`.
 
-- [ ] **Step 3: Change the combined recommendation to existing scripts**
+- [ ] **Step 3: Add a real combined mutation script**
 
-In `scripts/check-mutation-required.js`, replace:
+In `package.json`, add:
+
+```json
+"test:mutation:lead-security": "stryker run --mutate 'src/lib/lead-pipeline/**/*.ts,src/lib/security/**/*.ts'"
+```
+
+Use one comma-separated `--mutate` value. Stryker's CLI help defines `--mutate` as a comma-separated list; do not repeat `--mutate` twice.
+
+- [ ] **Step 4: Keep the combined recommendation**
+
+In `scripts/check-mutation-required.js`, keep:
 
 ```js
   if (touchesLead && touchesSecurity) {
@@ -1176,29 +1187,23 @@ In `scripts/check-mutation-required.js`, replace:
   }
 ```
 
-with:
+- [ ] **Step 5: Keep the existing expected error string and prove the script exists**
 
-```js
-  if (touchesLead && touchesSecurity) {
-    return "pnpm test:mutation:lead && pnpm test:mutation:security";
-  }
-```
-
-- [ ] **Step 4: Update the existing expected error string**
-
-In `tests/unit/scripts/check-mutation-required.test.ts`, replace:
+In `tests/unit/scripts/check-mutation-required.test.ts`, keep:
 
 ```ts
 "请运行 pnpm test:mutation:lead-security 并更新 reports/mutation/mutation-report.json",
 ```
 
-with:
+Also assert that `package.json` contains the script and that the script uses one comma-separated mutate list:
 
 ```ts
-"请运行 pnpm test:mutation:lead && pnpm test:mutation:security 并更新 reports/mutation/mutation-report.json",
+expect(packageJson.scripts["test:mutation:lead-security"]).toBe(
+  "stryker run --mutate 'src/lib/lead-pipeline/**/*.ts,src/lib/security/**/*.ts'",
+);
 ```
 
-- [ ] **Step 5: Run mutation guard tests**
+- [ ] **Step 6: Run mutation guard tests**
 
 Run:
 
@@ -1211,13 +1216,13 @@ Expected:
 - Vitest PASS;
 - Node script either prints a valid skip/pass message or asks for existing mutation scripts only.
 
-- [ ] **Step 6: Commit the mutation guard fix**
+- [ ] **Step 7: Commit the mutation guard fix**
 
 Run:
 
 ```bash
-git add scripts/check-mutation-required.js tests/unit/scripts/check-mutation-required.test.ts
-git commit -m "fix: suggest existing mutation scripts"
+git add package.json scripts/check-mutation-required.js tests/unit/scripts/check-mutation-required.test.ts
+git commit -m "fix: add combined mutation guard script"
 ```
 
 Expected: one commit containing script and test changes.
@@ -1481,10 +1486,10 @@ Expected: PASS.
 Run:
 
 ```bash
-node scripts/cloudflare/deploy-phase6.mjs --env preview --env-file /Users/Data/Warehouse/Pipe/tianze-website/.env.local
-pnpm smoke:cf:deploy -- --base-url https://tianze-website-gateway-preview.kei-tang.workers.dev
-curl -I https://tianze-website-gateway-preview.kei-tang.workers.dev/en/contact
-curl -I https://tianze-website-gateway-preview.kei-tang.workers.dev/zh/contact
+node scripts/cloudflare/deploy-phase6.mjs --env preview --env-file <redacted-main-repo-env-file>
+pnpm smoke:cf:deploy -- --base-url <redacted-workers-dev-gateway-url>
+curl -I <redacted-workers-dev-gateway-url>/en/contact
+curl -I <redacted-workers-dev-gateway-url>/zh/contact
 ```
 
 Expected:
@@ -1582,8 +1587,8 @@ Expected:
 rg -n "middleware|proxy" src .claude next.config.ts open-next.config.ts wrangler.jsonc
 pnpm build
 pnpm build:cf
-node scripts/cloudflare/deploy-phase6.mjs --env preview --env-file /Users/Data/Warehouse/Pipe/tianze-website/.env.local
-pnpm smoke:cf:deploy -- --base-url https://tianze-website-gateway-preview.kei-tang.workers.dev
+node scripts/cloudflare/deploy-phase6.mjs --env preview --env-file <redacted-main-repo-env-file>
+pnpm smoke:cf:deploy -- --base-url <redacted-workers-dev-gateway-url>
 ```
 
 Expected before migration starts:
@@ -1599,4 +1604,3 @@ These are real findings, but they are larger design changes and should not be mi
 2. `FPH-014`, `FPH-015`, `FPH-021`: buyer-facing UI, CTA, and performance proof plan.
 3. `FPH-016`: CSP inline script runtime proof plan; first prove which inline scripts are required by Next/OpenNext, then simplify policy.
 4. `FPH-022`: test portfolio cleanup plan; delete or simplify low-value primitive tests only after buyer-flow coverage is protected.
-

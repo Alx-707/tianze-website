@@ -93,7 +93,7 @@ Key evidence:
 Decisive facts:
 
 - Targeted component/responsive/a11y Vitest passed.
-- Browser-level a11y proof is weak because axe helper does not assert.
+- Baseline browser-level a11y proof was weak because axe helper did not assert; repair wave tightened the helper to fail on relevant axe violations and pass selector context/options.
 - Screenshots/Lighthouse were blocked by lack of server/runtime target in lane.
 
 ## Lane 04 - SEO / content / conversion
@@ -157,8 +157,9 @@ Key evidence:
 
 Decisive facts:
 
-- Preview phase6 deploy can run with `/Users/Data/Warehouse/Pipe/tianze-website/.env.local`.
-- Workers.dev gateway returns 500 for `/en/contact` and `/zh/contact`, while `/en`, `/zh`, `/api/health`, products, about, legal, and OEM routes return 200 in targeted probes.
+- Preview phase6 deploy can run with `<redacted-main-repo-env-file>`.
+- Baseline preview gateway returned 500 for `/en/contact` and `/zh/contact`, while `/en`, `/zh`, `/api/health`, products, about, legal, and OEM routes returned 200 in targeted probes.
+- Repair-wave preview route smoke now returns 200 for `/en/contact` and `/zh/contact`; see `docs/audits/full-project-health-v1/07-repair-closure.md`.
 - Gateway tail is `Ok`; web worker tail logs Next Cache Components `blocking-route` for `/[locale]/contact`.
 - Local `next dev` and `next start` controls return 200 for contact routes.
 - Preview workers currently prove only `NEXT_SERVER_ACTIONS_ENCRYPTION_KEY`; real external lead delivery remains blocked by missing Resend/Airtable/Turnstile secrets.
@@ -167,8 +168,8 @@ Decisive facts:
 
 | Evidence class | Status | Needed next |
 | --- | --- | --- |
-| Cloudflare preview deploy/auth | Partially proved | preview workers.dev deployed with explicit env file |
-| Preview post-deploy smoke | Failed | `/en/contact` and `/zh/contact` return 500 |
+| Cloudflare preview deploy/auth | Proved for route smoke | preview deployed with explicit redacted env-file proof |
+| Preview post-deploy smoke | Passed after repair | `/en/contact` and `/zh/contact` return 200 |
 | Cloudflare production deploy/auth | Blocked | production deploy not run |
 | Production post-deploy smoke | Blocked | production URL smoke from target commit |
 | Search Console | Blocked | export or dashboard evidence |

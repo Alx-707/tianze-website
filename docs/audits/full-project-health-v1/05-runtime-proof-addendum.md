@@ -2,30 +2,29 @@
 
 ## 0. Short conclusion
 
-Preview runtime proof is now partially executed.
+Preview runtime proof was first executed during the baseline audit, then rerun
+after the repair wave.
 
 Result:
 
-- Cloudflare auth/deploy blocker is resolved for preview when using the main repo env file:
-  `/Users/Data/Warehouse/Pipe/tianze-website/.env.local`
+- Cloudflare auth/deploy blocker is resolved for preview when using the redacted main repo env file.
 - Preview phase6 deployment succeeded for all three workers:
-  - `tianze-website-web-preview`
-  - `tianze-website-api-lead-preview`
-  - `tianze-website-gateway-preview`
-- Gateway workers.dev URL is:
-  `https://tianze-website-gateway-preview.kei-tang.workers.dev`
-- Preview smoke did **not** pass: `/en/contact` and `/zh/contact` return `500`.
-- Local Next runtime control passes `/en/contact` and `/zh/contact` with `200`, so the contact failure is Cloudflare/OpenNext runtime-specific, not a generic Next page failure.
+-  - `<redacted-web-preview-worker>`
+  - `<redacted-api-lead-preview-worker>`
+  - `<redacted-gateway-preview-worker>`
+- Baseline preview smoke did **not** pass: `/en/contact` and `/zh/contact` returned `500`.
+- Repair-wave preview smoke now passes: `/en/contact` and `/zh/contact` return `200`.
+- Local Next runtime control also passes `/en/contact` and `/zh/contact` with `200`.
 - Real form external delivery remains blocked: preview workers currently list only `NEXT_SERVER_ACTIONS_ENCRYPTION_KEY` as a secret, not Resend / Airtable / Turnstile secrets.
 
 ## 1. Credential / env finding
 
 Current shell did not contain `CLOUDFLARE_API_TOKEN`.
 
-Wrangler OAuth was logged in, but the successful preview deploy used the main repo env file:
+Wrangler OAuth was logged in, but the successful preview deploy used the redacted main repo env file:
 
 ```text
-/Users/Data/Warehouse/Pipe/tianze-website/.env.local
+<redacted-main-repo-env-file>
 ```
 
 Presence check, without printing values:
@@ -65,7 +64,7 @@ docs/audits/full-project-health-v1/evidence/runtime-proof-addendum/proof-cf-prev
 ```bash
 node scripts/cloudflare/deploy-phase6.mjs \
   --env preview \
-  --env-file /Users/Data/Warehouse/Pipe/tianze-website/.env.local
+  --env-file <redacted-main-repo-env-file>
 ```
 
 Result: passed.
@@ -79,19 +78,19 @@ docs/audits/full-project-health-v1/evidence/runtime-proof-addendum/deploy-phase6
 Important lines:
 
 - Server Actions secret sync completed for preview workers.
-- `tianze-website-web-preview` deployed.
-- `tianze-website-api-lead-preview` deployed.
-- `tianze-website-gateway-preview` deployed.
-- Gateway URL: `https://tianze-website-gateway-preview.kei-tang.workers.dev`
+- `<redacted-web-preview-worker>` deployed.
+- `<redacted-api-lead-preview-worker>` deployed.
+- `<redacted-gateway-preview-worker>` deployed.
+- Gateway URL: `<redacted-workers-dev-gateway-url>`
 
 ### Deployed smoke against gateway workers.dev
 
 ```bash
 pnpm smoke:cf:deploy -- \
-  --base-url https://tianze-website-gateway-preview.kei-tang.workers.dev
+  --base-url <redacted-workers-dev-gateway-url>
 ```
 
-Result: failed.
+Result after repair wave: passed.
 
 Evidence:
 
@@ -99,11 +98,10 @@ Evidence:
 docs/audits/full-project-health-v1/evidence/runtime-proof-addendum/smoke-cf-deploy-gateway-workers.txt
 ```
 
-Failure:
+Output:
 
 ```text
-Expected /en/contact to return 200, got 500
-Expected /zh/contact to return 200, got 500
+[post-deploy-smoke] All checks passed
 ```
 
 ### Serial route probe against gateway workers.dev
@@ -135,7 +133,7 @@ Result:
 Target:
 
 ```text
-https://preview.tianze-pipe.com
+<redacted-preview-domain>
 ```
 
 Result from this machine: fetch failed.
@@ -153,7 +151,7 @@ docs/audits/full-project-health-v1/evidence/runtime-proof-addendum/preview-domai
 docs/audits/full-project-health-v1/evidence/runtime-proof-addendum/preview-domain-probe.txt
 ```
 
-Interpretation: this environment cannot currently use `preview.tianze-pipe.com` as the smoke target. The successful deployed target is the workers.dev gateway URL.
+Interpretation: this environment cannot currently use `<redacted-preview-domain-host>` as the smoke target. The successful deployed target is the workers.dev gateway URL.
 
 ### Local Next runtime control
 
@@ -260,32 +258,36 @@ Interpretation: real contact / inquiry / subscribe external delivery cannot be h
 
 ```text
 Cloudflare preview deploy: pass
-Gateway workers.dev route smoke: partial fail
+Gateway preview route smoke: pass after repair wave
 Official preview domain smoke: blocked from this environment
 Local Next runtime contact page: pass
-Local OpenNext preview: fail
+Local OpenNext preview: historical baseline fail for contact route
 Runtime CSP local proof: pass under current exception contract
 External lead delivery: blocked
-Full preview buyer flow: fail, because contact page returns 500 on deployed workers.dev
+Full preview buyer flow: blocked only by external delivery credentials, not by contact route 500
 ```
 
-## 4. New blocker
+## 4. Baseline blocker and repair status
 
-The main new blocker is:
+The baseline blocker was:
 
 ```text
 Preview Cloudflare gateway returns 500 for /en/contact and /zh/contact.
 ```
 
-This is more severe than the original Audit Run 1 local baseline because contact is a lead-generation page. It should be handled as the next repair/debug target before calling preview runtime ready.
+Repair status:
+
+```text
+Closed for route smoke. The deployed preview gateway now returns 200 for both contact routes, and post-deploy smoke passes.
+```
 
 ## 5. Contact 500 systematic-debugging result
 
-Status: root failure class confirmed; exact source line still needs a repair-branch proof.
+Status: root failure class was confirmed during debugging; repair-wave proof closed the deployed route failure.
 
 What is confirmed:
 
-- Fresh repro still fails:
+- Historical fresh repro failed:
   `docs/audits/full-project-health-v1/evidence/contact-preview-500-debug/live-gateway-contact-reprobe.txt`
 - The gateway worker receives the request as `Ok`; the web worker emits the runtime error:
   `docs/audits/full-project-health-v1/evidence/contact-preview-500-debug/tail-gateway-pretty.txt`
@@ -320,23 +322,15 @@ Strong hypothesis:
 The contact route has a dynamic/PPR boundary problem around its Server Action-backed form and Suspense placement. This is not yet source-mapped to one original TypeScript line.
 ```
 
-## 6. Recommended next debugging target
+## 6. Repair-wave verification target
 
-Do not start by changing content or styling.
+The original debugging target was handled in the repair wave:
 
-Start by isolating why the contact route differs across runtimes in a repair branch:
+1. Keep deployed preview smoke as the route proof.
+2. Require `/en/contact` and `/zh/contact` to return `200`.
+3. Do not claim real form delivery until preview has Turnstile, Resend, and Airtable credentials.
 
-1. Keep deployed preview smoke as the failing test:
-   `/en/contact` and `/zh/contact` must return `200`.
-2. Try the smallest boundary change first:
-   wrap the full `ContactContentBody` route output in a page-level `<Suspense>` fallback, matching the about/privacy/terms/OEM pattern.
-3. If that does not close the error, split the Server Action-backed form island away from the prerendered route shell and keep the static fallback.
-4. Re-run:
-   - `node scripts/cloudflare/deploy-phase6.mjs --env preview --env-file /Users/Data/Warehouse/Pipe/tianze-website/.env.local`
-   - `pnpm smoke:cf:deploy -- --base-url https://tianze-website-gateway-preview.kei-tang.workers.dev`
-   - `pnpm exec wrangler tail tianze-website-web-preview --format=json --env-file /Users/Data/Warehouse/Pipe/tianze-website/.env.local`
-
-Do not claim the full form delivery flow until preview has Turnstile, Resend, and Airtable credentials. Right now the route page itself is the blocker.
+Current route proof is recorded in `07-repair-closure.md`.
 
 ## 7. Process note
 

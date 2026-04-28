@@ -1,11 +1,13 @@
      1	import { cn } from "@/lib/utils";
-     2	
+     2
+
      3	export interface StickyFamilyNavProps {
      4	  families: { slug: string; label: string }[];
      5	  ariaLabel?: string;
      6	  className?: string;
      7	}
-     8	
+     8
+
      9	export function StickyFamilyNav({
     10	  families,
     11	  ariaLabel = "Product families",

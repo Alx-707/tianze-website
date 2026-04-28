@@ -2,7 +2,8 @@
      2	import { Slot } from "@radix-ui/react-slot";
      3	import { cva, type VariantProps } from "class-variance-authority";
      4	import { cn } from "@/lib/utils";
-     5	
+     5
+
      6	const buttonVariants = cva(
      7	  "inline-flex shrink-0 items-center justify-center gap-1.5 rounded-[6px] text-sm font-semibold whitespace-nowrap transition-[background-color,color,border-color,box-shadow] duration-150 outline-none active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
      8	  {
@@ -36,7 +37,8 @@
     36	    },
     37	  },
     38	);
-    39	
+    39
+
     40	function Button({
     41	  className,
     42	  variant,
@@ -48,7 +50,8 @@
     48	    asChild?: boolean;
     49	  }) {
     50	  const Comp = asChild ? Slot : "button";
-    51	
+    51
+
     52	  return (
     53	    <Comp
     54	      data-slot="button"
@@ -57,5 +60,6 @@
     57	    />
     58	  );
     59	}
-    60	
+    60
+
     61	export { Button, buttonVariants };

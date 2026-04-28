@@ -32,6 +32,12 @@ describe("check-mutation-required", () => {
         scripts.filter((script) => script in packageJson.scripts),
       );
     });
+
+    it("uses one comma-separated mutate scope for the combined lead-security script", () => {
+      expect(packageJson.scripts["test:mutation:lead-security"]).toBe(
+        "stryker run --mutate 'src/lib/lead-pipeline/**/*.ts,src/lib/security/**/*.ts'",
+      );
+    });
   });
 
   describe("getLatestRelevantChangeTimestampMs", () => {
@@ -208,7 +214,7 @@ describe("check-mutation-required", () => {
           "命中目录: src/lib/lead-pipeline/, src/lib/security/",
           "报告 mutate scope: src/lib/security/**/*.ts",
           "未覆盖目录: src/lib/lead-pipeline/",
-          "请运行 pnpm test:mutation:lead && pnpm test:mutation:security 并更新 reports/mutation/mutation-report.json",
+          "请运行 pnpm test:mutation:lead-security 并更新 reports/mutation/mutation-report.json",
         ].join("\n"),
       );
     });

@@ -1,9 +1,11 @@
      1	"use client";
-     2	
+     2
+
      3	// Current split: MobileNavigationLinks (server-rendered fallback) + this file (client interactivity).
      4	// Content assembly (MobileNavigationHeader, drawer layout) still lives here.
      5	// A deeper RSC boundary refactor would move content assembly to the server shell.
-     6	
+     6
+
      7	import {
      8	  cloneElement,
      9	  isValidElement,
@@ -32,7 +34,8 @@
     32	  SheetDescription,
     33	  SheetTrigger,
     34	} from "@/components/ui/sheet";
-    35	
+    35
+
     36	interface MobileNavigationInteractiveProps {
     37	  children?: ReactNode;
     38	  className?: string;
@@ -43,14 +46,16 @@
     43	  siteDescription?: string | undefined;
     44	  siteName?: string | undefined;
     45	}
-    46	
+    46
+
     47	interface MobileMenuButtonProps extends ComponentProps<"button"> {
     48	  closeMenuLabel?: string | undefined;
     49	  isOpen: boolean;
     50	  labelTestId?: string | undefined;
     51	  openMenuLabel?: string | undefined;
     52	}
-    53	
+    53
+
     54	export function MobileMenuButton({
     55	  isOpen,
     56	  className,
@@ -64,7 +69,8 @@
     64	  const label = isOpen
     65	    ? (closeMenuLabel ?? t("accessibility.closeMenu"))
     66	    : (openMenuLabel ?? t("accessibility.openMenu"));
-    67	
+    67
+
     68	  return (
     69	    <Button
     70	      variant="ghost"
@@ -85,23 +91,27 @@
     85	    </Button>
     86	  );
     87	}
-    88	
+    88
+
     89	function useCloseMenuOnPathChange(
     90	  pathname: string,
     91	  isOpen: boolean,
     92	  onClose: () => void,
     93	) {
     94	  const previousPathnameRef = useRef(pathname);
-    95	
+    95
+
     96	  useEffect(() => {
     97	    if (previousPathnameRef.current !== pathname && isOpen) {
     98	      queueMicrotask(onClose);
     99	    }
-   100	
+   100
+
    101	    previousPathnameRef.current = pathname;
    102	  }, [isOpen, onClose, pathname]);
    103	}
-   104	
+   104
+
    105	function MobileNavigationHeader({
    106	  siteName,
    107	  siteDescription,
@@ -121,7 +131,8 @@
    121	    </SheetHeader>
    122	  );
    123	}
-   124	
+   124
+
    125	function MobileLanguageSwitcher({
    126	  languageLabel,
    127	  pathname,
@@ -132,12 +143,14 @@
    132	  pathname: string;
    133	}) {
    134	  const currentLocale = useLocale() === "zh" ? "zh" : "en";
-   135	
+   135
+
    136	  const languages = [
    137	    { locale: "en" as const, label: "English" },
    138	    { locale: "zh" as const, label: "简体中文" },
    139	  ];
-   140	
+   140
+
    141	  return (
    142	    <div
    143	      className="notranslate space-y-1"
@@ -181,7 +194,8 @@
    181	    </div>
    182	  );
    183	}
-   184	
+   184
+
    185	function withInteractiveNavigationProps(
    186	  children: ReactNode,
    187	  props: MobileNavigationLinksProps,
@@ -189,10 +203,12 @@
    189	  if (!isValidElement<MobileNavigationLinksProps>(children)) {
    190	    return children;
    191	  }
-   192	
+   192
+
    193	  return cloneElement(children, props);
    194	}
-   195	
+   195
+
    196	export function MobileNavigationInteractive({
    197	  children,
    198	  className,
@@ -209,9 +225,11 @@
    209	  const resolvedSiteName = siteName ?? t("navigation.siteName");
    210	  const resolvedSiteDescription =
    211	    siteDescription ?? t("navigation.siteDescription");
-   212	
+   212
+
    213	  useCloseMenuOnPathChange(pathname, isOpen, () => setIsOpen(false));
-   214	
+   214
+
    215	  const navigationContent = children ? (
    216	    withInteractiveNavigationProps(children, {
    217	      currentPathname: pathname,
@@ -223,7 +241,8 @@
    223	      onNavigate={() => setIsOpen(false)}
    224	    />
    225	  );
-   226	
+   226
+
    227	  return (
    228	    <div className={cn("header-mobile-only", className)}>
    229	      <Sheet open={isOpen} onOpenChange={setIsOpen}>
