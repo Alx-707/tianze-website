@@ -94,8 +94,9 @@
   - `@testing-library/dom 10.4.1`
   - `@testing-library/jest-dom 6.9.1`
   - `@testing-library/user-event 14.6.1`
-- **jsdom 29.0.1**
+- **jsdom 29.1.0**
 - **happy-dom 20.3.7**
+- **fast-check 4.7.0**
 
 ### E2E / 可访问性 / 性能
 
