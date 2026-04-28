@@ -61,6 +61,13 @@ Maintain this order (no lint enforcement — the rule itself is the mechanism):
 8. Other `@/*` aliases
 9. Relative imports (`./`, `../`)
 
+## Formatting Tooling
+
+Prettier patch upgrades can be handled as a small formatting-tool lane. Do not
+mix them with `prettier-plugin-tailwindcss` minor upgrades or import-sorting
+plugin changes, because those can create broad formatting churn. Prove the lane
+with `pnpm format:check` plus the normal type/lint/build checks.
+
 ## Constants
 
 - Organize by domain in `src/constants/`, use `as const`
