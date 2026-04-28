@@ -41,6 +41,12 @@ patch version in the same branch. Prove the upgrade with `pnpm test`; run
 `pnpm test:coverage` when the change touches coverage tooling, coverage gates,
 or coverage report behavior.
 
+When upgrading Playwright, keep `@playwright/test` and `playwright` on the same
+version in the same branch. When upgrading axe tooling, treat
+`@axe-core/playwright` and `axe-core` as one validation group. Prove the upgrade
+with the smallest browser-facing check that exercises the lane, such as release
+smoke, related E2E specs, or focused axe helper tests.
+
 ## Commands
 
 ```bash
