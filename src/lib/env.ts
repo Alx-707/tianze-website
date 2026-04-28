@@ -5,12 +5,12 @@
  */
 
 import { createEnv } from "@t3-oss/env-nextjs";
-import { clientEnvSchema, serverEnvSchema } from "@/lib/env-schemas";
+import { clientEnvSchema, serverEnvSchema } from "./env-schemas";
 import {
   readRawEnvValue,
   runtimeEnv,
   shouldSkipEnvValidation,
-} from "@/lib/env-runtime";
+} from "./env-runtime";
 
 // 创建类型安全的环境变量配置
 export const env = createEnv({
