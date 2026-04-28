@@ -114,8 +114,9 @@
     ],
     "diagnostic": ["pnpm run"],
     "optional": [
-      "pnpm build:cf",
       "pnpm truth:check",
+      "pnpm review:translation-quartet",
+      "pnpm review:translate-compat",
       "pnpm dep:check",
       "pnpm unused:check",
       "pnpm security:semgrep",
@@ -123,7 +124,8 @@
       "pnpm quality:gate:fast",
       "pnpm arch:conformance",
       "pnpm review:architecture-truth",
-      "pnpm perf:lighthouse"
+      "pnpm perf:lighthouse",
+      "CF_APPLY_GENERATED_PATCH=true pnpm build:cf"
     ],
     "credential_blocked": [
       "pnpm proof:cf:preview-deployed",

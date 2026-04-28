@@ -63,7 +63,12 @@ Lane 00 or the orchestrator must provide one runtime target before UI, SEO, CSP,
 - production URL
 - or an explicit blocker
 
-`pnpm build` and `pnpm build:cf` are serial commands. Never run them in parallel.
+Cloudflare build proof is serial:
+
+1. `pnpm clean:next-artifacts && pnpm build`
+2. `CF_APPLY_GENERATED_PATCH=true pnpm build:cf`
+
+Never run these commands in parallel, because both write Next.js build artifacts.
 
 Deploy and post-deploy smoke commands are credential-dependent. Do not run production-mutating commands during a read-only audit.
 
