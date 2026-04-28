@@ -74,8 +74,8 @@
 
 - **Airtable 0.12.2**：线索数据落地
 - **Resend 6.12.2**：邮件发送
-- **@react-email/components 1.0.11**
-- **@react-email/render 2.0.5**
+- **@react-email/components 1.0.12**
+- **@react-email/render 2.0.8**
 - **react-email 5.2.10**：邮件模板与本地预览
 
 ### 安全与防刷
