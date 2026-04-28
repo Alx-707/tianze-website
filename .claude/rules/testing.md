@@ -36,6 +36,11 @@ paths:
 - **E2E**: Playwright
 - **Config**: `vitest.config.mts`
 
+When upgrading Vitest, keep `vitest` and `@vitest/coverage-v8` on the same
+patch version in the same branch. Prove the upgrade with `pnpm test`; run
+`pnpm test:coverage` when the change touches coverage tooling, coverage gates,
+or coverage report behavior.
+
 ## Commands
 
 ```bash
