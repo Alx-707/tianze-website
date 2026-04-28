@@ -96,8 +96,10 @@ async function waitForFiniteCssAnimations(
           return false;
         }
 
-        const timing = animation.effect.getComputedTiming();
-        return timing.endTime > 0 && Number.isFinite(timing.endTime);
+        const endTime = animation.effect.getComputedTiming().endTime;
+        return (
+          typeof endTime === "number" && endTime > 0 && Number.isFinite(endTime)
+        );
       });
 
       if (activeAnimations.length === 0) {
