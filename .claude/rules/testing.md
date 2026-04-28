@@ -47,6 +47,12 @@ version in the same branch. When upgrading axe tooling, treat
 with the smallest browser-facing check that exercises the lane, such as release
 smoke, related E2E specs, or focused axe helper tests.
 
+When upgrading Stryker, keep `@stryker-mutator/core` and
+`@stryker-mutator/vitest-runner` on the same version in the same branch. Full
+mutation testing is intentionally heavy; for dependency-only patch upgrades,
+prove the tool loads with the current config plus targeted Vitest/mutation guard
+checks, and reserve full mutation runs for explicit risk-driven lanes.
+
 ## Commands
 
 ```bash
