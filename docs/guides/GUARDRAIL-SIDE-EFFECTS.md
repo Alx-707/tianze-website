@@ -54,4 +54,4 @@ Phase 0 recalibrates rules so later work does not keep chasing the old incentive
 - security scanning: block untrusted request/query/body key writes, not every dynamic property shape;
 - numeric cleanup: use direct literals or domain-named constants where generic `ZERO`/`ONE`/`COUNT_TWO` make the code worse.
 
-Proof boundary: unit/source-contract tests prove the internal `Link` href object, validated Contact context, module ownership, guardrail rule behavior, and scanner fixtures. The actual `/en/contact?...` or `/zh/contact?...` browser href is a routing/runtime proof and must not be claimed unless a browser or integration smoke verifies it.
+Proof boundary: unit/source-contract tests prove the internal `Link` href object, validated Contact context, module ownership, guardrail rule behavior, and scanner fixtures. `tests/e2e/product-family-contact-handoff.spec.ts` proves local browser runtime for the North America product-family handoff: the rendered links are `/en/contact?...` and `/zh/contact?...`, and clicking them opens Contact with the validated context notice. This is local Next browser smoke proof, not Cloudflare deployed proof.

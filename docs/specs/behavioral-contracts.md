@@ -4,6 +4,8 @@
 >
 > This document is the single source of truth for user-facing behavioral guarantees.
 > Every contract maps to at least one test file. If a contract has no test, it is a gap.
+>
+> When changing contact, inquiry, subscribe, health, behavioral-contract, or smoke-test behavior, update the affected contract status, proof boundary, and coverage summary in the same branch.
 
 ## Contract Format
 
@@ -143,13 +145,13 @@ The current critical market-page path is Contact handoff, not an in-page drawer.
 | Field | Value |
 |-------|-------|
 | Priority | Critical |
-| Test Type | Unit + Source Contract |
-| Test File | `src/app/[locale]/products/[market]/__tests__/market-landing.test.tsx`, `src/app/[locale]/contact/__tests__/page.test.tsx`, `src/app/[locale]/products/__tests__/interactive-islands-usage.test.ts` |
-| Status | Partial |
+| Test Type | E2E + Unit + Source Contract |
+| Test File | `tests/e2e/product-family-contact-handoff.spec.ts`, `src/app/[locale]/products/[market]/__tests__/market-landing.test.tsx`, `src/app/[locale]/contact/__tests__/page.test.tsx`, `src/app/[locale]/products/__tests__/interactive-islands-usage.test.ts` |
+| Status | Covered |
 
 Notes: The handoff must pass only internal slugs in the URL. Contact must validate `intent`, `market`, and `family` before displaying labels. Invalid query values are ignored and are never rendered directly.
 
-Proof boundary: component/unit tests prove the internal href object and Contact validation. A claim that the rendered browser URL is `/en/contact?...` or `/zh/contact?...` requires browser or integration smoke evidence.
+Proof boundary: component/unit tests prove the internal href object and Contact validation. `tests/e2e/product-family-contact-handoff.spec.ts` proves local browser runtime renders `/en/contact?...` and `/zh/contact?...` URLs for the North America product family handoff and that clicking the links displays the validated Contact context notice. This is local browser/runtime proof, not Cloudflare deployed proof.
 
 ---
 
@@ -390,10 +392,10 @@ All 5 market spec files contain required fields (product families, dimensions, s
 | Category | Active Total | Covered | Partial | Untested | Retired |
 |----------|--------------|---------|---------|----------|---------|
 | Navigation & Discovery | 6 | 4 | 2 | 0 | 0 |
-| Inquiry & Conversion | 6 | 1 | 5 | 0 | 0 |
+| Inquiry & Conversion | 6 | 2 | 4 | 0 | 0 |
 | Content & Information | 6 | 0 | 2 | 4 | 1 |
 | Resilience & Edge Cases | 6 | 4 | 2 | 0 | 0 |
-| **Total** | **24** | **9** | **11** | **4** | **1** |
+| **Total** | **24** | **10** | **10** | **4** | **1** |
 
 Retired contracts are kept for historical traceability but excluded from active coverage totals.
 
@@ -403,7 +405,6 @@ Retired contracts are kept for historical traceability but excluded from active 
 
 - **BC-001** (Partial): Hero CTA links need `href` verification for /contact and /products
 - **BC-007** (Partial): End-to-end contact form submission flow not tested (Turnstile blocker)
-- **BC-009** (Partial): Product family Contact handoff has source and unit proof for internal href construction plus Contact query validation; localized browser URL smoke remains the unproven boundary.
 - **BC-013** (Partial): Products page market cards have no E2E test
 
 ### High-priority gaps
