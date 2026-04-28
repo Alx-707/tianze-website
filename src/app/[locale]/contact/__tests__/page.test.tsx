@@ -267,7 +267,7 @@ describe("ContactPage MDX migration", () => {
     expect(zhMetadata.description).toBe(
       "联系天泽销售团队，咨询 PVC 电工套管配件、OEM 定制制造或技术支持。通常 24 小时内响应。",
     );
-    expect(enMetadata.other).not.toMatchObject({ google: "notranslate" });
-    expect(zhMetadata.other).not.toMatchObject({ google: "notranslate" });
+    expect(enMetadata.other?.google).not.toBe("notranslate");
+    expect(zhMetadata.other?.google).not.toBe("notranslate");
   });
 });

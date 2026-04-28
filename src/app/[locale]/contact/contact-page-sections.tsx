@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card";
 import { SectionHead } from "@/components/ui/section-head";
 import { siteFacts } from "@/config/site-facts";
 import { parseProductFamilyContactContext } from "@/lib/contact/product-family-context";
-import { readMessagePath } from "@/lib/i18n/read-message-path";
+import { readRequiredMessagePath } from "@/lib/i18n/read-message-path";
 import type { FaqItem } from "@/types/content.types";
 import { ContactFormStaticFallback } from "@/app/[locale]/contact/contact-form-static-fallback";
 import type { ContactPageData } from "@/app/[locale]/contact/contact-page-data";
@@ -164,21 +164,21 @@ async function ContactFormColumn({
     searchParams: resolvedSearchParams,
     messages,
   });
-  const productFamilyContextLabel = readMessagePath(
-    messages,
-    ["contact", "context", "productFamilyLabel"],
-    "You are asking about:",
-  );
-  const formLoadError = readMessagePath(
-    messages,
-    ["contact", "form", "loadError"],
-    "The secure inquiry form could not load. Retry, or use the contact methods on this page.",
-  );
-  const formRetryLabel = readMessagePath(
-    messages,
-    ["contact", "form", "retryLoad"],
-    "Retry loading form",
-  );
+  const productFamilyContextLabel = readRequiredMessagePath(messages, [
+    "contact",
+    "context",
+    "productFamilyLabel",
+  ]);
+  const formLoadError = readRequiredMessagePath(messages, [
+    "contact",
+    "form",
+    "loadError",
+  ]);
+  const formRetryLabel = readRequiredMessagePath(messages, [
+    "contact",
+    "form",
+    "retryLoad",
+  ]);
 
   return (
     <div className="space-y-6" data-testid="contact-form-column">

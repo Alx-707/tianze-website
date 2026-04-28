@@ -54,3 +54,44 @@ function okAllowedKeyWrite(field: "name" | "email") {
 
   return target;
 }
+
+const ALLOWED_FIELDS: readonly string[] = ["name", "email"];
+const ALLOWED_FIELD_SET = new Set<string>(ALLOWED_FIELDS);
+
+function okAllowlistIncludesWrite(request: RequestLike) {
+  const field = request.nextUrl.searchParams.get("field");
+  const target: Record<string, string> = {};
+
+  if (field !== null && ALLOWED_FIELDS.includes(field)) {
+    // ok: object-injection-untrusted-key-write
+    target[field] = "safe";
+  }
+
+  return target;
+}
+
+function okAllowlistSetWrite(request: RequestLike) {
+  const field = request.nextUrl.searchParams.get("field");
+  const target: Record<string, string> = {};
+
+  if (field !== null && ALLOWED_FIELD_SET.has(field)) {
+    // ok: object-injection-untrusted-key-write
+    target[field] = "safe";
+  }
+
+  return target;
+}
+
+function okEarlyReturnAllowlistWrite(request: RequestLike) {
+  const field = request.nextUrl.searchParams.get("field");
+  const target: Record<string, string> = {};
+
+  if (field === null || !ALLOWED_FIELD_SET.has(field)) {
+    return target;
+  }
+
+  // ok: object-injection-untrusted-key-write
+  target[field] = "safe";
+
+  return target;
+}

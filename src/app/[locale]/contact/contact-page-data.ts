@@ -1,3 +1,5 @@
+import "server-only";
+
 import {
   LAYER1_FACTS,
   extractFaqFromMetadata,
@@ -6,7 +8,7 @@ import {
 } from "@/lib/content/mdx-faq";
 import { getContactCopyFromMessages } from "@/lib/contact/getContactCopy";
 import { CONTENT_MANIFEST } from "@/lib/content-manifest.generated";
-import { readMessagePath } from "@/lib/i18n/read-message-path";
+import { readRequiredMessagePath } from "@/lib/i18n/read-message-path";
 import { mergeObjects } from "@/lib/merge-objects";
 import type { FaqItem, Locale, Page } from "@/types/content.types";
 import enCriticalMessages from "@messages/en/critical.json";
@@ -63,11 +65,10 @@ export function getContactPageData(locale: Locale): ContactPageData {
       answer: interpolateFaqAnswer(item.answer, LAYER1_FACTS),
     }),
   );
-  const faqSectionTitle = readMessagePath(
-    messages,
-    ["faq", "sectionTitle"],
-    "FAQ",
-  );
+  const faqSectionTitle = readRequiredMessagePath(messages, [
+    "faq",
+    "sectionTitle",
+  ]);
   const faqSchema =
     faqItems.length > 0 ? generateFaqSchemaFromItems(faqItems, locale) : null;
 

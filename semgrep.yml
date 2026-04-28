@@ -193,6 +193,62 @@ rules:
                   ...
               - pattern: |
                   $OBJ[$KEY] = $VALUE
+      - pattern-not-inside: |
+          if ($ALLOWED.includes($KEY)) {
+            ...
+          }
+      - pattern-not-inside: |
+          if ($KEY !== null && $ALLOWED.includes($KEY)) {
+            ...
+          }
+      - pattern-not-inside: |
+          if ($KEY && $ALLOWED.includes($KEY)) {
+            ...
+          }
+      - pattern-not-inside: |
+          if ($ALLOWED.has($KEY)) {
+            ...
+          }
+      - pattern-not-inside: |
+          if ($KEY !== null && $ALLOWED.has($KEY)) {
+            ...
+          }
+      - pattern-not-inside: |
+          if ($ALLOWED.indexOf($KEY) !== -1) {
+            ...
+          }
+      - pattern-not-inside: |
+          if ($ALLOWED.indexOf($KEY) >= 0) {
+            ...
+          }
+      - pattern-not-inside: |
+          if (!$ALLOWED.includes($KEY)) {
+            return ...
+          }
+          ...
+      - pattern-not-inside: |
+          if ($KEY === null || !$ALLOWED.includes($KEY)) {
+            return ...
+          }
+          ...
+      - pattern-not-inside: |
+          if (!$ALLOWED.has($KEY)) {
+            return ...
+          }
+          ...
+      - pattern-not-inside: |
+          if ($KEY === null || !$ALLOWED.has($KEY)) {
+            return ...
+          }
+          ...
+      - pattern-not-inside: |
+          if ($ALLOWED.includes($BODY.$FIELD)) {
+            ...
+          }
+      - pattern-not-inside: |
+          if ($ALLOWED.has($BODY.$FIELD)) {
+            ...
+          }
     paths:
       exclude:
         - "**/__tests__/**"

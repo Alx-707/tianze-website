@@ -12,7 +12,7 @@
 | ID | BC-XXX |
 | Contract | User-facing promise in plain language |
 | Priority | Critical / High / Medium |
-| Test Type | E2E / Integration / Static Truth / Unit |
+| Test Type | E2E / Integration / Static Truth / Source Contract / Unit |
 | Test File | Path to test file(s) that verify this contract |
 | Status | Untested / Covered / Partial / Retired |
 
@@ -403,7 +403,7 @@ Retired contracts are kept for historical traceability but excluded from active 
 
 - **BC-001** (Partial): Hero CTA links need `href` verification for /contact and /products
 - **BC-007** (Partial): End-to-end contact form submission flow not tested (Turnstile blocker)
-- **BC-009** (Planned): Product family Contact handoff needs implementation and tests.
+- **BC-009** (Partial): Product family Contact handoff has source and unit proof for internal href construction plus Contact query validation; localized browser URL smoke remains the unproven boundary.
 - **BC-013** (Partial): Products page market cards have no E2E test
 
 ### High-priority gaps

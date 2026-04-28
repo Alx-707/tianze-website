@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { hasOwn } from "../object-guards";
+import { hasOwn } from "@/lib/security/object-guards";
 
 describe("hasOwn", () => {
   it("returns true for own string properties", () => {

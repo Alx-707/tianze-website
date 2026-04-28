@@ -254,7 +254,6 @@ export const clientEnvSchema = {
 
   // Deployment Platform
   NEXT_PUBLIC_DEPLOYMENT_PLATFORM: z
-    .enum(["vercel", "cloudflare", "self-hosted"])
-    .optional()
-    .default("vercel"),
+    .enum(["vercel", "cloudflare", "development", "self-hosted"])
+    .optional(),
 };

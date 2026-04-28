@@ -47,7 +47,7 @@ const FAQ_SCHEMA_TYPE_PATTERN = /\bFAQPage\b/;
 function readProductMarketSource(filePath: string) {
   // eslint-disable-next-line security/detect-non-literal-fs-filename -- architecture test checks repo-local allowlisted files
   if (!existsSync(filePath)) {
-    return null;
+    throw new Error(`Missing product market source file: ${filePath}`);
   }
 
   return {
@@ -58,9 +58,7 @@ function readProductMarketSource(filePath: string) {
 }
 
 function readProductMarketSources() {
-  return PRODUCT_MARKET_SOURCE_FILES.map(readProductMarketSource).filter(
-    (item) => item !== null,
-  );
+  return PRODUCT_MARKET_SOURCE_FILES.map(readProductMarketSource);
 }
 
 type AstRecord = Record<string, unknown>;

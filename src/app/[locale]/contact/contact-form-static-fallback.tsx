@@ -1,12 +1,8 @@
 import { Card } from "@/components/ui/card";
-import { readMessagePath } from "@/lib/i18n/read-message-path";
+import { readRequiredMessagePath } from "@/lib/i18n/read-message-path";
 
-function pickContactFormCopy(
-  messages: Record<string, unknown>,
-  key: string,
-  fallback: string,
-) {
-  return readMessagePath(messages, ["contact", "form", key], fallback);
+function pickContactFormCopy(messages: Record<string, unknown>, key: string) {
+  return readRequiredMessagePath(messages, ["contact", "form", key]);
 }
 
 export function ContactFormStaticFallback({
@@ -14,14 +10,13 @@ export function ContactFormStaticFallback({
 }: {
   messages: Record<string, unknown>;
 }) {
-  const pick = (key: string, fallback: string) =>
-    pickContactFormCopy(messages, key, fallback);
+  const pick = (key: string) => pickContactFormCopy(messages, key);
 
   return (
     <Card className="mx-auto w-full max-w-2xl">
       <form
         aria-busy="true"
-        aria-label={pick("title", "Contact form")}
+        aria-label={pick("title")}
         className="space-y-6 p-6"
         data-contact-form-fallback="static"
         noValidate
@@ -29,7 +24,7 @@ export function ContactFormStaticFallback({
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div className="space-y-2">
             <label className="text-sm" htmlFor="firstName">
-              <span translate="no">{pick("firstName", "First Name")}</span>
+              <span translate="no">{pick("firstName")}</span>
             </label>
             <input
               id="firstName"
@@ -42,7 +37,7 @@ export function ContactFormStaticFallback({
           </div>
           <div className="space-y-2">
             <label className="text-sm" htmlFor="lastName">
-              <span translate="no">{pick("lastName", "Last Name")}</span>
+              <span translate="no">{pick("lastName")}</span>
             </label>
             <input
               id="lastName"
@@ -55,7 +50,7 @@ export function ContactFormStaticFallback({
           </div>
           <div className="space-y-2">
             <label className="text-sm" htmlFor="email">
-              <span translate="no">{pick("email", "Email")}</span>
+              <span translate="no">{pick("email")}</span>
             </label>
             <input
               id="email"
@@ -68,7 +63,7 @@ export function ContactFormStaticFallback({
           </div>
           <div className="space-y-2">
             <label className="text-sm" htmlFor="company">
-              <span translate="no">{pick("company", "Company Name")}</span>
+              <span translate="no">{pick("company")}</span>
             </label>
             <input
               id="company"
@@ -81,7 +76,7 @@ export function ContactFormStaticFallback({
         </div>
         <div className="space-y-2">
           <label className="text-sm" htmlFor="message">
-            <span translate="no">{pick("message", "Message")}</span>
+            <span translate="no">{pick("message")}</span>
           </label>
           <textarea
             id="message"
@@ -102,9 +97,7 @@ export function ContactFormStaticFallback({
             className="h-4 w-4 rounded border border-input"
           />
           <label className="text-sm" htmlFor="acceptPrivacy">
-            <span translate="no">
-              {pick("acceptPrivacy", "I agree to the privacy policy")}
-            </span>
+            <span translate="no">{pick("acceptPrivacy")}</span>
           </label>
         </div>
         <button
@@ -113,7 +106,7 @@ export function ContactFormStaticFallback({
           disabled
           type="submit"
         >
-          <span translate="no">{pick("submit", "Submit")}</span>
+          <span translate="no">{pick("submit")}</span>
         </button>
       </form>
     </Card>

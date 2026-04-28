@@ -5,6 +5,7 @@ import { ContactFormStaticFallback } from "@/app/[locale]/contact/contact-form-s
 const messages = {
   contact: {
     form: {
+      title: "Contact form",
       firstName: "First Name",
       lastName: "Last Name",
       email: "Email",
@@ -39,5 +40,13 @@ describe("ContactFormStaticFallback", () => {
 
     expect(firstNameLabel).toHaveAttribute("translate", "no");
     expect(submitLabel).toHaveAttribute("translate", "no");
+  });
+
+  it("fails fast when required fallback copy is missing", () => {
+    expect(() =>
+      render(
+        <ContactFormStaticFallback messages={{ contact: { form: {} } }} />,
+      ),
+    ).toThrow("Missing required message: contact.form.title");
   });
 });
