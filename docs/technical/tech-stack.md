@@ -131,9 +131,9 @@
 ### 包管理与运行时
 
 - **pnpm 10.13.1**
-- **Node.js 支持范围**：`>=20.19 <23`
-- 当前仓库的**proof baseline** 仍按 **Node 20.19.x** 看
-- **@types/node 22.19.17**：跟当前 Node 22/20 运行边界对齐，不跟随 Node 25 类型面
+- **Node.js 支持范围**：`>=24.15 <25`
+- 当前仓库的**proof baseline** 按 **Node 24.15.x LTS** 看
+- **@types/node 24.12.2**：跟当前 Node 24 LTS 运行边界对齐，不跟随 Node 25 类型面
 
 ### Cloudflare 构建链
 

@@ -3,19 +3,19 @@
 [![Test Coverage](https://img.shields.io/badge/coverage-85%25-brightgreen)](./reports/coverage/)
 [![CI/CD](https://github.com/Alx-707/tianze-website/actions/workflows/ci.yml/badge.svg)](https://github.com/Alx-707/tianze-website/actions/workflows/ci.yml)
 
-天泽管业海外站点仓库，采用 Next.js 16 + React 19 + TypeScript 5.9 + Tailwind CSS 4 技术栈，支持英中双语、Cloudflare 主部署链路、Contact 询盘主转化路径，以及当前仓库约定的发布门禁与部署验证流程。
+天泽管业海外站点仓库，采用 Next.js 16 + React 19 + TypeScript 6 + Tailwind CSS 4 技术栈，支持英中双语、Cloudflare 主部署链路、Contact 询盘主转化路径，以及当前仓库约定的发布门禁与部署验证流程。
 
 > 说明：`package.json` 中的包名仍为 `b2b-web-template`，这是历史遗留的内部包名，不代表当前项目身份。当前业务站点和文档默认都以 Tianze Website 为准。
 
 ## ✨ 特性
 
-- 🎯 **现代技术栈**: Next.js 16.2.0 + React 19.2.4 + TypeScript 5.9.3
-- 🎨 **现代化UI**: Tailwind CSS 4.2.2 + 响应式设计
+- 🎯 **现代技术栈**: Next.js 16.2.4 + React 19.2.5 + TypeScript 6.0.3
+- 🎨 **现代化UI**: Tailwind CSS 4.2.4 + 响应式设计
 - 📝 **内容管理**: MDX + Git-based 工作流
 - 🌍 **国际化支持**: 英中双语切换 + next-intl
 - 🎭 **主题系统**: 明亮/暗黑/系统主题
 - 📊 **错误监控（可选）**: 默认不启用客户端 Sentry；支持“服务端/边缘优先”的可选接入，兼顾性能与可观测性
-- 🔒 **企业级安全**: ESLint 9生态 + 安全扫描
+- 🔒 **企业级安全**: ESLint 10 生态 + 安全扫描
 - ⚡ **性能优化**: 包大小控制 + 性能预算
 - 🏗️ **架构检查**: 循环依赖检测 + 架构一致性
 
@@ -64,11 +64,11 @@ pnpm validate:translations
 
 ## 🛠️ 环境要求
 
-- **Node.js**: 20.19.0（默认开发版本与 CI 基线；项目运行时策略收口为 Node 20，`package.json > engines.node` 当前为 `>=20.19 <21`）
+- **Node.js**: 24.15.0（默认开发版本与 CI 基线；项目运行时策略收口为 Node 24 LTS，`package.json > engines.node` 当前为 `>=24.15 <25`）
 - **包管理器**: pnpm 10.13.1（已在 `.npmrc` 与 CI 固定）
 - **操作系统**: macOS, Linux, Windows
 
-> 提示：进入仓库前，请先确保当前 shell 已切到 Node 20.19.0；项目不会自动帮你切版本，`.nvmrc` / `.node-version` 仅作为版本真相提示。
+> 提示：进入仓库前，请先确保当前 shell 已切到 Node 24.15.0；项目不会自动帮你切版本，`.nvmrc` / `.node-version` 仅作为版本真相提示。
 
 ### 🔐 Turnstile 配置
 
