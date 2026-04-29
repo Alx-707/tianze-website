@@ -3,7 +3,7 @@
  * Resend email service core class
  */
 
-import { render } from "@react-email/render";
+import { render } from "react-email";
 import { Resend } from "resend";
 import { env } from "@/lib/env";
 import type {

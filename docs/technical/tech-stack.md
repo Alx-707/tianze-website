@@ -76,9 +76,9 @@
 
 - **Airtable 0.12.2**：线索数据落地
 - **Resend 6.12.2**：邮件发送
-- **@react-email/components 1.0.12**
-- **@react-email/render 2.0.8**
-- **react-email 5.2.10**：邮件模板与本地预览
+- **react-email 6.0.5**：邮件组件、模板 render 与本地预览 CLI
+- **@react-email/render 2.0.8**：Resend peer dependency 显式依赖
+- **@react-email/ui 6.0.5**：本地邮件预览 UI
 
 ### 安全与防刷
 

@@ -15,9 +15,6 @@
 
 | Package | Current reason | Safe next step |
 | --- | --- | --- |
-| `@react-email/components` | npm 标记 deprecated，但当前邮件模板仍在 React Email 5 线内 | 跟 `react-email` 6 迁移一起处理 |
-| `@react-email/preview-server` | dev-only 预览工具，和 React Email 5 当前链路绑定 | 跟 `react-email` 6 迁移一起处理 |
-| `react-email` | 6.x 是 major，不是补丁升级 | 单独开邮件工具迁移 lane，验证模板 render 和 `email:dev` |
 | `critters` | 上游转向 `beasties`，但它属于 Next/OpenNext 支撑依赖 | 单独验证 `beasties` 替换对 `pnpm build` / `pnpm build:cf` 的影响 |
 | `@types/node` | 项目 runtime 支持范围是 `>=20.19 <23`，Node 25 types 不匹配 | 只有当 runtime baseline 扩到 Node 25 时再升 |
 | `typescript` | 6.x 是 compiler major | 单独跑 type/build/Cloudflare build lane |
@@ -42,6 +39,25 @@
 - helper 能 import 到 `startMcpServer`
 - `src/app/[locale]/layout.tsx` 只在 development 且未禁用 dev tools 时加载这些脚本
 - paired test 断言具体 CDN URL，而不是只数 `<Script>` 个数
+
+### React Email 6
+
+`react-email` 6 迁移不是单纯改版本号。当前仓库采用：
+
+- `react-email 6.0.5` 作为邮件组件和 render 的统一入口
+- `@react-email/ui 6.0.5` 支撑本地 email preview
+- 移除已 deprecated 的 `@react-email/components` 和 `@react-email/preview-server`
+- 保留 `@react-email/render 2.0.8` 作为 `resend` peer dependency 的显式依赖
+- `pnpm.overrides["@react-email/ui>next"] = "$next"`，避免预览工具链带入旧 Next patch
+- `react-email 6.0.5` 当前会经由 `glob` 带入 vulnerable `brace-expansion 5.0.4`，因此用 `pnpm.overrides["brace-expansion@>=5.0.0 <5.0.5"] = "5.0.5"` 固定到 patched patch
+
+验证重点：
+
+- 管理员通知、客户确认、产品询盘三类模板都能 HTML render
+- 三类模板都能 plain text render
+- `email:dev` 能启动 React Email 6 preview
+- Resend 发送路径继续生成 plain text 内容
+- `pnpm deps:check` 不再出现 React Email 5 hold 项
 
 ### tech check
 

@@ -2,7 +2,7 @@
  * ProductInquiryEmail Component Tests
  */
 
-import { render } from "@react-email/render";
+import { render } from "react-email";
 import { describe, expect, it } from "vitest";
 import type { ProductInquiryEmailData } from "@/lib/email/email-data-schema";
 import { ProductInquiryEmail } from "@/emails/ProductInquiryEmail";

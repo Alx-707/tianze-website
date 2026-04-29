@@ -54,7 +54,7 @@ vi.mock("@/lib/logger", async () => {
   return mockLogger;
 });
 
-vi.mock("@react-email/render", () => ({
+vi.mock("react-email", () => ({
   render: vi.fn(async () => "mock-rendered-email"),
 }));
 

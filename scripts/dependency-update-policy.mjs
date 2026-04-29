@@ -1,17 +1,5 @@
 const heldDependencyUpdates = [
   {
-    name: "@react-email/components",
-    status: "deprecated-current-upstream",
-    rationale:
-      "React Email 5 remains the current mail template lane; the deprecated package is tied to the React Email major migration and is not a same-lane patch upgrade.",
-  },
-  {
-    name: "@react-email/preview-server",
-    status: "deprecated-current-upstream",
-    rationale:
-      "The preview server is dev-only and paired with the current React Email 5 tooling; replacing it belongs to the React Email 6 migration lane.",
-  },
-  {
     name: "critters",
     status: "deprecated-support-dependency",
     rationale:
@@ -40,12 +28,6 @@ const heldDependencyUpdates = [
     status: "runtime-baseline-held",
     rationale:
       "The project engine is >=20.19 <23, so Node 25 types would describe APIs outside the supported runtime range.",
-  },
-  {
-    name: "react-email",
-    status: "major-held",
-    rationale:
-      "React Email 6 is a major migration and must be paired with @react-email packages plus email preview/render proof.",
   },
   {
     name: "typescript",

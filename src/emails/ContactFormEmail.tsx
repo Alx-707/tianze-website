@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { Text } from "@react-email/components";
+import { Text } from "react-email";
 import type { EmailTemplateData } from "@/lib/email/email-data-schema";
 import { ResendUtils } from "@/lib/resend-utils";
 import { EmailField } from "@/emails/EmailField";
