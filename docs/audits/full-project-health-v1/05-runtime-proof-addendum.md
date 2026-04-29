@@ -209,32 +209,34 @@ Interpretation: local OpenNext preview is also not clean, but its failure shape 
 
 ### Runtime CSP proof
 
-The package script:
+The package script was rerun after the FPH-016 proof harness was tightened:
 
 ```bash
-pnpm security:csp:check
+CSP_CHECK_OUTPUT_PATH=docs/audits/full-project-health-v1/evidence/runtime-proof-addendum/fph016-csp-runtime-proof.txt pnpm security:csp:check
 ```
 
-returned `143` while shutting down `next start`, so it did not provide a clean script-level pass.
-
-Manual equivalent check was then run against local `next start`.
+Result: passed.
 
 Evidence:
 
 ```text
 docs/audits/full-project-health-v1/evidence/runtime-proof-addendum/security-csp-check-after-preview-build.txt
 docs/audits/full-project-health-v1/evidence/runtime-proof-addendum/manual-csp-runtime-check.txt
+docs/audits/full-project-health-v1/evidence/runtime-proof-addendum/fph016-csp-runtime-proof.txt
 ```
 
-Manual result:
+Fresh FPH-016 result at `origin/main` / `HEAD` `0ce02d3`:
 
 ```text
-/en status=200 csp=present nonce=present inline=39 nonced=0 unnonced=39
-/zh status=200 csp=present nonce=present inline=37 nonced=0 unnonced=37
-manual CSP runtime check passed
+/en status=200 csp=present script-src nonce=present unsafe-inline=false script-src-elem unsafe-inline=true inline total=38 nonced=0 unnonced=38 unnonced-executable=37 unnonced-non-executable=1
+  executable categories: next-rsc-flight-payload=36, next-themes-init=1
+  non-executable categories: project-json-ld=1
+/zh status=200 csp=present script-src nonce=present unsafe-inline=false script-src-elem unsafe-inline=true inline total=35 nonced=0 unnonced=35 unnonced-executable=34 unnonced-non-executable=1
+  executable categories: next-rsc-flight-payload=33, next-themes-init=1
+  non-executable categories: project-json-ld=1
 ```
 
-Interpretation: current local runtime matches the existing CSP contract: `script-src` has a nonce, but App Router inline script elements remain unnonced and rely on `script-src-elem 'unsafe-inline'`. This changes FPH-016 from "runtime proof unavailable" to "runtime proof confirms why the current exception exists." It does **not** mean the CSP is ideal; it means removing `'unsafe-inline'` needs a separate Next/App Router proof plan.
+Interpretation: current local runtime matches the existing CSP contract: `script-src` has a nonce and does not allow `'unsafe-inline'`, but App Router / RSC flight payloads and the `next-themes` init script remain unnonced executable inline scripts in built HTML and rely on `script-src-elem 'unsafe-inline'`. Project JSON-LD is present as an unnonced non-executable data block, so it is evidence of inline markup shape but not the reason the execution exception is needed. This changes FPH-016 from "runtime proof unavailable" to "runtime proof confirms why the current exception exists." It does **not** mean the CSP is ideal; it means removing `'unsafe-inline'` needs a separate strict-CSP plan that accounts for Next.js dynamic rendering / Cache Components trade-offs.
 
 ### Preview secret list
 

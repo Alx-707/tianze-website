@@ -532,12 +532,12 @@
   {
     "id": "FPH-016",
     "source_finding_ids": ["FPH-L02-003"],
-    "title": "Production CSP still allows inline script elements without runtime proof that it is unavoidable",
+    "title": "Production CSP still allows inline script elements; runtime proof confirms the current exception is required",
     "severity": "P2",
     "domain": "security",
     "source_lane": "02-security-trust-boundary",
-    "confidence": "medium",
-    "evidence_level": "Confirmed by static evidence",
+    "confidence": "high",
+    "evidence_level": "Confirmed by execution",
     "evidence": [
       {
         "type": "file",
@@ -548,13 +548,18 @@
         "type": "command",
         "reference": "docs/audits/full-project-health-v1/evidence/02-security-trust-boundary/security-csp-check.txt",
         "summary": "Runtime CSP check was blocked in Lane 02 because it needed a production build and the lane could not run build."
+      },
+      {
+        "type": "command",
+        "reference": "docs/audits/full-project-health-v1/evidence/runtime-proof-addendum/fph016-csp-runtime-proof.txt",
+        "summary": "Fresh local Next runtime proof at HEAD 0ce02d3 shows /en has 37 unnonced executable inline scripts and /zh has 34. The executable categories are Next RSC flight payloads and next-themes init; JSON-LD is observed separately as a non-executable data block. script-src has a nonce and no unsafe-inline, while script-src-elem uses unsafe-inline for the unnonced executable elements."
       }
     ],
     "impact": "CSP is weaker as a last-resort defense if an HTML/script injection bug appears.",
-    "root_cause": "A compatibility exception is broad and permanent rather than tied to measured required inline framework scripts.",
-    "recommended_fix": "After a build is available, run CSP proof. Remove unsafe-inline if not needed, or document the exact unavoidable scripts and prefer nonce/hash allowance.",
-    "verification_needed": "Run pnpm security:csp:check after pnpm build and inspect representative page CSP headers.",
-    "linus_gate": "Needs proof"
+    "root_cause": "The current App Router/Cache Components runtime emits unnonced executable RSC flight payloads and the next-themes init script while the layout avoids request header nonce reads to preserve static/PPR behavior.",
+    "recommended_fix": "Do not remove script-src-elem unsafe-inline in this branch. Keep it as documented technical debt unless a separate strict-CSP plan moves affected routes to dynamic rendering, adds a safe nonce path, or replaces the unnonced runtime/script sources.",
+    "verification_needed": "After pnpm build, run CSP_CHECK_OUTPUT_PATH=docs/audits/full-project-health-v1/evidence/runtime-proof-addendum/fph016-csp-runtime-proof.txt pnpm security:csp:check and confirm script-src remains nonce-scoped while unnonced runtime scripts are explicitly classified.",
+    "linus_gate": "Keep"
   },
   {
     "id": "FPH-017",
