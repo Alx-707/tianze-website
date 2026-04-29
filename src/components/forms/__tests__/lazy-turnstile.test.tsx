@@ -105,6 +105,7 @@ describe("LazyTurnstile", () => {
     class MockIntersectionObserver implements IntersectionObserver {
       readonly root = null;
       readonly rootMargin = "200px";
+      readonly scrollMargin = "";
       readonly thresholds = [0];
 
       constructor(callback: IntersectionObserverCallback) {

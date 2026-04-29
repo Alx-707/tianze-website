@@ -183,6 +183,7 @@ async function readProductionDomainRouteStatus() {
       `[phase6] cannot parse ${path.relative(ROOT_DIR, gatewayConfigPath)}: ${
         (error && error.message) || error
       }`,
+      { cause: error },
     );
   }
 }

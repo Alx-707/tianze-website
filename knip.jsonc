@@ -55,7 +55,6 @@
     "@next/eslint-plugin-next",
     // Explicit support deps kept for the Cloudflare phase6 / split-worker chain.
     // They are intentionally present even though knip cannot trace the runtime linkage.
-    "critters",
     "eslint-plugin-react",
     "eslint-plugin-react-hooks",
     "prettier-plugin-tailwindcss",

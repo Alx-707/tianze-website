@@ -3,7 +3,9 @@
  * Resend email service core class
  */
 
-import { render } from "@react-email/render";
+import "server-only";
+
+import { render } from "react-email";
 import { Resend } from "resend";
 import { env } from "@/lib/env";
 import type {
@@ -117,7 +119,7 @@ export class ResendService {
         error: error instanceof Error ? error.message : "Unknown error",
         email: sanitizeEmail(data.email),
       });
-      throw new Error("Failed to send email");
+      throw new Error("Failed to send email", { cause: error });
     }
   }
 
@@ -164,7 +166,7 @@ export class ResendService {
         error: error instanceof Error ? error.message : "Unknown error",
         email: sanitizeEmail(data.email),
       });
-      throw new Error("Failed to send confirmation email");
+      throw new Error("Failed to send confirmation email", { cause: error });
     }
   }
 
@@ -216,7 +218,7 @@ export class ResendService {
         email: sanitizeEmail(data.email),
         product: data.productName,
       });
-      throw new Error("Failed to send product inquiry email");
+      throw new Error("Failed to send product inquiry email", { cause: error });
     }
   }
 

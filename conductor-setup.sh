@@ -5,7 +5,7 @@ cd "${CONDUCTOR_WORKSPACE_PATH:-.}"
 
 export PATH="$HOME/.local/bin:$PATH:/opt/homebrew/bin:/usr/local/bin"
 
-REQUIRED_NODE_VERSION="20.19.0"
+REQUIRED_NODE_VERSION="24.15.0"
 if [ -f .node-version ]; then
   REQUIRED_NODE_VERSION="$(tr -d '[:space:]' < .node-version)"
 elif [ -f .nvmrc ]; then

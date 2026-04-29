@@ -37,7 +37,7 @@
 
 - `wrangler`: `4.85.0` -> `4.86.0`
 - `@opennextjs/cloudflare` 继续固定在 `1.19.4`
-- 项目 Node proof baseline 继续保持 `20.19.x`
+- 该轮当时项目 Node proof baseline 继续保持 `20.19.x`
 
 这次只处理 Cloudflare CLI / Miniflare / workerd patch 面，不混入测试工具、Tailwind、TypeScript、ESLint、React Email 或 `middleware.ts` -> `proxy.ts` 迁移。
 
@@ -54,6 +54,32 @@
 
 本轮额外尝试了 `pnpm preview:cf` + `pnpm smoke:cf:preview`。结果：`wrangler 4.86.0` 分支和 `main` 上的 `wrangler 4.85.0` 都出现相同的本地 preview 页面 500 / worker hung 行为，因此它不是 `4.86.0` 引入的新回归，不作为本轮 patch 阻断项。这个本地 preview smoke 基线问题已单独登记为 `TD-004`。
 
+### 2026-04-29 project Node 24 runtime baseline migration
+
+项目运行时基线已从 Node `20.19.0` 迁到 Node `24.15.0` LTS：
+
+- `.nvmrc` / `.node-version`: `24.15.0`
+- `package.json > engines.node`: `>=24 <25`
+- GitHub Actions、Cloudflare deploy workflow、Vercel deploy workflow: `node-version: "24.15.0"`
+- 本地 `ci:local` 预检基线: `24.15.0`
+- `@types/node`: `24.12.2`
+
+本轮证明：
+
+- `pnpm install --frozen-lockfile`
+- `pnpm type-check`
+- `pnpm type-check:tests`
+- `pnpm lint:check`
+- `pnpm deps:check`
+- `pnpm format:check`
+- `pnpm unused:check`
+- `pnpm build`
+- `pnpm build:cf`
+- `pnpm tech:check`
+- `pnpm ci:local:quick`
+
+`@types/node 25.x` 仍不跟随 latest；它必须等真实 runtime baseline 扩到 Node 25 后再单独验证。Vercel Project Settings 的 Node.js Version 建议同步切到 `24.x`；`package.json > engines.node` 也会约束 Vercel 使用 Node 24，但最终以部署日志中的实际 Node major 为准。
+
 ### 2026-04-28 GitHub Actions Node 24 runtime refresh
 
 GitHub Actions 在合并后提示：`actions/checkout@v4`、`actions/setup-node@v4`、`pnpm/action-setup@v4`、`actions/upload-artifact@v4`、`actions/download-artifact@v4` 等 action runtime 仍在 Node.js 20，GitHub 将在 2026-06-02 默认强制切到 Node 24。
@@ -68,7 +94,7 @@ GitHub Actions 在合并后提示：`actions/checkout@v4`、`actions/setup-node@
 - `pnpm/action-setup`: `v4` -> `v5`
 - `github/codeql-action/upload-sarif`: `v3` -> `v4`
 
-这些版本的 `action.yml` 已核对为 `runs: node24`，且现有 workflow 使用到的输入项仍存在。项目自己的 Node baseline 仍保持 `20.19.0`，不要把这次 workflow runtime 刷新误读成应用运行时升级。
+这些版本的 `action.yml` 已核对为 `runs: node24`，且现有 workflow 使用到的输入项仍存在。该轮当时不改变项目自己的 Node baseline；后续项目 runtime baseline 已在 2026-04-29 迁到 Node `24.15.0`。
 
 ### 0. 2026-04-26 runtime cache removal proof
 

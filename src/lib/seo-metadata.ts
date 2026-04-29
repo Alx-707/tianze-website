@@ -4,6 +4,7 @@ import { siteFacts } from "@/config/site-facts";
 import { ONE } from "@/constants";
 import { routing } from "@/i18n/routing-config";
 import { getRuntimeEnvString } from "@/lib/env";
+import { hasOwn } from "@/lib/security/object-guards";
 import {
   generateCanonicalURL,
   generateLanguageAlternates,
@@ -280,32 +281,9 @@ export function createPageSEOConfig(
     },
   };
 
-  let baseConfig = baseConfigs.home;
-  switch (pageType) {
-    case "home":
-      baseConfig = baseConfigs.home;
-      break;
-    case "about":
-      baseConfig = baseConfigs.about;
-      break;
-    case "contact":
-      baseConfig = baseConfigs.contact;
-      break;
-    case "products":
-      baseConfig = baseConfigs.products;
-      break;
-    case "privacy":
-      baseConfig = baseConfigs.privacy;
-      break;
-    case "terms":
-      baseConfig = baseConfigs.terms;
-      break;
-    case "oem":
-      baseConfig = baseConfigs.oem;
-      break;
-    default:
-      baseConfig = baseConfigs.home;
-  }
+  const baseConfig =
+    (hasOwn(baseConfigs, pageType) ? baseConfigs[pageType] : undefined) ??
+    baseConfigs.home;
 
   return mergeSEOConfig(baseConfig, customConfig);
 }

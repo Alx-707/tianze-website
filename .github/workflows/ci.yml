@@ -39,7 +39,7 @@ jobs:
       - name: 设置Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: "20.19.0"
+          node-version: "24.15.0"
           cache: "pnpm"
           cache-dependency-path: pnpm-lock.yaml
 
@@ -93,7 +93,7 @@ jobs:
       - name: 设置Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: "20.19.0"
+          node-version: "24.15.0"
           cache: "pnpm"
           cache-dependency-path: pnpm-lock.yaml
 
@@ -162,7 +162,7 @@ jobs:
       - name: 设置Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: "20.19.0"
+          node-version: "24.15.0"
           cache: "pnpm"
           cache-dependency-path: pnpm-lock.yaml
 
@@ -225,7 +225,7 @@ jobs:
       - name: 设置Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: "20.19.0"
+          node-version: "24.15.0"
           cache: "pnpm"
           cache-dependency-path: pnpm-lock.yaml
 
@@ -280,7 +280,7 @@ jobs:
       - name: 设置Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: "20.19.0"
+          node-version: "24.15.0"
           cache: "pnpm"
           cache-dependency-path: pnpm-lock.yaml
 
@@ -321,7 +321,7 @@ jobs:
       - name: 设置Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: "20.19.0"
+          node-version: "24.15.0"
           cache: "pnpm"
           cache-dependency-path: pnpm-lock.yaml
 
@@ -394,7 +394,7 @@ jobs:
       - name: 设置Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: "20.19.0"
+          node-version: "24.15.0"
           cache: "pnpm"
           cache-dependency-path: pnpm-lock.yaml
 
@@ -455,7 +455,7 @@ jobs:
       - name: 设置Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: "20.19.0"
+          node-version: "24.15.0"
           cache: "pnpm"
           cache-dependency-path: pnpm-lock.yaml
 

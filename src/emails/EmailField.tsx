@@ -1,5 +1,5 @@
 import type { CSSProperties, ReactNode } from "react";
-import { Section, Text } from "@react-email/components";
+import { Section, Text } from "react-email";
 import { COLORS, SIZES, SPACING } from "@/emails/theme";
 
 interface EmailFieldProps {
