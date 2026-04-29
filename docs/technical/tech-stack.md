@@ -11,7 +11,7 @@
 
 - **Next.js 16.2.4**：主框架，使用 App Router
 - **React 19.2.5**：UI 运行时
-- **TypeScript 5.9.3**：类型系统
+- **TypeScript 6.0.3**：类型系统
 - **Tailwind CSS 4.2.4**：样式系统
 
 ### 当前页面与数据执行方式
@@ -76,9 +76,9 @@
 
 - **Airtable 0.12.2**：线索数据落地
 - **Resend 6.12.2**：邮件发送
-- **@react-email/components 1.0.12**
-- **@react-email/render 2.0.8**
-- **react-email 5.2.10**：邮件模板与本地预览
+- **react-email 6.0.5**：邮件组件、模板 render 与本地预览 CLI
+- **@react-email/render 2.0.8**：Resend peer dependency 显式依赖
+- **@react-email/ui 6.0.5**：本地邮件预览 UI
 
 ### 安全与防刷
 
@@ -111,10 +111,14 @@
 
 ### 静态质量工具
 
-- **ESLint 9.39.2**
+- **ESLint 10.2.1**
+- **@eslint/js 10.0.1**
+- **@eslint/compat 2.0.5**：兼容部分尚未正式声明 ESLint 10 支持的 Next/React ESLint 规则
 - **typescript-eslint 8.59.1**
+- **eslint-plugin-security 4.0.0**
+- **eslint-plugin-react-you-might-not-need-an-effect 0.9.3**
 - **Prettier 3.8.3**
-- **prettier-plugin-tailwindcss 0.7.2**
+- **prettier-plugin-tailwindcss 0.8.0**
 - **@ianvs/prettier-plugin-sort-imports 4.7.1**
 - **dependency-cruiser 17.3.10**：依赖边界检查
 - **knip 6.7.0**：未使用代码扫描
@@ -127,8 +131,9 @@
 ### 包管理与运行时
 
 - **pnpm 10.13.1**
-- **Node.js 支持范围**：`>=20.19 <23`
-- 当前仓库的**proof baseline** 仍按 **Node 20.19.x** 看
+- **Node.js 支持范围**：`>=24 <25`
+- 当前仓库的**proof baseline** 按 **Node 24.15.x LTS** 看
+- **@types/node 24.12.2**：跟当前 Node 24 LTS 运行边界对齐，不跟随 Node 25 类型面
 
 ### Cloudflare 构建链
 

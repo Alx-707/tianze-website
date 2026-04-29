@@ -280,7 +280,7 @@ function analyzeSource(filePath, content, options = {}) {
 
 function analyzeFile(filePath, options = {}) {
   const absolute = path.join(REPO_ROOT, filePath);
-  let content = "";
+  let content;
   try {
     content = fs.readFileSync(absolute, "utf8");
   } catch (error) {

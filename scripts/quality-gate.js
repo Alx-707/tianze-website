@@ -1701,7 +1701,7 @@ class QualityGate {
 
     let exitCode = 0;
     let status = "completed";
-    let output = "";
+    let output;
 
     try {
       output = execSync("pnpm security:semgrep", {

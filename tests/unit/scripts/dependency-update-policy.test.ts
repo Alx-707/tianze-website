@@ -20,9 +20,9 @@ describe("dependency update policy", () => {
   it("keeps reviewed hold packages out of actionable updates", () => {
     const candidates: UpdateCandidate[] = [
       {
-        name: "typescript",
-        current: "5.9.3",
-        latest: "6.0.3",
+        name: "@types/node",
+        current: "22.19.17",
+        latest: "25.6.0",
         dependencyType: "devDependencies",
       },
       {
@@ -36,15 +36,15 @@ describe("dependency update policy", () => {
     const result = partitionDependencyUpdates(candidates);
 
     expect(result.heldUpdates).toHaveLength(1);
-    expect(result.heldUpdates[0]?.name).toBe("typescript");
+    expect(result.heldUpdates[0]?.name).toBe("@types/node");
     expect(result.actionableUpdates).toEqual([candidates[1]]);
   });
 
   it("does not suppress a held package when it has a vulnerability", () => {
     const candidate: UpdateCandidate = {
-      name: "typescript",
-      current: "5.9.3",
-      latest: "6.0.3",
+      name: "@types/node",
+      current: "22.19.17",
+      latest: "25.6.0",
       dependencyType: "devDependencies",
       vulnerability: {
         severity: "high",

@@ -9,8 +9,8 @@
 #   pnpm ci:local:quick     # 快速预检（跳过耗时任务）
 #   pnpm ci:local:fix       # 自动修复可修复的问题
 # 口径说明：
-#   - 远程 GitHub Actions 当前固定 Node 20.19.0
-#   - 本地脚本也按 Node 20.19.0 作为预检基线，不再把 Node 22 当作默认兼容真相
+#   - 远程 GitHub Actions 当前固定 Node 24.15.0
+#   - 本地脚本也按 Node 24.15.0 作为预检基线，不再把 Node 22 当作默认兼容真相
 # =============================================================================
 # CI 架构说明：
 #   - ci.yml: 主流水线，PR 必需检查（type-check, lint, test, security, etc.）
@@ -70,7 +70,7 @@ check_node_version() {
     print_step "检查 Node.js 版本"
 
     CURRENT_VERSION=$(node --version | cut -d'v' -f2)
-    CI_VERSION="20.19.0"
+    CI_VERSION="24.15.0"
 
     if [ "$CURRENT_VERSION" = "$CI_VERSION" ]; then
         print_success "Node.js 版本与远程 CI 一致: v$CURRENT_VERSION"

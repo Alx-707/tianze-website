@@ -46,6 +46,7 @@ function parseSemgrepJson(result, description) {
   } catch (error) {
     throw new Error(
       `${description} returned invalid JSON: ${error.message}\n${stdout}`,
+      { cause: error },
     );
   }
 }

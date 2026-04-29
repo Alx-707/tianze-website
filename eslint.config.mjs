@@ -1,5 +1,6 @@
 import path from "path";
 import { fileURLToPath } from "url";
+import { fixupConfigRules } from "@eslint/compat";
 import { FlatCompat } from "@eslint/eslintrc";
 import js from "@eslint/js";
 // Next.js ESLint configs - 使用官方推荐的直接导入方式
@@ -51,8 +52,8 @@ export default [
   js.configs.recommended,
 
   // Next.js configuration - 直接 spread 官方配置 (避免 FlatCompat 循环引用问题)
-  ...nextVitals,
-  ...nextTs,
+  ...fixupConfigRules(nextVitals),
+  ...fixupConfigRules(nextTs),
 
   // Import resolver settings for @/* alias (TypeScript + Node)
   {

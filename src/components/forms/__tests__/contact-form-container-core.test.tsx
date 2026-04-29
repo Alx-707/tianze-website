@@ -68,6 +68,7 @@ const originalIntersectionObserver = (
 class MockIntersectionObserver implements IntersectionObserver {
   readonly root: Element | Document | null = null;
   readonly rootMargin = "";
+  readonly scrollMargin = "";
   readonly thresholds = [0];
 
   constructor(private readonly callback: IntersectionObserverCallback) {}
