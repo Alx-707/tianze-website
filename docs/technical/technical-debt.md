@@ -131,3 +131,40 @@ execute destructive cleanup.
 - `HANDOFF.md` — Legacy DO cleanup deferred next step
 - `docs/superpowers/prompts/legacy-do-cleanup-review-swarm.md` — independent
   review prompt for the cleanup runbook and future cleanup PR
+
+---
+
+## TD-004: Local Cloudflare preview smoke returns 500 on page routes
+
+**Introduced:** Observed during Wrangler 4.86.0 isolated patch validation
+(2026-04-28)
+**Severity:** Medium operational proof gap — deployed smoke remains the stronger
+Cloudflare runtime proof
+
+During the Wrangler `4.85.0` -> `4.86.0` patch lane, `pnpm preview:cf` started
+successfully, but `pnpm smoke:cf:preview` returned 500 for `/en`, `/zh`,
+`/en/contact`, and `/zh/contact`. The preview process logged:
+
+```text
+Uncaught Error: The Workers runtime canceled this request because it detected that your Worker's code had hung and would never generate a response.
+```
+
+The same smoke failure reproduced on `main` with `wrangler 4.85.0`, so this is
+not currently classified as a `4.86.0` regression.
+
+**Current decision:** Do not treat local preview smoke as a release-blocking
+proof for the Wrangler 4.86 patch. Keep using:
+
+- `pnpm build`
+- `pnpm build:cf:phase6`
+- `pnpm review:cf:official-compare`
+- `pnpm deploy:cf:phase6:dry-run`
+- deployed smoke when a deployed preview URL exists
+
+**Follow-up scope:** Debug local preview separately, starting from the generated
+OpenNext worker request path and Cloudflare workerd hang behavior. Do not mix
+that fix into dependency patch lanes unless the new dependency version is proven
+to introduce the failure.
+
+**Decision trigger:** Before relying on local Cloudflare preview smoke as a
+merge gate again.

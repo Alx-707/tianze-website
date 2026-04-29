@@ -17,7 +17,7 @@
 - `@opennextjs/cloudflare`: `1.18.0` -> `1.19.4`
 - `wrangler`: `4.79.0` -> `4.85.0`
 
-`wrangler 4.86.0` 在本轮执行当天已经可用，但属于同日新版本；为了降低部署链风险，本轮固定在 `4.85.0`，后续再作为单独 patch 验证。`@opennextjs/cloudflare` 也按部署关键包处理，固定为 `1.19.4`，避免 patch 漂移影响 Cloudflare 构建链。
+`wrangler 4.86.0` 在本轮执行当天已经可用，但属于同日新版本；为了降低部署链风险，本轮先固定在 `4.85.0`，随后作为单独 patch 验证。`@opennextjs/cloudflare` 也按部署关键包处理，固定为 `1.19.4`，避免 patch 漂移影响 Cloudflare 构建链。
 
 本轮证明：
 
@@ -30,6 +30,45 @@
 - `pnpm release:verify`
 
 `middleware` deprecated warning 仍然是已知状态；本轮不做 `middleware.ts` -> `proxy.ts` 迁移。
+
+### 2026-04-28 Wrangler isolated patch refresh
+
+在 Next / OpenNext 主链已验证后，单独升级 Wrangler：
+
+- `wrangler`: `4.85.0` -> `4.86.0`
+- `@opennextjs/cloudflare` 继续固定在 `1.19.4`
+- 项目 Node proof baseline 继续保持 `20.19.x`
+
+这次只处理 Cloudflare CLI / Miniflare / workerd patch 面，不混入测试工具、Tailwind、TypeScript、ESLint、React Email 或 `middleware.ts` -> `proxy.ts` 迁移。
+
+本轮证明：
+
+- `pnpm install --frozen-lockfile`
+- `pnpm type-check`
+- `pnpm lint:check`
+- `pnpm security:audit`
+- `pnpm build`
+- `pnpm build:cf:phase6`
+- `pnpm review:cf:official-compare`
+- `pnpm deploy:cf:phase6:dry-run`
+
+本轮额外尝试了 `pnpm preview:cf` + `pnpm smoke:cf:preview`。结果：`wrangler 4.86.0` 分支和 `main` 上的 `wrangler 4.85.0` 都出现相同的本地 preview 页面 500 / worker hung 行为，因此它不是 `4.86.0` 引入的新回归，不作为本轮 patch 阻断项。这个本地 preview smoke 基线问题已单独登记为 `TD-004`。
+
+### 2026-04-28 GitHub Actions Node 24 runtime refresh
+
+GitHub Actions 在合并后提示：`actions/checkout@v4`、`actions/setup-node@v4`、`pnpm/action-setup@v4`、`actions/upload-artifact@v4`、`actions/download-artifact@v4` 等 action runtime 仍在 Node.js 20，GitHub 将在 2026-06-02 默认强制切到 Node 24。
+
+本轮只升级 workflow action 自身版本，不改变项目运行 Node baseline：
+
+- `actions/checkout`: `v4` -> `v6`
+- `actions/setup-node`: `v4` -> `v6`
+- `actions/cache`: `v4` -> `v5`
+- `actions/upload-artifact`: `v4` -> `v7`
+- `actions/download-artifact`: `v4` -> `v8`
+- `pnpm/action-setup`: `v4` -> `v5`
+- `github/codeql-action/upload-sarif`: `v3` -> `v4`
+
+这些版本的 `action.yml` 已核对为 `runs: node24`，且现有 workflow 使用到的输入项仍存在。项目自己的 Node baseline 仍保持 `20.19.0`，不要把这次 workflow runtime 刷新误读成应用运行时升级。
 
 ### 0. 2026-04-26 runtime cache removal proof
 

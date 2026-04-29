@@ -20,13 +20,13 @@ jobs:
 
     steps:
       - name: 检出代码
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           submodules: false
           persist-credentials: false
 
       - name: 设置pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v5
         with:
           version: 10.13.1
 
@@ -37,7 +37,7 @@ jobs:
         run: pnpm config set store-dir ~/.pnpm-store
 
       - name: 设置Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "20.19.0"
           cache: "pnpm"
@@ -73,14 +73,14 @@ jobs:
 
     steps:
       - name: 检出代码
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           persist-credentials: false
 
           submodules: false
 
       - name: 设置pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v5
         with:
           version: 10.13.1
 
@@ -91,14 +91,14 @@ jobs:
         run: pnpm config set store-dir ~/.pnpm-store
 
       - name: 设置Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "20.19.0"
           cache: "pnpm"
           cache-dependency-path: pnpm-lock.yaml
 
       - name: Cache Vitest
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: node_modules/.vitest
           key: ${{ runner.os }}-vitest-cache-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ hashFiles('vitest.config.*', 'tsconfig*.json') }}
@@ -114,14 +114,14 @@ jobs:
 
       - name: 上传覆盖率报告
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: coverage-report
           path: reports/coverage/
 
       - name: 上传 Vitest 测试报告
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: vitest-reports
           path: |
@@ -143,13 +143,13 @@ jobs:
 
     steps:
       - name: 检出代码
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           submodules: false
           persist-credentials: false
 
       - name: 设置pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v5
         with:
           version: 10.13.1
 
@@ -160,14 +160,14 @@ jobs:
         run: pnpm config set store-dir ~/.pnpm-store
 
       - name: 设置Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "20.19.0"
           cache: "pnpm"
           cache-dependency-path: pnpm-lock.yaml
 
       - name: Cache Next.js
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: .next/cache
           key: ${{ runner.os }}-next-cache-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ hashFiles('next.config.*', 'tsconfig*.json', 'tailwind.config.js', 'postcss.config.*', 'src/**/*.{ts,tsx,js,jsx,css,scss,mdx}') }}
@@ -192,7 +192,7 @@ jobs:
 
       - name: 上传E2E报告
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: e2e-report
           path: test-results/
@@ -206,13 +206,13 @@ jobs:
 
     steps:
       - name: 检出代码
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           submodules: false
           persist-credentials: false
 
       - name: 设置pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v5
         with:
           version: 10.13.1
 
@@ -223,14 +223,14 @@ jobs:
         run: pnpm config set store-dir ~/.pnpm-store
 
       - name: 设置Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "20.19.0"
           cache: "pnpm"
           cache-dependency-path: pnpm-lock.yaml
 
       - name: Cache Next.js build
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: .next/cache
           key: ${{ runner.os }}-next-cache-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ hashFiles('next.config.*', 'tsconfig*.json', 'tailwind.config.js', 'postcss.config.*', 'src/**/*.{ts,tsx,js,jsx,css,scss,mdx}') }}
@@ -261,13 +261,13 @@ jobs:
 
     steps:
       - name: 检出代码
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           submodules: false
           persist-credentials: false
 
       - name: 设置pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v5
         with:
           version: 10.13.1
 
@@ -278,7 +278,7 @@ jobs:
         run: pnpm config set store-dir ~/.pnpm-store
 
       - name: 设置Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "20.19.0"
           cache: "pnpm"
@@ -300,7 +300,7 @@ jobs:
 
     steps:
       - name: 检出代码
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           submodules: false
           # persist-credentials: true 因为 Semgrep baseline 模式需要 git fetch base branch
@@ -308,7 +308,7 @@ jobs:
           fetch-depth: 0
 
       - name: 设置pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v5
         with:
           version: 10.13.1
 
@@ -319,7 +319,7 @@ jobs:
         run: pnpm config set store-dir ~/.pnpm-store
 
       - name: 设置Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "20.19.0"
           cache: "pnpm"
@@ -375,13 +375,13 @@ jobs:
 
     steps:
       - name: 检出代码
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           submodules: false
           persist-credentials: false
 
       - name: 设置pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v5
         with:
           version: 10.13.1
 
@@ -392,7 +392,7 @@ jobs:
         run: pnpm config set store-dir ~/.pnpm-store
 
       - name: 设置Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "20.19.0"
           cache: "pnpm"
@@ -418,7 +418,7 @@ jobs:
 
       - name: 上传 i18n 形状报告
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: i18n-shape-report.json
           path: reports/i18n-shape-report.json
@@ -435,14 +435,14 @@ jobs:
 
     steps:
       - name: 检出代码
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           submodules: false
           persist-credentials: false
           fetch-depth: 0
 
       - name: 设置pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v5
         with:
           version: 10.13.1
 
@@ -453,7 +453,7 @@ jobs:
         run: pnpm config set store-dir ~/.pnpm-store
 
       - name: 设置Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "20.19.0"
           cache: "pnpm"
@@ -463,7 +463,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: 下载覆盖率报告
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: coverage-report
           path: reports/coverage/
@@ -481,7 +481,7 @@ jobs:
 
       - name: 上传 Guardrails 报告
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: guardrails-reports
           path: reports/guardrails/
@@ -520,7 +520,7 @@ jobs:
 
     steps:
       - name: 检出代码
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           submodules: false
           persist-credentials: false
@@ -528,7 +528,7 @@ jobs:
       - name: 下载 Guardrails 报告
         if: always()
         continue-on-error: true
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: guardrails-reports
           path: reports/guardrails/

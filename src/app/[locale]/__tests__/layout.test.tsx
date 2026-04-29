@@ -197,7 +197,14 @@ describe("LocaleLayout", () => {
       await renderAsyncPage(page);
 
       expect(screen.getByText("Skip to main content")).toBeInTheDocument();
-      expect(screen.getAllByTestId("next-script")).toHaveLength(3);
+      const scriptSources = screen
+        .getAllByTestId("next-script")
+        .map((script) => script.getAttribute("data-src"));
+      expect(scriptSources).toEqual([
+        "https://unpkg.com/react-scan@0.5.3/dist/auto.global.js",
+        "https://unpkg.com/react-grab@0.1.32/dist/index.global.js",
+        "https://unpkg.com/@react-grab/mcp@0.1.32/dist/client.global.js",
+      ]);
       expect(mockSetRequestLocale).toHaveBeenCalledWith("en");
     });
 

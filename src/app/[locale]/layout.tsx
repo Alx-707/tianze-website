@@ -173,14 +173,13 @@ export default async function LocaleLayout({
             {!disableDevTools && (
               <>
                 <Script
-                  src="https://unpkg.com/react-grab@0.1.28/dist/index.global.js"
+                  src="https://unpkg.com/react-grab@0.1.32/dist/index.global.js"
                   crossOrigin="anonymous"
                   strategy="afterInteractive"
                 />
                 <Script
-                  // Track the same release line as `react-grab` until this client is
-                  // versioned from a locally-managed dependency instead of CDN.
-                  src="https://unpkg.com/@react-grab/claude-code@0.1.28/dist/client.global.js"
+                  // Keep the browser bridge aligned with the local react-grab MCP helper.
+                  src="https://unpkg.com/@react-grab/mcp@0.1.32/dist/client.global.js"
                   strategy="lazyOnload"
                 />
               </>

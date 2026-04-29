@@ -36,6 +36,23 @@ paths:
 - **E2E**: Playwright
 - **Config**: `vitest.config.mts`
 
+When upgrading Vitest, keep `vitest` and `@vitest/coverage-v8` on the same
+patch version in the same branch. Prove the upgrade with `pnpm test`; run
+`pnpm test:coverage` when the change touches coverage tooling, coverage gates,
+or coverage report behavior.
+
+When upgrading Playwright, keep `@playwright/test` and `playwright` on the same
+version in the same branch. When upgrading axe tooling, treat
+`@axe-core/playwright` and `axe-core` as one validation group. Prove the upgrade
+with the smallest browser-facing check that exercises the lane, such as release
+smoke, related E2E specs, or focused axe helper tests.
+
+When upgrading Stryker, keep `@stryker-mutator/core` and
+`@stryker-mutator/vitest-runner` on the same version in the same branch. Full
+mutation testing is intentionally heavy; for dependency-only patch upgrades,
+prove the tool loads with the current config plus targeted Vitest/mutation guard
+checks, and reserve full mutation runs for explicit risk-driven lanes.
+
 ## Commands
 
 ```bash
