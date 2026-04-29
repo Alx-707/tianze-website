@@ -59,7 +59,7 @@
 项目运行时基线已从 Node `20.19.0` 迁到 Node `24.15.0` LTS：
 
 - `.nvmrc` / `.node-version`: `24.15.0`
-- `package.json > engines.node`: `>=24.15 <25`
+- `package.json > engines.node`: `>=24 <25`
 - GitHub Actions、Cloudflare deploy workflow、Vercel deploy workflow: `node-version: "24.15.0"`
 - 本地 `ci:local` 预检基线: `24.15.0`
 - `@types/node`: `24.12.2`

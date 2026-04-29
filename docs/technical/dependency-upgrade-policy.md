@@ -15,7 +15,7 @@
 
 | Package | Current reason | Safe next step |
 | --- | --- | --- |
-| `@types/node` | 项目 runtime 支持范围是 `>=24.15 <25`，Node 25 types 不匹配 | 只有当 runtime baseline 扩到 Node 25 时再升 |
+| `@types/node` | 项目 runtime 支持范围是 `>=24 <25`，Node 25 types 不匹配 | 只有当 runtime baseline 扩到 Node 25 时再升 |
 
 ## 这次升级经验
 
@@ -121,7 +121,7 @@ ESLint 10 不能只改版本号。当前仓库采用：
 
 原因：
 
-- 当前 `package.json` 运行时范围是 `>=24.15 <25`
+- 当前 `package.json` 运行时范围是 `>=24 <25`
 - GitHub Actions 和本地 `ci:local` 都以 Node `24.15.0` 作为 proof baseline
 - Node 官方说明生产应用应使用 Active LTS 或 Maintenance LTS；Node 25 是 Current，不是 LTS
 - Vercel 当前可用 Node major 是 `24.x`、`22.x`、`20.x`，没有 Node 25

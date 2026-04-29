@@ -64,7 +64,7 @@ pnpm validate:translations
 
 ## 🛠️ 环境要求
 
-- **Node.js**: 24.15.0（默认开发版本与 CI 基线；项目运行时策略收口为 Node 24 LTS，`package.json > engines.node` 当前为 `>=24.15 <25`）
+- **Node.js**: 24.15.0（默认开发版本与 CI 基线；项目运行时策略收口为 Node 24 LTS，`package.json > engines.node` 当前为 `>=24 <25`）
 - **包管理器**: pnpm 10.13.1（已在 `.npmrc` 与 CI 固定）
 - **操作系统**: macOS, Linux, Windows
 

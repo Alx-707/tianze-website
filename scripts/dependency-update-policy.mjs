@@ -3,7 +3,7 @@ const heldDependencyUpdates = [
     name: "@types/node",
     status: "runtime-baseline-held",
     rationale:
-      "The project engine is >=24.15 <25, so Node 25 types would describe APIs outside the supported runtime range.",
+      "The project engine is >=24 <25, so Node 25 types would describe APIs outside the supported runtime range.",
   },
 ];
 
