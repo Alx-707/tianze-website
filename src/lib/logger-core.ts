@@ -6,6 +6,12 @@
  * - debug/log: Development and test only
  */
 
+import {
+  getRuntimeEnvString,
+  isRuntimeDevelopment,
+  isRuntimeTest,
+} from "@/lib/env";
+
 type LogArgs = [message?: unknown, ...optionalParams: unknown[]];
 
 type LogLevel = "error" | "warn" | "info" | "debug";
@@ -18,9 +24,7 @@ const LOG_LEVELS: Record<LogLevel, number> = {
 };
 
 function isDev(): boolean {
-  return (
-    process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test"
-  );
+  return isRuntimeDevelopment() || isRuntimeTest();
 }
 
 function isValidLogLevel(value: string): value is LogLevel {
@@ -28,7 +32,7 @@ function isValidLogLevel(value: string): value is LogLevel {
 }
 
 function getLogLevel(): LogLevel {
-  const rawLevel = process.env.LOG_LEVEL;
+  const rawLevel = getRuntimeEnvString("LOG_LEVEL");
   const level = rawLevel?.toLowerCase() as LogLevel | undefined;
   if (level && isValidLogLevel(level)) {
     return level;
