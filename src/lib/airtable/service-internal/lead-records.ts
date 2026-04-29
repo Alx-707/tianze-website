@@ -156,6 +156,6 @@ export async function createLeadRecord(params: {
       error: error instanceof Error ? error.message : "Unknown error",
       type,
     });
-    throw new Error("Failed to create lead record");
+    throw new Error("Failed to create lead record", { cause: error });
   }
 }

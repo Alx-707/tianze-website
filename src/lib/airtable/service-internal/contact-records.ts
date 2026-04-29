@@ -86,7 +86,7 @@ export async function createContactRecord(params: {
     logger.error("Failed to create contact record", {
       error: error instanceof Error ? error.message : "Unknown error",
     });
-    throw new Error("Failed to create contact record");
+    throw new Error("Failed to create contact record", { cause: error });
   }
 }
 
@@ -124,7 +124,7 @@ export async function getContactRecords(params: {
     logger.error("Failed to fetch contact records", {
       error: error instanceof Error ? error.message : "Unknown error",
     });
-    throw new Error("Failed to fetch contact records");
+    throw new Error("Failed to fetch contact records", { cause: error });
   }
 }
 
@@ -157,7 +157,7 @@ export async function updateContactRecordStatus(params: {
       recordId,
       status,
     });
-    throw new Error("Failed to update contact status");
+    throw new Error("Failed to update contact status", { cause: error });
   }
 }
 
@@ -179,7 +179,7 @@ export async function deleteContactRecord(params: {
       error: error instanceof Error ? error.message : "Unknown error",
       recordId,
     });
-    throw new Error("Failed to delete contact record");
+    throw new Error("Failed to delete contact record", { cause: error });
   }
 }
 
@@ -209,6 +209,6 @@ export async function isDuplicateEmailAddress(params: {
     });
     // Re-throw to let callers decide how to handle the failure
     // instead of silently returning false (which masks API/network errors)
-    throw new Error("Failed to check duplicate email");
+    throw new Error("Failed to check duplicate email", { cause: error });
   }
 }

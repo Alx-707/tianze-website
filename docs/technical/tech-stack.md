@@ -111,8 +111,12 @@
 
 ### 静态质量工具
 
-- **ESLint 9.39.2**
+- **ESLint 10.2.1**
+- **@eslint/js 10.0.1**
+- **@eslint/compat 2.0.5**：兼容部分尚未正式声明 ESLint 10 支持的 Next/React ESLint 规则
 - **typescript-eslint 8.59.1**
+- **eslint-plugin-security 4.0.0**
+- **eslint-plugin-react-you-might-not-need-an-effect 0.9.3**
 - **Prettier 3.8.3**
 - **prettier-plugin-tailwindcss 0.8.0**
 - **@ianvs/prettier-plugin-sort-imports 4.7.1**

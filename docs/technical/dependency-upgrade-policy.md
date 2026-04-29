@@ -18,9 +18,6 @@
 | `critters` | 上游转向 `beasties`，但它属于 Next/OpenNext 支撑依赖 | 单独验证 `beasties` 替换对 `pnpm build` / `pnpm build:cf` 的影响 |
 | `@types/node` | 项目 runtime 支持范围是 `>=20.19 <23`，Node 25 types 不匹配 | 只有当 runtime baseline 扩到 Node 25 时再升 |
 | `typescript` | 6.x 是 compiler major | 单独跑 type/build/Cloudflare build lane |
-| `eslint` / `@eslint/js` | ESLint 10 是 lint major，可能改变 flat config 和规则输出 | 单独 lint-tooling lane，跑 `pnpm lint:check` 和质量脚本 |
-| `eslint-plugin-security` | 安全规则 major 可能带来大量误报 | 单独和 Semgrep / lint 一起验证 |
-| `eslint-plugin-react-you-might-not-need-an-effect` | 仍是 `0.x`，minor 可能改变规则行为 | 单独验证 lint 输出 |
 
 ## 这次升级经验
 
@@ -67,6 +64,30 @@
 
 - `pnpm format:check` 通过
 - 不和业务代码或其它依赖升级混在同一个提交里
+
+### ESLint 10
+
+ESLint 10 不能只改版本号。当前仓库采用：
+
+- `eslint 10.2.1`
+- `@eslint/js 10.0.1`
+- `eslint-plugin-security 4.0.0`
+- `eslint-plugin-react-you-might-not-need-an-effect 0.9.3`
+- `@eslint/compat 2.0.5`
+
+这次升级的关键点：
+
+- `eslint-plugin-react`、`eslint-plugin-import`、`eslint-plugin-jsx-a11y` 的 latest 仍未完全声明 ESLint 10 peer 范围，其中一部分由 `eslint-config-next` 间接带入。
+- 旧 React ESLint rule API 在 ESLint 10 下会触发 `contextOrFilename.getFilename is not a function`，因此 Next 官方配置通过 `@eslint/compat` 的 `fixupConfigRules()` 包一层，而不是关闭规则。
+- `pnpm.peerDependencyRules.allowedVersions` 只用于记录这批已验证的 ESLint 10 peer 噪声；如果后续插件 release 正式支持 ESLint 10，应优先移除这段兼容声明。
+- ESLint 10 暴露了 `preserve-caught-error`、`no-useless-assignment` 相关问题，本次已把丢失的原始错误挂到 `cause`，并去掉无意义初始赋值。
+
+验证重点：
+
+- `pnpm lint:check` 能完整跑完
+- `pnpm type-check` / `pnpm type-check:tests` 通过
+- 受影响的 SEO、Resend、Airtable 错误处理测试通过
+- `pnpm deps:check` 不再出现 ESLint 10 hold 项
 
 ### tech check
 

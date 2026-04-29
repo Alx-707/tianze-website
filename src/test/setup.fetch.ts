@@ -49,17 +49,17 @@ import { vi } from "vitest";
     | undefined;
 
   const mockFetch = vi.fn(async (input: any, init?: any) => {
-    let url = "";
-    try {
-      url =
-        typeof input === "string"
+    const url = (() => {
+      try {
+        return typeof input === "string"
           ? input
           : input && input.url
             ? (input.url as string)
             : String(input);
-    } catch {
-      url = "";
-    }
+      } catch {
+        return "";
+      }
+    })();
 
     if (!process.env.VITEST_USE_REAL_MESSAGES && url.includes("/messages/")) {
       const body = JSON.stringify({});

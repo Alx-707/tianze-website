@@ -280,32 +280,7 @@ export function createPageSEOConfig(
     },
   };
 
-  let baseConfig = baseConfigs.home;
-  switch (pageType) {
-    case "home":
-      baseConfig = baseConfigs.home;
-      break;
-    case "about":
-      baseConfig = baseConfigs.about;
-      break;
-    case "contact":
-      baseConfig = baseConfigs.contact;
-      break;
-    case "products":
-      baseConfig = baseConfigs.products;
-      break;
-    case "privacy":
-      baseConfig = baseConfigs.privacy;
-      break;
-    case "terms":
-      baseConfig = baseConfigs.terms;
-      break;
-    case "oem":
-      baseConfig = baseConfigs.oem;
-      break;
-    default:
-      baseConfig = baseConfigs.home;
-  }
+  const baseConfig = baseConfigs[pageType] ?? baseConfigs.home;
 
   return mergeSEOConfig(baseConfig, customConfig);
 }

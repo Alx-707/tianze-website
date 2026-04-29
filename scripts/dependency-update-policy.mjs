@@ -6,24 +6,6 @@ const heldDependencyUpdates = [
       "Kept as an OpenNext/Next support dependency until the Cloudflare build lane proves a replacement such as beasties is safe.",
   },
   {
-    name: "@eslint/js",
-    status: "major-held",
-    rationale:
-      "ESLint major upgrades can change flat-config behavior and rule output; upgrade only in an isolated lint-tooling lane.",
-  },
-  {
-    name: "eslint",
-    status: "major-held",
-    rationale:
-      "ESLint major upgrades can change flat-config behavior and rule output; upgrade only in an isolated lint-tooling lane.",
-  },
-  {
-    name: "eslint-plugin-security",
-    status: "major-held",
-    rationale:
-      "Security lint major upgrades can introduce broad false positives; validate with Semgrep and lint gates in a separate lane.",
-  },
-  {
     name: "@types/node",
     status: "runtime-baseline-held",
     rationale:
@@ -34,12 +16,6 @@ const heldDependencyUpdates = [
     status: "major-held",
     rationale:
       "TypeScript 6 is a compiler major and must be validated in its own type/build lane.",
-  },
-  {
-    name: "eslint-plugin-react-you-might-not-need-an-effect",
-    status: "zero-major-minor-held",
-    rationale:
-      "The package is still 0.x; minor releases may change lint behavior and should be isolated.",
   },
 ];
 

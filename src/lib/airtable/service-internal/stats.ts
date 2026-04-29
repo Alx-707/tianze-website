@@ -59,6 +59,6 @@ export async function getContactStatistics(params: {
     logger.error("Failed to get statistics", {
       error: error instanceof Error ? error.message : "Unknown error",
     });
-    throw new Error("Failed to get statistics");
+    throw new Error("Failed to get statistics", { cause: error });
   }
 }
