@@ -17,15 +17,21 @@ export {
   DYNAMIC_PATHS_CONFIG,
   PATHS_CONFIG,
 } from "@/config/paths/paths-config";
-export { LOCALES_CONFIG } from "@/config/paths/locales-config";
+export {
+  getLocaleCurrency,
+  getLocaleTimeZone,
+  LOCALES_CONFIG,
+} from "@/config/paths/locales-config";
 export { SITE_CONFIG } from "@/config/paths/site-config";
 
 // 重新导出工具函数
 export {
+  getCanonicalPath,
   getDynamicPathnames,
   getLocalizedPath,
   getPageTypeFromPath,
   getPathnames,
+  getProductMarketPath,
   getRoutingConfig,
   validatePathsConfig,
 } from "@/config/paths/utils";
@@ -35,5 +41,9 @@ export type {
   DynamicPathsConfig,
   PathsConfig,
 } from "@/config/paths/paths-config";
-export type { LocalesConfig } from "@/config/paths/locales-config";
+export type {
+  ConfiguredCurrency,
+  ConfiguredLocale,
+  LocalesConfig,
+} from "@/config/paths/locales-config";
 export type { SiteConfig } from "@/config/paths/site-config";

@@ -39,7 +39,7 @@ Notes: Hero section visibility and CTA link count are tested. CTA `href` targets
 
 #### BC-002: Buyer can navigate to all main pages from the header
 
-Desktop: Navigation bar shows links to Home, Products, Blog, and About. Mobile: Hamburger menu opens a sheet with the same links. Clicking any link reaches the correct page.
+Desktop: Navigation bar shows links to Home, Products, OEM, About, and Contact. Mobile: Hamburger menu opens a sheet with the same links. Clicking any link reaches the correct page. Blog links are intentionally absent while BC-015 and BC-016 remain retired.
 
 | Field | Value |
 |-------|-------|
@@ -232,29 +232,29 @@ Notes: Product spec data integrity is unit-tested. E2E journey test verifies a m
 
 ---
 
-#### BC-015: Blog listing page shows published posts
+#### BC-015: Retired — Blog listing page
 
-/blog renders a list of published blog posts with titles, dates, and excerpts. Each post links to /blog/[slug]. The listing loads without errors in both locales.
+The blog listing route was retired from the current public single-site route set. /blog should not be listed in navigation or sitemap until a blog route is intentionally restored.
 
 | Field | Value |
 |-------|-------|
 | Priority | Medium |
-| Test Type | E2E |
-| Test File | -- |
-| Status | Untested |
+| Test Type | Unit |
+| Test File | `src/app/__tests__/sitemap.test.ts` |
+| Status | Retired |
 
 ---
 
-#### BC-016: Blog post page renders full content
+#### BC-016: Retired — Blog post page
 
-/blog/[slug] renders the post title, date, author, and full MDX content. Navigation back to /blog works.
+The blog post route was retired from the current public single-site route set. /blog/[slug] should not be listed in sitemap until blog publishing is intentionally restored.
 
 | Field | Value |
 |-------|-------|
 | Priority | Medium |
-| Test Type | E2E |
-| Test File | -- |
-| Status | Untested |
+| Test Type | Unit |
+| Test File | `src/app/__tests__/sitemap.test.ts` |
+| Status | Retired |
 
 ---
 
@@ -348,7 +348,7 @@ Notes: `tests/integration/api/health.test.ts` covers the route in-suite. Deploye
 
 #### BC-023: Sitemap includes all public pages in both locales
 
-/sitemap.xml lists all public pages (homepage, about, contact, products, products/[market], blog, blog/[slug], oem-custom-manufacturing, privacy, terms) with hreflang alternates for en and zh.
+/sitemap.xml lists all active public pages (homepage, about, contact, products, products/[market], oem-custom-manufacturing, privacy, terms) with hreflang alternates for en and zh. Retired blog routes are explicitly excluded.
 
 | Field | Value |
 |-------|-------|
@@ -393,9 +393,9 @@ All 5 market spec files contain required fields (product families, dimensions, s
 |----------|--------------|---------|---------|----------|---------|
 | Navigation & Discovery | 6 | 4 | 2 | 0 | 0 |
 | Inquiry & Conversion | 6 | 2 | 4 | 0 | 0 |
-| Content & Information | 6 | 0 | 2 | 4 | 1 |
+| Content & Information | 4 | 0 | 2 | 2 | 3 |
 | Resilience & Edge Cases | 6 | 4 | 2 | 0 | 0 |
-| **Total** | **24** | **10** | **10** | **4** | **1** |
+| **Total** | **22** | **10** | **10** | **2** | **3** |
 
 Retired contracts are kept for historical traceability but excluded from active coverage totals.
 
@@ -415,5 +415,4 @@ Retired contracts are kept for historical traceability but excluded from active 
 
 ### Medium-priority gaps
 
-- **BC-015, BC-016** (Untested): Blog listing and post pages
 - **BC-019** (Untested): OEM page

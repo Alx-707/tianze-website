@@ -135,20 +135,17 @@ describe("middleware locale cookie", () => {
   });
 
   it("redirects invalid locale prefix for dynamic product routes", () => {
-    const request = new NextRequest(
-      "http://localhost/fr/products/eu/fittings",
-      {
-        headers: {
-          cookie: "NEXT_LOCALE=zh",
-        },
+    const request = new NextRequest("http://localhost/fr/products/eu", {
+      headers: {
+        cookie: "NEXT_LOCALE=zh",
       },
-    );
+    });
 
     const response = middleware(request);
 
     expect(response.status).toBe(307);
     expect(response.headers.get("location")).toBe(
-      "http://localhost/en/products/eu/fittings",
+      "http://localhost/en/products/eu",
     );
 
     const setCookie = (response.headers.get("set-cookie") ?? "").toLowerCase();

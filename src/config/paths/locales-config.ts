@@ -1,29 +1,46 @@
 /**
- * 语言配置
+ * Canonical locale configuration.
  */
 
-// 语言配置
 export const LOCALES_CONFIG = Object.freeze({
   locales: Object.freeze(["en", "zh"] as const),
   defaultLocale: "en" as const,
+  localePrefix: "always" as const,
 
-  // 语言前缀配置
+  // Display/helper prefixes are metadata. next-intl route prefix behavior is
+  // controlled by `localePrefix` above.
   prefixes: Object.freeze({
-    en: "", // 默认语言不需要前缀
+    en: "",
     zh: "/zh",
   }),
 
-  // 语言显示名称
   displayNames: Object.freeze({
     en: "English",
     zh: "中文",
   }),
 
-  // 时区配置
   timeZones: Object.freeze({
     en: "UTC",
     zh: "Asia/Shanghai",
   }),
+
+  currencies: Object.freeze({
+    en: "USD",
+    zh: "CNY",
+  }),
 } as const);
 
 export type LocalesConfig = typeof LOCALES_CONFIG;
+export type ConfiguredLocale = (typeof LOCALES_CONFIG.locales)[number];
+export type ConfiguredCurrency =
+  (typeof LOCALES_CONFIG.currencies)[ConfiguredLocale];
+
+export function getLocaleTimeZone(locale: ConfiguredLocale): string {
+  return LOCALES_CONFIG.timeZones[locale];
+}
+
+export function getLocaleCurrency(
+  locale: ConfiguredLocale,
+): ConfiguredCurrency {
+  return LOCALES_CONFIG.currencies[locale];
+}

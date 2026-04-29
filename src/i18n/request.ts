@@ -4,11 +4,16 @@ import {
   loadCompleteMessages,
   loadCompleteMessagesFromSource,
 } from "@/lib/load-messages";
+import {
+  getLocaleCurrency,
+  getLocaleTimeZone,
+} from "@/config/paths/locales-config";
 import { coerceLocale } from "@/i18n/locale-utils";
+import type { Locale } from "@/i18n/routing-config";
 import { COUNT_FIVE } from "@/constants";
 
 // 辅助函数：获取格式配置
-function getFormats(locale: string) {
+function getFormats(locale: Locale) {
   return {
     dateTime: {
       short: {
@@ -29,7 +34,7 @@ function getFormats(locale: string) {
       },
       currency: {
         style: "currency" as const,
-        currency: locale === "zh" ? "CNY" : "USD",
+        currency: getLocaleCurrency(locale),
       },
       percentage: {
         style: "percent" as const,
@@ -52,7 +57,7 @@ function recordRequestMetrics(loadTime: number) {
 
 // 辅助函数：创建成功响应
 interface SuccessResponseArgs {
-  locale: string;
+  locale: Locale;
   messages: Record<string, unknown>;
   loadTime: number;
 }
@@ -65,7 +70,7 @@ function createSuccessResponse({
   return {
     locale,
     messages,
-    timeZone: locale === "zh" ? "Asia/Shanghai" : "UTC",
+    timeZone: getLocaleTimeZone(locale),
     formats: getFormats(locale),
     strictMessageTypeSafety: true,
     metadata: {
@@ -75,11 +80,11 @@ function createSuccessResponse({
 }
 
 // 辅助函数：创建错误回退响应
-async function createFallbackResponse(locale: string, startTime: number) {
+async function createFallbackResponse(locale: Locale, startTime: number) {
   return {
     locale,
     messages: await loadCompleteMessagesFromSource(locale),
-    timeZone: locale === "zh" ? "Asia/Shanghai" : "UTC",
+    timeZone: getLocaleTimeZone(locale),
     formats: getFormats(locale),
     strictMessageTypeSafety: true,
     metadata: {

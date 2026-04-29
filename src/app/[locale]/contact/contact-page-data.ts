@@ -9,23 +9,8 @@ import {
 import { getContactCopyFromMessages } from "@/lib/contact/getContactCopy";
 import { CONTENT_MANIFEST } from "@/lib/content-manifest.generated";
 import { readRequiredMessagePath } from "@/lib/i18n/read-message-path";
-import { mergeObjects } from "@/lib/merge-objects";
+import { getStaticSplitMessages } from "@/lib/i18n/static-split-messages";
 import type { FaqItem, Locale, Page } from "@/types/content.types";
-import enCriticalMessages from "@messages/en/critical.json";
-import enDeferredMessages from "@messages/en/deferred.json";
-import zhCriticalMessages from "@messages/zh/critical.json";
-import zhDeferredMessages from "@messages/zh/deferred.json";
-
-const STATIC_MESSAGES_BY_LOCALE: Record<Locale, Record<string, unknown>> = {
-  en: mergeObjects(
-    enCriticalMessages as Record<string, unknown>,
-    enDeferredMessages as Record<string, unknown>,
-  ) as Record<string, unknown>,
-  zh: mergeObjects(
-    zhCriticalMessages as Record<string, unknown>,
-    zhDeferredMessages as Record<string, unknown>,
-  ) as Record<string, unknown>,
-};
 
 export interface ContactPageData {
   page: Page;
@@ -37,7 +22,7 @@ export interface ContactPageData {
 }
 
 export function getStaticMessages(locale: Locale): Record<string, unknown> {
-  return STATIC_MESSAGES_BY_LOCALE[locale];
+  return getStaticSplitMessages(locale);
 }
 
 export function getStaticContactPage(locale: Locale): Page {

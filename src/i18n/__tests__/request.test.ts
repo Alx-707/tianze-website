@@ -1,17 +1,40 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  LOCALES_CONFIG,
+  type ConfiguredLocale,
+} from "@/config/paths/locales-config";
 
-const { mockGetRequestConfig, mockI18nPerformanceMonitor, mockRouting } =
-  vi.hoisted(() => ({
-    mockGetRequestConfig: vi.fn(),
-    mockI18nPerformanceMonitor: {
-      recordLoadTime: vi.fn(),
-      recordError: vi.fn(),
-    },
-    mockRouting: {
-      locales: ["en", "zh"],
-      defaultLocale: "en",
-    },
-  }));
+const EN_LOCALE = "en" satisfies ConfiguredLocale;
+const ZH_LOCALE = "zh" satisfies ConfiguredLocale;
+
+interface RequestConfigResult {
+  locale: ConfiguredLocale;
+  timeZone: string;
+  formats: {
+    number: {
+      currency: {
+        currency: string;
+      };
+    };
+  };
+  strictMessageTypeSafety: boolean;
+  messages: unknown;
+  metadata: {
+    loadTime?: number;
+    error?: boolean;
+    cacheUsed?: boolean;
+    timestamp?: string;
+    smartDetection?: boolean;
+  };
+}
+
+const { mockGetRequestConfig, mockI18nPerformanceMonitor } = vi.hoisted(() => ({
+  mockGetRequestConfig: vi.fn(),
+  mockI18nPerformanceMonitor: {
+    recordLoadTime: vi.fn(),
+    recordError: vi.fn(),
+  },
+}));
 
 vi.mock("next-intl/server", () => ({
   getRequestConfig: mockGetRequestConfig,
@@ -21,17 +44,15 @@ vi.mock("@/lib/i18n-performance", () => ({
   I18nPerformanceMonitor: mockI18nPerformanceMonitor,
 }));
 
-vi.mock("../routing", () => ({
-  routing: mockRouting,
-}));
-
 describe("i18n Request Configuration", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.resetModules();
   });
 
-  async function runConfig(requestLocale: string | null) {
+  async function runConfig(
+    requestLocale: string | null,
+  ): Promise<RequestConfigResult> {
     let captured:
       | ((args: { requestLocale: Promise<string | null> }) => Promise<unknown>)
       | undefined;
@@ -47,7 +68,9 @@ describe("i18n Request Configuration", () => {
       throw new Error("getRequestConfig callback was not captured");
     }
 
-    return captured({ requestLocale: Promise.resolve(requestLocale) });
+    return (await captured({
+      requestLocale: Promise.resolve(requestLocale),
+    })) as RequestConfigResult;
   }
 
   it("registers a getRequestConfig callback", async () => {
@@ -56,34 +79,36 @@ describe("i18n Request Configuration", () => {
   });
 
   it("returns english request config", async () => {
-    const result = (await runConfig("en")) as any;
+    const result = await runConfig(EN_LOCALE);
 
-    expect(result.locale).toBe("en");
+    expect(result.locale).toBe(EN_LOCALE);
     expect(result.timeZone).toBe("UTC");
+    expect(result.formats.number.currency.currency).toBe("USD");
     expect(result.strictMessageTypeSafety).toBe(true);
     expect(result.messages).toBeDefined();
     expect(result.metadata.error).toBeUndefined();
   });
 
   it("returns chinese request config", async () => {
-    const result = (await runConfig("zh")) as any;
+    const result = await runConfig(ZH_LOCALE);
 
-    expect(result.locale).toBe("zh");
+    expect(result.locale).toBe(ZH_LOCALE);
     expect(result.timeZone).toBe("Asia/Shanghai");
+    expect(result.formats.number.currency.currency).toBe("CNY");
     expect(result.strictMessageTypeSafety).toBe(true);
     expect(result.messages).toBeDefined();
   });
 
   it("falls back to default locale when requestLocale is invalid", async () => {
-    const result = (await runConfig("invalid")) as any;
+    const result = await runConfig("invalid");
 
-    expect(result.locale).toBe("en");
+    expect(result.locale).toBe(LOCALES_CONFIG.defaultLocale);
   });
 
   it("falls back to default locale when requestLocale is null", async () => {
-    const result = (await runConfig(null)) as any;
+    const result = await runConfig(null);
 
-    expect(result.locale).toBe("en");
+    expect(result.locale).toBe(LOCALES_CONFIG.defaultLocale);
   });
 
   it("records request load time", async () => {
@@ -92,7 +117,7 @@ describe("i18n Request Configuration", () => {
       .mockReturnValueOnce(100)
       .mockReturnValueOnce(150);
 
-    await runConfig("en");
+    await runConfig(LOCALES_CONFIG.defaultLocale);
 
     expect(mockI18nPerformanceMonitor.recordLoadTime).toHaveBeenCalledWith(50);
 
@@ -105,7 +130,7 @@ describe("i18n Request Configuration", () => {
       .mockReturnValueOnce(100)
       .mockReturnValueOnce(200);
 
-    const result = (await runConfig("en")) as any;
+    const result = await runConfig(LOCALES_CONFIG.defaultLocale);
 
     expect(result.metadata.loadTime).toBe(100);
     expect(result.metadata).not.toHaveProperty("cacheUsed");
@@ -123,10 +148,10 @@ describe("i18n Request Configuration", () => {
       }),
     }));
 
-    const result = (await runConfig("en")) as any;
+    const result = await runConfig(LOCALES_CONFIG.defaultLocale);
 
     expect(mockI18nPerformanceMonitor.recordError).toHaveBeenCalled();
-    expect(result.locale).toBe("en");
+    expect(result.locale).toBe(LOCALES_CONFIG.defaultLocale);
     expect(result.metadata.error).toBe(true);
     expect(result.metadata).not.toHaveProperty("cacheUsed");
   });
