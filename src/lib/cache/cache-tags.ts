@@ -1,93 +1,44 @@
 /**
- * Cache Tag System for Next.js 16 Cache Components
+ * Cache tag utilities for Next.js 16 Cache Components.
  *
- * Provides consistent tag naming and generation for cache grouping.
- * Tags follow the schema: `domain:entity:identifier[:locale]`
+ * Runtime invalidation is not part of the current launch architecture.
+ * Keep only i18n tags used by `src/lib/load-messages.ts`.
  */
 
 import type { Locale } from "@/types/content.types";
 
-/**
- * Valid cache tag domains.
- * Each domain represents a distinct category of cached data.
- */
 export const CACHE_DOMAINS = {
-  /** i18n translation messages */
   I18N: "i18n",
-  /** Content pages */
-  CONTENT: "content",
-  /** Product data */
-  PRODUCT: "product",
-  /** SEO metadata */
-  SEO: "seo",
 } as const;
 
 export type CacheDomain = (typeof CACHE_DOMAINS)[keyof typeof CACHE_DOMAINS];
 
-/**
- * Entity types within each domain.
- */
 export const CACHE_ENTITIES = {
-  /** i18n entities */
   I18N: {
     CRITICAL: "critical",
     DEFERRED: "deferred",
     ALL: "all",
   },
-  /** Content entities */
-  CONTENT: {
-    PAGE: "page",
-    LIST: "list",
-  },
-  /** Product entities */
-  PRODUCT: {
-    DETAIL: "detail",
-    LIST: "list",
-    CATEGORY: "category",
-    STANDARD: "standard",
-    FEATURED: "featured",
-  },
-  /** SEO entities */
-  SEO: {
-    METADATA: "metadata",
-    SITEMAP: "sitemap",
-  },
 } as const;
 
-/**
- * Options for building a cache tag.
- */
 interface BuildTagOptions {
   domain: CacheDomain;
   entity: string;
   identifier?: string;
-  locale?: Locale;
 }
 
-/**
- * Build a cache tag string from components.
- * Format: `domain:entity:identifier[:locale]`
- */
 function buildTag(options: BuildTagOptions): string {
-  const { domain, entity, identifier, locale } = options;
+  const { domain, entity, identifier } = options;
   const parts = [domain, entity];
 
   if (identifier) {
     parts.push(identifier);
   }
 
-  if (locale) {
-    parts.push(locale);
-  }
-
   return parts.join(":");
 }
 
-/**
- * i18n cache tag generators.
- */
 export const i18nTags = {
-  /** Tag for critical messages of a locale */
   critical(locale: Locale): string {
     return buildTag({
       domain: CACHE_DOMAINS.I18N,
@@ -96,7 +47,6 @@ export const i18nTags = {
     });
   },
 
-  /** Tag for deferred messages of a locale */
   deferred(locale: Locale): string {
     return buildTag({
       domain: CACHE_DOMAINS.I18N,
@@ -105,7 +55,6 @@ export const i18nTags = {
     });
   },
 
-  /** Tag for all i18n messages (invalidates entire i18n cache) */
   all(): string {
     return buildTag({
       domain: CACHE_DOMAINS.I18N,
@@ -113,147 +62,11 @@ export const i18nTags = {
     });
   },
 
-  /** All tags for a specific locale */
-  forLocale(locale: Locale): string[] {
-    return [this.critical(locale), this.deferred(locale), this.all()];
-  },
-};
-
-/**
- * Content cache tag generators (pages).
- */
-export const contentTags = {
-  /** Tag for a specific page */
-  page(slug: string, locale: Locale): string {
-    return buildTag({
-      domain: CACHE_DOMAINS.CONTENT,
-      entity: CACHE_ENTITIES.CONTENT.PAGE,
-      identifier: slug,
-      locale,
-    });
-  },
-
-  /** All content tags for a locale — currently page-only (blog removed) */
-  forLocale(locale: Locale): string[] {
-    const knownSlugs = ["about", "contact", "privacy", "terms"] as const;
-    return knownSlugs.map((slug) => contentTags.page(slug, locale));
-  },
-};
-
-/**
- * Product cache tag generators.
- */
-export const productTags = {
-  /** Tag for a specific product detail */
-  detail(slug: string, locale: Locale): string {
-    return buildTag({
-      domain: CACHE_DOMAINS.PRODUCT,
-      entity: CACHE_ENTITIES.PRODUCT.DETAIL,
-      identifier: slug,
-      locale,
-    });
-  },
-
-  /** Tag for product list */
-  list(locale: Locale, category?: string): string {
-    const identifier = category ?? "all";
-    return buildTag({
-      domain: CACHE_DOMAINS.PRODUCT,
-      entity: CACHE_ENTITIES.PRODUCT.LIST,
-      identifier,
-      locale,
-    });
-  },
-
-  /** Tag for product categories */
-  categories(locale: Locale): string {
-    return buildTag({
-      domain: CACHE_DOMAINS.PRODUCT,
-      entity: CACHE_ENTITIES.PRODUCT.CATEGORY,
-      identifier: locale,
-    });
-  },
-
-  /** Tag for product standards */
-  standards(locale: Locale): string {
-    return buildTag({
-      domain: CACHE_DOMAINS.PRODUCT,
-      entity: CACHE_ENTITIES.PRODUCT.STANDARD,
-      identifier: locale,
-    });
-  },
-
-  /** Tag for featured products */
-  featured(locale: Locale): string {
-    return buildTag({
-      domain: CACHE_DOMAINS.PRODUCT,
-      entity: CACHE_ENTITIES.PRODUCT.FEATURED,
-      identifier: locale,
-    });
-  },
-
-  /** Related product cache groups kept for build-time grouping; updates ship by redeploy. */
-  forProduct(slug: string, locale: Locale, category?: string): string[] {
-    const tags = [
-      this.detail(slug, locale),
-      this.list(locale),
-      this.featured(locale),
-    ];
-
-    if (category) {
-      tags.push(this.list(locale, category));
-    }
-
-    return tags;
-  },
-
-  /** All product tags for a locale */
   forLocale(locale: Locale): string[] {
     return [
-      this.list(locale),
-      this.categories(locale),
-      this.standards(locale),
-      this.featured(locale),
+      i18nTags.critical(locale),
+      i18nTags.deferred(locale),
+      i18nTags.all(),
     ];
   },
 };
-
-/**
- * SEO cache tag generators.
- */
-export const seoTags = {
-  /** Tag for SEO metadata */
-  metadata(path: string, locale: Locale): string {
-    return buildTag({
-      domain: CACHE_DOMAINS.SEO,
-      entity: CACHE_ENTITIES.SEO.METADATA,
-      identifier: path,
-      locale,
-    });
-  },
-
-  /** Tag for sitemap */
-  sitemap(locale?: Locale): string {
-    if (locale) {
-      return buildTag({
-        domain: CACHE_DOMAINS.SEO,
-        entity: CACHE_ENTITIES.SEO.SITEMAP,
-        identifier: locale,
-      });
-    }
-    return buildTag({
-      domain: CACHE_DOMAINS.SEO,
-      entity: CACHE_ENTITIES.SEO.SITEMAP,
-    });
-  },
-};
-
-/**
- * Consolidated cache tags export for convenience.
- */
-export const cacheTags = {
-  i18n: i18nTags,
-  content: contentTags,
-  product: productTags,
-  seo: seoTags,
-} as const;

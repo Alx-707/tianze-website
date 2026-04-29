@@ -1,11 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { PRODUCT_CATALOG } from "@/constants/product-catalog";
-import { NORTH_AMERICA_SPECS } from "@/constants/product-specs/north-america";
-import { AUSTRALIA_NZ_SPECS } from "@/constants/product-specs/australia-new-zealand";
-import { MEXICO_SPECS } from "@/constants/product-specs/mexico";
-import { EUROPE_SPECS } from "@/constants/product-specs/europe";
-import { PNEUMATIC_SPECS } from "@/constants/product-specs/pneumatic-tube-systems";
-import type { MarketSpecs } from "@/constants/product-specs/types";
+import { getMarketSpecEntries } from "@/constants/product-specs/market-spec-registry";
 
 // Import translation JSON files
 import enCritical from "../../../../messages/en/critical.json";
@@ -31,15 +26,6 @@ function getNestedValue(obj: unknown, dotPath: string): unknown {
 
   return current;
 }
-
-// Market specs lookup table
-const SPECS_BY_MARKET: Record<string, MarketSpecs> = {
-  "north-america": NORTH_AMERICA_SPECS,
-  "australia-new-zealand": AUSTRALIA_NZ_SPECS,
-  mexico: MEXICO_SPECS,
-  europe: EUROPE_SPECS,
-  "pneumatic-tube-systems": PNEUMATIC_SPECS,
-};
 
 describe("Feature: Product Translation Key Parity", () => {
   describe("Scenario: Market catalog entries have translations", () => {
@@ -103,7 +89,7 @@ describe("Feature: Product Translation Key Parity", () => {
       // Collect all unique technical keys from all market specs
       const allTechnicalKeys = new Set<string>();
 
-      for (const specs of Object.values(SPECS_BY_MARKET)) {
+      for (const specs of getMarketSpecEntries().map(([, specs]) => specs)) {
         for (const key of Object.keys(specs.technical)) {
           allTechnicalKeys.add(key);
         }
@@ -127,7 +113,7 @@ describe("Feature: Product Translation Key Parity", () => {
 
   describe("Scenario: Family highlights have translations", () => {
     it("every family highlight count matches translation keys", () => {
-      for (const [marketSlug, specs] of Object.entries(SPECS_BY_MARKET)) {
+      for (const [marketSlug, specs] of getMarketSpecEntries()) {
         for (const family of specs.families) {
           for (let i = 0; i < family.highlights.length; i++) {
             const enKey = `catalog.specs.${marketSlug}.families.${family.slug}.highlights.${i}`;
@@ -149,7 +135,7 @@ describe("Feature: Product Translation Key Parity", () => {
 
   describe("Scenario: Spec groups have label translations", () => {
     it("every spec group has a label key in both locales", () => {
-      for (const [marketSlug, specs] of Object.entries(SPECS_BY_MARKET)) {
+      for (const [marketSlug, specs] of getMarketSpecEntries()) {
         for (const family of specs.families) {
           for (
             let groupIdx = 0;

@@ -8,6 +8,7 @@ import {
   type StaticPageLastModConfig,
 } from "@/lib/sitemap-utils";
 import { SITE_CONFIG } from "@/config/paths";
+import { getProductMarketPath } from "@/config/paths/utils";
 import {
   getSingleSiteSitemapPageConfig,
   SINGLE_SITE_PUBLIC_STATIC_PAGES,
@@ -104,7 +105,7 @@ function generateCatalogEntries(): MetadataRoute.Sitemap {
   // Market landing pages
   const marketConfig = getPageConfig("productMarket");
   for (const market of PRODUCT_CATALOG.markets) {
-    const path = `/products/${market.slug}`;
+    const path = getProductMarketPath(market.slug);
     const lastModified = getStaticPageLastModified(path, STATIC_PAGE_LASTMOD);
 
     for (const locale of routing.locales) {

@@ -69,6 +69,33 @@ describe("load-messages runtime gating", () => {
     await loadCriticalMessages("en");
 
     expect(unstableCache).toHaveBeenCalledTimes(1);
+    expect(unstableCache.mock.calls[0]?.[2]).toMatchObject({
+      tags: ["i18n:critical:en", "i18n:all"],
+    });
+  });
+
+  it("passes deferred locale cache tags to unstable_cache", async () => {
+    const unstableCache = vi.fn((loader: () => Promise<unknown>) => loader);
+
+    vi.doMock("next/cache", () => ({
+      unstable_cache: unstableCache,
+    }));
+    vi.doMock("@/lib/env", () => ({
+      isRuntimeCi: () => false,
+      isRuntimeDevelopment: () => true,
+      isRuntimePlaywright: () => false,
+      isRuntimeProductionBuildPhase: () => false,
+      isRuntimeCloudflare: () => false,
+    }));
+
+    const { loadDeferredMessages } = await import("@/lib/load-messages");
+
+    await loadDeferredMessages("zh");
+
+    expect(unstableCache).toHaveBeenCalledTimes(1);
+    expect(unstableCache.mock.calls[0]?.[2]).toMatchObject({
+      tags: ["i18n:deferred:zh", "i18n:all"],
+    });
   });
 
   it("bypasses unstable_cache on Cloudflare runtime", async () => {

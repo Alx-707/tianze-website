@@ -7,8 +7,34 @@ import {
   DYNAMIC_PATHS_CONFIG,
   PATHS_CONFIG,
 } from "@/config/paths/paths-config";
-import type { Locale, PageType } from "@/config/paths/types";
+import type { DynamicPageType, Locale, PageType } from "@/config/paths/types";
 import { ZERO } from "@/constants";
+
+type StaticPathname =
+  (typeof PATHS_CONFIG)[PageType][typeof LOCALES_CONFIG.defaultLocale];
+type DynamicPathname =
+  (typeof DYNAMIC_PATHS_CONFIG)[DynamicPageType]["pattern"];
+type DerivedPathname = StaticPathname | DynamicPathname;
+type PathnameMap = Readonly<Record<DerivedPathname, DerivedPathname>>;
+
+function getCanonicalPathValue(path: string): string {
+  return path === "" ? "/" : path;
+}
+
+function createPathnames(): Readonly<PathnameMap> {
+  const staticPathnames = Object.values(PATHS_CONFIG).map((paths) => {
+    const path = getCanonicalPathValue(paths[LOCALES_CONFIG.defaultLocale]);
+    return [path, path] as const;
+  });
+
+  const dynamicPathnames = Object.values(DYNAMIC_PATHS_CONFIG).map(
+    (config) => [config.pattern, config.pattern] as const,
+  );
+
+  return Object.freeze(
+    Object.fromEntries([...staticPathnames, ...dynamicPathnames]),
+  ) as PathnameMap;
+}
 
 /**
  * 获取本地化路径
@@ -32,23 +58,26 @@ export function getLocalizedPath(pageType: PageType, locale: Locale): string {
   return pathConfig[locale];
 }
 
+export function getCanonicalPath<T extends PageType>(
+  pageType: T,
+): (typeof PATHS_CONFIG)[T][typeof LOCALES_CONFIG.defaultLocale] {
+  return getLocalizedPath(
+    pageType,
+    LOCALES_CONFIG.defaultLocale,
+  ) as (typeof PATHS_CONFIG)[T][typeof LOCALES_CONFIG.defaultLocale];
+}
+
+export function getProductMarketPath(marketSlug: string): string {
+  return `${getCanonicalPath("products")}/${marketSlug}`;
+}
+
 /**
  * 获取所有页面的路径映射（用于next-intl routing）
  *
  * 使用标准路径方案，所有语言使用相同路径
  * 包含静态路径和动态路由模式
  */
-export const PATHNAMES = {
-  "/": "/",
-  "/about": "/about",
-  "/contact": "/contact",
-  "/products": "/products",
-  "/products/[market]": "/products/[market]",
-  "/products/[market]/[family]": "/products/[market]/[family]",
-  "/privacy": "/privacy",
-  "/terms": "/terms",
-  "/oem-custom-manufacturing": "/oem-custom-manufacturing",
-} as const;
+export const PATHNAMES = createPathnames();
 
 export function getPathnames(): typeof PATHNAMES {
   return PATHNAMES;
@@ -115,10 +144,9 @@ export function validatePathsConfig(): { isValid: boolean; errors: string[] } {
   });
 
   // 检查路径是否有重复
-  const pathsByLocale: Record<Locale, Set<string>> = {
-    en: new Set(),
-    zh: new Set(),
-  };
+  const pathsByLocale = Object.fromEntries(
+    LOCALES_CONFIG.locales.map((locale) => [locale, new Set<string>()]),
+  ) as Record<Locale, Set<string>>;
 
   Object.entries(PATHS_CONFIG).forEach(([pageType, paths]) => {
     LOCALES_CONFIG.locales.forEach((locale) => {
@@ -167,7 +195,6 @@ export function getRoutingConfig() {
     locales: LOCALES_CONFIG.locales,
     defaultLocale: LOCALES_CONFIG.defaultLocale,
     pathnames: getPathnames(),
-    // 使用 'always' 模式确保所有语言都有前缀，这是使用 pathnames 时的最佳实践
-    localePrefix: "always" as const,
+    localePrefix: LOCALES_CONFIG.localePrefix,
   };
 }

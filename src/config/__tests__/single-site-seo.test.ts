@@ -1,28 +1,48 @@
 import { describe, expect, it } from "vitest";
+import { PATHS_CONFIG } from "@/config/paths/paths-config";
+import { getCanonicalPath, getProductMarketPath } from "@/config/paths/utils";
 import {
+  SINGLE_SITE_PUBLIC_STATIC_PAGE_ROUTES,
   SINGLE_SITE_PUBLIC_STATIC_PAGES,
   SINGLE_SITE_ROBOTS_DISALLOW_PATHS,
   SINGLE_SITE_SITEMAP_DEFAULT_CONFIG,
   SINGLE_SITE_SITEMAP_PAGE_CONFIG,
   SINGLE_SITE_STATIC_PAGE_LASTMOD,
 } from "@/config/single-site-seo";
+import { getAllMarketSlugs } from "@/constants/product-catalog";
 
 describe("single-site-seo", () => {
   const RETIRED_BENDING_MACHINES_PATH = "/capabilities/bending-machines";
 
-  it("keeps the public static sitemap pages explicit", () => {
-    expect(SINGLE_SITE_PUBLIC_STATIC_PAGES).toContain("/about");
-    expect(SINGLE_SITE_PUBLIC_STATIC_PAGES).toContain("/contact");
+  it("keeps public static sitemap pages as an explicit route allowlist", () => {
+    expect(SINGLE_SITE_PUBLIC_STATIC_PAGE_ROUTES).toEqual([
+      "home",
+      "about",
+      "contact",
+      "products",
+      "privacy",
+      "terms",
+      "oem",
+    ]);
+    expect([...SINGLE_SITE_PUBLIC_STATIC_PAGE_ROUTES].sort()).toEqual(
+      Object.keys(PATHS_CONFIG).sort(),
+    );
+
+    const expectedPages = SINGLE_SITE_PUBLIC_STATIC_PAGE_ROUTES.map(
+      (pageType) => {
+        const canonicalPath = getCanonicalPath(pageType);
+        return canonicalPath === "/" ? "" : canonicalPath;
+      },
+    );
+
+    expect(SINGLE_SITE_PUBLIC_STATIC_PAGES).toEqual(expectedPages);
     expect(SINGLE_SITE_PUBLIC_STATIC_PAGES).not.toContain(
       RETIRED_BENDING_MACHINES_PATH,
-    );
-    expect(SINGLE_SITE_PUBLIC_STATIC_PAGES).toContain(
-      "/oem-custom-manufacturing",
     );
   });
 
   it("keeps sitemap configs explicit for special page types", () => {
-    expect(SINGLE_SITE_SITEMAP_PAGE_CONFIG["/terms"]).toEqual({
+    expect(SINGLE_SITE_SITEMAP_PAGE_CONFIG[getCanonicalPath("terms")]).toEqual({
       changeFrequency: "monthly",
       priority: 0.7,
     });
@@ -37,9 +57,14 @@ describe("single-site-seo", () => {
   });
 
   it("keeps static page lastmod defaults and robots disallow list centralized", () => {
-    expect(SINGLE_SITE_STATIC_PAGE_LASTMOD["/products"]).toBe(
+    expect(SINGLE_SITE_STATIC_PAGE_LASTMOD[getCanonicalPath("products")]).toBe(
       "2026-04-26T00:00:00Z",
     );
+    for (const marketSlug of getAllMarketSlugs()) {
+      expect(
+        SINGLE_SITE_STATIC_PAGE_LASTMOD[getProductMarketPath(marketSlug)],
+      ).toBe("2026-04-26T00:00:00Z");
+    }
     expect(SINGLE_SITE_ROBOTS_DISALLOW_PATHS).toEqual([
       "/api/",
       "/_next/",

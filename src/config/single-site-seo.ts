@@ -1,4 +1,6 @@
-import { PATHS_CONFIG } from "@/config/paths/paths-config";
+import type { PageType } from "@/config/paths/types";
+import { getCanonicalPath, getProductMarketPath } from "@/config/paths/utils";
+import { getAllMarketSlugs } from "@/constants/product-catalog";
 
 export type SingleSiteSitemapChangeFrequency =
   | "always"
@@ -23,21 +25,54 @@ export interface SingleSiteSitemapPageConfig {
   priority: number;
 }
 
-export const SINGLE_SITE_PUBLIC_STATIC_PAGES = Object.values(PATHS_CONFIG).map(
-  (paths) => (paths.en === "/" ? "" : paths.en),
-);
+const SINGLE_SITE_STATIC_LASTMOD_ISO = "2026-04-26T00:00:00Z";
+
+function toSitemapStaticPath(path: string): string {
+  return path === "/" ? "" : path;
+}
+
+function fromRouteConfig<T>(
+  configByPageType: Partial<Record<PageType, T>>,
+): Record<string, T> {
+  return Object.fromEntries(
+    (Object.entries(configByPageType) as Array<[PageType, T]>).map(
+      ([pageType, config]) => [
+        toSitemapStaticPath(getCanonicalPath(pageType)),
+        config,
+      ],
+    ),
+  );
+}
+
+export const SINGLE_SITE_PUBLIC_STATIC_PAGE_ROUTES = [
+  "home",
+  "about",
+  "contact",
+  "products",
+  "privacy",
+  "terms",
+  "oem",
+] as const satisfies readonly PageType[];
+
+export const SINGLE_SITE_PUBLIC_STATIC_PAGES =
+  SINGLE_SITE_PUBLIC_STATIC_PAGE_ROUTES.map((pageType) =>
+    toSitemapStaticPath(getCanonicalPath(pageType)),
+  );
+
+const SINGLE_SITE_STATIC_SITEMAP_PAGE_CONFIG_BY_ROUTE = {
+  home: { changeFrequency: "daily", priority: 1.0 },
+  about: { changeFrequency: "monthly", priority: 0.8 },
+  contact: { changeFrequency: "monthly", priority: 0.8 },
+  products: { changeFrequency: "weekly", priority: 0.9 },
+  privacy: { changeFrequency: "monthly", priority: 0.7 },
+  terms: { changeFrequency: "monthly", priority: 0.7 },
+  oem: { changeFrequency: "monthly", priority: 0.8 },
+} as const satisfies Record<PageType, SingleSiteSitemapPageConfig>;
 
 export const SINGLE_SITE_SITEMAP_PAGE_CONFIG = {
-  "": { changeFrequency: "daily", priority: 1.0 },
-  "/about": { changeFrequency: "monthly", priority: 0.8 },
-  "/contact": { changeFrequency: "monthly", priority: 0.8 },
-  "/products": { changeFrequency: "weekly", priority: 0.9 },
-  "/privacy": { changeFrequency: "monthly", priority: 0.7 },
-  "/terms": { changeFrequency: "monthly", priority: 0.7 },
-  "/oem-custom-manufacturing": {
-    changeFrequency: "monthly",
-    priority: 0.8,
-  },
+  ...fromRouteConfig<SingleSiteSitemapPageConfig>(
+    SINGLE_SITE_STATIC_SITEMAP_PAGE_CONFIG_BY_ROUTE,
+  ),
   productMarket: { changeFrequency: "weekly", priority: 0.8 },
 } as const satisfies Record<string, SingleSiteSitemapPageConfig>;
 
@@ -46,16 +81,24 @@ export const SINGLE_SITE_SITEMAP_DEFAULT_CONFIG = {
   priority: 0.5,
 } as const satisfies SingleSiteSitemapPageConfig;
 
-export const SINGLE_SITE_STATIC_PAGE_LASTMOD = {
+const SINGLE_SITE_STATIC_PAGE_LASTMOD_BY_ROUTE = {
   // Non-MDX routes and product market pages use this sidecar date source.
   // MDX-driven pages read updatedAt from content/pages/{locale}/*.mdx.
-  "": "2026-04-26T00:00:00Z",
-  "/products": "2026-04-26T00:00:00Z",
-  "/products/north-america": "2026-04-26T00:00:00Z",
-  "/products/australia-new-zealand": "2026-04-26T00:00:00Z",
-  "/products/mexico": "2026-04-26T00:00:00Z",
-  "/products/europe": "2026-04-26T00:00:00Z",
-  "/products/pneumatic-tube-systems": "2026-04-26T00:00:00Z",
+  home: SINGLE_SITE_STATIC_LASTMOD_ISO,
+  products: SINGLE_SITE_STATIC_LASTMOD_ISO,
+} as const satisfies Partial<Record<PageType, string>>;
+
+const SINGLE_SITE_PRODUCT_MARKET_LASTMOD: Record<string, string> =
+  Object.fromEntries(
+    getAllMarketSlugs().map((marketSlug) => [
+      getProductMarketPath(marketSlug),
+      SINGLE_SITE_STATIC_LASTMOD_ISO,
+    ]),
+  );
+
+export const SINGLE_SITE_STATIC_PAGE_LASTMOD = {
+  ...fromRouteConfig(SINGLE_SITE_STATIC_PAGE_LASTMOD_BY_ROUTE),
+  ...SINGLE_SITE_PRODUCT_MARKET_LASTMOD,
 } as const satisfies Record<string, string>;
 
 export const SINGLE_SITE_ROBOTS_DISALLOW_PATHS = [

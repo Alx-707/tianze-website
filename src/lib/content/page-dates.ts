@@ -1,15 +1,25 @@
+import type { PageType } from "@/config/paths/types";
+import { getCanonicalPath } from "@/config/paths/utils";
 import type { Locale } from "@/types/content.types";
 import { routing } from "@/i18n/routing";
 import { getPageBySlug } from "@/lib/content";
 import { logger } from "@/lib/logger";
 
-const MDX_PAGE_SLUGS: Record<string, string> = {
-  "/about": "about",
-  "/contact": "contact",
-  "/privacy": "privacy",
-  "/terms": "terms",
-  "/oem-custom-manufacturing": "oem-custom-manufacturing",
-};
+const MDX_PAGE_SLUGS_BY_ROUTE = {
+  about: "about",
+  contact: "contact",
+  privacy: "privacy",
+  terms: "terms",
+  oem: "oem-custom-manufacturing",
+} as const satisfies Partial<Record<PageType, string>>;
+
+type MdxPageRoute = keyof typeof MDX_PAGE_SLUGS_BY_ROUTE;
+
+const MDX_PAGE_SLUGS: Record<string, string> = Object.fromEntries(
+  (Object.entries(MDX_PAGE_SLUGS_BY_ROUTE) as Array<
+    [MdxPageRoute, string]
+  >).map(([pageType, slug]) => [getCanonicalPath(pageType), slug]),
+);
 
 export function isMdxDrivenPage(path: string): boolean {
   return path in MDX_PAGE_SLUGS;

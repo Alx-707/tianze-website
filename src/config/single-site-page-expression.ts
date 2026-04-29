@@ -1,3 +1,4 @@
+import { getCanonicalPath } from "@/config/paths/utils";
 import { PRODUCT_CATALOG } from "@/constants/product-catalog";
 
 /**
@@ -12,7 +13,7 @@ import { PRODUCT_CATALOG } from "@/constants/product-catalog";
  *
  * Keep implementation details out of here:
  * - `contact/page.tsx` `MERGED_MESSAGES`
- * - `products/[market]/page.tsx` `SPECS_BY_MARKET`
+ * - product route-local spec lookup maps
  * - `privacy` / `terms` heading-prefix constants
  * - `slugify`, heading parsers, JSON-LD object literals, and page-local helpers
  */
@@ -35,8 +36,8 @@ export type SingleSiteHomeTrailingSectionId =
   (typeof SINGLE_SITE_HOME_TRAILING_SECTION_ORDER)[number];
 
 export const SINGLE_SITE_HOME_LINK_TARGETS = {
-  contact: "/contact",
-  products: "/products",
+  contact: getCanonicalPath("contact"),
+  products: getCanonicalPath("products"),
 } as const;
 
 export const SINGLE_SITE_HOME_HERO_PROOF_ITEMS = [
@@ -110,7 +111,7 @@ export const SINGLE_SITE_HOME_QUALITY_PROOF_STRIP_ITEMS = [
 ] as const;
 
 export const SINGLE_SITE_ABOUT_PAGE_EXPRESSION = {
-  ctaHref: "/contact",
+  ctaHref: getCanonicalPath("contact"),
 } as const;
 
 const PNEUMATIC_MARKET_SLUG = "pneumatic-tube-systems" as const;
@@ -123,7 +124,7 @@ export const SINGLE_SITE_PRODUCTS_PAGE_EXPRESSION = {
   standardMarketSlugs,
   specialtyMarketSlug: PNEUMATIC_MARKET_SLUG,
   marketLanding: {
-    ctaHref: "/contact",
+    ctaHref: getCanonicalPath("contact"),
   },
 } as const;
 
@@ -141,5 +142,5 @@ export const SINGLE_SITE_OEM_PAGE_EXPRESSION = {
     "qualityAssurance",
   ],
   processStepCount: 5,
-  ctaHref: "/contact",
+  ctaHref: getCanonicalPath("contact"),
 } as const;

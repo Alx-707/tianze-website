@@ -1,14 +1,29 @@
 import { describe, expect, it, vi } from "vitest";
+import { getCanonicalPath, getProductMarketPath } from "@/config/paths/utils";
+import {
+  getAllMarketFamilyCombos,
+  getAllMarketSlugs,
+} from "@/constants/product-catalog";
+import {
+  getSingleSiteSitemapPageConfig,
+  SINGLE_SITE_PUBLIC_STATIC_PAGES,
+} from "@/config/single-site-seo";
 import { getMdxPageLastModified } from "@/lib/content/page-dates";
 import { getStaticPageLastModified } from "@/lib/sitemap-utils";
 import sitemap from "../sitemap";
 
 // Mock dependencies before imports
-vi.mock("@/config/paths", () => ({
-  SITE_CONFIG: {
-    baseUrl: "https://example.com",
-  },
-}));
+vi.mock("@/config/paths", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/config/paths")>();
+
+  return {
+    ...actual,
+    SITE_CONFIG: {
+      ...actual.SITE_CONFIG,
+      baseUrl: "https://example.com",
+    },
+  };
+});
 
 vi.mock("@/i18n/routing", () => ({
   routing: {
@@ -17,41 +32,64 @@ vi.mock("@/i18n/routing", () => ({
   },
 }));
 
-vi.mock("@/lib/sitemap-utils", () => ({
-  getStaticPageLastModified: vi.fn((page) => {
-    const dates: Record<string, Date> = {
-      "": new Date("2024-12-01T00:00:00Z"),
-      "/products": new Date("2024-11-01T00:00:00Z"),
-      "/products/north-america": new Date("2024-11-01T00:00:00Z"),
-      "/products/australia-new-zealand": new Date("2024-11-01T00:00:00Z"),
-      "/products/mexico": new Date("2024-11-01T00:00:00Z"),
-      "/products/europe": new Date("2024-11-01T00:00:00Z"),
-      "/products/pneumatic-tube-systems": new Date("2024-11-01T00:00:00Z"),
-    };
-    const date = dates[page];
-    if (date === undefined) {
-      throw new Error(`Unexpected static lastmod fallback: ${page}`);
-    }
-    return date;
-  }),
-}));
+vi.mock("@/lib/sitemap-utils", async () => {
+  const { getCanonicalPath } = await import("@/config/paths/utils");
+  const productsPath = getCanonicalPath("products");
 
-vi.mock("@/lib/content/page-dates", () => ({
-  isMdxDrivenPage: vi.fn((path: string) =>
-    [
-      "/about",
-      "/contact",
-      "/privacy",
-      "/terms",
-      "/oem-custom-manufacturing",
-    ].includes(path),
-  ),
-  getMdxPageLastModified: vi.fn(async () => new Date("2026-04-20T00:00:00Z")),
-}));
+  return {
+    getStaticPageLastModified: vi.fn((page: string) => {
+      if (page === "") {
+        return new Date("2024-12-01T00:00:00Z");
+      }
+      const marketSlug = page.startsWith(`${productsPath}/`)
+        ? page.slice(productsPath.length + 1)
+        : "";
+      if (
+        page === productsPath ||
+        (marketSlug.length > 0 && !marketSlug.includes("/"))
+      ) {
+        return new Date("2024-11-01T00:00:00Z");
+      }
+      throw new Error(`Unexpected static lastmod fallback: ${page}`);
+    }),
+  };
+});
+
+vi.mock("@/lib/content/page-dates", async () => {
+  const { getCanonicalPath } = await import("@/config/paths/utils");
+  const productsPath = getCanonicalPath("products");
+
+  return {
+    isMdxDrivenPage: vi.fn(
+      (path: string) =>
+        path !== "" &&
+        path !== productsPath &&
+        !path.startsWith(`${productsPath}/`),
+    ),
+    getMdxPageLastModified: vi.fn(async () => new Date("2026-04-20T00:00:00Z")),
+  };
+});
 
 describe("sitemap.ts", () => {
-  const RETIRED_BENDING_MACHINES_URL =
-    "https://example.com/en/capabilities/bending-machines";
+  const BASE_URL = "https://example.com";
+  const RETIRED_BENDING_MACHINES_URL = `${BASE_URL}/en/capabilities/bending-machines`;
+  const defaultLocale = "en";
+
+  function sitemapPathForCanonical(path: string): string {
+    return path === "/" ? "" : path;
+  }
+
+  function localizedUrl(locale: string, path: string): string {
+    return `${BASE_URL}/${locale}${path}`;
+  }
+
+  function findEntry(
+    entries: Awaited<ReturnType<typeof sitemap>>,
+    locale: string,
+    path: string,
+  ) {
+    return entries.find((entry) => entry.url === localizedUrl(locale, path));
+  }
 
   describe("sitemap()", () => {
     it("should return sitemap array", async () => {
@@ -64,30 +102,21 @@ describe("sitemap.ts", () => {
     it("should include static pages for all locales", async () => {
       const result = await sitemap();
 
-      // Check for English home page
-      const enHome = result.find(
-        (entry) => entry.url === "https://example.com/en",
-      );
-      expect(enHome).toBeDefined();
-
-      // Check for Chinese home page
-      const zhHome = result.find(
-        (entry) => entry.url === "https://example.com/zh",
-      );
-      expect(zhHome).toBeDefined();
+      for (const locale of ["en", "zh"]) {
+        for (const pagePath of SINGLE_SITE_PUBLIC_STATIC_PAGES) {
+          expect(findEntry(result, locale, pagePath)).toBeDefined();
+        }
+      }
     });
 
     it("should include static pages", async () => {
       const result = await sitemap();
       const urls = result.map((entry) => entry.url);
 
-      expect(urls).toContain("https://example.com/en/about");
-      expect(urls).toContain("https://example.com/en/contact");
-      expect(urls).toContain("https://example.com/en/products");
-      expect(urls).toContain("https://example.com/en/privacy");
-      expect(urls).toContain("https://example.com/en/terms");
+      for (const pagePath of SINGLE_SITE_PUBLIC_STATIC_PAGES) {
+        expect(urls).toContain(localizedUrl(defaultLocale, pagePath));
+      }
       expect(urls).not.toContain(RETIRED_BENDING_MACHINES_URL);
-      expect(urls).toContain("https://example.com/en/oem-custom-manufacturing");
     });
 
     it("should not include removed blog pages", async () => {
@@ -103,19 +132,28 @@ describe("sitemap.ts", () => {
       const result = await sitemap();
       const urls = result.map((entry) => entry.url);
 
-      expect(urls).toContain("https://example.com/en/products/north-america");
-      expect(urls).toContain(
-        "https://example.com/en/products/australia-new-zealand",
-      );
-      expect(urls).toContain("https://example.com/zh/products/north-america");
+      for (const marketSlug of getAllMarketSlugs()) {
+        expect(urls).toContain(
+          localizedUrl(defaultLocale, getProductMarketPath(marketSlug)),
+        );
+        expect(urls).toContain(
+          localizedUrl("zh", getProductMarketPath(marketSlug)),
+        );
+      }
     });
 
     it("should not include product catalog family pages (removed route)", async () => {
       const result = await sitemap();
       const urls = result.map((entry) => entry.url);
+      const productsPath = getCanonicalPath("products");
+      const [familyCombo] = getAllMarketFamilyCombos();
 
+      expect(familyCombo).toBeDefined();
       expect(urls).not.toContain(
-        "https://example.com/en/products/north-america/conduit-sweeps-elbows",
+        localizedUrl(
+          defaultLocale,
+          `${productsPath}/${familyCombo?.market}/${familyCombo?.family}`,
+        ),
       );
     });
 
@@ -166,91 +204,85 @@ describe("sitemap.ts", () => {
 
     it("should include x-default in alternates", async () => {
       const result = await sitemap();
-      const enHome = result.find(
-        (entry) => entry.url === "https://example.com/en",
-      );
+      const enHome = findEntry(result, defaultLocale, "");
 
       expect(enHome?.alternates?.languages?.["x-default"]).toBeDefined();
     });
 
     it("should set home page priority to 1.0", async () => {
       const result = await sitemap();
-      const enHome = result.find(
-        (entry) => entry.url === "https://example.com/en",
-      );
+      const homePath = sitemapPathForCanonical(getCanonicalPath("home"));
+      const home = findEntry(result, defaultLocale, homePath);
+      const homeConfig = getSingleSiteSitemapPageConfig(homePath);
 
-      expect(enHome?.priority).toBe(1.0);
+      expect(home?.priority).toBe(homeConfig.priority);
     });
 
-    it("should set products listing priority to 0.9", async () => {
+    it("should set products listing priority from sitemap config", async () => {
       const result = await sitemap();
-      const products = result.find(
-        (entry) => entry.url === "https://example.com/en/products",
-      );
+      const productsPath = getCanonicalPath("products");
+      const products = findEntry(result, defaultLocale, productsPath);
+      const productsConfig = getSingleSiteSitemapPageConfig(productsPath);
 
-      expect(products?.priority).toBe(0.9);
+      expect(products?.priority).toBe(productsConfig.priority);
     });
 
-    it("should set home page changeFrequency to daily", async () => {
+    it("should set home page changeFrequency from sitemap config", async () => {
       const result = await sitemap();
-      const enHome = result.find(
-        (entry) => entry.url === "https://example.com/en",
-      );
+      const homePath = sitemapPathForCanonical(getCanonicalPath("home"));
+      const home = findEntry(result, defaultLocale, homePath);
+      const homeConfig = getSingleSiteSitemapPageConfig(homePath);
 
-      expect(enHome?.changeFrequency).toBe("daily");
+      expect(home?.changeFrequency).toBe(homeConfig.changeFrequency);
     });
 
-    it("should set about page changeFrequency to monthly", async () => {
+    it("should set about page changeFrequency from sitemap config", async () => {
       const result = await sitemap();
-      const about = result.find(
-        (entry) => entry.url === "https://example.com/en/about",
-      );
+      const aboutPath = getCanonicalPath("about");
+      const about = findEntry(result, defaultLocale, aboutPath);
+      const aboutConfig = getSingleSiteSitemapPageConfig(aboutPath);
 
-      expect(about?.changeFrequency).toBe("monthly");
+      expect(about?.changeFrequency).toBe(aboutConfig.changeFrequency);
     });
 
     it("should use MDX updatedAt for MDX-driven page lastmod", async () => {
       const result = await sitemap();
-      const about = result.find(
-        (entry) => entry.url === "https://example.com/en/about",
-      );
+      const aboutPath = getCanonicalPath("about");
+      const about = findEntry(result, defaultLocale, aboutPath);
 
-      expect(getMdxPageLastModified).toHaveBeenCalledWith("/about");
+      expect(getMdxPageLastModified).toHaveBeenCalledWith(aboutPath);
       expect(about?.lastModified).toEqual(new Date("2026-04-20T00:00:00Z"));
     });
 
     it("should use sidecar dates for non-MDX and product market pages", async () => {
       const result = await sitemap();
-      const products = result.find(
-        (entry) => entry.url === "https://example.com/en/products",
-      );
-      const northAmerica = result.find(
-        (entry) =>
-          entry.url === "https://example.com/en/products/north-america",
-      );
+      const productsPath = getCanonicalPath("products");
+      const [marketSlug] = getAllMarketSlugs();
+      const marketPath = getProductMarketPath(marketSlug ?? "");
+      const products = findEntry(result, defaultLocale, productsPath);
+      const market = findEntry(result, defaultLocale, marketPath);
 
+      expect(marketSlug).toBeDefined();
       expect(getStaticPageLastModified).toHaveBeenCalledWith(
-        "/products",
+        productsPath,
         expect.any(Map),
       );
       expect(getStaticPageLastModified).toHaveBeenCalledWith(
-        "/products/north-america",
+        marketPath,
         expect.any(Map),
       );
       expect(products?.lastModified).toEqual(new Date("2024-11-01T00:00:00Z"));
-      expect(northAmerica?.lastModified).toEqual(
-        new Date("2024-11-01T00:00:00Z"),
-      );
+      expect(market?.lastModified).toEqual(new Date("2024-11-01T00:00:00Z"));
     });
 
     it("should keep terms page SEO defaults explicit", async () => {
       const result = await sitemap();
-      const terms = result.find(
-        (entry) => entry.url === "https://example.com/en/terms",
-      );
+      const termsPath = getCanonicalPath("terms");
+      const terms = findEntry(result, defaultLocale, termsPath);
+      const termsConfig = getSingleSiteSitemapPageConfig(termsPath);
 
-      expect(terms?.priority).toBe(0.7);
-      expect(terms?.changeFrequency).toBe("monthly");
+      expect(terms?.priority).toBe(termsConfig.priority);
+      expect(terms?.changeFrequency).toBe(termsConfig.changeFrequency);
     });
 
     it("should not have duplicate entries", async () => {
@@ -263,14 +295,13 @@ describe("sitemap.ts", () => {
 
     it("should include standalone pages with correct config", async () => {
       const result = await sitemap();
+      const oemPath = getCanonicalPath("oem");
+      const oem = findEntry(result, defaultLocale, oemPath);
+      const oemConfig = getSingleSiteSitemapPageConfig(oemPath);
 
-      const oem = result.find(
-        (entry) =>
-          entry.url === "https://example.com/en/oem-custom-manufacturing",
-      );
       expect(oem).toBeDefined();
-      expect(oem?.priority).toBe(0.8);
-      expect(oem?.changeFrequency).toBe("monthly");
+      expect(oem?.priority).toBe(oemConfig.priority);
+      expect(oem?.changeFrequency).toBe(oemConfig.changeFrequency);
     });
   });
 });

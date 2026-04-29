@@ -242,16 +242,14 @@ describe("Middleware Cookie Security", () => {
           pathnames: {
             "/": "/",
             "/about": "/about",
-            "/products/[market]/[family]": "/products/[market]/[family]",
+            "/products/[market]": "/products/[market]",
           },
         },
       }));
 
       const { default: middleware } = await import("@/middleware");
 
-      const request = new NextRequest(
-        "http://localhost:3000/fr/products/eu/fittings",
-      );
+      const request = new NextRequest("http://localhost:3000/fr/products/eu");
       const response = middleware(request);
 
       if (response) {
@@ -261,7 +259,7 @@ describe("Middleware Cookie Security", () => {
           expect(setCookieHeader).toMatch(/SameSite=Lax/i);
         }
         expect(response.headers.get("location")).toBe(
-          "http://localhost:3000/en/products/eu/fittings",
+          "http://localhost:3000/en/products/eu",
         );
       }
     });

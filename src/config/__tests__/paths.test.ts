@@ -1,9 +1,14 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Locale } from "@/config/paths";
 import {
+  DYNAMIC_PATHS_CONFIG,
+  getCanonicalPath,
+  getLocaleCurrency,
+  getLocaleTimeZone,
   getLocalizedPath,
   getPageTypeFromPath,
   getPathnames,
+  getProductMarketPath,
   getRoutingConfig,
   LOCALES_CONFIG,
   PATHS_CONFIG,
@@ -19,6 +24,26 @@ const isHttpUrl = (value: string) => /^https?:\/\/.+/.test(value);
 const isEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 const isPhone = (value: string) =>
   /^\+\d{1,3}[-\s]?\(?[\d]{1,4}\)?[-\s]?\d{1,4}[-\s]?\d{1,9}$/.test(value);
+
+const CURRENT_PRODUCTION_LOCALE_CONTRACT = {
+  locales: ["en", "zh"],
+  defaultLocale: "en",
+  localePrefix: "always",
+  timeZones: {
+    en: "UTC",
+    zh: "Asia/Shanghai",
+  },
+  currencies: {
+    en: "USD",
+    zh: "CNY",
+  },
+} as const satisfies {
+  locales: readonly Locale[];
+  defaultLocale: Locale;
+  localePrefix: "always";
+  timeZones: Record<Locale, string>;
+  currencies: Record<Locale, string>;
+};
 
 describe("paths configuration", () => {
   describe("type definitions", () => {
@@ -110,9 +135,27 @@ describe("paths configuration", () => {
   });
 
   describe("LOCALES_CONFIG", () => {
+    it("should match the current production locale contract", () => {
+      expect(LOCALES_CONFIG.locales).toEqual(
+        CURRENT_PRODUCTION_LOCALE_CONTRACT.locales,
+      );
+      expect(LOCALES_CONFIG.defaultLocale).toBe(
+        CURRENT_PRODUCTION_LOCALE_CONTRACT.defaultLocale,
+      );
+      expect(LOCALES_CONFIG.localePrefix).toBe(
+        CURRENT_PRODUCTION_LOCALE_CONTRACT.localePrefix,
+      );
+      expect(LOCALES_CONFIG.timeZones).toEqual(
+        CURRENT_PRODUCTION_LOCALE_CONTRACT.timeZones,
+      );
+      expect(LOCALES_CONFIG.currencies).toEqual(
+        CURRENT_PRODUCTION_LOCALE_CONTRACT.currencies,
+      );
+    });
+
     it("should have correct locale configuration", () => {
-      expect(LOCALES_CONFIG.locales).toEqual(["en", "zh"]);
-      expect(LOCALES_CONFIG.defaultLocale).toBe("en");
+      expect(LOCALES_CONFIG.locales).toContain(LOCALES_CONFIG.defaultLocale);
+      expect(LOCALES_CONFIG.locales.length).toBeGreaterThan(0);
     });
 
     it("should have valid prefixes", () => {
@@ -123,6 +166,24 @@ describe("paths configuration", () => {
     it("should have display names", () => {
       expect(LOCALES_CONFIG.displayNames.en).toBe("English");
       expect(LOCALES_CONFIG.displayNames.zh).toBe("中文");
+    });
+
+    it("should expose locale time zones and currencies from the registry", () => {
+      expect(LOCALES_CONFIG.timeZones).toEqual({
+        en: "UTC",
+        zh: "Asia/Shanghai",
+      });
+      expect(LOCALES_CONFIG.currencies).toEqual({
+        en: "USD",
+        zh: "CNY",
+      });
+    });
+
+    it("should resolve locale metadata through helpers", () => {
+      expect(getLocaleTimeZone("en")).toBe("UTC");
+      expect(getLocaleTimeZone("zh")).toBe("Asia/Shanghai");
+      expect(getLocaleCurrency("en")).toBe("USD");
+      expect(getLocaleCurrency("zh")).toBe("CNY");
     });
 
     it("should have time zones", () => {
@@ -209,19 +270,30 @@ describe("paths configuration", () => {
   });
 
   describe("getPathnames", () => {
-    it("should return all pathnames", () => {
+    it("should derive static pathnames from PATHS_CONFIG", () => {
       const pathnames = getPathnames();
+      const expectedStaticPaths = Object.values(PATHS_CONFIG).map((paths) =>
+        paths.en === "/" ? "/" : paths.en,
+      );
 
-      expect(pathnames["/"]).toBe("/");
-      expect(pathnames["/about"]).toBe("/about");
-      expect(pathnames["/contact"]).toBe("/contact");
-      expect(pathnames["/products"]).toBe("/products");
+      for (const path of expectedStaticPaths) {
+        expect(pathnames[path]).toBe(path);
+      }
     });
 
-    it("should include dynamic route patterns", () => {
+    it("should derive dynamic route patterns from DYNAMIC_PATHS_CONFIG", () => {
       const pathnames = getPathnames();
 
-      expect(pathnames["/products/[market]"]).toBe("/products/[market]");
+      for (const config of Object.values(DYNAMIC_PATHS_CONFIG)) {
+        expect(pathnames[config.pattern]).toBe(config.pattern);
+      }
+    });
+
+    it("should not advertise product family pages without a real route", () => {
+      const pathnames = getPathnames();
+      const removedFamilyRoute = `/products/${"[market]"}/${"[family]"}`;
+
+      expect(pathnames).not.toHaveProperty(removedFamilyRoute);
     });
 
     it("should have consistent paths", () => {
@@ -230,6 +302,21 @@ describe("paths configuration", () => {
       Object.entries(pathnames).forEach(([key, value]) => {
         expect(key).toBe(value);
       });
+    });
+  });
+
+  describe("getCanonicalPath", () => {
+    it("should resolve route IDs to canonical non-localized paths", () => {
+      expect(getCanonicalPath("home")).toBe("/");
+      expect(getCanonicalPath("contact")).toBe("/contact");
+      expect(getCanonicalPath("products")).toBe("/products");
+      expect(getCanonicalPath("oem")).toBe("/oem-custom-manufacturing");
+    });
+
+    it("should derive product market paths from the products route", () => {
+      expect(getProductMarketPath("north-america")).toBe(
+        `${getCanonicalPath("products")}/north-america`,
+      );
     });
   });
 
@@ -273,9 +360,9 @@ describe("paths configuration", () => {
     it("should return valid routing configuration", () => {
       const config = getRoutingConfig();
 
-      expect(config.locales).toEqual(["en", "zh"]);
-      expect(config.defaultLocale).toBe("en");
-      expect(config.localePrefix).toBe("always");
+      expect(config.locales).toEqual(LOCALES_CONFIG.locales);
+      expect(config.defaultLocale).toBe(LOCALES_CONFIG.defaultLocale);
+      expect(config.localePrefix).toBe(LOCALES_CONFIG.localePrefix);
       expect(typeof config.pathnames).toBe("object");
     });
 
@@ -306,7 +393,7 @@ describe("paths configuration", () => {
         "privacy",
         "terms",
       ];
-      const locales: Locale[] = ["en", "zh"];
+      const locales: Locale[] = [...LOCALES_CONFIG.locales];
 
       pageTypes.forEach((pageType) => {
         locales.forEach((locale) => {
@@ -584,7 +671,7 @@ describe("paths configuration", () => {
 
     it("should ensure all Locale values are supported", () => {
       const supportedLocales = LOCALES_CONFIG.locales;
-      const expectedLocales: Locale[] = ["en", "zh"];
+      const expectedLocales: Locale[] = [...LOCALES_CONFIG.locales];
 
       expect(supportedLocales).toEqual(expectedLocales);
 
