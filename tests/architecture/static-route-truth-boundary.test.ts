@@ -10,7 +10,7 @@ describe("static route truth boundary", () => {
     );
 
     expect(source).not.toMatch(
-      /\bhref:\s*"(?:\/|\/about|\/contact|\/products|\/privacy|\/terms|\/oem-custom-manufacturing)"/,
+      /\bhref:\s*["'`](?:\/|\/about|\/contact|\/products|\/privacy|\/terms|\/oem-custom-manufacturing)["'`]/,
     );
   });
 

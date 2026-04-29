@@ -31,9 +31,19 @@ describe("page-dates", () => {
 
   it("keeps sitemap MDX page detection aligned with public static routes", () => {
     const nonMdxPages = new Set(["", getCanonicalPath("products")]);
+    const representativePageContracts = [
+      { path: "", isMdx: false },
+      { path: "/products", isMdx: false },
+      { path: "/about", isMdx: true },
+      { path: "/oem-custom-manufacturing", isMdx: true },
+    ] as const;
 
     for (const pagePath of SINGLE_SITE_PUBLIC_STATIC_PAGES) {
       expect(isMdxDrivenPage(pagePath)).toBe(!nonMdxPages.has(pagePath));
+    }
+
+    for (const { path, isMdx } of representativePageContracts) {
+      expect(isMdxDrivenPage(path)).toBe(isMdx);
     }
 
     expect(SINGLE_SITE_PUBLIC_STATIC_PAGE_ROUTES).toContain("oem");

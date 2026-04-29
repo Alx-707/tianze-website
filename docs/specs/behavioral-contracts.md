@@ -39,7 +39,7 @@ Notes: Hero section visibility and CTA link count are tested. CTA `href` targets
 
 #### BC-002: Buyer can navigate to all main pages from the header
 
-Desktop: Navigation bar shows links to Home, Products, Blog, and About. Mobile: Hamburger menu opens a sheet with the same links. Clicking any link reaches the correct page.
+Desktop: Navigation bar shows links to Home, Products, OEM, About, and Contact. Mobile: Hamburger menu opens a sheet with the same links. Clicking any link reaches the correct page. Blog links are intentionally absent while BC-015 and BC-016 remain retired.
 
 | Field | Value |
 |-------|-------|

@@ -671,7 +671,9 @@ describe("paths configuration", () => {
 
     it("should ensure all Locale values are supported", () => {
       const supportedLocales = LOCALES_CONFIG.locales;
-      const expectedLocales: Locale[] = [...LOCALES_CONFIG.locales];
+      const expectedLocales: Locale[] = [
+        ...CURRENT_PRODUCTION_LOCALE_CONTRACT.locales,
+      ];
 
       expect(supportedLocales).toEqual(expectedLocales);
 

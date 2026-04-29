@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-import { getCanonicalPath } from "@/config/paths/utils";
 import { PRODUCT_CATALOG } from "@/constants/product-catalog";
 import {
   SINGLE_SITE_ABOUT_PAGE_EXPRESSION,
@@ -31,8 +30,8 @@ describe("single-site-page-expression", () => {
     ]);
     expect(SINGLE_SITE_HOME_TRAILING_SECTION_ORDER).toEqual(["finalCta"]);
     expect(SINGLE_SITE_HOME_LINK_TARGETS).toEqual({
-      contact: getCanonicalPath("contact"),
-      products: getCanonicalPath("products"),
+      contact: "/contact",
+      products: "/products",
     });
   });
 
@@ -110,13 +109,9 @@ describe("single-site-page-expression", () => {
 
     expect(groupedMarketSlugs.sort()).toEqual(allMarketSlugs.sort());
     expect(SINGLE_SITE_PRODUCTS_PAGE_EXPRESSION.marketLanding.ctaHref).toBe(
-      getCanonicalPath("contact"),
+      "/contact",
     );
-    expect(SINGLE_SITE_ABOUT_PAGE_EXPRESSION.ctaHref).toBe(
-      getCanonicalPath("contact"),
-    );
-    expect(SINGLE_SITE_OEM_PAGE_EXPRESSION.ctaHref).toBe(
-      getCanonicalPath("contact"),
-    );
+    expect(SINGLE_SITE_ABOUT_PAGE_EXPRESSION.ctaHref).toBe("/contact");
+    expect(SINGLE_SITE_OEM_PAGE_EXPRESSION.ctaHref).toBe("/contact");
   });
 });

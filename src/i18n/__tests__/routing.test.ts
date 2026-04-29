@@ -6,6 +6,12 @@ import type { Locale } from "@/i18n/routing";
 const mockCreateNavigation = vi.fn();
 const mockDefineRouting = vi.fn();
 
+const CURRENT_ROUTING_CONTRACT = {
+  locales: ["en", "zh"],
+  defaultLocale: "en",
+  localePrefix: "always",
+} as const;
+
 vi.mock("next-intl/navigation", () => ({
   createNavigation: mockCreateNavigation,
 }));
@@ -60,6 +66,13 @@ describe("i18n Routing Configuration", () => {
           }),
           alternateLinks: true,
           localeDetection: true,
+        }),
+      );
+      expect(mockDefineRouting).toHaveBeenCalledWith(
+        expect.objectContaining({
+          locales: CURRENT_ROUTING_CONTRACT.locales,
+          defaultLocale: CURRENT_ROUTING_CONTRACT.defaultLocale,
+          localePrefix: CURRENT_ROUTING_CONTRACT.localePrefix,
         }),
       );
     });

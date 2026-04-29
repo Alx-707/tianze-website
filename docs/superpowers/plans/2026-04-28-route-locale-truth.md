@@ -1705,14 +1705,17 @@ pnpm type-check
 pnpm lint:check
 pnpm dep:check
 pnpm truth:check
+pnpm review:translation-quartet
+pnpm review:translate-compat
 ```
 
 Expected:
 
 ```text
-All four commands pass.
+All six commands pass.
 No new dependency-cruiser boundary errors.
 No stale truth-source doc failures.
+No translation quartet or translate-compat regressions.
 ```
 
 - [ ] **Step 3: Run architecture cache policy guard**

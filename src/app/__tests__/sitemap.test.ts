@@ -119,6 +119,33 @@ describe("sitemap.ts", () => {
       expect(urls).not.toContain(RETIRED_BENDING_MACHINES_URL);
     });
 
+    it("pins representative sitemap contract entries with fixed values", async () => {
+      const result = await sitemap();
+
+      expect(findEntry(result, "en", "")).toMatchObject({
+        url: "https://example.com/en",
+        priority: 1.0,
+        changeFrequency: "daily",
+      });
+      expect(findEntry(result, "zh", "/about")).toMatchObject({
+        url: "https://example.com/zh/about",
+        priority: 0.8,
+        changeFrequency: "monthly",
+        lastModified: new Date("2026-04-20T00:00:00Z"),
+      });
+      expect(findEntry(result, "en", "/products/north-america")).toMatchObject({
+        url: "https://example.com/en/products/north-america",
+        priority: 0.8,
+        changeFrequency: "weekly",
+        lastModified: new Date("2024-11-01T00:00:00Z"),
+      });
+      expect(findEntry(result, "en", "/terms")).toMatchObject({
+        url: "https://example.com/en/terms",
+        priority: 0.7,
+        changeFrequency: "monthly",
+      });
+    });
+
     it("should not include removed blog pages", async () => {
       const result = await sitemap();
       const urls = result.map((entry) => entry.url);

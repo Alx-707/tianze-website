@@ -1,7 +1,6 @@
 import fs from "fs";
 import path from "path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { LOCALES_CONFIG } from "@/config/paths/locales-config";
 import { ContentError, type ContentConfig } from "@/types/content.types";
 import {
   TEST_COUNT_CONSTANTS,
@@ -35,12 +34,17 @@ vi.mock("@/lib/logger", () => ({
 
 const mockFs = vi.mocked(fs);
 
+const CURRENT_CONTENT_LOCALE_CONTRACT = {
+  defaultLocale: "en",
+  supportedLocales: ["en", "zh"],
+} satisfies Pick<ContentConfig, "defaultLocale" | "supportedLocales">;
+
 function expectedDefaultContentConfig(
   overrides: Partial<ContentConfig> = {},
 ): ContentConfig {
   return {
-    defaultLocale: LOCALES_CONFIG.defaultLocale,
-    supportedLocales: [...LOCALES_CONFIG.locales],
+    defaultLocale: CURRENT_CONTENT_LOCALE_CONTRACT.defaultLocale,
+    supportedLocales: CURRENT_CONTENT_LOCALE_CONTRACT.supportedLocales,
     postsPerPage: 10,
     enableDrafts: process.env.NODE_ENV === "development",
     enableSearch: true,
