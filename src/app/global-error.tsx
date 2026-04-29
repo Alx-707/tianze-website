@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { coerceLocale } from "@/i18n/locale-utils";
-import { isRuntimeDevelopment } from "@/lib/env";
+import { isPublicRuntimeDevelopment } from "@/lib/public-env";
 
 interface GlobalErrorProps {
   error: Error & { digest?: string };
@@ -40,7 +40,7 @@ function getLocaleFromBrowser(): "en" | "zh" {
 }
 
 function isDevelopmentRuntime(): boolean {
-  return isRuntimeDevelopment();
+  return isPublicRuntimeDevelopment();
 }
 
 async function reportGlobalError(error: Error): Promise<void> {
