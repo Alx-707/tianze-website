@@ -54,7 +54,8 @@ export function extractScriptTypeAttr(attrs: string): string | null {
   const match = attrs.match(
     /(?:^|\s)type\s*=\s*(?:"([^"]+)"|'([^']+)'|([^\s>]+))/i,
   );
-  return (match?.[1] ?? match?.[2] ?? match?.[3] ?? null)?.toLowerCase();
+  const scriptType = match?.[1] ?? match?.[2] ?? match?.[3];
+  return scriptType ? scriptType.toLowerCase() : null;
 }
 
 export function hasExecutableScriptType(script: InlineScript): boolean {
@@ -84,7 +85,7 @@ async function waitForReady(url: string, timeoutMs: number): Promise<void> {
 
 function parseCspNonce(csp: string): string | null {
   const m = csp.match(/'nonce-([^']+)'/);
-  return m ? m[1] : null;
+  return m?.[1] ?? null;
 }
 
 function parseCspDirectives(csp: string): Map<string, Set<string>> {
