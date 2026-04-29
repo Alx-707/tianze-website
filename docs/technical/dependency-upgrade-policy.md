@@ -141,7 +141,7 @@ Node 24 迁移验证重点：
 2. `pnpm type-check`、`pnpm type-check:tests`、`pnpm lint:check` 必须通过。
 3. `pnpm build` 和 `pnpm build:cf` 必须通过。
 4. `pnpm ci:local:quick` 或完整 CI 必须在 Node 24 下通过。
-5. Vercel Project Settings 的 Node.js Version 需要切到 `24.x`，否则仓库 proof 和部署平台不一致。
+5. Vercel Project Settings 的 Node.js Version 建议同步切到 `24.x`；`package.json > engines.node` 也会约束 Vercel 使用 Node 24，但最终以部署日志中的实际 Node major 为准。
 6. 只有当 Vercel、CI 和项目运行时都明确支持 Node 25 时，才考虑 `@types/node 25.x`。
 
 ### `critters`

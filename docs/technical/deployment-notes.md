@@ -78,7 +78,7 @@
 - `pnpm tech:check`
 - `pnpm ci:local:quick`
 
-`@types/node 25.x` 仍不跟随 latest；它必须等真实 runtime baseline 扩到 Node 25 后再单独验证。Vercel Project Settings 的 Node.js Version 也需要切到 `24.x`，否则仓库 proof 和部署平台会不一致。
+`@types/node 25.x` 仍不跟随 latest；它必须等真实 runtime baseline 扩到 Node 25 后再单独验证。Vercel Project Settings 的 Node.js Version 建议同步切到 `24.x`；`package.json > engines.node` 也会约束 Vercel 使用 Node 24，但最终以部署日志中的实际 Node major 为准。
 
 ### 2026-04-28 GitHub Actions Node 24 runtime refresh
 
