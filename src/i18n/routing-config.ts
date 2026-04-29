@@ -1,4 +1,5 @@
 import { defineRouting } from "next-intl/routing";
+import { LOCALES_CONFIG } from "@/config/paths/locales-config";
 import { PATHNAMES } from "@/config/paths/utils";
 
 /**
@@ -10,14 +11,9 @@ import { PATHNAMES } from "@/config/paths/utils";
  * import from '@/i18n/routing' instead.
  */
 export const routing = defineRouting({
-  // 支持的语言
-  locales: ["en", "zh"],
-
-  // 默认语言
-  defaultLocale: "en",
-
-  // 使用 'always' 模式 - next-intl 3.0 官方推荐，避免边缘情况
-  localePrefix: "always",
+  locales: LOCALES_CONFIG.locales,
+  defaultLocale: LOCALES_CONFIG.defaultLocale,
+  localePrefix: LOCALES_CONFIG.localePrefix,
 
   // Shared Pathnames - 所有语言使用相同路径，简单可靠
   // 注意：仅包含已实现的页面路径，避免 404 错误

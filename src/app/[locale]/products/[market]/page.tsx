@@ -7,7 +7,8 @@ import {
   isValidMarketSlug,
 } from "@/constants/product-catalog";
 import { SINGLE_SITE_PRODUCTS_PAGE_EXPRESSION } from "@/config/single-site-page-expression";
-import { DYNAMIC_PATHS_CONFIG, SITE_CONFIG } from "@/config/paths";
+import { SITE_CONFIG } from "@/config/paths";
+import { getProductMarketPath } from "@/config/paths/utils";
 import { generateMetadataForPath } from "@/lib/seo-metadata";
 import { JsonLdGraphScript } from "@/components/seo";
 import { CatalogBreadcrumb } from "@/components/products/catalog-breadcrumb";
@@ -50,10 +51,7 @@ export async function generateMetadata({
   return generateMetadataForPath({
     locale: locale as Locale,
     pageType: "products",
-    path: DYNAMIC_PATHS_CONFIG.productMarket.pattern.replace(
-      "[market]",
-      market.slug,
-    ),
+    path: getProductMarketPath(market.slug),
     config: {
       title: `${marketLabel} | ${SITE_CONFIG.name}`,
       description: marketDescription,
@@ -73,7 +71,9 @@ export default async function MarketPage({ params }: MarketPageProps) {
   const t = await getTranslations({ locale, namespace: "catalog" });
   const marketLabel = t(`markets.${marketSlug}.label`);
   const marketDescription = t(`markets.${marketSlug}.description`);
-  const marketUrl = `${SITE_CONFIG.baseUrl}/${locale}/products/${pageData.market.slug}`;
+  const marketUrl = `${SITE_CONFIG.baseUrl}/${locale}${getProductMarketPath(
+    pageData.market.slug,
+  )}`;
   const jsonLdData = await buildMarketPageJsonLdData({
     data: {
       families: pageData.families,

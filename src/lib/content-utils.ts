@@ -12,6 +12,7 @@ import { getRuntimeEnvBoolean, getRuntimeEnvString } from "@/lib/env";
 import { logger } from "@/lib/logger";
 import { COUNT_TEN } from "@/constants";
 import { COUNT_160 } from "@/constants/count";
+import { LOCALES_CONFIG } from "@/config/paths/locales-config";
 
 // Content directory paths
 export const CONTENT_DIR = path.join(process.cwd(), "content");
@@ -48,8 +49,8 @@ function resolveDraftsEnabled(configValue?: boolean): boolean {
 
 // Default content configuration
 const DEFAULT_CONFIG: ContentConfig = {
-  defaultLocale: "en",
-  supportedLocales: ["en", "zh"],
+  defaultLocale: LOCALES_CONFIG.defaultLocale,
+  supportedLocales: [...LOCALES_CONFIG.locales],
   postsPerPage: COUNT_TEN,
   enableDrafts: resolveDraftsEnabled(),
   enableSearch: true,

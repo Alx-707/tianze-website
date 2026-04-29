@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { ContentError } from "@/types/content.types";
+import { ContentError, type ContentConfig } from "@/types/content.types";
 import {
   TEST_COUNT_CONSTANTS,
   TEST_SAMPLE_CONSTANTS,
@@ -33,6 +33,29 @@ vi.mock("@/lib/logger", () => ({
 }));
 
 const mockFs = vi.mocked(fs);
+
+const CURRENT_CONTENT_LOCALE_CONTRACT = {
+  defaultLocale: "en",
+  supportedLocales: ["en", "zh"],
+} satisfies Pick<ContentConfig, "defaultLocale" | "supportedLocales">;
+
+function expectedDefaultContentConfig(
+  overrides: Partial<ContentConfig> = {},
+): ContentConfig {
+  return {
+    defaultLocale: CURRENT_CONTENT_LOCALE_CONTRACT.defaultLocale,
+    supportedLocales: CURRENT_CONTENT_LOCALE_CONTRACT.supportedLocales,
+    postsPerPage: 10,
+    enableDrafts: process.env.NODE_ENV === "development",
+    enableSearch: true,
+    enableComments: false,
+    autoGenerateExcerpt: true,
+    excerptLength: 160,
+    dateFormat: "YYYY-MM-DD",
+    timeZone: "UTC",
+    ...overrides,
+  };
+}
 
 describe("Content Utils", () => {
   beforeEach(() => {
@@ -244,18 +267,7 @@ describe("Content Utils", () => {
 
       const config = getContentConfig();
 
-      expect(config).toEqual({
-        defaultLocale: "en",
-        supportedLocales: ["en", "zh"],
-        postsPerPage: 10,
-        enableDrafts: process.env.NODE_ENV === "development",
-        enableSearch: true,
-        enableComments: false,
-        autoGenerateExcerpt: true,
-        excerptLength: 160,
-        dateFormat: "YYYY-MM-DD",
-        timeZone: "UTC",
-      });
+      expect(config).toEqual(expectedDefaultContentConfig());
     });
 
     it("should load and merge custom config when file exists (ignoring unknown keys)", () => {
@@ -270,18 +282,12 @@ describe("Content Utils", () => {
 
       const config = getContentConfig();
 
-      expect(config).toEqual({
-        defaultLocale: "en",
-        supportedLocales: ["en", "zh"],
-        postsPerPage: 20, // Overridden
-        enableDrafts: process.env.NODE_ENV === "development",
-        enableSearch: true,
-        enableComments: true, // Overridden
-        autoGenerateExcerpt: true,
-        excerptLength: 160,
-        dateFormat: "YYYY-MM-DD",
-        timeZone: "UTC",
-      });
+      expect(config).toEqual(
+        expectedDefaultContentConfig({
+          postsPerPage: 20,
+          enableComments: true,
+        }),
+      );
     });
 
     it("should handle JSON parsing errors gracefully", async () => {
@@ -292,18 +298,7 @@ describe("Content Utils", () => {
 
       const config = getContentConfig();
 
-      expect(config).toEqual({
-        defaultLocale: "en",
-        supportedLocales: ["en", "zh"],
-        postsPerPage: 10,
-        enableDrafts: process.env.NODE_ENV === "development",
-        enableSearch: true,
-        enableComments: false,
-        autoGenerateExcerpt: true,
-        excerptLength: 160,
-        dateFormat: "YYYY-MM-DD",
-        timeZone: "UTC",
-      });
+      expect(config).toEqual(expectedDefaultContentConfig());
 
       expect(logger.warn).toHaveBeenCalledWith(
         "Failed to load content config, using defaults",
@@ -320,18 +315,7 @@ describe("Content Utils", () => {
 
       const config = getContentConfig();
 
-      expect(config).toEqual({
-        defaultLocale: "en",
-        supportedLocales: ["en", "zh"],
-        postsPerPage: 10,
-        enableDrafts: process.env.NODE_ENV === "development",
-        enableSearch: true,
-        enableComments: false,
-        autoGenerateExcerpt: true,
-        excerptLength: 160,
-        dateFormat: "YYYY-MM-DD",
-        timeZone: "UTC",
-      });
+      expect(config).toEqual(expectedDefaultContentConfig());
 
       expect(logger.warn).toHaveBeenCalledWith(
         "Failed to load content config, using defaults",
@@ -355,18 +339,7 @@ describe("Content Utils", () => {
 
       const config = getContentConfig();
 
-      expect(config).toEqual({
-        defaultLocale: "en",
-        supportedLocales: ["en", "zh"],
-        postsPerPage: 10,
-        enableDrafts: process.env.NODE_ENV === "development",
-        enableSearch: true,
-        enableComments: false,
-        autoGenerateExcerpt: true,
-        excerptLength: 160,
-        dateFormat: "YYYY-MM-DD",
-        timeZone: "UTC",
-      });
+      expect(config).toEqual(expectedDefaultContentConfig());
     });
 
     it("should handle partial config override", () => {
