@@ -41,12 +41,6 @@ const heldDependencyUpdates = [
     rationale:
       "The package is still 0.x; minor releases may change lint behavior and should be isolated.",
   },
-  {
-    name: "prettier-plugin-tailwindcss",
-    status: "zero-major-minor-held",
-    rationale:
-      "The package is still 0.x and can create formatting churn; keep it separate from application dependency refreshes.",
-  },
 ];
 
 export const HELD_DEPENDENCY_UPDATES = heldDependencyUpdates;

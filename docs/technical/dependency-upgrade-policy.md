@@ -21,7 +21,6 @@
 | `eslint` / `@eslint/js` | ESLint 10 是 lint major，可能改变 flat config 和规则输出 | 单独 lint-tooling lane，跑 `pnpm lint:check` 和质量脚本 |
 | `eslint-plugin-security` | 安全规则 major 可能带来大量误报 | 单独和 Semgrep / lint 一起验证 |
 | `eslint-plugin-react-you-might-not-need-an-effect` | 仍是 `0.x`，minor 可能改变规则行为 | 单独验证 lint 输出 |
-| `prettier-plugin-tailwindcss` | 仍是 `0.x`，minor 可能带来格式化 churn | 单独 formatting lane，跑 `pnpm format:check` |
 
 ## 这次升级经验
 
@@ -58,6 +57,16 @@
 - `email:dev` 能启动 React Email 6 preview
 - Resend 发送路径继续生成 plain text 内容
 - `pnpm deps:check` 不再出现 React Email 5 hold 项
+
+### prettier-plugin-tailwindcss 0.8
+
+`prettier-plugin-tailwindcss` 仍在 `0.x`，因此 minor 升级按独立 formatting lane 处理。
+本次 `0.7.2 -> 0.8.0` 没有触发全仓格式化 churn。
+
+验证重点：
+
+- `pnpm format:check` 通过
+- 不和业务代码或其它依赖升级混在同一个提交里
 
 ### tech check
 

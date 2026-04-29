@@ -250,7 +250,7 @@
     "playwright": "^1.59.1",
     "postcss": "^8.5.12",
     "prettier": "3.8.3",
-    "prettier-plugin-tailwindcss": "^0.7.2",
+    "prettier-plugin-tailwindcss": "^0.8.0",
     "react-grab": "^0.1.32",
     "react-scan": "^0.5.3",
     "react-server-dom-turbopack": "19.2.5",
