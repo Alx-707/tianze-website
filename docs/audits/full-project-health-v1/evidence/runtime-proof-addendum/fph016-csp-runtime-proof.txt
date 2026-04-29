@@ -1,0 +1,41 @@
+CSP inline script runtime proof
+generatedAt=2026-04-29T03:15:43.624Z
+baseUrl=http://localhost:3210
+
+route=http://localhost:3210/en
+status=200
+csp=present
+script-src nonce=present unsafe-inline=false
+script-src-elem unsafe-inline=true
+inline total=38 nonced=0 unnonced=38 unnonced-executable=37 unnonced-non-executable=1
+unnonced executable categories:
+  - next-rsc-flight-payload: 36
+  - next-themes-init: 1
+unnonced executable samples:
+  - category=next-rsc-flight-payload sha256=OBTN3RiyCV4Bq7dFqZ5a2pAXjnCcCYeTJMO2I/LYKeo= attrs="<none>" preview="(self.__next_f=self.__next_f||[]).push([0])"
+  - category=next-themes-init sha256=n46vPwSWuMC0W703pBofImv82Z26xo4LXymv0E9caPk= attrs="<none>" preview="((a,b,c,d,e,f,g,h)=>{let i=document.documentElement,j=[\"light\",\"dark\"];function k(b){var c;(Array.isArray(a)?a:[a]).forE"
+unnonced non-executable categories:
+  - project-json-ld: 1
+unnonced non-executable samples:
+  - category=project-json-ld sha256=bKOKqxvy+jJRpvJkh3tObGLxfPHbx7vkmrJdy9Dh6ao= attrs="type=\"application/ld+json\"" preview="{ \"@context\": \"https://schema.org\", \"@graph\": [ { \"@type\": \"Organization\", \"name\": \"Tianze Pipe\", \"description\": \"Profes"
+result=pass: unnonced executable inline script elements exist and are covered by script-src-elem 'unsafe-inline'; script-src itself remains nonce-scoped.
+
+route=http://localhost:3210/zh
+status=200
+csp=present
+script-src nonce=present unsafe-inline=false
+script-src-elem unsafe-inline=true
+inline total=35 nonced=0 unnonced=35 unnonced-executable=34 unnonced-non-executable=1
+unnonced executable categories:
+  - next-rsc-flight-payload: 33
+  - next-themes-init: 1
+unnonced executable samples:
+  - category=next-rsc-flight-payload sha256=OBTN3RiyCV4Bq7dFqZ5a2pAXjnCcCYeTJMO2I/LYKeo= attrs="<none>" preview="(self.__next_f=self.__next_f||[]).push([0])"
+  - category=next-themes-init sha256=n46vPwSWuMC0W703pBofImv82Z26xo4LXymv0E9caPk= attrs="<none>" preview="((a,b,c,d,e,f,g,h)=>{let i=document.documentElement,j=[\"light\",\"dark\"];function k(b){var c;(Array.isArray(a)?a:[a]).forE"
+unnonced non-executable categories:
+  - project-json-ld: 1
+unnonced non-executable samples:
+  - category=project-json-ld sha256=lRmP+TDa+VTJPqh5Krxt7fboIT++XRjQYuCd6b/dqbU= attrs="type=\"application/ld+json\"" preview="{ \"@context\": \"https://schema.org\", \"@graph\": [ { \"@type\": \"Organization\", \"name\": \"天泽管业\", \"description\": \"专业PVC管道与PETG气"
+result=pass: unnonced executable inline script elements exist and are covered by script-src-elem 'unsafe-inline'; script-src itself remains nonce-scoped.
+
+overall=pass: runtime HTML still contains unnonced executable inline script elements while script-src remains nonce-scoped.
