@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { FIVE_MINUTES_MS } from "@/constants";
+import { FIVE_MINUTES_MS } from "@/constants/time";
 import { useCurrentTime } from "@/hooks/use-current-time";
 import { getPublicRuntimeEnvNumber } from "@/lib/public-env";
 

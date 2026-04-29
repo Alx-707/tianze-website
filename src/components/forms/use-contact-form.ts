@@ -5,7 +5,7 @@ import {
   useState,
   useTransition,
 } from "react";
-import { logger } from "@/lib/logger";
+import { logger } from "@/lib/logger-core";
 import { generateIdempotencyKey } from "@/lib/idempotency-key";
 import { appendAttributionToFormData } from "@/lib/utm";
 import { useRateLimit } from "@/components/forms/use-rate-limit";

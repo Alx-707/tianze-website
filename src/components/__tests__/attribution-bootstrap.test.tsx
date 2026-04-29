@@ -75,24 +75,39 @@ describe("AttributionBootstrap", () => {
 
   it("does not load attribution logic when there are no attribution params", async () => {
     const module = await import("../attribution-bootstrap");
-    const loadSpy = vi.spyOn(module, "loadAttributionModule");
-    render(<module.AttributionBootstrap />);
+    const loadModule = vi.fn(module.loadAttributionModule);
+    render(<module.AttributionBootstrap loadModule={loadModule} />);
 
-    await new Promise((resolve) => setTimeout(resolve, 0));
-    expect(loadSpy).not.toHaveBeenCalled();
+    expect(loadModule).not.toHaveBeenCalled();
   });
 
   it("still avoids loading attribution logic on re-render when no params exist", async () => {
     const module = await import("../attribution-bootstrap");
-    const loadSpy = vi.spyOn(module, "loadAttributionModule");
+    const loadModule = vi.fn(module.loadAttributionModule);
 
-    const { rerender } = render(<module.AttributionBootstrap />);
+    const { rerender } = render(
+      <module.AttributionBootstrap loadModule={loadModule} />,
+    );
 
-    rerender(<module.AttributionBootstrap />);
-    rerender(<module.AttributionBootstrap />);
+    rerender(<module.AttributionBootstrap loadModule={loadModule} />);
+    rerender(<module.AttributionBootstrap loadModule={loadModule} />);
 
-    await new Promise((resolve) => setTimeout(resolve, 0));
-    expect(loadSpy).not.toHaveBeenCalled();
+    expect(loadModule).not.toHaveBeenCalled();
+  });
+
+  it("loads attribution logic when attribution params exist", async () => {
+    window.location.search = "?utm_source=google";
+    const module = await import("../attribution-bootstrap");
+    const loadModule = vi.fn(() =>
+      Promise.resolve({
+        flushPendingAttribution: vi.fn(),
+        storeAttributionData: vi.fn(),
+      }),
+    );
+
+    render(<module.AttributionBootstrap loadModule={loadModule} />);
+
+    await waitFor(() => expect(loadModule).toHaveBeenCalledTimes(1));
   });
 
   it("flushes pending attribution through the real consent event path", async () => {

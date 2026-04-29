@@ -1,5 +1,4 @@
-import React from "react";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import GlobalError from "../global-error";
 
@@ -8,40 +7,12 @@ const { mockLoggerError } = vi.hoisted(() => ({
   mockLoggerError: vi.fn(),
 }));
 
-vi.mock("@/lib/logger", () => ({
+vi.mock("@/lib/logger-core", () => ({
   logger: {
     error: mockLoggerError,
     info: vi.fn(),
     warn: vi.fn(),
   },
-  sanitizeIP: (ip: string | undefined | null) =>
-    ip ? "[REDACTED_IP]" : "[NO_IP]",
-  sanitizeEmail: (email: string | undefined | null) =>
-    email ? "[REDACTED_EMAIL]" : "[NO_EMAIL]",
-}));
-
-// Mock Button component
-vi.mock("@/components/ui/button", () => ({
-  Button: ({
-    children,
-    onClick,
-    variant,
-    className,
-  }: React.PropsWithChildren<{
-    onClick?: () => void;
-    variant?: string;
-    className?: string;
-  }>) => (
-    <button
-      data-testid={
-        variant === "outline" ? "go-home-button" : "try-again-button"
-      }
-      onClick={onClick}
-      className={className}
-    >
-      {children}
-    </button>
-  ),
 }));
 
 describe("GlobalError", () => {
@@ -106,34 +77,47 @@ describe("GlobalError", () => {
   });
 
   describe("error logging", () => {
-    it("should log error on mount", () => {
+    it("should log error on mount", async () => {
       render(<GlobalError error={mockError} reset={mockReset} />);
 
-      expect(mockLoggerError).toHaveBeenCalledWith(
-        "Global error caught",
-        mockError,
-      );
+      await waitFor(() => {
+        expect(mockLoggerError).toHaveBeenCalledWith(
+          "Global error caught",
+          mockError,
+        );
+      });
     });
 
-    it("should log error only once on initial mount", () => {
+    it("should log error only once on initial mount", async () => {
       render(<GlobalError error={mockError} reset={mockReset} />);
 
-      expect(mockLoggerError).toHaveBeenCalledTimes(1);
+      await waitFor(() => {
+        expect(mockLoggerError).toHaveBeenCalledTimes(1);
+      });
     });
 
-    it("should log new error when error prop changes", () => {
+    it("should log new error when error prop changes", async () => {
       const { rerender } = render(
         <GlobalError error={mockError} reset={mockReset} />,
       );
 
+      await waitFor(() => {
+        expect(mockLoggerError).toHaveBeenCalledWith(
+          "Global error caught",
+          mockError,
+        );
+      });
+
       const newError = new Error("New error message");
       rerender(<GlobalError error={newError} reset={mockReset} />);
 
-      expect(mockLoggerError).toHaveBeenCalledTimes(2);
-      expect(mockLoggerError).toHaveBeenLastCalledWith(
-        "Global error caught",
-        newError,
-      );
+      await waitFor(() => {
+        expect(mockLoggerError).toHaveBeenCalledTimes(2);
+        expect(mockLoggerError).toHaveBeenLastCalledWith(
+          "Global error caught",
+          newError,
+        );
+      });
     });
   });
 
@@ -203,17 +187,19 @@ describe("GlobalError", () => {
   });
 
   describe("error with digest", () => {
-    it("should handle error with digest property", () => {
+    it("should handle error with digest property", async () => {
       const errorWithDigest = Object.assign(new Error("Digest error"), {
         digest: "error-digest-123",
       });
 
       render(<GlobalError error={errorWithDigest} reset={mockReset} />);
 
-      expect(mockLoggerError).toHaveBeenCalledWith(
-        "Global error caught",
-        errorWithDigest,
-      );
+      await waitFor(() => {
+        expect(mockLoggerError).toHaveBeenCalledWith(
+          "Global error caught",
+          errorWithDigest,
+        );
+      });
     });
   });
 

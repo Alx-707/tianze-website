@@ -3,6 +3,17 @@
 import { useEffect } from "react";
 
 const ATTRIBUTION_PARAM_PATTERN = /(?:^|[?&])(utm_|gclid=|fbclid=|msclkid=)/i;
+const ATTRIBUTION_FLUSH_EVENTS = ["storage", "visibilitychange"] as const;
+
+type AttributionModule = Pick<
+  typeof import("@/lib/utm"),
+  "flushPendingAttribution" | "storeAttributionData"
+>;
+type AttributionModuleLoader = () => Promise<AttributionModule>;
+
+interface AttributionBootstrapProps {
+  loadModule?: AttributionModuleLoader;
+}
 
 export function loadAttributionModule() {
   return import("@/lib/utm");
@@ -12,7 +23,9 @@ export function shouldLoadAttribution(search: string) {
   return ATTRIBUTION_PARAM_PATTERN.test(search);
 }
 
-export function AttributionBootstrap() {
+export function AttributionBootstrap({
+  loadModule = loadAttributionModule,
+}: AttributionBootstrapProps) {
   useEffect(() => {
     if (!shouldLoadAttribution(window.location.search)) {
       return undefined;
@@ -21,19 +34,17 @@ export function AttributionBootstrap() {
     let cancelled = false;
     let removeFlushListeners: (() => void) | undefined;
 
-    loadAttributionModule()
+    loadModule()
       .then(({ flushPendingAttribution, storeAttributionData }) => {
         if (!cancelled) {
           storeAttributionData();
 
-          const flushEvents = ["storage", "visibilitychange"] as const;
-
-          for (const eventName of flushEvents) {
+          for (const eventName of ATTRIBUTION_FLUSH_EVENTS) {
             window.addEventListener(eventName, flushPendingAttribution);
           }
 
           removeFlushListeners = () => {
-            for (const eventName of flushEvents) {
+            for (const eventName of ATTRIBUTION_FLUSH_EVENTS) {
               window.removeEventListener(eventName, flushPendingAttribution);
             }
           };
@@ -45,7 +56,7 @@ export function AttributionBootstrap() {
       cancelled = true;
       removeFlushListeners?.();
     };
-  }, []);
+  }, [loadModule]);
 
   return null;
 }

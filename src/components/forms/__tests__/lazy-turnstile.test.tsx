@@ -1,25 +1,20 @@
+import { readFileSync } from "node:fs";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { IDLE_CALLBACK_TIMEOUT_LONG } from "@/constants/time";
 import { TURNSTILE_WIDGET_HEIGHT_PX } from "@/constants/turnstile-constants";
 import { LazyTurnstile } from "@/components/forms/lazy-turnstile";
 
-const { idleCallbacks, intersectionCallbacks, mockRequestIdleCallback } =
-  vi.hoisted(() => ({
-    idleCallbacks: [] as Array<() => void>,
-    intersectionCallbacks: [] as Array<IntersectionObserverCallback>,
-    mockRequestIdleCallback: vi.fn((callback: () => void) => {
-      idleCallbacks.push(callback);
-      return () => undefined;
-    }),
-  }));
-
-vi.mock("@/lib/idle-callback", () => ({
-  requestIdleCallback: mockRequestIdleCallback,
-}));
-
-vi.mock("next/dynamic", () => ({
-  default: (_loader: unknown, _options: Record<string, unknown>) => {
-    const MockTurnstile = ({
+const {
+  idleCallbacks,
+  intersectionCallbacks,
+  mockRequestIdleCallback,
+  mockTurnstileState,
+  mockTurnstileWidget,
+} = vi.hoisted(() => {
+  const mockTurnstileState = { shouldThrow: false };
+  const MockTurnstileWidget = vi.fn(
+    ({
       action,
       size,
       theme,
@@ -37,48 +32,70 @@ vi.mock("next/dynamic", () => ({
       onError?: (reason?: string) => void;
       onExpire?: () => void;
       onLoad?: () => void;
-    }) => (
-      <div
-        data-testid="turnstile-widget"
-        data-action={action}
-        data-size={size}
-        data-theme={theme}
-        data-classname={className}
-      >
-        <button
-          type="button"
-          data-testid="turnstile-load"
-          onClick={() => onLoad?.()}
-        >
-          Load
-        </button>
-        <button
-          type="button"
-          data-testid="turnstile-success"
-          onClick={() => onSuccess?.("lazy-token")}
-        >
-          Success
-        </button>
-        <button
-          type="button"
-          data-testid="turnstile-error"
-          onClick={() => onError?.("lazy-error")}
-        >
-          Error
-        </button>
-        <button
-          type="button"
-          data-testid="turnstile-expire"
-          onClick={() => onExpire?.()}
-        >
-          Expire
-        </button>
-      </div>
-    );
+    }) => {
+      if (mockTurnstileState.shouldThrow) {
+        throw new Error("turnstile widget failed to load");
+      }
 
-    MockTurnstile.displayName = "MockTurnstile";
-    return MockTurnstile;
-  },
+      return (
+        <div
+          data-testid="turnstile-widget"
+          data-action={action}
+          data-size={size}
+          data-theme={theme}
+          data-classname={className}
+        >
+          <button
+            type="button"
+            data-testid="turnstile-load"
+            onClick={() => onLoad?.()}
+          >
+            Load
+          </button>
+          <button
+            type="button"
+            data-testid="turnstile-success"
+            onClick={() => onSuccess?.("lazy-token")}
+          >
+            Success
+          </button>
+          <button
+            type="button"
+            data-testid="turnstile-error"
+            onClick={() => onError?.("lazy-error")}
+          >
+            Error
+          </button>
+          <button
+            type="button"
+            data-testid="turnstile-expire"
+            onClick={() => onExpire?.()}
+          >
+            Expire
+          </button>
+        </div>
+      );
+    },
+  );
+
+  return {
+    idleCallbacks: [] as Array<() => void>,
+    intersectionCallbacks: [] as Array<IntersectionObserverCallback>,
+    mockRequestIdleCallback: vi.fn((callback: () => void) => {
+      idleCallbacks.push(callback);
+      return () => undefined;
+    }),
+    mockTurnstileState,
+    mockTurnstileWidget: MockTurnstileWidget,
+  };
+});
+
+vi.mock("@/lib/idle-callback", () => ({
+  requestIdleCallback: mockRequestIdleCallback,
+}));
+
+vi.mock("@/components/security/turnstile", () => ({
+  TurnstileWidget: mockTurnstileWidget,
 }));
 
 function getPlaceholderContainer() {
@@ -101,6 +118,7 @@ describe("LazyTurnstile", () => {
   beforeEach(() => {
     idleCallbacks.length = 0;
     intersectionCallbacks.length = 0;
+    mockTurnstileState.shouldThrow = false;
 
     class MockIntersectionObserver implements IntersectionObserver {
       readonly root = null;
@@ -132,6 +150,14 @@ describe("LazyTurnstile", () => {
     vi.stubGlobal("IntersectionObserver", MockIntersectionObserver);
   });
 
+  it("keeps the lazy Turnstile entry free of next/dynamic runtime", () => {
+    const source = readFileSync("src/components/forms/lazy-turnstile.tsx", {
+      encoding: "utf8",
+    });
+
+    expect(source).not.toContain("next/dynamic");
+  });
+
   it("keeps a placeholder until idle or visibility triggers rendering", () => {
     render(<LazyTurnstile onSuccess={vi.fn()} />);
 
@@ -141,7 +167,10 @@ describe("LazyTurnstile", () => {
         "--turnstile-placeholder-height",
       ),
     ).toBe(`${TURNSTILE_WIDGET_HEIGHT_PX.normal}px`);
-    expect(mockRequestIdleCallback).toHaveBeenCalledTimes(1);
+    expect(mockRequestIdleCallback).toHaveBeenCalledWith(expect.any(Function), {
+      fallbackDelay: IDLE_CALLBACK_TIMEOUT_LONG,
+      timeout: IDLE_CALLBACK_TIMEOUT_LONG,
+    });
   });
 
   it("uses the documented compact placeholder height", () => {
@@ -154,7 +183,7 @@ describe("LazyTurnstile", () => {
     ).toBe(`${TURNSTILE_WIDGET_HEIGHT_PX.compact}px`);
   });
 
-  it("renders on idle and forwards props and callbacks", () => {
+  it("renders on idle and forwards props and callbacks", async () => {
     const onSuccess = vi.fn();
     const onError = vi.fn();
     const onExpire = vi.fn();
@@ -173,8 +202,9 @@ describe("LazyTurnstile", () => {
       />,
     );
 
-    act(() => {
+    await act(async () => {
       idleCallbacks[0]?.();
+      await vi.dynamicImportSettled();
     });
 
     const widget = screen.getByTestId("turnstile-widget");
@@ -194,11 +224,12 @@ describe("LazyTurnstile", () => {
     expect(onExpire).toHaveBeenCalledTimes(1);
   });
 
-  it("lets the shared widget decide the default action when none is provided", () => {
+  it("lets the shared widget decide the default action when none is provided", async () => {
     render(<LazyTurnstile onSuccess={vi.fn()} />);
 
-    act(() => {
+    await act(async () => {
       idleCallbacks[0]?.();
+      await vi.dynamicImportSettled();
     });
 
     expect(screen.getByTestId("turnstile-widget")).not.toHaveAttribute(
@@ -206,16 +237,42 @@ describe("LazyTurnstile", () => {
     );
   });
 
-  it("renders when the wrapper enters the viewport", () => {
+  it("renders when the wrapper enters the viewport", async () => {
     render(<LazyTurnstile onSuccess={vi.fn()} />);
 
-    act(() => {
+    await act(async () => {
       intersectionCallbacks[0]?.(
         [{ isIntersecting: true } as IntersectionObserverEntry],
         {} as IntersectionObserver,
       );
+      await vi.dynamicImportSettled();
     });
 
     expect(screen.getByTestId("turnstile-widget")).toBeInTheDocument();
+  });
+
+  it("shows a safe fallback and reports an error when the widget fails", async () => {
+    mockTurnstileState.shouldThrow = true;
+    const onError = vi.fn();
+    const consoleError = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+
+    try {
+      render(<LazyTurnstile onError={onError} />);
+
+      await act(async () => {
+        idleCallbacks[0]?.();
+        await vi.dynamicImportSettled();
+      });
+
+      expect(screen.queryByTestId("turnstile-widget")).not.toBeInTheDocument();
+      expect(screen.getByRole("status")).toHaveTextContent(
+        "Security verification is temporarily unavailable.",
+      );
+      expect(onError).toHaveBeenCalledWith("Turnstile widget failed to load");
+    } finally {
+      consoleError.mockRestore();
+    }
   });
 });

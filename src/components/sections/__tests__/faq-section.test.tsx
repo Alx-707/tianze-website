@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -41,6 +42,19 @@ vi.mock("@/components/seo", () => ({
 }));
 
 describe("Feature: FaqSection Reusable Component", () => {
+  describe("Scenario 0: performance boundary", () => {
+    it("keeps the FAQ accordion out of the client JavaScript bundle", () => {
+      const source = readFileSync(
+        "src/components/sections/faq-accordion.tsx",
+        "utf8",
+      );
+
+      expect(source).not.toContain('"use client"');
+      expect(source).not.toContain("@/components/ui/accordion");
+      expect(source).not.toContain("lucide-react");
+    });
+  });
+
   async function renderFaqSection(
     props?: Partial<{
       items: string[];
@@ -81,9 +95,11 @@ describe("Feature: FaqSection Reusable Component", () => {
 
   describe("Scenario 1.2: renders accordion items from translation keys", () => {
     it("renders the correct number of accordion items", async () => {
-      await renderFaqSection({ items: ["moq", "leadTime"] });
-      const triggers = screen.getAllByRole("button");
-      expect(triggers).toHaveLength(2);
+      const { container } = await renderFaqSection({
+        items: ["moq", "leadTime"],
+      });
+
+      expect(container.querySelectorAll("summary")).toHaveLength(2);
     });
 
     it("displays question text for each item", async () => {
@@ -149,14 +165,16 @@ describe("Feature: FaqSection Reusable Component", () => {
   });
 
   describe("Scenario 1.5: Keyboard navigation", () => {
-    it("toggles accordion with Enter key", async () => {
+    it("uses a native summary trigger for keyboard-accessible toggling", async () => {
       await renderFaqSection({ items: ["moq"] });
-      const trigger = screen.getByRole("button", {
-        name: "What is the minimum order quantity (MOQ)?",
-      });
-      trigger.focus();
-      await userEvent.keyboard("{Enter}");
-      expect(screen.getByText(/500 to 1,000 pieces/)).toBeVisible();
+      const trigger = screen
+        .getByText("What is the minimum order quantity (MOQ)?")
+        .closest("summary");
+
+      expect(trigger).toBeInstanceOf(HTMLElement);
+      expect(trigger).toHaveTextContent(
+        "What is the minimum order quantity (MOQ)?",
+      );
     });
   });
 

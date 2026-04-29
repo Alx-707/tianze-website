@@ -5,7 +5,7 @@
  * Link component, handling both static and dynamic routes.
  */
 import type { ComponentProps } from "react";
-import { DYNAMIC_PATHS_CONFIG } from "@/config/paths";
+import { DYNAMIC_PATHS_CONFIG } from "@/config/paths/paths-config";
 import type { Link } from "@/i18n/routing";
 import { routing } from "@/i18n/routing-config";
 

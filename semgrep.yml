@@ -301,7 +301,6 @@ rules:
         - "**/src/lib/validations.ts"
         - "**/src/lib/env.ts"
         - "**/src/lib/locale-detection-hooks.ts"
-        - "**/src/testing/utils/theme-test-utilities.ts"
     message: '检测到动态属性访问：这是启发式风险提示；只有请求/查询/body 键写入才由 object-injection-untrusted-key-write 阻断'
     languages: [typescript, javascript]
     severity: WARNING
@@ -332,9 +331,7 @@ rules:
         - "**/src/lib/theme-analytics-core.ts"
         - "**/src/lib/theme-analytics.ts"
         - "**/src/lib/web-vitals/**"
-        - "**/src/templates/**"
         - "**/src/config/contact-form-config.ts"
-        - "**/src/testing/utils/theme-test-utilities.ts"
         - "**/src/types/whatsapp-api-config/utils.ts"
         - "**/src/lib/performance-monitoring-config-history.ts"
         - "**/src/lib/performance-monitoring-config-modules.ts"

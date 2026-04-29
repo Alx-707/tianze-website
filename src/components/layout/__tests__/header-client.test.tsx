@@ -2,71 +2,67 @@
  * @vitest-environment jsdom
  * Tests for header client components (Island components)
  */
+import { readFileSync } from "node:fs";
 import React from "react";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
-import {
-  LanguageToggleIsland,
-  MobileNavigationIsland,
-  NavSwitcherIsland,
-} from "../header-client";
-
-// Mock next/dynamic
-vi.mock("next/dynamic", () => ({
-  default: (
-    loader: () => Promise<Record<string, unknown>>,
-    options?: { ssr?: boolean },
-  ) => {
-    // Return a component that renders a placeholder
-    const DynamicComponent = (props: Record<string, unknown>) => (
-      <div
-        data-testid="dynamic-component"
-        data-ssr={String(options?.ssr ?? true)}
-        {...props}
-      >
-        {props.children as React.ReactNode}
-      </div>
-    );
-    DynamicComponent.displayName = "DynamicComponent";
-
-    // Trigger loader to avoid unused warnings
-    loader();
-    return DynamicComponent;
-  },
-}));
-
-// Mock MobileNavigation server shell
-vi.mock("@/components/layout/mobile-navigation", () => ({
-  MobileNavigationLinks: (props: React.HTMLAttributes<HTMLElement>) => (
-    <nav data-testid="mobile-navigation-links" {...props}>
-      <a href="/">Home</a>
-      <a href="/about">About</a>
-    </nav>
-  ),
-}));
+import { LanguageToggleIsland, MobileNavigationIsland } from "../header-client";
 
 vi.mock("@/components/layout/mobile-navigation-interactive", () => ({
   MobileNavigationInteractive: ({
     children,
+    closeMenuLabel,
+    initialOpen,
+    languageLabel,
+    openMenuLabel,
   }: {
     children?: React.ReactNode;
-  }) => <div data-testid="mobile-navigation-interactive">{children}</div>,
+    closeMenuLabel?: string;
+    initialOpen?: boolean;
+    languageLabel?: string;
+    openMenuLabel?: string;
+  }) => (
+    <div
+      data-testid="mobile-navigation-interactive"
+      data-close-menu-label={closeMenuLabel}
+      data-initial-open={String(initialOpen ?? false)}
+      data-language-label={languageLabel}
+      data-open-menu-label={openMenuLabel}
+    >
+      {children}
+    </div>
+  ),
 }));
 
-// Mock NavSwitcher
-vi.mock("@/components/layout/nav-switcher", () => ({
-  NavSwitcher: () => <div data-testid="nav-switcher">Nav Switcher</div>,
-}));
-
-// Mock LanguageToggle
-vi.mock("@/components/language-toggle", () => ({
-  LanguageToggle: ({ locale }: { locale: string }) => (
-    <div data-testid="language-toggle" data-locale={locale}>
+// Mock the deferred header language menu.
+vi.mock("@/components/layout/header-language-menu", () => ({
+  HeaderLanguageMenu: ({
+    initialOpen,
+    locale,
+  }: {
+    initialOpen?: boolean;
+    locale: string;
+  }) => (
+    <div
+      data-testid="header-language-menu"
+      data-initial-open={String(initialOpen ?? false)}
+      data-locale={locale}
+    >
       Language Toggle
     </div>
   ),
 }));
+
+describe("header client entry", () => {
+  it("keeps always-present header islands free of next/dynamic runtime", () => {
+    const source = readFileSync("src/components/layout/header-client.tsx", {
+      encoding: "utf8",
+    });
+
+    expect(source).not.toContain("next/dynamic");
+  });
+});
 
 describe("MobileNavigationIsland", () => {
   it("renders deferred trigger before loading dynamic component", () => {
@@ -76,19 +72,31 @@ describe("MobileNavigationIsland", () => {
     expect(trigger).toBeInTheDocument();
     expect(trigger).toHaveAttribute("aria-haspopup", "dialog");
     expect(trigger).toHaveAttribute("aria-controls", "mobile-navigation");
-    expect(trigger).toHaveAttribute("aria-expanded", "false");
-    expect(screen.queryByTestId("dynamic-component")).not.toBeInTheDocument();
+    expect(
+      screen.getByTestId("header-mobile-navigation-fallback"),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByTestId("mobile-navigation-interactive"),
+    ).not.toBeInTheDocument();
   });
 
-  it("server-renders mobile navigation links as the pre-hydration fallback", () => {
-    const html = renderToStaticMarkup(<MobileNavigationIsland />);
+  it("server-renders mobile navigation fallback without loading interactive navigation", () => {
+    const html = renderToStaticMarkup(
+      <MobileNavigationIsland>
+        <nav data-testid="header-mobile-navigation-fallback-links">
+          Fallback navigation
+        </nav>
+      </MobileNavigationIsland>,
+    );
 
-    expect(html).toContain('data-testid="header-mobile-navigation-fallback"');
-    expect(html).toContain("Home");
-    expect(html).toContain("About");
+    expect(html).toContain('data-testid="header-mobile-menu-button"');
+    expect(html).toContain(
+      'data-testid="header-mobile-navigation-fallback-links"',
+    );
+    expect(html).not.toContain("mobile-navigation-interactive");
   });
 
-  it("passes localized labels to the hydrated mobile navigation", () => {
+  it("passes localized labels to the hydrated mobile navigation", async () => {
     render(
       <MobileNavigationIsland
         openMenuLabel="打开导航菜单"
@@ -97,25 +105,33 @@ describe("MobileNavigationIsland", () => {
       />,
     );
 
-    fireEvent.click(screen.getByTestId("header-mobile-menu-button"));
+    await act(async () => {
+      fireEvent.click(screen.getByTestId("header-mobile-menu-button"));
+      await vi.dynamicImportSettled();
+    });
 
-    const dynamicComponent = screen.getByTestId("dynamic-component");
-    expect(dynamicComponent).toHaveAttribute("openMenuLabel", "打开导航菜单");
-    expect(dynamicComponent).toHaveAttribute("closeMenuLabel", "关闭导航菜单");
-    expect(dynamicComponent).toHaveAttribute("languageLabel", "选择语言");
+    const interactive = screen.getByTestId("mobile-navigation-interactive");
+    expect(interactive).toHaveAttribute("data-open-menu-label", "打开导航菜单");
+    expect(interactive).toHaveAttribute(
+      "data-close-menu-label",
+      "关闭导航菜单",
+    );
+    expect(interactive).toHaveAttribute("data-language-label", "选择语言");
   });
 
-  it("loads dynamic component after trigger click", () => {
+  it("loads interactive component after trigger click", async () => {
     render(<MobileNavigationIsland />);
 
-    fireEvent.click(screen.getByTestId("header-mobile-menu-button"));
+    await act(async () => {
+      fireEvent.click(screen.getByTestId("header-mobile-menu-button"));
+      await vi.dynamicImportSettled();
+    });
 
-    const dynamicComponent = screen.getByTestId("dynamic-component");
-    expect(dynamicComponent).toHaveAttribute("data-ssr", "false");
+    const interactive = screen.getByTestId("mobile-navigation-interactive");
+    expect(interactive).toHaveAttribute("data-initial-open", "true");
     expect(
       screen.queryByTestId("header-mobile-navigation-fallback"),
     ).not.toBeInTheDocument();
-    expect(screen.getByTestId("mobile-navigation-links")).toBeInTheDocument();
   });
 
   it("marks the deferred menu label as notranslate", () => {
@@ -128,36 +144,40 @@ describe("MobileNavigationIsland", () => {
   });
 });
 
-describe("NavSwitcherIsland", () => {
-  it("renders dynamic component with ssr false", () => {
-    render(<NavSwitcherIsland />);
-
-    const dynamicComponent = screen.getByTestId("dynamic-component");
-    expect(dynamicComponent).toHaveAttribute("data-ssr", "false");
-  });
-});
-
 describe("LanguageToggleIsland", () => {
-  it("renders LanguageToggle with en locale", () => {
+  it("renders a lightweight trigger before loading the dynamic language menu", () => {
     render(<LanguageToggleIsland locale="en" />);
 
-    const toggle = screen.getByTestId("dynamic-component");
-    expect(toggle).toHaveAttribute("data-ssr", "false");
+    const trigger = screen.getByTestId("language-toggle-button");
+    expect(trigger).toHaveAttribute("aria-haspopup", "menu");
+    expect(trigger).toHaveAttribute("aria-expanded", "false");
+    expect(trigger).toHaveAttribute("data-locale", "en");
+    expect(
+      screen.queryByTestId("header-language-menu"),
+    ).not.toBeInTheDocument();
   });
 
-  it("renders LanguageToggle with zh locale", () => {
+  it("uses the localized label on the lightweight trigger", () => {
     render(<LanguageToggleIsland locale="zh" />);
 
-    const toggle = screen.getByTestId("dynamic-component");
-    expect(toggle).toBeInTheDocument();
+    const trigger = screen.getByTestId("language-toggle-button");
+    expect(trigger).toHaveAttribute("aria-label", "简体中文");
+    expect(screen.getByTestId("language-current-label")).toHaveTextContent(
+      "简体中文",
+    );
   });
 
-  it("passes locale prop to LanguageToggle", () => {
+  it("loads HeaderLanguageMenu with initialOpen after the first click", async () => {
     render(<LanguageToggleIsland locale="zh" />);
 
-    // The dynamic component receives the locale prop
-    const toggle = screen.getByTestId("dynamic-component");
-    expect(toggle).toHaveAttribute("locale", "zh");
+    await act(async () => {
+      fireEvent.click(screen.getByTestId("language-toggle-button"));
+      await vi.dynamicImportSettled();
+    });
+
+    const menu = screen.getByTestId("header-language-menu");
+    expect(menu).toHaveAttribute("data-locale", "zh");
+    expect(menu).toHaveAttribute("data-initial-open", "true");
   });
 
   it("does not wrap in extra i18n provider", () => {
@@ -173,23 +193,22 @@ describe("Island components integration", () => {
     const { container } = render(
       <>
         <MobileNavigationIsland />
-        <NavSwitcherIsland />
         <LanguageToggleIsland locale="en" />
       </>,
     );
 
     const dynamicComponents = container.querySelectorAll(
-      '[data-testid="dynamic-component"]',
+      '[data-testid="mobile-navigation-interactive"], [data-testid="header-language-menu"]',
     );
-    expect(dynamicComponents.length).toBe(2);
+    expect(dynamicComponents.length).toBe(0);
     expect(screen.getByTestId("header-mobile-menu-button")).toBeInTheDocument();
+    expect(screen.getByTestId("language-toggle-button")).toBeInTheDocument();
   });
 
   it("all islands accept zh locale", () => {
     render(
       <>
         <MobileNavigationIsland />
-        <NavSwitcherIsland />
         <LanguageToggleIsland locale="zh" />
       </>,
     );

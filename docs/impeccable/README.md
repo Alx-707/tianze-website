@@ -20,3 +20,6 @@
 - `system/`：当前设计系统与规范
 - `homepage/` / `products/`：页面级设计工作盘
 - `external/`：外部参考设计资料
+- `research-brief.md`：设计输入 Brief，用于在 `shape`、`impeccable`、视觉探索或页面重构前统一业务、买家和证据判断
+- `claim-evidence-matrix.md`：主张与证据矩阵，用于约束 factory、certification、OEM、quality、PETG 等高风险表达
+- `homepage/hero-trust-shape.md`：首页 Hero + 首个信任证据区的 shape brief，用于后续 pilot 设计和实现前确认

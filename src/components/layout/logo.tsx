@@ -3,7 +3,6 @@
  *
  * Responsive logo component with proper accessibility and theming support.
  * Supports both text and image logos with automatic dark mode handling.
- * P0-2 Fix: Converted to Server Component (no interactivity needed)
  */
 import { Link } from "@/i18n/routing";
 import { SINGLE_SITE_FACTS } from "@/config/single-site";

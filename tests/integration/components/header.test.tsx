@@ -42,21 +42,8 @@ vi.mock("next/dynamic", async () => {
   };
 });
 
-// Mock child components
-vi.mock("@/components/language-toggle", () => ({
-  LanguageToggle: () => (
-    <div data-testid="language-toggle">Language Toggle</div>
-  ),
-}));
-
 vi.mock("@/components/layout/logo", () => ({
   Logo: () => <div data-testid="logo">Logo</div>,
-}));
-
-vi.mock("@/components/layout/nav-switcher", () => ({
-  __esModule: true,
-  default: () => <div data-testid="nav-switcher">Nav Switcher</div>,
-  NavSwitcher: () => <div data-testid="nav-switcher">Nav Switcher</div>,
 }));
 
 vi.mock("@/components/layout/mobile-navigation", () => ({
@@ -79,25 +66,8 @@ vi.mock("@/components/layout/header-client", () => ({
   MobileNavigationIsland: () => (
     <nav data-testid="mobile-navigation">Mobile Navigation</nav>
   ),
-  NavSwitcherIsland: () => (
-    <nav data-testid="header-desktop-nav">Nav Switcher</nav>
-  ),
   LanguageToggleIsland: () => (
     <div data-testid="language-toggle">Language Toggle</div>
-  ),
-}));
-
-vi.mock("@/components/lazy/idle", () => ({
-  Idle: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
-
-vi.mock("@/components/layout/header-scroll-chrome", () => ({
-  HeaderScrollChrome: () => null,
-}));
-
-vi.mock("@/components/layout/viewport-client-gate", () => ({
-  ViewportClientGate: ({ children }: { children: React.ReactNode }) => (
-    <>{children}</>
   ),
 }));
 
@@ -183,9 +153,7 @@ describe("Header Integration Tests", () => {
       expect(header).toHaveClass("sticky");
       expect(header).toHaveClass("top-0");
       expect(header).toHaveClass("z-50");
-      expect(header).toHaveClass(
-        "transition-[background-color,border-color,box-shadow]",
-      );
+      expect(header).toHaveClass("transition-[background-color,border-color]");
       expect(header).toHaveClass("duration-200");
     });
 

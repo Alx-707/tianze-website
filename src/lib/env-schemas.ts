@@ -248,7 +248,6 @@ export const clientEnvSchema = {
 
   // UI tuning
   NEXT_PUBLIC_NAV_VARIANT: z.string().optional(),
-  NEXT_PUBLIC_IDLE_ROOTMARGIN: z.string().optional(),
   NEXT_PUBLIC_CONTACT_FORM_COOLDOWN_MS: z.coerce.number().optional(),
 
   // Deployment Platform

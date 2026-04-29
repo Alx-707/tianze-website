@@ -93,6 +93,6 @@ Angle, size, wall thickness, end type (plain/bell), color, schedule/duty → spe
 ## Research Sources
 - `docs/research/product-catalog-hierarchy-research.md` (em-digger, 11 enterprises)
 - Codex research (inline, strongest decision influence)
-- ChatGPT Deep Research (`/Users/Data/Downloads/deep-research-report.md`)
+- ChatGPT Deep Research (private source archive)
 - Gemini research (inline)
 - AI Studio research (inline)

@@ -3,17 +3,18 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { THIRTY_SECONDS_MS } from "@/constants/time";
 import { LazyThemeSwitcher } from "@/components/ui/lazy-theme-switcher";
 
-const { mockUsePathname, mockUseIdleRender } = vi.hoisted(() => ({
-  mockUsePathname: vi.fn(),
-  mockUseIdleRender: vi.fn(),
-}));
+const { idleCallbacks, mockCleanupIdleCallback, mockRequestIdleCallback } =
+  vi.hoisted(() => ({
+    idleCallbacks: [] as Array<() => void>,
+    mockCleanupIdleCallback: vi.fn(),
+    mockRequestIdleCallback: vi.fn((callback: () => void) => {
+      idleCallbacks.push(callback);
+      return mockCleanupIdleCallback;
+    }),
+  }));
 
-vi.mock("next/navigation", () => ({
-  usePathname: mockUsePathname,
-}));
-
-vi.mock("@/hooks/use-idle-render", () => ({
-  useIdleRender: mockUseIdleRender,
+vi.mock("@/lib/idle-callback", () => ({
+  requestIdleCallback: mockRequestIdleCallback,
 }));
 
 vi.mock("@/components/ui/theme-switcher", () => ({
@@ -26,50 +27,35 @@ vi.mock("@/components/ui/theme-switcher", () => ({
 
 describe("LazyThemeSwitcher", () => {
   beforeEach(() => {
+    idleCallbacks.length = 0;
     vi.clearAllMocks();
-    vi.useFakeTimers();
-    mockUsePathname.mockReturnValue("/about");
-    mockUseIdleRender.mockReturnValue(false);
   });
 
-  afterEach(() => {
-    vi.useRealTimers();
+  it("waits for the shared idle callback before importing the switcher", async () => {
+    render(<LazyThemeSwitcher data-testid="footer-theme-toggle" />);
+
+    expect(mockRequestIdleCallback).toHaveBeenCalledWith(expect.any(Function), {
+      fallbackDelay: THIRTY_SECONDS_MS,
+      timeout: THIRTY_SECONDS_MS,
+    });
+    expect(screen.queryByTestId("footer-theme-toggle")).not.toBeInTheDocument();
+
+    await act(async () => {
+      idleCallbacks[0]?.();
+      await vi.dynamicImportSettled();
+    });
+
+    expect(screen.getByTestId("footer-theme-toggle")).toBeInTheDocument();
   });
 
-  it("stays hidden until idle rendering is allowed on non-home routes", async () => {
-    const { rerender } = render(
+  it("cancels the shared idle callback after unmounting before idle", async () => {
+    const { unmount } = render(
       <LazyThemeSwitcher data-testid="footer-theme-toggle" />,
     );
 
+    unmount();
+
+    expect(mockCleanupIdleCallback).toHaveBeenCalledTimes(1);
     expect(screen.queryByTestId("footer-theme-toggle")).not.toBeInTheDocument();
-
-    mockUseIdleRender.mockReturnValue(true);
-    rerender(<LazyThemeSwitcher data-testid="footer-theme-toggle" />);
-
-    await act(async () => {
-      await vi.dynamicImportSettled();
-    });
-
-    expect(screen.getByTestId("footer-theme-toggle")).toBeInTheDocument();
-  });
-
-  it("waits for the homepage delay before importing the switcher", async () => {
-    mockUsePathname.mockReturnValue("/en");
-
-    render(<LazyThemeSwitcher data-testid="footer-theme-toggle" />);
-
-    await act(async () => {
-      vi.advanceTimersByTime(THIRTY_SECONDS_MS - 1);
-      await vi.dynamicImportSettled();
-    });
-
-    expect(screen.queryByTestId("footer-theme-toggle")).not.toBeInTheDocument();
-
-    await act(async () => {
-      vi.advanceTimersByTime(1);
-      await vi.dynamicImportSettled();
-    });
-
-    expect(screen.getByTestId("footer-theme-toggle")).toBeInTheDocument();
   });
 });

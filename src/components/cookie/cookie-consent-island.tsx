@@ -1,16 +1,22 @@
 "use client";
 
-import { Suspense } from "react";
+import { lazy, Suspense } from "react";
 import { CookieConsentProvider } from "@/lib/cookie-consent";
 import { isPublicRuntimeProduction } from "@/lib/public-env";
 import { LazyCookieBanner } from "@/components/cookie/lazy-cookie-banner";
-import { EnterpriseAnalyticsIsland } from "@/components/monitoring/enterprise-analytics-island";
+import { LazyIslandErrorBoundary } from "@/components/ui/lazy-island-error-boundary";
+
+const EnterpriseAnalyticsIsland = lazy(() =>
+  import("@/components/monitoring/enterprise-analytics-island").then((mod) => ({
+    default: mod.EnterpriseAnalyticsIsland,
+  })),
+);
 
 /**
  * Cookie Consent Island
  *
- * P0-3 Fix: Wraps only the components that consume CookieConsentContext,
- * avoiding unnecessary context propagation through the entire tree.
+ * Wraps only the components that consume CookieConsentContext, avoiding
+ * unnecessary context propagation through the entire tree.
  *
  * Consumers:
  * - LazyCookieBanner: displays consent UI
@@ -24,7 +30,13 @@ export function CookieConsentIsland() {
       <Suspense fallback={null}>
         <LazyCookieBanner />
       </Suspense>
-      {isProd && <EnterpriseAnalyticsIsland />}
+      {isProd ? (
+        <LazyIslandErrorBoundary fallback={null}>
+          <Suspense fallback={null}>
+            <EnterpriseAnalyticsIsland />
+          </Suspense>
+        </LazyIslandErrorBoundary>
+      ) : null}
     </CookieConsentProvider>
   );
 }

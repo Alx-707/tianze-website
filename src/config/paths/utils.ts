@@ -8,7 +8,6 @@ import {
   PATHS_CONFIG,
 } from "@/config/paths/paths-config";
 import type { DynamicPageType, Locale, PageType } from "@/config/paths/types";
-import { ZERO } from "@/constants";
 
 type StaticPathname =
   (typeof PATHS_CONFIG)[PageType][typeof LOCALES_CONFIG.defaultLocale];
@@ -182,7 +181,7 @@ export function validatePathsConfig(): { isValid: boolean; errors: string[] } {
   });
 
   return {
-    isValid: errors.length === ZERO,
+    isValid: errors.length === 0,
     errors,
   };
 }

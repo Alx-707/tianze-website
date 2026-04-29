@@ -145,8 +145,8 @@ test.describe("Homepage Core Functionality", () => {
       await expect(heroTitle).toBeVisible();
 
       // Tablet (768px) is below the lg breakpoint (1024px), so the header
-      // shows the mobile hamburger button. It's lazy-loaded via <Idle>, so
-      // wait for it with a generous timeout instead of a sync check.
+      // shows the mobile hamburger button. Keep a generous timeout because
+      // route hydration and dynamic chunks can still settle at different speeds.
       const mobileMenuButton = getHeaderMobileMenuButton(page);
       await expect(mobileMenuButton).toBeVisible({ timeout: 15_000 });
     });

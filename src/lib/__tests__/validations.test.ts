@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { airtableRecordSchema } from "@/lib/airtable/record-schema";
 import { emailTemplateDataSchema } from "@/lib/email/email-data-schema";
 import { contactFieldValidators } from "@/lib/form-schema/contact-field-validators";
@@ -7,19 +7,13 @@ import {
   type ContactFormData,
 } from "@/lib/form-schema/contact-form-schema";
 import { type FormSubmissionStatus } from "@/lib/forms/form-submission-status";
-import {
-  validationConfig,
-  validationHelpers,
-  type FormValidationError,
-} from "@/lib/forms/validation-helpers";
-import {
-  CONTACT_FORM_CONFIG,
-  createContactFormSchemaFromConfig,
-} from "@/config/contact-form-config";
+import { CONTACT_FORM_CONFIG } from "@/config/contact-form-config";
+import { createContactFormSchemaFromConfig } from "@/config/contact-form-validation";
 
 // 确保使用真实的 schema/helper 模块和 Zod 库，不受 Mock 影响
 vi.unmock("zod");
 vi.unmock("@/config/contact-form-config");
+vi.unmock("@/config/contact-form-validation");
 
 describe("validations - Schema Validation", () => {
   describe("contactFormSchema", () => {
@@ -282,126 +276,7 @@ describe("validations - API and Data Schemas", () => {
   });
 });
 
-describe("validations - Helper Functions", () => {
-  describe("validationHelpers", () => {
-    describe("isEmailDomainAllowed", () => {
-      it("should allow all domains when no restrictions", () => {
-        const result =
-          validationHelpers.isEmailDomainAllowed("test@example.com");
-        expect(result).toBe(true);
-      });
-
-      it("should allow all domains when empty array provided", () => {
-        const result = validationHelpers.isEmailDomainAllowed(
-          "test@example.com",
-          [],
-        );
-        expect(result).toBe(true);
-      });
-
-      it("should allow email from allowed domain", () => {
-        const result = validationHelpers.isEmailDomainAllowed(
-          "test@example.com",
-          ["example.com"],
-        );
-        expect(result).toBe(true);
-      });
-
-      it("should reject email from disallowed domain", () => {
-        const result = validationHelpers.isEmailDomainAllowed("test@spam.com", [
-          "example.com",
-        ]);
-        expect(result).toBe(false);
-      });
-
-      it("should be case insensitive", () => {
-        const result = validationHelpers.isEmailDomainAllowed(
-          "test@EXAMPLE.COM",
-          ["example.com"],
-        );
-        expect(result).toBe(true);
-      });
-    });
-
-    describe("isSpamContent", () => {
-      it("should detect spam keywords", () => {
-        const result = validationHelpers.isSpamContent("Win the lottery now!");
-        expect(result).toBe(true);
-      });
-
-      it("should be case insensitive", () => {
-        const result = validationHelpers.isSpamContent("VIAGRA for sale");
-        expect(result).toBe(true);
-      });
-
-      it("should allow legitimate content", () => {
-        const result = validationHelpers.isSpamContent(
-          "I would like to inquire about your services",
-        );
-        expect(result).toBe(false);
-      });
-    });
-
-    describe("isSubmissionRateLimited", () => {
-      beforeEach(() => {
-        vi.useFakeTimers();
-      });
-
-      it("should not rate limit when no previous submission", () => {
-        const result = validationHelpers.isSubmissionRateLimited(null);
-        expect(result).toBe(false);
-      });
-
-      it("should rate limit recent submissions", () => {
-        const recentSubmission = new Date();
-        const result = validationHelpers.isSubmissionRateLimited(
-          recentSubmission,
-          5,
-        );
-        expect(result).toBe(true);
-      });
-
-      it("should not rate limit old submissions", () => {
-        const oldSubmission = new Date(Date.now() - 10 * 60 * 1000); // 10 minutes ago
-        const result = validationHelpers.isSubmissionRateLimited(
-          oldSubmission,
-          5,
-        );
-        expect(result).toBe(false);
-      });
-    });
-  });
-});
-
-describe("validations - Configuration and Types", () => {
-  describe("validationConfig", () => {
-    it("should have correct default configuration", () => {
-      expect(validationConfig.submissionCooldownMinutes).toBe(5);
-      expect(validationConfig.maxSubmissionsPerHour).toBe(10);
-      expect(validationConfig.enableSpamDetection).toBe(true);
-      expect(validationConfig.allowedEmailDomains).toEqual([]);
-      expect(validationConfig.enableHoneypot).toBe(true);
-      expect(validationConfig.enableCsrfProtection).toBe(true);
-      expect(validationConfig.enableTurnstile).toBe(true);
-    });
-
-    it("should have correct required fields", () => {
-      expect(validationConfig.requiredFields).toContain("firstName");
-      expect(validationConfig.requiredFields).toContain("lastName");
-      expect(validationConfig.requiredFields).toContain("email");
-      expect(validationConfig.requiredFields).toContain("company");
-      expect(validationConfig.requiredFields).toContain("message");
-      expect(validationConfig.requiredFields).toContain("acceptPrivacy");
-    });
-
-    it("should have correct optional fields", () => {
-      expect(validationConfig.optionalFields).toContain("phone");
-      expect(validationConfig.optionalFields).toContain("subject");
-      expect(validationConfig.optionalFields).toContain("marketingConsent");
-      expect(validationConfig.optionalFields).toContain("website");
-    });
-  });
-
+describe("validations - Types", () => {
   describe("TypeScript types", () => {
     it("should infer correct ContactFormData type", () => {
       const formData: ContactFormData = {
@@ -414,14 +289,6 @@ describe("validations - Configuration and Types", () => {
         website: "",
       };
       expect(formData).toBeDefined();
-    });
-
-    it("should define FormValidationError interface", () => {
-      const error: FormValidationError = {
-        field: "firstName",
-        message: "First name is required",
-      };
-      expect(error).toBeDefined();
     });
 
     it("should define FormSubmissionStatus type", () => {

@@ -2,9 +2,11 @@ import { z } from "zod";
 import {
   CONTACT_FORM_VALIDATION_CONSTANTS,
   type ContactFormFieldConfig,
+} from "@/config/contact-form-config";
+import {
   type ContactFormFieldValidatorContext,
   type ContactFormFieldValidators,
-} from "@/config/contact-form-config";
+} from "@/config/contact-form-validation";
 
 const applyOptionality = (
   schema: z.ZodTypeAny,

@@ -1,5 +1,5 @@
-import { Check } from "lucide-react";
 import { getTranslations } from "next-intl/server";
+import { StaticCheckIcon } from "@/components/icons/static-icons";
 import { HomepageSectionShell } from "@/components/sections/homepage-section-shell";
 
 const STEP_COUNT = 5;
@@ -53,7 +53,7 @@ function StatBadge({ text }: { text: string }) {
   return (
     <div className="flex items-center gap-3 rounded-lg border border-[var(--success-light)] bg-[var(--success-light)] px-5 py-4">
       <span className="text-green-600">
-        <Check size={20} aria-hidden />
+        <StaticCheckIcon size={20} />
       </span>
       <span className="text-sm font-medium">{text}</span>
     </div>

@@ -5,14 +5,7 @@ const CLEANUP_FILES = [
   "src/app/[locale]/contact/page.tsx",
   "src/services/url-generator.ts",
   "src/i18n/request.ts",
-  "src/hooks/use-keyboard-navigation.ts",
-  "src/hooks/use-intersection-observer.ts",
-  "src/components/error-boundary.tsx",
-  "src/components/ui/scroll-reveal.tsx",
-  "src/components/ui/animated-counter.tsx",
-  "src/components/ui/animated-counter-helpers.tsx",
   "src/lib/lead-pipeline/utils.ts",
-  "src/lib/accessibility-utils.ts",
 ];
 
 const TSX_CLEANUP_FILES = CLEANUP_FILES.filter((file) => file.endsWith(".tsx"));

@@ -1,5 +1,6 @@
 import { env } from "@/lib/env";
-import { getCanonicalPath } from "@/config/paths/utils";
+import { SINGLE_SITE_ROUTE_HREFS } from "@/config/single-site-links";
+import { SINGLE_SITE_NAVIGATION } from "@/config/single-site-navigation";
 import { singleSiteProductCatalog } from "@/config/single-site-product-catalog";
 import type {
   ProductCatalog,
@@ -7,7 +8,6 @@ import type {
   SiteDefinition,
   SiteFacts,
   SiteFooterColumnConfig,
-  SiteNavigationItem,
 } from "@/config/site-types";
 
 export type {
@@ -50,16 +50,6 @@ const social = {
 const contact = {
   phone: "+86-518-0000-0000",
   email: "sales@tianze-pipe.com",
-} as const;
-
-const routeHref = {
-  home: getCanonicalPath("home"),
-  about: getCanonicalPath("about"),
-  contact: getCanonicalPath("contact"),
-  products: getCanonicalPath("products"),
-  privacy: getCanonicalPath("privacy"),
-  terms: getCanonicalPath("terms"),
-  oem: getCanonicalPath("oem"),
 } as const;
 
 const establishedYear = 2018;
@@ -153,29 +143,7 @@ export const SINGLE_SITE_DEFINITION: SiteDefinition = {
   },
   productCatalog: singleSiteProductCatalog,
   navigation: {
-    main: [
-      { key: "home", href: routeHref.home, translationKey: "navigation.home" },
-      {
-        key: "products",
-        href: routeHref.products,
-        translationKey: "navigation.products",
-      },
-      {
-        key: "oem",
-        href: routeHref.oem,
-        translationKey: "navigation.oem",
-      },
-      {
-        key: "about",
-        href: routeHref.about,
-        translationKey: "navigation.about",
-      },
-      {
-        key: "contact",
-        href: routeHref.contact,
-        translationKey: "navigation.contact",
-      },
-    ],
+    main: SINGLE_SITE_NAVIGATION,
   },
   footerColumns: [
     {
@@ -186,28 +154,28 @@ export const SINGLE_SITE_DEFINITION: SiteDefinition = {
         {
           key: "home",
           label: "Home",
-          href: routeHref.home,
+          href: SINGLE_SITE_ROUTE_HREFS.home,
           external: false,
           translationKey: "footer.sections.navigation.home",
         },
         {
           key: "about",
           label: "About",
-          href: routeHref.about,
+          href: SINGLE_SITE_ROUTE_HREFS.about,
           external: false,
           translationKey: "footer.sections.navigation.about",
         },
         {
           key: "products",
           label: "Products",
-          href: routeHref.products,
+          href: SINGLE_SITE_ROUTE_HREFS.products,
           external: false,
           translationKey: "footer.sections.navigation.products",
         },
         {
           key: "contact",
           label: "Contact",
-          href: routeHref.contact,
+          href: SINGLE_SITE_ROUTE_HREFS.contact,
           external: false,
           translationKey: "footer.sections.navigation.contact",
         },
@@ -221,14 +189,14 @@ export const SINGLE_SITE_DEFINITION: SiteDefinition = {
         {
           key: "privacy",
           label: "Privacy Policy",
-          href: routeHref.privacy,
+          href: SINGLE_SITE_ROUTE_HREFS.privacy,
           external: false,
           translationKey: "footer.sections.support.privacy",
         },
         {
           key: "terms",
           label: "Terms of Service",
-          href: routeHref.terms,
+          href: SINGLE_SITE_ROUTE_HREFS.terms,
           external: false,
           translationKey: "footer.sections.support.terms",
         },
@@ -262,7 +230,7 @@ export const SINGLE_SITE_CONFIG: SiteConfig = SINGLE_SITE_DEFINITION.config;
 export const SINGLE_SITE_FACTS: SiteFacts = SINGLE_SITE_DEFINITION.facts;
 export const SINGLE_SITE_PRODUCT_CATALOG: ProductCatalog =
   SINGLE_SITE_DEFINITION.productCatalog;
-export const SINGLE_SITE_NAVIGATION: SiteNavigationItem[] =
-  SINGLE_SITE_DEFINITION.navigation.main;
 export const SINGLE_SITE_FOOTER_COLUMNS: SiteFooterColumnConfig[] =
   SINGLE_SITE_DEFINITION.footerColumns;
+
+export { SINGLE_SITE_NAVIGATION } from "@/config/single-site-navigation";

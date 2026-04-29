@@ -3,7 +3,7 @@
  *
  * 服务端渲染的头部，交互部件以客户端小岛方式注入，减少首屏 JS 体积。
  */
-import { SINGLE_SITE_HOME_LINK_TARGETS } from "@/config/single-site-page-expression";
+import { SINGLE_SITE_HOME_LINK_TARGETS } from "@/config/single-site-links";
 import { Link } from "@/i18n/routing";
 import { getRuntimeEnvString } from "@/lib/env";
 import { NAVIGATION_ARIA } from "@/lib/navigation";
@@ -12,10 +12,8 @@ import {
   MobileNavigationIsland,
   LanguageToggleIsland,
 } from "@/components/layout/header-client";
-import { HeaderScrollChrome } from "@/components/layout/header-scroll-chrome";
 import { Logo } from "@/components/layout/logo";
-import { ViewportClientGate } from "@/components/layout/viewport-client-gate";
-import { Idle } from "@/components/lazy/idle";
+import { MobileNavigationLinks } from "@/components/layout/mobile-navigation";
 import { Button } from "@/components/ui/button";
 
 /**
@@ -52,9 +50,6 @@ function getHeaderState(
     isMinimal: variant === "minimal",
     isTransparent: variant === "transparent",
     isVercelNav: getRuntimeEnvString("NEXT_PUBLIC_NAV_VARIANT") !== "legacy",
-    visibleMargin:
-      getRuntimeEnvString("NEXT_PUBLIC_IDLE_ROOTMARGIN") ??
-      "400px 0px 400px 0px",
     showTestIds: !locale,
   };
 }
@@ -70,14 +65,8 @@ export function Header({
   mobileLanguageLabel = "Language",
   mainNavItems = [],
 }: HeaderProps) {
-  const {
-    isSticky,
-    isMinimal,
-    isTransparent,
-    isVercelNav,
-    visibleMargin,
-    showTestIds,
-  } = getHeaderState(variant, sticky, locale);
+  const { isSticky, isMinimal, isTransparent, isVercelNav, showTestIds } =
+    getHeaderState(variant, sticky, locale);
 
   return (
     <header
@@ -85,15 +74,12 @@ export function Header({
         "w-full bg-background/80 backdrop-blur-md",
         isSticky && "sticky top-0 z-50",
         isTransparent && "border-transparent bg-transparent backdrop-blur-none",
-        // Scroll shadow effect via data-scrolled attribute (8-12% border opacity)
         isVercelNav
-          ? "border-b border-border/10 transition-[background-color,border-color,box-shadow] duration-200 data-[scrolled=true]:border-border/20 data-[scrolled=true]:bg-background/95 data-[scrolled=true]:shadow-sm"
+          ? "border-b border-border/10 transition-[background-color,border-color] duration-200"
           : !isTransparent && "border-b border-border/10",
         className,
       )}
     >
-      {/* Scroll detection client island */}
-      {isVercelNav && <HeaderScrollChrome />}
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="header-nav-layout">
           {/* Left section: Logo */}
@@ -117,7 +103,6 @@ export function Header({
             openMenuLabel={openMenuLabel}
             closeMenuLabel={closeMenuLabel}
             mobileLanguageLabel={mobileLanguageLabel}
-            rootMargin={visibleMargin}
           />
         </div>
       </div>
@@ -176,14 +161,12 @@ function HeaderUtilityControls({
   openMenuLabel,
   closeMenuLabel,
   mobileLanguageLabel,
-  rootMargin,
 }: {
   contactSalesLabel: string;
   locale: "en" | "zh" | undefined;
   openMenuLabel: string;
   closeMenuLabel: string;
   mobileLanguageLabel: string;
-  rootMargin: string;
 }) {
   return (
     <div
@@ -193,11 +176,7 @@ function HeaderUtilityControls({
       {locale ? (
         <>
           <div className="header-desktop-only h-10 w-28 items-center justify-end">
-            <ViewportClientGate mode="desktop">
-              <Idle strategy="visible" rootMargin={rootMargin}>
-                <LanguageToggleIsland locale={locale} />
-              </Idle>
-            </ViewportClientGate>
+            <LanguageToggleIsland locale={locale} />
           </div>
           <Button
             variant="default"
@@ -216,15 +195,16 @@ function HeaderUtilityControls({
             </Link>
           </Button>
           <div className="header-mobile-only h-10 w-10">
-            <ViewportClientGate mode="mobile">
-              <Idle strategy="visible" rootMargin={rootMargin}>
-                <MobileNavigationIsland
-                  openMenuLabel={openMenuLabel}
-                  closeMenuLabel={closeMenuLabel}
-                  languageLabel={mobileLanguageLabel}
-                />
-              </Idle>
-            </ViewportClientGate>
+            <MobileNavigationIsland
+              openMenuLabel={openMenuLabel}
+              closeMenuLabel={closeMenuLabel}
+              languageLabel={mobileLanguageLabel}
+            >
+              <MobileNavigationLinks
+                contactSalesLabel={contactSalesLabel}
+                data-testid="header-mobile-navigation-fallback-links"
+              />
+            </MobileNavigationIsland>
           </div>
         </>
       ) : null}

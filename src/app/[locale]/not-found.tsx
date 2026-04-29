@@ -1,11 +1,9 @@
-"use client";
-
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/routing";
 
-export default function LocaleNotFound() {
-  const t = useTranslations("errors.notFound");
+export default async function LocaleNotFound() {
+  const t = await getTranslations("errors.notFound");
 
   return (
     <div className="flex min-h-[60vh] flex-col items-center justify-center bg-background px-4 py-16">

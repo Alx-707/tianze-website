@@ -14,17 +14,18 @@ import {
   NAVIGATION_BREAKPOINTS,
   type NavigationItem,
 } from "../navigation";
-import { SINGLE_SITE_NAVIGATION } from "@/config/single-site";
+import { SINGLE_SITE_NAVIGATION } from "@/config/single-site-navigation";
 
 // Use vi.hoisted to ensure proper mock setup
 const { mockLocalesConfig } = vi.hoisted(() => ({
   mockLocalesConfig: {
     locales: ["en", "zh"],
+    defaultLocale: "en",
   },
 }));
 
-// Mock the config/paths module
-vi.mock("@/config/paths", () => ({
+// Mock the locale config module used by the client-safe navigation helpers.
+vi.mock("@/config/paths/locales-config", () => ({
   LOCALES_CONFIG: mockLocalesConfig,
 }));
 

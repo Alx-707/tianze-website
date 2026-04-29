@@ -1,9 +1,8 @@
 "use client";
 
 import { useEffect, useState, type ComponentType } from "react";
-import { usePathname } from "next/navigation";
-import { FIVE_SECONDS_MS, THIRTY_SECONDS_MS } from "@/constants/time";
-import { useIdleRender } from "@/hooks/use-idle-render";
+import { THIRTY_SECONDS_MS } from "@/constants/time";
+import { requestIdleCallback } from "@/lib/idle-callback";
 import type { ThemeSwitcherProps } from "@/components/ui/theme-switcher";
 
 type ThemeSwitcherModule = {
@@ -11,28 +10,15 @@ type ThemeSwitcherModule = {
 };
 
 export function LazyThemeSwitcher(props: ThemeSwitcherProps) {
-  const pathname = usePathname();
-  const isHomePage = pathname === "/en" || pathname === "/zh";
-  const shouldRenderOnOtherPages = useIdleRender({
-    timeout: FIVE_SECONDS_MS,
-    fallbackDelay: FIVE_SECONDS_MS,
-  });
-  const [homeDelayElapsed, setHomeDelayElapsed] = useState(false);
+  const [shouldRender, setShouldRender] = useState(false);
   const [module, setModule] = useState<ThemeSwitcherModule | null>(null);
 
   useEffect(() => {
-    if (!isHomePage) {
-      return undefined;
-    }
-
-    const timer = setTimeout(() => {
-      setHomeDelayElapsed(true);
-    }, THIRTY_SECONDS_MS);
-
-    return () => clearTimeout(timer);
-  }, [isHomePage]);
-
-  const shouldRender = isHomePage ? homeDelayElapsed : shouldRenderOnOtherPages;
+    return requestIdleCallback(() => setShouldRender(true), {
+      fallbackDelay: THIRTY_SECONDS_MS,
+      timeout: THIRTY_SECONDS_MS,
+    });
+  }, []);
 
   useEffect(() => {
     if (!shouldRender || module) {

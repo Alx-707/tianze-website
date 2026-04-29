@@ -1,7 +1,14 @@
 "use client";
 
-import { useIdleRender } from "@/hooks/use-idle-render";
-import { CookieConsentIsland } from "@/components/cookie/cookie-consent-island";
+import { lazy, Suspense, useEffect, useState } from "react";
+import { requestIdleCallback } from "@/lib/idle-callback";
+import { IDLE_CALLBACK_TIMEOUT_LONG } from "@/constants/time";
+
+const CookieConsentIsland = lazy(() =>
+  import("@/components/cookie/cookie-consent-island").then((mod) => ({
+    default: mod.CookieConsentIsland,
+  })),
+);
 
 /**
  * Lazy Cookie Consent Island
@@ -13,11 +20,24 @@ import { CookieConsentIsland } from "@/components/cookie/cookie-consent-island";
  * so deferring it improves Core Web Vitals without impacting UX.
  */
 export function LazyCookieConsentIsland() {
-  const shouldRender = useIdleRender();
+  const [shouldRender, setShouldRender] = useState(false);
+
+  useEffect(() => {
+    if (shouldRender) return undefined;
+
+    return requestIdleCallback(() => setShouldRender(true), {
+      fallbackDelay: IDLE_CALLBACK_TIMEOUT_LONG,
+      timeout: IDLE_CALLBACK_TIMEOUT_LONG,
+    });
+  }, [shouldRender]);
 
   if (!shouldRender) {
     return null;
   }
 
-  return <CookieConsentIsland />;
+  return (
+    <Suspense fallback={null}>
+      <CookieConsentIsland />
+    </Suspense>
+  );
 }

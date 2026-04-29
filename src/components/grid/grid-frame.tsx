@@ -1,6 +1,5 @@
 import type { CSSProperties } from "react";
 
-import { DesktopDecorationGate } from "@/components/grid/desktop-decoration-gate";
 import { Crosshair } from "@/components/grid/grid-system";
 
 interface GridFrameProps {
@@ -31,38 +30,34 @@ function getCrosshairRotation(pos: CSSProperties): string {
 export function GridFrame({ children, crosshairs = [] }: GridFrameProps) {
   return (
     <div className="relative">
-      <DesktopDecorationGate>
-        {/* Outer frame — centered 1080px border, desktop only */}
+      {/* Outer frame — centered 1080px border, desktop only */}
+      <div
+        className="pointer-events-none absolute inset-0 z-10 hidden lg:block"
+        aria-hidden="true"
+      >
         <div
-          className="pointer-events-none absolute inset-0 z-10 hidden lg:block"
+          className="mx-auto h-full border border-[var(--grid-guide)]"
+          style={{
+            maxWidth: "calc(min(1080px, 100% - 48px) + 2px)",
+          }}
+        />
+      </div>
+
+      {/* Crosshairs — desktop only, inset-0 so inner Crosshair can anchor to any corner */}
+      {crosshairs.map((pos, i) => (
+        <div
+          key={i}
+          className="pointer-events-none absolute inset-y-0 z-20 hidden lg:block"
+          style={{
+            left: "50%",
+            transform: "translateX(-50%)",
+            width: "min(1080px, calc(100% - 48px))",
+          }}
           aria-hidden="true"
         >
-          <div
-            className="mx-auto h-full border border-[var(--grid-guide)]"
-            style={{
-              maxWidth: "calc(min(1080px, 100% - 48px) + 2px)",
-            }}
-          />
+          <Crosshair style={{ ...pos, transform: getCrosshairRotation(pos) }} />
         </div>
-
-        {/* Crosshairs — desktop only, inset-0 so inner Crosshair can anchor to any corner */}
-        {crosshairs.map((pos, i) => (
-          <div
-            key={i}
-            className="pointer-events-none absolute inset-y-0 z-20 hidden lg:block"
-            style={{
-              left: "50%",
-              transform: "translateX(-50%)",
-              width: "min(1080px, calc(100% - 48px))",
-            }}
-            aria-hidden="true"
-          >
-            <Crosshair
-              style={{ ...pos, transform: getCrosshairRotation(pos) }}
-            />
-          </div>
-        ))}
-      </DesktopDecorationGate>
+      ))}
 
       {children}
     </div>

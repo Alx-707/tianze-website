@@ -1,13 +1,3 @@
-import {
-  type LucideIcon,
-  Building2,
-  Check,
-  Clock,
-  FileText,
-  LayoutGrid,
-  Package,
-  User,
-} from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import {
   SINGLE_SITE_HOME_QUALITY_COMMITMENT_ITEMS,
@@ -15,14 +5,24 @@ import {
   SINGLE_SITE_HOME_QUALITY_STANDARD_ITEMS,
 } from "@/config/single-site-page-expression";
 import { siteFacts } from "@/config/site-facts";
+import {
+  type StaticIconComponent,
+  StaticBuildingIcon,
+  StaticCheckIcon,
+  StaticClockIcon,
+  StaticFileTextIcon,
+  StaticLayoutGridIcon,
+  StaticPackageIcon,
+  StaticUserIcon,
+} from "@/components/icons/static-icons";
 import { HomepageSectionShell } from "@/components/sections/homepage-section-shell";
 
-const COMMITMENT_ICONS: Record<string, LucideIcon> = {
-  commitment1: Clock,
-  commitment2: FileText,
-  commitment3: Package,
-  commitment4: User,
-  commitment5: LayoutGrid,
+const COMMITMENT_ICONS: Record<string, StaticIconComponent> = {
+  commitment1: StaticClockIcon,
+  commitment2: StaticFileTextIcon,
+  commitment3: StaticPackageIcon,
+  commitment4: StaticUserIcon,
+  commitment5: StaticLayoutGridIcon,
 };
 
 function CommitmentList({
@@ -145,7 +145,7 @@ export async function QualitySection() {
         </h3>
         <div className="flex items-center gap-3 rounded-lg border bg-card px-4 py-3">
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10">
-            <Check size={16} className="text-primary" aria-hidden />
+            <StaticCheckIcon size={16} className="text-primary" />
           </div>
           <div>
             <span className="font-semibold">{t("certifications.iso9001")}</span>
@@ -167,7 +167,7 @@ export async function QualitySection() {
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-              <Building2 size={18} aria-hidden />
+              <StaticBuildingIcon size={18} />
             </div>
             <div>
               <p className="text-sm font-semibold text-foreground">
