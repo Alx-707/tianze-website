@@ -4,6 +4,7 @@ import { siteFacts } from "@/config/site-facts";
 import { ONE } from "@/constants";
 import { routing } from "@/i18n/routing-config";
 import { getRuntimeEnvString } from "@/lib/env";
+import { hasOwn } from "@/lib/security/object-guards";
 import {
   generateCanonicalURL,
   generateLanguageAlternates,
@@ -280,7 +281,9 @@ export function createPageSEOConfig(
     },
   };
 
-  const baseConfig = baseConfigs[pageType] ?? baseConfigs.home;
+  const baseConfig =
+    (hasOwn(baseConfigs, pageType) ? baseConfigs[pageType] : undefined) ??
+    baseConfigs.home;
 
   return mergeSEOConfig(baseConfig, customConfig);
 }
