@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Turnstile } from "@marsidev/react-turnstile";
-import { logger } from "@/lib/logger";
+import { logger } from "@/lib/logger-core";
 import {
   getPublicRuntimeEnvBoolean,
   getPublicRuntimeEnvString,

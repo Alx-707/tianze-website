@@ -8,20 +8,9 @@ import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Header } from "@/components/layout/header";
 
-// Mock the navigation components used by Header
-vi.mock("@/components/layout/nav-switcher", () => ({
-  NavSwitcher: () => <nav data-testid="nav-switcher">Main Navigation</nav>,
-}));
-
 vi.mock("@/components/layout/mobile-navigation", () => ({
-  MobileNavigation: () => (
+  MobileNavigationLinks: () => (
     <nav data-testid="mobile-navigation">Mobile Navigation</nav>
-  ),
-}));
-
-vi.mock("@/components/language-toggle", () => ({
-  LanguageToggle: () => (
-    <button data-testid="language-toggle-button">Language Toggle</button>
   ),
 }));
 
@@ -34,25 +23,8 @@ vi.mock("@/components/layout/header-client", () => ({
   MobileNavigationIsland: () => (
     <nav data-testid="mobile-navigation">Mobile Navigation</nav>
   ),
-  NavSwitcherIsland: () => (
-    <nav data-testid="header-desktop-nav">Main Navigation</nav>
-  ),
   LanguageToggleIsland: () => (
     <button data-testid="language-toggle-button">Language Toggle</button>
-  ),
-}));
-
-vi.mock("@/components/lazy/idle", () => ({
-  Idle: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
-
-vi.mock("@/components/layout/header-scroll-chrome", () => ({
-  HeaderScrollChrome: () => null,
-}));
-
-vi.mock("@/components/layout/viewport-client-gate", () => ({
-  ViewportClientGate: ({ children }: { children: React.ReactNode }) => (
-    <>{children}</>
   ),
 }));
 
@@ -100,6 +72,15 @@ describe("Header Component", () => {
 
       expect(screen.getByTestId("logo")).toBeInTheDocument();
       expect(screen.getByTestId("header-desktop-nav")).toBeInTheDocument();
+      expect(screen.getByTestId("mobile-navigation")).toBeInTheDocument();
+      expect(screen.getByTestId("language-toggle-button")).toBeInTheDocument();
+    });
+
+    it("does not delay first-screen header controls behind Idle", async () => {
+      await renderAsyncComponent(
+        Header({ locale: "en", mainNavItems: MAIN_NAV_ITEMS }),
+      );
+
       expect(screen.getByTestId("mobile-navigation")).toBeInTheDocument();
       expect(screen.getByTestId("language-toggle-button")).toBeInTheDocument();
     });

@@ -275,11 +275,34 @@ describe("check-translate-compat protected surface coverage", () => {
   it("tracks only existing protected component surfaces", () => {
     expect(RISK_SCAN_FILES).toEqual(
       expect.arrayContaining([
+        "src/components/layout/header-language-menu.tsx",
         "src/components/layout/mobile-navigation-interactive.tsx",
       ]),
     );
     expect(RISK_SCAN_FILES).not.toEqual(
-      expect.arrayContaining(["src/components/blog/blog-newsletter.tsx"]),
+      expect.arrayContaining([
+        "src/components/blog/blog-newsletter.tsx",
+        "src/components/language-toggle.tsx",
+        "src/components/layout/vercel-navigation.tsx",
+        "src/components/products/inquiry-drawer.tsx",
+        "src/components/products/product-inquiry-form.tsx",
+      ]),
     );
+  });
+
+  it("keeps the protected surface list pinned to current component paths", () => {
+    expect(RISK_SCAN_FILES).toEqual([
+      "src/app/[locale]/contact/contact-form-static-fallback.tsx",
+      "src/components/contact/product-family-context-notice.tsx",
+      "src/components/layout/header-language-menu.tsx",
+      "src/components/layout/mobile-navigation-interactive.tsx",
+      "src/components/forms/contact-form-container.tsx",
+      "src/components/forms/contact-form-feedback.tsx",
+      "src/components/layout/header.tsx",
+      "src/components/layout/header-client.tsx",
+      "src/components/sections/faq-accordion.tsx",
+      "src/components/sections/final-cta.tsx",
+      "src/components/sections/sample-cta.tsx",
+    ]);
   });
 });

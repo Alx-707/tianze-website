@@ -42,7 +42,7 @@ Tianze 是 B2B 工业制造网站，动画策略偏向 **restraint + speed + pur
 - 元素在不同时间到达终态，模拟自然物理
 - UI 场景：列表项 stagger 进入、卡片内的标题/描述/按钮依次出现
 - **注意**：stagger delay 总量控制在 200-400ms 内，过长会显慢
-- Spring 动画的 overshoot-and-settle 比 easing curve 更自然
+- 当前项目不把 spring / overshoot 作为默认语言。`--ease-spring` 如果存在，只能用于明确需要强调的 hero moment 或一次性状态反馈，不能成为通用交互动效。
 
 ### 6. Slow In & Slow Out — 缓动曲线
 
@@ -129,6 +129,9 @@ Tianze 是 B2B 工业制造网站，动画策略偏向 **restraint + speed + pur
 | 层次 | 工具 | 用途 |
 |------|------|------|
 | 设计原则 | 本文档 | 决策"加不加动画、什么类型" |
-| 工程规则 | `emilkowal-animations` skill | 具体参数、性能、可中断性 |
-| 审计框架 | `design-motion-principles` skill | 系统性审计现有 UI 的 motion gap |
-| 实现参考 | `tailwindcss-animations` skill | Tailwind CSS 动画 utilities |
+| 工程品控 | `craft-workspace-tianze-website:emil-design-eng` | 组件手感、状态反馈、微交互克制度 |
+| 页面级增强 | `craft-workspace-tianze-website:animate` | 判断具体页面或组件是否值得加动效 |
+| 系统级设计 | `craft-workspace-tianze-website:impeccable` | 确认动效是否符合品牌、信息层级和转化目标 |
+| 实现参考 | CSS / Tailwind / `tailwindcss-animate` | 当前默认实现层，除非有明确业务理由，不引入重型动画 runtime |
+
+`transitions-dev` 这类外部 skill 如果未来接入，只能作为 motion implementation recipe library，不能替代本文档的判断原则。

@@ -1,31 +1,23 @@
 "use client";
 
-import { type CSSProperties, useEffect, useRef, useState } from "react";
-import dynamic from "next/dynamic";
 import {
-  TURNSTILE_PLACEHOLDER_HEIGHT_CSS_VAR,
-  TURNSTILE_WIDGET_HEIGHT_PX,
-} from "@/constants/turnstile-constants";
+  type CSSProperties,
+  lazy,
+  Suspense,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import { IDLE_CALLBACK_TIMEOUT_LONG } from "@/constants/time";
+import { TURNSTILE_WIDGET_HEIGHT_PX } from "@/constants/turnstile-constants";
 import { requestIdleCallback } from "@/lib/idle-callback";
 
 const TURNSTILE_PLACEHOLDER_CLASS_NAME =
   "h-[var(--turnstile-placeholder-height)] w-full animate-pulse rounded-md bg-muted";
 
 type TurnstilePlaceholderStyle = CSSProperties & {
-  [TURNSTILE_PLACEHOLDER_HEIGHT_CSS_VAR]: string;
+  "--turnstile-placeholder-height": string;
 };
-
-// 懒加载 Turnstile 组件（进入视口或空闲时）
-const DynamicTurnstile = dynamic(
-  () =>
-    import("@/components/security/turnstile").then((m) => m.TurnstileWidget),
-  {
-    ssr: false,
-    loading: () => (
-      <div className={TURNSTILE_PLACEHOLDER_CLASS_NAME} aria-hidden="true" />
-    ),
-  },
-);
 
 interface LazyTurnstileProps {
   onSuccess?: (token: string) => void;
@@ -41,6 +33,12 @@ interface LazyTurnstileProps {
   cData?: string;
 }
 
+const TurnstileWidget = lazy(() =>
+  import("@/components/security/turnstile").then((mod) => ({
+    default: mod.TurnstileWidget,
+  })),
+);
+
 function createTurnstilePlaceholderStyle(
   size: NonNullable<LazyTurnstileProps["size"]>,
 ): TurnstilePlaceholderStyle {
@@ -50,7 +48,7 @@ function createTurnstilePlaceholderStyle(
       : TURNSTILE_WIDGET_HEIGHT_PX.normal;
 
   return {
-    [TURNSTILE_PLACEHOLDER_HEIGHT_CSS_VAR]: `${placeholderHeight}px`,
+    "--turnstile-placeholder-height": `${placeholderHeight}px`,
   };
 }
 
@@ -93,7 +91,10 @@ function useLazyRender(containerRef: React.RefObject<HTMLDivElement | null>) {
         io.observe(el);
       }
 
-      cleanupIdle = requestIdleCallback(enableRender, { timeout: 1500 });
+      cleanupIdle = requestIdleCallback(enableRender, {
+        fallbackDelay: IDLE_CALLBACK_TIMEOUT_LONG,
+        timeout: IDLE_CALLBACK_TIMEOUT_LONG,
+      });
     }
 
     return () => {
@@ -126,6 +127,9 @@ export function LazyTurnstile({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const shouldRender = useLazyRender(containerRef);
   const placeholderStyle = createTurnstilePlaceholderStyle(size);
+  const placeholder = (
+    <div className={TURNSTILE_PLACEHOLDER_CLASS_NAME} aria-hidden="true" />
+  );
   const turnstileProps = {
     className: className ?? "w-full",
     theme,
@@ -143,9 +147,11 @@ export function LazyTurnstile({
   return (
     <div className="space-y-2" ref={containerRef} style={placeholderStyle}>
       {shouldRender ? (
-        <DynamicTurnstile {...turnstileProps} />
+        <Suspense fallback={placeholder}>
+          <TurnstileWidget {...turnstileProps} />
+        </Suspense>
       ) : (
-        <div className={TURNSTILE_PLACEHOLDER_CLASS_NAME} aria-hidden="true" />
+        placeholder
       )}
     </div>
   );

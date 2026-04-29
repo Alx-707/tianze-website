@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -33,6 +34,15 @@ describe("CookieConsentIsland", () => {
     vi.resetModules();
   });
 
+  it("keeps the consent island free of next/dynamic runtime", () => {
+    const source = readFileSync(
+      "src/components/cookie/cookie-consent-island.tsx",
+      "utf8",
+    );
+
+    expect(source).not.toContain("next/dynamic");
+  });
+
   it("renders CookieConsentProvider wrapping children", async () => {
     const { CookieConsentIsland } = await import("../cookie-consent-island");
     render(<CookieConsentIsland />);
@@ -54,7 +64,7 @@ describe("CookieConsentIsland", () => {
     render(<CookieConsentIsland />);
 
     expect(
-      screen.getByTestId("enterprise-analytics-island"),
+      await screen.findByTestId("enterprise-analytics-island"),
     ).toBeInTheDocument();
   });
 

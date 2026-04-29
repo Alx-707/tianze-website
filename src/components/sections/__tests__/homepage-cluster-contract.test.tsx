@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
@@ -16,7 +17,38 @@ async function renderAsyncComponent(
   return render(resolvedElement);
 }
 
+const HOMEPAGE_SERVER_SECTION_SOURCES = [
+  {
+    filePath: "src/components/sections/chain-section.tsx",
+    source: readFileSync("src/components/sections/chain-section.tsx", "utf8"),
+  },
+  {
+    filePath: "src/components/sections/resources-section.tsx",
+    source: readFileSync(
+      "src/components/sections/resources-section.tsx",
+      "utf8",
+    ),
+  },
+  {
+    filePath: "src/components/sections/scenarios-section.tsx",
+    source: readFileSync(
+      "src/components/sections/scenarios-section.tsx",
+      "utf8",
+    ),
+  },
+  {
+    filePath: "src/components/sections/quality-section.tsx",
+    source: readFileSync("src/components/sections/quality-section.tsx", "utf8"),
+  },
+] as const;
+
 describe("Homepage section cluster contract", () => {
+  it("keeps server-rendered homepage sections from importing client icon packages", () => {
+    for (const { filePath, source } of HOMEPAGE_SERVER_SECTION_SOURCES) {
+      expect(source, filePath).not.toContain("lucide-react");
+    }
+  });
+
   it("preserves hero and final/sample CTA hierarchy", async () => {
     await renderAsyncComponent(HeroSection());
     const heroProofList = screen.getByRole("list", {

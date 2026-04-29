@@ -1,17 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import dynamic from "next/dynamic";
 import { Monitor, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
-
-// P0-1 Fix: Move dynamic import to module scope (was inside render causing new component type per render)
-const MotionHighlight = dynamic(
-  () =>
-    import("./theme-switcher-highlight").then((m) => m.ThemeSwitcherHighlight),
-  { ssr: false },
-);
+import { ThemeSwitcherHighlight } from "@/components/ui/theme-switcher-highlight";
 
 const themes = [
   {
@@ -102,7 +95,7 @@ export const ThemeSwitcher = ({ className, ...rest }: ThemeSwitcherProps) => {
             onClick={() => handleThemeClick(key as "light" | "dark" | "system")}
             type="button"
           >
-            {isActive ? <MotionHighlight /> : null}
+            {isActive ? <ThemeSwitcherHighlight /> : null}
             <Icon
               className={cn(
                 "relative z-10 m-auto h-4 w-4",

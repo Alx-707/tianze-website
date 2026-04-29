@@ -1,10 +1,19 @@
-import { ArrowUpRight, Cable, Factory, ShieldCheck } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { SINGLE_SITE_HOME_SCENARIO_ITEMS } from "@/config/single-site-page-expression";
 import { siteFacts } from "@/config/site-facts";
+import {
+  StaticArrowUpRightIcon,
+  StaticCableIcon,
+  StaticFactoryIcon,
+  StaticShieldCheckIcon,
+} from "@/components/icons/static-icons";
 import { HomepageSectionShell } from "@/components/sections/homepage-section-shell";
 
-const SCENARIO_ICONS = [Cable, Factory, ShieldCheck] as const;
+const SCENARIO_ICONS = [
+  StaticCableIcon,
+  StaticFactoryIcon,
+  StaticShieldCheckIcon,
+] as const;
 
 export async function ScenariosSection() {
   const t = await getTranslations("home.scenarios");
@@ -17,7 +26,7 @@ export async function ScenariosSection() {
     >
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         {SINGLE_SITE_HOME_SCENARIO_ITEMS.map((key, index) => {
-          const Icon = SCENARIO_ICONS[index] ?? ShieldCheck;
+          const Icon = SCENARIO_ICONS[index] ?? StaticShieldCheckIcon;
 
           return (
             <div
@@ -29,7 +38,7 @@ export async function ScenariosSection() {
                 <div className="relative flex h-full flex-col justify-between p-5 transition-transform duration-300 group-hover:scale-[1.02]">
                   <div className="flex items-center justify-between">
                     <div className="inline-flex items-center gap-2 rounded-full bg-white/12 px-3 py-1 text-[11px] uppercase tracking-[0.2em] text-white/80">
-                      <Icon size={14} aria-hidden />
+                      <Icon size={14} />
                       {t("cardEyebrow", { count: index + 1 })}
                     </div>
                     <div className="rounded-full border border-white/20 px-2.5 py-1 text-xs text-white/75">
@@ -44,7 +53,7 @@ export async function ScenariosSection() {
                     </p>
                     <div className="mt-3 inline-flex items-center gap-1 text-xs text-white/75">
                       {t("proofLabel")}
-                      <ArrowUpRight size={14} aria-hidden />
+                      <StaticArrowUpRightIcon size={14} />
                     </div>
                   </div>
                 </div>

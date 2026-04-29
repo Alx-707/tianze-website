@@ -5,18 +5,15 @@
  * and utility functions for the responsive navigation system.
  */
 import type { Locale } from "@/types/i18n";
-import { LOCALES_CONFIG } from "@/config/paths";
-import {
-  BREAKPOINT_MD,
-  BREAKPOINT_XL,
-  BYTES_PER_KB,
-  PERCENTAGE_FULL,
-} from "@/constants";
+import { LOCALES_CONFIG } from "@/config/paths/locales-config";
+import { BREAKPOINT_MD, BREAKPOINT_XL } from "@/constants/breakpoints";
+import { BYTES_PER_KB } from "@/constants/core";
 import { COUNT_250 } from "@/constants/count";
+import { PERCENTAGE_FULL } from "@/constants/decimal";
 import {
   SINGLE_SITE_NAVIGATION,
   type SiteNavigationItem,
-} from "@/config/single-site";
+} from "@/config/single-site-navigation";
 
 export type NavigationItem = SiteNavigationItem;
 

@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
@@ -37,15 +38,12 @@ vi.mock("web-vitals", () => ({
   onINP: vi.fn(),
 }));
 
-let dynamicIndex = 0;
-vi.mock("next/dynamic", () => ({
-  default: () => {
-    dynamicIndex += 1;
-    const testId = dynamicIndex === 1 ? "analytics" : "speed-insights";
-    const DynamicComponent = () => <div data-testid={testId} />;
-    DynamicComponent.displayName = `MockDynamic(${testId})`;
-    return DynamicComponent;
-  },
+vi.mock("@vercel/analytics/next", () => ({
+  Analytics: () => <div data-testid="analytics" />,
+}));
+
+vi.mock("@vercel/speed-insights/next", () => ({
+  SpeedInsights: () => <div data-testid="speed-insights" />,
 }));
 
 vi.mock("next/script", () => ({
@@ -71,10 +69,18 @@ describe("EnterpriseAnalyticsIsland", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.resetModules();
-    dynamicIndex = 0;
     // Reset window.dataLayer and window.gtag
     delete (window as unknown as Record<string, unknown>).dataLayer;
     delete (window as unknown as Record<string, unknown>).gtag;
+  });
+
+  it("keeps analytics integrations free of next/dynamic runtime", () => {
+    const source = readFileSync(
+      "src/components/monitoring/enterprise-analytics-island.tsx",
+      "utf8",
+    );
+
+    expect(source).not.toContain("next/dynamic");
   });
 
   it("renders nothing when consent system exists but is not ready", async () => {
@@ -99,8 +105,8 @@ describe("EnterpriseAnalyticsIsland", () => {
       await import("../enterprise-analytics-island");
     render(<EnterpriseAnalyticsIsland />);
 
-    expect(screen.getByTestId("analytics")).toBeInTheDocument();
-    expect(screen.getByTestId("speed-insights")).toBeInTheDocument();
+    expect(await screen.findByTestId("analytics")).toBeInTheDocument();
+    expect(await screen.findByTestId("speed-insights")).toBeInTheDocument();
   });
 
   it("initializes GA4 dataLayer and gtag when enabled in production", async () => {

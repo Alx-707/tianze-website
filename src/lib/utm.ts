@@ -147,25 +147,18 @@ export function getAttributionSnapshot(): AttributionData {
   };
 }
 
-const ATTRIBUTION_KEYS = [
-  "utmSource",
-  "utmMedium",
-  "utmCampaign",
-  "utmTerm",
-  "utmContent",
-  "gclid",
-  "fbclid",
-  "msclkid",
-] as const satisfies readonly (keyof AttributionData)[];
-
 export function getAttributionAsObject(): Record<string, string> {
   const attribution = getAttributionSnapshot();
   const result: Record<string, string> = {};
 
-  for (const key of ATTRIBUTION_KEYS) {
-    const value = attribution[key];
-    if (value) result[key] = value;
-  }
+  if (attribution.utmSource) result.utmSource = attribution.utmSource;
+  if (attribution.utmMedium) result.utmMedium = attribution.utmMedium;
+  if (attribution.utmCampaign) result.utmCampaign = attribution.utmCampaign;
+  if (attribution.utmTerm) result.utmTerm = attribution.utmTerm;
+  if (attribution.utmContent) result.utmContent = attribution.utmContent;
+  if (attribution.gclid) result.gclid = attribution.gclid;
+  if (attribution.fbclid) result.fbclid = attribution.fbclid;
+  if (attribution.msclkid) result.msclkid = attribution.msclkid;
 
   return result;
 }

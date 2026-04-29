@@ -34,6 +34,9 @@ Tianze 的设计方向是：
 
 ## 当前视觉基线
 
+当前视觉基线是实现起点，不是最终设计规范。
+现有 token、圆角、阴影、网格和 Vercel 借鉴方式可以继续作为当前控制面板，但不能在未经关键页面试跑前被视为最终品牌身份。
+
 ### 色彩
 
 - 主方向：Industrial Steel Blue
@@ -78,3 +81,6 @@ Tianze 的设计方向是：
 - `docs/impeccable/system/MOTION-PRINCIPLES.md`
 
 如果工作盘里的原型与这里冲突，以这份文档和生产实现为准。
+
+根目录 `PRODUCT.md` 和 `DESIGN.md` 是当前给设计类 skills 读取的操作上下文。
+其中 `DESIGN.md` 明确标记为 provisional；只有经过页面试跑验证的规则，才应该从 provisional 升级为稳定设计真相。

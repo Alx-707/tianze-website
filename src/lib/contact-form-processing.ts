@@ -13,9 +13,9 @@ import { verifyTurnstileDetailed } from "@/lib/turnstile";
 import { mapZodIssueToErrorKey } from "@/lib/contact-form-error-utils";
 import {
   CONTACT_FORM_CONFIG,
-  createContactFormSchemaFromConfig,
   type ContactFormFieldValues,
 } from "@/config/contact-form-config";
+import { createContactFormSchemaFromConfig } from "@/config/contact-form-validation";
 import { HTTP_SERVICE_UNAVAILABLE } from "@/constants";
 import { TEN_MINUTES_MS } from "@/constants/time";
 import { API_ERROR_CODES } from "@/constants/api-error-codes";

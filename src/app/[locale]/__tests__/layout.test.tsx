@@ -1,5 +1,5 @@
 import type React from "react";
-import { screen } from "@testing-library/react";
+import { cleanup, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { renderAsyncPage } from "@/testing/render-async-page";
 import LocaleLayout, { generateMetadata } from "../layout";
@@ -48,12 +48,6 @@ vi.mock("next-intl", () => ({
 
 vi.mock("next/navigation", () => ({
   notFound: mockNotFound,
-}));
-
-vi.mock("next/script", () => ({
-  default: ({ src }: { src: string }) => (
-    <script data-testid="next-script" data-src={src} />
-  ),
 }));
 
 vi.mock("@/app/[locale]/layout-metadata", () => ({
@@ -117,10 +111,6 @@ vi.mock("@/components/layout/header", () => ({
   Header: () => <header data-testid="header" />,
 }));
 
-vi.mock("@/components/lazy/lazy-top-loader", () => ({
-  LazyTopLoader: () => <div data-testid="top-loader" />,
-}));
-
 vi.mock("@/components/theme-provider", () => ({
   ThemeProvider: ({ children }: { children: React.ReactNode }) => (
     <>{children}</>
@@ -156,6 +146,10 @@ vi.mock("@/i18n/routing", () => ({
 
 describe("LocaleLayout", () => {
   beforeEach(() => {
+    cleanup();
+    document
+      .querySelectorAll('script[data-testid="dev-script"]')
+      .forEach((script) => script.remove());
     vi.clearAllMocks();
     mockRuntimeEnv.NODE_ENV = "development";
     mockRuntimeEnv.PLAYWRIGHT_TEST = false;
@@ -197,9 +191,12 @@ describe("LocaleLayout", () => {
       await renderAsyncPage(page);
 
       expect(screen.getByText("Skip to main content")).toBeInTheDocument();
-      const scriptSources = screen
-        .getAllByTestId("next-script")
-        .map((script) => script.getAttribute("data-src"));
+      const scriptSources = Array.from(
+        document.querySelectorAll<HTMLScriptElement>(
+          'script[data-testid="dev-script"]',
+        ),
+        (script) => script.getAttribute("src"),
+      );
       expect(scriptSources).toEqual([
         "https://unpkg.com/react-scan@0.5.3/dist/auto.global.js",
         "https://unpkg.com/react-grab@0.1.32/dist/index.global.js",
@@ -218,7 +215,9 @@ describe("LocaleLayout", () => {
 
       await renderAsyncPage(page);
 
-      expect(screen.queryAllByTestId("next-script")).toHaveLength(0);
+      expect(
+        document.querySelectorAll('script[data-testid="dev-script"]'),
+      ).toHaveLength(0);
     });
   });
 });

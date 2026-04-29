@@ -1,14 +1,5 @@
-import { z } from "zod";
-import {
-  ANIMATION_DURATION_VERY_SLOW,
-  COUNT_FIVE,
-  COUNT_TWO,
-  COUNT_TEN,
-  PERCENTAGE_FULL,
-  PERCENTAGE_HALF,
-  SECONDS_PER_MINUTE,
-} from "@/constants";
 import { PHONE_MAX_DIGITS } from "@/constants/count";
+import { MILLISECONDS_PER_SECOND, SECONDS_PER_MINUTE } from "@/constants/time";
 
 /**
  * 表单字段枚举键值
@@ -91,21 +82,33 @@ export interface ContactFormFieldValues {
   website?: string | undefined;
 }
 
+const CONTACT_NAME_MIN_LENGTH = 2;
+const CONTACT_NAME_MAX_LENGTH = 50;
+const CONTACT_EMAIL_MAX_LENGTH = 100;
+const CONTACT_COMPANY_MIN_LENGTH = 2;
+const CONTACT_COMPANY_MAX_LENGTH = 100;
+const CONTACT_MESSAGE_MIN_LENGTH = 10;
+const CONTACT_MESSAGE_MAX_LENGTH = 1000;
+const CONTACT_SUBJECT_MIN_LENGTH = 5;
+const CONTACT_SUBJECT_MAX_LENGTH = 100;
+const CONTACT_HONEYPOT_MAX_LENGTH = 0;
+const CONTACT_DEFAULT_COOLDOWN_MINUTES = 5;
+
 export const CONTACT_FORM_VALIDATION_CONSTANTS = {
-  NAME_MIN_LENGTH: COUNT_TWO,
-  NAME_MAX_LENGTH: PERCENTAGE_HALF,
-  EMAIL_MAX_LENGTH: PERCENTAGE_FULL,
-  COMPANY_MIN_LENGTH: COUNT_TWO,
-  COMPANY_MAX_LENGTH: PERCENTAGE_FULL,
-  MESSAGE_MIN_LENGTH: COUNT_TEN,
-  MESSAGE_MAX_LENGTH: ANIMATION_DURATION_VERY_SLOW,
-  SUBJECT_MIN_LENGTH: COUNT_FIVE,
-  SUBJECT_MAX_LENGTH: PERCENTAGE_FULL,
+  NAME_MIN_LENGTH: CONTACT_NAME_MIN_LENGTH,
+  NAME_MAX_LENGTH: CONTACT_NAME_MAX_LENGTH,
+  EMAIL_MAX_LENGTH: CONTACT_EMAIL_MAX_LENGTH,
+  COMPANY_MIN_LENGTH: CONTACT_COMPANY_MIN_LENGTH,
+  COMPANY_MAX_LENGTH: CONTACT_COMPANY_MAX_LENGTH,
+  MESSAGE_MIN_LENGTH: CONTACT_MESSAGE_MIN_LENGTH,
+  MESSAGE_MAX_LENGTH: CONTACT_MESSAGE_MAX_LENGTH,
+  SUBJECT_MIN_LENGTH: CONTACT_SUBJECT_MIN_LENGTH,
+  SUBJECT_MAX_LENGTH: CONTACT_SUBJECT_MAX_LENGTH,
   PHONE_MAX_DIGITS: PHONE_MAX_DIGITS,
-  HONEYPOT_MAX_LENGTH: 0,
-  DEFAULT_COOLDOWN_MINUTES: COUNT_FIVE,
-  COOLDOWN_TO_MS_MULTIPLIER: SECONDS_PER_MINUTE * 1000,
-  MS_PER_SECOND: ANIMATION_DURATION_VERY_SLOW,
+  HONEYPOT_MAX_LENGTH: CONTACT_HONEYPOT_MAX_LENGTH,
+  DEFAULT_COOLDOWN_MINUTES: CONTACT_DEFAULT_COOLDOWN_MINUTES,
+  COOLDOWN_TO_MS_MULTIPLIER: SECONDS_PER_MINUTE * MILLISECONDS_PER_SECOND,
+  MS_PER_SECOND: MILLISECONDS_PER_SECOND,
 } as const;
 
 /**
@@ -214,51 +217,6 @@ export const CONTACT_FORM_CONFIG: ContactFormConfig = {
   },
 };
 
-const FIELD_CONFIG_SCHEMA = z.object({
-  key: z.enum(CONTACT_FORM_FIELD_KEYS as readonly string[]),
-  enabled: z.boolean(),
-  required: z.boolean(),
-  type: z.enum(["text", "email", "tel", "textarea", "checkbox", "hidden"]),
-  order: z.number().int().nonnegative(),
-  i18nKey: z.string().min(1),
-});
-
-const FEATURES_SCHEMA = z.object({
-  enableTurnstile: z.boolean(),
-  showPrivacyCheckbox: z.boolean(),
-  showMarketingConsent: z.boolean(),
-  useWebsiteHoneypot: z.boolean(),
-  sendConfirmationEmail: z.boolean(),
-});
-
-const VALIDATION_SCHEMA = z
-  .object({
-    emailDomainWhitelist: z.array(z.string().min(1)).default([]),
-    messageMinLength: z.number().int().positive(),
-    messageMaxLength: z.number().int().positive(),
-  })
-  .refine((value) => value.messageMinLength <= value.messageMaxLength, {
-    message: "messageMinLength must be <= messageMaxLength",
-  });
-
-const CONTACT_FORM_FIELD_KEYS_ENUM = z.enum(
-  CONTACT_FORM_FIELD_KEYS as readonly string[],
-);
-
-// 注意：Zod v4 中 ZodRecord 不支持 superRefine，这里改用 refine 实现必备键校验
-const FIELDS_SCHEMA = z
-  .record(CONTACT_FORM_FIELD_KEYS_ENUM, FIELD_CONFIG_SCHEMA)
-  .refine((value) => CONTACT_FORM_FIELD_KEYS.every((key) => key in value), {
-    message: "Missing required field configs",
-  });
-
-export const contactFormConfigSchema = z.object({
-  schemaVersion: z.number().int().min(1),
-  fields: FIELDS_SCHEMA,
-  features: FEATURES_SCHEMA,
-  validation: VALIDATION_SCHEMA,
-});
-
 export interface ContactFormFieldDescriptor extends ContactFormFieldConfig {
   labelKey: string;
   placeholderKey?: string | undefined;
@@ -313,58 +271,4 @@ export function buildFormFieldsFromConfig(
       isCheckbox: field.type === "checkbox",
       isHoneypot: field.key === "website",
     }));
-}
-
-export interface ContactFormFieldValidatorContext {
-  config: ContactFormConfig;
-  field: ContactFormFieldConfig;
-}
-
-export type ContactFormFieldValidator = (
-  context: ContactFormFieldValidatorContext,
-) => z.ZodTypeAny;
-
-export type ContactFormFieldValidators = Record<
-  ContactFormFieldKey,
-  ContactFormFieldValidator
->;
-
-/**
- * Zod shape type that maps each ContactFormFieldValues key to a ZodType
- * producing the correct output type. Used to bridge the gap between
- * config-driven dynamic schema construction (which loses type specificity
- * via Record<string, ZodTypeAny>) and the statically-known field value types.
- */
-type ContactFormFieldValuesShape = {
-  [K in keyof ContactFormFieldValues]-?: z.ZodType<ContactFormFieldValues[K]>;
-};
-
-export function createContactFormSchemaFromConfig(
-  config: ContactFormConfig,
-  validators: ContactFormFieldValidators,
-): z.ZodObject<ContactFormFieldValuesShape> {
-  const shape = CONTACT_FORM_FIELD_KEYS.reduce<Record<string, z.ZodTypeAny>>(
-    (acc, key) => {
-      const field = config.fields[key];
-      if (!shouldRenderField(field, config.features)) {
-        return acc;
-      }
-
-      const validator = validators[key];
-      if (!validator) {
-        throw new Error(`Missing validator for field key: ${key}`);
-      }
-
-      acc[key] = validator({ config, field });
-      return acc;
-    },
-    {},
-  );
-
-  // Single assertion: config-driven dynamic schema inherently loses type
-  // specificity because validators are selected at runtime from a Record.
-  // The shape is guaranteed to match ContactFormFieldValues by the field
-  // validators contract, so we bridge the type gap here at the definition
-  // site rather than requiring double assertions at every consumer.
-  return z.object(shape) as z.ZodObject<ContactFormFieldValuesShape>;
 }

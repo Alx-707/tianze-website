@@ -1,17 +1,21 @@
 "use client";
 
-import dynamic from "next/dynamic";
+import { lazy, Suspense } from "react";
 
 interface CookieBannerProps {
   className?: string;
 }
 
-const DynamicCookieBanner = dynamic<CookieBannerProps>(
-  () =>
-    import("@/components/cookie/cookie-banner").then((mod) => mod.CookieBanner),
-  { ssr: false, loading: () => null },
+const CookieBanner = lazy(() =>
+  import("@/components/cookie/cookie-banner").then((mod) => ({
+    default: mod.CookieBanner,
+  })),
 );
 
 export function LazyCookieBanner(props: CookieBannerProps) {
-  return <DynamicCookieBanner {...props} />;
+  return (
+    <Suspense fallback={null}>
+      <CookieBanner {...props} />
+    </Suspense>
+  );
 }

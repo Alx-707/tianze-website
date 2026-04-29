@@ -1,0 +1,43 @@
+/**
+ * @vitest-environment jsdom
+ */
+import { render } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
+import { HeaderScrollChrome } from "@/components/layout/header-scroll-chrome";
+
+function setScrollY(value: number) {
+  Object.defineProperty(window, "scrollY", {
+    configurable: true,
+    value,
+  });
+}
+
+describe("HeaderScrollChrome", () => {
+  it("updates header data-scrolled only when threshold state changes", () => {
+    const onScrollChange = vi.fn();
+    document.body.innerHTML = "<header></header>";
+    setScrollY(0);
+
+    render(
+      <HeaderScrollChrome threshold={10} onScrollChange={onScrollChange} />,
+    );
+
+    const header = document.querySelector("header");
+    expect(header).toHaveAttribute("data-scrolled", "false");
+
+    setScrollY(5);
+    window.dispatchEvent(new Event("scroll"));
+    expect(onScrollChange).not.toHaveBeenCalled();
+    expect(header).toHaveAttribute("data-scrolled", "false");
+
+    setScrollY(11);
+    window.dispatchEvent(new Event("scroll"));
+    expect(onScrollChange).toHaveBeenCalledOnce();
+    expect(onScrollChange).toHaveBeenCalledWith(true);
+    expect(header).toHaveAttribute("data-scrolled", "true");
+
+    setScrollY(20);
+    window.dispatchEvent(new Event("scroll"));
+    expect(onScrollChange).toHaveBeenCalledOnce();
+  });
+});

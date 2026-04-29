@@ -12,4 +12,4 @@ export const { Link, redirect, usePathname, useRouter } =
   createNavigation(routing);
 
 // 导出配置验证函数，供其他模块使用
-export { validatePathsConfig } from "@/config/paths";
+export { validatePathsConfig } from "@/config/paths/utils";

@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { getHeaderMobileMenuButton } from "./helpers/navigation";
 
 const localeCases = [
   {
@@ -35,6 +36,28 @@ for (const localeCase of localeCases) {
       const html = await page.content();
       expect(html).not.toContain("BAILOUT_TO_CLIENT_SIDE_RENDERING");
       expect(html).toContain('id="main-content"');
+    });
+
+    test("mobile homepage exposes navigation fallback without JavaScript", async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width: 390, height: 844 });
+      await page.goto(`http://localhost:3000/${localeCase.locale}`, {
+        waitUntil: "domcontentloaded",
+      });
+
+      const trigger = getHeaderMobileMenuButton(page);
+      await expect(trigger).toBeVisible();
+      await expect(trigger).toHaveAttribute("aria-haspopup", "dialog");
+
+      await trigger.click();
+
+      await expect(
+        page.getByTestId("header-mobile-navigation-fallback-panel"),
+      ).toBeVisible();
+      await expect(
+        page.getByRole("navigation", { name: /mobile navigation menu/i }),
+      ).toBeVisible();
     });
 
     test("contact page renders form structure without JavaScript", async ({

@@ -4,8 +4,8 @@ import { describe, expect, it, vi } from "vitest";
 import LocaleNotFound from "../not-found";
 
 // Mock next-intl
-vi.mock("next-intl", () => ({
-  useTranslations: () => (key: string) => {
+vi.mock("next-intl/server", () => ({
+  getTranslations: async () => (key: string) => {
     const translations: Record<string, string> = {
       title: "Page not found",
       description:
@@ -37,22 +37,26 @@ vi.mock("@/i18n/routing", () => ({
   ),
 }));
 
+async function renderLocaleNotFound() {
+  render(await LocaleNotFound());
+}
+
 describe("LocaleNotFound", () => {
   describe("rendering", () => {
-    it("should render 404 text", () => {
-      render(<LocaleNotFound />);
+    it("should render 404 text", async () => {
+      await renderLocaleNotFound();
 
       expect(screen.getByText("404")).toBeInTheDocument();
     });
 
-    it("should render page title", () => {
-      render(<LocaleNotFound />);
+    it("should render page title", async () => {
+      await renderLocaleNotFound();
 
       expect(screen.getByText("Page not found")).toBeInTheDocument();
     });
 
-    it("should render description", () => {
-      render(<LocaleNotFound />);
+    it("should render description", async () => {
+      await renderLocaleNotFound();
 
       expect(
         screen.getByText(
@@ -61,14 +65,14 @@ describe("LocaleNotFound", () => {
       ).toBeInTheDocument();
     });
 
-    it("should render back to homepage button", () => {
-      render(<LocaleNotFound />);
+    it("should render back to homepage button", async () => {
+      await renderLocaleNotFound();
 
       expect(screen.getByText("Back to homepage")).toBeInTheDocument();
     });
 
-    it("should have link to homepage", () => {
-      render(<LocaleNotFound />);
+    it("should have link to homepage", async () => {
+      await renderLocaleNotFound();
 
       const link = screen.getByTestId("home-link");
       expect(link).toHaveAttribute("href", "/");
@@ -76,22 +80,22 @@ describe("LocaleNotFound", () => {
   });
 
   describe("structure", () => {
-    it("should have centered layout container", () => {
-      const { container } = render(<LocaleNotFound />);
+    it("should have centered layout container", async () => {
+      const { container } = render(await LocaleNotFound());
 
       const mainContainer = container.querySelector(".flex.min-h-\\[60vh\\]");
       expect(mainContainer).toBeInTheDocument();
     });
 
-    it("should have max-width container for content", () => {
-      const { container } = render(<LocaleNotFound />);
+    it("should have max-width container for content", async () => {
+      const { container } = render(await LocaleNotFound());
 
       const contentContainer = container.querySelector(".max-w-lg");
       expect(contentContainer).toBeInTheDocument();
     });
 
-    it("should render h1 heading", () => {
-      render(<LocaleNotFound />);
+    it("should render h1 heading", async () => {
+      await renderLocaleNotFound();
 
       const heading = screen.getByRole("heading", { level: 1 });
       expect(heading).toBeInTheDocument();
@@ -100,16 +104,16 @@ describe("LocaleNotFound", () => {
   });
 
   describe("accessibility", () => {
-    it("should have proper heading hierarchy", () => {
-      render(<LocaleNotFound />);
+    it("should have proper heading hierarchy", async () => {
+      await renderLocaleNotFound();
 
       const headings = screen.getAllByRole("heading");
       expect(headings).toHaveLength(1);
       expect(headings[0]).toHaveTextContent("Page not found");
     });
 
-    it("should have accessible button", () => {
-      render(<LocaleNotFound />);
+    it("should have accessible button", async () => {
+      await renderLocaleNotFound();
 
       const button = screen.getByTestId("home-button");
       expect(button).toBeInTheDocument();

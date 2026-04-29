@@ -18,11 +18,12 @@ const TRANSLATION_LEAF_RULES = [
     markers: ["product-family-context-notice", 'translate="no"'],
   },
   {
-    file: "src/components/language-toggle.tsx",
+    file: "src/components/layout/header-language-menu.tsx",
     markers: [
+      "language-switcher",
+      "language-dropdown-content",
       "language-current-label",
-      "language-option-label-en",
-      "language-option-label-zh",
+      "language-option-label-",
       'translate="no"',
     ],
   },
@@ -32,15 +33,6 @@ const TRANSLATION_LEAF_RULES = [
       "mobile-language-switcher",
       "mobile-language-switcher-label",
       "mobile-language-option-label-",
-      'translate="no"',
-    ],
-  },
-  {
-    file: "src/components/products/inquiry-drawer.tsx",
-    markers: [
-      "inquiry-drawer-product-header",
-      "inquiry-drawer-product-title",
-      "inquiry-drawer-product-sku",
       'translate="no"',
     ],
   },
@@ -57,15 +49,6 @@ const TRANSLATION_LEAF_RULES = [
     ],
   },
   {
-    file: "src/components/products/product-inquiry-form.tsx",
-    markers: [
-      "product-inquiry-success-message",
-      "product-inquiry-error-message",
-      "product-inquiry-submit-label",
-      'translate="no"',
-    ],
-  },
-  {
     file: "src/components/layout/header.tsx",
     markers: [
       "header-desktop-nav",
@@ -77,26 +60,6 @@ const TRANSLATION_LEAF_RULES = [
   {
     file: "src/components/layout/header-client.tsx",
     markers: ["header-mobile-menu-label", 'translate="no"'],
-  },
-  {
-    file: "src/components/layout/vercel-navigation.tsx",
-    markers: [
-      "vercel-navigation-root",
-      "vercel-navigation-trigger-label-",
-      "vercel-navigation-link-label-",
-      'translate="no"',
-    ],
-  },
-  {
-    file: "src/components/blocks/tech/tech-tabs-block.tsx",
-    markers: [
-      "tech-tabs-list",
-      "tech-tab-label-",
-      "tech-card-title-",
-      "tech-card-version-",
-      "tech-card-link-label-",
-      'translate="no"',
-    ],
   },
   {
     file: "src/components/sections/faq-accordion.tsx",

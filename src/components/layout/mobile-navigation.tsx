@@ -1,6 +1,6 @@
 import type { ComponentProps } from "react";
 import { useTranslations } from "next-intl";
-import { SINGLE_SITE_HOME_LINK_TARGETS } from "@/config/single-site-page-expression";
+import { SINGLE_SITE_HOME_LINK_TARGETS } from "@/config/single-site-links";
 import {
   isActivePath,
   mobileNavigation,

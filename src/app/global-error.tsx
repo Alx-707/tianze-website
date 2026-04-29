@@ -1,9 +1,6 @@
 "use client";
 
 import { useEffect } from "react";
-import { logger } from "@/lib/logger";
-import { isPublicRuntimeDevelopment } from "@/lib/public-env";
-import { Button } from "@/components/ui/button";
 import { coerceLocale } from "@/i18n/locale-utils";
 
 interface GlobalErrorProps {
@@ -41,13 +38,22 @@ function getLocaleFromBrowser(): "en" | "zh" {
   return coerceLocale(browserLang.startsWith("zh") ? "zh" : "en");
 }
 
+function isDevelopmentRuntime(): boolean {
+  return process.env.NODE_ENV === "development";
+}
+
+async function reportGlobalError(error: Error): Promise<void> {
+  const { logger } = await import("@/lib/logger-core");
+  logger.error("Global error caught", error);
+}
+
 export default function GlobalError({ error, reset }: GlobalErrorProps) {
   const locale = getLocaleFromBrowser();
   // Safe: locale is strictly typed as 'en' | 'zh' from getLocaleFromBrowser()
   const t = translations[locale];
 
   useEffect(() => {
-    logger.error("Global error caught", error);
+    reportGlobalError(error).catch(() => undefined);
   }, [error]);
 
   return (
@@ -59,7 +65,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
               {t.title}
             </h1>
             <p className="mb-6 text-muted-foreground">{t.description}</p>
-            {isPublicRuntimeDevelopment() && (
+            {isDevelopmentRuntime() && (
               <details className="mb-6 text-left">
                 <summary className="cursor-pointer text-sm font-medium">
                   {t.devDetails}
@@ -76,18 +82,24 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
               </details>
             )}
             <div className="space-y-4">
-              <Button onClick={reset} className="w-full">
+              <button
+                type="button"
+                onClick={reset}
+                className="inline-flex h-[38px] w-full shrink-0 items-center justify-center rounded-[6px] bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[var(--primary-dark)]"
+                data-testid="try-again-button"
+              >
                 {t.tryAgain}
-              </Button>
-              <Button
-                variant="outline"
+              </button>
+              <button
+                type="button"
                 onClick={() => {
                   window.location.href = `/${locale}`;
                 }}
-                className="w-full"
+                className="inline-flex h-[38px] w-full shrink-0 items-center justify-center rounded-[6px] border-2 border-primary bg-transparent px-5 py-2.5 text-sm font-semibold text-primary transition-colors duration-150 hover:bg-primary/10"
+                data-testid="go-home-button"
               >
                 {t.goHome}
-              </Button>
+              </button>
             </div>
           </div>
         </div>

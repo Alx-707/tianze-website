@@ -1,7 +1,6 @@
 import { generateLocaleMetadata } from "@/app/[locale]/layout-metadata";
 import "@/app/globals.css";
 import { type ReactNode } from "react";
-import Script from "next/script";
 import { notFound } from "next/navigation";
 import { NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -10,7 +9,6 @@ import { AttributionBootstrap } from "@/components/attribution-bootstrap";
 import { LazyCookieConsentIsland } from "@/components/cookie/lazy-cookie-consent-island";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/layout/header";
-import { LazyTopLoader } from "@/components/lazy/lazy-top-loader";
 import { ThemeProvider } from "@/components/theme-provider";
 import { LazyThemeSwitcher } from "@/components/ui/lazy-theme-switcher";
 import { FOOTER_COLUMNS, FOOTER_STYLE_TOKENS } from "@/config/footer-links";
@@ -32,6 +30,22 @@ interface LocaleLayoutProps {
 interface AsyncLocaleLayoutContentProps {
   locale: "en" | "zh";
   children: ReactNode;
+}
+
+interface DevScriptProps {
+  crossOrigin?: "anonymous";
+  src: string;
+}
+
+function DevScript({ crossOrigin, src }: DevScriptProps) {
+  return (
+    <script
+      async
+      crossOrigin={crossOrigin}
+      data-testid="dev-script"
+      src={src}
+    />
+  );
 }
 
 async function AsyncLocaleLayoutContent({
@@ -83,9 +97,6 @@ async function AsyncLocaleLayoutContent({
           {/* P1-1 Fix: Single attribution initialization for UTM tracking */}
           <AttributionBootstrap />
 
-          {/* 页面导航进度条 - P1 优化：懒加载，减少 vendors chunk */}
-          <LazyTopLoader />
-
           {/* 导航栏 */}
           <Header
             locale={locale}
@@ -115,8 +126,7 @@ async function AsyncLocaleLayoutContent({
             }
           />
 
-          {/* P0-3 Fix: Cookie Consent Island - scoped provider for consent consumers only */}
-          {/* TBT Optimization: Deferred until main thread is idle */}
+          {/* Consent UI and analytics are deferred until the main thread is idle. */}
           <LazyCookieConsentIsland />
         </ThemeProvider>
       </NextIntlClientProvider>
@@ -164,24 +174,19 @@ export default async function LocaleLayout({
         {shouldLoadDevScripts && (
           <>
             {!disableReactScan && (
-              <Script
+              <DevScript
                 src="https://unpkg.com/react-scan@0.5.3/dist/auto.global.js"
                 crossOrigin="anonymous"
-                strategy="afterInteractive"
               />
             )}
             {!disableDevTools && (
               <>
-                <Script
+                <DevScript
                   src="https://unpkg.com/react-grab@0.1.32/dist/index.global.js"
                   crossOrigin="anonymous"
-                  strategy="afterInteractive"
                 />
-                <Script
-                  // Keep the browser bridge aligned with the local react-grab MCP helper.
-                  src="https://unpkg.com/@react-grab/mcp@0.1.32/dist/client.global.js"
-                  strategy="lazyOnload"
-                />
+                {/* Keep the browser bridge aligned with the local react-grab MCP helper. */}
+                <DevScript src="https://unpkg.com/@react-grab/mcp@0.1.32/dist/client.global.js" />
               </>
             )}
           </>

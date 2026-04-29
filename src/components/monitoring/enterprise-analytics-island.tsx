@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import dynamic from "next/dynamic";
+import { lazy, Suspense, useEffect, useRef } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import Script from "next/script";
 import { useCookieConsentOptional } from "@/lib/cookie-consent";
@@ -10,14 +9,16 @@ import {
   isPublicRuntimeProduction,
 } from "@/lib/public-env";
 
-const Analytics = dynamic(
-  () => import("@vercel/analytics/next").then((mod) => mod.Analytics),
-  { ssr: false },
+const Analytics = lazy(() =>
+  import("@vercel/analytics/next").then((mod) => ({
+    default: mod.Analytics,
+  })),
 );
 
-const SpeedInsights = dynamic(
-  () => import("@vercel/speed-insights/next").then((mod) => mod.SpeedInsights),
-  { ssr: false },
+const SpeedInsights = lazy(() =>
+  import("@vercel/speed-insights/next").then((mod) => ({
+    default: mod.SpeedInsights,
+  })),
 );
 
 function ensureGa4QueueInitialized(measurementId: string): void {
@@ -83,8 +84,12 @@ export function EnterpriseAnalyticsIsland() {
           strategy="afterInteractive"
         />
       )}
-      {isProd && isVercel && <Analytics />}
-      {isProd && isVercel && <SpeedInsights />}
+      {isProd && isVercel ? (
+        <Suspense fallback={null}>
+          <Analytics />
+          <SpeedInsights />
+        </Suspense>
+      ) : null}
     </>
   );
 }

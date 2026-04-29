@@ -8,16 +8,12 @@ const { mockLoggerError } = vi.hoisted(() => ({
   mockLoggerError: vi.fn(),
 }));
 
-vi.mock("@/lib/logger", () => ({
+vi.mock("@/lib/logger-core", () => ({
   logger: {
     error: mockLoggerError,
     info: vi.fn(),
     warn: vi.fn(),
   },
-  sanitizeIP: (ip: string | undefined | null) =>
-    ip ? "[REDACTED_IP]" : "[NO_IP]",
-  sanitizeEmail: (email: string | undefined | null) =>
-    email ? "[REDACTED_EMAIL]" : "[NO_EMAIL]",
 }));
 
 // Mock next-intl - component uses useTranslations('errors.contact')

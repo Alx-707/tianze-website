@@ -1,5 +1,7 @@
-import { getCanonicalPath } from "@/config/paths/utils";
+import { SINGLE_SITE_HOME_LINK_TARGETS } from "@/config/single-site-links";
 import { PRODUCT_CATALOG } from "@/constants/product-catalog";
+
+export { SINGLE_SITE_HOME_LINK_TARGETS } from "@/config/single-site-links";
 
 /**
  * Canonical single-site page-expression inputs.
@@ -34,11 +36,6 @@ export type SingleSiteHomeGridSectionId =
   (typeof SINGLE_SITE_HOME_GRID_SECTION_ORDER)[number];
 export type SingleSiteHomeTrailingSectionId =
   (typeof SINGLE_SITE_HOME_TRAILING_SECTION_ORDER)[number];
-
-export const SINGLE_SITE_HOME_LINK_TARGETS = {
-  contact: getCanonicalPath("contact"),
-  products: getCanonicalPath("products"),
-} as const;
 
 export const SINGLE_SITE_HOME_HERO_PROOF_ITEMS = [
   "est",
@@ -111,7 +108,7 @@ export const SINGLE_SITE_HOME_QUALITY_PROOF_STRIP_ITEMS = [
 ] as const;
 
 export const SINGLE_SITE_ABOUT_PAGE_EXPRESSION = {
-  ctaHref: getCanonicalPath("contact"),
+  ctaHref: SINGLE_SITE_HOME_LINK_TARGETS.contact,
 } as const;
 
 const PNEUMATIC_MARKET_SLUG = "pneumatic-tube-systems" as const;
@@ -124,7 +121,7 @@ export const SINGLE_SITE_PRODUCTS_PAGE_EXPRESSION = {
   standardMarketSlugs,
   specialtyMarketSlug: PNEUMATIC_MARKET_SLUG,
   marketLanding: {
-    ctaHref: getCanonicalPath("contact"),
+    ctaHref: SINGLE_SITE_HOME_LINK_TARGETS.contact,
   },
 } as const;
 
@@ -142,5 +139,5 @@ export const SINGLE_SITE_OEM_PAGE_EXPRESSION = {
     "qualityAssurance",
   ],
   processStepCount: 5,
-  ctaHref: getCanonicalPath("contact"),
+  ctaHref: SINGLE_SITE_HOME_LINK_TARGETS.contact,
 } as const;

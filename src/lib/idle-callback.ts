@@ -27,31 +27,49 @@ import {
  * }, []);
  * ```
  */
+interface RequestIdleCallbackOptions {
+  timeout?: number;
+  fallbackDelay?: number;
+}
+
 export function requestIdleCallback(
   callback: () => void,
-  options: { timeout?: number } = {},
+  options: RequestIdleCallbackOptions = {},
 ): () => void {
-  const { timeout = IDLE_CALLBACK_TIMEOUT } = options;
+  const {
+    timeout = IDLE_CALLBACK_TIMEOUT,
+    fallbackDelay = IDLE_CALLBACK_FALLBACK_DELAY,
+  } = options;
+  let canceled = false;
+
+  const runCallback = () => {
+    if (canceled) return;
+    callback();
+  };
 
   if (typeof window === "undefined") {
     // SSR环境，立即执行
-    callback();
+    runCallback();
     return () => {
-      // no-op in SSR
+      canceled = true;
     };
   }
 
-  if (window.requestIdleCallback) {
+  if (typeof window.requestIdleCallback === "function") {
     // 浏览器支持requestIdleCallback
-    const id = window.requestIdleCallback(() => callback(), { timeout });
+    const id = window.requestIdleCallback(runCallback, { timeout });
     return () => {
-      if (window.cancelIdleCallback) {
+      canceled = true;
+      if (typeof window.cancelIdleCallback === "function") {
         window.cancelIdleCallback(id);
       }
     };
   }
 
   // Fallback到setTimeout
-  const id = setTimeout(callback, IDLE_CALLBACK_FALLBACK_DELAY);
-  return () => clearTimeout(id);
+  const id = setTimeout(runCallback, fallbackDelay);
+  return () => {
+    canceled = true;
+    clearTimeout(id);
+  };
 }

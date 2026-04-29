@@ -4,8 +4,8 @@ import {
   CONTACT_FORM_CONFIG,
   CONTACT_FORM_VALIDATION_CONSTANTS,
   type ContactFormFieldKey,
-  type ContactFormFieldValidatorContext,
 } from "@/config/contact-form-config";
+import { type ContactFormFieldValidatorContext } from "@/config/contact-form-validation";
 import {
   company,
   email,
@@ -17,6 +17,7 @@ import {
 } from "@/lib/form-schema/contact-field-validators";
 
 vi.unmock("zod");
+vi.unmock("@/config/contact-form-validation");
 
 function createContext(
   key: ContactFormFieldKey,
