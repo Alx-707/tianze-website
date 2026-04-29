@@ -2,8 +2,9 @@ import { spawn } from "child_process";
 import { createHash } from "crypto";
 import { mkdir, writeFile } from "fs/promises";
 import { dirname } from "path";
+import { pathToFileURL } from "url";
 
-type InlineScript = {
+export type InlineScript = {
   attrs: string;
   body: string;
 };
@@ -49,14 +50,14 @@ function extractNonceAttr(attrs: string): string | null {
   return match?.[1] ?? match?.[2] ?? match?.[3] ?? null;
 }
 
-function extractScriptTypeAttr(attrs: string): string | null {
+export function extractScriptTypeAttr(attrs: string): string | null {
   const match = attrs.match(
     /(?:^|\s)type\s*=\s*(?:"([^"]+)"|'([^']+)'|([^\s>]+))/i,
   );
   return (match?.[1] ?? match?.[2] ?? match?.[3] ?? null)?.toLowerCase();
 }
 
-function hasExecutableScriptType(script: InlineScript): boolean {
+export function hasExecutableScriptType(script: InlineScript): boolean {
   const type = extractScriptTypeAttr(script.attrs);
   if (!type) return true;
   if (type === "module") return true;
@@ -226,7 +227,7 @@ async function fetchHtml(
   return { html, csp, status: res.status };
 }
 
-function classifyInlineScript(script: InlineScript): string {
+export function classifyInlineScript(script: InlineScript): string {
   const attrs = script.attrs.toLowerCase();
   const body = script.body.trim();
 
@@ -478,7 +479,12 @@ async function run(): Promise<void> {
   }
 }
 
-run().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+if (
+  process.argv[1] &&
+  import.meta.url === pathToFileURL(process.argv[1]).href
+) {
+  run().catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });
+}
