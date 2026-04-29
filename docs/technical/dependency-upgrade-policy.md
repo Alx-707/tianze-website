@@ -15,7 +15,6 @@
 
 | Package | Current reason | Safe next step |
 | --- | --- | --- |
-| `critters` | 上游转向 `beasties`，但它属于 Next/OpenNext 支撑依赖 | 单独验证 `beasties` 替换对 `pnpm build` / `pnpm build:cf` 的影响 |
 | `@types/node` | 项目 runtime 支持范围是 `>=20.19 <23`，Node 25 types 不匹配 | 只有当 runtime baseline 扩到 Node 25 时再升 |
 
 ## 这次升级经验
@@ -142,6 +141,25 @@ ESLint 10 不能只改版本号。当前仓库采用：
 2. 验证 `pnpm ci:local`、GitHub Actions、Vercel、Cloudflare/OpenNext build。
 3. 再把 `@types/node` 升到对应 LTS major 的 latest patch。
 4. 只有当 Vercel、CI 和项目运行时都明确支持 Node 25 时，才考虑 `@types/node 25.x`。
+
+### `critters`
+
+`critters` 已从仓库移除，不替换成 `beasties`。
+
+原因：
+
+- `critters` 只在 Next.js 的 `experimental.optimizeCss` 路径里被动态 `require("critters")`
+- 当前仓库没有开启 `experimental.optimizeCss`
+- 当前仓库还明确关闭 `experimental.inlineCss`，因为它会引入 FOUC 和首屏性能回退
+- `beasties` 是 `critters` 的维护 fork，但 Next.js 16.2.4 当前并不会自动 `require("beasties")`
+- 因此直接新增 `beasties` 会变成新的未使用依赖，不是稳定升级
+
+验证重点：
+
+- `pnpm build` 通过
+- `pnpm build:cf` 通过
+- `pnpm unused:check` 通过
+- `pnpm deps:check` 不再出现 deprecated `critters`
 
 ### tech check
 

@@ -1,11 +1,5 @@
 const heldDependencyUpdates = [
   {
-    name: "critters",
-    status: "deprecated-support-dependency",
-    rationale:
-      "Kept as an OpenNext/Next support dependency until the Cloudflare build lane proves a replacement such as beasties is safe.",
-  },
-  {
     name: "@types/node",
     status: "runtime-baseline-held",
     rationale:
