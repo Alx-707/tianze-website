@@ -14,6 +14,22 @@
 - `integrations.md`：后续可能引入的插件、组件、集成清单
 - `design-truth.md`：当前设计真相文档
 
+## 2026-04-29 技术栈升级后的文档边界
+
+本轮全量扫描覆盖 `docs/` 下 156 个 Markdown / MDX 文档。升级后不要把所有旧版本号都机械替换：
+
+- `README.md`、`AGENTS.md`、`CLAUDE.md`、`guides/`、`technical/` 才是当前真相入口。
+- `audits/`、`reports/`、`superpowers/plans/`、`superpowers/prompts/` 多数是历史证据或执行计划，旧 Node / Next / OpenNext / Wrangler 版本号代表当时的运行环境，不代表当前项目状态。
+- 退役内容目录要从当前入口移除：`content/posts/` 当前不存在；产品 MDX 已归档到 `content/_archive/products/`，不再作为运行时内容源。
+- `messages/en.json` 和 `messages/zh.json` 是兼容副本，不是 runtime 翻译真相；运行时读取 `messages/{locale}/critical.json` 和 `messages/{locale}/deferred.json`。
+
+如果要进一步精简体量，优先处理这些候选，而不是改历史 evidence：
+
+1. 将已完成且无人继续执行的 `docs/superpowers/plans/**` 移到 Trash 或改看 git 历史。
+2. 将旧 prompt 执行包 `docs/superpowers/prompts/**` 降级为外部 handoff archive。
+3. `docs/reports/**` 和 `docs/audits/full-project-health-v1/**` 已退出 live docs tree；需要追溯时优先看 git 历史或本机 Trash 批次。
+4. 当前入口只保留能回答“现在项目是什么、怎么发布、怎么证明、谁是真相源”的文档。
+
 ## 主真相层
 
 - `guides/`：当前仍在使用的真相文档、proof 口径、治理合同
@@ -32,9 +48,9 @@
 
 ## 工作盘
 
-- `cwf/`：内容工作盘。现在只保留内容基础资料 + FAQ 定稿 + homepage 定稿
-- `impeccable/`：设计工作盘。现在只保留设计系统、少量最新原型和必要外部参考
-- `superpowers/`：Superpowers 的 spec / plan / current program 产物
+- `cwf/`：内容工作盘。只保留内容基础资料、FAQ 定稿和 homepage 定稿
+- `impeccable/`：设计工作盘。只保留设计系统、少量最新原型和必要外部参考
+- `superpowers/`：Superpowers 产物。`current/` 可读，`plans/` 和 `prompts/` 默认按历史执行材料看，不作为当前版本真相
 
 ## 策略与规格
 

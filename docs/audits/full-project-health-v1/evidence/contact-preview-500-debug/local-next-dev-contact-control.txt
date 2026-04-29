@@ -1,5 +1,0 @@
-/en/contact 200 text/html; charset=utf-8
-/zh/contact 200 text/html; charset=utf-8
-/en 200 text/html; charset=utf-8
-/zh 200 text/html; charset=utf-8
-/api/health 200 application/json

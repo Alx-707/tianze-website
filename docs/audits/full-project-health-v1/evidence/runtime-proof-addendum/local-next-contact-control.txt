@@ -1,5 +1,0 @@
-/en/contact status=200 content-type=text/html; charset=utf-8 body=<!DOCTYPE html><html lang="en" class="__variable_7229dd --font-jetbrains-mono"><head><meta charSet="utf-8"/><meta name="viewport" content="width=device-width, i
-/zh/contact status=200 content-type=text/html; charset=utf-8 body=<!DOCTYPE html><html lang="zh" class="__variable_7229dd --font-jetbrains-mono"><head><meta charSet="utf-8"/><meta name="viewport" content="width=device-width, i
-/en status=200 content-type=text/html; charset=utf-8 body=<!DOCTYPE html><html lang="en" class="__variable_7229dd --font-jetbrains-mono"><head><meta charSet="utf-8"/><meta name="viewport" content="width=device-width, i
-/zh status=200 content-type=text/html; charset=utf-8 body=<!DOCTYPE html><html lang="zh" class="__variable_7229dd --font-jetbrains-mono"><head><meta charSet="utf-8"/><meta name="viewport" content="width=device-width, i
-/api/health status=200 content-type=application/json body={"status":"ok"}

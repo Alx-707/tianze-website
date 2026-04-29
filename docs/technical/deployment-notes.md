@@ -9,6 +9,21 @@
 
 ## 当前关键事实
 
+当前版本真相以 `package.json` 为准；部署相关核心快照如下：
+
+| Area | Current |
+| --- | --- |
+| Node runtime policy | `>=24 <25` |
+| Proof baseline | Node `24.15.x` LTS |
+| Next.js | `16.2.4` |
+| React / React DOM | `19.2.5` |
+| @opennextjs/cloudflare | `1.19.4` |
+| Wrangler | `4.86.0` |
+| TypeScript | `6.0.3` |
+| ESLint | `10.2.1` |
+
+下面的 dated sections 是升级/验证记录。里面出现的旧版本号代表当时的起点或对照环境，不要当成当前技术栈。
+
 ### 2026-04-28 Next / OpenNext / Wrangler patch refresh
 
 本轮只升级已验证的部署主链补丁面：

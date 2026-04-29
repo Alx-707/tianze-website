@@ -1,2 +1,0 @@
-/en/contact 500 text/plain
-/en/products 200 text/html; charset=utf-8

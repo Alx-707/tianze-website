@@ -1,3 +1,0 @@
-<redacted-preview-domain>/ error=TypeError fetch failed
-<redacted-preview-domain>/en error=TypeError fetch failed
-<redacted-preview-domain>/api/health error=TypeError fetch failed

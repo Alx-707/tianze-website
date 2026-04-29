@@ -1,8 +1,0 @@
-Raw Cloudflare gateway worker tail was redacted before committing.
-
-Summary:
-- Baseline gateway received contact-route requests successfully.
-- The failure localized to the web worker render path.
-- Raw request URLs, worker identifiers, and runtime correlation fields were intentionally removed from repo evidence.
-
-See docs/audits/full-project-health-v1/06-contact-preview-500-debug.md.

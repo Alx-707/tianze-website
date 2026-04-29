@@ -1,5 +1,0 @@
-/en/contact status=500 type=text/plain body=Internal Server Error
-/zh/contact status=500 type=text/plain body=Internal Server Error
-/en status=200 type=text/html; charset=utf-8 body=<!DOCTYPE html><html lang="en" class="__variable_7229dd --font-jetbrains-mono"><head><meta charSet="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><li
-/zh status=200 type=text/html; charset=utf-8 body=<!DOCTYPE html><html lang="zh" class="__variable_7229dd --font-jetbrains-mono"><head><meta charSet="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><li
-/api/health status=200 type=application/json body={"status":"ok"}

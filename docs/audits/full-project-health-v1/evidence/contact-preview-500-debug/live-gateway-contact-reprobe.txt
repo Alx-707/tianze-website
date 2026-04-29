@@ -1,5 +1,0 @@
-<redacted-workers-dev-gateway-url>/en/contact 500 text/plain
-<redacted-workers-dev-gateway-url>/zh/contact 500 text/plain
-<redacted-workers-dev-gateway-url>/en 200 text/html; charset=utf-8
-<redacted-workers-dev-gateway-url>/zh 200 text/html; charset=utf-8
-<redacted-workers-dev-gateway-url>/api/health 200 application/json

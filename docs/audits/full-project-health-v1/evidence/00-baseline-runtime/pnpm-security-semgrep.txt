@@ -1,6 +1,0 @@
-
-> b2b-web-template@0.1.0 security:semgrep /Users/Data/conductor/workspaces/tianze-website/miami
-> node scripts/semgrep-scan.js
-
-Semgrep ERROR findings: 0 (reports/semgrep-error-1777288059737.json)
-Semgrep WARNING findings: 2 (reports/semgrep-warning-1777288059737.json)

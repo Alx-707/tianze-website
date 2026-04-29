@@ -3,9 +3,8 @@
 > Finalized: 2026-03-20
 > Decision basis: 4-source cross-validated research + business logic review
 > Historical snapshot only. For current execution, this file is superseded by:
-> - `docs/strategy/ring2/07-information-architecture.md`
-> - `docs/strategy/ring2/08-content-strategy.md`
-> - `docs/strategy/ring2/12-content-inventory.md`
+> - `docs/strategy/current-strategy-summary.md`
+> - `docs/strategy/ring4-implementation-handoff.md`
 >
 > Important: this file still reflects the older decision that bending machines lived under `/capabilities/` and OEM lived outside `/products/`. Do not use it as the current source of truth for routing or page ownership.
 
