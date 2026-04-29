@@ -112,6 +112,37 @@ ESLint 10 不能只改版本号。当前仓库采用：
 - `pnpm build` 和 `pnpm build:cf` 都要跑，因为 Next 文档明确生产构建会执行类型检查
 - `pnpm deps:check` 不再出现 TypeScript hold 项
 
+### `@types/node` / Node runtime
+
+`@types/node` 不能按 npm latest 直接升。当前结论：
+
+- 继续保留 `@types/node 22.x`
+- 不把 `@types/node` 升到 `25.x`
+- 不在这轮把项目 runtime baseline 改到 Node 25
+
+原因：
+
+- 当前 `package.json` 运行时范围是 `>=20.19 <23`
+- GitHub Actions 和本地 `ci:local` 都以 Node `20.19.0` 作为 proof baseline
+- Node 官方说明生产应用应使用 Active LTS 或 Maintenance LTS；Node 25 是 Current，不是 LTS
+- Vercel 当前可用 Node major 是 `24.x`、`22.x`、`20.x`，没有 Node 25
+- Cloudflare Wrangler 可以在 Current / Active / Maintenance Node 上运行，但 Worker 最终运行在 `workerd`，这不能证明应用代码可以安全使用 Node 25 API
+
+参考来源：
+
+- Node.js release schedule: https://nodejs.org/en/about/previous-releases
+- Vercel supported Node.js versions: https://vercel.com/docs/functions/runtimes/node-js/node-js-versions
+- Cloudflare Wrangler install/update: https://developers.cloudflare.com/workers/wrangler/install-and-update/
+
+所以这条不是“忘了升”，而是类型定义必须和真实运行时对齐。否则 TypeScript 会允许 Node 25 API，但 CI / Vercel / Node 20 proof baseline 实际不可用。
+
+后续安全升级路径：
+
+1. 先单独做 runtime baseline lane，把 CI、`ci:local`、部署文档和 `engines.node` 从 Node 20 baseline 迁到 Node 24 LTS。
+2. 验证 `pnpm ci:local`、GitHub Actions、Vercel、Cloudflare/OpenNext build。
+3. 再把 `@types/node` 升到对应 LTS major 的 latest patch。
+4. 只有当 Vercel、CI 和项目运行时都明确支持 Node 25 时，才考虑 `@types/node 25.x`。
+
 ### tech check
 
 `pnpm tech:check` 的目标是指出真正需要处理的问题。
