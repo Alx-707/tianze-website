@@ -11,6 +11,7 @@ import {
 import { IDLE_CALLBACK_TIMEOUT_LONG } from "@/constants/time";
 import { TURNSTILE_WIDGET_HEIGHT_PX } from "@/constants/turnstile-constants";
 import { requestIdleCallback } from "@/lib/idle-callback";
+import { LazyIslandErrorBoundary } from "@/components/ui/lazy-island-error-boundary";
 
 const TURNSTILE_PLACEHOLDER_CLASS_NAME =
   "h-[var(--turnstile-placeholder-height)] w-full animate-pulse rounded-md bg-muted";
@@ -130,6 +131,20 @@ export function LazyTurnstile({
   const placeholder = (
     <div className={TURNSTILE_PLACEHOLDER_CLASS_NAME} aria-hidden="true" />
   );
+  const failureFallback = (
+    <div
+      className={`turnstile-fallback ${className ?? "w-full"}`}
+      role="status"
+      aria-live="polite"
+    >
+      <div className="text-sm text-destructive">
+        Security verification is temporarily unavailable.
+      </div>
+    </div>
+  );
+  const handleLazyError = () => {
+    onError?.("Turnstile widget failed to load");
+  };
   const turnstileProps = {
     className: className ?? "w-full",
     theme,
@@ -147,9 +162,14 @@ export function LazyTurnstile({
   return (
     <div className="space-y-2" ref={containerRef} style={placeholderStyle}>
       {shouldRender ? (
-        <Suspense fallback={placeholder}>
-          <TurnstileWidget {...turnstileProps} />
-        </Suspense>
+        <LazyIslandErrorBoundary
+          fallback={failureFallback}
+          onError={handleLazyError}
+        >
+          <Suspense fallback={placeholder}>
+            <TurnstileWidget {...turnstileProps} />
+          </Suspense>
+        </LazyIslandErrorBoundary>
       ) : (
         placeholder
       )}

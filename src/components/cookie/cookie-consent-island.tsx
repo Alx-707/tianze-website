@@ -4,6 +4,7 @@ import { lazy, Suspense } from "react";
 import { CookieConsentProvider } from "@/lib/cookie-consent";
 import { isPublicRuntimeProduction } from "@/lib/public-env";
 import { LazyCookieBanner } from "@/components/cookie/lazy-cookie-banner";
+import { LazyIslandErrorBoundary } from "@/components/ui/lazy-island-error-boundary";
 
 const EnterpriseAnalyticsIsland = lazy(() =>
   import("@/components/monitoring/enterprise-analytics-island").then((mod) => ({
@@ -30,9 +31,11 @@ export function CookieConsentIsland() {
         <LazyCookieBanner />
       </Suspense>
       {isProd ? (
-        <Suspense fallback={null}>
-          <EnterpriseAnalyticsIsland />
-        </Suspense>
+        <LazyIslandErrorBoundary fallback={null}>
+          <Suspense fallback={null}>
+            <EnterpriseAnalyticsIsland />
+          </Suspense>
+        </LazyIslandErrorBoundary>
       ) : null}
     </CookieConsentProvider>
   );
