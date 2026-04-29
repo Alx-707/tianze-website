@@ -2,9 +2,8 @@
 
 > 数据来源: 现有页面结构 + `docs/cwf/context/company/content-gaps.md`
 > 历史快照。当前实施请以以下文档为准：
-> - `docs/strategy/ring2/07-information-architecture.md`
-> - `docs/strategy/ring2/08-content-strategy.md`
-> - `docs/strategy/ring2/12-content-inventory.md`
+> - `docs/strategy/current-strategy-summary.md`
+> - `docs/strategy/ring4-implementation-handoff.md`
 >
 > 说明：本文件仍保留早期的 `/products/[slug]` 视角，不能作为当前 Ring 4 路由和页面结构的真相源。
 

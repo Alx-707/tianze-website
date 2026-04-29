@@ -1,3 +1,0 @@
-/en status=200 csp=present nonce=present inline=39 nonced=0 unnonced=39
-/zh status=200 csp=present nonce=present inline=37 nonced=0 unnonced=37
-manual CSP runtime check passed

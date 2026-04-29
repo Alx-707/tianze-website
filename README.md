@@ -175,15 +175,11 @@ src/
 └── types/        # TypeScript 类型
 
 content/          # MDX 内容文件
-├── posts/        # 博客文章
-│   ├── en/       # 英文博客
-│   └── zh/       # 中文博客
-├── products/     # 产品目录
-│   ├── en/       # 英文产品
-│   └── zh/       # 中文产品
-└── pages/        # 静态页面（FAQ、隐私政策等）
-    ├── en/
-    └── zh/
+├── pages/        # 当前活跃 MDX 页面内容
+│   ├── en/
+│   └── zh/
+├── config/       # 内容相关配置
+└── _archive/     # 已归档内容，不作为当前运行时内容源
 
 messages/         # 国际化翻译文件
 ├── en/
@@ -306,70 +302,11 @@ pnpm perf:lighthouse  # Lighthouse CI（性能）
 
 ## 📝 内容管理系统
 
-本模板使用基于文件系统的 MDX 内容管理，支持产品目录、博客文章和静态页面。
+当前项目使用基于文件系统的 MDX 内容管理。当前活跃内容源是 `content/pages/{locale}/*.mdx`。
 
-### 产品内容 (`content/products/`)
+历史产品 MDX 已放在 `content/_archive/products/`，不作为当前运行时内容源；博客内容目录 `content/posts/` 当前不存在，也不作为当前站点内容入口。产品市场页当前由 typed config / catalog 数据和页面路由组合生成，不从 `content/products/` 读取。
 
-产品文件支持 B2B 外贸特有的字段：
-
-```yaml
----
-locale: 'en'
-title: 'Product Name'
-slug: 'product-slug'           # 英中版本必须使用相同 slug
-publishedAt: '2024-01-15'
-draft: false
-description: 'Product description'
-coverImage: '/images/products/cover.jpg'
-images:
-  - '/images/products/image1.jpg'
-  - '/images/products/image2.jpg'
-category: 'Industrial Equipment'
-tags: ['tag1', 'tag2']
-featured: true
-moq: '10 Units'                # 最小起订量
-leadTime: '15-20 Days'         # 交货期
-supplyCapacity: '5000 Units/Month'
-certifications: ['CE', 'ISO 9001']
-packaging: 'Wooden Crate'
-portOfLoading: 'Shanghai Port'
-specs:
-  Power: '7.5kW'
-  Voltage: '380V AC'
-relatedProducts: ['related-product-slug']
-seo:
-  title: 'SEO Title'
-  description: 'SEO Description'
-  keywords: ['keyword1', 'keyword2']
----
-
-Product detailed description in MDX format...
-```
-
-### 博客文章 (`content/posts/`)
-
-```yaml
----
-locale: 'en'
-title: 'Article Title'
-slug: 'article-slug'
-description: 'Article summary'
-publishedAt: '2024-01-15'
-author: 'Author Name'
-tags: ['Trade', 'Export']
-categories: ['Industry Insights']
-featured: false
-readingTime: 8
-coverImage: '/images/blog/cover.jpg'
-seo:
-  title: 'SEO Title'
-  description: 'SEO Description'
----
-
-Article content in MDX format...
-```
-
-### 静态页面 (`content/pages/`)
+### 页面内容 (`content/pages/`)
 
 适用于 FAQ、隐私政策、关于我们等页面：
 
@@ -404,13 +341,13 @@ Page content in MDX format...
 
 ### 核心框架
 
-- **Next.js 16.2.0** - React全栈框架，App Router架构
-- **React 19.2.4** - 用户界面库，支持服务器组件
-- **TypeScript 5.9.3** - 类型安全的JavaScript超集
+- **Next.js 16.2.4** - React全栈框架，App Router架构
+- **React 19.2.5** - 用户界面库，支持服务器组件
+- **TypeScript 6.0.3** - 类型安全的JavaScript超集
 
 ### 样式和UI
 
-- **Tailwind CSS 4.2.2** - 原子化CSS框架，CSS-first配置
+- **Tailwind CSS 4.2.4** - 原子化CSS框架，CSS-first配置
 - **Geist字体** - Vercel设计的现代字体系列
 
 ### 内容管理
@@ -421,7 +358,7 @@ Page content in MDX format...
 
 ### 开发工具
 
-- **ESLint 9** - 代码质量检查 (9个插件)
+- **ESLint 10** - 代码质量检查
 - **Prettier** - 代码格式化
 - **TypeScript严格模式** - 最严格的类型检查
 - **React Scan** - React 组件性能监控和渲染分析

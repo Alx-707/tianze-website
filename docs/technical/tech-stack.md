@@ -28,7 +28,7 @@
 
 - **next-intl 4.11.0**：多语言框架
 - 当前语言：**en / zh**
-- 运行时翻译文件：`messages/en.json`、`messages/zh.json`
+- 运行时翻译文件：`messages/{locale}/critical.json` + `messages/{locale}/deferred.json`
 - 翻译同步与校验走仓库脚本，不依赖外部 CMS
 
 ### 内容管理

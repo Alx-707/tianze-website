@@ -14,7 +14,7 @@
 | 1 | Company Identity | `src/config/single-site.ts` | 公司事实：名称、地址、联系方式、成立时间、人数、认证、出口国家、社媒 | 第 1 个换 |
 | 2 | Page Expression | `src/config/single-site-page-expression.ts` | 页面结构开关和指针：某页是否显示 FAQ、CTA、stats；不放正文 | 第 2 个换 |
 | 3 | Page Content | `content/pages/{locale}/*.mdx` | 页面正文、hero 文案、FAQ 问答、页面级 SEO、发布日期/更新日期 | 第 3 批换 |
-| 4 | UI Chrome | `messages/{locale}/*.json` | 跨页面通用界面文案：按钮、表单标签、导航、通用提示 | 通常保留 |
+| 4 | UI Chrome | `messages/{locale}/critical.json` + `messages/{locale}/deferred.json` | 跨页面通用界面文案：按钮、表单标签、导航、通用提示 | 通常保留 |
 
 例外：产品目录、OEM 结构化卡片数据保留在 typed config 中，并按 locale 存储需要翻译的字段。
 
@@ -29,7 +29,7 @@
 | Terms | Layer 3 `content/pages/{locale}/terms.mdx` | Layer 3 | 不适用 | Layer 2 不再保存 TOC key | Layer 4 `legal.*` | TOC 从 MDX heading 派生 |
 | OEM custom manufacturing | Layer 3 `content/pages/{locale}/oem-custom-manufacturing.mdx` | 当前页面组件 + Layer 3 FAQ | Layer 3 frontmatter `faq[]` | Layer 2 | Layer 4 | Batch B 后 FAQ 不再来自共享翻译池 |
 | Product market pages | Route metadata helper + catalog/config | Product catalog/config | 不适用；当前不挂载共享 FAQ | Layer 2/product config + `src/config/single-site-seo.ts` | Layer 4 | ProductGroup schema 从产品结构派生 |
-| Blog posts | `content/posts/{locale}/*.mdx` | `content/posts/{locale}/*.mdx` | 不适用 | 不适用 | Layer 4 | OG 图来自 post frontmatter 或 central fallback |
+| Blog posts | 当前无 active `content/posts/**` | 当前无 active blog runtime source | 不适用 | 不适用 | Layer 4 | Blog 路由和内容已退役；历史内容不作为当前站点真相 |
 
 ## SEO Metadata Ownership
 

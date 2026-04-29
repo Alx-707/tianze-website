@@ -1,8 +1,0 @@
-
-> b2b-web-template@0.1.0 arch:hotspots /Users/Data/conductor/workspaces/tianze-website/miami
-> node scripts/structural-hotspots.js
-
-Structural hotspot report written: reports/architecture/structural-hotspots-1777287895690.json
-Structural hotspot markdown: reports/architecture/structural-hotspots-1777287895690.md
-Commits analyzed: 167
-Unique files touched: 1096

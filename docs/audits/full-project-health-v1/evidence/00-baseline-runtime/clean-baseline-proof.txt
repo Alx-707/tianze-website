@@ -1,3 +1,0 @@
-$ git diff --name-only origin/main...HEAD -- excluded audit paths
-
-$ git status --short --untracked-files=all -- excluded audit paths

@@ -9,23 +9,26 @@
 
 - [`reports/architecture/structural-hotspots-latest.md`](/Users/Data/Warehouse/Pipe/tianze-website/reports/architecture/structural-hotspots-latest.md)
 
-## Cluster 1：翻译关键四件套
+## Cluster 1：翻译运行时与兼容副本
 
 ### Files
 
+- `messages/en/critical.json`
+- `messages/en/deferred.json`
+- `messages/zh/critical.json`
+- `messages/zh/deferred.json`
 - `messages/en.json`
 - `messages/zh.json`
-- `messages/en/critical.json`
-- `messages/zh/critical.json`
 
 ### 为什么重要
 
-- 这是仓库里逻辑耦合度最高的一组文件
-- 它们不只是存内容，还直接影响 runtime 用户可见语义
+- `critical.json` / `deferred.json` 是 runtime 翻译真相
+- flat `messages/en.json` / `messages/zh.json` 是测试、脚本和兼容视图使用的派生副本
+- 这组文件不只是存内容，还直接影响 runtime 用户可见语义
 
 ### Review rule
 
-- 四件套里只要改了一个，另外三个也要一起看
+- runtime split source 只要改了一个，对应 locale 的 split + flat 兼容副本都要一起看
 - 如果影响 runtime-facing copy 或 error semantics，至少走 `local-full proof`
 - 执行命令：
 

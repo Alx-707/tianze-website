@@ -1,8 +1,0 @@
-
-> b2b-web-template@0.1.0 lint:pii /Users/Data/conductor/workspaces/tianze-website/miami
-> node scripts/check-pii-in-logs.js
-
-Checking for PII in log statements...
-
-PII check passed - no unsanitized PII found in logs
-exit=0

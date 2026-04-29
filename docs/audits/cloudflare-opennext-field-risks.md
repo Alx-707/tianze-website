@@ -22,15 +22,20 @@ Exa 报告是外部风险池，不是执行命令。里面很多问题来自 Git
 
 当前仓库不是刚接 Cloudflare 的初始状态。关键事实如下：
 
-- Next.js：`16.2.3`
+- Next.js：`16.2.4`
 - React / React DOM：`19.2.5`
-- `@opennextjs/cloudflare`：`^1.18.0`
-- `next-intl`：`^4.9.1`
-- Tailwind CSS：`^4.2.2`
+- `@opennextjs/cloudflare`：`1.19.4`
+- Wrangler：`4.86.0`
+- Node runtime policy：`>=24 <25`
+- Proof baseline：Node `24.15.x` LTS
+- `next-intl`：`^4.11.0`
+- Tailwind CSS：`^4.2.4`
 - Resend：`^6.12.2`
 - Cloudflare 构建入口：`pnpm build:cf`
 - Cloudflare runtime 配置：`open-next.config.ts` + `wrangler.jsonc`
 - 当前 Cloudflare 图片策略：`DEPLOY_TARGET=cloudflare` 时 `next/image` 设置 `unoptimized: true`
+
+说明：这份风险清单生成于 2026-04-26。上面的基线已按 2026-04-29 全面技术栈升级刷新；下方风险分组仍按原报告结构保留。
 
 当前验证原则不变：
 
@@ -51,7 +56,7 @@ Exa 报告是外部风险池，不是执行命令。里面很多问题来自 Git
 
 当前状态：
 
-- 项目使用 `@opennextjs/cloudflare ^1.18.0`。
+- 项目使用 `@opennextjs/cloudflare 1.19.4`。
 - 2026-04-26 runtime cache removal 后，当前上线链路不再配置 R2 incremental cache、D1 tag cache 或 Durable Object queue。
 - 内容更新采用静态生成 + 重新部署，不走运行时 tag cache。
 
