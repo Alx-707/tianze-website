@@ -11,12 +11,6 @@ const heldDependencyUpdates = [
     rationale:
       "The project engine is >=20.19 <23, so Node 25 types would describe APIs outside the supported runtime range.",
   },
-  {
-    name: "typescript",
-    status: "major-held",
-    rationale:
-      "TypeScript 6 is a compiler major and must be validated in its own type/build lane.",
-  },
 ];
 
 export const HELD_DEPENDENCY_UPDATES = heldDependencyUpdates;

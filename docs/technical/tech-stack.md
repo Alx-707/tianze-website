@@ -11,7 +11,7 @@
 
 - **Next.js 16.2.4**：主框架，使用 App Router
 - **React 19.2.5**：UI 运行时
-- **TypeScript 5.9.3**：类型系统
+- **TypeScript 6.0.3**：类型系统
 - **Tailwind CSS 4.2.4**：样式系统
 
 ### 当前页面与数据执行方式

@@ -17,7 +17,6 @@
 | --- | --- | --- |
 | `critters` | 上游转向 `beasties`，但它属于 Next/OpenNext 支撑依赖 | 单独验证 `beasties` 替换对 `pnpm build` / `pnpm build:cf` 的影响 |
 | `@types/node` | 项目 runtime 支持范围是 `>=20.19 <23`，Node 25 types 不匹配 | 只有当 runtime baseline 扩到 Node 25 时再升 |
-| `typescript` | 6.x 是 compiler major | 单独跑 type/build/Cloudflare build lane |
 
 ## 这次升级经验
 
@@ -88,6 +87,30 @@ ESLint 10 不能只改版本号。当前仓库采用：
 - `pnpm type-check` / `pnpm type-check:tests` 通过
 - 受影响的 SEO、Resend、Airtable 错误处理测试通过
 - `pnpm deps:check` 不再出现 ESLint 10 hold 项
+
+### TypeScript 6
+
+`typescript` 6 迁移不是只改版本号。当前仓库采用：
+
+- `typescript 6.0.3`
+- 移除 `tsconfig.json` 里的 `baseUrl`，保留显式 `paths` alias
+- 移除旧的 `ignoreDeprecations: 5.0`，不再靠静默配置掩盖编译器弃用项
+- 补齐 `tsconfig.typecheck-source.json`，让已有 `pnpm type-check:source` 脚本可执行
+
+这次升级的关键点：
+
+- TypeScript 6 会把 `baseUrl` 作为弃用错误处理；当前项目没有依赖裸的 `src/...`、`components/...` 等 baseUrl import，因此可以直接移除。
+- `@/*`、`@messages/*`、`@content/*` 继续通过 `paths` 工作。
+- 新版 DOM 类型要求 `IntersectionObserver.scrollMargin`，测试 mock 需要补齐这个只读字段。
+
+验证重点：
+
+- `pnpm type-check:source` 通过
+- `pnpm type-check:tests` 通过
+- `pnpm type-check` 通过
+- 与 Turnstile / IntersectionObserver 相关测试通过
+- `pnpm build` 和 `pnpm build:cf` 都要跑，因为 Next 文档明确生产构建会执行类型检查
+- `pnpm deps:check` 不再出现 TypeScript hold 项
 
 ### tech check
 
