@@ -1,5 +1,5 @@
 CSP inline script runtime proof
-generatedAt=2026-04-29T03:15:43.624Z
+generatedAt=2026-04-29T03:37:08.977Z
 baseUrl=http://localhost:3210
 
 route=http://localhost:3210/en

@@ -50,7 +50,9 @@ function extractNonceAttr(attrs: string): string | null {
 }
 
 function extractScriptTypeAttr(attrs: string): string | null {
-  const match = attrs.match(/(?:^|\s)type=(?:"([^"]+)"|'([^']+)'|([^\s>]+))/i);
+  const match = attrs.match(
+    /(?:^|\s)type\s*=\s*(?:"([^"]+)"|'([^']+)'|([^\s>]+))/i,
+  );
   return (match?.[1] ?? match?.[2] ?? match?.[3] ?? null)?.toLowerCase();
 }
 
@@ -228,7 +230,7 @@ function classifyInlineScript(script: InlineScript): string {
   const attrs = script.attrs.toLowerCase();
   const body = script.body.trim();
 
-  if (attrs.includes("application/ld+json")) {
+  if (extractScriptTypeAttr(script.attrs) === "application/ld+json") {
     return "project-json-ld";
   }
 
@@ -284,7 +286,10 @@ function summarizeClassifications(
   }
 
   return Array.from(counts.entries())
-    .map(([category, count]) => ({ category, count }))
+    .map(
+      ([category, count]) =>
+        ({ category, count }) satisfies ScriptClassification,
+    )
     .sort((a, b) =>
       a.category === b.category ? 0 : a.category < b.category ? -1 : 1,
     );
@@ -301,12 +306,15 @@ function collectSamples(scripts: InlineScript[]): ScriptSample[] {
   }
 
   return Array.from(firstByCategory.entries())
-    .map(([category, script]) => ({
-      category,
-      attrs: script.attrs || "<none>",
-      sha256: createScriptFingerprint(script.body),
-      preview: createPreview(script.body),
-    }))
+    .map(
+      ([category, script]) =>
+        ({
+          category,
+          attrs: script.attrs || "<none>",
+          sha256: createScriptFingerprint(script.body),
+          preview: createPreview(script.body),
+        }) satisfies ScriptSample,
+    )
     .sort((a, b) =>
       a.category === b.category ? 0 : a.category < b.category ? -1 : 1,
     );
