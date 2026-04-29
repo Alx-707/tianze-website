@@ -69,12 +69,14 @@ const SINGLE_SITE_STATIC_SITEMAP_PAGE_CONFIG_BY_ROUTE = {
   oem: { changeFrequency: "monthly", priority: 0.8 },
 } as const satisfies Record<PageType, SingleSiteSitemapPageConfig>;
 
-export const SINGLE_SITE_SITEMAP_PAGE_CONFIG = {
+export const SINGLE_SITE_SITEMAP_PAGE_CONFIG: Readonly<
+  Record<string, SingleSiteSitemapPageConfig>
+> = {
   ...fromRouteConfig<SingleSiteSitemapPageConfig>(
     SINGLE_SITE_STATIC_SITEMAP_PAGE_CONFIG_BY_ROUTE,
   ),
   productMarket: { changeFrequency: "weekly", priority: 0.8 },
-} as const satisfies Record<string, SingleSiteSitemapPageConfig>;
+} as const;
 
 export const SINGLE_SITE_SITEMAP_DEFAULT_CONFIG = {
   changeFrequency: "weekly",
@@ -110,13 +112,7 @@ export const SINGLE_SITE_ROBOTS_DISALLOW_PATHS = [
 export function getSingleSiteSitemapPageConfig(
   path: string,
 ): SingleSiteSitemapPageConfig {
-  if (
-    Object.prototype.hasOwnProperty.call(SINGLE_SITE_SITEMAP_PAGE_CONFIG, path)
-  ) {
-    return SINGLE_SITE_SITEMAP_PAGE_CONFIG[
-      path as keyof typeof SINGLE_SITE_SITEMAP_PAGE_CONFIG
-    ];
-  }
-
-  return SINGLE_SITE_SITEMAP_DEFAULT_CONFIG;
+  return (
+    SINGLE_SITE_SITEMAP_PAGE_CONFIG[path] ?? SINGLE_SITE_SITEMAP_DEFAULT_CONFIG
+  );
 }

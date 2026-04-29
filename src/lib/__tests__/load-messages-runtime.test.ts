@@ -1,5 +1,20 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+interface CacheOptions {
+  revalidate?: number | false;
+  tags?: string[];
+}
+
+type UnstableCacheMock = (
+  loader: () => Promise<unknown>,
+  keyParts?: string[],
+  options?: CacheOptions,
+) => () => Promise<unknown>;
+
+function createUnstableCacheMock() {
+  return vi.fn<UnstableCacheMock>((loader) => loader);
+}
+
 afterEach(() => {
   vi.resetModules();
   vi.clearAllMocks();
@@ -9,7 +24,7 @@ afterEach(() => {
 
 describe("load-messages runtime gating", () => {
   it("bypasses cache in CI mode", async () => {
-    const unstableCache = vi.fn((loader: () => Promise<unknown>) => loader);
+    const unstableCache = createUnstableCacheMock();
 
     vi.doMock("next/cache", () => ({
       unstable_cache: unstableCache,
@@ -30,7 +45,7 @@ describe("load-messages runtime gating", () => {
   });
 
   it("bypasses cache during production build phase", async () => {
-    const unstableCache = vi.fn((loader: () => Promise<unknown>) => loader);
+    const unstableCache = createUnstableCacheMock();
 
     vi.doMock("next/cache", () => ({
       unstable_cache: unstableCache,
@@ -51,7 +66,7 @@ describe("load-messages runtime gating", () => {
   });
 
   it("uses cache outside CI and production build", async () => {
-    const unstableCache = vi.fn((loader: () => Promise<unknown>) => loader);
+    const unstableCache = createUnstableCacheMock();
 
     vi.doMock("next/cache", () => ({
       unstable_cache: unstableCache,
@@ -75,7 +90,7 @@ describe("load-messages runtime gating", () => {
   });
 
   it("passes deferred locale cache tags to unstable_cache", async () => {
-    const unstableCache = vi.fn((loader: () => Promise<unknown>) => loader);
+    const unstableCache = createUnstableCacheMock();
 
     vi.doMock("next/cache", () => ({
       unstable_cache: unstableCache,
@@ -99,7 +114,7 @@ describe("load-messages runtime gating", () => {
   });
 
   it("bypasses unstable_cache on Cloudflare runtime", async () => {
-    const unstableCache = vi.fn((loader: () => Promise<unknown>) => loader);
+    const unstableCache = createUnstableCacheMock();
 
     vi.doMock("next/cache", () => ({
       unstable_cache: unstableCache,
