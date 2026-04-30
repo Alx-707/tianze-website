@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { getAllMarketSlugs } from "@/constants/product-catalog";
+import {
+  getAllMarketSlugs,
+  getFamiliesForMarket,
+} from "@/constants/product-catalog";
 import {
   getMarketSpecEntries,
   getMarketSpecsBySlug,
@@ -22,6 +25,19 @@ describe("market spec registry", () => {
     for (const [, specs] of entries) {
       expect(specs.families.length).toBeGreaterThan(0);
       expect(Object.keys(specs.technical).length).toBeGreaterThan(0);
+    }
+  });
+
+  it("keeps catalog family slugs aligned with market spec families per market", () => {
+    for (const marketSlug of getAllMarketSlugs()) {
+      const catalogFamilySlugs = getFamiliesForMarket(marketSlug)
+        .map((family) => family.slug)
+        .sort();
+      const specFamilySlugs = (getMarketSpecsBySlug(marketSlug)?.families ?? [])
+        .map((family) => family.slug)
+        .sort();
+
+      expect(specFamilySlugs, marketSlug).toEqual(catalogFamilySlugs);
     }
   });
 
