@@ -86,37 +86,55 @@ function stripCssComments(source: string) {
   return source.replaceAll(/\/\*[\s\S]*?\*\//g, "");
 }
 
-function extractHighContrastBlock(css: string) {
+function extractHighContrastBlocks(css: string) {
   const marker = "@media (prefers-contrast: high)";
-  const startIndex = css.indexOf(marker);
+  const blocks: string[] = [];
+  let searchStartIndex = 0;
 
-  if (startIndex === -1) {
-    return null;
-  }
+  while (searchStartIndex < css.length) {
+    const startIndex = css.indexOf(marker, searchStartIndex);
 
-  const blockStart = css.indexOf("{", startIndex);
+    if (startIndex === -1) {
+      break;
+    }
 
-  if (blockStart === -1) {
-    return null;
-  }
+    const blockStart = css.indexOf("{", startIndex);
 
-  let depth = 0;
+    if (blockStart === -1) {
+      break;
+    }
 
-  for (let index = blockStart; index < css.length; index += 1) {
-    const character = css[index];
+    let depth = 0;
 
-    if (character === "{") {
-      depth += 1;
-    } else if (character === "}") {
-      depth -= 1;
+    for (let index = blockStart; index < css.length; index += 1) {
+      const character = css[index];
 
-      if (depth === 0) {
-        return css.slice(startIndex, index + 1);
+      if (character === "{") {
+        depth += 1;
+      } else if (character === "}") {
+        depth -= 1;
+
+        if (depth === 0) {
+          blocks.push(css.slice(startIndex, index + 1));
+          searchStartIndex = index + 1;
+          break;
+        }
       }
     }
   }
 
-  return null;
+  return blocks;
+}
+
+function findHighContrastOverrideBlock(blocks: readonly string[]) {
+  return (
+    blocks.find(
+      (block) =>
+        block.includes("--ring") ||
+        block.includes("*:focus-visible") ||
+        block.includes('button, [role="button"]'),
+    ) ?? null
+  );
 }
 
 function readCssVariable(css: string, tokenName: string) {
@@ -216,16 +234,25 @@ describe("design token contract", () => {
 
   it("keeps high contrast overrides off old brand values", () => {
     const css = stripCssComments(readRepoFile(GLOBALS_CSS));
-    const highContrastBlock = extractHighContrastBlock(css);
+    const highContrastBlocks = extractHighContrastBlocks(css);
+    const highContrastOverrideBlock =
+      findHighContrastOverrideBlock(highContrastBlocks);
 
     expect(
-      highContrastBlock,
-      `${GLOBALS_CSS} should define a @media (prefers-contrast: high) override block`,
+      highContrastBlocks.length,
+      `${GLOBALS_CSS} should define at least one @media (prefers-contrast: high) block`,
+    ).toBeGreaterThan(0);
+
+    expect(
+      highContrastOverrideBlock,
+      `${GLOBALS_CSS} should include a high contrast override block for --ring or focus-visible states`,
     ).toBeTruthy();
 
-    expect(
-      highContrastBlock?.match(BANNED_INLINE_BRAND_PATTERN),
-      `${GLOBALS_CSS} high contrast overrides should not keep old brand hex or rgba values`,
-    ).toBeNull();
+    for (const block of highContrastBlocks) {
+      expect(
+        block.match(BANNED_INLINE_BRAND_PATTERN),
+        `${GLOBALS_CSS} high contrast blocks should not keep old brand hex or rgba values`,
+      ).toBeNull();
+    }
   });
 });
