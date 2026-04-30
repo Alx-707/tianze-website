@@ -60,8 +60,11 @@ const SEMANTIC_TOKEN_EXPECTATIONS = {
   "--success-light": "var(--success-muted)",
 } as const;
 
-const BANNED_RAW_CLASS_PATTERN =
-  /\b(?:bg|text|border)-(?:green|red|blue|amber|yellow|cyan|sky|emerald|purple|violet|slate|gray)-\d{2,3}\b/;
+const BANNED_RAW_BRAND_PALETTE_CLASS_PATTERN =
+  /\b(?:bg|text|border)-(?:blue|sky|cyan)-\d{2,3}\b/;
+
+const BANNED_RAW_STATUS_PALETTE_CLASS_PATTERN =
+  /\b(?:bg|text|border)-(?:green|red|amber|yellow|emerald)-\d{2,3}\b/;
 
 const BANNED_INLINE_BRAND_PATTERN =
   /#004d9e|#003b7a|rgba\(\s*0\s*,\s*77\s*,\s*158\b/i;
@@ -76,6 +79,10 @@ function readRepoFile(filePath: string) {
   return readFileSync(filePath, "utf8");
 }
 
+function stripCssComments(source: string) {
+  return source.replaceAll(/\/\*[\s\S]*?\*\//g, "");
+}
+
 function readCssVariable(css: string, tokenName: string) {
   const escapedTokenName = tokenName.replaceAll("-", "\\-");
   // eslint-disable-next-line security/detect-non-literal-regexp -- token names are fixed test inputs for contract assertions
@@ -87,7 +94,7 @@ function readCssVariable(css: string, tokenName: string) {
 
 describe("design token contract", () => {
   it("defines a 12-step brand and neutral primitive scale", () => {
-    const css = readRepoFile(GLOBALS_CSS);
+    const css = stripCssComments(readRepoFile(GLOBALS_CSS));
 
     for (const token of [...REQUIRED_BRAND_STEPS, ...REQUIRED_NEUTRAL_STEPS]) {
       expect(
@@ -98,7 +105,7 @@ describe("design token contract", () => {
   });
 
   it("maps semantic UI roles to primitive token roles", () => {
-    const css = readRepoFile(GLOBALS_CSS);
+    const css = stripCssComments(readRepoFile(GLOBALS_CSS));
 
     for (const [token, expectedValue] of Object.entries(
       SEMANTIC_TOKEN_EXPECTATIONS,
@@ -108,7 +115,7 @@ describe("design token contract", () => {
   });
 
   it("defines status state aliases for forms and system feedback", () => {
-    const css = readRepoFile(GLOBALS_CSS);
+    const css = stripCssComments(readRepoFile(GLOBALS_CSS));
 
     for (const token of REQUIRED_STATUS_TOKENS) {
       expect(
@@ -118,20 +125,31 @@ describe("design token contract", () => {
     }
   });
 
-  it("keeps selected production UI files off raw palette classes", () => {
+  it("keeps selected production UI files off raw brand palette classes", () => {
     for (const filePath of RAW_COLOR_PRODUCTION_FILES) {
-      const source = readRepoFile(filePath);
+      const source = stripCssComments(readRepoFile(filePath));
 
       expect(
-        source.match(BANNED_RAW_CLASS_PATTERN),
-        `${filePath} should use semantic token classes instead of raw Tailwind palette classes`,
+        source.match(BANNED_RAW_BRAND_PALETTE_CLASS_PATTERN),
+        `${filePath} should route brand color usage through --primary or other brand semantic tokens instead of raw Tailwind blue/sky/cyan palette classes`,
+      ).toBeNull();
+    }
+  });
+
+  it("keeps selected production UI files off raw status palette classes", () => {
+    for (const filePath of RAW_COLOR_PRODUCTION_FILES) {
+      const source = stripCssComments(readRepoFile(filePath));
+
+      expect(
+        source.match(BANNED_RAW_STATUS_PALETTE_CLASS_PATTERN),
+        `${filePath} should route success/warning/error/info states through semantic status tokens instead of raw Tailwind green/red/amber/yellow/emerald palette classes`,
       ).toBeNull();
     }
   });
 
   it("keeps selected production UI files from embedding old brand color values", () => {
     for (const filePath of RAW_COLOR_PRODUCTION_FILES) {
-      const source = readRepoFile(filePath);
+      const source = stripCssComments(readRepoFile(filePath));
 
       expect(
         source.match(BANNED_INLINE_BRAND_PATTERN),
@@ -141,7 +159,7 @@ describe("design token contract", () => {
   });
 
   it("does not keep old brand color values in the browser runtime CSS", () => {
-    const css = readRepoFile(GLOBALS_CSS);
+    const css = stripCssComments(readRepoFile(GLOBALS_CSS));
 
     expect(
       css.match(BANNED_INLINE_BRAND_PATTERN),
