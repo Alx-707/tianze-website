@@ -1,5 +1,3 @@
-import { STATIC_THEME_COLORS } from "@/config/static-theme-colors";
-
 /**
  * Footer 视觉 token：独立文件，避免 footer-links.ts 体积超过 max-lines 限制。
  */
@@ -49,12 +47,12 @@ export const FOOTER_STYLE_TOKENS = {
     },
     selection: {
       dark: {
-        background: STATIC_THEME_COLORS.footerSelectionBackground,
-        foreground: STATIC_THEME_COLORS.footerSelectionForeground,
+        background: "var(--selection-background)",
+        foreground: "var(--selection-foreground)",
       },
       light: {
-        background: STATIC_THEME_COLORS.footerSelectionForeground,
-        foreground: STATIC_THEME_COLORS.footerSelectionBackground,
+        background: "var(--selection-background)",
+        foreground: "var(--selection-foreground)",
       },
     },
   },

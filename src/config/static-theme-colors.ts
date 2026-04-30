@@ -19,6 +19,4 @@ export const STATIC_THEME_COLORS = {
   contentBackground: "#f3f6f8",
   headerText: "#fbfcfd",
   border: "#dce3e8",
-  footerSelectionBackground: "#ededed",
-  footerSelectionForeground: "#1a1a1a",
 } as const;

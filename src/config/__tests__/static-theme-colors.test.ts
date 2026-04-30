@@ -1,9 +1,35 @@
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync, statSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { STATIC_THEME_COLORS } from "../static-theme-colors";
+import { STATIC_THEME_COLORS } from "@/config/static-theme-colors";
 
 const HEX_COLOR_PATTERN = /^#[0-9a-f]{6}$/i;
+const STATIC_THEME_IMPORT_PATTERN =
+  /from\s+["'](?:@\/config\/static-theme-colors|\.\.\/static-theme-colors)["']/;
 const BRIDGE_SOURCE = readFileSync("src/config/static-theme-colors.ts", "utf8");
+const BROWSER_UI_SCAN_ROOTS = [
+  "src/components",
+  "src/app",
+  "src/styles",
+] as const;
+const EXPLICIT_BROWSER_UI_FILES = [
+  "src/config/footer-style-tokens.ts",
+  "src/config/footer-links.ts",
+] as const;
+
+function collectFiles(directoryPath: string): string[] {
+  // eslint-disable-next-line security/detect-non-literal-fs-filename -- test-only boundary scan walks approved repo directories to catch browser UI imports
+  return readdirSync(directoryPath).flatMap((entry) => {
+    const entryPath = join(directoryPath, entry);
+
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- test-only boundary scan inspects discovered repo paths under approved directories
+    if (statSync(entryPath).isDirectory()) {
+      return collectFiles(entryPath);
+    }
+
+    return [entryPath];
+  });
+}
 
 describe("static theme colors", () => {
   it("exposes email-safe sRGB values for non-CSS surfaces", () => {
@@ -12,8 +38,6 @@ describe("static theme colors", () => {
       "border",
       "contentBackground",
       "error",
-      "footerSelectionBackground",
-      "footerSelectionForeground",
       "headerText",
       "muted",
       "primary",
@@ -37,5 +61,28 @@ describe("static theme colors", () => {
     expect(BRIDGE_SOURCE).toContain("sRGB bridge for src/app/globals.css");
     expect(BRIDGE_SOURCE).toContain("non-CSS surfaces only");
     expect(BRIDGE_SOURCE).toContain("not the brand truth source");
+  });
+
+  it("stays out of browser ui and browser-ui config surfaces", () => {
+    const browserUiFiles = [
+      ...BROWSER_UI_SCAN_ROOTS.flatMap((directoryPath) =>
+        collectFiles(directoryPath),
+      ),
+      ...EXPLICIT_BROWSER_UI_FILES,
+    ].filter(
+      (filePath, index, allFiles) =>
+        allFiles.indexOf(filePath) === index &&
+        filePath !== "src/config/static-theme-colors.ts" &&
+        filePath !== "src/config/__tests__/static-theme-colors.test.ts" &&
+        !filePath.startsWith("src/emails/") &&
+        /\.(ts|tsx|css)$/.test(filePath),
+    );
+
+    const offenders = browserUiFiles.filter((filePath) => {
+      // eslint-disable-next-line security/detect-non-literal-fs-filename -- test-only boundary scan reads approved repo source files to enforce non-CSS bridge isolation
+      return STATIC_THEME_IMPORT_PATTERN.test(readFileSync(filePath, "utf8"));
+    });
+
+    expect(offenders).toEqual([]);
   });
 });
