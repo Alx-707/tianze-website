@@ -11,6 +11,7 @@ import {
   CONTACT_FORM_CONFIG,
   type ContactFormFieldDescriptor,
 } from "@/config/contact-form-config";
+import { FORM_FIELD_REQUIRED_CLASS_NAME } from "@/components/forms/form-status-styles";
 
 export { AdditionalFields } from "@/components/forms/fields/additional-fields";
 export { CheckboxFields } from "@/components/forms/fields/checkbox-fields";
@@ -83,12 +84,7 @@ export const FormFields = memo(({ t, isPending }: FormFieldsProps) => {
   const honeypotField = configuredFields.find((field) => field.isHoneypot);
 
   const renderLabelClass = (field: ContactFormFieldDescriptor) =>
-    [
-      "text-sm",
-      field.required
-        ? "after:ml-0.5 after:text-red-500 after:content-['*']"
-        : "",
-    ]
+    ["text-sm", field.required ? FORM_FIELD_REQUIRED_CLASS_NAME : ""]
       .filter(Boolean)
       .join(" ");
 

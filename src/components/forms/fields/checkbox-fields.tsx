@@ -1,4 +1,6 @@
+import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
+import { FORM_FIELD_REQUIRED_CLASS_NAME } from "@/components/forms/form-status-styles";
 
 /**
  * Checkbox fields component - React 19 Native Form Version
@@ -26,7 +28,7 @@ export function CheckboxFields({ t, isPending }: CheckboxFieldsProps) {
           />
           <Label
             htmlFor="acceptPrivacy"
-            className="text-sm after:ml-0.5 after:text-red-500 after:content-['*']"
+            className={cn("text-sm", FORM_FIELD_REQUIRED_CLASS_NAME)}
           >
             {t("acceptPrivacy")}
           </Label>

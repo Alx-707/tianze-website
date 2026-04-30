@@ -11,6 +11,7 @@ import {
   StatusMessage,
 } from "@/components/forms/contact-form-feedback";
 import { FormFields } from "@/components/forms/contact-form-fields";
+import { FORM_STATUS_CLASS_NAMES } from "@/components/forms/form-status-styles";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
@@ -101,7 +102,10 @@ export function ContactFormContainer() {
         />
 
         {isRateLimited && (
-          <p className="text-center text-sm text-amber-600" aria-live="polite">
+          <p
+            className={`text-center text-sm ${FORM_STATUS_CLASS_NAMES.warningText}`}
+            aria-live="polite"
+          >
             {t("rateLimitMessage")}
           </p>
         )}
