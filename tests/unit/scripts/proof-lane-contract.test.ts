@@ -94,4 +94,16 @@ describe("proof lane contract", () => {
     expect(releaseProofRunbook).toContain("test:e2e:post-deploy");
     expect(releaseProofRunbook).toContain("manual launch gate");
   });
+
+  it("keeps review:mutation:critical pointed at an existing script", () => {
+    const packageJson = JSON.parse(readRepoFile("package.json")) as {
+      scripts: Record<string, string>;
+    };
+    const command = packageJson.scripts["review:mutation:critical"];
+
+    expect(command).toBe("node scripts/review-mutation-critical.js");
+    expect(() =>
+      readRepoFile("scripts/review-mutation-critical.js"),
+    ).not.toThrow();
+  });
 });
