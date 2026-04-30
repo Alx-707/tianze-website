@@ -239,6 +239,10 @@ class QualityGate {
             "**/*.types.ts", // 另一种类型文件命名约定
             "**/*.test.*",
             "**/*.spec.*",
+            "**/*.stories.ts",
+            "**/*.stories.tsx",
+            "**/*.stories.js",
+            "**/*.stories.jsx",
             "**/__tests__/**",
             "src/test/**",
             "src/testing/**",
@@ -714,13 +718,13 @@ class QualityGate {
       file.match(/\.(js|jsx|ts|tsx)$/),
     );
     const excludedFiles = changedFilesWithCode.filter((file) =>
-      excludeList.includes(file),
+      this.shouldExcludeFromDiffCoverage(file),
     );
     if (excludedFiles.length > 0) {
       log(`⏭️  增量覆盖率排除文件: ${excludedFiles.join(", ")}`);
     }
     const changedFiles = changedFilesWithCode.filter(
-      (file) => !excludeList.includes(file),
+      (file) => !this.shouldExcludeFromDiffCoverage(file),
     );
     if (changedFiles.length === 0) return null;
 

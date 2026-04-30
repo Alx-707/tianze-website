@@ -138,6 +138,14 @@ describe("QualityGate Diff Coverage", () => {
   });
 
   describe("calculateDiffCoverage with synthetic data", () => {
+    it("excludes Storybook story files from diff coverage", () => {
+      expect(
+        gate.shouldExcludeFromDiffCoverage(
+          "src/components/ui/button.stories.tsx",
+        ),
+      ).toBe(true);
+    });
+
     it("skips type-only file (empty statementMap) without counting in denominator", () => {
       const changedLinesByFile = new Map([
         ["src/types/foo.ts", new Set([1, 2, 3])],
