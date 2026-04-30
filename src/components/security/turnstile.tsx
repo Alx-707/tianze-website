@@ -80,7 +80,7 @@ export function TurnstileWidget({
         role="status"
         aria-live="polite"
       >
-        <div className="rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-200">
+        <div className="rounded-md border border-[var(--warning-border)] bg-[var(--warning-muted)] p-3 text-sm text-[var(--warning-foreground)]">
           <strong>Dev Mode:</strong> Turnstile verification bypassed
         </div>
       </div>

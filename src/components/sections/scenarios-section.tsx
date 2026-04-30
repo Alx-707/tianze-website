@@ -33,8 +33,8 @@ export async function ScenariosSection() {
               key={key}
               className="group overflow-hidden rounded-lg bg-card shadow-card transition-[box-shadow,transform] duration-150 hover:-translate-y-0.5 hover:shadow-card-hover"
             >
-              <div className="relative h-40 overflow-hidden bg-[radial-gradient(circle_at_top_left,_rgba(34,197,94,0.22),_transparent_45%),linear-gradient(135deg,_rgba(15,23,42,0.95),_rgba(30,41,59,0.85))] text-white">
-                <div className="absolute inset-0 opacity-30 [background-image:linear-gradient(rgba(255,255,255,0.12)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.12)_1px,transparent_1px)] [background-size:22px_22px]" />
+              <div className="tianze-scenario-surface relative h-40 overflow-hidden">
+                <div className="tianze-scenario-grid absolute inset-0 opacity-30" />
                 <div className="relative flex h-full flex-col justify-between p-5 transition-transform duration-300 group-hover:scale-[1.02]">
                   <div className="flex items-center justify-between">
                     <div className="inline-flex items-center gap-2 rounded-full bg-white/12 px-3 py-1 text-[11px] uppercase tracking-[0.2em] text-white/80">

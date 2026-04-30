@@ -81,7 +81,10 @@ describe("Button Component", () => {
       render(<Button variant="destructive">Destructive</Button>);
 
       const button = screen.getByRole("button");
-      expect(button).toHaveClass("bg-destructive", "text-white");
+      expect(button).toHaveClass(
+        "bg-destructive",
+        "text-destructive-foreground",
+      );
     });
 
     it("applies outline variant styles", () => {
@@ -99,7 +102,12 @@ describe("Button Component", () => {
       render(<Button variant="secondary">Secondary</Button>);
 
       const button = screen.getByRole("button");
-      expect(button).toHaveClass("bg-white", "text-foreground");
+      expect(button).toHaveClass(
+        "bg-secondary",
+        "text-secondary-foreground",
+        "border",
+        "border-border",
+      );
     });
 
     it("applies ghost variant styles", () => {
@@ -311,7 +319,7 @@ describe("Button Component", () => {
       );
 
       const button = screen.getByRole("button");
-      expect(button).toHaveClass("bg-white"); // secondary variant
+      expect(button).toHaveClass("bg-secondary"); // secondary variant
       expect(button).toHaveClass("h-8"); // sm size
       expect(button).toHaveClass("custom-spacing"); // custom class
       expect(button).toBeDisabled(); // disabled state
