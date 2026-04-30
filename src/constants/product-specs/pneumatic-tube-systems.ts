@@ -1,6 +1,7 @@
 import type { MarketSpecs } from "@/constants/product-specs/types";
 
 export const PNEUMATIC_SPECS = {
+  updatedAt: "2026-04-26T00:00:00Z",
   technical: {
     material: "PETG (Food-grade available)",
     transparency: "Crystal clear for visual monitoring",

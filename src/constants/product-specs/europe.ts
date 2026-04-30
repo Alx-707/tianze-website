@@ -1,6 +1,7 @@
 import type { MarketSpecs } from "@/constants/product-specs/types";
 
 export const EUROPE_SPECS = {
+  updatedAt: "2026-04-26T00:00:00Z",
   technical: {
     material: "100% Virgin PVC (UPVC)",
     surface: "Smooth interior, reduces wire pulling friction",

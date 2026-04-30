@@ -10,6 +10,7 @@ import {
   SINGLE_SITE_STATIC_PAGE_LASTMOD,
 } from "@/config/single-site-seo";
 import { getAllMarketSlugs } from "@/constants/product-catalog";
+import { getMarketSpecsBySlug } from "@/constants/product-specs/market-spec-registry";
 
 describe("single-site-seo", () => {
   const RETIRED_BENDING_MACHINES_PATH = "/capabilities/bending-machines";
@@ -61,9 +62,12 @@ describe("single-site-seo", () => {
       "2026-04-26T00:00:00Z",
     );
     for (const marketSlug of getAllMarketSlugs()) {
+      const specs = getMarketSpecsBySlug(marketSlug);
+
+      expect(specs, `${marketSlug} should have market specs`).toBeDefined();
       expect(
         SINGLE_SITE_STATIC_PAGE_LASTMOD[getProductMarketPath(marketSlug)],
-      ).toBe("2026-04-26T00:00:00Z");
+      ).toBe(specs?.updatedAt);
     }
     expect(SINGLE_SITE_ROBOTS_DISALLOW_PATHS).toEqual([
       "/api/",

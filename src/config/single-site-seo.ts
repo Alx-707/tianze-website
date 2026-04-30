@@ -1,6 +1,7 @@
 import type { PageType } from "@/config/paths/types";
 import { getCanonicalPath, getProductMarketPath } from "@/config/paths/utils";
 import { getAllMarketSlugs } from "@/constants/product-catalog";
+import { getMarketSpecsBySlug } from "@/constants/product-specs/market-spec-registry";
 
 export type SingleSiteSitemapChangeFrequency =
   | "always"
@@ -94,7 +95,8 @@ const SINGLE_SITE_PRODUCT_MARKET_LASTMOD: Record<string, string> =
   Object.fromEntries(
     getAllMarketSlugs().map((marketSlug) => [
       getProductMarketPath(marketSlug),
-      SINGLE_SITE_STATIC_LASTMOD_ISO,
+      getMarketSpecsBySlug(marketSlug)?.updatedAt ??
+        SINGLE_SITE_STATIC_LASTMOD_ISO,
     ]),
   );
 
