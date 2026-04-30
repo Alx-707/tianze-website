@@ -34,6 +34,10 @@ function importsStaticThemeColors(source: string) {
   return Array.from(source.matchAll(IMPORT_FROM_PATTERN)).some((match) => {
     const specifier = match[1];
 
+    if (!specifier) {
+      return false;
+    }
+
     return (
       specifier === "@/config/static-theme-colors" ||
       specifier === "@/config/static-theme-colors.ts" ||
