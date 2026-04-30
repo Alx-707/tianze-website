@@ -98,6 +98,7 @@ Current implementation tokens in `src/app/globals.css` are the production baseli
 ## 2. Colors
 
 The current palette is a restrained steel-blue and neutral system. It is suitable as a baseline, but should be tested against manufacturing photography and product pages before being treated as final.
+The stable design decision is the role-based color architecture, not the exact current blue value. Current color values are provisional and may change after pilot-page validation.
 
 ### Primary
 

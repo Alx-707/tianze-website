@@ -4,6 +4,8 @@
 >
 > **Authority**: `src/app/globals.css` is always the production truth.
 > This document is a reference spec. If any value here conflicts with globals.css, globals.css wins.
+>
+> Current contract note: `docs/impeccable/system/COLOR-SYSTEM.md` is the current color-system contract. This document remains useful as historical design-token background and implementation detail, but it must not override `src/app/globals.css` or `COLOR-SYSTEM.md`.
 
 ---
 

@@ -105,6 +105,7 @@ Before editing, use this routing table and read only the matching files under `.
 | i18n, translations, locale routing, message loading | `i18n.md` |
 | API routes, forms, validation, rate limits, CSP, sensitive server code | `security.md` |
 | UI components, Tailwind, shadcn/ui, `next/image`, `next/font` | `ui.md` |
+| Design tokens, brand color, theme, visual system, color migration | `ui.md` + `DESIGN.md` + `docs/design-truth.md` + `docs/impeccable/system/COLOR-SYSTEM.md` |
 | MDX, page content, content ownership, frontmatter | `content.md` |
 | Tests, mocks, Vitest, Playwright, coverage gates | `testing.md` |
 | JSON-LD, schema.org, structured data builders | `structured-data.md` |

@@ -39,6 +39,7 @@ Tianze 的设计方向是：
 
 ### 色彩
 
+- Current truth: Tianze uses a replaceable role-based color system. The current steel-blue candidate is not final brand identity. Agents should preserve the role system and avoid writing raw color values into production components.
 - 主方向：Industrial Steel Blue
 - 背景：偏干净、轻工业感、中性底色
 - 强调色使用要克制，不做大片花哨渐变
@@ -77,6 +78,7 @@ Tianze 的设计方向是：
 当前设计真相主要来自：
 
 - `src/app/globals.css`
+- `docs/impeccable/system/COLOR-SYSTEM.md`
 - `docs/impeccable/system/TIANZE-DESIGN-TOKENS.md`
 - `docs/impeccable/system/MOTION-PRINCIPLES.md`
 
