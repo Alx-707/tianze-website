@@ -61,10 +61,13 @@ const SEMANTIC_TOKEN_EXPECTATIONS = {
 } as const;
 
 const BANNED_RAW_BRAND_PALETTE_CLASS_PATTERN =
-  /\b(?:bg|text|border)-(?:blue|sky|cyan)-\d{2,3}\b/;
+  /\b(?:bg|text|border)-(?:sky|cyan)-\d{2,3}\b/;
 
 const BANNED_RAW_STATUS_PALETTE_CLASS_PATTERN =
   /\b(?:bg|text|border)-(?:green|red|amber|yellow|emerald)-\d{2,3}\b/;
+
+const BANNED_RAW_INFO_PALETTE_CLASS_PATTERN =
+  /\b(?:bg|text|border)-(?:blue|sky|cyan)-\d{2,3}\b/;
 
 const BANNED_INLINE_BRAND_PATTERN =
   /#004d9e|#003b7a|rgba\(\s*0\s*,\s*77\s*,\s*158\b/i;
@@ -81,6 +84,39 @@ function readRepoFile(filePath: string) {
 
 function stripCssComments(source: string) {
   return source.replaceAll(/\/\*[\s\S]*?\*\//g, "");
+}
+
+function extractHighContrastBlock(css: string) {
+  const marker = "@media (prefers-contrast: high)";
+  const startIndex = css.indexOf(marker);
+
+  if (startIndex === -1) {
+    return null;
+  }
+
+  const blockStart = css.indexOf("{", startIndex);
+
+  if (blockStart === -1) {
+    return null;
+  }
+
+  let depth = 0;
+
+  for (let index = blockStart; index < css.length; index += 1) {
+    const character = css[index];
+
+    if (character === "{") {
+      depth += 1;
+    } else if (character === "}") {
+      depth -= 1;
+
+      if (depth === 0) {
+        return css.slice(startIndex, index + 1);
+      }
+    }
+  }
+
+  return null;
 }
 
 function readCssVariable(css: string, tokenName: string) {
@@ -131,7 +167,7 @@ describe("design token contract", () => {
 
       expect(
         source.match(BANNED_RAW_BRAND_PALETTE_CLASS_PATTERN),
-        `${filePath} should route brand color usage through --primary or other brand semantic tokens instead of raw Tailwind blue/sky/cyan palette classes`,
+        `${filePath} should route brand color usage through --primary or other brand semantic tokens instead of raw Tailwind sky/cyan palette classes`,
       ).toBeNull();
     }
   });
@@ -142,7 +178,18 @@ describe("design token contract", () => {
 
       expect(
         source.match(BANNED_RAW_STATUS_PALETTE_CLASS_PATTERN),
-        `${filePath} should route success/warning/error/info states through semantic status tokens instead of raw Tailwind green/red/amber/yellow/emerald palette classes`,
+        `${filePath} should route success/warning/error states through semantic status tokens instead of raw Tailwind green/red/amber/yellow/emerald palette classes`,
+      ).toBeNull();
+    }
+  });
+
+  it("keeps selected production UI files off raw info palette classes", () => {
+    for (const filePath of RAW_COLOR_PRODUCTION_FILES) {
+      const source = stripCssComments(readRepoFile(filePath));
+
+      expect(
+        source.match(BANNED_RAW_INFO_PALETTE_CLASS_PATTERN),
+        `${filePath} should route info or submitting states through --info-* semantic tokens instead of raw Tailwind blue/sky/cyan palette classes`,
       ).toBeNull();
     }
   });
@@ -164,6 +211,21 @@ describe("design token contract", () => {
     expect(
       css.match(BANNED_INLINE_BRAND_PATTERN),
       `${GLOBALS_CSS} should not keep old brand hex or rgba values, including high-contrast overrides`,
+    ).toBeNull();
+  });
+
+  it("keeps high contrast overrides off old brand values", () => {
+    const css = stripCssComments(readRepoFile(GLOBALS_CSS));
+    const highContrastBlock = extractHighContrastBlock(css);
+
+    expect(
+      highContrastBlock,
+      `${GLOBALS_CSS} should define a @media (prefers-contrast: high) override block`,
+    ).toBeTruthy();
+
+    expect(
+      highContrastBlock?.match(BANNED_INLINE_BRAND_PATTERN),
+      `${GLOBALS_CSS} high contrast overrides should not keep old brand hex or rgba values`,
     ).toBeNull();
   });
 });
