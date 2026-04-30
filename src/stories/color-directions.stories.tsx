@@ -294,7 +294,9 @@ function SideBySide({ directions }: { directions: readonly ColorDirection[] }) {
               <Badge variant="outline">ASTM D1785</Badge>
             </div>
             <div className="rounded-lg bg-primary p-5 text-center">
-              <h3 className="text-lg font-bold text-white">Ready to start?</h3>
+              <h3 className="text-lg font-bold text-primary-foreground">
+                Ready to start?
+              </h3>
               <div className="mt-3 flex justify-center gap-2">
                 <Button variant="on-dark" size="sm">
                   Get quote
