@@ -1,5 +1,6 @@
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
+import ts from "typescript";
 import { describe, expect, it } from "vitest";
 
 const CORE_UI_COMPONENTS = [
@@ -12,6 +13,7 @@ const CORE_UI_COMPONENTS = [
 ] as const;
 
 const SOURCE_ROOT = "src";
+const STORY_EXPLORATION_ROOT = "src/stories";
 const UI_WRAPPER_ROOT = "src/components/ui";
 const STORY_OR_TEST_FILE_PATTERN =
   /(?:\.stories\.(?:ts|tsx|js|jsx|mdx)|\.(?:test|spec)\.(?:ts|tsx|js|jsx)|\/__tests__\/)/;
@@ -35,6 +37,56 @@ function walkFiles(root: string): string[] {
 
 function normalizePath(filePath: string): string {
   return relative(process.cwd(), filePath).replaceAll("\\", "/");
+}
+
+function isStoryModulePath(importPath: string, importerDirectory: string) {
+  if (importPath === "@/stories" || importPath.startsWith("@/stories/")) {
+    return true;
+  }
+
+  if (!importPath.startsWith(".")) {
+    return false;
+  }
+
+  const normalizedImportPath = join(importerDirectory, importPath).replaceAll(
+    "\\",
+    "/",
+  );
+
+  return (
+    normalizedImportPath === STORY_EXPLORATION_ROOT ||
+    normalizedImportPath.startsWith(`${STORY_EXPLORATION_ROOT}/`)
+  );
+}
+
+function hasStoryImport(source: string, filePath: string): boolean {
+  const sourceFile = ts.createSourceFile(
+    filePath,
+    source,
+    ts.ScriptTarget.Latest,
+    false,
+    ts.ScriptKind.TSX,
+  );
+
+  const importerDirectory = filePath.split("/").slice(0, -1).join("/");
+
+  return sourceFile.statements.some((statement) => {
+    if (
+      !ts.isImportDeclaration(statement) &&
+      !ts.isExportDeclaration(statement)
+    ) {
+      return false;
+    }
+
+    const moduleSpecifier = statement.moduleSpecifier;
+
+    if (!moduleSpecifier || !ts.isStringLiteral(moduleSpecifier)) {
+      return false;
+    }
+
+    const importPath = moduleSpecifier.text;
+    return isStoryModulePath(importPath, importerDirectory);
+  });
 }
 
 describe("component governance", () => {
@@ -69,5 +121,39 @@ describe("component governance", () => {
       });
 
     expect(violations).toEqual([]);
+  });
+
+  it("keeps Storybook exploration out of production imports", () => {
+    const violations = walkFiles(SOURCE_ROOT)
+      .map(normalizePath)
+      .filter((filePath) => SOURCE_FILE_PATTERN.test(filePath))
+      .filter((filePath) => !filePath.startsWith(`${STORY_EXPLORATION_ROOT}/`))
+      .filter((filePath) => !STORY_OR_TEST_FILE_PATTERN.test(filePath))
+      .filter((filePath) => {
+        // eslint-disable-next-line security/detect-non-literal-fs-filename -- architecture test reads source files
+        const source = readFileSync(filePath, "utf8");
+        return hasStoryImport(source, filePath);
+      });
+
+    expect(violations).toEqual([]);
+  });
+
+  it("detects Storybook exploration imports without matching similarly named modules", () => {
+    const importerPath = "src/components/example.ts";
+
+    expect(hasStoryImport('import "@/stories";', importerPath)).toBe(true);
+    expect(
+      hasStoryImport(
+        'export { Example } from "@/stories/example";',
+        importerPath,
+      ),
+    ).toBe(true);
+    expect(hasStoryImport('import "../stories/example";', importerPath)).toBe(
+      true,
+    );
+    expect(hasStoryImport('import "@/stories-utils";', importerPath)).toBe(
+      false,
+    );
+    expect(hasStoryImport("export { Example };", importerPath)).toBe(false);
   });
 });

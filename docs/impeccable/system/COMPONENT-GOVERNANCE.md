@@ -131,6 +131,8 @@ Storybook stories should show practical states:
 
 Do not use Storybook as a separate implementation source. Stories demonstrate real components from `src/components/`; they do not replace production components.
 
+Storybook-only design exploration may live in `src/stories/` when it helps compare visual directions, tokens, or composed examples without adding production runtime code. These files must still import real project components, stay lint/build clean, and must not be treated as the source of production component APIs.
+
 ## Radix boundary
 
 Radix is the low-level primitive layer. Production UI should normally consume project wrappers from `src/components/ui/`.
