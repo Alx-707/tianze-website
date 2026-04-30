@@ -559,11 +559,13 @@ All chroma values are capped at 0.090 to prevent browser gamut-mapping inconsist
 
 ---
 
-## 13. Implementation Checklist
+## 13. Historical implementation checklist
 
-### Before Launch
+Historical note only: the checklist below belonged to the previous steel-blue token baseline. It is not the current launch checklist and must not be used as the active ship gate.
 
-- [ ] All colors use OKLCH values from this spec
+### Historical pre-launch checklist
+
+- [ ] All colors use OKLCH values from the previous baseline spec
 - [ ] Shadows use slate tones (not pure gray)
 - [ ] Border radius follows micro precision (4-8px)
 - [ ] All interactive elements have cursor-pointer
@@ -572,11 +574,11 @@ All chroma values are capped at 0.090 to prevent browser gamut-mapping inconsist
 - [ ] Contrast ratios verified (WCAG AA)
 - [ ] Reduced motion preference respected
 - [ ] No emojis used as icons
-- [ ] Status colors distinct from brand blue
+- [ ] Status colors distinct from the historical brand blue
 
-### Per-Component
+### Historical per-component review
 
-- [ ] Uses component tokens (not hardcoded values)
+- [ ] Uses component tokens from the previous baseline (not hardcoded values)
 - [ ] Hover states don't cause layout shift
 - [ ] Transitions use defined duration/easing
 - [ ] Accessible via keyboard navigation
@@ -584,11 +586,13 @@ All chroma values are capped at 0.090 to prevent browser gamut-mapping inconsist
 
 ---
 
-## 14. Migration Guide
+## 14. Historical migration notes
 
-### From Current globals.css
+Historical note only: this section describes an earlier migration idea. It is not the current migration plan. For current implementation truth, use `src/app/globals.css` and `docs/impeccable/system/COLOR-SYSTEM.md`.
 
-The main changes:
+### Historical migration framing
+
+The earlier migration idea assumed these changes:
 
 1. **Primary color**: From neutral gray to Steel Blue (hue 230)
 2. **Background**: From pure white to blue-tinted white
@@ -596,7 +600,7 @@ The main changes:
 4. **Shadows**: Added 4-tier system with slate tones
 5. **Animation**: Added standardized duration/easing tokens
 
-### Gradual Adoption
+### Historical gradual adoption sequence
 
 1. **Phase 1**: Update semantic colors (`:root` and `.dark`)
 2. **Phase 2**: Add shadow and animation tokens
@@ -605,37 +609,38 @@ The main changes:
 
 ---
 
-## Appendix A: Quick Reference Card
+## Appendix A: Historical quick reference
+
+Historical note only: the values below belong to the previous steel-blue baseline. They are not the current quick reference. For the current contract, use `docs/impeccable/system/COLOR-SYSTEM.md` and `src/app/globals.css`.
 
 ```css
-/* Brand */
---primary: #004d9e;                /* Steel Blue - buttons, links, CTA */
+/* Historical brand */
+--primary: #004d9e;                /* Historical Steel Blue baseline */
 
-/* Surfaces */
+/* Historical surfaces */
 --background: #fafafa;             /* Neutral warm white */
 --card: #ffffff;                   /* Pure white cards */
 
-/* Text */
+/* Historical text */
 --foreground: #36424a;             /* Body text */
 --muted-foreground: #5f6b73;       /* Secondary text */
 
-/* Status */
+/* Historical status */
 --success: #0f7b5f;               /* Green */
 --warning: #d97706;               /* Amber */
 --error: #dc2626;                  /* Red */
 
-/* Radius */
+/* Historical radius */
 --radius: 0.5rem;  /* 8px base */
 
-/* Shadow */
+/* Historical shadow */
 --shadow-md: 0 4px 6px rgba(0,0,0,0.06), 0 2px 4px rgba(0,0,0,0.03);
 
-/* Animation */
+/* Historical animation */
 --duration-fast: 150ms;
 --ease-out: cubic-bezier(0, 0, 0.2, 1);  /* default easing */
 ```
 
 ---
 
-*Tianze Design System v1.1 — synced with globals.css (2026-03-19)*
-*Authority: src/app/globals.css*
+*Historical reference only. Current contract: `src/app/globals.css` + `docs/impeccable/system/COLOR-SYSTEM.md`.*
