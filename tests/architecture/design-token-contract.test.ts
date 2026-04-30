@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 const GLOBALS_CSS = "src/app/globals.css";
+const FOOTER_LAYOUT_SOURCE = "src/app/[locale]/layout.tsx";
 const FOOTER_COMPONENT_SOURCE = "src/components/footer/Footer.tsx";
 const FOOTER_STYLE_TOKEN_SOURCE = "src/config/footer-style-tokens.ts";
 
@@ -13,6 +14,7 @@ const RAW_COLOR_PRODUCTION_FILES = [
   "src/components/sections/quality-section.tsx",
   "src/components/sections/chain-section.tsx",
   "src/components/sections/scenarios-section.tsx",
+  FOOTER_COMPONENT_SOURCE,
 ] as const;
 
 const REQUIRED_BRAND_STEPS = Array.from(
@@ -79,6 +81,13 @@ const REQUIRED_FOOTER_SELECTION_TOKENS = [
   "--footer-selection-dark-foreground",
 ] as const;
 
+const FOOTER_SELECTION_TOKEN_EXPECTATIONS = {
+  "--footer-selection-light-background": "var(--neutral-3)",
+  "--footer-selection-light-foreground": "var(--neutral-12)",
+  "--footer-selection-dark-background": "var(--neutral-3)",
+  "--footer-selection-dark-foreground": "var(--neutral-12)",
+} as const;
+
 const FOOTER_SELECTION_RUNTIME_CHAIN = {
   "--footer-selection-dark-bg": "--footer-selection-dark-background",
   "--footer-selection-dark-fg": "--footer-selection-dark-foreground",
@@ -87,19 +96,27 @@ const FOOTER_SELECTION_RUNTIME_CHAIN = {
 } as const;
 
 const BANNED_RAW_BRAND_PALETTE_CLASS_PATTERN =
-  /\b(?:bg|text|border)-(?:sky|cyan)-\d{2,3}\b/;
+  /\b(?:bg|text|border|ring|outline)-(?:sky|cyan)-\d{2,3}\b/;
 
 const BANNED_RAW_STATUS_PALETTE_CLASS_PATTERN =
-  /\b(?:bg|text|border)-(?:green|red|amber|yellow|emerald)-\d{2,3}\b/;
+  /\b(?:bg|text|border|ring|outline)-(?:green|red|amber|yellow|emerald)-\d{2,3}\b/;
 
 const BANNED_RAW_INFO_PALETTE_CLASS_PATTERN =
-  /\b(?:bg|text|border)-(?:blue|sky|cyan)-\d{2,3}\b/;
+  /\b(?:bg|text|border|ring|outline)-(?:blue|sky|cyan)-\d{2,3}\b/;
 
 const BANNED_INLINE_BRAND_PATTERN =
   /#004d9e|#003b7a|rgba\(\s*0\s*,\s*77\s*,\s*158\b/i;
 
 const BANNED_FOOTER_RAW_PALETTE_CLASS_PATTERN =
-  /\b(?:text|hover:text|dark:text|dark:hover:text)-(?:neutral|gray|slate|zinc|stone|blue|sky|cyan|green|red|amber|yellow|emerald)-\d{2,3}\b/;
+  /\b(?:(?:hover|dark|focus-visible):)*(?:bg|text|border|ring|outline)-(?:neutral|gray|slate|zinc|stone|blue|sky|cyan|green|red|amber|yellow|emerald)-\d{2,3}\b/;
+
+const FOOTER_SURFACE_TOKEN_EXPECTATIONS = {
+  "--footer-bg": "var(--neutral-11)",
+  "--footer-text": "var(--neutral-5)",
+  "--footer-heading": "var(--neutral-6)",
+  "--footer-link": "var(--neutral-4)",
+  "--footer-divider": "color-mix(in oklch, var(--neutral-1) 8%, transparent)",
+} as const;
 
 const FOOTER_STYLE_TOKEN_TAILWIND_SOURCE =
   '@source "../config/footer-style-tokens.ts";';
@@ -237,6 +254,12 @@ describe("design token contract", () => {
         `${FOOTER_STYLE_TOKEN_SOURCE} should consume ${token}`,
       ).toBe(true);
     }
+
+    for (const [token, expectedValue] of Object.entries(
+      FOOTER_SELECTION_TOKEN_EXPECTATIONS,
+    )) {
+      expect(readCssVariable(css, token), token).toBe(expectedValue);
+    }
   });
 
   it("wires footer selection tokens through the rendered footer component", () => {
@@ -270,8 +293,36 @@ describe("design token contract", () => {
       readRepoFile(FOOTER_STYLE_TOKEN_SOURCE),
     );
 
-    expect(footerTokenSource).toContain('text: "text-muted-foreground"');
-    expect(footerTokenSource).toContain('hoverText: "hover:text-foreground"');
+    expect(footerTokenSource).toContain('text: "text-[var(--footer-text)]"');
+    expect(footerTokenSource).toContain(
+      'hoverText: "hover:text-[var(--footer-link)]"',
+    );
+    expect(footerTokenSource).not.toContain('text: ""');
+    expect(footerTokenSource).not.toContain('hoverText: ""');
+  });
+
+  it("keeps footer surface roles wired through footer-specific tokens", () => {
+    const css = stripCssComments(readRepoFile(GLOBALS_CSS));
+    const footerLayoutSource = stripCssComments(
+      readRepoFile(FOOTER_LAYOUT_SOURCE),
+    );
+    const footerComponentSource = stripCssComments(
+      readRepoFile(FOOTER_COMPONENT_SOURCE),
+    );
+
+    for (const [token, expectedValue] of Object.entries(
+      FOOTER_SURFACE_TOKEN_EXPECTATIONS,
+    )) {
+      expect(readCssVariable(css, token), token).toBe(expectedValue);
+    }
+
+    expect(footerComponentSource).toContain("bg-[var(--footer-bg)]");
+    expect(footerComponentSource).toContain("text-[var(--footer-text)]");
+    expect(footerComponentSource).toContain("border-[var(--footer-divider)]");
+    expect(footerComponentSource).toContain("text-[var(--footer-heading)]");
+    expect(footerComponentSource).not.toContain("bg-background");
+    expect(footerComponentSource).not.toContain("text-foreground");
+    expect(footerLayoutSource).toContain("text-[var(--footer-text)]");
   });
 
   it("keeps selected production UI files off raw brand palette classes", () => {
@@ -319,12 +370,16 @@ describe("design token contract", () => {
   });
 
   it("keeps footer browser UI config off raw Tailwind palette classes", () => {
-    const source = stripCssComments(readRepoFile(FOOTER_STYLE_TOKEN_SOURCE));
+    const footerSources = [FOOTER_STYLE_TOKEN_SOURCE, FOOTER_COMPONENT_SOURCE];
 
-    expect(
-      source.match(BANNED_FOOTER_RAW_PALETTE_CLASS_PATTERN),
-      `${FOOTER_STYLE_TOKEN_SOURCE} should use semantic tokens instead of raw Tailwind palette classes because it feeds browser-rendered footer UI`,
-    ).toBeNull();
+    for (const filePath of footerSources) {
+      const source = stripCssComments(readRepoFile(filePath));
+
+      expect(
+        source.match(BANNED_FOOTER_RAW_PALETTE_CLASS_PATTERN),
+        `${filePath} should use semantic tokens instead of raw Tailwind palette classes because it feeds browser-rendered footer UI`,
+      ).toBeNull();
+    }
   });
 
   it("includes footer browser UI config in Tailwind source scanning", () => {

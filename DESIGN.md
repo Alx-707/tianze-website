@@ -102,17 +102,19 @@ The current brand scale is a provisional steel-blue candidate. Treat the role sy
 
 ### Neutral
 
-- **Clean Factory Background** (`#fafafa`): Current page background. It should feel clean and technical, not pure white showroom gloss.
-- **Industrial Text Gray** (`#36424a`): Primary text color.
-- **Muted Specification Gray** (`#5f6b73`): Secondary copy, metadata, and supporting explanation.
-- **Soft Divider Gray** (`#e2e5e9`, `#ebebeb`): Borders, section dividers, and structural grid lines.
-- **Controlled White Surface** (`#ffffff`): Cards and elevated content surfaces.
+- **Clean factory background**: Current page background role. It should feel clean and technical, not pure white showroom gloss.
+- **Industrial text**: Primary text role.
+- **Muted specification text**: Secondary copy, metadata, and supporting explanation role.
+- **Soft divider**: Borders, section dividers, and structural grid role.
+- **Controlled surface**: Cards and elevated content surface role.
 
 ### Status
 
-- **Success Green** (`#0f7b5f`): Completion and confirmation states.
-- **Warning Amber** (`#d97706`): Caution states.
-- **Error Red** (`#dc2626`): Validation and destructive states.
+- **Success**: Completion and confirmation states.
+- **Warning**: Caution states.
+- **Error**: Validation and destructive states.
+
+Exact current token values live in `src/app/globals.css`. Use `docs/impeccable/system/COLOR-SYSTEM.md` and `docs/guides/CANONICAL-TRUTH-REGISTRY.md` for the color-system contract and change process. This document describes roles and intent, not a second color truth source.
 
 ### Named Rules
 

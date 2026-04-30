@@ -152,8 +152,8 @@
   /* Selection */
   --selection-background: color-mix(in oklch, var(--primary) 20%, transparent);
   --selection-foreground: var(--foreground);
-  --footer-selection-light-background: var(--neutral-12);
-  --footer-selection-light-foreground: var(--neutral-1);
+  --footer-selection-light-background: var(--neutral-3);
+  --footer-selection-light-foreground: var(--neutral-12);
   --footer-selection-dark-background: var(--neutral-3);
   --footer-selection-dark-foreground: var(--neutral-12);
 

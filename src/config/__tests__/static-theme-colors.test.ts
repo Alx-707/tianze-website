@@ -4,8 +4,7 @@ import { describe, expect, it } from "vitest";
 import { STATIC_THEME_COLORS } from "@/config/static-theme-colors";
 
 const HEX_COLOR_PATTERN = /^#[0-9a-f]{6}$/i;
-const STATIC_THEME_IMPORT_PATTERN =
-  /from\s+["'](?:@\/config\/static-theme-colors|\.\.\/static-theme-colors)["']/;
+const IMPORT_FROM_PATTERN = /from\s+["']([^"']+)["']/g;
 const BRIDGE_SOURCE = readFileSync("src/config/static-theme-colors.ts", "utf8");
 const BROWSER_UI_SCAN_ROOTS = [
   "src/components",
@@ -28,6 +27,20 @@ function collectFiles(directoryPath: string): string[] {
     }
 
     return [entryPath];
+  });
+}
+
+function importsStaticThemeColors(source: string) {
+  return Array.from(source.matchAll(IMPORT_FROM_PATTERN)).some((match) => {
+    const specifier = match[1];
+
+    return (
+      specifier === "@/config/static-theme-colors" ||
+      specifier === "@/config/static-theme-colors.ts" ||
+      (specifier.startsWith(".") &&
+        (specifier.endsWith("/static-theme-colors") ||
+          specifier.endsWith("/static-theme-colors.ts")))
+    );
   });
 }
 
@@ -80,7 +93,7 @@ describe("static theme colors", () => {
 
     const offenders = browserUiFiles.filter((filePath) => {
       // eslint-disable-next-line security/detect-non-literal-fs-filename -- test-only boundary scan reads approved repo source files to enforce non-CSS bridge isolation
-      return STATIC_THEME_IMPORT_PATTERN.test(readFileSync(filePath, "utf8"));
+      return importsStaticThemeColors(readFileSync(filePath, "utf8"));
     });
 
     expect(offenders).toEqual([]);

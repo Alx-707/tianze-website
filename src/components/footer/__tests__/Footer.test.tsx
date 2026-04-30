@@ -83,6 +83,26 @@ describe("Footer Component", () => {
     expect(footer).toBeInTheDocument();
   });
 
+  it("uses footer-specific color tokens for the dark footer surface", () => {
+    render(<Footer />);
+
+    const footer = screen.getByRole("contentinfo");
+    expect(footer).toHaveClass(
+      "bg-[var(--footer-bg)]",
+      "text-[var(--footer-text)]",
+      "border-[var(--footer-divider)]",
+    );
+
+    const firstHeading = screen.getAllByRole("heading", { level: 2 })[0];
+    expect(firstHeading).toHaveClass("text-[var(--footer-heading)]");
+
+    const firstLink = screen.getAllByRole("link")[0];
+    expect(firstLink).toHaveClass(
+      "text-[var(--footer-text)]",
+      "hover:text-[var(--footer-link)]",
+    );
+  });
+
   it("renders with default FOOTER_COLUMNS config", () => {
     render(<Footer />);
 

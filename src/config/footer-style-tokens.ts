@@ -38,12 +38,12 @@ export const FOOTER_STYLE_TOKENS = {
   },
   colors: {
     light: {
-      text: "text-muted-foreground",
-      hoverText: "hover:text-foreground",
+      text: "text-[var(--footer-text)]",
+      hoverText: "hover:text-[var(--footer-link)]",
     },
     dark: {
-      text: "",
-      hoverText: "",
+      text: "text-[var(--footer-text)]",
+      hoverText: "hover:text-[var(--footer-link)]",
     },
     selection: {
       dark: {

@@ -117,7 +117,7 @@ async function AsyncLocaleLayoutContent({
             columns={FOOTER_COLUMNS}
             tokens={FOOTER_STYLE_TOKENS}
             statusSlot={
-              <span className="text-xs font-medium text-muted-foreground sm:text-sm">
+              <span className="text-xs font-medium text-[var(--footer-text)] sm:text-sm">
                 {footerSystemStatus}
               </span>
             }

@@ -335,7 +335,7 @@ const SEMANTIC_TOKEN_EXPECTATIONS = {
 } as const;
 
 const BANNED_RAW_CLASS_PATTERN =
-  /\b(?:bg|text|border)-(?:green|red|blue|amber|yellow|cyan|sky|emerald|purple|violet|slate|gray)-\d{2,3}\b/;
+  /\b(?:bg|text|border|ring|outline)-(?:green|red|blue|amber|yellow|cyan|sky|emerald|purple|violet|slate|gray)-\d{2,3}\b/;
 
 const BANNED_INLINE_BRAND_PATTERN =
   /#004d9e|#003b7a|rgba\(\s*0\s*,\s*77\s*,\s*158\b/i;
