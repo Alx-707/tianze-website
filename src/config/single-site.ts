@@ -138,6 +138,9 @@ export const SINGLE_SITE_DEFINITION: SiteDefinition = {
         width: 200,
         height: 60,
       },
+      productPhotos: {
+        status: "pending",
+      },
       ogImage: "/images/og-image.jpg",
       favicon: "/favicon.ico",
     },

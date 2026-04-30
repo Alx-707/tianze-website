@@ -391,6 +391,19 @@ describe("Structured Data Generation", () => {
       expect(data).toHaveProperty("@type", "Article");
     });
 
+    it("does not emit a pending logo in article publisher schema", async () => {
+      const data = await generateLocalizedStructuredData("en", "Article", {
+        title: "Test Article",
+        description: "Test Description",
+        publishedTime: "2023-01-01T00:00:00Z",
+        url: "https://example.com/test",
+      });
+      const publisher = data.publisher as Record<string, unknown>;
+
+      expect(publisher.logo).toBeUndefined();
+      expect(JSON.stringify(data)).not.toContain("/images/logo.svg");
+    });
+
     it("should handle malformed product data", async () => {
       const malformedData = {
         name: "",

@@ -207,6 +207,12 @@ export function validatePublicLaunchTrustContent(
     );
   }
 
+  if (SINGLE_SITE_FACTS.brandAssets.productPhotos.status !== "ready") {
+    target.push(
+      "brandAssets.productPhotos.status is pending. Neutral product illustrations are allowed for preview, but owner-confirmed product photos must be supplied before launch.",
+    );
+  }
+
   return { warnings, errors };
 }
 

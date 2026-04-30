@@ -61,5 +61,6 @@ describe("site-facts", () => {
     );
     expect(siteFacts.brandAssets.logo.status).toBe("pending");
     expect(getPublicLogoPath(siteFacts.brandAssets.logo)).toBeUndefined();
+    expect(siteFacts.brandAssets.productPhotos.status).toBe("pending");
   });
 });

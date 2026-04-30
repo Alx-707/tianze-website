@@ -201,6 +201,7 @@ describe("public launch trust content guard", () => {
       expect.arrayContaining([
         expect.stringContaining("SITE_CONFIG.contact.phone"),
         expect.stringContaining("brandAssets.logo.status"),
+        expect.stringContaining("brandAssets.productPhotos.status"),
       ]),
     );
   });
@@ -218,6 +219,7 @@ describe("public launch trust content guard", () => {
       expect.arrayContaining([
         expect.stringContaining("SITE_CONFIG.contact.phone"),
         expect.stringContaining("brandAssets.logo.status"),
+        expect.stringContaining("brandAssets.productPhotos.status"),
       ]),
     );
   });
