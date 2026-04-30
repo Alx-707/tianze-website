@@ -5,6 +5,7 @@ describe("Feature: Specification Data Architecture", () => {
   describe("Scenario: Spec data types enforce completeness", () => {
     it("MarketSpecs requires technical, certifications, trade, and families", () => {
       const specs: MarketSpecs = {
+        updatedAt: "2026-04-26T00:00:00Z",
         technical: { material: "PVC" },
         certifications: ["UL 651"],
         trade: {
