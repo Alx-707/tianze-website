@@ -40,7 +40,7 @@
     "format:write": "prettier --write .",
     "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --config eslint.config.mjs --fix --cache --cache-location .eslintcache",
     "test:coverage": "vitest run --coverage",
-    "test:lead-family": "pnpm exec vitest run tests/integration/api/lead-family-contract.test.ts tests/integration/api/lead-family-protection.test.ts",
+    "test:lead-family": "pnpm exec vitest run tests/integration/api/lead-family-contract.test.ts tests/integration/api/lead-family-protection.test.ts src/app/api/inquiry/__tests__/route.test.ts tests/integration/api/subscribe.test.ts",
     "test:locale-runtime": "pnpm exec vitest run tests/unit/middleware.test.ts src/__tests__/middleware-locale-cookie.test.ts src/i18n/__tests__/request.test.ts src/lib/__tests__/load-messages.fallback.test.ts",
     "test:translate-compat": "pnpm exec vitest run src/app/[locale]/contact/__tests__/page.test.tsx src/app/[locale]/contact/__tests__/contact-form-static-fallback.test.tsx src/app/[locale]/products/[market]/__tests__/market-landing.test.tsx src/components/layout/__tests__/mobile-navigation.test.tsx src/components/forms/__tests__/contact-form-container.test.tsx src/components/layout/__tests__/header.test.tsx tests/integration/components/header.test.tsx src/components/layout/__tests__/header-client.test.tsx src/components/layout/__tests__/header-language-menu.test.tsx src/components/sections/__tests__/faq-section.test.tsx src/components/sections/__tests__/final-cta.test.tsx src/components/sections/__tests__/sample-cta.test.tsx tests/unit/scripts/check-translate-compat.test.ts",
     "test:e2e": "playwright test",

@@ -367,10 +367,10 @@ The contact Server Action dedupes by `idempotencyKey` form field, while /api/inq
 |-------|-------|
 | Priority | High |
 | Test Type | Integration |
-| Test File | `src/app/__tests__/actions.test.ts`, `src/app/__tests__/contact-integration.test.ts`, `tests/integration/api/lead-family-protection.test.ts` |
+| Test File | `src/app/__tests__/actions.test.ts`, `src/app/__tests__/contact-integration.test.ts`, `tests/integration/api/lead-family-protection.test.ts`, `src/app/api/inquiry/__tests__/route.test.ts`, `tests/integration/api/subscribe.test.ts` |
 | Status | Partial |
 
-Notes: Contact Server Action replay behavior is covered in action/integration tests. Inquiry and subscribe currently prove key requirement at the route layer, but replay semantics are still not family-wide fully proven.
+Notes: Contact Server Action replay behavior is covered in action/integration tests. Inquiry route replay is covered in `src/app/api/inquiry/__tests__/route.test.ts`, and subscribe replay/conflict semantics are covered in `tests/integration/api/subscribe.test.ts`. The remaining proof boundary is family-wide end-to-end alignment across all lead surfaces, so this contract stays Partial rather than Covered.
 
 ---
 
