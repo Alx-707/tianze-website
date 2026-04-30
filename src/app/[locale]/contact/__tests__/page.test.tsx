@@ -1,5 +1,5 @@
 import React from "react";
-import { screen, within } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { setRequestLocale } from "next-intl/server";
 import ContactPage, { generateMetadata } from "@/app/[locale]/contact/page";
@@ -170,6 +170,24 @@ describe("ContactPage MDX migration", () => {
     ).toBeInTheDocument();
     expect(screen.getByText("工作日 24 小时内")).toBeInTheDocument();
     expect(screen.getByText("建议提供")).toBeInTheDocument();
+  });
+
+  it("does not render the owner phone row while the public phone is not configured", async () => {
+    const { ContactMethodsCard } = await import("../contact-page-sections");
+
+    render(
+      <ContactMethodsCard
+        copy={{
+          title: "Contact Methods",
+          emailLabel: "Email",
+          phoneLabel: "Phone",
+        }}
+      />,
+    );
+
+    expect(screen.getByText("sales@tianze-pipe.com")).toBeInTheDocument();
+    expect(screen.queryByText("+86-518-0000-0000")).not.toBeInTheDocument();
+    expect(screen.queryByText("Phone")).not.toBeInTheDocument();
   });
 
   it("renders FAQ from MDX frontmatter", async () => {

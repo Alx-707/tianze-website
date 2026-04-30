@@ -4,6 +4,7 @@ import { ProductFamilyContextNotice } from "@/components/contact/product-family-
 import { FaqAccordion } from "@/components/sections/faq-accordion";
 import { Card } from "@/components/ui/card";
 import { SectionHead } from "@/components/ui/section-head";
+import { getPublicContactPhone } from "@/config/public-trust";
 import { siteFacts } from "@/config/site-facts";
 import { parseProductFamilyContactContext } from "@/lib/contact/product-family-context";
 import { readRequiredMessagePath } from "@/lib/i18n/read-message-path";
@@ -18,6 +19,8 @@ export function ContactMethodsCard({
 }: {
   copy: ContactPageData["copy"]["panel"]["contact"];
 }) {
+  const publicPhone = getPublicContactPhone(siteFacts.contact.phone);
+
   return (
     <Card className="p-6">
       <h3 className="mb-4 text-xl font-semibold">{copy.title}</h3>
@@ -44,27 +47,29 @@ export function ContactMethodsCard({
           </div>
         </div>
 
-        <div className="flex items-center space-x-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-            <svg
-              className="h-5 w-5 text-primary"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-              />
-            </svg>
+        {publicPhone ? (
+          <div className="flex items-center space-x-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+              <svg
+                className="h-5 w-5 text-primary"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                />
+              </svg>
+            </div>
+            <div>
+              <p className="font-medium">{copy.phoneLabel}</p>
+              <p className="text-muted-foreground">{publicPhone}</p>
+            </div>
           </div>
-          <div>
-            <p className="font-medium">{copy.phoneLabel}</p>
-            <p className="text-muted-foreground">{siteFacts.contact.phone}</p>
-          </div>
-        </div>
+        ) : null}
       </div>
     </Card>
   );

@@ -7,6 +7,10 @@ import type {
   ProductData,
   WebSiteData,
 } from "@/lib/structured-data-types";
+import {
+  getPublicContactPhone,
+  getPublicLogoPath,
+} from "@/config/public-trust";
 import { SINGLE_SITE_FACTS } from "@/config/single-site";
 import { SITE_CONFIG } from "@/config/paths/site-config";
 import { routing } from "@/i18n/routing";
@@ -77,6 +81,11 @@ export function generateOrganizationData(
   t: Awaited<ReturnType<typeof getTranslations>>,
   data: OrganizationData = {},
 ) {
+  const logoPath = data.logo ?? getPublicLogoPath();
+  const telephone = getPublicContactPhone(
+    data.phone ?? SITE_CONFIG.contact.phone,
+  );
+
   return {
     "@context": "https://schema.org",
     "@type": "Organization",
@@ -91,12 +100,12 @@ export function generateOrganizationData(
         defaultValue: SITE_CONFIG.description,
       }),
     url: data.url || FALLBACK_BASE_URL,
-    logo: data.logo || `${FALLBACK_BASE_URL}${DEFAULT_LOGO_PATH}`,
+    ...(logoPath
+      ? { logo: new URL(logoPath, FALLBACK_BASE_URL).toString() }
+      : {}),
     contactPoint: {
       "@type": "ContactPoint",
-      telephone:
-        data.phone ||
-        t("organization.phone", { defaultValue: SITE_CONFIG.contact.phone }),
+      ...(telephone ? { telephone } : {}),
       contactType: "customer service",
       availableLanguage: routing.locales,
     },
