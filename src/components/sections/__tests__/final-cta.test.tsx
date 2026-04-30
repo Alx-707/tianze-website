@@ -51,6 +51,18 @@ describe("FinalCTA", () => {
     expect(within(trustList).getByText("trust")).toBeInTheDocument();
   });
 
+  it("keeps inverse trust text above contrast threshold on primary backgrounds", async () => {
+    await renderAsyncComponent(FinalCTA());
+
+    const trustList = screen.getByRole("list", {
+      name: "Homepage trust facts",
+    });
+
+    expect(within(trustList).getByText("trust")).toHaveClass(
+      "text-primary-foreground/90",
+    );
+  });
+
   it("protects CTA labels without broad link protection", async () => {
     await renderAsyncComponent(FinalCTA());
 

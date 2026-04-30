@@ -25,11 +25,11 @@ export function HomepageTrustStrip({
   }
 
   const valueClassName = cn(
-    tone === "inverse" ? "text-white/75" : "text-foreground",
+    tone === "inverse" ? "text-primary-foreground/90" : "text-foreground",
     emphasizeValues ? "font-semibold" : "font-normal",
   );
   const labelClassName =
-    tone === "inverse" ? "text-white/80" : "text-muted-foreground";
+    tone === "inverse" ? "text-primary-foreground/90" : "text-muted-foreground";
   const separatorClassName =
     tone === "inverse" ? "text-white/25" : "text-border";
 
