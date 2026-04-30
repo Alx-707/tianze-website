@@ -9,19 +9,21 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-primary text-primary-foreground hover:bg-[var(--primary-dark)]",
+          "bg-primary text-primary-foreground hover:bg-[var(--button-primary-hover-bg)]",
         destructive:
-          "bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive",
+          "bg-destructive text-destructive-foreground hover:bg-[color-mix(in_oklch,var(--destructive)_90%,black)] focus-visible:ring-destructive",
         outline:
-          "border-2 border-primary bg-transparent text-primary hover:bg-primary/10",
+          "border-2 border-primary bg-transparent text-primary hover:bg-[var(--button-outline-hover-bg)]",
         secondary:
-          "bg-white text-foreground border border-border shadow-[var(--shadow-xs)] hover:border-[#C8CDD2] hover:shadow-[var(--shadow-sm)]",
+          "border border-border bg-secondary text-secondary-foreground shadow-[var(--shadow-xs)] hover:border-[var(--button-secondary-hover-border)] hover:shadow-[var(--shadow-sm)]",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
-        accent: "bg-accent text-accent-foreground hover:bg-accent/90",
-        "on-dark": "bg-white text-primary hover:bg-white/90",
+        accent:
+          "bg-accent text-accent-foreground hover:bg-[var(--button-accent-hover-bg)]",
+        "on-dark":
+          "bg-[var(--neutral-1)] text-primary hover:bg-[color-mix(in_oklch,var(--neutral-1)_90%,transparent)]",
         "ghost-dark":
-          "bg-transparent text-white border border-white/30 hover:bg-white/[0.08] hover:border-white/50",
+          "border border-[color-mix(in_oklch,var(--neutral-1)_30%,transparent)] bg-transparent text-[var(--neutral-1)] hover:border-[color-mix(in_oklch,var(--neutral-1)_50%,transparent)] hover:bg-[color-mix(in_oklch,var(--neutral-1)_8%,transparent)]",
       },
       size: {
         default: "h-[38px] px-5 py-2.5 has-[>svg]:px-4",

@@ -3,17 +3,19 @@
  * Uses inline styles for maximum email client compatibility.
  */
 
+import { STATIC_THEME_COLORS } from "@/config/static-theme-colors";
+
 export const COLORS = {
-  primary: "#007ee6",
-  success: "#059669",
-  successLight: "#ecfdf5",
-  text: "#333333",
-  textLight: "#555555",
-  muted: "#666666",
-  background: "#ffffff",
-  contentBackground: "#f9f9f9",
-  headerText: "#ffffff",
-  border: "#eaeaea",
+  primary: STATIC_THEME_COLORS.primary,
+  success: STATIC_THEME_COLORS.success,
+  successLight: STATIC_THEME_COLORS.successLight,
+  text: STATIC_THEME_COLORS.text,
+  textLight: STATIC_THEME_COLORS.textLight,
+  muted: STATIC_THEME_COLORS.muted,
+  background: STATIC_THEME_COLORS.background,
+  contentBackground: STATIC_THEME_COLORS.contentBackground,
+  headerText: STATIC_THEME_COLORS.headerText,
+  border: STATIC_THEME_COLORS.border,
 } as const;
 
 export const SPACING = {

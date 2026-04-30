@@ -102,6 +102,7 @@ When a task crosses rule boundaries or path-based loading may not cover the full
 - i18n or locale routing: `i18n.md`
 - API routes, validation, CSP, or security: `security.md`
 - UI components, Tailwind, or shadcn/ui: `ui.md`
+- Design tokens, brand color, theme, visual system, or color migration: `ui.md` + `DESIGN.md` + `docs/design-truth.md` + `docs/impeccable/system/COLOR-SYSTEM.md`
 - Content source, MDX, or page copy: `content.md`
 - Tests, mocks, Vitest, or Playwright: `testing.md`
 - Structured data / JSON-LD: `structured-data.md`

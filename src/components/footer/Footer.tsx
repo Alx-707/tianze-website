@@ -49,7 +49,7 @@ function FooterSection({
     <section aria-labelledby={`${section.key}-heading`} className="space-y-4">
       <h2
         id={`${section.key}-heading`}
-        className="text-foreground/85"
+        className="text-[var(--footer-heading)]"
         style={titleStyle}
       >
         {translate(section.translationKey, section.title)}
@@ -167,7 +167,7 @@ export function Footer({
   return (
     <footer
       className={cn(
-        "border-t border-border bg-background text-foreground",
+        "border-t border-[var(--footer-divider)] bg-[var(--footer-bg)] text-[var(--footer-text)]",
         "selection:bg-[var(--footer-selection-light-bg)] selection:text-[var(--footer-selection-light-fg)]",
         "dark:selection:bg-[var(--footer-selection-dark-bg)] dark:selection:text-[var(--footer-selection-dark-fg)]",
         className,
@@ -198,7 +198,9 @@ export function Footer({
         </nav>
         {(statusSlot || themeToggleSlot) && (
           <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="text-sm text-muted-foreground">{statusSlot}</div>
+            <div className="text-sm text-[var(--footer-text)]">
+              {statusSlot}
+            </div>
             <div className="flex items-center justify-start gap-4 sm:justify-end">
               {themeToggleSlot}
             </div>

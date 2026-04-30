@@ -1,23 +1,38 @@
 # Tianze Design Token System
 
-> Industrial Steel Blue | B2B Manufacturing | Modern Minimalist
+> Historical reference only | Previous steel-blue baseline | Not the current contract
 >
-> **Authority**: `src/app/globals.css` is always the production truth.
-> This document is a reference spec. If any value here conflicts with globals.css, globals.css wins.
+> **Current contract sources**: `src/app/globals.css` and `docs/impeccable/system/COLOR-SYSTEM.md`.
+> This file is historical/reference only. It is not the active implementation spec and must not be used as the current color contract.
+>
+> Current contract note: `docs/impeccable/system/COLOR-SYSTEM.md` is the current color-system contract. This document remains useful as historical design-token background and implementation detail, but it must not override `src/app/globals.css` or `COLOR-SYSTEM.md`.
 
 ---
 
-## 1. Design Philosophy
+## Historical boundary
 
-### Brand Positioning
+Everything below describes a previous baseline that was centered on `Industrial Steel Blue` and `--primary-*` examples.
 
-Tianze is a B2B manufacturing enterprise. The design system reflects:
+Read it as historical design-token background only:
+
+- It does **not** define the current production contract.
+- It does **not** override `src/app/globals.css`.
+- It does **not** override `docs/impeccable/system/COLOR-SYSTEM.md`.
+- If any wording below sounds current, treat it as describing the earlier baseline, not today's source of truth.
+
+---
+
+## 1. Historical design philosophy
+
+### Historical brand positioning
+
+This section historically described Tianze as a B2B manufacturing enterprise. The earlier token baseline emphasized:
 
 - **Professional Trust**: Steel blue conveys reliability and industrial precision
 - **Modern Minimalism**: Linear/Vercel-inspired clean aesthetics
 - **Manufacturing Heritage**: Colors and shadows inspired by refined steel
 
-### Key Differentiators (Avoiding "AI Slop")
+### Historical differentiators (previous baseline)
 
 | Aspect | Generic Approach | Tianze Approach |
 |--------|------------------|-----------------|
@@ -29,9 +44,9 @@ Tianze is a B2B manufacturing enterprise. The design system reflects:
 
 ---
 
-## 2. Token Architecture
+## 2. Historical token architecture
 
-### Three-Layer Hierarchy
+### Historical three-layer hierarchy
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -46,7 +61,7 @@ Tianze is a B2B manufacturing enterprise. The design system reflects:
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### Naming Convention
+### Historical naming convention
 
 ```
 --{category}-{element}-{property}-{variant}-{state}
@@ -61,11 +76,11 @@ Examples:
 
 ---
 
-## 3. Color System
+## 3. Historical color system
 
-### 3.1 Primary Scale (Industrial Steel Blue - Hue 230)
+### 3.1 Historical primary scale (Industrial Steel Blue - Hue 230)
 
-sRGB-safe chroma (capped at 0.090) for consistent cross-browser rendering:
+This was the earlier `--primary-*` scale used to explain the previous steel-blue baseline:
 
 | Token | OKLCH Value | Usage |
 |-------|-------------|-------|
@@ -81,10 +96,10 @@ sRGB-safe chroma (capped at 0.090) for consistent cross-browser rendering:
 | `--primary-900` | `oklch(0.22 0.040 230)` | Text on light |
 | `--primary-950` | `oklch(0.16 0.030 230)` | Headings |
 
-### 3.2 Semantic Colors (Light Theme)
+### 3.2 Historical semantic colors (Light Theme)
 
 > **Note**: globals.css uses hex values. The OKLCH values below are approximate equivalents for reference.
-> When in doubt, defer to `src/app/globals.css`.
+> Historical note only. For the current contract, defer to `src/app/globals.css` and `docs/impeccable/system/COLOR-SYSTEM.md`.
 
 ```css
 :root {
@@ -125,7 +140,7 @@ sRGB-safe chroma (capped at 0.090) for consistent cross-browser rendering:
 }
 ```
 
-### 3.3 Semantic Colors (Dark Theme)
+### 3.3 Historical semantic colors (Dark Theme)
 
 ```css
 .dark {
@@ -166,7 +181,7 @@ sRGB-safe chroma (capped at 0.090) for consistent cross-browser rendering:
 }
 ```
 
-### 3.4 Status Colors
+### 3.4 Historical status colors
 
 | Status | Light Mode | Dark Mode | Usage |
 |--------|------------|-----------|-------|
@@ -544,11 +559,13 @@ All chroma values are capped at 0.090 to prevent browser gamut-mapping inconsist
 
 ---
 
-## 13. Implementation Checklist
+## 13. Historical implementation checklist
 
-### Before Launch
+Historical note only: the checklist below belonged to the previous steel-blue token baseline. It is not the current launch checklist and must not be used as the active ship gate.
 
-- [ ] All colors use OKLCH values from this spec
+### Historical pre-launch checklist
+
+- [ ] All colors use OKLCH values from the previous baseline spec
 - [ ] Shadows use slate tones (not pure gray)
 - [ ] Border radius follows micro precision (4-8px)
 - [ ] All interactive elements have cursor-pointer
@@ -557,11 +574,11 @@ All chroma values are capped at 0.090 to prevent browser gamut-mapping inconsist
 - [ ] Contrast ratios verified (WCAG AA)
 - [ ] Reduced motion preference respected
 - [ ] No emojis used as icons
-- [ ] Status colors distinct from brand blue
+- [ ] Status colors distinct from the historical brand blue
 
-### Per-Component
+### Historical per-component review
 
-- [ ] Uses component tokens (not hardcoded values)
+- [ ] Uses component tokens from the previous baseline (not hardcoded values)
 - [ ] Hover states don't cause layout shift
 - [ ] Transitions use defined duration/easing
 - [ ] Accessible via keyboard navigation
@@ -569,11 +586,13 @@ All chroma values are capped at 0.090 to prevent browser gamut-mapping inconsist
 
 ---
 
-## 14. Migration Guide
+## 14. Historical migration notes
 
-### From Current globals.css
+Historical note only: this section describes an earlier migration idea. It is not the current migration plan. For current implementation truth, use `src/app/globals.css` and `docs/impeccable/system/COLOR-SYSTEM.md`.
 
-The main changes:
+### Historical migration framing
+
+The earlier migration idea assumed these changes:
 
 1. **Primary color**: From neutral gray to Steel Blue (hue 230)
 2. **Background**: From pure white to blue-tinted white
@@ -581,7 +600,7 @@ The main changes:
 4. **Shadows**: Added 4-tier system with slate tones
 5. **Animation**: Added standardized duration/easing tokens
 
-### Gradual Adoption
+### Historical gradual adoption sequence
 
 1. **Phase 1**: Update semantic colors (`:root` and `.dark`)
 2. **Phase 2**: Add shadow and animation tokens
@@ -590,37 +609,38 @@ The main changes:
 
 ---
 
-## Appendix A: Quick Reference Card
+## Appendix A: Historical quick reference
+
+Historical note only: the values below belong to the previous steel-blue baseline. They are not the current quick reference. For the current contract, use `docs/impeccable/system/COLOR-SYSTEM.md` and `src/app/globals.css`.
 
 ```css
-/* Brand */
---primary: #004d9e;                /* Steel Blue - buttons, links, CTA */
+/* Historical brand */
+--primary: #004d9e;                /* Historical Steel Blue baseline */
 
-/* Surfaces */
+/* Historical surfaces */
 --background: #fafafa;             /* Neutral warm white */
 --card: #ffffff;                   /* Pure white cards */
 
-/* Text */
+/* Historical text */
 --foreground: #36424a;             /* Body text */
 --muted-foreground: #5f6b73;       /* Secondary text */
 
-/* Status */
+/* Historical status */
 --success: #0f7b5f;               /* Green */
 --warning: #d97706;               /* Amber */
 --error: #dc2626;                  /* Red */
 
-/* Radius */
+/* Historical radius */
 --radius: 0.5rem;  /* 8px base */
 
-/* Shadow */
+/* Historical shadow */
 --shadow-md: 0 4px 6px rgba(0,0,0,0.06), 0 2px 4px rgba(0,0,0,0.03);
 
-/* Animation */
+/* Historical animation */
 --duration-fast: 150ms;
 --ease-out: cubic-bezier(0, 0, 0.2, 1);  /* default easing */
 ```
 
 ---
 
-*Tianze Design System v1.1 — synced with globals.css (2026-03-19)*
-*Authority: src/app/globals.css*
+*Historical reference only. Current contract: `src/app/globals.css` + `docs/impeccable/system/COLOR-SYSTEM.md`.*

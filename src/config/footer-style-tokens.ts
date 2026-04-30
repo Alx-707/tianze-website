@@ -38,21 +38,21 @@ export const FOOTER_STYLE_TOKENS = {
   },
   colors: {
     light: {
-      text: "text-neutral-600",
-      hoverText: "hover:text-neutral-900",
+      text: "text-[var(--footer-text)]",
+      hoverText: "hover:text-[var(--footer-link)]",
     },
     dark: {
-      text: "dark:text-neutral-400",
-      hoverText: "dark:hover:text-neutral-100",
+      text: "text-[var(--footer-text)]",
+      hoverText: "hover:text-[var(--footer-link)]",
     },
     selection: {
       dark: {
-        background: "#ededed",
-        foreground: "#1a1a1a",
+        background: "var(--footer-selection-dark-background)",
+        foreground: "var(--footer-selection-dark-foreground)",
       },
       light: {
-        background: "#171717",
-        foreground: "#f2f2f2",
+        background: "var(--footer-selection-light-background)",
+        foreground: "var(--footer-selection-light-foreground)",
       },
     },
   },

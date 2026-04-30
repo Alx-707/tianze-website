@@ -1,6 +1,7 @@
 import { act } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ContactFormContainer } from "@/components/forms/contact-form-container";
+import { FORM_STATUS_CLASS_NAMES } from "@/components/forms/form-status-styles";
 import * as contactFormConfig from "@/config/contact-form-config";
 import { fireEvent, render, screen } from "@/test/utils";
 
@@ -170,6 +171,12 @@ const _fillValidForm = async () => {
   });
 };
 
+function expectSemanticStatusClasses(element: HTMLElement, classNames: string) {
+  for (const className of classNames.split(" ")) {
+    expect(element).toHaveClass(className);
+  }
+}
+
 describe("ContactFormContainer - 剩余高级测试", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -217,7 +224,10 @@ describe("ContactFormContainer - 剩余高级测试", () => {
 
       // 检查消息样式 - success uses role="status" with aria-live="polite"
       const statusElement = screen.getByRole("status");
-      expect(statusElement).toHaveClass("text-green-800");
+      expectSemanticStatusClasses(
+        statusElement,
+        FORM_STATUS_CLASS_NAMES.success,
+      );
       expect(
         screen.getByTestId("contact-form-status-message"),
       ).toBeInTheDocument();
@@ -252,8 +262,9 @@ describe("ContactFormContainer - 剩余高级测试", () => {
       expect(
         screen.queryByTestId("contact-form-error-heading"),
       ).not.toBeInTheDocument();
-      expect(screen.getByTestId("contact-form-error-display")).toHaveClass(
-        "text-amber-800",
+      expectSemanticStatusClasses(
+        screen.getByTestId("contact-form-error-display"),
+        FORM_STATUS_CLASS_NAMES.partialSuccess,
       );
     });
 
@@ -272,14 +283,8 @@ describe("ContactFormContainer - 剩余高级测试", () => {
         screen.getByText("Failed to submit form. Please try again."),
       ).toBeInTheDocument();
 
-      // 检查错误消息样式 - both StatusMessage and ErrorDisplay render role="alert"
-      const alertElements = screen.getAllByRole("alert");
-      expect(alertElements.length).toBeGreaterThanOrEqual(1);
-      // StatusMessage has text-red-800
-      const statusAlert = alertElements.find((el) =>
-        el.classList.contains("text-red-800"),
-      );
-      expect(statusAlert).toBeDefined();
+      const statusMessage = screen.getByTestId("contact-form-status-message");
+      expectSemanticStatusClasses(statusMessage, FORM_STATUS_CLASS_NAMES.error);
       expect(
         screen.getByTestId("contact-form-status-message-text"),
       ).toHaveTextContent("Failed to submit form. Please try again.");

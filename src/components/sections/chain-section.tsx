@@ -51,8 +51,8 @@ function ProcessStep({
 
 function StatBadge({ text }: { text: string }) {
   return (
-    <div className="flex items-center gap-3 rounded-lg border border-[var(--success-light)] bg-[var(--success-light)] px-5 py-4">
-      <span className="text-green-600">
+    <div className="flex items-center gap-3 rounded-lg border border-[var(--success-border)] bg-[var(--success-muted)] px-5 py-4">
+      <span className="text-[var(--success)]">
         <StaticCheckIcon size={20} />
       </span>
       <span className="text-sm font-medium">{text}</span>

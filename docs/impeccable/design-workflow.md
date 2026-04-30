@@ -1,11 +1,13 @@
 # Tianze Design Workflow
 
-> Last updated: 2026-04-29
-> Scope: project-level design workflow for Tianze website, before changing or adding design-related skills.
+> Last updated: 2026-04-30
+> Scope: project-level design workflow for Tianze website and active design-skill routing.
 
 这份文档定义 Tianze 网站的设计工作流。它不是某个单独页面的设计稿，也不是某个 skill 的使用说明。
 
 核心目的：让后续所有设计、动效、视觉 polish、图片生成和 skill 调整，都先服务项目真实业务，而不是变成“看到一个好 skill 就装一个”。
+
+Current boundary: Tianze design work starts from the live site, current components, `PRODUCT.md`, `DESIGN.md`, `docs/design-truth.md`, and confirmed Impeccable system docs. External generated-design pipelines are not part of the project workflow unless the owner explicitly introduces one later.
 
 ## 1. One-line principle
 
@@ -498,18 +500,22 @@ flowchart TD
 
   B --> B1["shape"]
   B --> B2["product-marketing-context"]
+  B --> B3["customer-research / positioning-messaging / content-strategy"]
 
   C --> C1["impeccable"]
-  C --> C2["layout / typeset / distill / quieter"]
-  C --> C3["critique"]
+  C --> C2["layout / typeset / colorize / clarify"]
+  C --> C3["distill / quieter / bolder"]
+  C --> C4["critique / web-design-guidelines"]
 
   D --> D1["animate"]
-  D --> D2["emil-design-eng"]
-  D --> D3["transitions-dev candidate"]
+  D --> D2["make-interfaces-feel-better"]
+  D --> D3["emil-design-eng / delight / overdrive"]
+  D --> D4["shadcn"]
 
   E --> E1["audit"]
-  E --> E2["adapt"]
-  E --> E3["optimize"]
+  E --> E2["adapt / optimize"]
+  E --> E3["harden"]
+  E --> E4["wcag-audit-patterns / baseline-ui"]
 ```
 
 Default routing:
@@ -519,14 +525,42 @@ Default routing:
 | Define project-level design operating model | `impeccable document` + manual synthesis |
 | Explore visual moodboard / hero direction | `imagegen` |
 | Plan a specific new feature/page | `shape` |
+| Clarify positioning or page message | `positioning-messaging`, `content-strategy`, `copywriting`, `copy-editing` |
+| Check buyer/ICP assumptions | `customer-research` |
 | Improve overall UI quality | `impeccable` |
 | Fix layout rhythm | `layout` |
 | Fix typography | `typeset` |
+| Fix color emphasis | `colorize` |
+| Fix unclear labels, instructions, form hints, or error copy | `clarify` |
 | Reduce noise | `distill` or `quieter` |
-| Final pass | `polish` |
+| Make an overly safe section more noticeable | `bolder`, only after Gate 3 brand fit |
+| Add small moments of personality | `delight`, only when it strengthens trust or conversion |
+| Improve small interaction/detail feel | `make-interfaces-feel-better` |
 | Decide whether to animate | `animate` |
-| Implement small motion details | `emil-design-eng`, CSS / Tailwind, or future `transitions-dev` recipes |
+| Implement small motion details | `make-interfaces-feel-better`, `emil-design-eng`, CSS / Tailwind |
+| Push a high-impact visual or motion experiment | `overdrive`, only with explicit owner approval |
+| Compose or repair shadcn-based UI | `shadcn`, only after the page/component contract is clear |
+| Harden against real data, errors, i18n, and edge cases | `harden` |
+| Check WCAG accessibility | `wcag-audit-patterns` |
+| Check Tailwind UI baseline | `baseline-ui` as checklist only |
+| Review against modern web design guidelines | `web-design-guidelines` |
 | Verify technical UI quality | `audit`, `adapt`, `optimize` |
+| Final pass | `polish` |
+
+### Design routing rule
+
+The design chain is:
+
+```text
+business goal -> buyer decision -> evidence -> information architecture -> visual system -> component implementation -> verification
+```
+
+Rules:
+
+- Do not ask agents to extract, convert, or iterate from external generated-design projects unless the owner explicitly changes the workflow.
+- Do not treat generated screens, generated prompts, or generated component dumps as source material.
+- If active tooling contains compatibility wording for older `DESIGN.md` formats, treat it as parsing compatibility only, not as workflow direction.
+- New design-system work starts from the live site, current components, `PRODUCT.md`, `DESIGN.md`, `docs/design-truth.md`, and confirmed Impeccable system docs.
 
 ## 18. Image generation usage
 
@@ -583,11 +617,12 @@ Do not write every experiment into permanent truth. Only write back confirmed ru
 
 ## 20. Current next steps
 
-Before changing skill files:
+Before changing design files:
 
 1. Keep this workflow as the top-level design process.
 2. Use `PRODUCT.md` and provisional `DESIGN.md` as the current design skill context.
 3. Run visual direction exploration before freezing final tokens.
 4. Use `shape` only for a specific page or module after the project-level context is loaded.
 5. Keep motion-skill references aligned with the actual available skill set.
-6. Evaluate `transitions-dev` only as a motion implementation recipe library, not as a new design philosophy.
+6. Treat newly added skills as supporting tools, not as new workflow owners.
+7. Do not introduce external generated-design pipelines unless the owner explicitly changes the project direction.

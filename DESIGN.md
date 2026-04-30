@@ -3,20 +3,12 @@ name: Tianze Website
 description: Provisional design operating model for a B2B manufacturing website focused on qualified inquiry conversion.
 status: provisional
 colors:
-  background: "#fafafa"
-  foreground: "#36424a"
-  card: "#ffffff"
-  primary-steel-blue: "#004d9e"
-  primary-steel-blue-dark: "#003b7a"
-  primary-steel-blue-light: "#e8f0fe"
-  muted-surface: "#f0f1f3"
-  muted-text: "#5f6b73"
-  border: "#e2e5e9"
-  divider: "#ebebeb"
-  success: "#0f7b5f"
-  warning: "#d97706"
-  error: "#dc2626"
-  footer-bg: "#2c353b"
+  source: "src/app/globals.css"
+  current-contract: "docs/impeccable/system/COLOR-SYSTEM.md"
+  status: "role-based architecture is stable; exact values are provisional"
+  brand-role: "--primary / --brand-*"
+  neutral-role: "--background / --foreground / --neutral-*"
+  status-roles: "--success-* / --warning-* / --error-* / --info-*"
 typography:
   display:
     fontFamily: "Figtree, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif"
@@ -48,8 +40,8 @@ spacing:
   section-y-desktop: "72px"
 components:
   button-primary:
-    backgroundColor: "{colors.primary-steel-blue}"
-    textColor: "#ffffff"
+    backgroundColor: "var(--primary)"
+    textColor: "var(--primary-foreground)"
     rounded: "{rounded.md}"
     padding: "height 38px, horizontal 20px"
   button-secondary:
@@ -89,7 +81,7 @@ Current implementation tokens in `src/app/globals.css` are the production baseli
 
 **Not final yet:**
 
-- Final brand color confidence beyond current steel blue baseline.
+- Final brand color confidence beyond the current provisional brand scale.
 - Final product photography and hero visual language.
 - Final amount of decorative grid usage across non-home pages.
 - Final shadow and radius personality after pilot pages.
@@ -98,26 +90,31 @@ Current implementation tokens in `src/app/globals.css` are the production baseli
 ## 2. Colors
 
 The current palette is a restrained steel-blue and neutral system. It is suitable as a baseline, but should be tested against manufacturing photography and product pages before being treated as final.
+The stable design decision is the role-based color architecture, not the exact current blue value. Current color values are provisional and may change after pilot-page validation.
 
-### Primary
+### Brand roles
 
-- **Industrial Steel Blue** (`#004d9e`): Current primary action, link, and brand accent color. Use for main CTAs and important navigational emphasis.
-- **Deep Factory Blue** (`#003b7a`): Hover and stronger action state. Use sparingly to avoid a heavy SaaS feel.
-- **Pale Technical Blue** (`#e8f0fe`): Soft surface for low-intensity emphasis, icon backgrounds, and procurement cues.
+- **Primary action role** (`--primary`): Use for main CTAs and important navigational emphasis. Do not write the underlying color value in components.
+- **Primary hover role** (`--primary-dark` / component hover tokens): Use for stronger action states.
+- **Low-intensity brand surface** (`--primary-light`, `--primary-50`, or `--brand-2` / `--brand-3`): Use for soft surfaces, icon backgrounds, and procurement cues.
+
+The current brand scale is a provisional steel-blue candidate. Treat the role system as stable, but treat the exact blue values as adjustable.
 
 ### Neutral
 
-- **Clean Factory Background** (`#fafafa`): Current page background. It should feel clean and technical, not pure white showroom gloss.
-- **Industrial Text Gray** (`#36424a`): Primary text color.
-- **Muted Specification Gray** (`#5f6b73`): Secondary copy, metadata, and supporting explanation.
-- **Soft Divider Gray** (`#e2e5e9`, `#ebebeb`): Borders, section dividers, and structural grid lines.
-- **Controlled White Surface** (`#ffffff`): Cards and elevated content surfaces.
+- **Clean factory background**: Current page background role. It should feel clean and technical, not pure white showroom gloss.
+- **Industrial text**: Primary text role.
+- **Muted specification text**: Secondary copy, metadata, and supporting explanation role.
+- **Soft divider**: Borders, section dividers, and structural grid role.
+- **Controlled surface**: Cards and elevated content surface role.
 
 ### Status
 
-- **Success Green** (`#0f7b5f`): Completion and confirmation states.
-- **Warning Amber** (`#d97706`): Caution states.
-- **Error Red** (`#dc2626`): Validation and destructive states.
+- **Success**: Completion and confirmation states.
+- **Warning**: Caution states.
+- **Error**: Validation and destructive states.
+
+Exact current token values live in `src/app/globals.css`. Use `docs/impeccable/system/COLOR-SYSTEM.md` and `docs/guides/CANONICAL-TRUTH-REGISTRY.md` for the color-system contract and change process. This document describes roles and intent, not a second color truth source.
 
 ### Named Rules
 
@@ -155,7 +152,7 @@ The current system is mostly flat with light border-shadow elevation. This fits 
 - **Shadow Border** (`0 0 0 1px rgba(0, 0, 0, 0.08)`): Lightweight card boundary and Vercel-style precision.
 - **Card Shadow** (`1px ring + subtle 1px and 4px layers`): Default interactive cards where a plain border feels too flat.
 - **Card Hover Shadow** (`1px ring + 2px and 8px layers`): Hover feedback for clickable product or evidence cards.
-- **Primary Active Ring** (`0 0 0 1px #004d9e, 0 0 0 4px rgba(0, 77, 158, 0.12)`): Strong interactive emphasis, use only when clickability needs to be obvious.
+- **Primary Active Ring** (`--shadow-card-active` / `--shadow-accent`): Strong interactive emphasis, use only when clickability needs to be obvious.
 
 ### Named Rules
 
@@ -166,7 +163,7 @@ The current system is mostly flat with light border-shadow elevation. This fits 
 ### Buttons
 
 - **Shape:** 6px radius for primary and secondary buttons. Pill shapes are allowed only for compact tags or very specific navigation chips.
-- **Primary:** Steel blue background with white text. Use for quote, inquiry, sample, and technical discussion actions.
+- **Primary:** Use `--primary` with `--primary-foreground`. Use for quote, inquiry, sample, and technical discussion actions.
 - **Secondary:** White or light surface with border or shadow treatment. Use for catalog, specs, and lower-commitment actions.
 - **On dark:** White button on blue or dark surfaces for final CTAs.
 - **Hover / Focus:** Quick color or shadow transition, usually 150ms to 200ms. Focus must remain visible.
@@ -189,7 +186,7 @@ The current system is mostly flat with light border-shadow elevation. This fits 
 ### Inputs / Fields
 
 - **Style:** 40px baseline height, 8px radius, white or transparent background depending on section context.
-- **Focus:** Steel-blue focus ring or border. The state must be visible and accessible.
+- **Focus:** Use the semantic focus ring (`--ring`) or related component token. The state must be visible and accessible.
 - **Error / Disabled:** Error red plus text explanation. Disabled state should not rely on color alone.
 
 ### Navigation

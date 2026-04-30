@@ -1,5 +1,6 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { FORM_FIELD_REQUIRED_CLASS_NAME } from "@/components/forms/form-status-styles";
 
 /**
  * Name fields component - React 19 Native Form Version
@@ -16,10 +17,7 @@ export function NameFields({ t, isPending }: NameFieldsProps) {
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
       <div className="space-y-2">
-        <Label
-          htmlFor="firstName"
-          className="after:ml-0.5 after:text-red-500 after:content-['*']"
-        >
+        <Label htmlFor="firstName" className={FORM_FIELD_REQUIRED_CLASS_NAME}>
           {t("firstName")}
         </Label>
         <Input
@@ -34,10 +32,7 @@ export function NameFields({ t, isPending }: NameFieldsProps) {
       </div>
 
       <div className="space-y-2">
-        <Label
-          htmlFor="lastName"
-          className="after:ml-0.5 after:text-red-500 after:content-['*']"
-        >
+        <Label htmlFor="lastName" className={FORM_FIELD_REQUIRED_CLASS_NAME}>
           {t("lastName")}
         </Label>
         <Input

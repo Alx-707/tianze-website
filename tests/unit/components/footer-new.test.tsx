@@ -89,6 +89,26 @@ describe("Footer (Vercel style)", () => {
     expect(screen.getByText("Toggle")).toBeInTheDocument();
   });
 
+  it("使用 footer 专用色彩 token，避免被页面明暗主题覆盖", () => {
+    render(<Footer />);
+
+    const footer = screen.getByRole("contentinfo");
+    expect(footer).toHaveClass(
+      "bg-[var(--footer-bg)]",
+      "text-[var(--footer-text)]",
+      "border-[var(--footer-divider)]",
+    );
+
+    const heading = screen.getAllByRole("heading", { level: 2 })[0];
+    expect(heading).toHaveClass("text-[var(--footer-heading)]");
+
+    const link = screen.getAllByRole("link")[0];
+    expect(link).toHaveClass(
+      "text-[var(--footer-text)]",
+      "hover:text-[var(--footer-link)]",
+    );
+  });
+
   it("外部链接带 target/rel，内部链接保持可点击", () => {
     render(<Footer />);
 

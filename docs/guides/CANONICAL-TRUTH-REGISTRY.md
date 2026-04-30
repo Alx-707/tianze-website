@@ -100,6 +100,19 @@ Runtime 正式读取：
 7. 检查 SEO frontmatter、OG 图、schema
 8. 检查 sitemap lastmod 是否来自内容日期，再跑完整验证链再发布
 
+## Design System Truth
+
+| Layer | Canonical source | 用途 |
+| --- | --- | --- |
+| Runtime color tokens | `src/app/globals.css` | Browser CSS variables and Tailwind `@theme inline` bindings |
+| Static color bridge | `src/config/static-theme-colors.ts` | Email and non-CSS surfaces that cannot read CSS variables; must not flow back into browser UI |
+| Design intent | `DESIGN.md` + `docs/design-truth.md` | Business-facing design direction and current truth |
+| Current color contract | `docs/impeccable/system/COLOR-SYSTEM.md` | Agent-readable token role rules |
+| Agent implementation rule | `.claude/rules/ui.md` | What future Codex/Claude edits must follow |
+| Proof | `tests/architecture/design-token-contract.test.ts` + browser visual smoke | Contract and visual regression checks |
+
+Rule: current token values are provisional. The role architecture is the stable interface.
+
 ## 配套 canonical docs
 
 - `.claude/rules/content.md`

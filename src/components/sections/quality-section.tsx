@@ -69,7 +69,7 @@ function StandardsCompliance({
         >
           <span>{t(`standards.${key}`)}</span>
           {key === "asnzs" ? (
-            <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[11px] font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+            <span className="rounded bg-[var(--warning-muted)] px-1.5 py-0.5 text-[11px] font-medium text-[var(--warning-foreground)]">
               {t("certifications.applying")}
             </span>
           ) : (

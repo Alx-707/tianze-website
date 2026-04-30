@@ -23,6 +23,26 @@ Design values (spacing, color, typography) live in `src/app/globals.css`, not in
 <div className="text-primary" style={{ maxWidth: 'var(--container-max)' }} />
 ```
 
+### Design token migration rule
+
+The current color values are provisional. Do not treat `#004D9E` or any current blue as final brand identity.
+
+For production UI:
+
+- Use semantic tokens from `src/app/globals.css`, such as `bg-primary`, `text-foreground`, `border-border`, `ring-ring`, or explicit CSS-variable classes like `bg-[var(--success-muted)]`.
+- Do not introduce raw brand hex values in components.
+- Do not introduce raw Tailwind palette classes such as `bg-blue-50`, `text-red-500`, `border-amber-200`, or `text-green-600` in production UI unless the class is inside a test fixture.
+- If a new visual state is needed, add or reuse a semantic/component token in `src/app/globals.css`.
+- If a non-CSS or email surface needs a color, use `src/config/static-theme-colors.ts`.
+- Browser UI must not import `src/config/static-theme-colors.ts` or treat the static bridge as the color truth source. That bridge is only for email and other non-CSS surfaces.
+
+Before changing brand color, theme, or design-token architecture, read:
+
+1. `DESIGN.md`
+2. `docs/design-truth.md`
+3. `docs/impeccable/system/COLOR-SYSTEM.md`
+4. `docs/guides/CANONICAL-TRUTH-REGISTRY.md`
+
 ## Component Library
 
 - **Base**: shadcn/ui (Radix UI + Tailwind CSS) at `src/components/ui/`
