@@ -92,6 +92,7 @@ wrangler.toml
 .stryker-tmp/
 
 # Codex review loop (runtime state & output)
+.context/
 .claude/review-loop.local.md
 .claude/review-loop.log
 reviews/
