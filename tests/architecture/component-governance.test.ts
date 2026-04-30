@@ -39,6 +39,26 @@ function normalizePath(filePath: string): string {
   return relative(process.cwd(), filePath).replaceAll("\\", "/");
 }
 
+function isStoryModulePath(importPath: string, importerDirectory: string) {
+  if (importPath === "@/stories" || importPath.startsWith("@/stories/")) {
+    return true;
+  }
+
+  if (!importPath.startsWith(".")) {
+    return false;
+  }
+
+  const normalizedImportPath = join(importerDirectory, importPath).replaceAll(
+    "\\",
+    "/",
+  );
+
+  return (
+    normalizedImportPath === STORY_EXPLORATION_ROOT ||
+    normalizedImportPath.startsWith(`${STORY_EXPLORATION_ROOT}/`)
+  );
+}
+
 function hasStoryImport(source: string, filePath: string): boolean {
   const sourceFile = ts.createSourceFile(
     filePath,
@@ -48,34 +68,24 @@ function hasStoryImport(source: string, filePath: string): boolean {
     ts.ScriptKind.TSX,
   );
 
+  const importerDirectory = filePath.split("/").slice(0, -1).join("/");
+
   return sourceFile.statements.some((statement) => {
-    if (!ts.isImportDeclaration(statement)) {
+    if (
+      !ts.isImportDeclaration(statement) &&
+      !ts.isExportDeclaration(statement)
+    ) {
       return false;
     }
 
     const moduleSpecifier = statement.moduleSpecifier;
 
-    if (!ts.isStringLiteral(moduleSpecifier)) {
+    if (!moduleSpecifier || !ts.isStringLiteral(moduleSpecifier)) {
       return false;
     }
 
     const importPath = moduleSpecifier.text;
-
-    if (importPath.startsWith("@/stories")) {
-      return true;
-    }
-
-    if (!importPath.startsWith(".")) {
-      return false;
-    }
-
-    const importerDirectory = filePath.split("/").slice(0, -1).join("/");
-    const normalizedImportPath = join(importerDirectory, importPath).replaceAll(
-      "\\",
-      "/",
-    );
-
-    return normalizedImportPath.startsWith(STORY_EXPLORATION_ROOT);
+    return isStoryModulePath(importPath, importerDirectory);
   });
 }
 
@@ -126,5 +136,24 @@ describe("component governance", () => {
       });
 
     expect(violations).toEqual([]);
+  });
+
+  it("detects Storybook exploration imports without matching similarly named modules", () => {
+    const importerPath = "src/components/example.ts";
+
+    expect(hasStoryImport('import "@/stories";', importerPath)).toBe(true);
+    expect(
+      hasStoryImport(
+        'export { Example } from "@/stories/example";',
+        importerPath,
+      ),
+    ).toBe(true);
+    expect(hasStoryImport('import "../stories/example";', importerPath)).toBe(
+      true,
+    );
+    expect(hasStoryImport('import "@/stories-utils";', importerPath)).toBe(
+      false,
+    );
+    expect(hasStoryImport("export { Example };", importerPath)).toBe(false);
   });
 });
