@@ -1,5 +1,7 @@
 # Homepage Component Inventory
 
+> **Scope note:** This is a homepage/prototype mapping inventory. The reusable component governance source of truth is `docs/impeccable/system/COMPONENT-GOVERNANCE.md`.
+
 > Prototype → Component mapping for development
 > Source: `docs/impeccable/homepage/prototype/v6-swagelok-vercel/index.html`
 

@@ -11,6 +11,20 @@ paths:
 
 Check `src/components/` subdirectories (`ui/`, `blocks/`, `sections/`, `forms/`, `products/`, `layout/`, `contact/`, `trust/`) for existing components before creating new ones.
 
+For reusable UI work, also read `docs/impeccable/system/COMPONENT-GOVERNANCE.md`.
+
+Follow the reuse decision tree:
+
+1. Reuse an existing component.
+2. Use or add a variant when the concept is the same.
+3. Create a composed business component only when there is clear business meaning.
+4. Keep one-off page UI local instead of over-abstracting.
+5. Create a new `src/components/ui/` primitive only with a clear reason, Storybook coverage, and tests or contract checks when behavior exists.
+
+Do not import Radix primitives directly from route pages, page sections, or business components. Use project wrappers in `src/components/ui/` unless an explicit governance exception is documented.
+
+When changing reusable components, update or add Storybook stories for the states that matter to review.
+
 ## Design Tokens
 
 Design values (spacing, color, typography) live in `src/app/globals.css`, not in component code.

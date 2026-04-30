@@ -38,6 +38,7 @@ export default [
       "coverage/**",
       "dist/**",
       "build/**",
+      "storybook-static/**",
       ".codex/**",
       ".omx/**",
       ".eslintcache-audit",
