@@ -12,11 +12,20 @@ const CORE_UI_COMPONENTS = [
 ] as const;
 
 const SOURCE_ROOT = "src";
+const STORY_EXPLORATION_ROOT = "src/stories";
 const UI_WRAPPER_ROOT = "src/components/ui";
 const STORY_OR_TEST_FILE_PATTERN =
   /(?:\.stories\.(?:ts|tsx|js|jsx|mdx)|\.(?:test|spec)\.(?:ts|tsx|js|jsx)|\/__tests__\/)/;
 const SOURCE_FILE_PATTERN = /\.(?:ts|tsx)$/;
 const RADIX_IMPORT_PATTERN = /from\s+["']@radix-ui\//;
+const STORY_IMPORT_MARKERS = [
+  'from "@/stories',
+  "from '@/stories",
+  'from "../stories',
+  "from '../stories",
+  'from "./stories',
+  "from './stories",
+] as const;
 
 function walkFiles(root: string): string[] {
   // eslint-disable-next-line security/detect-non-literal-fs-filename -- fixed architecture test root
@@ -66,6 +75,21 @@ describe("component governance", () => {
         // eslint-disable-next-line security/detect-non-literal-fs-filename -- architecture test reads source files
         const source = readFileSync(filePath, "utf8");
         return RADIX_IMPORT_PATTERN.test(source);
+      });
+
+    expect(violations).toEqual([]);
+  });
+
+  it("keeps Storybook exploration out of production imports", () => {
+    const violations = walkFiles(SOURCE_ROOT)
+      .map(normalizePath)
+      .filter((filePath) => SOURCE_FILE_PATTERN.test(filePath))
+      .filter((filePath) => !filePath.startsWith(`${STORY_EXPLORATION_ROOT}/`))
+      .filter((filePath) => !STORY_OR_TEST_FILE_PATTERN.test(filePath))
+      .filter((filePath) => {
+        // eslint-disable-next-line security/detect-non-literal-fs-filename -- architecture test reads source files
+        const source = readFileSync(filePath, "utf8");
+        return STORY_IMPORT_MARKERS.some((marker) => source.includes(marker));
       });
 
     expect(violations).toEqual([]);
