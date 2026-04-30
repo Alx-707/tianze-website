@@ -81,4 +81,17 @@ describe("proof lane contract", () => {
       expect(leadFamilyScript).toContain(testFile);
     }
   });
+
+  it("does not imply deployed GET smoke proves real lead submission", () => {
+    const releaseProofScript = readRepoFile("scripts/release-proof.sh");
+    const releaseProofRunbook = readRepoFile(
+      "docs/guides/RELEASE-PROOF-RUNBOOK.md",
+    );
+
+    expect(releaseProofScript).toContain("test:e2e:post-deploy");
+    expect(releaseProofScript).toContain("Airtable");
+    expect(releaseProofScript).toContain("manual launch gate");
+    expect(releaseProofRunbook).toContain("test:e2e:post-deploy");
+    expect(releaseProofRunbook).toContain("manual launch gate");
+  });
 });
