@@ -2,6 +2,8 @@ import { existsSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 const GLOBALS_CSS = "src/app/globals.css";
+const FOOTER_COMPONENT_SOURCE = "src/components/footer/Footer.tsx";
+const FOOTER_STYLE_TOKEN_SOURCE = "src/config/footer-style-tokens.ts";
 
 const RAW_COLOR_PRODUCTION_FILES = [
   "src/components/ui/button.tsx",
@@ -60,6 +62,30 @@ const SEMANTIC_TOKEN_EXPECTATIONS = {
   "--success-light": "var(--success-muted)",
 } as const;
 
+const THEME_COLOR_BINDING_EXPECTATIONS = {
+  "--color-primary": "var(--primary)",
+  "--color-primary-foreground": "var(--primary-foreground)",
+  "--color-destructive": "var(--destructive)",
+  "--color-destructive-foreground": "var(--destructive-foreground)",
+  "--color-muted-foreground": "var(--muted-foreground)",
+  "--color-secondary-foreground": "var(--secondary-foreground)",
+  "--color-accent-foreground": "var(--accent-foreground)",
+} as const;
+
+const REQUIRED_FOOTER_SELECTION_TOKENS = [
+  "--footer-selection-light-background",
+  "--footer-selection-light-foreground",
+  "--footer-selection-dark-background",
+  "--footer-selection-dark-foreground",
+] as const;
+
+const FOOTER_SELECTION_RUNTIME_CHAIN = {
+  "--footer-selection-dark-bg": "--footer-selection-dark-background",
+  "--footer-selection-dark-fg": "--footer-selection-dark-foreground",
+  "--footer-selection-light-bg": "--footer-selection-light-background",
+  "--footer-selection-light-fg": "--footer-selection-light-foreground",
+} as const;
+
 const BANNED_RAW_BRAND_PALETTE_CLASS_PATTERN =
   /\b(?:bg|text|border)-(?:sky|cyan)-\d{2,3}\b/;
 
@@ -71,6 +97,12 @@ const BANNED_RAW_INFO_PALETTE_CLASS_PATTERN =
 
 const BANNED_INLINE_BRAND_PATTERN =
   /#004d9e|#003b7a|rgba\(\s*0\s*,\s*77\s*,\s*158\b/i;
+
+const BANNED_FOOTER_RAW_PALETTE_CLASS_PATTERN =
+  /\b(?:text|hover:text|dark:text|dark:hover:text)-(?:neutral|gray|slate|zinc|stone|blue|sky|cyan|green|red|amber|yellow|emerald)-\d{2,3}\b/;
+
+const FOOTER_STYLE_TOKEN_TAILWIND_SOURCE =
+  '@source "../config/footer-style-tokens.ts";';
 
 function readRepoFile(filePath: string) {
   // eslint-disable-next-line security/detect-non-literal-fs-filename -- architecture test reads fixed repo files
@@ -179,6 +211,69 @@ describe("design token contract", () => {
     }
   });
 
+  it("binds semantic color roles used by Tailwind utilities", () => {
+    const css = stripCssComments(readRepoFile(GLOBALS_CSS));
+
+    for (const [token, expectedValue] of Object.entries(
+      THEME_COLOR_BINDING_EXPECTATIONS,
+    )) {
+      expect(readCssVariable(css, token), token).toBe(expectedValue);
+    }
+  });
+
+  it("defines footer-specific selection tokens for light and dark states", () => {
+    const css = stripCssComments(readRepoFile(GLOBALS_CSS));
+    const footerTokenSource = stripCssComments(
+      readRepoFile(FOOTER_STYLE_TOKEN_SOURCE),
+    );
+
+    for (const token of REQUIRED_FOOTER_SELECTION_TOKENS) {
+      expect(
+        readCssVariable(css, token),
+        `${token} should exist in ${GLOBALS_CSS}`,
+      ).toBeDefined();
+      expect(
+        footerTokenSource.includes(`var(${token})`),
+        `${FOOTER_STYLE_TOKEN_SOURCE} should consume ${token}`,
+      ).toBe(true);
+    }
+  });
+
+  it("wires footer selection tokens through the rendered footer component", () => {
+    const footerTokenSource = stripCssComments(
+      readRepoFile(FOOTER_STYLE_TOKEN_SOURCE),
+    );
+    const footerComponentSource = stripCssComments(
+      readRepoFile(FOOTER_COMPONENT_SOURCE),
+    );
+
+    for (const [runtimeToken, sourceToken] of Object.entries(
+      FOOTER_SELECTION_RUNTIME_CHAIN,
+    )) {
+      expect(
+        footerTokenSource.includes(`var(${sourceToken})`),
+        `${FOOTER_STYLE_TOKEN_SOURCE} should source ${runtimeToken} from ${sourceToken}`,
+      ).toBe(true);
+      expect(
+        footerComponentSource.includes(`"${runtimeToken}"`),
+        `${FOOTER_COMPONENT_SOURCE} should expose ${runtimeToken} as an inline custom property`,
+      ).toBe(true);
+      expect(
+        footerComponentSource.includes(`var(${runtimeToken})`),
+        `${FOOTER_COMPONENT_SOURCE} should consume ${runtimeToken} in selection utilities`,
+      ).toBe(true);
+    }
+  });
+
+  it("keeps footer browser UI config in a semantic light/dark link contract", () => {
+    const footerTokenSource = stripCssComments(
+      readRepoFile(FOOTER_STYLE_TOKEN_SOURCE),
+    );
+
+    expect(footerTokenSource).toContain('text: "text-muted-foreground"');
+    expect(footerTokenSource).toContain('hoverText: "hover:text-foreground"');
+  });
+
   it("keeps selected production UI files off raw brand palette classes", () => {
     for (const filePath of RAW_COLOR_PRODUCTION_FILES) {
       const source = stripCssComments(readRepoFile(filePath));
@@ -221,6 +316,21 @@ describe("design token contract", () => {
         `${filePath} should not embed the old steel-blue value directly`,
       ).toBeNull();
     }
+  });
+
+  it("keeps footer browser UI config off raw Tailwind palette classes", () => {
+    const source = stripCssComments(readRepoFile(FOOTER_STYLE_TOKEN_SOURCE));
+
+    expect(
+      source.match(BANNED_FOOTER_RAW_PALETTE_CLASS_PATTERN),
+      `${FOOTER_STYLE_TOKEN_SOURCE} should use semantic tokens instead of raw Tailwind palette classes because it feeds browser-rendered footer UI`,
+    ).toBeNull();
+  });
+
+  it("includes footer browser UI config in Tailwind source scanning", () => {
+    const css = stripCssComments(readRepoFile(GLOBALS_CSS));
+
+    expect(css).toContain(FOOTER_STYLE_TOKEN_TAILWIND_SOURCE);
   });
 
   it("does not keep old brand color values in the browser runtime CSS", () => {
