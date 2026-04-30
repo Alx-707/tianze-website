@@ -45,7 +45,7 @@ export async function LegalPageShell({
     <>
       <JsonLdGraphScript locale={locale as Locale} data={[schema]} />
 
-      <main className="container mx-auto px-4 py-8 md:py-12">
+      <div className="container mx-auto px-4 py-8 md:py-12">
         <header className="mb-6 md:mb-8">
           <h1 className="text-heading mb-4">{metadata.title}</h1>
           {metadata.description && (
@@ -95,7 +95,7 @@ export async function LegalPageShell({
             </aside>
           )}
         </div>
-      </main>
+      </div>
     </>
   );
 }

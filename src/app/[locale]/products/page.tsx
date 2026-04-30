@@ -60,7 +60,7 @@ export default async function ProductsPage({ params }: ProductsPageProps) {
   );
 
   return (
-    <main className="mx-auto max-w-[1080px] px-6 py-8 md:py-12">
+    <div className="mx-auto max-w-[1080px] px-6 py-8 md:py-12">
       <JsonLdGraphScript
         locale={locale as SeoLocale}
         data={[breadcrumbSchema]}
@@ -114,6 +114,6 @@ export default async function ProductsPage({ params }: ProductsPageProps) {
           </div>
         </section>
       )}
-    </main>
+    </div>
   );
 }

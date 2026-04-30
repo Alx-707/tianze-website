@@ -197,7 +197,9 @@ describe("Feature: Product Overview Page", () => {
         ProductsPage({ params: Promise.resolve({ locale: "zh" }) }),
       );
 
-      expect(screen.getByRole("main")).toBeInTheDocument();
+      expect(
+        screen.getByTestId("market-card-north-america"),
+      ).toBeInTheDocument();
     });
   });
 });

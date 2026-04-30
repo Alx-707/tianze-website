@@ -58,7 +58,7 @@ export default async function AboutPage({ params }: AboutPageProps) {
   return (
     <Suspense
       fallback={
-        <main className="container mx-auto px-4 py-8 md:py-12">
+        <div className="container mx-auto px-4 py-8 md:py-12">
           <div className="mb-4 h-9 w-64 animate-pulse rounded bg-muted" />
           <div className="space-y-4">
             {Array.from({ length: 4 }, (_, index) => (
@@ -68,7 +68,7 @@ export default async function AboutPage({ params }: AboutPageProps) {
               />
             ))}
           </div>
-        </main>
+        </div>
       }
     >
       <AboutContent locale={locale} />

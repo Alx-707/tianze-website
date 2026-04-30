@@ -27,7 +27,7 @@ vi.mock("@/components/content/legal-page-shell", () => ({
       headings: Array<{ id: string; text: string }>;
       schemaType: string;
     }) => (
-      <main data-schema-type={schemaType}>
+      <div data-schema-type={schemaType}>
         <h1>{metadata.title}</h1>
         <nav aria-label="Table of Contents">
           {headings.map((heading) => (
@@ -36,7 +36,7 @@ vi.mock("@/components/content/legal-page-shell", () => ({
             </a>
           ))}
         </nav>
-      </main>
+      </div>
     ),
   ),
 }));
@@ -110,7 +110,6 @@ describe("Privacy Page", () => {
 
     const { container } = render(PrivacyPageComponent);
 
-    expect(container.querySelector("main")).not.toBeNull();
     expect(container.querySelectorAll(".animate-pulse")).toHaveLength(8);
   });
 });

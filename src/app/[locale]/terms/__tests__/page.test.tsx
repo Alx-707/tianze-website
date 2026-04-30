@@ -25,9 +25,9 @@ vi.mock("@/components/content/legal-page-shell", () => ({
       metadata: { title: string };
       schemaType: string;
     }) => (
-      <main data-schema-type={schemaType}>
+      <div data-schema-type={schemaType}>
         <h1>{metadata.title}</h1>
-      </main>
+      </div>
     ),
   ),
 }));
@@ -110,7 +110,6 @@ describe("TermsPage", () => {
 
       const { container } = render(component);
 
-      expect(container.querySelector("main")).not.toBeNull();
       expect(container.querySelectorAll(".animate-pulse")).toHaveLength(8);
     });
   });
