@@ -89,7 +89,7 @@ export default async function MarketPage({ params }: MarketPageProps) {
   });
 
   return (
-    <main
+    <div
       className="mx-auto max-w-[1080px] px-6 py-8 md:py-12"
       data-testid="market-page-content"
     >
@@ -145,6 +145,6 @@ export default async function MarketPage({ params }: MarketPageProps) {
         buttonText={t("market.cta.button")}
         href={SINGLE_SITE_PRODUCTS_PAGE_EXPRESSION.marketLanding.ctaHref}
       />
-    </main>
+    </div>
   );
 }

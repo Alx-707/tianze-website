@@ -3,6 +3,12 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 
 const REPO_ROOT = path.resolve(__dirname, "../../..");
+const LEAD_FAMILY_TEST_FILES = [
+  "tests/integration/api/lead-family-contract.test.ts",
+  "tests/integration/api/lead-family-protection.test.ts",
+  "src/app/api/inquiry/__tests__/route.test.ts",
+  "tests/integration/api/subscribe.test.ts",
+] as const;
 
 function readRepoFile(relativePath: string) {
   // eslint-disable-next-line security/detect-non-literal-fs-filename -- test reads fixed repo fixture files by relative path
@@ -62,5 +68,42 @@ describe("proof lane contract", () => {
     expect(releaseProofRunbook).toContain("targeted proof");
     expect(releaseProofRunbook).toContain("clean branch");
     expect(releaseProofRunbook).toContain("ci:local:quick");
+  });
+
+  it("keeps the lead-family proof lane aligned with route-level replay coverage", () => {
+    const packageJson = JSON.parse(readRepoFile("package.json")) as {
+      scripts: Record<string, string>;
+    };
+    const leadFamilyScript = packageJson.scripts["test:lead-family"];
+
+    expect(leadFamilyScript).toBeTruthy();
+    for (const testFile of LEAD_FAMILY_TEST_FILES) {
+      expect(leadFamilyScript).toContain(testFile);
+    }
+  });
+
+  it("does not imply deployed GET smoke proves real lead submission", () => {
+    const releaseProofScript = readRepoFile("scripts/release-proof.sh");
+    const releaseProofRunbook = readRepoFile(
+      "docs/guides/RELEASE-PROOF-RUNBOOK.md",
+    );
+
+    expect(releaseProofScript).toContain("test:e2e:post-deploy");
+    expect(releaseProofScript).toContain("Airtable");
+    expect(releaseProofScript).toContain("manual launch gate");
+    expect(releaseProofRunbook).toContain("test:e2e:post-deploy");
+    expect(releaseProofRunbook).toContain("manual launch gate");
+  });
+
+  it("keeps review:mutation:critical pointed at an existing script", () => {
+    const packageJson = JSON.parse(readRepoFile("package.json")) as {
+      scripts: Record<string, string>;
+    };
+    const command = packageJson.scripts["review:mutation:critical"];
+
+    expect(command).toBe("node scripts/review-mutation-critical.js");
+    expect(() =>
+      readRepoFile("scripts/review-mutation-critical.js"),
+    ).not.toThrow();
   });
 });

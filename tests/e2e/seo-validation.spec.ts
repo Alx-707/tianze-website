@@ -64,10 +64,12 @@ for (const { path, name, expectedGraphTypes } of KEY_PAGES) {
       expect(title).not.toContain("{{");
     });
 
-    test("has canonical link", async ({ page }) => {
+    test("has exactly one canonical link", async ({ page }) => {
       await page.goto(path);
       const canonical = page.locator('link[rel="canonical"]');
-      const href = await canonical.getAttribute("href");
+
+      await expect(canonical).toHaveCount(1);
+      const href = await canonical.first().getAttribute("href");
       expect(href).toBeTruthy();
       expect(href).toMatch(/^https?:\/\//);
     });
@@ -105,11 +107,17 @@ for (const { path, name, expectedGraphTypes } of KEY_PAGES) {
       await expect(ogType).toHaveAttribute("content", /.+/);
     });
 
-    test("has hreflang alternates for en and zh", async ({ page }) => {
+    test("has one hreflang alternate per locale", async ({ page }) => {
       await page.goto(path);
       const enAlt = page.locator('link[rel="alternate"][hreflang="en"]');
       const zhAlt = page.locator('link[rel="alternate"][hreflang="zh"]');
+      const xDefaultAlt = page.locator(
+        'link[rel="alternate"][hreflang="x-default"]',
+      );
 
+      await expect(enAlt).toHaveCount(1);
+      await expect(zhAlt).toHaveCount(1);
+      await expect(xDefaultAlt).toHaveCount(1);
       await expect(enAlt).toHaveAttribute("href", /\/en/);
       await expect(zhAlt).toHaveAttribute("href", /\/zh/);
     });

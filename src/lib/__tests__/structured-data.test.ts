@@ -142,14 +142,18 @@ describe("Structured Data Generation", () => {
         description:
           "Professional PVC conduit and PETG pneumatic tube manufacturer",
         url: "https://example.com",
-        logo: "https://example.com/images/logo.svg",
         contactPoint: {
           "@type": "ContactPoint",
-          telephone: "+86-518-0000-0000",
           contactType: "customer service",
           availableLanguage: ["en", "zh"],
         },
       });
+      expect(
+        (schema.contactPoint as Record<string, unknown>).telephone,
+      ).toBeUndefined();
+      expect(JSON.stringify(schema)).not.toContain("+86-518-0000-0000");
+      expect((schema as Record<string, unknown>).logo).toBeUndefined();
+      expect(JSON.stringify(schema)).not.toContain("/images/logo.svg");
 
       const sameAs = schema["sameAs"] as string[];
       expect(sameAs).toEqual([
@@ -385,6 +389,19 @@ describe("Structured Data Generation", () => {
 
       expect(data).toHaveProperty("@context", "https://schema.org");
       expect(data).toHaveProperty("@type", "Article");
+    });
+
+    it("does not emit a pending logo in article publisher schema", async () => {
+      const data = await generateLocalizedStructuredData("en", "Article", {
+        title: "Test Article",
+        description: "Test Description",
+        publishedTime: "2023-01-01T00:00:00Z",
+        url: "https://example.com/test",
+      });
+      const publisher = data.publisher as Record<string, unknown>;
+
+      expect(publisher.logo).toBeUndefined();
+      expect(JSON.stringify(data)).not.toContain("/images/logo.svg");
     });
 
     it("should handle malformed product data", async () => {

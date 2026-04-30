@@ -1,6 +1,7 @@
 import type { MarketSpecs } from "@/constants/product-specs/types";
 
 export const PNEUMATIC_SPECS = {
+  updatedAt: "2026-04-26T00:00:00Z",
   technical: {
     material: "PETG (Food-grade available)",
     transparency: "Crystal clear for visual monitoring",
@@ -68,7 +69,7 @@ export const PNEUMATIC_SPECS = {
     },
     {
       slug: "fittings",
-      images: ["/images/products/sample-product.svg"],
+      images: ["/images/products/placeholder-coupling.svg"],
       highlights: [
         "Impact Resistant",
         "Hospital Grade",

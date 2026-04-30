@@ -7,13 +7,14 @@ import type {
   ProductData,
   WebSiteData,
 } from "@/lib/structured-data-types";
-import { SINGLE_SITE_FACTS } from "@/config/single-site";
+import {
+  getPublicContactPhone,
+  getPublicLogoPath,
+} from "@/config/public-trust";
 import { SITE_CONFIG } from "@/config/paths/site-config";
 import { routing } from "@/i18n/routing";
 
 const FALLBACK_BASE_URL = SITE_CONFIG.baseUrl;
-
-const DEFAULT_LOGO_PATH = SINGLE_SITE_FACTS.brandAssets.logo.horizontal;
 
 interface ProductGroupInput {
   name: string;
@@ -77,6 +78,11 @@ export function generateOrganizationData(
   t: Awaited<ReturnType<typeof getTranslations>>,
   data: OrganizationData = {},
 ) {
+  const logoPath = data.logo ?? getPublicLogoPath();
+  const telephone = getPublicContactPhone(
+    data.phone ?? SITE_CONFIG.contact.phone,
+  );
+
   return {
     "@context": "https://schema.org",
     "@type": "Organization",
@@ -91,12 +97,12 @@ export function generateOrganizationData(
         defaultValue: SITE_CONFIG.description,
       }),
     url: data.url || FALLBACK_BASE_URL,
-    logo: data.logo || `${FALLBACK_BASE_URL}${DEFAULT_LOGO_PATH}`,
+    ...(logoPath
+      ? { logo: new URL(logoPath, FALLBACK_BASE_URL).toString() }
+      : {}),
     contactPoint: {
       "@type": "ContactPoint",
-      telephone:
-        data.phone ||
-        t("organization.phone", { defaultValue: SITE_CONFIG.contact.phone }),
+      ...(telephone ? { telephone } : {}),
       contactType: "customer service",
       availableLanguage: routing.locales,
     },
@@ -146,6 +152,8 @@ export function generateArticleData(
   locale: Locale,
   data: ArticleData,
 ) {
+  const logoPath = getPublicLogoPath();
+
   return {
     "@context": "https://schema.org",
     "@type": "Article",
@@ -164,10 +172,14 @@ export function generateArticleData(
       name: t("organization.name", {
         defaultValue: SITE_CONFIG.name,
       }),
-      logo: {
-        "@type": "ImageObject",
-        url: `${FALLBACK_BASE_URL}${DEFAULT_LOGO_PATH}`,
-      },
+      ...(logoPath
+        ? {
+            logo: {
+              "@type": "ImageObject",
+              url: new URL(logoPath, FALLBACK_BASE_URL).toString(),
+            },
+          }
+        : {}),
     },
     datePublished: data.publishedTime,
     dateModified: data.modifiedTime || data.publishedTime,

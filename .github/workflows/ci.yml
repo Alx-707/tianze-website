@@ -185,7 +185,9 @@ jobs:
         env:
           NODE_ENV: production
           APP_ENV: preview
-          NEXT_PUBLIC_SITE_URL: https://tianze-pipe.com
+          PLAYWRIGHT_TEST: "true"
+          NEXT_PUBLIC_BASE_URL: http://localhost:3000
+          NEXT_PUBLIC_SITE_URL: http://localhost:3000
 
       - name: 运行E2E测试
         run: pnpm test:e2e

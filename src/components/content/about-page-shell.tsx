@@ -169,7 +169,7 @@ export function AboutPageShell({
     faqItems.length > 0 ? generateFaqSchemaFromItems(faqItems, typedLocale) : null;
 
   return (
-    <main>
+    <div>
       <JsonLdGraphScript
         locale={typedLocale}
         data={faqSchema ? [aboutSchema, faqSchema] : [aboutSchema]}
@@ -269,6 +269,6 @@ export function AboutPageShell({
           </Button>
         </div>
       </section>
-    </main>
+    </div>
   );
 }

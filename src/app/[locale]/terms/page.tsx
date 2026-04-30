@@ -39,7 +39,7 @@ export async function generateMetadata({
 
 function TermsLoadingSkeleton() {
   return (
-    <main className="container mx-auto px-4 py-8 md:py-12">
+    <div className="container mx-auto px-4 py-8 md:py-12">
       <div className="mb-6 md:mb-8">
         <div className="mb-4 h-9 w-48 animate-pulse rounded bg-muted" />
         <div className="h-5 w-96 animate-pulse rounded bg-muted" />
@@ -49,7 +49,7 @@ function TermsLoadingSkeleton() {
           <div key={i} className="h-4 w-full animate-pulse rounded bg-muted" />
         ))}
       </div>
-    </main>
+    </div>
   );
 }
 

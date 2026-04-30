@@ -61,10 +61,7 @@ function ContactContentBody({
     getContactPageData(locale);
 
   return (
-    <main
-      className="min-h-[80vh] px-4 py-16"
-      data-testid="contact-page-content"
-    >
+    <div className="min-h-[80vh] px-4 py-16" data-testid="contact-page-content">
       <JsonLdGraphScript locale={locale} data={faqSchema ? [faqSchema] : []} />
       <div className="mx-auto max-w-4xl">
         <header className="mb-12 text-center">
@@ -99,7 +96,7 @@ function ContactContentBody({
       {faqItems.length > 0 ? (
         <ContactFaqSection faqItems={faqItems} title={faqSectionTitle} />
       ) : null}
-    </main>
+    </div>
   );
 }
 

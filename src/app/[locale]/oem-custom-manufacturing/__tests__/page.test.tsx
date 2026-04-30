@@ -104,7 +104,8 @@ describe("Feature: OEM Custom Manufacturing Page", () => {
 
   it("renders in Chinese locale", async () => {
     await renderPage("zh");
-    expect(screen.getByRole("main")).toBeInTheDocument();
+    const heading = await screen.findByRole("heading", { level: 1 });
+    expect(heading).toHaveTextContent("OEM 定制制造");
   });
 
   it("is an async server component", async () => {

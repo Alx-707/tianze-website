@@ -14,6 +14,10 @@ const localeCases = [
   },
 ] as const;
 
+function expectExactlyOneMain(html: string) {
+  expect((html.match(/<main\b/g) ?? []).length).toBe(1);
+}
+
 for (const localeCase of localeCases) {
   test.describe(`No-JS HTML contract (${localeCase.locale})`, () => {
     test.use({ javaScriptEnabled: false });
@@ -34,6 +38,7 @@ for (const localeCase of localeCases) {
       await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 
       const html = await page.content();
+      expectExactlyOneMain(html);
       expect(html).not.toContain("BAILOUT_TO_CLIENT_SIDE_RENDERING");
       expect(html).toContain('id="main-content"');
     });
@@ -78,6 +83,7 @@ for (const localeCase of localeCases) {
       ).toBeVisible();
 
       const html = await page.content();
+      expectExactlyOneMain(html);
       expect(html).toContain('id="main-content"');
       expect(html).toContain("<form");
       for (const fieldName of [
@@ -89,6 +95,25 @@ for (const localeCase of localeCases) {
         "acceptPrivacy",
       ]) {
         expect(html).toContain(`name="${fieldName}"`);
+      }
+    });
+
+    test("key localized pages expose one composed main landmark", async ({
+      page,
+    }) => {
+      for (const path of [
+        `/${localeCase.locale}/about`,
+        `/${localeCase.locale}/products`,
+        `/${localeCase.locale}/products/north-america`,
+        `/${localeCase.locale}/privacy`,
+        `/${localeCase.locale}/terms`,
+        `/${localeCase.locale}/oem-custom-manufacturing`,
+      ]) {
+        await page.goto(`http://localhost:3000${path}`, {
+          waitUntil: "domcontentloaded",
+        });
+
+        expectExactlyOneMain(await page.content());
       }
     });
   });

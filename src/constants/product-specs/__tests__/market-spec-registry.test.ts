@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { getAllMarketSlugs } from "@/constants/product-catalog";
+import {
+  getAllMarketSlugs,
+  getFamiliesForMarket,
+} from "@/constants/product-catalog";
 import {
   getMarketSpecEntries,
   getMarketSpecsBySlug,
@@ -25,9 +28,32 @@ describe("market spec registry", () => {
     }
   });
 
+  it("keeps catalog family slugs aligned with market spec families per market", () => {
+    for (const marketSlug of getAllMarketSlugs()) {
+      const catalogFamilySlugs = getFamiliesForMarket(marketSlug)
+        .map((family) => family.slug)
+        .sort();
+      const specFamilySlugs = (getMarketSpecsBySlug(marketSlug)?.families ?? [])
+        .map((family) => family.slug)
+        .sort();
+
+      expect(specFamilySlugs, marketSlug).toEqual(catalogFamilySlugs);
+    }
+  });
+
   it("returns undefined for unknown and prototype-like market slugs", () => {
     expect(getMarketSpecsBySlug("unknown-market")).toBeUndefined();
     expect(getMarketSpecsBySlug("__proto__")).toBeUndefined();
     expect(getMarketSpecsBySlug("constructor")).toBeUndefined();
+  });
+
+  it("keeps live market spec families off the sample product illustration", () => {
+    for (const [marketSlug, specs] of getMarketSpecEntries()) {
+      for (const family of specs.families) {
+        expect(family.images, `${marketSlug}/${family.slug}`).not.toContain(
+          "/images/products/sample-product.svg",
+        );
+      }
+    }
   });
 });

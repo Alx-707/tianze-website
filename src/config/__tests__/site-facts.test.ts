@@ -45,4 +45,22 @@ describe("site-facts", () => {
 
     expect(missingCertificationFiles).toEqual([]);
   });
+
+  it("keeps owner-dependent public trust assets in a safe interim state", async () => {
+    const {
+      getPublicContactPhone,
+      getPublicLogoPath,
+      isPublicPhoneConfigured,
+    } = await import("@/config/public-trust");
+
+    expect(isPublicPhoneConfigured("+86-518-0000-0000")).toBe(false);
+    expect(isPublicPhoneConfigured("+86-138-0013-8000")).toBe(true);
+    expect(getPublicContactPhone("+86-518-0000-0000")).toBeUndefined();
+    expect(getPublicContactPhone("+86-138-0013-8000")).toBe(
+      "+86-138-0013-8000",
+    );
+    expect(siteFacts.brandAssets.logo.status).toBe("pending");
+    expect(getPublicLogoPath(siteFacts.brandAssets.logo)).toBeUndefined();
+    expect(siteFacts.brandAssets.productPhotos.status).toBe("pending");
+  });
 });

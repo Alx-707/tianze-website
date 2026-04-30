@@ -1,6 +1,7 @@
 import type { MarketSpecs } from "@/constants/product-specs/types";
 
 export const AUSTRALIA_NZ_SPECS = {
+  updatedAt: "2026-04-26T00:00:00Z",
   technical: {
     material: "100% Virgin PVC (UPVC)",
     surface: "Smooth interior, reduces wire pulling friction",
@@ -67,7 +68,7 @@ export const AUSTRALIA_NZ_SPECS = {
     },
     {
       slug: "bellmouths",
-      images: ["/images/products/sample-product.svg"],
+      images: ["/images/products/placeholder-conduit.svg"],
       highlights: [
         "Flared Entry Protection",
         "AS/NZS 2053 Compliant",
@@ -104,7 +105,7 @@ export const AUSTRALIA_NZ_SPECS = {
     },
     {
       slug: "couplings",
-      images: ["/images/products/sample-product.svg"],
+      images: ["/images/products/placeholder-coupling.svg"],
       highlights: [
         "Double-Bell Design",
         "AS/NZS 2053 Compliant",
@@ -141,7 +142,7 @@ export const AUSTRALIA_NZ_SPECS = {
     },
     {
       slug: "conduit-pipes",
-      images: ["/images/products/sample-product.svg"],
+      images: ["/images/products/placeholder-pipe.svg"],
       highlights: [
         "Medium & Heavy Duty",
         "Standard Metric Lengths",

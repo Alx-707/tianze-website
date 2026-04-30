@@ -41,17 +41,15 @@ describe("Logo", () => {
       expect(link).toHaveAttribute("href", "/");
     });
 
-    it("renders logo image", () => {
+    it("does not render an image while logo assets are pending", () => {
       render(<Logo />);
 
-      const image = screen.getByRole("img", {
-        name: `${SITE_CONFIG.name} Logo`,
-      });
-      expect(image).toBeInTheDocument();
-      expect(image).toHaveAttribute("alt", `${SITE_CONFIG.name} Logo`);
+      expect(
+        screen.queryByRole("img", { name: `${SITE_CONFIG.name} Logo` }),
+      ).not.toBeInTheDocument();
     });
 
-    it("renders logo text by default", () => {
+    it("renders text fallback by default", () => {
       render(<Logo />);
 
       expect(screen.getByText(SITE_CONFIG.name)).toBeInTheDocument();
@@ -63,22 +61,13 @@ describe("Logo", () => {
       const link = screen.getByTestId("logo-link");
       expect(link).toHaveAttribute("aria-label", SITE_CONFIG.name);
     });
-
-    it("loads logo eagerly", () => {
-      render(<Logo />);
-
-      const image = screen.getByRole("img", {
-        name: `${SITE_CONFIG.name} Logo`,
-      });
-      expect(image).toHaveAttribute("loading", "eager");
-    });
   });
 
   describe("showText prop", () => {
-    it("hides text when showText is false", () => {
+    it("still shows text fallback when showText is false and logo is pending", () => {
       render(<Logo showText={false} />);
 
-      expect(screen.queryByText(SITE_CONFIG.name)).not.toBeInTheDocument();
+      expect(screen.getByText(SITE_CONFIG.name)).toBeInTheDocument();
     });
 
     it("shows text when showText is true", () => {
@@ -89,33 +78,6 @@ describe("Logo", () => {
   });
 
   describe("size prop", () => {
-    it("applies sm size class to image", () => {
-      render(<Logo size="sm" />);
-
-      const image = screen.getByRole("img", {
-        name: `${SITE_CONFIG.name} Logo`,
-      });
-      expect(image).toHaveClass("h-6");
-    });
-
-    it("applies md size class to image (default)", () => {
-      render(<Logo size="md" />);
-
-      const image = screen.getByRole("img", {
-        name: `${SITE_CONFIG.name} Logo`,
-      });
-      expect(image).toHaveClass("h-8");
-    });
-
-    it("applies lg size class to image", () => {
-      render(<Logo size="lg" />);
-
-      const image = screen.getByRole("img", {
-        name: `${SITE_CONFIG.name} Logo`,
-      });
-      expect(image).toHaveClass("h-10");
-    });
-
     it("applies sm text size class", () => {
       render(<Logo size="sm" />);
 
@@ -165,35 +127,6 @@ describe("Logo", () => {
     });
   });
 
-  describe("image attributes", () => {
-    it("uses correct src path", () => {
-      render(<Logo />);
-
-      const image = screen.getByRole("img", {
-        name: `${SITE_CONFIG.name} Logo`,
-      });
-      expect(image).toHaveAttribute("src", "/images/logo.svg");
-    });
-
-    it("has dark mode invert class", () => {
-      render(<Logo />);
-
-      const image = screen.getByRole("img", {
-        name: `${SITE_CONFIG.name} Logo`,
-      });
-      expect(image).toHaveClass("dark:invert");
-    });
-
-    it("has transition class", () => {
-      render(<Logo />);
-
-      const image = screen.getByRole("img", {
-        name: `${SITE_CONFIG.name} Logo`,
-      });
-      expect(image).toHaveClass("transition-[filter,opacity]");
-    });
-  });
-
   describe("text styling", () => {
     it("text has font-bold class", () => {
       render(<Logo />);
@@ -209,11 +142,11 @@ describe("Logo", () => {
       expect(text).toHaveClass("text-foreground");
     });
 
-    it("text uses desktop-only visibility contract", () => {
+    it("text fallback stays visible when logo asset is pending", () => {
       render(<Logo />);
 
       const text = screen.getByText(SITE_CONFIG.name);
-      expect(text).toHaveClass("header-logo-text-desktop-only");
+      expect(text).not.toHaveClass("header-logo-text-desktop-only");
     });
   });
 
@@ -235,22 +168,20 @@ describe("Logo", () => {
 });
 
 describe("LogoCompact", () => {
-  it("renders Logo with showText false", () => {
+  it("renders text fallback while logo assets are pending", () => {
     render(<LogoCompact />);
 
     expect(
-      screen.getByRole("img", { name: `${SITE_CONFIG.name} Logo` }),
-    ).toBeInTheDocument();
-    expect(screen.queryByText(SITE_CONFIG.name)).not.toBeInTheDocument();
+      screen.queryByRole("img", { name: `${SITE_CONFIG.name} Logo` }),
+    ).not.toBeInTheDocument();
+    expect(screen.getByText(SITE_CONFIG.name)).toBeInTheDocument();
   });
 
-  it("uses sm size", () => {
+  it("uses sm text size", () => {
     render(<LogoCompact />);
 
-    const image = screen.getByRole("img", {
-      name: `${SITE_CONFIG.name} Logo`,
-    });
-    expect(image).toHaveClass("h-6");
+    const text = screen.getByText(SITE_CONFIG.name);
+    expect(text).toHaveClass("text-lg");
   });
 
   it("accepts custom className", () => {
@@ -262,22 +193,13 @@ describe("LogoCompact", () => {
 });
 
 describe("LogoLarge", () => {
-  it("renders Logo with showText true", () => {
+  it("renders text fallback while logo assets are pending", () => {
     render(<LogoLarge />);
 
     expect(
-      screen.getByRole("img", { name: `${SITE_CONFIG.name} Logo` }),
-    ).toBeInTheDocument();
+      screen.queryByRole("img", { name: `${SITE_CONFIG.name} Logo` }),
+    ).not.toBeInTheDocument();
     expect(screen.getByText(SITE_CONFIG.name)).toBeInTheDocument();
-  });
-
-  it("uses lg size", () => {
-    render(<LogoLarge />);
-
-    const image = screen.getByRole("img", {
-      name: `${SITE_CONFIG.name} Logo`,
-    });
-    expect(image).toHaveClass("h-10");
   });
 
   it("uses lg text size", () => {

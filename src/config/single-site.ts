@@ -131,11 +131,15 @@ export const SINGLE_SITE_DEFINITION: SiteDefinition = {
     // Do NOT convert logo.tsx to next/image static import until files exist.
     brandAssets: {
       logo: {
+        status: "pending",
         horizontal: "/images/logo.svg",
         horizontalPng: "/images/logo.png",
         square: "/images/logo-square.svg",
         width: 200,
         height: 60,
+      },
+      productPhotos: {
+        status: "pending",
       },
       ogImage: "/images/og-image.jpg",
       favicon: "/favicon.ico",

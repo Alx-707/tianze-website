@@ -1,6 +1,7 @@
 import type { MarketSpecs } from "@/constants/product-specs/types";
 
 export const NORTH_AMERICA_SPECS = {
+  updatedAt: "2026-04-26T00:00:00Z",
   technical: {
     material: "100% Virgin PVC (UPVC)",
     surface: "Smooth interior, reduces wire pulling friction",
@@ -70,7 +71,7 @@ export const NORTH_AMERICA_SPECS = {
     },
     {
       slug: "couplings",
-      images: ["/images/products/sample-product.svg"],
+      images: ["/images/products/placeholder-coupling.svg"],
       highlights: [
         "Double-Bell Design",
         "Secure Conduit Joints",
@@ -111,7 +112,7 @@ export const NORTH_AMERICA_SPECS = {
     },
     {
       slug: "conduit-pipes",
-      images: ["/images/products/sample-product.svg"],
+      images: ["/images/products/placeholder-pipe.svg"],
       highlights: [
         "Schedule 40 & 80",
         "Standard Lengths",

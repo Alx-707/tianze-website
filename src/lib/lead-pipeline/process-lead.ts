@@ -3,6 +3,8 @@
  * Unified handler for all lead sources: contact, product inquiry, newsletter
  */
 
+import "server-only";
+
 import {
   isContactLead,
   isProductLead,

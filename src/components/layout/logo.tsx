@@ -4,6 +4,7 @@
  * Responsive logo component with proper accessibility and theming support.
  * Supports both text and image logos with automatic dark mode handling.
  */
+import { getPublicLogoPath } from "@/config/public-trust";
 import { Link } from "@/i18n/routing";
 import { SINGLE_SITE_FACTS } from "@/config/single-site";
 import { cn } from "@/lib/utils";
@@ -23,7 +24,9 @@ export function Logo({
   size = "md",
   ariaLabel = SITE_CONFIG.name,
 }: LogoProps) {
-  const { horizontal, width, height } = SINGLE_SITE_FACTS.brandAssets.logo;
+  const { width, height } = SINGLE_SITE_FACTS.brandAssets.logo;
+  const logoPath = getPublicLogoPath();
+  const shouldShowText = showText || !logoPath;
 
   const getSizeClass = (sizeValue: "sm" | "md" | "lg"): string => {
     switch (sizeValue) {
@@ -61,26 +64,28 @@ export function Logo({
       )}
       aria-label={ariaLabel}
     >
-      {/* Static logo asset does not need next/image client runtime. */}
-      {/* eslint-disable-next-line @next/next/no-img-element -- static local SVG logo should not pull next/image runtime into the shared layout chunk */}
-      <img
-        src={horizontal}
-        alt={`${SITE_CONFIG.name} Logo`}
-        width={width}
-        height={height}
-        className={cn(
-          "transition-[filter,opacity] duration-200 dark:invert",
-          getSizeClass(size),
-        )}
-        decoding="async"
-        loading="eager"
-      />
+      {logoPath ? (
+        // eslint-disable-next-line @next/next/no-img-element -- static local SVG logo should not pull next/image runtime into the shared layout chunk
+        <img
+          src={logoPath}
+          alt={`${SITE_CONFIG.name} Logo`}
+          width={width}
+          height={height}
+          className={cn(
+            "transition-[filter,opacity] duration-200 dark:invert",
+            getSizeClass(size),
+          )}
+          decoding="async"
+          loading="eager"
+        />
+      ) : null}
 
-      {/* Logo Text */}
-      {showText && (
+      {/* Keep the brand name visible until real logo assets are public-ready. */}
+      {shouldShowText && (
         <span
           className={cn(
-            "header-logo-text-desktop-only font-bold text-foreground",
+            "font-bold text-foreground",
+            logoPath ? "header-logo-text-desktop-only" : undefined,
             getTextSizeClass(size),
           )}
         >

@@ -245,7 +245,7 @@ async function OemCustomManufacturingContent({ locale }: { locale: string }) {
   const faqSchema = generateFaqSchemaFromItems(faqItems, locale as Locale);
 
   return (
-    <main className="mx-auto max-w-[1080px] px-6 py-8 md:py-12">
+    <div className="mx-auto max-w-[1080px] px-6 py-8 md:py-12">
       <JsonLdGraphScript
         locale={locale as Locale}
         data={[oemSchema, faqSchema]}
@@ -282,13 +282,13 @@ async function OemCustomManufacturingContent({ locale }: { locale: string }) {
         buttonText={t("cta.button")}
         href={SINGLE_SITE_OEM_PAGE_EXPRESSION.ctaHref}
       />
-    </main>
+    </div>
   );
 }
 
 function OemCustomManufacturingLoadingSkeleton() {
   return (
-    <main className="mx-auto max-w-[1080px] px-6 py-8 md:py-12">
+    <div className="mx-auto max-w-[1080px] px-6 py-8 md:py-12">
       <div className="mb-8 h-10 w-72 animate-pulse rounded bg-muted" />
       <div className="space-y-4">
         {Array.from({ length: 6 }, (_, index) => (
@@ -298,7 +298,7 @@ function OemCustomManufacturingLoadingSkeleton() {
           />
         ))}
       </div>
-    </main>
+    </div>
   );
 }
 

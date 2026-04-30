@@ -1,6 +1,7 @@
 import type { MarketSpecs } from "@/constants/product-specs/types";
 
 export const MEXICO_SPECS = {
+  updatedAt: "2026-04-26T00:00:00Z",
   technical: {
     material: "100% Virgin PVC (UPVC)",
     surface: "Smooth interior, reduces wire pulling friction",
@@ -62,7 +63,7 @@ export const MEXICO_SPECS = {
     },
     {
       slug: "couplings",
-      images: ["/images/products/sample-product.svg"],
+      images: ["/images/products/placeholder-coupling.svg"],
       highlights: ["NOM Compliant", "Double-Bell Design", "Metric Sizes"],
       specGroups: [
         {
@@ -95,7 +96,7 @@ export const MEXICO_SPECS = {
     },
     {
       slug: "conduit-pipes",
-      images: ["/images/products/sample-product.svg"],
+      images: ["/images/products/placeholder-pipe.svg"],
       highlights: ["NOM Compliant", "Standard Lengths", "Metric Sizes"],
       specGroups: [
         {

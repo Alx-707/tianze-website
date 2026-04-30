@@ -8,14 +8,15 @@ The audit should judge launch readiness from the buyer's view, not only whether 
 
 ## Stack and runtime
 
-- Next.js 16.2 App Router with Cache Components
-- React 19.2
-- TypeScript 5.9
-- Tailwind CSS 4.2
-- next-intl 4.8
+- Next.js: 16.2.4
+- React: 19.2.5
+- TypeScript: 6.0.3
+- Tailwind CSS: 4.2.4
+- next-intl: 4.11.0
 - Cloudflare/OpenNext deployment path
+- Version-locked Next.js docs: `node_modules/next/dist/docs/`
 
-Version-locked Next.js docs live in `.next-docs/`. Read them before making Next.js claims or proposing framework changes.
+Read the version-locked Next.js docs before making Next.js claims or proposing framework changes.
 
 ## Critical buyer flows
 
@@ -31,7 +32,7 @@ Version-locked Next.js docs live in `.next-docs/`. Read them before making Next.
 - `CLAUDE.md`
 - `.claude/rules/*`
 - `package.json`
-- `.next-docs/`
+- `node_modules/next/dist/docs/`
 - `next.config.*`
 - `open-next.config.*`
 - `wrangler.*`

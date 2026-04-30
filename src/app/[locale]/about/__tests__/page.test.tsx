@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { render } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import AboutPage, { generateMetadata, generateStaticParams } from "../page";
 
@@ -33,7 +33,7 @@ vi.mock("@/app/[locale]/generate-static-params", () => ({
 }));
 
 vi.mock("@/components/content/about-page-shell", () => ({
-  AboutPageShell: () => <main data-testid="about-shell" />,
+  AboutPageShell: () => <div data-testid="about-shell" />,
 }));
 
 vi.mock("@/lib/content", () => ({
@@ -144,7 +144,6 @@ describe("AboutPage", () => {
 
     const { container } = render(element);
 
-    expect(screen.getByRole("main")).toBeInTheDocument();
     expect(container.querySelectorAll(".animate-pulse").length).toBeGreaterThan(
       0,
     );

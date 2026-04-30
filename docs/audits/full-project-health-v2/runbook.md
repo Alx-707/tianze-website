@@ -54,6 +54,14 @@ PYTHONDONTWRITEBYTECODE=1 python3 "$REPO_HEALTH_AUDIT_SKILL/scripts/validate_aud
 
 For a read-only audit run, business-code diff against `origin/main` must be zero unless the user names a checkpoint commit.
 
+For Semgrep evidence, prefer the repo-owned wrapper:
+
+```bash
+pnpm security:semgrep
+```
+
+Do not claim fresh local Semgrep evidence from raw `semgrep` unless the binary exists in the current environment and the command output is captured for the current run.
+
 ## Runtime handoff
 
 Lane 00 or the orchestrator must provide one runtime target before UI, SEO, CSP, or contact-flow runtime claims:

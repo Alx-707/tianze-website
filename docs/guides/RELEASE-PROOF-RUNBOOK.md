@@ -140,7 +140,7 @@ pnpm clean:next-artifacts && pnpm build
 - release proof 比 CI proof 更强，因为它考虑改动类型和平台边界
 - 如果这次改动本身就碰了 Cloudflare build chain，signoff 前额外再补一次 fresh `pnpm build:cf`
 - canonical final Cloudflare preview proof 是 `pnpm proof:cf:preview-deployed`
-- preview proof 已经包含 deployed smoke，所以 preview workflow 不要再补第二套 post-deploy 校验
+- preview proof 已经包含 deployed GET smoke，所以 preview workflow 不要再补第二套 GET smoke；但正式公开前仍要单独跑 deployed lead canary manual launch gate
 - 如果需要更底层的原语，再手动跑真实 preview 发布加：
   - `pnpm smoke:cf:deploy -- --base-url <deployment-url>`
 - Cloudflare 相关步骤失败时，必须记清楚它属于：
@@ -160,3 +160,28 @@ pnpm clean:next-artifacts && pnpm build
 
 release-proof 只结束技术证据阶段。  
 它本身不自动授权发布。
+
+## Deployed lead canary manual launch gate
+
+`pnpm release:verify` proves the local/build/release smoke floor. It does not prove that a deployed buyer inquiry writes to Airtable or triggers the deployed lead notification path.
+
+Before broad public launch, set `DEPLOYED_BASE_URL` to the deployed preview or production URL and run:
+
+```bash
+POST_DEPLOY_TEST=1 PLAYWRIGHT_BASE_URL="$DEPLOYED_BASE_URL" pnpm test:e2e:post-deploy
+```
+
+Passing criteria:
+
+- the deployed Contact form submits successfully;
+- the test records the submitted reference data;
+- Airtable/Resend/Turnstile credentials are the deployed environment credentials;
+- failures block public launch until investigated.
+
+This is a manual launch gate because it depends on deployed secrets and external service state.
+
+## Middleware to proxy migration lane
+
+The Next.js installed docs under `node_modules/next/dist/docs/` describe `proxy.ts` as the renamed convention for middleware. The current Cloudflare/OpenNext lane keeps `src/middleware.ts` until a separate migration branch proves `pnpm build`, `pnpm build:cf`, local preview smoke, strict preview smoke, and deployed smoke.
+
+This migration is not part of the launch trust asset repair wave.

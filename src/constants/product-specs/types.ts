@@ -27,6 +27,8 @@ export interface TradeInfo {
 }
 
 export interface MarketSpecs {
+  /** Market-level content freshness used by sitemap lastmod */
+  updatedAt: string;
   /** Shared material/physical properties (key-value) */
   technical: Record<string, string>;
   /** Standard/certification names */

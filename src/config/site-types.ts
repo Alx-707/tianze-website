@@ -81,13 +81,19 @@ export interface SocialLinks {
   instagram?: string;
 }
 
+export type PublicAssetStatus = "pending" | "ready";
+
 export interface BrandAssets {
   logo: {
+    status: PublicAssetStatus;
     horizontal: string;
     horizontalPng: string;
     square: string;
     width: number;
     height: number;
+  };
+  productPhotos: {
+    status: PublicAssetStatus;
   };
   ogImage: string;
   favicon: string;
