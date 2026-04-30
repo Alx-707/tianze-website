@@ -1,0 +1,288 @@
+[
+  {
+    "id": "FPH-001",
+    "source_finding_ids": ["FPH-L04-001"],
+    "title": "Contact page renders duplicate canonical and hreflang links under E2E production-start environment",
+    "severity": "P1",
+    "domain": "seo",
+    "source_lane": "04-seo-content-conversion",
+    "confidence": "high",
+    "evidence_level": "Confirmed by execution",
+    "evidence": [
+      {
+        "type": "command",
+        "reference": "CI=1 pnpm exec playwright test tests/e2e/seo-validation.spec.ts --project=chromium --grep \"Contact\"",
+        "summary": "Reproduced 2 failed SEO tests: canonical and hreflang locators resolve to both localhost and production URL elements on /en/contact."
+      },
+      {
+        "type": "runtime",
+        "reference": "manual Playwright DOM probe against http://localhost:3000/en/contact with E2E-like pnpm start env",
+        "summary": "DOM contained canonical/hreflang set for http://localhost:3000/en/contact and a second set for https://tianze-pipe.com/en/contact."
+      },
+      {
+        "type": "file",
+        "reference": "src/app/[locale]/contact/page.tsx:42",
+        "summary": "Contact page uses path-aware generateMetadataForPath for canonical and hreflang metadata."
+      },
+      {
+        "type": "file",
+        "reference": "src/lib/seo-metadata.ts:216-228",
+        "summary": "generateMetadataForPath rewrites alternates from SITE_CONFIG.baseUrl, so mixed base URL ownership can duplicate metadata when static and streamed metadata disagree."
+      }
+    ],
+    "impact": "The main inquiry page can send contradictory SEO signals and fail the repo's own SEO E2E gate. For a buyer-conversion page, this is a launch blocker even though normal unit tests pass.",
+    "root_cause": "Canonical base URL ownership is split between build-time/static prerender output and runtime E2E start environment. Next.js 16 can stream metadata for dynamic pages, so the Contact route can end up with a build-time localhost set and a runtime production set.",
+    "recommended_fix": "Make Contact metadata use one canonical base URL source per environment. Rebuild and start with the same URL contract, or change the metadata helper/test env so static and streamed metadata cannot disagree. Do not relax the SEO test.",
+    "verification_needed": "Rerun the targeted Contact SEO E2E, then the full seo-validation.spec.ts, then pnpm ci:local or the E2E stage that previously failed.",
+    "linus_gate": "Simplify"
+  },
+  {
+    "id": "FPH-002",
+    "source_finding_ids": ["FPH-L04-002"],
+    "title": "Public buyer-facing content still contains placeholder contact and product assets",
+    "severity": "P1",
+    "domain": "conversion",
+    "source_lane": "04-seo-content-conversion",
+    "confidence": "high",
+    "evidence_level": "Confirmed by static evidence",
+    "evidence": [
+      {
+        "type": "file",
+        "reference": "src/config/single-site.ts:50-52",
+        "summary": "Public contact phone is still +86-518-0000-0000."
+      },
+      {
+        "type": "file",
+        "reference": "src/config/single-site.ts:129-140",
+        "summary": "Brand asset paths are explicitly marked as intentional placeholders."
+      },
+      {
+        "type": "file",
+        "reference": "public/images/products/sample-product.svg:31-35",
+        "summary": "The shipped product image says Sample Product and asks to replace it with a real product photo."
+      },
+      {
+        "type": "file",
+        "reference": "src/constants/product-specs/north-america.ts:73",
+        "summary": "Product spec image slots still point to /images/products/sample-product.svg; the same placeholder appears across 10 product-family slots."
+      }
+    ],
+    "impact": "Overseas B2B buyers can see fake-looking phone numbers and sample product imagery. This directly weakens supplier trust and inquiry conversion.",
+    "root_cause": "Owner-dependent launch assets were intentionally left as placeholders but are now present on public buyer-facing surfaces.",
+    "recommended_fix": "Replace with verified owner-provided phone, logo, OG image, and real product/factory images; or hide image blocks until real assets exist.",
+    "verification_needed": "Run a placeholder scan for phone/sample-product/logo TODOs, then visually smoke product and contact pages in both locales.",
+    "linus_gate": "Delete"
+  },
+  {
+    "id": "FPH-003",
+    "source_finding_ids": ["FPH-L01-001"],
+    "title": "Next.js middleware convention is deprecated while repo Cloudflare rules still require middleware.ts",
+    "severity": "P2",
+    "domain": "architecture",
+    "source_lane": "01-architecture-coupling",
+    "confidence": "high",
+    "evidence_level": "Confirmed by execution",
+    "evidence": [
+      {
+        "type": "command",
+        "reference": "pnpm build",
+        "summary": "Build passes but prints: The middleware file convention is deprecated. Please use proxy instead."
+      },
+      {
+        "type": "command",
+        "reference": "CF_APPLY_GENERATED_PATCH=true pnpm build:cf",
+        "summary": "Cloudflare/OpenNext build passes but prints the same middleware deprecation warning."
+      },
+      {
+        "type": "file",
+        "reference": ".claude/rules/cloudflare.md:80-82",
+        "summary": "Repo rule says middleware.ts is the Cloudflare-compatible entry and src/proxy.ts previously blocked pnpm build:cf."
+      },
+      {
+        "type": "file",
+        "reference": "node_modules/next/dist/docs/01-app/03-api-reference/03-file-conventions/proxy.md:11-23",
+        "summary": "Installed Next.js 16.2.4 docs state middleware is deprecated and proxy.ts is the renamed convention."
+      }
+    ],
+    "impact": "The site builds today, but future Next/OpenNext upgrades may turn this warning into a harder migration cost. Changing it casually could also break Cloudflare.",
+    "root_cause": "Framework convention changed faster than the repo-specific Cloudflare compatibility rule was revalidated.",
+    "recommended_fix": "Create a dedicated Cloudflare proof lane for middleware.ts to proxy.ts migration, including pnpm build, pnpm build:cf, preview:cf, and smoke:cf:preview before changing the rule.",
+    "verification_needed": "A branch that renames the entry must pass Next build, OpenNext build, Cloudflare local preview, and page smoke.",
+    "linus_gate": "Needs proof"
+  },
+  {
+    "id": "FPH-004",
+    "source_finding_ids": ["FPH-L01-002"],
+    "title": "full-project-health-v2 project profile is stale",
+    "severity": "P2",
+    "domain": "process",
+    "source_lane": "01-architecture-coupling",
+    "confidence": "high",
+    "evidence_level": "Confirmed by static evidence",
+    "evidence": [
+      {
+        "type": "file",
+        "reference": "docs/audits/full-project-health-v2/project-profile.md:11-18",
+        "summary": "Profile lists TypeScript 5.9, next-intl 4.8, and .next-docs/ as the docs path."
+      },
+      {
+        "type": "file",
+        "reference": "package.json",
+        "summary": "Current package uses Next.js 16.2.4, React 19.2.5, TypeScript ^6.0.3, Tailwind ^4.2.4, and next-intl ^4.11.0."
+      },
+      {
+        "type": "command",
+        "reference": "test -d .next-docs; test -d node_modules/next/dist/docs",
+        "summary": ".next-docs does not exist; installed Next docs exist under node_modules/next/dist/docs."
+      }
+    ],
+    "impact": "Future audit runs can start from stale stack assumptions or miss the correct version-locked Next.js documentation source.",
+    "root_cause": "The project adapter was not updated after dependency and documentation-source changes.",
+    "recommended_fix": "Update project-profile.md to match package.json and AGENTS.md: current versions, Node 24 baseline, and node_modules/next/dist/docs.",
+    "verification_needed": "Rerun validate_audit_config.py and manually confirm the adapter's stack facts against package.json and installed docs.",
+    "linus_gate": "Keep"
+  },
+  {
+    "id": "FPH-005",
+    "source_finding_ids": ["FPH-L05-001"],
+    "title": "review:mutation:critical package script points to a missing file",
+    "severity": "P2",
+    "domain": "tests",
+    "source_lane": "05-tests-ai-smell-dead-code",
+    "confidence": "high",
+    "evidence_level": "Confirmed by execution",
+    "evidence": [
+      {
+        "type": "file",
+        "reference": "package.json:161",
+        "summary": "review:mutation:critical is defined as node scripts/review-mutation-critical.js."
+      },
+      {
+        "type": "command",
+        "reference": "pnpm review:mutation:critical",
+        "summary": "Command fails with MODULE_NOT_FOUND for scripts/review-mutation-critical.js."
+      },
+      {
+        "type": "command",
+        "reference": "find scripts -maxdepth 2 -type f | rg 'mutation|stryker|review'",
+        "summary": "Related review scripts exist, but scripts/review-mutation-critical.js is absent."
+      }
+    ],
+    "impact": "Normal test and build gates still pass, but an advertised critical-path mutation review lane is unusable, so future reviewers can get false confidence or lose time.",
+    "root_cause": "The package script survived after its implementation file was removed or never added.",
+    "recommended_fix": "Either restore the intended script or delete/rename the package script to the real mutation guard command.",
+    "verification_needed": "Run pnpm review:mutation:critical or its replacement and record the expected pass/fail contract.",
+    "linus_gate": "Delete"
+  },
+  {
+    "id": "FPH-006",
+    "source_finding_ids": ["FPH-L02-001"],
+    "title": "Sensitive server-only files do not consistently include import \"server-only\"",
+    "severity": "P2",
+    "domain": "security",
+    "source_lane": "02-security-trust-boundary",
+    "confidence": "medium",
+    "evidence_level": "Confirmed by static evidence",
+    "evidence": [
+      {
+        "type": "file",
+        "reference": ".claude/rules/security.md:39-44",
+        "summary": "Repo security rule says sensitive server files should add import \"server-only\"."
+      },
+      {
+        "type": "command",
+        "reference": "rg -n '^import \"server-only\"|server-only' src/app/api src/lib/lead-pipeline src/lib/security/stores",
+        "summary": "Only src/app/api/inquiry/route.ts currently has import \"server-only\" among the checked sensitive files."
+      },
+      {
+        "type": "file",
+        "reference": "src/app/api/subscribe/route.ts:1",
+        "summary": "Public write route starts with next/server imports, not import \"server-only\"."
+      },
+      {
+        "type": "file",
+        "reference": "src/lib/lead-pipeline/process-lead.ts:1",
+        "summary": "Lead processing module is server-sensitive but has no import \"server-only\" marker."
+      }
+    ],
+    "impact": "This is not a confirmed exploit because API routes are server-only by framework boundary. The risk is future accidental client imports or unclear server/client ownership.",
+    "root_cause": "The security convention is documented but not systematically applied across existing sensitive modules.",
+    "recommended_fix": "Add import \"server-only\" to sensitive route/pipeline/store files where compatible, and keep tests/build as the regression guard.",
+    "verification_needed": "Run type-check, lint, tests touching API/lead/security, and build after adding the markers.",
+    "linus_gate": "Keep"
+  },
+  {
+    "id": "FPH-007",
+    "source_finding_ids": ["FPH-TIER-007"],
+    "title": "Layout owns the global main landmark while page shells add nested main landmarks",
+    "severity": "P2",
+    "domain": "accessibility",
+    "source_lane": "03-ui-performance-accessibility",
+    "confidence": "high",
+    "evidence_level": "Confirmed by static evidence",
+    "evidence": [
+      {
+        "type": "file",
+        "reference": "src/app/[locale]/layout.tsx:111-113",
+        "summary": "The localized root layout already wraps all page children in <main id=\"main-content\">."
+      },
+      {
+        "type": "command",
+        "reference": "rg -n \"<main\\\\b\" src/app src/components --glob '!**/__tests__/**'",
+        "summary": "Current runtime source contains 11 <main> declarations outside tests, including page shells nested under the layout main."
+      },
+      {
+        "type": "file",
+        "reference": "src/app/[locale]/contact/page.tsx:64, src/app/[locale]/products/page.tsx:63, src/app/[locale]/products/[market]/page.tsx:92",
+        "summary": "Key buyer-facing pages render additional page-level main landmarks inside the layout-owned main wrapper."
+      },
+      {
+        "type": "command",
+        "reference": "rg -n \"getByRole\\\\(\\\"main\\\"\\\\)|getByRole\\\\('main'\\\\)|toHaveCount\\\\(1\\\\).*main|main.*toHaveCount\\\\(1\\\\)\" src tests --glob '*.{ts,tsx}'",
+        "summary": "Existing tests assert that a main landmark exists, but no current test asserts exactly one composed main landmark per page."
+      }
+    ],
+    "impact": "Real pages can contain nested or multiple main landmarks. The skip-link still points to the outer layout wrapper, but page semantics become noisy for screen readers and accessibility tooling.",
+    "root_cause": "The repo has two competing ownership models: the app layout owns the document main landmark, while individual pages and content shells also render their own main landmarks.",
+    "recommended_fix": "Choose one owner. Given the current layout skip link, keep the layout <main id=\"main-content\"> and convert page/shell <main> wrappers to div, section, or article containers where appropriate. Add a regression check for one main landmark on key pages.",
+    "verification_needed": "Run the no-JS HTML contract and navigation/accessibility smoke tests, then verify key pages have exactly one main landmark after full layout composition.",
+    "linus_gate": "Simplify"
+  },
+  {
+    "id": "FPH-008",
+    "source_finding_ids": ["FPH-TIER-008"],
+    "title": "Production config validation does not catch buyer-facing placeholder assets",
+    "severity": "P2",
+    "domain": "process",
+    "source_lane": "05-tests-ai-smell-dead-code",
+    "confidence": "high",
+    "evidence_level": "Confirmed by execution",
+    "evidence": [
+      {
+        "type": "command",
+        "reference": "pnpm validate:config",
+        "summary": "The command passes with 'Production configuration validated successfully' while public placeholder phone and product assets still exist."
+      },
+      {
+        "type": "file",
+        "reference": "src/config/paths/site-config.ts:20-27",
+        "summary": "isPlaceholder only matches bracket-style values such as [PLACEHOLDER_NAME]."
+      },
+      {
+        "type": "file",
+        "reference": "src/config/paths/site-config.ts:46-90",
+        "summary": "getUnconfiguredPlaceholders checks a narrow set of SITE_CONFIG fields and does not inspect placeholder-like phone numbers, public image paths, copied message bundles, or Terms content."
+      },
+      {
+        "type": "command",
+        "reference": "rg -n \"\\\\+86-518-0000-0000|Sample Product|Replace this image|/images/products/sample-product\\\\.svg\" src content messages public",
+        "summary": "Static scans still find the fake phone and sample-product asset across public config, messages, Terms content, product specs, and public SVG assets."
+      }
+    ],
+    "impact": "A command named production configuration validation can be green while the exact buyer-trust placeholders that block launch remain public. Future release checks can therefore give a false sense of readiness.",
+    "root_cause": "The validation contract is too narrow: it validates runtime/env and bracket placeholders, but not public-launch trust placeholders that look like realistic template data.",
+    "recommended_fix": "Either rename the command to reflect its narrow runtime scope or extend it with a public-launch placeholder guard for fake phone patterns, sample product assets, placeholder SVG text, Terms/contact copies, and brand asset TODOs. If no real phone exists, the passing state should be intentionally hidden, not fake data allowed.",
+    "verification_needed": "Rerun pnpm validate:config and the placeholder scan after repair; the validator should fail on current placeholders and pass only when public placeholders are replaced or intentionally suppressed.",
+    "linus_gate": "Keep"
+  }
+]

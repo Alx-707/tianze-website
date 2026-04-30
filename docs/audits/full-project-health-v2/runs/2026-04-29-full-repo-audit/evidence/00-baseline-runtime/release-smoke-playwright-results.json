@@ -1,0 +1,2151 @@
+{
+  "config": {
+    "configFile": "/Users/Data/Warehouse/Pipe/tianze-website/playwright.config.ts",
+    "rootDir": "/Users/Data/Warehouse/Pipe/tianze-website/tests/e2e",
+    "forbidOnly": true,
+    "fullyParallel": true,
+    "globalSetup": "/Users/Data/Warehouse/Pipe/tianze-website/tests/e2e/global-setup.ts",
+    "globalTeardown": "/Users/Data/Warehouse/Pipe/tianze-website/tests/e2e/global-teardown.ts",
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": {},
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 2
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/Users/Data/Warehouse/Pipe/tianze-website/test-results",
+        "repeatEach": 1,
+        "retries": 2,
+        "metadata": {
+          "actualWorkers": 2
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "/Users/Data/Warehouse/Pipe/tianze-website/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "html",
+        {
+          "outputFolder": "reports/playwright-report",
+          "open": "never"
+        }
+      ],
+      [
+        "json",
+        {
+          "outputFile": "reports/playwright-results.json"
+        }
+      ],
+      [
+        "junit",
+        {
+          "outputFile": "reports/playwright-results.xml"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.59.1",
+    "workers": 2,
+    "webServer": {
+      "command": "pnpm start",
+      "url": "http://localhost:3000",
+      "reuseExistingServer": false,
+      "timeout": 60000,
+      "env": {
+        "NODE_ENV": "production",
+        "PLAYWRIGHT_TEST": "true",
+        "NEXT_PUBLIC_TEST_MODE": "true",
+        "NEXT_PUBLIC_BASE_URL": "http://localhost:3000",
+        "NEXT_PUBLIC_SITE_URL": "https://tianze-pipe.com",
+        "NEXT_PUBLIC_TURNSTILE_SITE_KEY": "1x00000000000000000000AA",
+        "TURNSTILE_SECRET_KEY": "1x0000000000000000000000000000000AA",
+        "NEXT_PUBLIC_TURNSTILE_ACTION": "contact-form",
+        "NEXT_PUBLIC_DISABLE_REACT_SCAN": "true",
+        "NEXT_PUBLIC_DISABLE_DEV_TOOLS": "true",
+        "NEXT_PUBLIC_ENABLE_ANALYTICS": "false",
+        "NEXT_PUBLIC_ENABLE_ERROR_REPORTING": "false",
+        "NEXT_PUBLIC_ENABLE_PERFORMANCE_MONITORING": "false",
+        "NEXT_PUBLIC_SECURITY_MODE": "relaxed",
+        "SECURITY_HEADERS_ENABLED": "false",
+        "SKIP_ENV_VALIDATION": "true",
+        "APP_ENV": "preview"
+      }
+    }
+  },
+  "suites": [
+    {
+      "title": "contact-form-smoke.spec.ts",
+      "file": "contact-form-smoke.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Contact Form - Test-Mode Smoke",
+          "file": "contact-form-smoke.spec.ts",
+          "line": 16,
+          "column": 6,
+          "specs": [],
+          "suites": [
+            {
+              "title": "1. Turnstile 验证流程",
+              "file": "contact-form-smoke.spec.ts",
+              "line": 172,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "应该加载 Turnstile widget（英文页面）",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [
+                        {
+                          "workerIndex": 0,
+                          "parallelIndex": 0,
+                          "status": "passed",
+                          "duration": 3431,
+                          "errors": [],
+                          "stdout": [
+                            {
+                              "text": "✅ Turnstile element detected\n"
+                            }
+                          ],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-04-29T16:53:38.120Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "fd4b3df01f6e58ab2f89-817cee34e43a695ff4de",
+                  "file": "contact-form-smoke.spec.ts",
+                  "line": 173,
+                  "column": 9
+                },
+                {
+                  "title": "应该加载 Turnstile widget（中文页面）",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [
+                        {
+                          "workerIndex": 0,
+                          "parallelIndex": 0,
+                          "status": "passed",
+                          "duration": 308,
+                          "errors": [],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-04-29T16:53:41.687Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "fd4b3df01f6e58ab2f89-27b31719f489cda662e4",
+                  "file": "contact-form-smoke.spec.ts",
+                  "line": 220,
+                  "column": 9
+                },
+                {
+                  "title": "提交按钮初始状态应该被禁用",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [
+                        {
+                          "workerIndex": 0,
+                          "parallelIndex": 0,
+                          "status": "passed",
+                          "duration": 257,
+                          "errors": [],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-04-29T16:53:42.001Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "fd4b3df01f6e58ab2f89-215a22e3cf1ebe6d1ee4",
+                  "file": "contact-form-smoke.spec.ts",
+                  "line": 228,
+                  "column": 9
+                }
+              ]
+            },
+            {
+              "title": "2. 表单验证与错误信息",
+              "file": "contact-form-smoke.spec.ts",
+              "line": 238,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "应该显示必填字段错误（英文）",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [
+                        {
+                          "workerIndex": 0,
+                          "parallelIndex": 0,
+                          "status": "passed",
+                          "duration": 265,
+                          "errors": [],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-04-29T16:53:42.266Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "fd4b3df01f6e58ab2f89-7dd20467f8a9154bb2cb",
+                  "file": "contact-form-smoke.spec.ts",
+                  "line": 239,
+                  "column": 9
+                },
+                {
+                  "title": "应该显示必填字段错误（中文）",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [
+                        {
+                          "workerIndex": 0,
+                          "parallelIndex": 0,
+                          "status": "passed",
+                          "duration": 287,
+                          "errors": [],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-04-29T16:53:42.537Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "fd4b3df01f6e58ab2f89-3b27f856e2eff5bf8587",
+                  "file": "contact-form-smoke.spec.ts",
+                  "line": 270,
+                  "column": 9
+                },
+                {
+                  "title": "应该验证邮箱格式",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [
+                        {
+                          "workerIndex": 0,
+                          "parallelIndex": 0,
+                          "status": "passed",
+                          "duration": 279,
+                          "errors": [],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-04-29T16:53:42.830Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "fd4b3df01f6e58ab2f89-a4264dbc0b6c9b5346a5",
+                  "file": "contact-form-smoke.spec.ts",
+                  "line": 289,
+                  "column": 9
+                }
+              ]
+            },
+            {
+              "title": "3. 表单字段渲染",
+              "file": "contact-form-smoke.spec.ts",
+              "line": 297,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "应该渲染所有必需字段（英文）",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [
+                        {
+                          "workerIndex": 0,
+                          "parallelIndex": 0,
+                          "status": "passed",
+                          "duration": 277,
+                          "errors": [],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-04-29T16:53:43.115Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "fd4b3df01f6e58ab2f89-a8ed144a040ecec2f00f",
+                  "file": "contact-form-smoke.spec.ts",
+                  "line": 298,
+                  "column": 9
+                },
+                {
+                  "title": "应该渲染所有必需字段（中文）",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [
+                        {
+                          "workerIndex": 0,
+                          "parallelIndex": 0,
+                          "status": "passed",
+                          "duration": 279,
+                          "errors": [],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-04-29T16:53:43.398Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "fd4b3df01f6e58ab2f89-6b6b7c09a33852526d19",
+                  "file": "contact-form-smoke.spec.ts",
+                  "line": 312,
+                  "column": 9
+                }
+              ]
+            },
+            {
+              "title": "4. 国际化（i18n）验证",
+              "file": "contact-form-smoke.spec.ts",
+              "line": 324,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "英文页面应该显示英文标签",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [
+                        {
+                          "workerIndex": 0,
+                          "parallelIndex": 0,
+                          "status": "passed",
+                          "duration": 280,
+                          "errors": [],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-04-29T16:53:43.683Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "fd4b3df01f6e58ab2f89-3161d5a87e7cf23b1d82",
+                  "file": "contact-form-smoke.spec.ts",
+                  "line": 325,
+                  "column": 9
+                },
+                {
+                  "title": "中文页面应该显示中文标签",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [
+                        {
+                          "workerIndex": 0,
+                          "parallelIndex": 0,
+                          "status": "passed",
+                          "duration": 291,
+                          "errors": [],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-04-29T16:53:43.969Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "fd4b3df01f6e58ab2f89-0657a6a9d2d94b9aa243",
+                  "file": "contact-form-smoke.spec.ts",
+                  "line": 335,
+                  "column": 9
+                }
+              ]
+            },
+            {
+              "title": "5. 性能与可访问性",
+              "file": "contact-form-smoke.spec.ts",
+              "line": 346,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "页面加载时间应该合理",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [
+                        {
+                          "workerIndex": 0,
+                          "parallelIndex": 0,
+                          "status": "passed",
+                          "duration": 207,
+                          "errors": [],
+                          "stdout": [
+                            {
+                              "text": "✅ Contact page loaded in 57ms\n"
+                            }
+                          ],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-04-29T16:53:44.265Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "fd4b3df01f6e58ab2f89-71d05af891ec36871361",
+                  "file": "contact-form-smoke.spec.ts",
+                  "line": 347,
+                  "column": 9
+                },
+                {
+                  "title": "表单字段应该有可读标签和正确输入类型",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [
+                        {
+                          "workerIndex": 0,
+                          "parallelIndex": 0,
+                          "status": "passed",
+                          "duration": 274,
+                          "errors": [],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-04-29T16:53:44.478Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "fd4b3df01f6e58ab2f89-3545c7a7a2d9bf4d9f84",
+                  "file": "contact-form-smoke.spec.ts",
+                  "line": 362,
+                  "column": 9
+                }
+              ]
+            },
+            {
+              "title": "6. 响应式设计",
+              "file": "contact-form-smoke.spec.ts",
+              "line": 385,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "应该在移动设备上正确显示",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [
+                        {
+                          "workerIndex": 0,
+                          "parallelIndex": 0,
+                          "status": "passed",
+                          "duration": 244,
+                          "errors": [],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-04-29T16:53:44.757Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "fd4b3df01f6e58ab2f89-53e8ee76140ef82a7777",
+                  "file": "contact-form-smoke.spec.ts",
+                  "line": 386,
+                  "column": 9
+                },
+                {
+                  "title": "应该在桌面设备上正确显示",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [
+                        {
+                          "workerIndex": 0,
+                          "parallelIndex": 0,
+                          "status": "passed",
+                          "duration": 263,
+                          "errors": [],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-04-29T16:53:45.006Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "fd4b3df01f6e58ab2f89-28b159c261174babb3a3",
+                  "file": "contact-form-smoke.spec.ts",
+                  "line": 403,
+                  "column": 9
+                }
+              ]
+            },
+            {
+              "title": "7. 网络请求验证",
+              "file": "contact-form-smoke.spec.ts",
+              "line": 415,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "应该正确加载页面资源",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [
+                        {
+                          "workerIndex": 0,
+                          "parallelIndex": 0,
+                          "status": "passed",
+                          "duration": 235,
+                          "errors": [],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-04-29T16:53:45.274Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "fd4b3df01f6e58ab2f89-6d1e15cc90ef0a17296c",
+                  "file": "contact-form-smoke.spec.ts",
+                  "line": 416,
+                  "column": 9
+                }
+              ]
+            },
+            {
+              "title": "8. 交互式表单可用性",
+              "file": "contact-form-smoke.spec.ts",
+              "line": 442,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "英文页面应该保持真实表单可编辑，而不是只停留在备用壳子",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [
+                        {
+                          "workerIndex": 0,
+                          "parallelIndex": 0,
+                          "status": "passed",
+                          "duration": 330,
+                          "errors": [],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-04-29T16:53:45.515Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "fd4b3df01f6e58ab2f89-31810afc2f50a0068e86",
+                  "file": "contact-form-smoke.spec.ts",
+                  "line": 443,
+                  "column": 9
+                },
+                {
+                  "title": "中文页面应该保持真实表单可编辑，而不是只停留在备用壳子",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [
+                        {
+                          "workerIndex": 0,
+                          "parallelIndex": 0,
+                          "status": "passed",
+                          "duration": 348,
+                          "errors": [],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-04-29T16:53:45.850Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "fd4b3df01f6e58ab2f89-2859647a79a7e4f1bad9",
+                  "file": "contact-form-smoke.spec.ts",
+                  "line": 474,
+                  "column": 9
+                }
+              ]
+            },
+            {
+              "title": "9. 表单提交验证",
+              "file": "contact-form-smoke.spec.ts",
+              "line": 503,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "应该能够成功提交表单（英文）",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [
+                        {
+                          "workerIndex": 0,
+                          "parallelIndex": 0,
+                          "status": "passed",
+                          "duration": 2314,
+                          "errors": [],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-04-29T16:53:46.205Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "fd4b3df01f6e58ab2f89-78799c8fa8bb82a5c180",
+                  "file": "contact-form-smoke.spec.ts",
+                  "line": 504,
+                  "column": 9
+                },
+                {
+                  "title": "应该能够成功提交表单（中文）",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [
+                        {
+                          "workerIndex": 0,
+                          "parallelIndex": 0,
+                          "status": "passed",
+                          "duration": 2347,
+                          "errors": [],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-04-29T16:53:48.525Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "fd4b3df01f6e58ab2f89-3d96926862bcfffec6d3",
+                  "file": "contact-form-smoke.spec.ts",
+                  "line": 536,
+                  "column": 9
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "navigation.spec.ts",
+      "file": "navigation.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Navigation System",
+          "file": "navigation.spec.ts",
+          "line": 25,
+          "column": 6,
+          "specs": [
+            {
+              "title": "should redirect root path to default locale",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
+                      "status": "passed",
+                      "duration": 414,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "🧹 Removing interfering elements...\n"
+                        },
+                        {
+                          "text": "✅ Interfering elements removed\n"
+                        },
+                        {
+                          "text": "⏳ Waiting for page to stabilize...\n"
+                        },
+                        {
+                          "text": "✅ Page is stable\n"
+                        },
+                        {
+                          "text": "⏳ Waiting for page to stabilize...\n"
+                        },
+                        {
+                          "text": "✅ Page is stable\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-29T16:53:38.145Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "5d2868f7d23420c27cca-80970301feff4fba66cb",
+              "file": "navigation.spec.ts",
+              "line": 38,
+              "column": 7
+            }
+          ],
+          "suites": [
+            {
+              "title": "Desktop Navigation",
+              "file": "navigation.spec.ts",
+              "line": 78,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "should display all main navigation links",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [
+                        {
+                          "workerIndex": 1,
+                          "parallelIndex": 1,
+                          "status": "passed",
+                          "duration": 275,
+                          "errors": [],
+                          "stdout": [
+                            {
+                              "text": "🧹 Removing interfering elements...\n"
+                            },
+                            {
+                              "text": "✅ Interfering elements removed\n"
+                            },
+                            {
+                              "text": "⏳ Waiting for page to stabilize...\n"
+                            },
+                            {
+                              "text": "✅ Page is stable\n"
+                            }
+                          ],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-04-29T16:53:38.678Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "5d2868f7d23420c27cca-9164a20d8dd1669ef1d2",
+                  "file": "navigation.spec.ts",
+                  "line": 79,
+                  "column": 9
+                },
+                {
+                  "title": "should navigate between pages and highlight active link",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [
+                        {
+                          "workerIndex": 1,
+                          "parallelIndex": 1,
+                          "status": "passed",
+                          "duration": 1229,
+                          "errors": [],
+                          "stdout": [
+                            {
+                              "text": "🧹 Removing interfering elements...\n"
+                            },
+                            {
+                              "text": "✅ Interfering elements removed\n"
+                            },
+                            {
+                              "text": "⏳ Waiting for page to stabilize...\n"
+                            },
+                            {
+                              "text": "✅ Page is stable\n"
+                            },
+                            {
+                              "text": "🖱️  Safe clicking: nav a[href=\"/en/about\"]:visible\n"
+                            },
+                            {
+                              "text": "🧹 Removing interfering elements...\n"
+                            },
+                            {
+                              "text": "✅ Interfering elements removed\n"
+                            },
+                            {
+                              "text": "🧹 Removing interfering elements...\n"
+                            },
+                            {
+                              "text": "✅ Interfering elements removed\n"
+                            },
+                            {
+                              "text": "✅ Successfully clicked: nav a[href=\"/en/about\"]:visible\n"
+                            },
+                            {
+                              "text": "⏳ Waiting for page to stabilize...\n"
+                            },
+                            {
+                              "text": "✅ Page is stable\n"
+                            },
+                            {
+                              "text": "⏳ Waiting for page to stabilize...\n"
+                            },
+                            {
+                              "text": "✅ Page is stable\n"
+                            }
+                          ],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-04-29T16:53:38.960Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "5d2868f7d23420c27cca-3d1ba091381efb4a8c55",
+                  "file": "navigation.spec.ts",
+                  "line": 98,
+                  "column": 9
+                },
+                {
+                  "title": "should support keyboard navigation",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [
+                        {
+                          "workerIndex": 1,
+                          "parallelIndex": 1,
+                          "status": "passed",
+                          "duration": 273,
+                          "errors": [],
+                          "stdout": [
+                            {
+                              "text": "🧹 Removing interfering elements...\n"
+                            },
+                            {
+                              "text": "✅ Interfering elements removed\n"
+                            },
+                            {
+                              "text": "⏳ Waiting for page to stabilize...\n"
+                            },
+                            {
+                              "text": "✅ Page is stable\n"
+                            }
+                          ],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-04-29T16:53:40.197Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "5d2868f7d23420c27cca-076cd288c7d8ce37b4f2",
+                  "file": "navigation.spec.ts",
+                  "line": 156,
+                  "column": 9
+                },
+                {
+                  "title": "should handle external links correctly",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [
+                        {
+                          "workerIndex": 1,
+                          "parallelIndex": 1,
+                          "status": "passed",
+                          "duration": 239,
+                          "errors": [],
+                          "stdout": [
+                            {
+                              "text": "🧹 Removing interfering elements...\n"
+                            },
+                            {
+                              "text": "✅ Interfering elements removed\n"
+                            },
+                            {
+                              "text": "⏳ Waiting for page to stabilize...\n"
+                            },
+                            {
+                              "text": "✅ Page is stable\n"
+                            }
+                          ],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-04-29T16:53:40.476Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "5d2868f7d23420c27cca-2e2dbb526616f1941d41",
+                  "file": "navigation.spec.ts",
+                  "line": 199,
+                  "column": 9
+                }
+              ]
+            },
+            {
+              "title": "Mobile Navigation",
+              "file": "navigation.spec.ts",
+              "line": 214,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "should display hamburger menu on mobile",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [
+                        {
+                          "workerIndex": 1,
+                          "parallelIndex": 1,
+                          "status": "passed",
+                          "duration": 221,
+                          "errors": [],
+                          "stdout": [
+                            {
+                              "text": "🧹 Removing interfering elements...\n"
+                            },
+                            {
+                              "text": "✅ Interfering elements removed\n"
+                            },
+                            {
+                              "text": "⏳ Waiting for page to stabilize...\n"
+                            },
+                            {
+                              "text": "✅ Page is stable\n"
+                            }
+                          ],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-04-29T16:53:40.722Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "5d2868f7d23420c27cca-d0461459901abbcbe9c6",
+                  "file": "navigation.spec.ts",
+                  "line": 224,
+                  "column": 9
+                },
+                {
+                  "title": "should open and close mobile navigation sheet",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [
+                        {
+                          "workerIndex": 1,
+                          "parallelIndex": 1,
+                          "status": "passed",
+                          "duration": 1851,
+                          "errors": [],
+                          "stdout": [
+                            {
+                              "text": "🧹 Removing interfering elements...\n"
+                            },
+                            {
+                              "text": "✅ Interfering elements removed\n"
+                            },
+                            {
+                              "text": "⏳ Waiting for page to stabilize...\n"
+                            },
+                            {
+                              "text": "✅ Page is stable\n"
+                            }
+                          ],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-04-29T16:53:40.949Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "5d2868f7d23420c27cca-e404bc922c232ca7f367",
+                  "file": "navigation.spec.ts",
+                  "line": 244,
+                  "column": 9
+                },
+                {
+                  "title": "should return focus to the trigger after closing the mobile sheet with Escape",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [
+                        {
+                          "workerIndex": 1,
+                          "parallelIndex": 1,
+                          "status": "passed",
+                          "duration": 1021,
+                          "errors": [],
+                          "stdout": [
+                            {
+                              "text": "🧹 Removing interfering elements...\n"
+                            },
+                            {
+                              "text": "✅ Interfering elements removed\n"
+                            },
+                            {
+                              "text": "⏳ Waiting for page to stabilize...\n"
+                            },
+                            {
+                              "text": "✅ Page is stable\n"
+                            }
+                          ],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-04-29T16:53:42.806Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "5d2868f7d23420c27cca-5bb64cff98e04bb79759",
+                  "file": "navigation.spec.ts",
+                  "line": 285,
+                  "column": 9
+                },
+                {
+                  "title": "should navigate from mobile menu and auto-close",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [
+                        {
+                          "workerIndex": 1,
+                          "parallelIndex": 1,
+                          "status": "passed",
+                          "duration": 2034,
+                          "errors": [],
+                          "stdout": [
+                            {
+                              "text": "🧹 Removing interfering elements...\n"
+                            },
+                            {
+                              "text": "✅ Interfering elements removed\n"
+                            },
+                            {
+                              "text": "⏳ Waiting for page to stabilize...\n"
+                            },
+                            {
+                              "text": "✅ Page is stable\n"
+                            },
+                            {
+                              "text": "⏳ Waiting for page to stabilize...\n"
+                            },
+                            {
+                              "text": "✅ Page is stable\n"
+                            },
+                            {
+                              "text": "🖱️  Safe clicking: [data-testid=\"mobile-menu-content\"] a[href=\"/en/about\"]\n"
+                            },
+                            {
+                              "text": "🧹 Removing interfering elements...\n"
+                            },
+                            {
+                              "text": "✅ Interfering elements removed\n"
+                            },
+                            {
+                              "text": "🧹 Removing interfering elements...\n"
+                            },
+                            {
+                              "text": "✅ Interfering elements removed\n"
+                            },
+                            {
+                              "text": "✅ Successfully clicked: [data-testid=\"mobile-menu-content\"] a[href=\"/en/about\"]\n"
+                            },
+                            {
+                              "text": "⏳ Waiting for page to stabilize...\n"
+                            },
+                            {
+                              "text": "✅ Page is stable\n"
+                            }
+                          ],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-04-29T16:53:43.834Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "5d2868f7d23420c27cca-7bb3252fa7077a504836",
+                  "file": "navigation.spec.ts",
+                  "line": 305,
+                  "column": 9
+                },
+                {
+                  "title": "should support touch interactions",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [
+                        {
+                          "workerIndex": 1,
+                          "parallelIndex": 1,
+                          "status": "passed",
+                          "duration": 672,
+                          "errors": [],
+                          "stdout": [
+                            {
+                              "text": "🧹 Removing interfering elements...\n"
+                            },
+                            {
+                              "text": "✅ Interfering elements removed\n"
+                            },
+                            {
+                              "text": "⏳ Waiting for page to stabilize...\n"
+                            },
+                            {
+                              "text": "✅ Page is stable\n"
+                            }
+                          ],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-04-29T16:53:45.874Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "5d2868f7d23420c27cca-c9d453012c3656819d49",
+                  "file": "navigation.spec.ts",
+                  "line": 334,
+                  "column": 9
+                }
+              ]
+            },
+            {
+              "title": "Route Handling",
+              "file": "navigation.spec.ts",
+              "line": 361,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "should handle non-existent routes with 404 page",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [
+                        {
+                          "workerIndex": 1,
+                          "parallelIndex": 1,
+                          "status": "passed",
+                          "duration": 339,
+                          "errors": [],
+                          "stdout": [
+                            {
+                              "text": "🧹 Removing interfering elements...\n"
+                            },
+                            {
+                              "text": "✅ Interfering elements removed\n"
+                            },
+                            {
+                              "text": "⏳ Waiting for page to stabilize...\n"
+                            },
+                            {
+                              "text": "✅ Page is stable\n"
+                            }
+                          ],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-04-29T16:53:46.552Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "5d2868f7d23420c27cca-0e10e616859eecd15c48",
+                  "file": "navigation.spec.ts",
+                  "line": 362,
+                  "column": 9
+                },
+                {
+                  "title": "should preserve query parameters during navigation",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [
+                        {
+                          "workerIndex": 1,
+                          "parallelIndex": 1,
+                          "status": "passed",
+                          "duration": 393,
+                          "errors": [],
+                          "stdout": [
+                            {
+                              "text": "🧹 Removing interfering elements...\n"
+                            },
+                            {
+                              "text": "✅ Interfering elements removed\n"
+                            },
+                            {
+                              "text": "⏳ Waiting for page to stabilize...\n"
+                            },
+                            {
+                              "text": "✅ Page is stable\n"
+                            }
+                          ],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-04-29T16:53:46.897Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "5d2868f7d23420c27cca-78d011d69e99e777b46b",
+                  "file": "navigation.spec.ts",
+                  "line": 378,
+                  "column": 9
+                },
+                {
+                  "title": "should handle browser back/forward navigation",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [
+                        {
+                          "workerIndex": 1,
+                          "parallelIndex": 1,
+                          "status": "passed",
+                          "duration": 778,
+                          "errors": [],
+                          "stdout": [
+                            {
+                              "text": "🧹 Removing interfering elements...\n"
+                            },
+                            {
+                              "text": "✅ Interfering elements removed\n"
+                            },
+                            {
+                              "text": "⏳ Waiting for page to stabilize...\n"
+                            },
+                            {
+                              "text": "✅ Page is stable\n"
+                            }
+                          ],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-04-29T16:53:47.295Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "5d2868f7d23420c27cca-4dfcc49c8032fe0d8806",
+                  "file": "navigation.spec.ts",
+                  "line": 406,
+                  "column": 9
+                }
+              ]
+            },
+            {
+              "title": "Accessibility Tests",
+              "file": "navigation.spec.ts",
+              "line": 458,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "should pass navigation accessibility checks",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [
+                        {
+                          "workerIndex": 1,
+                          "parallelIndex": 1,
+                          "status": "passed",
+                          "duration": 621,
+                          "errors": [],
+                          "stdout": [
+                            {
+                              "text": "🧹 Removing interfering elements...\n"
+                            },
+                            {
+                              "text": "✅ Interfering elements removed\n"
+                            },
+                            {
+                              "text": "⏳ Waiting for page to stabilize...\n"
+                            },
+                            {
+                              "text": "✅ Page is stable\n"
+                            }
+                          ],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-04-29T16:53:48.080Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "5d2868f7d23420c27cca-83cc1927d60b10c56914",
+                  "file": "navigation.spec.ts",
+                  "line": 459,
+                  "column": 9
+                },
+                {
+                  "title": "should have proper ARIA attributes",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [
+                        {
+                          "workerIndex": 1,
+                          "parallelIndex": 1,
+                          "status": "passed",
+                          "duration": 259,
+                          "errors": [],
+                          "stdout": [
+                            {
+                              "text": "🧹 Removing interfering elements...\n"
+                            },
+                            {
+                              "text": "✅ Interfering elements removed\n"
+                            },
+                            {
+                              "text": "⏳ Waiting for page to stabilize...\n"
+                            },
+                            {
+                              "text": "✅ Page is stable\n"
+                            }
+                          ],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-04-29T16:53:48.708Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "5d2868f7d23420c27cca-a90a51d9088d5fe82ad6",
+                  "file": "navigation.spec.ts",
+                  "line": 492,
+                  "column": 9
+                },
+                {
+                  "title": "should support screen reader navigation",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [
+                        {
+                          "workerIndex": 1,
+                          "parallelIndex": 1,
+                          "status": "passed",
+                          "duration": 259,
+                          "errors": [],
+                          "stdout": [
+                            {
+                              "text": "🧹 Removing interfering elements...\n"
+                            },
+                            {
+                              "text": "✅ Interfering elements removed\n"
+                            },
+                            {
+                              "text": "⏳ Waiting for page to stabilize...\n"
+                            },
+                            {
+                              "text": "✅ Page is stable\n"
+                            }
+                          ],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-04-29T16:53:48.974Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "5d2868f7d23420c27cca-27f845359cf5ef89592a",
+                  "file": "navigation.spec.ts",
+                  "line": 515,
+                  "column": 9
+                },
+                {
+                  "title": "should restore focus after closing cookie preferences with Escape",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [
+                        {
+                          "workerIndex": 1,
+                          "parallelIndex": 1,
+                          "status": "passed",
+                          "duration": 790,
+                          "errors": [],
+                          "stdout": [
+                            {
+                              "text": "🧹 Removing interfering elements...\n"
+                            },
+                            {
+                              "text": "✅ Interfering elements removed\n"
+                            },
+                            {
+                              "text": "⏳ Waiting for page to stabilize...\n"
+                            },
+                            {
+                              "text": "✅ Page is stable\n"
+                            }
+                          ],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-04-29T16:53:49.239Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "5d2868f7d23420c27cca-9a0733f408baba346cf8",
+                  "file": "navigation.spec.ts",
+                  "line": 543,
+                  "column": 9
+                },
+                {
+                  "title": "should work with high contrast mode",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [
+                        {
+                          "workerIndex": 1,
+                          "parallelIndex": 1,
+                          "status": "passed",
+                          "duration": 347,
+                          "errors": [],
+                          "stdout": [
+                            {
+                              "text": "🧹 Removing interfering elements...\n"
+                            },
+                            {
+                              "text": "✅ Interfering elements removed\n"
+                            },
+                            {
+                              "text": "⏳ Waiting for page to stabilize...\n"
+                            },
+                            {
+                              "text": "✅ Page is stable\n"
+                            },
+                            {
+                              "text": "⏳ Waiting for page to stabilize...\n"
+                            },
+                            {
+                              "text": "✅ Page is stable\n"
+                            }
+                          ],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-04-29T16:53:50.035Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "5d2868f7d23420c27cca-782df176843465c8a102",
+                  "file": "navigation.spec.ts",
+                  "line": 565,
+                  "column": 9
+                }
+              ]
+            },
+            {
+              "title": "Performance Tests",
+              "file": "navigation.spec.ts",
+              "line": 596,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "should navigate quickly between pages",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [
+                        {
+                          "workerIndex": 1,
+                          "parallelIndex": 1,
+                          "status": "passed",
+                          "duration": 715,
+                          "errors": [],
+                          "stdout": [
+                            {
+                              "text": "🧹 Removing interfering elements...\n"
+                            },
+                            {
+                              "text": "✅ Interfering elements removed\n"
+                            },
+                            {
+                              "text": "⏳ Waiting for page to stabilize...\n"
+                            },
+                            {
+                              "text": "✅ Page is stable\n"
+                            },
+                            {
+                              "text": "About navigation time: 28ms\n"
+                            }
+                          ],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-04-29T16:53:50.387Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "5d2868f7d23420c27cca-77a2638cc18aeedcec35",
+                  "file": "navigation.spec.ts",
+                  "line": 597,
+                  "column": 9
+                },
+                {
+                  "title": "should preload navigation links",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [
+                        {
+                          "workerIndex": 0,
+                          "parallelIndex": 0,
+                          "status": "passed",
+                          "duration": 275,
+                          "errors": [],
+                          "stdout": [
+                            {
+                              "text": "🧹 Removing interfering elements...\n"
+                            },
+                            {
+                              "text": "✅ Interfering elements removed\n"
+                            },
+                            {
+                              "text": "⏳ Waiting for page to stabilize...\n"
+                            },
+                            {
+                              "text": "✅ Page is stable\n"
+                            }
+                          ],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-04-29T16:53:50.907Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "5d2868f7d23420c27cca-2aa8dc3c5100328f79ce",
+                  "file": "navigation.spec.ts",
+                  "line": 638,
+                  "column": 9
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "no-js-html-contract.spec.ts",
+      "file": "no-js-html-contract.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "No-JS HTML contract (en)",
+          "file": "no-js-html-contract.spec.ts",
+          "line": 18,
+          "column": 8,
+          "specs": [
+            {
+              "title": "homepage keeps meaningful structure without client boot",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
+                      "status": "passed",
+                      "duration": 215,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-29T16:53:51.112Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f81e802a8e412d0dc490-7036af84d3aa884045c7",
+              "file": "no-js-html-contract.spec.ts",
+              "line": 21,
+              "column": 9
+            },
+            {
+              "title": "mobile homepage exposes navigation fallback without JavaScript",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 280,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-29T16:53:51.189Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f81e802a8e412d0dc490-172feeb4e8ed1d3e3ae2",
+              "file": "no-js-html-contract.spec.ts",
+              "line": 41,
+              "column": 9
+            },
+            {
+              "title": "contact page renders form structure without JavaScript",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
+                      "status": "passed",
+                      "duration": 189,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-29T16:53:51.332Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f81e802a8e412d0dc490-1c10db71e2d3b0692a85",
+              "file": "no-js-html-contract.spec.ts",
+              "line": 63,
+              "column": 9
+            }
+          ]
+        },
+        {
+          "title": "No-JS HTML contract (zh)",
+          "file": "no-js-html-contract.spec.ts",
+          "line": 18,
+          "column": 8,
+          "specs": [
+            {
+              "title": "homepage keeps meaningful structure without client boot",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 262,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-29T16:53:51.474Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f81e802a8e412d0dc490-eeec823b2981b75faee3",
+              "file": "no-js-html-contract.spec.ts",
+              "line": 21,
+              "column": 9
+            },
+            {
+              "title": "mobile homepage exposes navigation fallback without JavaScript",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
+                      "status": "passed",
+                      "duration": 307,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-29T16:53:51.526Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f81e802a8e412d0dc490-56882e671dcaaa4a8d5c",
+              "file": "no-js-html-contract.spec.ts",
+              "line": 41,
+              "column": 9
+            },
+            {
+              "title": "contact page renders form structure without JavaScript",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 202,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-29T16:53:51.742Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f81e802a8e412d0dc490-ffd22db6cdffe392bf12",
+              "file": "no-js-html-contract.spec.ts",
+              "line": 63,
+              "column": 9
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-04-29T16:53:35.578Z",
+    "duration": 16408.371000000003,
+    "expected": 45,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

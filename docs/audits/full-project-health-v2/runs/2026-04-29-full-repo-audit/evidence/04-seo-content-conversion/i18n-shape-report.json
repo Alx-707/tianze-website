@@ -1,0 +1,11 @@
+{
+  "ok": true,
+  "timestamp": "2026-04-29T16:52:58.877Z",
+  "duration": 19,
+  "summary": {
+    "totalChecks": 6,
+    "passedChecks": 6,
+    "failedChecks": 0
+  },
+  "issues": []
+}
