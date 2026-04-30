@@ -185,3 +185,40 @@ describe("validateProductionConfig CI vs deploy gate", () => {
     expect(result.errors.length).toBeGreaterThan(0);
   });
 });
+
+describe("public launch trust content guard", () => {
+  it("reports owner-dependent public trust items as warnings by default", () => {
+    const env: NodeJS.ProcessEnv = {
+      APP_ENV: "preview",
+      NODE_ENV: "production",
+      VALIDATE_PUBLIC_LAUNCH_CONTENT: "true",
+    };
+
+    const result = validateProductionConfig(env);
+
+    expect(result.errors).toEqual([]);
+    expect(result.warnings).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining("SITE_CONFIG.contact.phone"),
+        expect.stringContaining("brandAssets.logo.status"),
+      ]),
+    );
+  });
+
+  it("promotes public trust items to errors when PUBLIC_LAUNCH_STRICT=true", () => {
+    const env: NodeJS.ProcessEnv = {
+      APP_ENV: "preview",
+      NODE_ENV: "production",
+      PUBLIC_LAUNCH_STRICT: "true",
+    };
+
+    const result = validateProductionConfig(env);
+
+    expect(result.errors).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining("SITE_CONFIG.contact.phone"),
+        expect.stringContaining("brandAssets.logo.status"),
+      ]),
+    );
+  });
+});

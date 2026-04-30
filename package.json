@@ -129,6 +129,7 @@
     "perf:check": "echo 'Performance monitoring via Lighthouse CI - see lighthouserc.js'",
     "config:check": "node scripts/check-config-consistency.js",
     "validate:config": "tsx scripts/validate-production-config.ts",
+    "validate:launch-content": "PUBLIC_LAUNCH_STRICT=true tsx scripts/validate-production-config.ts",
     "eslint:disable:check": "node scripts/check-eslint-disable-usage.js",
     "test:e2e:no-reuse": "CI=1 pnpm test:e2e",
     "test:e2e:ci-local": "CI=1 pnpm test:e2e",

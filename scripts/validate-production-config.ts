@@ -10,7 +10,12 @@
  */
 import { pathToFileURL } from "node:url";
 import { CONTACT_FORM_CONFIG } from "../src/config/contact-form-config";
+import {
+  getPublicContactPhone,
+  getPublicLogoPath,
+} from "../src/config/public-trust";
 import { validateSiteConfig } from "../src/config/paths/site-config";
+import { SINGLE_SITE_FACTS } from "../src/config/single-site";
 
 const MIN_SECRET_LENGTH = 32;
 
@@ -176,6 +181,35 @@ export function validateProductionRuntimeContract(
   return { warnings, errors };
 }
 
+export function validatePublicLaunchTrustContent(
+  env: EnvMap,
+): ValidationReport {
+  const warnings: string[] = [];
+  const errors: string[] = [];
+  const target = isTrue(env, "PUBLIC_LAUNCH_STRICT") ? errors : warnings;
+  const shouldCheck =
+    isTrue(env, "PUBLIC_LAUNCH_STRICT") ||
+    isTrue(env, "VALIDATE_PUBLIC_LAUNCH_CONTENT");
+
+  if (!shouldCheck) {
+    return { warnings, errors };
+  }
+
+  if (!getPublicContactPhone(SINGLE_SITE_FACTS.contact.phone)) {
+    target.push(
+      "SITE_CONFIG.contact.phone is not public-launch ready. Hide it from runtime now and replace it with the owner-confirmed public phone before launch.",
+    );
+  }
+
+  if (!getPublicLogoPath(SINGLE_SITE_FACTS.brandAssets.logo)) {
+    target.push(
+      "brandAssets.logo.status is pending. Header falls back to text-only now; owner-confirmed logo files must be supplied before launch.",
+    );
+  }
+
+  return { warnings, errors };
+}
+
 export function validateProductionConfig(
   env: EnvMap = process.env,
 ): ValidationReport & { runtimeContractChecked: boolean } {
@@ -184,10 +218,19 @@ export function validateProductionConfig(
   const runtimeContract = runtimeContractChecked
     ? validateProductionRuntimeContract(env)
     : { warnings: [], errors: [] };
+  const publicLaunchTrust = validatePublicLaunchTrustContent(env);
 
   return {
-    warnings: [...siteConfig.warnings, ...runtimeContract.warnings],
-    errors: [...siteConfig.errors, ...runtimeContract.errors],
+    warnings: [
+      ...siteConfig.warnings,
+      ...runtimeContract.warnings,
+      ...publicLaunchTrust.warnings,
+    ],
+    errors: [
+      ...siteConfig.errors,
+      ...runtimeContract.errors,
+      ...publicLaunchTrust.errors,
+    ],
     runtimeContractChecked,
   };
 }
