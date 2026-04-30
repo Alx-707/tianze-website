@@ -70,7 +70,7 @@ export const NORTH_AMERICA_SPECS = {
     },
     {
       slug: "couplings",
-      images: ["/images/products/sample-product.svg"],
+      images: ["/images/products/placeholder-coupling.svg"],
       highlights: [
         "Double-Bell Design",
         "Secure Conduit Joints",
@@ -111,7 +111,7 @@ export const NORTH_AMERICA_SPECS = {
     },
     {
       slug: "conduit-pipes",
-      images: ["/images/products/sample-product.svg"],
+      images: ["/images/products/placeholder-pipe.svg"],
       highlights: [
         "Schedule 40 & 80",
         "Standard Lengths",

@@ -62,7 +62,7 @@ export const MEXICO_SPECS = {
     },
     {
       slug: "couplings",
-      images: ["/images/products/sample-product.svg"],
+      images: ["/images/products/placeholder-coupling.svg"],
       highlights: ["NOM Compliant", "Double-Bell Design", "Metric Sizes"],
       specGroups: [
         {
@@ -95,7 +95,7 @@ export const MEXICO_SPECS = {
     },
     {
       slug: "conduit-pipes",
-      images: ["/images/products/sample-product.svg"],
+      images: ["/images/products/placeholder-pipe.svg"],
       highlights: ["NOM Compliant", "Standard Lengths", "Metric Sizes"],
       specGroups: [
         {

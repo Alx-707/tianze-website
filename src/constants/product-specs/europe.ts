@@ -69,7 +69,7 @@ export const EUROPE_SPECS = {
     },
     {
       slug: "couplings",
-      images: ["/images/products/sample-product.svg"],
+      images: ["/images/products/placeholder-coupling.svg"],
       highlights: ["IEC 61386 Certified", "Double-Bell Design", "Metric Sizes"],
       specGroups: [
         {
@@ -115,7 +115,7 @@ export const EUROPE_SPECS = {
     },
     {
       slug: "conduit-pipes",
-      images: ["/images/products/sample-product.svg"],
+      images: ["/images/products/placeholder-pipe.svg"],
       highlights: ["IEC 61386 Certified", "Standard Lengths", "Metric Sizes"],
       specGroups: [
         {

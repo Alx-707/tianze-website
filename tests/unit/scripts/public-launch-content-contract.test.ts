@@ -13,6 +13,13 @@ const LIVE_TEXT_PATHS = [
   "messages/en/deferred.json",
   "messages/zh/deferred.json",
 ] as const;
+const LIVE_PRODUCT_SPEC_PATHS = [
+  "src/constants/product-specs/north-america.ts",
+  "src/constants/product-specs/australia-new-zealand.ts",
+  "src/constants/product-specs/mexico.ts",
+  "src/constants/product-specs/europe.ts",
+  "src/constants/product-specs/pneumatic-tube-systems.ts",
+] as const;
 
 function readRepoFile(relativePath: string): string {
   // eslint-disable-next-line security/detect-non-literal-fs-filename -- fixed repo-owned contract fixtures
@@ -26,6 +33,16 @@ describe("public launch content contract", () => {
 
       expect(source, relativePath).not.toContain("+86-518-0000-0000");
       expect(source, relativePath).not.toContain("0000-0000");
+    }
+  });
+
+  it("keeps live product spec sources off the sample product illustration", () => {
+    for (const relativePath of LIVE_PRODUCT_SPEC_PATHS) {
+      const source = readRepoFile(relativePath);
+
+      expect(source, relativePath).not.toContain(
+        "/images/products/sample-product.svg",
+      );
     }
   });
 });

@@ -68,7 +68,7 @@ export const PNEUMATIC_SPECS = {
     },
     {
       slug: "fittings",
-      images: ["/images/products/sample-product.svg"],
+      images: ["/images/products/placeholder-coupling.svg"],
       highlights: [
         "Impact Resistant",
         "Hospital Grade",

@@ -30,4 +30,14 @@ describe("market spec registry", () => {
     expect(getMarketSpecsBySlug("__proto__")).toBeUndefined();
     expect(getMarketSpecsBySlug("constructor")).toBeUndefined();
   });
+
+  it("keeps live market spec families off the sample product illustration", () => {
+    for (const [marketSlug, specs] of getMarketSpecEntries()) {
+      for (const family of specs.families) {
+        expect(family.images, `${marketSlug}/${family.slug}`).not.toContain(
+          "/images/products/sample-product.svg",
+        );
+      }
+    }
+  });
 });
