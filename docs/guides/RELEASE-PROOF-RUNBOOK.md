@@ -179,3 +179,9 @@ Passing criteria:
 - failures block public launch until investigated.
 
 This is a manual launch gate because it depends on deployed secrets and external service state.
+
+## Middleware to proxy migration lane
+
+The Next.js installed docs under `node_modules/next/dist/docs/` describe `proxy.ts` as the renamed convention for middleware. The current Cloudflare/OpenNext lane keeps `src/middleware.ts` until a separate migration branch proves `pnpm build`, `pnpm build:cf`, local preview smoke, strict preview smoke, and deployed smoke.
+
+This migration is not part of the launch trust asset repair wave.

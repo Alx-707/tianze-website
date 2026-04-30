@@ -79,7 +79,33 @@ In `open-next.config.ts`, keep `minify: false` for split functions and default w
 
 ### middleware.ts is the Cloudflare-compatible entry
 
-`src/proxy.ts` passes `next build` but blocks `pnpm build:cf`. All locale redirect, CSP nonce, and security header changes go in `src/middleware.ts`.
+Next.js 16 recommends the renamed `proxy.ts` convention, but this repo must not rename `src/middleware.ts` until a dedicated Cloudflare proof branch passes:
+
+```bash
+pnpm build
+pnpm build:cf
+pnpm smoke:cf:preview
+pnpm smoke:cf:preview:strict
+```
+
+If a preview deployment URL is created, also run:
+
+```bash
+pnpm smoke:cf:deploy -- --base-url "$DEPLOYED_BASE_URL"
+```
+
+Until that proof exists, `src/middleware.ts` remains the repo-compatible runtime entry.
+
+This wording is based on the installed Next.js docs:
+
+```text
+node_modules/next/dist/docs/01-app/01-getting-started/16-proxy.md
+node_modules/next/dist/docs/01-app/03-api-reference/03-file-conventions/proxy.md
+```
+
+Those docs say the functionality remains the same, `middleware` is deprecated/renamed to `proxy`, and the file convention is `proxy.ts`; they do not prove this repo's Cloudflare/OpenNext adapter path, so the repo-specific proof lane still controls execution.
+
+All locale redirect, CSP nonce, and security header changes go in `src/middleware.ts`.
 
 ### matcher must be static literals
 
