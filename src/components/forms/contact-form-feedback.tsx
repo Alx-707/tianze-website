@@ -7,10 +7,7 @@ import { type FormSubmissionStatus } from "@/lib/forms/form-submission-status";
 import { translateApiError } from "@/lib/api/translate-error-code";
 import { type ServerActionResult } from "@/lib/server-action-utils";
 import { type ContactFormResult } from "@/lib/actions/contact";
-import {
-  FORM_STATUS_CLASS_NAMES,
-  LEGACY_FORM_STATUS_TEST_CLASS_NAMES,
-} from "@/components/forms/form-status-styles";
+import { FORM_STATUS_CLASS_NAMES } from "@/components/forms/form-status-styles";
 
 /**
  * 获取状态消息配置
@@ -22,17 +19,17 @@ export function getStatusConfig(
   switch (status) {
     case "success":
       return {
-        className: `${FORM_STATUS_CLASS_NAMES.success} ${LEGACY_FORM_STATUS_TEST_CLASS_NAMES.success}`,
+        className: FORM_STATUS_CLASS_NAMES.success,
         message: t("submitSuccess"),
       };
     case "error":
       return {
-        className: `${FORM_STATUS_CLASS_NAMES.error} ${LEGACY_FORM_STATUS_TEST_CLASS_NAMES.error}`,
+        className: FORM_STATUS_CLASS_NAMES.error,
         message: t("submitError"),
       };
     case "submitting":
       return {
-        className: `${FORM_STATUS_CLASS_NAMES.submitting} ${LEGACY_FORM_STATUS_TEST_CLASS_NAMES.submitting}`,
+        className: FORM_STATUS_CLASS_NAMES.submitting,
         message: t("submitting"),
       };
     case "idle":
@@ -118,8 +115,8 @@ function getErrorDisplayState(
       !isValidationError &&
       !isPartialSuccess,
     containerClass: isPartialSuccess
-      ? `rounded-lg border p-4 ${FORM_STATUS_CLASS_NAMES.partialSuccess} ${LEGACY_FORM_STATUS_TEST_CLASS_NAMES.partialSuccess}`
-      : `rounded-lg border p-4 ${FORM_STATUS_CLASS_NAMES.error} ${LEGACY_FORM_STATUS_TEST_CLASS_NAMES.error}`,
+      ? `rounded-lg border p-4 ${FORM_STATUS_CLASS_NAMES.partialSuccess}`
+      : `rounded-lg border p-4 ${FORM_STATUS_CLASS_NAMES.error}`,
   };
 }
 
