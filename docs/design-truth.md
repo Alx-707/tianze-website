@@ -77,10 +77,11 @@ Tianze 的设计方向是：
 
 当前设计真相主要来自：
 
-- `src/app/globals.css`
-- `docs/impeccable/system/COLOR-SYSTEM.md`
-- `docs/impeccable/system/TIANZE-DESIGN-TOKENS.md`
+- `src/app/globals.css`（生产 UI 的当前颜色运行时真相）
+- `docs/impeccable/system/COLOR-SYSTEM.md`（当前颜色 contract / agent 规则真相）
 - `docs/impeccable/system/MOTION-PRINCIPLES.md`
+
+`docs/impeccable/system/TIANZE-DESIGN-TOKENS.md` 现在只保留为历史背景和旧方案参考，不再是当前颜色 contract。
 
 如果工作盘里的原型与这里冲突，以这份文档和生产实现为准。
 

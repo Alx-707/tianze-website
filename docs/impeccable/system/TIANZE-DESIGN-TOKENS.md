@@ -1,25 +1,38 @@
 # Tianze Design Token System
 
-> Industrial Steel Blue | B2B Manufacturing | Modern Minimalist
+> Historical reference only | Previous steel-blue baseline | Not the current contract
 >
-> **Authority**: `src/app/globals.css` is always the production truth.
-> This document is a reference spec. If any value here conflicts with globals.css, globals.css wins.
+> **Current contract sources**: `src/app/globals.css` and `docs/impeccable/system/COLOR-SYSTEM.md`.
+> This file is historical/reference only. It is not the active implementation spec and must not be used as the current color contract.
 >
 > Current contract note: `docs/impeccable/system/COLOR-SYSTEM.md` is the current color-system contract. This document remains useful as historical design-token background and implementation detail, but it must not override `src/app/globals.css` or `COLOR-SYSTEM.md`.
 
 ---
 
-## 1. Design Philosophy
+## Historical boundary
 
-### Brand Positioning
+Everything below describes a previous baseline that was centered on `Industrial Steel Blue` and `--primary-*` examples.
 
-Tianze is a B2B manufacturing enterprise. The design system reflects:
+Read it as historical design-token background only:
+
+- It does **not** define the current production contract.
+- It does **not** override `src/app/globals.css`.
+- It does **not** override `docs/impeccable/system/COLOR-SYSTEM.md`.
+- If any wording below sounds current, treat it as describing the earlier baseline, not today's source of truth.
+
+---
+
+## 1. Historical design philosophy
+
+### Historical brand positioning
+
+This section historically described Tianze as a B2B manufacturing enterprise. The earlier token baseline emphasized:
 
 - **Professional Trust**: Steel blue conveys reliability and industrial precision
 - **Modern Minimalism**: Linear/Vercel-inspired clean aesthetics
 - **Manufacturing Heritage**: Colors and shadows inspired by refined steel
 
-### Key Differentiators (Avoiding "AI Slop")
+### Historical differentiators (previous baseline)
 
 | Aspect | Generic Approach | Tianze Approach |
 |--------|------------------|-----------------|
@@ -31,9 +44,9 @@ Tianze is a B2B manufacturing enterprise. The design system reflects:
 
 ---
 
-## 2. Token Architecture
+## 2. Historical token architecture
 
-### Three-Layer Hierarchy
+### Historical three-layer hierarchy
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -48,7 +61,7 @@ Tianze is a B2B manufacturing enterprise. The design system reflects:
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### Naming Convention
+### Historical naming convention
 
 ```
 --{category}-{element}-{property}-{variant}-{state}
@@ -63,11 +76,11 @@ Examples:
 
 ---
 
-## 3. Color System
+## 3. Historical color system
 
-### 3.1 Primary Scale (Industrial Steel Blue - Hue 230)
+### 3.1 Historical primary scale (Industrial Steel Blue - Hue 230)
 
-sRGB-safe chroma (capped at 0.090) for consistent cross-browser rendering:
+This was the earlier `--primary-*` scale used to explain the previous steel-blue baseline:
 
 | Token | OKLCH Value | Usage |
 |-------|-------------|-------|
@@ -83,10 +96,10 @@ sRGB-safe chroma (capped at 0.090) for consistent cross-browser rendering:
 | `--primary-900` | `oklch(0.22 0.040 230)` | Text on light |
 | `--primary-950` | `oklch(0.16 0.030 230)` | Headings |
 
-### 3.2 Semantic Colors (Light Theme)
+### 3.2 Historical semantic colors (Light Theme)
 
 > **Note**: globals.css uses hex values. The OKLCH values below are approximate equivalents for reference.
-> When in doubt, defer to `src/app/globals.css`.
+> Historical note only. For the current contract, defer to `src/app/globals.css` and `docs/impeccable/system/COLOR-SYSTEM.md`.
 
 ```css
 :root {
@@ -127,7 +140,7 @@ sRGB-safe chroma (capped at 0.090) for consistent cross-browser rendering:
 }
 ```
 
-### 3.3 Semantic Colors (Dark Theme)
+### 3.3 Historical semantic colors (Dark Theme)
 
 ```css
 .dark {
@@ -168,7 +181,7 @@ sRGB-safe chroma (capped at 0.090) for consistent cross-browser rendering:
 }
 ```
 
-### 3.4 Status Colors
+### 3.4 Historical status colors
 
 | Status | Light Mode | Dark Mode | Usage |
 |--------|------------|-----------|-------|
