@@ -54,7 +54,6 @@ describe("structured data generators characterization", () => {
     const schema = buildLocalBusinessSchema({
       name: "Tianze Pipe Office",
       address: "No.6 Yulong Road, Dongwangji Industrial Zone, Guanyun County",
-      phone: undefined,
     });
 
     expect(schema).not.toHaveProperty("telephone");
