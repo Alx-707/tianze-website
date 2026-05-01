@@ -17,20 +17,25 @@ const EXCLUDE_GLOBS = [
   "src/test/**",
   "src/testing/**",
 ];
+const DIRECTIVE_LINE_PATTERN =
+  /^(?:"(?<double>(?:[^"\\]|\\.)*)"|'(?<single>(?:[^'\\]|\\.)*)')\s*;?\s*(?:(?:\/\/.*))?$/u;
 
 function normalizePath(filePath) {
   return filePath.split("\\").join("/");
 }
 
-function isDirectiveLine(line, directive) {
-  const trimmed = line.trim();
+function getDirectiveLiteral(line) {
+  const match = DIRECTIVE_LINE_PATTERN.exec(line.trim());
 
-  return (
-    trimmed === `"${directive}"` ||
-    trimmed === `"${directive}";` ||
-    trimmed === `'${directive}'` ||
-    trimmed === `'${directive}';`
-  );
+  if (!match?.groups) {
+    return null;
+  }
+
+  return match.groups.double ?? match.groups.single ?? null;
+}
+
+function isDirectiveLine(line, directive) {
+  return getDirectiveLiteral(line) === directive;
 }
 
 function isBlankOrCommentLine(line) {
@@ -40,7 +45,7 @@ function isBlankOrCommentLine(line) {
 }
 
 function isAnyDirectiveLine(line) {
-  return /^["'][^"']+["'];?$/u.test(line.trim());
+  return getDirectiveLiteral(line) !== null;
 }
 
 function stripLeadingBlockComments(line, state) {
@@ -102,9 +107,74 @@ export function findClientBoundaryFiles(files) {
     .sort();
 }
 
+function isObjectRecord(value) {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function findDuplicateAllowedFiles(allowedFiles) {
+  const seenFiles = new Set();
+  const duplicateFiles = new Set();
+
+  for (const filePath of allowedFiles.map(normalizePath)) {
+    if (seenFiles.has(filePath)) {
+      duplicateFiles.add(filePath);
+      continue;
+    }
+
+    seenFiles.add(filePath);
+  }
+
+  return [...duplicateFiles].sort();
+}
+
+export function validateClientBoundaryBudget(budget) {
+  if (!isObjectRecord(budget)) {
+    return ["budget must be an object"];
+  }
+
+  const errors = [];
+
+  if (
+    !Number.isInteger(budget.maxClientBoundaryFiles) ||
+    budget.maxClientBoundaryFiles < 0
+  ) {
+    errors.push("maxClientBoundaryFiles must be a non-negative integer");
+  }
+
+  if (
+    !Array.isArray(budget.allowedFiles) ||
+    !budget.allowedFiles.every((filePath) => typeof filePath === "string")
+  ) {
+    errors.push("allowedFiles must be a string[]");
+    return errors;
+  }
+
+  const duplicateFiles = findDuplicateAllowedFiles(budget.allowedFiles);
+
+  if (duplicateFiles.length > 0) {
+    errors.push(
+      `allowedFiles contains duplicate entries: ${duplicateFiles.join(", ")}`,
+    );
+  }
+
+  return errors;
+}
+
 export function compareClientBoundaryBudget({ budget, currentFiles }) {
-  const allowedFiles = new Set(budget.allowedFiles);
   const normalizedCurrentFiles = currentFiles.map(normalizePath).sort();
+  const budgetErrors = validateClientBoundaryBudget(budget);
+
+  if (budgetErrors.length > 0) {
+    return {
+      ok: false,
+      budgetErrors,
+      excessFiles: [],
+      count: normalizedCurrentFiles.length,
+      maxClientBoundaryFiles: null,
+    };
+  }
+
+  const allowedFiles = new Set(budget.allowedFiles.map(normalizePath));
   const excessFiles = normalizedCurrentFiles.filter(
     (filePath) => !allowedFiles.has(filePath),
   );
@@ -117,6 +187,17 @@ export function compareClientBoundaryBudget({ budget, currentFiles }) {
     count,
     maxClientBoundaryFiles,
   };
+}
+
+function getAllowedFilesForReport(budget) {
+  if (!isObjectRecord(budget) || !Array.isArray(budget.allowedFiles)) {
+    return [];
+  }
+
+  return budget.allowedFiles
+    .filter((filePath) => typeof filePath === "string")
+    .map(normalizePath)
+    .sort();
 }
 
 async function readJson(path) {
@@ -152,7 +233,7 @@ async function main() {
     budgetPath: BUDGET_PATH,
     ...result,
     currentFiles,
-    allowedFiles: [...budget.allowedFiles].sort(),
+    allowedFiles: getAllowedFilesForReport(budget),
   };
 
   await writeReport(report);
@@ -162,6 +243,16 @@ async function main() {
       `review:client-boundary passed (${result.count}/${result.maxClientBoundaryFiles})`,
     );
     return;
+  }
+
+  if (result.budgetErrors?.length > 0) {
+    console.error("review:client-boundary failed: invalid budget");
+
+    for (const budgetError of result.budgetErrors) {
+      console.error(`- ${budgetError}`);
+    }
+
+    process.exit(1);
   }
 
   console.error(

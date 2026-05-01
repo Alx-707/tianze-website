@@ -16,6 +16,17 @@ pnpm build
 
 然后在 `next build` 的 route summary 里记录下面页面的 route mode：
 
+## Evidence snapshot
+
+- captured date: 2026-05-01
+- commit: `07e52e1edce4a47d1038efbf7ea85b8e800863a2`
+- command: `pnpm build`
+- environment: local worktree path `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501`
+
+下面表格只是这次 build 的 snapshot，不是永久 route-mode baseline。未来任何
+route、layout、cache、rendering 或 Next.js 版本相关变更，都必须重新跑
+`pnpm build`，并用新的 build 输出更新 evidence。
+
 | Page | Route mode from build summary |
 | --- | --- |
 | `/en` | `◐` Partial Prerender |
