@@ -22,6 +22,7 @@ async function runCommand(step) {
   const logPath = `${REPORT_DIR}/${step.name}.log`;
 
   return new Promise((resolve) => {
+    let settled = false;
     const child = spawn(step.command, step.args, {
       shell: false,
       stdio: ["ignore", "pipe", "pipe"],
@@ -40,23 +41,28 @@ async function runCommand(step) {
       process.stderr.write(chunk);
     });
 
-    child.on("error", async (error) => {
-      output += `${error.stack ?? error.message}\n`;
+    const settle = async (exitCode, extraOutput = "") => {
+      if (settled) {
+        return;
+      }
+
+      settled = true;
+      output += extraOutput;
       await writeFile(logPath, output);
       resolve({
         name: step.name,
-        exitCode: 1,
+        exitCode,
         logPath,
       });
+    };
+
+    child.on("error", (error) => {
+      output += `${error.stack ?? error.message}\n`;
+      void settle(1);
     });
 
-    child.on("close", async (code) => {
-      await writeFile(logPath, output);
-      resolve({
-        name: step.name,
-        exitCode: code ?? 1,
-        logPath,
-      });
+    child.on("close", (code) => {
+      void settle(code ?? 1);
     });
   });
 }

@@ -6,6 +6,17 @@ import {
   readProxyProofArtifact,
 } from "../../../scripts/cloudflare/proxy-proof-check.mjs";
 
+const completePassingSteps = [
+  { name: "next-build", exitCode: 0, logPath: "reports/a.log" },
+  { name: "cloudflare-build", exitCode: 0, logPath: "reports/b.log" },
+  { name: "cf-preview-smoke", exitCode: 0, logPath: "reports/c.log" },
+  {
+    name: "cf-preview-smoke-strict",
+    exitCode: 0,
+    logPath: "reports/d.log",
+  },
+];
+
 describe("cloudflare proxy proof check", () => {
   it("detects middleware deprecation warning", () => {
     expect(
@@ -32,6 +43,55 @@ describe("cloudflare proxy proof check", () => {
         { name: "next-build", exitCode: 0, logPath: "reports/a.log" },
         { name: "cloudflare-build", exitCode: 1, logPath: "reports/b.log" },
       ],
+      artifactBlockers: [],
+    });
+  });
+
+  it("returns artifact blockers when steps is not an array", () => {
+    const artifact = readProxyProofArtifact(
+      JSON.stringify({
+        subject: "src/proxy.ts",
+        steps: null,
+      }),
+    );
+
+    expect(artifact).toEqual({
+      subject: "src/proxy.ts",
+      steps: [],
+      artifactBlockers: ["artifact.steps must be an array"],
+    });
+    expect(
+      classifyProxyProof({
+        ...artifact,
+        fileState: { proxyExists: true, middlewareExists: false },
+        warnings: [],
+      }),
+    ).toEqual({
+      ok: false,
+      recommendation: "keep-middleware",
+      blockers: [
+        "artifact.steps must be an array",
+        "missing required proof step: next-build",
+        "missing required proof step: cloudflare-build",
+        "missing required proof step: cf-preview-smoke",
+        "missing required proof step: cf-preview-smoke-strict",
+      ],
+      warnings: [],
+    });
+  });
+
+  it("returns artifact blockers when a step is missing exitCode", () => {
+    const artifact = readProxyProofArtifact(
+      JSON.stringify({
+        subject: "src/proxy.ts",
+        steps: [{ name: "next-build", logPath: "reports/a.log" }],
+      }),
+    );
+
+    expect(artifact).toEqual({
+      subject: "src/proxy.ts",
+      steps: [],
+      artifactBlockers: ["artifact.steps[0].exitCode must be a number"],
     });
   });
 
@@ -40,16 +100,7 @@ describe("cloudflare proxy proof check", () => {
       classifyProxyProof({
         subject: "src/proxy.ts",
         fileState: { proxyExists: true, middlewareExists: false },
-        steps: [
-          { name: "next-build", exitCode: 0, logPath: "reports/a.log" },
-          { name: "cloudflare-build", exitCode: 0, logPath: "reports/b.log" },
-          { name: "cf-preview-smoke", exitCode: 0, logPath: "reports/c.log" },
-          {
-            name: "cf-preview-smoke-strict",
-            exitCode: 0,
-            logPath: "reports/d.log",
-          },
-        ],
+        steps: completePassingSteps,
         warnings: [],
       }),
     ).toEqual({
@@ -74,7 +125,67 @@ describe("cloudflare proxy proof check", () => {
     ).toEqual({
       ok: false,
       recommendation: "keep-middleware",
-      blockers: ["cloudflare-build failed with exit code 1"],
+      blockers: [
+        "missing required proof step: cf-preview-smoke",
+        "missing required proof step: cf-preview-smoke-strict",
+        "cloudflare-build failed with exit code 1",
+      ],
+      warnings: [],
+    });
+  });
+
+  it("blocks proxy-compatible recommendation when a required step is missing", () => {
+    expect(
+      classifyProxyProof({
+        subject: "src/proxy.ts",
+        fileState: { proxyExists: true, middlewareExists: false },
+        steps: completePassingSteps.filter(
+          (step) => step.name !== "cf-preview-smoke-strict",
+        ),
+        warnings: [],
+      }),
+    ).toEqual({
+      ok: false,
+      recommendation: "keep-middleware",
+      blockers: ["missing required proof step: cf-preview-smoke-strict"],
+      warnings: [],
+    });
+  });
+
+  it("blocks proxy-compatible recommendation when a step is unknown", () => {
+    expect(
+      classifyProxyProof({
+        subject: "src/proxy.ts",
+        fileState: { proxyExists: true, middlewareExists: false },
+        steps: [
+          ...completePassingSteps,
+          { name: "extra-smoke", exitCode: 0, logPath: "reports/e.log" },
+        ],
+        warnings: [],
+      }),
+    ).toEqual({
+      ok: false,
+      recommendation: "keep-middleware",
+      blockers: ["unknown proof step: extra-smoke"],
+      warnings: [],
+    });
+  });
+
+  it("blocks proxy-compatible recommendation when a step is duplicated", () => {
+    expect(
+      classifyProxyProof({
+        subject: "src/proxy.ts",
+        fileState: { proxyExists: true, middlewareExists: false },
+        steps: [
+          ...completePassingSteps,
+          { name: "next-build", exitCode: 0, logPath: "reports/e.log" },
+        ],
+        warnings: [],
+      }),
+    ).toEqual({
+      ok: false,
+      recommendation: "keep-middleware",
+      blockers: ["duplicate proof step: next-build"],
       warnings: [],
     });
   });
@@ -84,10 +195,7 @@ describe("cloudflare proxy proof check", () => {
       classifyProxyProof({
         subject: "src/proxy.ts",
         fileState: { proxyExists: false, middlewareExists: true },
-        steps: [
-          { name: "next-build", exitCode: 0, logPath: "reports/a.log" },
-          { name: "cloudflare-build", exitCode: 0, logPath: "reports/b.log" },
-        ],
+        steps: completePassingSteps,
         warnings: [],
       }),
     ).toEqual({
@@ -106,10 +214,7 @@ describe("cloudflare proxy proof check", () => {
       classifyProxyProof({
         subject: "src/proxy.ts",
         fileState: { proxyExists: true, middlewareExists: true },
-        steps: [
-          { name: "next-build", exitCode: 0, logPath: "reports/a.log" },
-          { name: "cloudflare-build", exitCode: 0, logPath: "reports/b.log" },
-        ],
+        steps: completePassingSteps,
         warnings: [],
       }),
     ).toEqual({

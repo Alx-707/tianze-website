@@ -2,15 +2,118 @@ import { access, readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 
 const DEFAULT_ARTIFACT_PATH = "reports/cloudflare-proxy/proof-artifact.json";
+const REQUIRED_STEP_NAMES = [
+  "next-build",
+  "cloudflare-build",
+  "cf-preview-smoke",
+  "cf-preview-smoke-strict",
+];
+const REQUIRED_STEP_NAME_SET = new Set(REQUIRED_STEP_NAMES);
 const NEXT_BUILD_STEP_NAMES = new Set(["next-build", "cloudflare-build"]);
 const PROXY_PROOF_SUBJECT = "src/proxy.ts";
 const MIDDLEWARE_ENTRY_PATH = "src/middleware.ts";
 
-export function readProxyProofArtifact(rawJson) {
-  const parsed = JSON.parse(rawJson);
+/**
+ * @typedef {{ name: string; exitCode: number; logPath: string }} ProxyProofStep
+ * @typedef {{
+ *   subject: string;
+ *   steps: ProxyProofStep[];
+ *   artifactBlockers: string[];
+ * }} ProxyProofArtifact
+ * @typedef {{ proxyExists: boolean; middlewareExists: boolean }} ProofFileState
+ */
+
+function isObject(value) {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+/** @returns {{ step: ProxyProofStep | null; blockers: string[] }} */
+function validateStep(step, index) {
+  const blockers = [];
+
+  if (!isObject(step)) {
+    return {
+      step: null,
+      blockers: [`artifact.steps[${index}] must be an object`],
+    };
+  }
+
+  if (typeof step.name !== "string") {
+    blockers.push(`artifact.steps[${index}].name must be a string`);
+  }
+
+  if (typeof step.exitCode !== "number") {
+    blockers.push(`artifact.steps[${index}].exitCode must be a number`);
+  }
+
+  if (typeof step.logPath !== "string") {
+    blockers.push(`artifact.steps[${index}].logPath must be a string`);
+  }
+
+  if (blockers.length > 0) {
+    return { step: null, blockers };
+  }
+
   return {
-    subject: parsed.subject,
-    steps: parsed.steps,
+    step: {
+      name: step.name,
+      exitCode: step.exitCode,
+      logPath: step.logPath,
+    },
+    blockers: [],
+  };
+}
+
+/** @returns {ProxyProofArtifact} */
+export function readProxyProofArtifact(rawJson) {
+  let parsed;
+  try {
+    parsed = JSON.parse(rawJson);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+
+    return {
+      subject: "",
+      steps: [],
+      artifactBlockers: [`artifact JSON is invalid: ${message}`],
+    };
+  }
+
+  if (!isObject(parsed)) {
+    return {
+      subject: "",
+      steps: [],
+      artifactBlockers: ["artifact must be an object"],
+    };
+  }
+
+  const artifactBlockers = [];
+
+  if (typeof parsed.subject !== "string") {
+    artifactBlockers.push("artifact.subject must be a string");
+  }
+
+  if (!Array.isArray(parsed.steps)) {
+    artifactBlockers.push("artifact.steps must be an array");
+
+    return {
+      subject: typeof parsed.subject === "string" ? parsed.subject : "",
+      steps: [],
+      artifactBlockers,
+    };
+  }
+
+  const validatedSteps = parsed.steps.map(validateStep);
+
+  return {
+    subject: typeof parsed.subject === "string" ? parsed.subject : "",
+    steps: validatedSteps
+      .map((result) => result.step)
+      .filter((step) => step !== null),
+    artifactBlockers: [
+      ...artifactBlockers,
+      ...validatedSteps.flatMap((result) => result.blockers),
+    ],
   };
 }
 
@@ -48,14 +151,62 @@ export function classifyFileState({ subject, proxyExists, middlewareExists }) {
   return { blockers };
 }
 
-export function classifyProxyProof({ subject, steps, warnings, fileState }) {
-  const commandBlockers = steps
+function classifyProofSteps(steps) {
+  const blockers = [];
+  const stepCounts = new Map();
+
+  for (const step of steps) {
+    stepCounts.set(step.name, (stepCounts.get(step.name) ?? 0) + 1);
+
+    if (!REQUIRED_STEP_NAME_SET.has(step.name)) {
+      blockers.push(`unknown proof step: ${step.name}`);
+    }
+  }
+
+  for (const requiredStepName of REQUIRED_STEP_NAMES) {
+    if (!stepCounts.has(requiredStepName)) {
+      blockers.push(`missing required proof step: ${requiredStepName}`);
+    }
+  }
+
+  for (const [stepName, count] of stepCounts.entries()) {
+    if (count > 1) {
+      blockers.push(`duplicate proof step: ${stepName}`);
+    }
+  }
+
+  return blockers;
+}
+
+/**
+ * @param {{
+ *   subject: string;
+ *   steps: ProxyProofStep[];
+ *   warnings: string[];
+ *   fileState?: ProofFileState;
+ *   artifactBlockers?: string[];
+ * }} proof
+ */
+export function classifyProxyProof({
+  subject,
+  steps,
+  warnings,
+  fileState,
+  artifactBlockers = [],
+}) {
+  const proofSteps = Array.isArray(steps) ? steps : [];
+  const commandBlockers = proofSteps
     .filter((step) => step.exitCode !== 0)
     .map((step) => `${step.name} failed with exit code ${step.exitCode}`);
   const fileStateBlockers = fileState
     ? classifyFileState({ subject, ...fileState }).blockers
     : ["proof worktree file state was not checked"];
-  const blockers = [...fileStateBlockers, ...commandBlockers];
+  const blockers = [
+    ...artifactBlockers,
+    ...fileStateBlockers,
+    ...classifyProofSteps(proofSteps),
+    ...commandBlockers,
+  ];
 
   return {
     ok: blockers.length === 0,
@@ -109,7 +260,19 @@ async function main() {
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   main().catch((error) => {
-    console.error("[proxy-proof-check] unexpected error:", error);
+    const message = error instanceof Error ? error.message : String(error);
+    console.log(
+      JSON.stringify(
+        {
+          ok: false,
+          recommendation: "keep-middleware",
+          blockers: [`proxy proof check failed: ${message}`],
+          warnings: [],
+        },
+        null,
+        2,
+      ),
+    );
     process.exit(1);
   });
 }

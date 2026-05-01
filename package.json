@@ -167,7 +167,9 @@
     "test:mutation:form-schema": "stryker run --mutate 'src/lib/form-schema/**/*.ts'",
     "review:mutation:critical": "node scripts/review-mutation-critical.js",
     "proof:cf:preview-deployed": "node scripts/cloudflare/proof-preview-deployed.mjs",
-    "proof:cf:proxy": "node scripts/cloudflare/proxy-proof-check.mjs reports/cloudflare-proxy/proof-artifact.json"
+    "proof:cf:proxy:run": "node scripts/cloudflare/run-proxy-proof.mjs",
+    "proof:cf:proxy:check": "node scripts/cloudflare/proxy-proof-check.mjs reports/cloudflare-proxy/proof-artifact.json",
+    "proof:cf:proxy": "pnpm proof:cf:proxy:run && pnpm proof:cf:proxy:check"
   },
   "dependencies": {
     "@marsidev/react-turnstile": "^1.5.1",
