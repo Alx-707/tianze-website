@@ -76,6 +76,7 @@
     "scan:translations": "node scripts/translation-scanner.js",
     "sync:translations:enhanced": "node scripts/translation-sync.js",
     "content:slug-check": "node scripts/content-slug-sync.js",
+    "content:readiness": "node scripts/content-readiness-check.mjs",
     "content:manifest": "tsx scripts/generate-content-manifest.ts",
     "i18n:full": "pnpm scan:translations && pnpm sync:translations:enhanced && pnpm validate:translations && pnpm content:slug-check",
     "review:translation-quartet": "pnpm i18n:regenerate-flat && pnpm validate:translations && node scripts/copy-translations.js && pnpm i18n:shape:check",

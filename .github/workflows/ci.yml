@@ -415,6 +415,9 @@ jobs:
       - name: MDX slug 对齐校验
         run: pnpm content:slug-check
 
+      - name: 内容上线就绪检查
+        run: pnpm content:readiness
+
       - name: Translation Quartet Review
         run: pnpm review:translation-quartet
 
