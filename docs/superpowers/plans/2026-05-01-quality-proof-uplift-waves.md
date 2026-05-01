@@ -1760,7 +1760,9 @@ reports/cloudflare-proxy/proof-artifact.json
 Modify `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/package.json`:
 
 ```json
-"proof:cf:proxy": "node scripts/cloudflare/proxy-proof-check.mjs reports/cloudflare-proxy/proof-artifact.json"
+"proof:cf:proxy:run": "node scripts/cloudflare/run-proxy-proof.mjs",
+"proof:cf:proxy:check": "node scripts/cloudflare/proxy-proof-check.mjs reports/cloudflare-proxy/proof-artifact.json",
+"proof:cf:proxy": "pnpm proof:cf:proxy:run && pnpm proof:cf:proxy:check"
 ```
 
 Run:
@@ -2414,37 +2416,78 @@ Expected: commit succeeds.
 
 - [ ] **Step 1: 写 characterization test**
 
-Create `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/src/lib/lead-pipeline/__tests__/process-lead.characterization.test.ts` with:
+Create `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/src/lib/lead-pipeline/__tests__/process-lead.characterization.test.ts` by following the existing `process-lead.test.ts` mock pattern. Do not invent an injectable API or contact-form wrapper payload. The current `processLead` contract accepts a normalized lead input with `type`, `fullName`, `email`, `subject`, `message`, `turnstileToken`, and optional context.
 
 ```ts
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { resetSystemObservability } from "@/lib/observability/system-observability";
+import { CONTACT_SUBJECTS, LEAD_TYPES } from "../lead-schema";
 import { processLead } from "../process-lead";
 
+const mockSendContactFormEmail = vi.hoisted(() => vi.fn());
+const mockCreateLead = vi.hoisted(() => vi.fn());
+const mockLoggerWarn = vi.hoisted(() => vi.fn());
+
+vi.mock("@/lib/resend", () => ({
+  resendService: { sendContactFormEmail: mockSendContactFormEmail },
+}));
+vi.mock("@/lib/airtable", () => ({
+  airtableService: { createLead: mockCreateLead },
+}));
+vi.mock("@/lib/logger", () => ({
+  logger: { info: vi.fn(), warn: mockLoggerWarn, error: vi.fn() },
+  sanitizeEmail: () => "[REDACTED_EMAIL]",
+  sanitizeCompany: () => "[REDACTED]",
+  sanitizeIP: () => "[REDACTED_IP]",
+}));
+
+const VALID_CONTACT_LEAD = {
+  type: LEAD_TYPES.CONTACT,
+  fullName: "Test Buyer",
+  email: "buyer@example.com",
+  subject: CONTACT_SUBJECTS.PRODUCT_INQUIRY,
+  message: "Need PVC conduit fittings for a distributor order.",
+  turnstileToken: "valid-token",
+  company: "Example Distributor",
+  marketingConsent: true,
+};
+
 describe("processLead characterization", () => {
-  it("returns partial success when at least one non-critical service succeeds", async () => {
-    const result = await processLead({
-      kind: "contact",
-      payload: {
-        firstName: "Test",
-        lastName: "Buyer",
-        email: "buyer@example.com",
-        company: "Example Distributor",
-        message: "Need PVC conduit fittings.",
-        acceptPrivacy: true,
-      },
-      services: {
-        airtable: vi.fn().mockResolvedValue({ ok: true, id: "rec123" }),
-        email: vi.fn().mockRejectedValue(new Error("email unavailable")),
-      },
+  beforeEach(() => {
+    vi.clearAllMocks();
+    resetSystemObservability();
+  });
+
+  it("returns partial success without error when contact email fails and CRM succeeds", async () => {
+    mockSendContactFormEmail.mockRejectedValue(new Error("email unavailable"));
+    mockCreateLead.mockResolvedValue({ id: "rec-contact-001" });
+
+    const result = await processLead(VALID_CONTACT_LEAD, {
+      requestId: "req-email-failed-crm-succeeded",
     });
 
-    expect(result.status).toBe("partial-success");
-    expect(JSON.stringify(result)).toContain("email unavailable");
+    expect(result).toEqual({
+      success: false,
+      partialSuccess: true,
+      emailSent: false,
+      recordCreated: true,
+      referenceId: expect.stringMatching(/^CON-/),
+      error: undefined,
+    });
+    expect(mockLoggerWarn).toHaveBeenCalledWith(
+      "Lead processed partially",
+      expect.objectContaining({
+        type: LEAD_TYPES.CONTACT,
+        referenceId: result.referenceId,
+        emailSent: false,
+        recordCreated: true,
+      }),
+    );
   });
 });
 ```
 
-If current `processLead` does not accept injectable services, adapt the test to the existing testing pattern in `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/src/lib/lead-pipeline/__tests__/process-lead.test.ts`. The behavior being locked is partial success observability, not a specific dependency injection style.
+The behavior being locked is partial success observability and public return shape, not dependency injection style. Do not use form-only fields such as `firstName`, `lastName`, or `acceptPrivacy` as `processLead` inputs.
 
 - [ ] **Step 2: 运行测试，确认当前调用方式**
 
@@ -2581,8 +2624,8 @@ import { glob } from "glob";
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 
-const LIVE_PREFIXES = ["content/pages/", "messages/", "public/images/"];
-const LIVE_EXACT_FILES = ["src/config/single-site.ts"];
+const LIVE_EXACT_FILES = new Set(["src/config/single-site.ts"]);
+const EXCLUDED_EXACT_FILES = new Set(["src/config/public-trust.ts"]);
 const EXCLUDED_PREFIXES = [
   "content/_archive/",
   "docs/",
@@ -2590,7 +2633,6 @@ const EXCLUDED_PREFIXES = [
   "node_modules/",
   ".next/",
   ".open-next/",
-  "src/config/public-trust.ts",
 ];
 const EXCLUDED_PATH_PATTERNS = [
   /\/__tests__\//,
@@ -2599,7 +2641,13 @@ const EXCLUDED_PATH_PATTERNS = [
   /\/__mocks__\//,
 ];
 
-const PATTERNS = [
+const LIVE_GLOBS = [
+  "content/pages/**/*",
+  "messages/**/*",
+  "public/images/**/*.svg",
+  ...LIVE_EXACT_FILES,
+];
+const READINESS_PATTERNS = [
   { label: "fake phone", pattern: /\+86-518-0000-0000/i },
   {
     label: "sample product replacement instruction",
@@ -2607,29 +2655,46 @@ const PATTERNS = [
   },
   { label: "sample product label", pattern: /Sample Product/i },
   { label: "missing translation marker", pattern: /MISSING_MESSAGE/i },
-  { label: "template todo marker", pattern: /\bTODO\b/i },
 ];
 
-export function shouldScanLivePath(path) {
+function normalizePath(path) {
+  return path.replaceAll("\\", "/").replace(/^\.\//, "");
+}
+
+function isExcludedPath(path) {
   return (
-    (LIVE_PREFIXES.some((prefix) => path.startsWith(prefix)) ||
-      LIVE_EXACT_FILES.includes(path)) &&
-    !EXCLUDED_PREFIXES.some((prefix) => path.startsWith(prefix)) &&
-    !EXCLUDED_PATH_PATTERNS.some((pattern) => pattern.test(path))
+    EXCLUDED_EXACT_FILES.has(path) ||
+    EXCLUDED_PREFIXES.some((prefix) => path.startsWith(prefix)) ||
+    EXCLUDED_PATH_PATTERNS.some((pattern) => pattern.test(path))
   );
+}
+
+function isLiveInputPath(path) {
+  return (
+    path.startsWith("content/pages/") ||
+    path.startsWith("messages/") ||
+    (path.startsWith("public/images/") && path.endsWith(".svg")) ||
+    LIVE_EXACT_FILES.has(path)
+  );
+}
+
+export function shouldScanLivePath(path) {
+  const normalizedPath = normalizePath(path);
+  return isLiveInputPath(normalizedPath) && !isExcludedPath(normalizedPath);
 }
 
 export function checkContentReadiness(files) {
   const findings = [];
 
   for (const file of files) {
-    if (!shouldScanLivePath(file.path)) {
+    const path = normalizePath(file.path);
+    if (!shouldScanLivePath(path)) {
       continue;
     }
-    for (const { label, pattern } of PATTERNS) {
+    for (const { label, pattern } of READINESS_PATTERNS) {
       const match = file.text.match(pattern);
       if (match) {
-        findings.push({ path: file.path, label, match: match[0] });
+        findings.push({ path, label, match: match[0] });
       }
     }
   }
@@ -2638,16 +2703,10 @@ export function checkContentReadiness(files) {
 }
 
 async function readLiveFiles() {
-  const globbedPaths = await glob(
-    "{content/pages,messages,public/images}/**/*",
-    {
-      nodir: true,
-      ignore: ["content/_archive/**"],
-    },
-  );
-  const paths = [...globbedPaths, ...LIVE_EXACT_FILES].filter(
-    shouldScanLivePath,
-  );
+  const globbedPaths = await glob(LIVE_GLOBS, { nodir: true });
+  const paths = [...new Set(globbedPaths.map(normalizePath))]
+    .filter(shouldScanLivePath)
+    .sort();
 
   const files = [];
   for (const path of paths) {
@@ -2741,7 +2800,7 @@ pnpm content:readiness
 pnpm test:e2e:page-contracts
 ```
 
-Expected: PASS. If `page-contracts` still fails because `/images/logo.svg` is referenced but absent, add a neutral `public/images/logo.svg` placeholder or update config to omit logo until real asset exists. Do not leave a broken public URL.
+Expected: PASS. If `page-contracts` still fails because `/images/logo.svg` is referenced but absent, prefer updating the runtime/logo config to omit the logo until the owner provides a real asset. Only add a neutral `public/images/logo.svg` if the runtime contract truly requires a file-backed logo. Do not leave a broken public URL.
 
 - [ ] **Step 8: 接入 CI**
 
@@ -2760,11 +2819,11 @@ Run:
 
 ```bash
 cd /Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501
-git add package.json .github/workflows/ci.yml scripts/content-readiness-check.mjs tests/unit/scripts/content-readiness-check.test.ts src/config/single-site.ts public/images/products/sample-product.svg public/images/logo.svg
+git add package.json .github/workflows/ci.yml scripts/content-readiness-check.mjs tests/unit/scripts/content-readiness-check.test.ts src/config/single-site.ts public/images/products/sample-product.svg
 git commit -m "fix: guard launch-facing placeholder content"
 ```
 
-Expected: commit succeeds. If `public/images/logo.svg` was not needed, omit it from `git add`.
+Expected: commit succeeds. If a real logo/config change was needed, include only the file that actually changed; do not stage a non-existent or unnecessary `public/images/logo.svg`.
 
 ### Task 12: Preview observability summary
 
@@ -2782,7 +2841,9 @@ Create `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-wav
 ```ts
 import { describe, expect, it } from "vitest";
 import {
+  buildHeaders,
   buildObservabilityReport,
+  parsePreviewObservabilityArgs,
   summarizeHeaders,
 } from "../../../scripts/deploy/preview-observability-summary.mjs";
 
@@ -2791,14 +2852,24 @@ describe("preview-observability-summary", () => {
     expect(
       summarizeHeaders({
         "x-request-id": "req_123",
-        "x-observability-surface": "api:health",
+        "x-observability-surface": "cache-health",
       }),
     ).toEqual({
       requestId: "req_123",
-      surface: "api:health",
+      surface: "cache-health",
       ok: true,
       missing: [],
     });
+  });
+
+  it("fails when the observability surface is not the cache health surface", () => {
+    const summary = summarizeHeaders({
+      "x-request-id": "req_123",
+      "x-observability-surface": "lead-family",
+    });
+
+    expect(summary.ok).toBe(false);
+    expect(summary.missing).toEqual(["x-observability-surface=cache-health"]);
   });
 
   it("reports missing headers", () => {
@@ -2820,7 +2891,7 @@ describe("preview-observability-summary", () => {
             pathname: "/api/health",
             status: 200,
             requestId: "req_123",
-            surface: "api:health",
+            surface: "cache-health",
             ok: true,
             missing: [],
           },
@@ -2836,11 +2907,39 @@ describe("preview-observability-summary", () => {
           pathname: "/api/health",
           status: 200,
           requestId: "req_123",
-          surface: "api:health",
+          surface: "cache-health",
           ok: true,
           missing: [],
         },
       ],
+    });
+  });
+
+  it("rejects missing base url and incomplete protection header args", () => {
+    expect(() =>
+      parsePreviewObservabilityArgs(["node", "preview-observability-summary.mjs"]),
+    ).toThrow("Missing required --base-url");
+    expect(() =>
+      parsePreviewObservabilityArgs([
+        "node",
+        "preview-observability-summary.mjs",
+        "--base-url",
+        "https://example-preview.vercel.app",
+        "--header-name",
+        "x-vercel-protection-bypass",
+      ]),
+    ).toThrow("Both --header-name and --header-value must be provided together");
+  });
+
+  it("builds optional Vercel protection bypass headers", () => {
+    expect(
+      buildHeaders({
+        headerName: "x-vercel-protection-bypass",
+        headerValue: "secret",
+      }),
+    ).toEqual({
+      "user-agent": "preview-observability-summary",
+      "x-vercel-protection-bypass": "secret",
     });
   });
 });
@@ -2856,18 +2955,29 @@ import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const DEFAULT_OUTPUT = "reports/deploy/preview-observability-summary.json";
-const PROBES = ["/api/health"];
+const DEFAULT_PROBES = ["/api/health"];
+const REQUEST_TIMEOUT_MS = 30000;
+const OK_STATUS_MIN = 200;
+const OK_STATUS_MAX_EXCLUSIVE = 400;
+const REQUIRED_HEADERS = ["x-request-id", "x-observability-surface"];
+const EXPECTED_OBSERVABILITY_SURFACE = "cache-health";
 
 export function summarizeHeaders(headers) {
-  const requestId = headers["x-request-id"] ?? "";
-  const surface = headers["x-observability-surface"] ?? "";
+  const normalizedHeaders = normalizeHeaders(headers);
+  const requestId = normalizedHeaders["x-request-id"] ?? "";
+  const surface = normalizedHeaders["x-observability-surface"] ?? "";
   const missing = [];
+
   if (!requestId) {
     missing.push("x-request-id");
   }
+
   if (!surface) {
     missing.push("x-observability-surface");
+  } else if (surface !== EXPECTED_OBSERVABILITY_SURFACE) {
+    missing.push(`x-observability-surface=${EXPECTED_OBSERVABILITY_SURFACE}`);
   }
+
   return { requestId, surface, ok: missing.length === 0, missing };
 }
 
@@ -2876,12 +2986,17 @@ export function buildObservabilityReport({ baseUrl, checkedAt, probes }) {
     tool: "preview-observability-summary",
     baseUrl,
     checkedAt,
-    ok: probes.every((probe) => probe.ok && probe.status < 500),
+    ok: probes.every(
+      (probe) =>
+        probe.ok &&
+        probe.status >= OK_STATUS_MIN &&
+        probe.status < OK_STATUS_MAX_EXCLUSIVE,
+    ),
     probes,
   };
 }
 
-function parseArgs(argv) {
+export function parsePreviewObservabilityArgs(argv) {
   const args = {
     baseUrl: "",
     output: DEFAULT_OUTPUT,
@@ -2919,25 +3034,53 @@ function parseArgs(argv) {
   return args;
 }
 
-function buildHeaders(args) {
+export function buildHeaders(args) {
   const headers = { "user-agent": "preview-observability-summary" };
+
   if (args.headerName && args.headerValue) {
     headers[args.headerName] = args.headerValue;
   }
+
   return headers;
 }
 
+function normalizeHeaders(headers) {
+  const normalizedHeaders = {};
+  const entries =
+    headers && typeof headers.entries === "function"
+      ? headers.entries()
+      : Object.entries(headers ?? {});
+
+  for (const [name, value] of entries) {
+    normalizedHeaders[String(name).toLowerCase()] =
+      value == null ? "" : String(value).trim();
+  }
+
+  return normalizedHeaders;
+}
+
 async function probe(baseUrl, pathname, headers) {
-  const response = await fetch(new URL(pathname, baseUrl), {
-    headers,
-    signal: AbortSignal.timeout(30000),
-  });
-  const responseHeaders = Object.fromEntries(response.headers.entries());
-  return {
-    pathname,
-    status: response.status,
-    ...summarizeHeaders(responseHeaders),
-  };
+  try {
+    const response = await fetch(new URL(pathname, baseUrl), {
+      headers,
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+    });
+
+    return {
+      pathname,
+      status: response.status,
+      ...summarizeHeaders(response.headers),
+    };
+  } catch {
+    return {
+      pathname,
+      status: 0,
+      requestId: "",
+      surface: "",
+      ok: false,
+      missing: [...REQUIRED_HEADERS],
+    };
+  }
 }
 
 async function writeJson(path, value) {
@@ -2946,23 +3089,28 @@ async function writeJson(path, value) {
 }
 
 async function main() {
-  const args = parseArgs(process.argv);
+  const args = parsePreviewObservabilityArgs(process.argv);
   const headers = buildHeaders(args);
   const probes = [];
-  for (const pathname of PROBES) {
+
+  for (const pathname of DEFAULT_PROBES) {
     probes.push(await probe(args.baseUrl, pathname, headers));
   }
+
   const report = buildObservabilityReport({
     baseUrl: args.baseUrl,
     checkedAt: new Date().toISOString(),
     probes,
   });
+
   await writeJson(args.output, report);
+
   if (!report.ok) {
     console.error("[preview-observability] missing required signals");
     process.exit(1);
   }
-  console.log("[preview-observability] passed");
+
+  console.log(`[preview-observability] Report written to ${args.output}`);
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
@@ -2987,7 +3135,10 @@ Preview proof should not only say a page is reachable. It should also capture en
 ## Required signals
 
 - `x-request-id`
-- `x-observability-surface`
+- `x-observability-surface: cache-health`
+
+This is not a page-business-contract proof. It only proves the preview health
+endpoint exposes enough request identity and surface information for debugging.
 
 ## Command
 
@@ -3022,7 +3173,7 @@ Modify `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-wav
       - name: 预览部署可观测性摘要
         run: |
           set -euo pipefail
-          pnpm proof:preview-observability -- \
+          node scripts/deploy/preview-observability-summary.mjs \
             --base-url "${{ needs.deploy-to-vercel.outputs.preview_url }}" \
             --header-name "x-vercel-protection-bypass" \
             --header-value "${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}" \
