@@ -71,6 +71,20 @@ export function buildSchemaFallback(type: string): Record<string, unknown> {
   };
 }
 
+function compactOptionalSchemaFields(
+  fields: Record<string, string | string[] | undefined>,
+): Record<string, string | string[]> {
+  const compacted: Record<string, string | string[]> = {};
+
+  for (const [key, value] of Object.entries(fields)) {
+    if (value) {
+      compacted[key] = value;
+    }
+  }
+
+  return compacted;
+}
+
 /**
  * 生成组织结构化数据
  */
@@ -327,6 +341,10 @@ export function buildBreadcrumbListSchema(
 export function buildLocalBusinessSchema(
   business: LocalBusinessSchemaInput,
 ): Record<string, unknown> {
+  const telephone =
+    business.phone === undefined
+      ? undefined
+      : getPublicContactPhone(business.phone);
   const schema: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
@@ -336,20 +354,13 @@ export function buildLocalBusinessSchema(
       streetAddress: business.address,
     },
     url: SITE_CONFIG.baseUrl,
+    ...compactOptionalSchemaFields({
+      telephone,
+      email: business.email,
+      openingHours: business.openingHours,
+      priceRange: business.priceRange,
+    }),
   };
-
-  if (business.phone) {
-    schema.telephone = business.phone;
-  }
-  if (business.email) {
-    schema.email = business.email;
-  }
-  if (business.openingHours) {
-    schema.openingHours = business.openingHours;
-  }
-  if (business.priceRange) {
-    schema.priceRange = business.priceRange;
-  }
 
   return schema;
 }
