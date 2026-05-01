@@ -48,7 +48,7 @@ const social = {
 } as const;
 
 const contact = {
-  phone: "+86-518-0000-0000",
+  phone: "",
   email: "sales@tianze-pipe.com",
 } as const;
 

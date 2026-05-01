@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900" role="img" aria-label="Sample product placeholder image">
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900" role="img" aria-label="Product image pending">
   <defs>
     <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#0b1220" />
@@ -29,10 +29,6 @@
   </g>
 
   <text x="600" y="520" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="52" font-weight="700" fill="#e5e7eb" text-anchor="middle">
-    Sample Product
-  </text>
-  <text x="600" y="590" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="24" fill="#94a3b8" text-anchor="middle">
-    Replace this image with your real product photo
+    Product image pending
   </text>
 </svg>
-

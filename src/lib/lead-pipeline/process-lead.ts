@@ -13,7 +13,10 @@ import {
   type LeadType,
 } from "@/lib/lead-pipeline/lead-schema";
 import { createLatencyTimer } from "@/lib/lead-pipeline/metrics";
-import { recordPipelineObservability } from "@/lib/lead-pipeline/pipeline-observability";
+import {
+  recordPipelineObservability,
+  type PipelineObservabilityOutcome,
+} from "@/lib/lead-pipeline/pipeline-observability";
 import { processContactLead } from "@/lib/lead-pipeline/processors/contact";
 import { processNewsletterLead } from "@/lib/lead-pipeline/processors/newsletter";
 import { processProductLead } from "@/lib/lead-pipeline/processors/product";
@@ -40,6 +43,13 @@ interface ProcessLeadOptions {
   requestId?: string;
 }
 
+interface ProcessedLeadResultParams {
+  referenceId: string;
+  emailResult: ServiceResult;
+  crmResult: ServiceResult;
+  outcome: PipelineObservabilityOutcome;
+}
+
 function withRequestId(
   requestId?: string,
 ): { requestId: string } | Record<string, never> {
@@ -64,6 +74,28 @@ function createProcessingFailureResult(referenceId: string): LeadResult {
     recordCreated: false,
     referenceId,
     error: "PROCESSING_FAILED",
+  };
+}
+
+function shouldExposeReferenceId(
+  outcome: PipelineObservabilityOutcome,
+): boolean {
+  return outcome.success || outcome.partialSuccess;
+}
+
+function createProcessedLeadResult(
+  params: ProcessedLeadResultParams,
+): LeadResult {
+  const { referenceId, emailResult, crmResult, outcome } = params;
+  const exposeReferenceId = shouldExposeReferenceId(outcome);
+
+  return {
+    success: outcome.success,
+    partialSuccess: outcome.partialSuccess,
+    emailSent: emailResult.success,
+    recordCreated: crmResult.success,
+    referenceId: exposeReferenceId ? referenceId : undefined,
+    error: exposeReferenceId ? undefined : "PROCESSING_FAILED",
   };
 }
 
@@ -135,18 +167,12 @@ export async function processLead(
       ...withRequestId(requestId),
     });
 
-    return {
-      success: outcome.success,
-      partialSuccess: outcome.partialSuccess,
-      emailSent: emailResult.success,
-      recordCreated: crmResult.success,
-      referenceId:
-        outcome.success || outcome.partialSuccess ? referenceId : undefined,
-      error:
-        outcome.success || outcome.partialSuccess
-          ? undefined
-          : "PROCESSING_FAILED",
-    };
+    return createProcessedLeadResult({
+      referenceId,
+      emailResult,
+      crmResult,
+      outcome,
+    });
   } catch (error) {
     const totalLatencyMs = pipelineTimer.stop();
 

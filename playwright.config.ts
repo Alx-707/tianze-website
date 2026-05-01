@@ -1,5 +1,10 @@
 import { defineConfig, devices } from "@playwright/test";
 import { config } from "dotenv";
+import {
+  isLocalE2ETarget,
+  normalizeE2ETarget,
+  selectExplicitE2ETarget,
+} from "@/test/e2e-target";
 
 // 加载测试环境配置
 config({ path: ".env.test", quiet: true });
@@ -18,36 +23,50 @@ const defaultLocale =
   process.env.NEXT_PUBLIC_DEFAULT_LOCALE?.trim() || supportedLocales[0] || "en";
 
 const ensureLocaleInUrl = (input: string): string => {
-  try {
-    const url = new URL(input);
-    const segments = url.pathname.split("/").filter(Boolean);
-    const firstSegment = segments[0];
-    const lastSegment =
-      segments.length > 0 ? segments[segments.length - 1] : undefined;
-    const hasLocale =
-      (firstSegment ? supportedLocales.includes(firstSegment) : false) ||
-      (lastSegment ? supportedLocales.includes(lastSegment) : false);
+  const url = normalizeE2ETarget(input);
 
-    if (!hasLocale) {
-      url.pathname = `${url.pathname.replace(/\/$/, "")}/${defaultLocale}`;
-    }
-
-    const normalizedPath = url.pathname.replace(/\/$/, "");
-    return `${url.origin}${normalizedPath}${url.search}${url.hash}`;
-  } catch {
-    const trimmed = input.replace(/\/$/, "");
+  if (!url) {
+    const trimmed = input.trim().replace(/\/$/, "");
     const hasLocale = supportedLocales.some((locale) =>
       trimmed.endsWith(`/${locale}`),
     );
     return hasLocale ? trimmed : `${trimmed}/${defaultLocale}`;
   }
+
+  const segments = url.pathname.split("/").filter(Boolean);
+  const firstSegment = segments[0];
+  const lastSegment =
+    segments.length > 0 ? segments[segments.length - 1] : undefined;
+  const hasLocale =
+    (firstSegment ? supportedLocales.includes(firstSegment) : false) ||
+    (lastSegment ? supportedLocales.includes(lastSegment) : false);
+
+  if (!hasLocale) {
+    url.pathname = `${url.pathname.replace(/\/$/, "")}/${defaultLocale}`;
+  }
+
+  const normalizedPath = url.pathname.replace(/\/$/, "");
+  return `${url.origin}${normalizedPath}${url.search}${url.hash}`;
 };
 
-const resolvedBaseUrl = ensureLocaleInUrl(
-  process.env.STAGING_URL ||
-    process.env.PLAYWRIGHT_BASE_URL ||
-    "http://localhost:3000",
+const selectedE2ETarget = selectExplicitE2ETarget(
+  process.env.STAGING_URL,
+  process.env.PLAYWRIGHT_BASE_URL,
 );
+const requiresRemoteE2ETarget =
+  process.env.E2E_REQUIRE_REMOTE_TARGET === "true";
+const resolvedBaseUrl = ensureLocaleInUrl(
+  selectedE2ETarget?.href ?? "http://localhost:3000",
+);
+const shouldUseLocalWebServer = selectedE2ETarget
+  ? isLocalE2ETarget(selectedE2ETarget.href)
+  : true;
+
+if (requiresRemoteE2ETarget && shouldUseLocalWebServer) {
+  throw new Error(
+    "E2E_REQUIRE_REMOTE_TARGET=true requires a non-local STAGING_URL or PLAYWRIGHT_BASE_URL",
+  );
+}
 
 // HTML reporter may start a local server and wait for Ctrl+C when open is enabled.
 // In non-interactive runners (e.g. ClaudeCode/CI logs), this causes the process to hang.
@@ -131,10 +150,9 @@ export default defineConfig({
   projects: isDaily ? [...baseProjects, ...extendedProjects] : baseProjects,
 
   /* Run your local dev server before starting the tests */
-  // 如果设置了 STAGING_URL，跳过本地服务器
-  ...(process.env.STAGING_URL
-    ? {}
-    : {
+  // 显式远端目标跳过本地服务器；本地/缺失目标仍使用本地服务器。
+  ...(shouldUseLocalWebServer
+    ? {
         webServer: {
           // 统一使用生产模式运行 E2E 测试,消除开发模式的 Hydration mismatch 警告
           // 注意：必须使用 NODE_ENV=production 进行构建，否则 React 19 的某些内部 API
@@ -170,7 +188,8 @@ export default defineConfig({
             APP_ENV: "preview",
           },
         },
-      }),
+      }
+    : {}),
 
   /* Global setup and teardown */
   globalSetup: require.resolve("./tests/e2e/global-setup.ts"),

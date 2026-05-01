@@ -8,7 +8,10 @@ import {
   PRODUCT_CATALOG,
   getFamiliesForMarket,
 } from "@/constants/product-catalog";
-import { SINGLE_SITE_PRODUCTS_PAGE_EXPRESSION } from "@/config/single-site-page-expression";
+import {
+  SINGLE_SITE_HOME_LINK_TARGETS,
+  SINGLE_SITE_PRODUCTS_PAGE_EXPRESSION,
+} from "@/config/single-site-page-expression";
 import { getLocalizedPath } from "@/config/paths";
 import {
   CatalogBreadcrumb,
@@ -17,6 +20,7 @@ import {
 import { JsonLdGraphScript } from "@/components/seo";
 import { MarketSeriesCard } from "@/components/products/market-series-card";
 import { generateLocaleStaticParams } from "@/app/[locale]/generate-static-params";
+import { Link } from "@/i18n/routing";
 
 export function generateStaticParams() {
   return generateLocaleStaticParams();
@@ -72,6 +76,13 @@ export default async function ProductsPage({ params }: ProductsPageProps) {
         <p className="text-body max-w-2xl text-muted-foreground">
           {t("overview.description")}
         </p>
+        <Link
+          href={SINGLE_SITE_HOME_LINK_TARGETS.contact}
+          prefetch={false}
+          className="mt-6 inline-flex items-center rounded-md bg-primary px-6 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+        >
+          {t("market.cta.button")}
+        </Link>
       </header>
 
       {/* Section 1: By Market Standard */}

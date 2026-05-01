@@ -80,6 +80,32 @@ function buildLanguagesForPath(path: string): Record<string, string> {
   return Object.fromEntries(entries);
 }
 
+interface PathAwareAlternates {
+  canonical: string;
+  languages: Record<string, string>;
+}
+
+function buildPathAwareAlternates(
+  locale: Locale,
+  path: string,
+): PathAwareAlternates {
+  return {
+    canonical: buildCanonicalForPath(locale, path),
+    languages: buildLanguagesForPath(path),
+  };
+}
+
+function buildOpenGraphWithUrl(
+  openGraph: Metadata["openGraph"],
+  url: string,
+): Metadata["openGraph"] {
+  if (openGraph && typeof openGraph === "object") {
+    return { ...openGraph, url };
+  }
+
+  return { url };
+}
+
 /**
  * Apply base fields to merged config
  */
@@ -221,23 +247,12 @@ export function generateMetadataForPath(
   const seoConfig = createPageSEOConfig(pageType, config ?? {});
   const metadata = generateLocalizedMetadata(locale, pageType, seoConfig);
 
-  const canonical = buildCanonicalForPath(locale, path);
-  const languages = buildLanguagesForPath(path);
-
-  metadata.alternates = {
-    canonical,
-    languages,
-  };
-
-  const { openGraph } = metadata;
-  if (openGraph && typeof openGraph === "object") {
-    (openGraph as { url?: string | URL }).url = canonical;
-    metadata.openGraph = openGraph;
-  } else {
-    metadata.openGraph = {
-      url: canonical,
-    } as unknown as Metadata["openGraph"];
-  }
+  const alternates = buildPathAwareAlternates(locale, path);
+  metadata.alternates = alternates;
+  metadata.openGraph = buildOpenGraphWithUrl(
+    metadata.openGraph,
+    alternates.canonical,
+  );
 
   return metadata;
 }

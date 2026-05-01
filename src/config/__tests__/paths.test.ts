@@ -24,6 +24,8 @@ const isHttpUrl = (value: string) => /^https?:\/\/.+/.test(value);
 const isEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 const isPhone = (value: string) =>
   /^\+\d{1,3}[-\s]?\(?[\d]{1,4}\)?[-\s]?\d{1,4}[-\s]?\d{1,9}$/.test(value);
+const isPendingOrValidPhone = (value: string) =>
+  value === "" || isPlaceholder(value) || isPhone(value);
 
 const CURRENT_PRODUCTION_LOCALE_CONTRACT = {
   locales: ["en", "zh"],
@@ -241,7 +243,7 @@ describe("paths configuration", () => {
     it("should have contact information", () => {
       const { contact } = SITE_CONFIG;
 
-      expect(isPlaceholder(contact.phone) || isPhone(contact.phone)).toBe(true);
+      expect(isPendingOrValidPhone(contact.phone)).toBe(true);
       expect(isPlaceholder(contact.email) || isEmail(contact.email)).toBe(true);
     });
   });
@@ -500,10 +502,7 @@ describe("paths configuration", () => {
     });
 
     it("should have valid phone format in contact", () => {
-      expect(
-        isPlaceholder(SITE_CONFIG.contact.phone) ||
-          isPhone(SITE_CONFIG.contact.phone),
-      ).toBe(true);
+      expect(isPendingOrValidPhone(SITE_CONFIG.contact.phone)).toBe(true);
     });
   });
 

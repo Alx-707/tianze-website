@@ -5,6 +5,7 @@ import {
   setupTestEnvironment,
   waitForStablePage,
 } from "./test-environment-setup";
+import { isLocalE2ETarget, selectExplicitE2ETarget } from "@/test/e2e-target";
 
 async function globalSetup(config: FullConfig) {
   console.log("🚀 Starting global setup for Playwright tests...");
@@ -54,20 +55,26 @@ async function globalSetup(config: FullConfig) {
   await installInterferenceGuard(page);
 
   try {
-    // 如果设置了 STAGING_URL，使用它；否则使用 baseURL
-    const stagingURL = process.env.STAGING_URL;
-    const baseURL = ensureLocaleInUrl(
-      stagingURL ||
-        config.projects?.[0]?.use?.baseURL ||
-        process.env.PLAYWRIGHT_BASE_URL ||
-        "http://localhost:3000",
+    const selectedE2ETarget = selectExplicitE2ETarget(
+      process.env.STAGING_URL,
+      process.env.PLAYWRIGHT_BASE_URL,
     );
+    const configuredBaseURL = config.projects?.[0]?.use?.baseURL;
+    const fallbackBaseURL =
+      typeof configuredBaseURL === "string"
+        ? configuredBaseURL
+        : "http://localhost:3000";
+    const baseURL = ensureLocaleInUrl(
+      selectedE2ETarget?.href ?? fallbackBaseURL,
+    );
+    const shouldSkipLocalReadiness = selectedE2ETarget
+      ? !isLocalE2ETarget(selectedE2ETarget.href)
+      : false;
 
     console.log(`⏳ Waiting for server at ${baseURL}...`);
 
-    // 如果是 staging URL，跳过服务器健康检查（假设已部署）
-    if (stagingURL) {
-      console.log("✅ Using staging URL, skipping local server check");
+    if (shouldSkipLocalReadiness) {
+      console.log("✅ Using remote E2E target, skipping local server check");
     } else {
       await page.goto(baseURL, { waitUntil: "networkidle" });
 
