@@ -45,6 +45,30 @@ describe("preview-observability-summary", () => {
     });
   });
 
+  it("fails when the observability surface is not the cache health surface", () => {
+    const summary = summarizeHeaders({
+      "x-request-id": "req_123",
+      "x-observability-surface": "lead-family",
+    });
+
+    expect(summary.ok).toBe(false);
+    expect(summary.missing).toEqual(["x-observability-surface=cache-health"]);
+
+    expect(
+      buildObservabilityReport({
+        baseUrl: "https://example-preview.vercel.app",
+        checkedAt: "2026-05-01T00:00:00.000Z",
+        probes: [
+          {
+            pathname: "/api/health",
+            status: 200,
+            ...summary,
+          },
+        ],
+      }).ok,
+    ).toBe(false);
+  });
+
   it("builds a passing report when every probe has required headers and 2xx or 3xx status", () => {
     expect(
       buildObservabilityReport({

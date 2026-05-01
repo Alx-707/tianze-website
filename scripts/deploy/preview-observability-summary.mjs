@@ -8,6 +8,7 @@ const REQUEST_TIMEOUT_MS = 30000;
 const OK_STATUS_MIN = 200;
 const OK_STATUS_MAX_EXCLUSIVE = 400;
 const REQUIRED_HEADERS = ["x-request-id", "x-observability-surface"];
+const EXPECTED_OBSERVABILITY_SURFACE = "cache-health";
 
 export function summarizeHeaders(headers) {
   const normalizedHeaders = normalizeHeaders(headers);
@@ -21,6 +22,10 @@ export function summarizeHeaders(headers) {
 
   if (!surface) {
     missing.push("x-observability-surface");
+  } else if (surface !== EXPECTED_OBSERVABILITY_SURFACE) {
+    missing.push(
+      `x-observability-surface=${EXPECTED_OBSERVABILITY_SURFACE}`,
+    );
   }
 
   return {
