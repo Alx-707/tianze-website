@@ -142,6 +142,7 @@
     "smoke:cf:preview": "node scripts/cloudflare/preview-smoke.mjs",
     "smoke:cf:preview:strict": "node scripts/cloudflare/preview-smoke.mjs --include-api-health",
     "smoke:cf:deploy": "node scripts/deploy/post-deploy-smoke.mjs",
+    "proof:preview": "node scripts/deploy/preview-proof.mjs",
     "build:cf:phase5": "pnpm build:cf && node scripts/cloudflare/build-phase5-worker.mjs",
     "build:cf:phase6": "pnpm build:cf && node scripts/cloudflare/build-phase6-workers.mjs",
     "preview:cf": "pnpm clean:next-artifacts && pnpm build:cf && pnpm exec opennextjs-cloudflare preview --env preview",
