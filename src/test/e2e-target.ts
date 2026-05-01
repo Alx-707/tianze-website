@@ -54,11 +54,19 @@ export function selectExplicitE2ETarget(
   ...candidates: Array<string | undefined>
 ): URL | undefined {
   for (const candidate of candidates) {
+    const trimmed = candidate?.trim();
+
+    if (!trimmed) {
+      continue;
+    }
+
     const url = normalizeE2ETarget(candidate);
 
     if (url) {
       return url;
     }
+
+    return undefined;
   }
 
   return undefined;

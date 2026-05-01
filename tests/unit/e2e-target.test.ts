@@ -49,7 +49,7 @@ describe("e2e target normalization", () => {
     expect(hasRemoteE2ETarget("   ")).toBe(false);
   });
 
-  it("selects the first valid explicit target by priority", () => {
+  it("selects explicit targets by priority", () => {
     expect(
       selectExplicitE2ETarget("localhost:3000", "preview.example.vercel.app")
         ?.origin,
@@ -58,10 +58,17 @@ describe("e2e target normalization", () => {
     expect(
       selectExplicitE2ETarget("   ", "preview.example.vercel.app")?.origin,
     ).toBe("http://preview.example.vercel.app");
+  });
 
+  it("does not fall back from invalid high-priority targets to lower-priority remotes", () => {
     expect(
-      selectExplicitE2ETarget("/relative", "preview.example.vercel.app")
-        ?.origin,
-    ).toBe("http://preview.example.vercel.app");
+      selectExplicitE2ETarget("/relative", "preview.example.vercel.app"),
+    ).toBeUndefined();
+    expect(
+      selectExplicitE2ETarget("?x=1", "preview.example.vercel.app"),
+    ).toBeUndefined();
+    expect(
+      selectExplicitE2ETarget("foo bar", "preview.example.vercel.app"),
+    ).toBeUndefined();
   });
 });
