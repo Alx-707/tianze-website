@@ -13,6 +13,7 @@ const mockTranslations = {
   "overview.specialty": "Specialty Products",
   "overview.title": "Products",
   "overview.description": "Our product catalog",
+  "market.cta.button": "Request a Quote",
   familyCount: "3 product families",
 } as const;
 
@@ -131,5 +132,17 @@ describe("Products Overview Page", () => {
     render(page);
 
     expect(screen.getByLabelText("breadcrumb")).toBeInTheDocument();
+  });
+
+  it("renders a quote CTA linking to contact", async () => {
+    const { default: ProductsPage } = await import("../page");
+    const page = await ProductsPage({
+      params: Promise.resolve({ locale: "en" }),
+    });
+    render(page);
+
+    expect(
+      screen.getByRole("link", { name: "Request a Quote" }),
+    ).toHaveAttribute("href", "/contact");
   });
 });
