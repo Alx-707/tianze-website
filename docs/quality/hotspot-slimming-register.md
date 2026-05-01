@@ -4,17 +4,23 @@ This is a candidate register, not permission to refactor immediately.
 
 ## Source
 
-- Generated at: 2026-05-01T13:49:05.688Z
+- Generated at: 2026-05-01T14:32:39.077Z
 - Input: `reports/architecture/structural-hotspots-latest.json`
-- Source report generatedAt: 2026-05-01T13:48:57.221Z
+- Input mode: structural-hotspots
+- Source report generatedAt: 2026-05-01T14:32:18.707Z
 - Source report windowDays: 180
-- Source report commitsAnalyzed: 233
+- Source report commitsAnalyzed: 234
 - Source report uniqueFilesTouched: 1150
-- Source report sha256: `c272c386f7e7c4e20cd336507660ecac1387c8afbec23556887cb5024de86f62`
+- Source report sha256: `16ce0a327a2c8271b3ff7589f39a6d1d489b6d3f6bbd0afab62afdb43b00bd71`
 - Command chain: `pnpm arch:metrics` -> `pnpm arch:hotspots` -> `pnpm review:hotspot-slimming reports/architecture/structural-hotspots-latest.json`
-- Ranking formula: metric value x real file lines
+- Checkout commit: `9b729d807c3687db8149591adc099f65e2a82309`
+- Checkout status: dirty
+- Derived candidate sha256: `ef3a95763eff84c70cd6106572276a1facdc53ce554bd8395ce1e4d06f1bec56`
+- Derived candidate rows: 11
+- Ranking formula: change touches x current checkout line count
 - Top candidates: 5
 - Current-tree filter: skipped 1 structural hotspot paths that no longer exist in this checkout.
+- Candidate rank caveat: table rank is after filtering to current critical source/script paths and excluding package, messages, workflow, tests, and deleted paths; original structural hotspot rank is not this table rank.
 
 ## Non-negotiable rule
 
@@ -24,7 +30,7 @@ Use each row as a slimming plan: prove current behavior first, make one small ex
 
 ## Candidates
 
-| Rank | File | Change touches | Lines | Score | Slimming plan |
+| Candidate Rank | File | Change touches | Lines | Score | Slimming plan |
 |---:|---|---:|---:|---:|---|
 | 1 | `scripts/quality-gate.js` | 17 | 2033 | 34561 | Characterize current behavior first, then extract one small seam around scripts/quality-gate.js. |
 | 2 | `src/app/globals.css` | 16 | 863 | 13808 | Characterize current behavior first, then extract one small seam around src/app/globals.css. |
@@ -36,7 +42,7 @@ Use each row as a slimming plan: prove current behavior first, make one small ex
 
 - Change touches: sourced from `summary.hotspots[].commits`.
 - Change touches are commit touch counts, not cyclomatic complexity or proof of bad code.
-- Lines are real file line counts for structural-hotspots input; flat input may provide lines for future complexity tooling tests.
+- Lines are current checkout line counts for structural-hotspots input and input-provided line counts for flat input.
 - Structural history can contain deleted or renamed files; those paths are excluded because this register is for current files only.
 - Score is only a prioritization aid. Final work order still needs characterization-test coverage and owner judgment.
 

@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { createHash } from "node:crypto";
+import { execFileSync } from "node:child_process";
 import {
   existsSync,
   mkdirSync,
@@ -33,6 +34,10 @@ const TEST_PATH_PATTERNS = [
   ".test.",
   ".spec.",
 ];
+const INPUT_MODES = {
+  FLAT: "flat input",
+  STRUCTURAL: "structural-hotspots",
+};
 
 function isObjectRecord(value) {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -264,6 +269,14 @@ function getMetricNotes(candidates) {
   );
 }
 
+function getInputMode(input) {
+  if (isObjectRecord(input) && Array.isArray(input.summary?.hotspots)) {
+    return INPUT_MODES.STRUCTURAL;
+  }
+
+  return INPUT_MODES.FLAT;
+}
+
 function getSlimmingPlan(candidate) {
   return `Characterize current behavior first, then extract one small seam around ${candidate.file}.`;
 }
@@ -289,20 +302,73 @@ function getStructuralMetadata(input) {
 
 export function createSourceReportEvidence(input, options) {
   const metadata = getStructuralMetadata(input);
+  const inputMode = getInputMode(input);
+  const commandChain =
+    inputMode === INPUT_MODES.STRUCTURAL
+      ? [
+          "pnpm arch:metrics",
+          "pnpm arch:hotspots",
+          `pnpm review:hotspot-slimming ${options.inputPath}`,
+        ]
+      : [`pnpm review:hotspot-slimming ${options.inputPath}`];
 
   return {
     ...metadata,
-    commandChain: [
-      "pnpm arch:metrics",
-      "pnpm arch:hotspots",
-      `pnpm review:hotspot-slimming ${options.inputPath}`,
-    ],
-    hash: createHash("sha256").update(options.rawInput).digest("hex"),
+    commandChain,
+    inputMode,
+    sourceHash: createHash("sha256").update(options.rawInput).digest("hex"),
   };
 }
 
 function formatSourceValue(value) {
   return value === null ? "not provided" : String(value);
+}
+
+function runGit(args, rootDir) {
+  return execFileSync("git", args, {
+    cwd: rootDir,
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "ignore"],
+  }).trim();
+}
+
+export function createCheckoutEvidence(rootDir) {
+  const statusShort = runGit(["status", "--short"], rootDir);
+
+  return {
+    commit: runGit(["rev-parse", "HEAD"], rootDir),
+    status: statusShort ? "dirty" : "clean",
+  };
+}
+
+export function createDerivedCandidateEvidence(candidates) {
+  const rows = candidates.map((candidate) => ({
+    file: candidate.file,
+    metricLabel: candidate.metricLabel,
+    metricValue: candidate.metricValue,
+    lines: candidate.lines,
+    score: candidate.score,
+  }));
+
+  return {
+    hash: createHash("sha256").update(`${JSON.stringify(rows)}\n`).digest("hex"),
+    rowCount: rows.length,
+  };
+}
+
+export function rankAllHotspotCandidates(rows) {
+  if (!Array.isArray(rows)) {
+    throw new Error("Malformed hotspot input: rankHotspotCandidates expects an array");
+  }
+
+  return rows
+    .map(normalizeRowForRanking)
+    .filter(Boolean)
+    .map((row) => ({
+      ...row,
+      score: row.metricValue * row.lines,
+    }))
+    .sort(compareCandidates);
 }
 
 export function normalizeHotspotInput(input, options = {}) {
@@ -326,27 +392,31 @@ export function normalizeHotspotInput(input, options = {}) {
 }
 
 export function rankHotspotCandidates(rows) {
-  if (!Array.isArray(rows)) {
-    throw new Error("Malformed hotspot input: rankHotspotCandidates expects an array");
-  }
-
-  return rows
-    .map(normalizeRowForRanking)
-    .filter(Boolean)
-    .map((row) => ({
-      ...row,
-      score: row.metricValue * row.lines,
-    }))
-    .sort(compareCandidates)
-    .slice(0, MAX_CANDIDATES);
+  return rankAllHotspotCandidates(rows).slice(0, MAX_CANDIDATES);
 }
 
 export function renderHotspotRegister(candidates, options = {}) {
   const generatedAt = options.generatedAt ?? new Date().toISOString();
   const inputPath = options.inputPath ?? "not provided";
   const sourceReport = options.sourceReport ?? null;
+  const inputMode = sourceReport?.inputMode ?? INPUT_MODES.FLAT;
+  const checkout = options.checkout ?? null;
+  const derivedCandidate =
+    options.derivedCandidate ?? createDerivedCandidateEvidence(candidates);
   const skippedMissingFiles = options.skippedMissingFiles ?? [];
   const metricHeader = getMetricHeader(candidates);
+  const rankingFormula =
+    inputMode === INPUT_MODES.STRUCTURAL
+      ? "change touches x current checkout line count"
+      : "metric value x input-provided lines";
+  const filterNote =
+    inputMode === INPUT_MODES.STRUCTURAL
+      ? `- Current-tree filter: skipped ${skippedMissingFiles.length} structural hotspot paths that no longer exist in this checkout.`
+      : "- Candidate filter: flat input rows are filtered to critical source/script prefixes and test/non-source path patterns before ranking; line counts stay input-provided.";
+  const rankCaveat =
+    inputMode === INPUT_MODES.STRUCTURAL
+      ? "- Candidate rank caveat: table rank is after filtering to current critical source/script paths and excluding package, messages, workflow, tests, and deleted paths; original structural hotspot rank is not this table rank."
+      : "- Candidate rank caveat: table rank is after filtering flat input rows to critical source/script paths and excluding package, messages, workflow, and tests; flat input does not prove current checkout line counts.";
   const lines = [
     "# Hotspot Slimming Register",
     "",
@@ -359,6 +429,7 @@ export function renderHotspotRegister(candidates, options = {}) {
   ];
 
   if (sourceReport) {
+    lines.push(`- Input mode: ${sourceReport.inputMode}`);
     lines.push(
       `- Source report generatedAt: ${formatSourceValue(sourceReport.generatedAt)}`,
     );
@@ -371,16 +442,24 @@ export function renderHotspotRegister(candidates, options = {}) {
     lines.push(
       `- Source report uniqueFilesTouched: ${formatSourceValue(sourceReport.uniqueFilesTouched)}`,
     );
-    lines.push(`- Source report sha256: \`${sourceReport.hash}\``);
+    lines.push(`- Source report sha256: \`${sourceReport.sourceHash}\``);
     lines.push(
       `- Command chain: ${sourceReport.commandChain.map((command) => `\`${command}\``).join(" -> ")}`,
     );
   }
 
+  if (checkout) {
+    lines.push(`- Checkout commit: \`${checkout.commit}\``);
+    lines.push(`- Checkout status: ${checkout.status}`);
+  }
+
   lines.push(
-    "- Ranking formula: metric value x real file lines",
+    `- Derived candidate sha256: \`${derivedCandidate.hash}\``,
+    `- Derived candidate rows: ${derivedCandidate.rowCount}`,
+    `- Ranking formula: ${rankingFormula}`,
     "- Top candidates: 5",
-    `- Current-tree filter: skipped ${skippedMissingFiles.length} structural hotspot paths that no longer exist in this checkout.`,
+    filterNote,
+    rankCaveat,
     "",
     "## Non-negotiable rule",
     "",
@@ -390,7 +469,7 @@ export function renderHotspotRegister(candidates, options = {}) {
     "",
     "## Candidates",
     "",
-    `| Rank | File | ${metricHeader} | Lines | Score | Slimming plan |`,
+    `| Candidate Rank | File | ${metricHeader} | Lines | Score | Slimming plan |`,
     "|---:|---|---:|---:|---:|---|",
   );
 
@@ -412,11 +491,17 @@ export function renderHotspotRegister(candidates, options = {}) {
     "- Change touches are commit touch counts, not cyclomatic complexity or proof of bad code.",
   );
   lines.push(
-    "- Lines are real file line counts for structural-hotspots input; flat input may provide lines for future complexity tooling tests.",
+    "- Lines are current checkout line counts for structural-hotspots input and input-provided line counts for flat input.",
   );
-  lines.push(
-    "- Structural history can contain deleted or renamed files; those paths are excluded because this register is for current files only.",
-  );
+  if (inputMode === INPUT_MODES.STRUCTURAL) {
+    lines.push(
+      "- Structural history can contain deleted or renamed files; those paths are excluded because this register is for current files only.",
+    );
+  } else {
+    lines.push(
+      "- Flat input lines are trusted as provided by the input file; they are not recalculated from checkout files.",
+    );
+  }
   lines.push(
     "- Score is only a prioritization aid. Final work order still needs characterization-test coverage and owner judgment.",
   );
@@ -451,7 +536,8 @@ function runCli() {
         return lines;
       },
     });
-    const candidates = rankHotspotCandidates(rows);
+    const rankedCandidates = rankAllHotspotCandidates(rows);
+    const candidates = rankedCandidates.slice(0, MAX_CANDIDATES);
 
     if (candidates.length === 0) {
       throw new Error(
@@ -466,6 +552,8 @@ function runCli() {
         inputPath: displayInputPath,
         rawInput,
       }),
+      checkout: createCheckoutEvidence(rootDir),
+      derivedCandidate: createDerivedCandidateEvidence(rankedCandidates),
       skippedMissingFiles,
     });
 
