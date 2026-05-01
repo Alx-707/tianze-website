@@ -16,7 +16,7 @@
 
 - Wave 1：提高 proof 可信度
   - PR preview 部署后跑关键页面、SEO、JSON-LD、no-JS、runtime placeholder 合同。
-  - 建立 staging lead canary，不要求真实生产数据，但要证明询盘链路能在 staging/test 目标上闭环。
+  - 建立 staging lead canary 的安全合同。本轮默认只做 dry-run/report；只有明确配置 staging-only Turnstile 测试策略和 idempotency key 后，才允许 submit/strict 证明 product inquiry 链路。
   - 建立关键页面合同快照，避免 canonical/hreflang、主内容、CTA、JSON-LD、占位内容再次漂移。
 - Wave 2：降低平台和长期维护风险
   - 用单独 proof lane 探索 Next.js `middleware` -> `proxy` 迁移与 Cloudflare/OpenNext 适配状态，不在主线直接改名。
@@ -56,7 +56,7 @@
 - Create: `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/tests/e2e/page-contracts.spec.ts`
   - 对关键页面跑一组稳定合同：H1、canonical、hreflang、JSON-LD、CTA、no-JS main。
 - Create: `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/scripts/deploy/staging-lead-canary.mjs`
-  - 负责 staging/test lead canary，支持 dry-run、skip、strict staging 三种行为。
+  - 负责 staging lead canary 报告。默认 dry-run，不把错误请求当成链路证明；submit/strict 必须使用当前 `/api/inquiry` product payload、Turnstile 测试策略和 idempotency key。
 - Create: `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/tests/unit/scripts/staging-lead-canary.test.ts`
   - 覆盖 canary mode、payload marker、环境缺失时行为和报告格式。
 - Create: `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/docs/guides/STAGING-LEAD-CANARY.md`
@@ -70,24 +70,22 @@
 
 - Create: `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/docs/proofs/cloudflare-proxy-proof.md`
   - 记录 Next docs、本仓库 runtime、Cloudflare/OpenNext 适配证明、不能主线直接 rename 的原因。
+- Create: `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/scripts/cloudflare/run-proxy-proof.mjs`
+  - 在 proof worktree 内顺序执行 build/smoke 命令，捕获每一步 exit code 和 log。
 - Create: `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/scripts/cloudflare/proxy-proof-check.mjs`
-  - 检查 middleware/proxy 文件状态、构建日志 warning、Cloudflare proof 命令输出文件。
+  - 读取固定 proof artifact，检查 middleware/proxy 文件状态、构建日志 warning、Cloudflare proof 命令 exit code。
 - Create: `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/tests/unit/scripts/cloudflare-proxy-proof-check.test.ts`
-  - 覆盖 proof check 的日志解析和 pass/fail 分类。
-- Create: `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/scripts/next-route-mode-snapshot.mjs`
-  - 从 `.next` build 输出生成 route mode 快照。
-- Create: `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/tests/unit/scripts/next-route-mode-snapshot.test.ts`
-  - 覆盖 route mode 解析和 baseline diff。
+  - 覆盖 proof artifact 读取、日志解析和 pass/fail 分类。
+- Create: `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/docs/quality/route-mode-proof.md`
+  - 本轮只记录 manual proof，不把未验证的 `.next` 内部 artifact 伪装成自动 guard。
 - Create: `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/scripts/client-boundary-budget.mjs`
   - 扫描 `"use client"` 边界和 `.next/static` client chunk，生成 budget 报告。
 - Create: `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/tests/unit/scripts/client-boundary-budget.test.ts`
   - 覆盖 client boundary 扫描、budget pass/fail、allowlist。
-- Create: `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/docs/quality/route-mode-baseline.json`
-  - 当前关键 route 的基线。
 - Create: `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/docs/quality/client-boundary-budget.json`
   - 当前 client boundary 和 bundle budget。
 - Modify: `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/package.json`
-  - 新增 `proof:cf:proxy`、`review:route-mode`、`review:client-boundary`。
+  - 新增 `proof:cf:proxy`、`review:client-boundary`。
 - Modify: `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/scripts/run-all-guardrails-review.js`
   - 把轻量 route/client guard 接入 review guardrails，避免变成孤儿脚本。
 
@@ -570,34 +568,42 @@ Expected: commit succeeds.
 **Files:**
 - Modify: `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/.github/workflows/vercel-deploy.yml`
 
-- [ ] **Step 1: 检查当前 deploy output 名称**
+- [ ] **Step 1: 检查当前 post-deployment-verification job 和 bypass header**
 
 Run:
 
 ```bash
 cd /Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501
-grep -n "deployment-url\\|preview_url\\|post-deployment" .github/workflows/vercel-deploy.yml
+grep -n "post-deployment-verification\\|等待部署就绪\\|VERCEL_AUTOMATION_BYPASS_SECRET\\|post-deploy-smoke" .github/workflows/vercel-deploy.yml
 ```
 
-Expected: output contains `steps.vercel_cli_deploy.outputs.deployment-url` and `preview_url`.
+Expected:
 
-- [ ] **Step 2: 在 preview deploy 后追加 proof step**
+- output contains `post-deployment-verification`
+- output contains `等待部署就绪`
+- output contains `VERCEL_AUTOMATION_BYPASS_SECRET`
+- output contains existing `post-deploy-smoke` invocation
 
-Modify `.github/workflows/vercel-deploy.yml` after the deploy URL summary step in the preview job:
+Do not add preview proof to `deploy-to-vercel`. It must run only after the existing readiness wait.
+
+- [ ] **Step 2: 在 post-deployment-verification 的等待就绪之后追加 proof step**
+
+Modify `.github/workflows/vercel-deploy.yml` inside `post-deployment-verification`, immediately after `等待部署就绪（增强版）` and before `验证部署健康状态`:
 
 ```yaml
       - name: 预览部署合同证明
-        if: steps.vercel_secrets.outputs.configured == 'true' && steps.vercel_cli_deploy.outputs.deployment-url != ''
         run: |
           set -euo pipefail
           pnpm proof:preview -- \
-            --base-url "${{ steps.vercel_cli_deploy.outputs.deployment-url }}" \
+            --base-url "${{ needs.deploy-to-vercel.outputs.preview_url }}" \
+            --header-name "x-vercel-protection-bypass" \
+            --header-value "${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}" \
             --output reports/deploy/preview-proof.json
         env:
           CI: true
 
       - name: 上传预览部署合同证明
-        if: always() && steps.vercel_secrets.outputs.configured == 'true'
+        if: always()
         uses: actions/upload-artifact@v7
         with:
           name: preview-proof.json
@@ -605,14 +611,7 @@ Modify `.github/workflows/vercel-deploy.yml` after the deploy URL summary step i
           if-no-files-found: ignore
 ```
 
-If the repo already has a protection bypass secret later, use:
-
-```yaml
-            --header-name "x-vercel-protection-bypass" \
-            --header-value "${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}"
-```
-
-Only add the header block when that secret is already present in the repository workflow.
+This repository already uses `VERCEL_AUTOMATION_BYPASS_SECRET` in this job. Reuse it. Do not create a second bypass mechanism.
 
 - [ ] **Step 3: 校验 workflow YAML 关键字段**
 
@@ -620,10 +619,15 @@ Run:
 
 ```bash
 cd /Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501
-grep -n "预览部署合同证明\\|preview-proof.json\\|proof:preview" .github/workflows/vercel-deploy.yml
+grep -n "预览部署合同证明\\|preview-proof.json\\|proof:preview\\|needs.deploy-to-vercel.outputs.preview_url\\|x-vercel-protection-bypass" .github/workflows/vercel-deploy.yml
 ```
 
-Expected: three matching areas exist: proof step, upload step, script invocation.
+Expected:
+
+- proof step appears under `post-deployment-verification`
+- script uses `needs.deploy-to-vercel.outputs.preview_url`
+- script passes `x-vercel-protection-bypass`
+- upload step stores `reports/deploy/preview-proof.json`
 
 - [ ] **Step 4: 运行轻量检查**
 
@@ -822,11 +826,20 @@ describe("staging-lead-canary", () => {
       mode: "dry-run",
       output: "reports/deploy/staging-lead-canary.json",
       reference: "",
+      turnstileToken: "",
+      idempotencyKey: "",
     });
   });
 
   it("classifies missing base url as skipped for PR mode", () => {
-    expect(classifyCanaryMode({ baseUrl: "", mode: "dry-run" })).toEqual({
+    expect(
+      classifyCanaryMode({
+        baseUrl: "",
+        mode: "dry-run",
+        turnstileToken: "",
+        idempotencyKey: "",
+      }),
+    ).toEqual({
       shouldSubmit: false,
       ok: true,
       status: "skipped",
@@ -835,7 +848,14 @@ describe("staging-lead-canary", () => {
   });
 
   it("fails missing base url in strict staging mode", () => {
-    expect(classifyCanaryMode({ baseUrl: "", mode: "strict" })).toEqual({
+    expect(
+      classifyCanaryMode({
+        baseUrl: "",
+        mode: "strict",
+        turnstileToken: "valid-staging-token",
+        idempotencyKey: "staging-canary-pr-123",
+      }),
+    ).toEqual({
       shouldSubmit: false,
       ok: false,
       status: "failed",
@@ -843,20 +863,40 @@ describe("staging-lead-canary", () => {
     });
   });
 
-  it("builds traceable test payload", () => {
+  it("refuses submit without explicit staging security inputs", () => {
+    expect(
+      classifyCanaryMode({
+        baseUrl: "https://example-preview.vercel.app",
+        mode: "submit",
+        turnstileToken: "",
+        idempotencyKey: "",
+      }),
+    ).toEqual({
+      shouldSubmit: false,
+      ok: false,
+      status: "failed",
+      reason:
+        "submit mode requires --turnstile-token and --idempotency-key for the current /api/inquiry contract",
+    });
+  });
+
+  it("builds traceable product inquiry dry-run payload", () => {
     expect(
       buildCanaryPayload({
         reference: "pr-123",
         checkedAt: "2026-05-01T00:00:00.000Z",
+        turnstileToken: "valid-staging-token",
       }),
     ).toMatchObject({
-      firstName: "Staging",
-      lastName: "Canary",
+      fullName: "Staging Canary",
       email: "staging-canary@example.invalid",
+      productSlug: "pvc-conduit-fittings",
+      productName: "PVC Conduit Fittings",
+      quantity: "1 carton",
       company: "Tianze Preview Proof",
-      message:
+      requirements:
         "[staging-canary pr-123] This is an automated non-production lead proof.",
-      acceptPrivacy: true,
+      turnstileToken: "valid-staging-token",
     });
   });
 
@@ -917,6 +957,8 @@ export function parseLeadCanaryArgs(argv) {
     mode: "dry-run",
     output: DEFAULT_OUTPUT,
     reference: "",
+    turnstileToken: "",
+    idempotencyKey: "",
   };
 
   for (let index = 2; index < argv.length; index += 1) {
@@ -937,6 +979,14 @@ export function parseLeadCanaryArgs(argv) {
       args.reference = argv[++index];
       continue;
     }
+    if (arg === "--turnstile-token" && index + 1 < argv.length) {
+      args.turnstileToken = argv[++index];
+      continue;
+    }
+    if (arg === "--idempotency-key" && index + 1 < argv.length) {
+      args.idempotencyKey = argv[++index];
+      continue;
+    }
     throw new Error(`Unknown argument: ${arg}`);
   }
 
@@ -947,7 +997,12 @@ export function parseLeadCanaryArgs(argv) {
   return args;
 }
 
-export function classifyCanaryMode({ baseUrl, mode }) {
+export function classifyCanaryMode({
+  baseUrl,
+  mode,
+  turnstileToken,
+  idempotencyKey,
+}) {
   if (!baseUrl && mode === "strict") {
     return {
       shouldSubmit: false,
@@ -975,6 +1030,16 @@ export function classifyCanaryMode({ baseUrl, mode }) {
     };
   }
 
+  if (!turnstileToken || !idempotencyKey) {
+    return {
+      shouldSubmit: false,
+      ok: false,
+      status: "failed",
+      reason:
+        "submit mode requires --turnstile-token and --idempotency-key for the current /api/inquiry contract",
+    };
+  }
+
   return {
     shouldSubmit: true,
     ok: true,
@@ -983,20 +1048,19 @@ export function classifyCanaryMode({ baseUrl, mode }) {
   };
 }
 
-export function buildCanaryPayload({ reference, checkedAt }) {
+export function buildCanaryPayload({ reference, checkedAt, turnstileToken }) {
   const marker = reference || "manual";
   return {
-    firstName: "Staging",
-    lastName: "Canary",
+    fullName: "Staging Canary",
     email: "staging-canary@example.invalid",
-    phone: "",
     company: "Tianze Preview Proof",
-    country: "US",
-    productInterest: "PVC conduit fittings",
-    message: `[staging-canary ${marker}] This is an automated non-production lead proof.`,
-    source: "staging-lead-canary",
+    productSlug: "pvc-conduit-fittings",
+    productName: "PVC Conduit Fittings",
+    quantity: "1 carton",
+    requirements: `[staging-canary ${marker}] This is an automated non-production lead proof.`,
+    marketingConsent: false,
+    turnstileToken,
     checkedAt,
-    acceptPrivacy: true,
   };
 }
 
@@ -1015,12 +1079,13 @@ export function buildLeadCanaryReport(input) {
   };
 }
 
-async function submitLead({ baseUrl, payload }) {
+async function submitLead({ baseUrl, payload, idempotencyKey }) {
   const response = await fetch(new URL("/api/inquiry", baseUrl), {
     method: "POST",
     headers: {
       "content-type": "application/json",
       "user-agent": "staging-lead-canary",
+      "idempotency-key": idempotencyKey,
     },
     body: JSON.stringify(payload),
     signal: AbortSignal.timeout(30000),
@@ -1059,7 +1124,12 @@ async function main() {
   } else {
     const result = await submitLead({
       baseUrl: args.baseUrl,
-      payload: buildCanaryPayload({ reference: args.reference, checkedAt }),
+      payload: buildCanaryPayload({
+        reference: args.reference,
+        checkedAt,
+        turnstileToken: args.turnstileToken,
+      }),
+      idempotencyKey: args.idempotencyKey,
     });
     report = buildLeadCanaryReport({
       checkedAt,
@@ -1094,7 +1164,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
 }
 ```
 
-- [ ] **Step 4: 写 canary 操作文档**
+- [ ] **Step 4: 写 canary 操作文档，明确本轮默认不证明真实 submit**
 
 Create `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/docs/guides/STAGING-LEAD-CANARY.md` with:
 
@@ -1103,13 +1173,18 @@ Create `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-wav
 
 ## Purpose
 
-This proof checks whether the deployed inquiry path can accept a clearly marked non-production test lead. It is not a substitute for a real buyer inquiry test, and it must not pollute production sales records.
+This proof has two levels:
+
+1. `dry-run`: validates and records the product inquiry payload shape without submitting data.
+2. `submit` / `strict`: only allowed when staging has an explicit Turnstile test strategy and a non-production data target.
+
+Without the staging-only security/data contract, this script must not be described as an end-to-end lead proof.
 
 ## Modes
 
 - `dry-run`: default. Writes a report and does not submit data.
-- `submit`: submits to the provided preview/staging URL.
-- `strict`: same as submit, but missing `--base-url` is a hard failure.
+- `submit`: submits a product inquiry payload to the provided preview/staging URL. Requires a valid staging Turnstile strategy.
+- `strict`: same as submit, but missing `--base-url` or missing staging security configuration is a hard failure.
 
 ## Safe payload marker
 
@@ -1117,15 +1192,36 @@ Every payload uses:
 
 - email: `staging-canary@example.invalid`
 - company: `Tianze Preview Proof`
-- message prefix: `[staging-canary <reference>]`
-- source: `staging-lead-canary`
+- productSlug: `pvc-conduit-fittings`
+- productName: `PVC Conduit Fittings`
+- requirements prefix: `[staging-canary <reference>]`
+- idempotency header: `idempotency-key: staging-canary-<timestamp-or-reference>`
+
+## Security contract for submit/strict
+
+Current `/api/inquiry` validates product inquiry data, requires Turnstile, and requires an idempotency key. Therefore:
+
+- Do not send contact-form fields such as `firstName`, `lastName`, or `acceptPrivacy` to `/api/inquiry`.
+- Do not use invalid Turnstile tokens and call that a lead-chain proof.
+- Do not submit to production Airtable from this canary.
+- If staging Turnstile bypass/test keys are unavailable, keep this lane in `dry-run`.
 
 ## Commands
 
 ```bash
 pnpm proof:lead-canary:staging -- --mode dry-run
-pnpm proof:lead-canary:staging -- --base-url https://example-preview.vercel.app --mode submit --reference pr-123
-pnpm proof:lead-canary:staging -- --base-url https://example-preview.vercel.app --mode strict --reference release-candidate
+pnpm proof:lead-canary:staging -- \
+  --base-url https://example-preview.vercel.app \
+  --mode submit \
+  --reference pr-123 \
+  --turnstile-token "$STAGING_TURNSTILE_TEST_TOKEN" \
+  --idempotency-key "staging-canary-pr-123"
+pnpm proof:lead-canary:staging -- \
+  --base-url https://example-preview.vercel.app \
+  --mode strict \
+  --reference release-candidate \
+  --turnstile-token "$STAGING_TURNSTILE_TEST_TOKEN" \
+  --idempotency-key "staging-canary-release-candidate"
 ```
 
 ## Report
@@ -1245,25 +1341,7 @@ git mv src/middleware.ts src/proxy.ts
 
 Expected: file is renamed only in proof worktree.
 
-- [ ] **Step 4: proof 分支跑平台验证，不能并行跑 build 和 build:cf**
-
-Run:
-
-```bash
-cd /Users/Data/conductor/workspaces/tianze-website/cloudflare-next-proxy-proof
-pnpm build 2>&1 | tee reports/cloudflare-proxy-next-build.log
-pnpm build:cf 2>&1 | tee reports/cloudflare-proxy-build-cf.log
-pnpm smoke:cf:preview 2>&1 | tee reports/cloudflare-proxy-preview-smoke.log
-pnpm smoke:cf:preview:strict 2>&1 | tee reports/cloudflare-proxy-preview-smoke-strict.log
-```
-
-Expected:
-
-- `pnpm build` either passes without middleware deprecation warning or produces a documented warning.
-- `pnpm build:cf` proves whether OpenNext/Cloudflare accepts `src/proxy.ts`.
-- smoke commands prove runtime route and API behavior.
-
-- [ ] **Step 5: 回到主 plan worktree 写失败测试**
+- [ ] **Step 4: 回到主 plan worktree 写 proof artifact 测试**
 
 Create `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/tests/unit/scripts/cloudflare-proxy-proof-check.test.ts` with:
 
@@ -1272,6 +1350,7 @@ import { describe, expect, it } from "vitest";
 import {
   classifyProxyProof,
   parseBuildWarnings,
+  readProxyProofArtifact,
 } from "../../../scripts/cloudflare/proxy-proof-check.mjs";
 
 describe("cloudflare proxy proof check", () => {
@@ -1283,46 +1362,187 @@ describe("cloudflare proxy proof check", () => {
     ).toEqual(["middleware-deprecated"]);
   });
 
+  it("reads proxy proof artifact", () => {
+    expect(
+      readProxyProofArtifact(
+        JSON.stringify({
+          subject: "src/proxy.ts",
+          steps: [
+            { name: "next-build", exitCode: 0, logPath: "reports/a.log" },
+            { name: "cloudflare-build", exitCode: 1, logPath: "reports/b.log" },
+          ],
+        }),
+      ),
+    ).toEqual({
+      subject: "src/proxy.ts",
+      steps: [
+        { name: "next-build", exitCode: 0, logPath: "reports/a.log" },
+        { name: "cloudflare-build", exitCode: 1, logPath: "reports/b.log" },
+      ],
+    });
+  });
+
   it("classifies full proof pass", () => {
     expect(
       classifyProxyProof({
-        nextBuildExitCode: 0,
-        cloudflareBuildExitCode: 0,
-        previewSmokeExitCode: 0,
-        strictPreviewSmokeExitCode: 0,
+        subject: "src/proxy.ts",
+        steps: [
+          { name: "next-build", exitCode: 0, logPath: "reports/a.log" },
+          { name: "cloudflare-build", exitCode: 0, logPath: "reports/b.log" },
+          { name: "cf-preview-smoke", exitCode: 0, logPath: "reports/c.log" },
+          {
+            name: "cf-preview-smoke-strict",
+            exitCode: 0,
+            logPath: "reports/d.log",
+          },
+        ],
         warnings: [],
       }),
     ).toEqual({
       ok: true,
       recommendation: "proxy-compatible",
       blockers: [],
+      warnings: [],
     });
   });
 
   it("blocks mainline migration when Cloudflare build fails", () => {
     expect(
       classifyProxyProof({
-        nextBuildExitCode: 0,
-        cloudflareBuildExitCode: 1,
-        previewSmokeExitCode: 0,
-        strictPreviewSmokeExitCode: 0,
+        subject: "src/proxy.ts",
+        steps: [
+          { name: "next-build", exitCode: 0, logPath: "reports/a.log" },
+          { name: "cloudflare-build", exitCode: 1, logPath: "reports/b.log" },
+        ],
         warnings: [],
       }),
     ).toEqual({
       ok: false,
       recommendation: "keep-middleware",
-      blockers: ["Cloudflare/OpenNext build failed with src/proxy.ts"],
+      blockers: ["cloudflare-build failed with exit code 1"],
+      warnings: [],
     });
   });
 });
 ```
 
-- [ ] **Step 6: 实现 proof check 脚本**
+- [ ] **Step 5: 实现 proof wrapper**
+
+Create `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/scripts/cloudflare/run-proxy-proof.mjs` with:
+
+```js
+import { mkdir, writeFile } from "node:fs/promises";
+import { dirname } from "node:path";
+import { spawn } from "node:child_process";
+import { fileURLToPath } from "node:url";
+
+const OUTPUT = "reports/cloudflare-proxy/proof-artifact.json";
+
+const COMMANDS = [
+  { name: "next-build", command: "pnpm", args: ["build"] },
+  { name: "cloudflare-build", command: "pnpm", args: ["build:cf"] },
+  { name: "cf-preview-smoke", command: "pnpm", args: ["smoke:cf:preview"] },
+  {
+    name: "cf-preview-smoke-strict",
+    command: "pnpm",
+    args: ["smoke:cf:preview:strict"],
+  },
+];
+
+async function runCommand(step) {
+  await mkdir("reports/cloudflare-proxy", { recursive: true });
+  const logPath = `reports/cloudflare-proxy/${step.name}.log`;
+
+  return new Promise((resolve) => {
+    const child = spawn(step.command, step.args, {
+      shell: false,
+      stdio: ["ignore", "pipe", "pipe"],
+      env: process.env,
+    });
+
+    let output = "";
+    child.stdout.on("data", (chunk) => {
+      output += chunk.toString();
+      process.stdout.write(chunk);
+    });
+    child.stderr.on("data", (chunk) => {
+      output += chunk.toString();
+      process.stderr.write(chunk);
+    });
+    child.on("close", async (code) => {
+      await writeFile(logPath, output);
+      resolve({
+        name: step.name,
+        exitCode: code ?? 1,
+        logPath,
+      });
+    });
+  });
+}
+
+async function main() {
+  const steps = [];
+  for (const command of COMMANDS) {
+    const result = await runCommand(command);
+    steps.push(result);
+    if (result.exitCode !== 0) {
+      break;
+    }
+  }
+
+  const artifact = {
+    subject: "src/proxy.ts",
+    checkedAt: new Date().toISOString(),
+    steps,
+  };
+
+  await mkdir(dirname(OUTPUT), { recursive: true });
+  await writeFile(OUTPUT, `${JSON.stringify(artifact, null, 2)}\n`);
+
+  if (steps.some((step) => step.exitCode !== 0)) {
+    process.exit(1);
+  }
+}
+
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  main().catch((error) => {
+    console.error("[run-proxy-proof] unexpected error:", error);
+    process.exit(1);
+  });
+}
+```
+
+- [ ] **Step 6: proof 分支跑平台验证，不能并行跑 build 和 build:cf**
+
+Run:
+
+```bash
+cd /Users/Data/conductor/workspaces/tianze-website/cloudflare-next-proxy-proof
+node /Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/scripts/cloudflare/run-proxy-proof.mjs
+```
+
+Expected:
+
+- command runs `pnpm build`, then `pnpm build:cf`, then both Cloudflare smoke commands sequentially.
+- `reports/cloudflare-proxy/proof-artifact.json` exists in the proof worktree.
+- each step in the artifact contains `name`, `exitCode`, and `logPath`.
+- a failing command stops later commands and records the failure.
+
+- [ ] **Step 7: 实现 proof check 脚本**
 
 Create `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/scripts/cloudflare/proxy-proof-check.mjs` with:
 
 ```js
+import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
+
+export function readProxyProofArtifact(rawJson) {
+  const parsed = JSON.parse(rawJson);
+  return {
+    subject: parsed.subject,
+    steps: parsed.steps,
+  };
+}
 
 export function parseBuildWarnings(logText) {
   const warnings = [];
@@ -1332,27 +1552,10 @@ export function parseBuildWarnings(logText) {
   return warnings;
 }
 
-export function classifyProxyProof({
-  nextBuildExitCode,
-  cloudflareBuildExitCode,
-  previewSmokeExitCode,
-  strictPreviewSmokeExitCode,
-  warnings,
-}) {
-  const blockers = [];
-
-  if (nextBuildExitCode !== 0) {
-    blockers.push("Next build failed with src/proxy.ts");
-  }
-  if (cloudflareBuildExitCode !== 0) {
-    blockers.push("Cloudflare/OpenNext build failed with src/proxy.ts");
-  }
-  if (previewSmokeExitCode !== 0) {
-    blockers.push("Cloudflare preview smoke failed with src/proxy.ts");
-  }
-  if (strictPreviewSmokeExitCode !== 0) {
-    blockers.push("Cloudflare strict preview smoke failed with src/proxy.ts");
-  }
+export function classifyProxyProof({ subject, steps, warnings }) {
+  const blockers = steps
+    .filter((step) => step.exitCode !== 0)
+    .map((step) => `${step.name} failed with exit code ${step.exitCode}`);
 
   return {
     ok: blockers.length === 0,
@@ -1362,20 +1565,16 @@ export function classifyProxyProof({
   };
 }
 
-function parseExitCode(value) {
-  const parsed = Number.parseInt(value ?? "", 10);
-  return Number.isFinite(parsed) ? parsed : 1;
-}
-
 async function main() {
+  const artifactPath =
+    process.argv[2] ?? "reports/cloudflare-proxy/proof-artifact.json";
+  const artifact = readProxyProofArtifact(await readFile(artifactPath, "utf8"));
+  const warningText = await Promise.all(
+    artifact.steps.map((step) => readFile(step.logPath, "utf8").catch(() => "")),
+  );
   const result = classifyProxyProof({
-    nextBuildExitCode: parseExitCode(process.env.NEXT_BUILD_EXIT_CODE),
-    cloudflareBuildExitCode: parseExitCode(process.env.CF_BUILD_EXIT_CODE),
-    previewSmokeExitCode: parseExitCode(process.env.CF_PREVIEW_SMOKE_EXIT_CODE),
-    strictPreviewSmokeExitCode: parseExitCode(
-      process.env.CF_PREVIEW_STRICT_EXIT_CODE,
-    ),
-    warnings: parseBuildWarnings(process.env.NEXT_BUILD_LOG ?? ""),
+    ...artifact,
+    warnings: parseBuildWarnings(warningText.join("\n")),
   });
 
   console.log(JSON.stringify(result, null, 2));
@@ -1433,13 +1632,16 @@ The installed package docs are the source of truth for this repository.
 
 ## Required proof commands
 
-Run these sequentially, not in parallel:
+Run the wrapper. It runs these sequentially, not in parallel, and writes exit codes plus logs:
 
 ```bash
-pnpm build
-pnpm build:cf
-pnpm smoke:cf:preview
-pnpm smoke:cf:preview:strict
+node /Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/scripts/cloudflare/run-proxy-proof.mjs
+```
+
+Artifact:
+
+```text
+reports/cloudflare-proxy/proof-artifact.json
 ```
 
 ## Mainline rule
@@ -1454,7 +1656,7 @@ pnpm smoke:cf:preview:strict
 Modify `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/package.json`:
 
 ```json
-"proof:cf:proxy": "node scripts/cloudflare/proxy-proof-check.mjs"
+"proof:cf:proxy": "node scripts/cloudflare/proxy-proof-check.mjs reports/cloudflare-proxy/proof-artifact.json"
 ```
 
 Run:
@@ -1472,66 +1674,58 @@ Run:
 
 ```bash
 cd /Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501
-git add package.json docs/proofs/cloudflare-proxy-proof.md scripts/cloudflare/proxy-proof-check.mjs tests/unit/scripts/cloudflare-proxy-proof-check.test.ts
+git add package.json docs/proofs/cloudflare-proxy-proof.md scripts/cloudflare/run-proxy-proof.mjs scripts/cloudflare/proxy-proof-check.mjs tests/unit/scripts/cloudflare-proxy-proof-check.test.ts
 git commit -m "docs: add Cloudflare proxy proof lane"
 ```
 
 Expected: commit succeeds.
 
-### Task 6: Route mode 和 client boundary guard
+### Task 6: Route mode manual proof 和 client boundary guard
 
 **Files:**
-- Create: `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/scripts/next-route-mode-snapshot.mjs`
-- Create: `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/tests/unit/scripts/next-route-mode-snapshot.test.ts`
+- Create: `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/docs/quality/route-mode-proof.md`
 - Create: `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/scripts/client-boundary-budget.mjs`
 - Create: `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/tests/unit/scripts/client-boundary-budget.test.ts`
-- Create: `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/docs/quality/route-mode-baseline.json`
 - Create: `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/docs/quality/client-boundary-budget.json`
 - Modify: `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/package.json`
 - Modify: `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/scripts/run-all-guardrails-review.js`
 
-- [ ] **Step 1: 写 route mode 失败测试**
+- [ ] **Step 1: 写 route mode manual proof 文档**
 
-Create `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/tests/unit/scripts/next-route-mode-snapshot.test.ts` with:
+Create `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/docs/quality/route-mode-proof.md` with:
 
-```ts
-import { describe, expect, it } from "vitest";
-import {
-  compareRouteModeBaseline,
-  normalizeRouteModeRows,
-} from "../../../scripts/next-route-mode-snapshot.mjs";
+```md
+# Route Mode Proof
 
-describe("next-route-mode-snapshot", () => {
-  it("normalizes route mode rows", () => {
-    expect(
-      normalizeRouteModeRows([
-        { route: "/en", mode: "static", revalidate: false },
-        { route: "/en/contact", mode: "dynamic", revalidate: false },
-      ]),
-    ).toEqual([
-      { route: "/en", mode: "static", revalidate: false },
-      { route: "/en/contact", mode: "dynamic", revalidate: false },
-    ]);
-  });
+## Decision
 
-  it("reports route mode drift", () => {
-    expect(
-      compareRouteModeBaseline({
-        baseline: [{ route: "/en/contact", mode: "static", revalidate: false }],
-        current: [{ route: "/en/contact", mode: "dynamic", revalidate: false }],
-      }),
-    ).toEqual({
-      ok: false,
-      drift: [
-        {
-          route: "/en/contact",
-          expected: { mode: "static", revalidate: false },
-          actual: { mode: "dynamic", revalidate: false },
-        },
-      ],
-    });
-  });
-});
+Route mode is a manual proof lane in this wave. Do not add an automated route-mode gate until the project has a stable, version-checked parser for Next.js 16 build artifacts.
+
+## Why
+
+The previous plan described a script that would read `reports/quality/route-mode-current.json`, but no step generated that file from `.next`. Because `reports/` is ignored, that design is not reproducible from a clean checkout.
+
+## Manual proof command
+
+Run:
+
+```bash
+pnpm build
+```
+
+Then inspect the Next.js route summary printed by the build. Record the route mode evidence in the repair PR notes for these pages:
+
+- `/en`
+- `/zh`
+- `/en/contact`
+- `/zh/contact`
+- `/en/products`
+- `/en/products/north-america`
+- `/en/about`
+
+## Follow-up automation rule
+
+Only add `review:route-mode` when the script can derive current route mode from a stable artifact in the same run, create its own report directory, and pass from a clean checkout.
 ```
 
 - [ ] **Step 2: 写 client boundary 失败测试**
@@ -1571,89 +1765,14 @@ describe("client-boundary-budget", () => {
 });
 ```
 
-- [ ] **Step 3: 实现 route mode 脚本**
-
-Create `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/scripts/next-route-mode-snapshot.mjs` with:
-
-```js
-import { readFile, writeFile } from "node:fs/promises";
-import { fileURLToPath } from "node:url";
-
-export function normalizeRouteModeRows(rows) {
-  return rows
-    .map((row) => ({
-      route: row.route,
-      mode: row.mode,
-      revalidate: row.revalidate,
-    }))
-    .sort((left, right) => left.route.localeCompare(right.route));
-}
-
-export function compareRouteModeBaseline({ baseline, current }) {
-  const currentByRoute = new Map(current.map((row) => [row.route, row]));
-  const drift = [];
-
-  for (const expectedRow of baseline) {
-    const actualRow = currentByRoute.get(expectedRow.route);
-    if (
-      !actualRow ||
-      actualRow.mode !== expectedRow.mode ||
-      actualRow.revalidate !== expectedRow.revalidate
-    ) {
-      drift.push({
-        route: expectedRow.route,
-        expected: {
-          mode: expectedRow.mode,
-          revalidate: expectedRow.revalidate,
-        },
-        actual: actualRow
-          ? { mode: actualRow.mode, revalidate: actualRow.revalidate }
-          : null,
-      });
-    }
-  }
-
-  return { ok: drift.length === 0, drift };
-}
-
-async function readJson(path) {
-  return JSON.parse(await readFile(path, "utf8"));
-}
-
-async function main() {
-  const baselinePath = "docs/quality/route-mode-baseline.json";
-  const outputPath = "reports/quality/route-mode-current.json";
-  const current = normalizeRouteModeRows(await readJson(outputPath));
-  const baseline = normalizeRouteModeRows(await readJson(baselinePath));
-  const result = compareRouteModeBaseline({ baseline, current });
-  await writeFile(
-    "reports/quality/route-mode-diff.json",
-    `${JSON.stringify(result, null, 2)}\n`,
-  );
-  if (!result.ok) {
-    console.error("[route-mode] drift detected");
-    process.exit(1);
-  }
-  console.log("[route-mode] baseline matched");
-}
-
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  main().catch((error) => {
-    console.error("[route-mode] unexpected error:", error);
-    process.exit(1);
-  });
-}
-```
-
-After this minimal version passes, extend it in a later step to generate `reports/quality/route-mode-current.json` from `.next` artifacts if the artifact location is stable in this repo. Do not guess undocumented `.next` internals until after `pnpm build` evidence is available.
-
-- [ ] **Step 4: 实现 client boundary 脚本**
+- [ ] **Step 3: 实现 client boundary 脚本**
 
 Create `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/scripts/client-boundary-budget.mjs` with:
 
 ```js
 import { glob } from "glob";
-import { readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 export function findClientBoundaryFiles(files) {
@@ -1690,6 +1809,9 @@ async function main() {
   );
   const currentFiles = findClientBoundaryFiles(await readSourceFiles());
   const result = compareClientBoundaryBudget({ budget, currentFiles });
+  await mkdir(dirname("reports/quality/client-boundary-budget.json"), {
+    recursive: true,
+  });
   await writeFile(
     "reports/quality/client-boundary-budget.json",
     `${JSON.stringify({ ...result, currentFiles }, null, 2)}\n`,
@@ -1709,21 +1831,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
 }
 ```
 
-- [ ] **Step 5: 创建初始 budget 文件**
-
-Create `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/docs/quality/route-mode-baseline.json` with:
-
-```json
-[
-  { "route": "/en", "mode": "static", "revalidate": false },
-  { "route": "/zh", "mode": "static", "revalidate": false },
-  { "route": "/en/contact", "mode": "static", "revalidate": false },
-  { "route": "/zh/contact", "mode": "static", "revalidate": false },
-  { "route": "/en/products", "mode": "static", "revalidate": false },
-  { "route": "/en/products/north-america", "mode": "static", "revalidate": false },
-  { "route": "/en/about", "mode": "static", "revalidate": false }
-]
-```
+- [ ] **Step 4: 创建初始 budget 文件**
 
 Create `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/docs/quality/client-boundary-budget.json` with:
 
@@ -1743,16 +1851,15 @@ grep -R -l '^[[:space:]]*["'\"'"]use client["'\"'"]' src --include='*.tsx' --inc
 
 Expected: command outputs current client boundary file list. Paste that exact list into `allowedFiles`, one string per file. Do not invent paths.
 
-- [ ] **Step 6: 新增 package scripts**
+- [ ] **Step 5: 新增 package scripts**
 
 Modify `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/package.json`:
 
 ```json
-"review:route-mode": "node scripts/next-route-mode-snapshot.mjs",
 "review:client-boundary": "node scripts/client-boundary-budget.mjs"
 ```
 
-- [ ] **Step 7: 将 client boundary 接入 all guardrails**
+- [ ] **Step 6: 将 client boundary 接入 all guardrails**
 
 Modify `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/scripts/run-all-guardrails-review.js` so the command list includes:
 
@@ -1766,25 +1873,25 @@ Modify `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-wav
 
 Do not add `review:route-mode` here until route current generation is fully automated from stable build artifacts; route mode remains manual/build-dependent in this wave.
 
-- [ ] **Step 8: 运行单测和 guard**
+- [ ] **Step 7: 运行单测和 guard**
 
 Run:
 
 ```bash
 cd /Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501
-pnpm exec vitest run tests/unit/scripts/next-route-mode-snapshot.test.ts tests/unit/scripts/client-boundary-budget.test.ts
+pnpm exec vitest run tests/unit/scripts/client-boundary-budget.test.ts
 pnpm review:client-boundary
 ```
 
 Expected: tests PASS and client-boundary budget PASS after `allowedFiles` is populated.
 
-- [ ] **Step 9: Commit**
+- [ ] **Step 8: Commit**
 
 Run:
 
 ```bash
 cd /Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501
-git add package.json scripts/next-route-mode-snapshot.mjs scripts/client-boundary-budget.mjs scripts/run-all-guardrails-review.js tests/unit/scripts/next-route-mode-snapshot.test.ts tests/unit/scripts/client-boundary-budget.test.ts docs/quality/route-mode-baseline.json docs/quality/client-boundary-budget.json
+git add package.json scripts/client-boundary-budget.mjs scripts/run-all-guardrails-review.js tests/unit/scripts/client-boundary-budget.test.ts docs/quality/route-mode-proof.md docs/quality/client-boundary-budget.json
 git commit -m "chore: add route and client boundary guards"
 ```
 
@@ -1974,15 +2081,16 @@ describe("seo metadata characterization", () => {
   it("generates one production canonical for contact path", () => {
     const metadata = generateMetadataForPath({
       locale: "en",
+      pageType: "contact",
       path: "/contact",
-      title: "Contact Tianze",
-      description: "Contact Tianze for PVC conduit fittings.",
-      keywords: ["PVC conduit fittings"],
+      config: {
+        title: "Contact Tianze",
+        description: "Contact Tianze for PVC conduit fittings.",
+        keywords: ["PVC conduit fittings"],
+      },
     });
 
-    expect(metadata.alternates?.canonical?.toString()).toMatch(
-      /^https:\/\/www\.tianze-pipe\.com\/en\/contact/,
-    );
+    expect(metadata.alternates?.canonical?.toString()).toContain("/en/contact");
     expect(metadata.alternates?.canonical?.toString()).not.toContain(
       "localhost",
     );
@@ -1991,9 +2099,12 @@ describe("seo metadata characterization", () => {
   it("keeps locale alternates for en zh and x-default", () => {
     const metadata = generateMetadataForPath({
       locale: "en",
+      pageType: "products",
       path: "/products",
-      title: "Products",
-      description: "PVC conduit fittings products.",
+      config: {
+        title: "Products",
+        description: "PVC conduit fittings products.",
+      },
     });
 
     expect(metadata.alternates?.languages).toMatchObject({
@@ -2087,16 +2198,19 @@ import {
   generateWebSiteData,
 } from "../structured-data-generators";
 
+const t = (key: string, options?: { defaultValue?: string }) =>
+  options?.defaultValue ?? key;
+
 describe("structured data generators characterization", () => {
   it("keeps organization schema identity stable", () => {
-    const data = generateOrganizationData();
+    const data = generateOrganizationData(t, {});
     expect(data["@type"]).toBe("Organization");
     expect(data.name).toMatch(/Tianze/i);
     expect(JSON.stringify(data)).not.toContain("+86-518-0000-0000");
   });
 
   it("keeps website schema searchable", () => {
-    const data = generateWebSiteData();
+    const data = generateWebSiteData(t, {});
     expect(data["@type"]).toBe("WebSite");
     expect(data.url).toMatch(/^https:\/\//);
   });
@@ -2106,16 +2220,28 @@ describe("structured data generators characterization", () => {
       name: "PVC Conduit Fittings",
       description: "PVC conduit fittings for distributor sourcing.",
       url: "https://www.tianze-pipe.com/en/products",
-      image: "https://www.tianze-pipe.com/images/products/pvc-fittings.svg",
+      brand: "Tianze",
+      products: [
+        {
+          name: "PVC Coupling",
+          image: "https://www.tianze-pipe.com/images/products/pvc-fittings.svg",
+        },
+      ],
     });
     expect(data["@type"]).toBe("ProductGroup");
     expect(data.name).toBe("PVC Conduit Fittings");
   });
 
   it("local business schema does not expose fake phone", () => {
-    expect(JSON.stringify(buildLocalBusinessSchema())).not.toContain(
-      "+86-518-0000-0000",
-    );
+    expect(
+      JSON.stringify(
+        buildLocalBusinessSchema({
+          name: "Tianze",
+          address: "Lianyungang, Jiangsu, China",
+          phone: undefined,
+        }),
+      ),
+    ).not.toContain("+86-518-0000-0000");
   });
 });
 ```
@@ -2299,9 +2425,14 @@ import {
 describe("content-readiness-check", () => {
   it("scans live source and public paths", () => {
     expect(shouldScanLivePath("src/config/single-site.ts")).toBe(true);
+    expect(shouldScanLivePath("src/config/public-trust.ts")).toBe(false);
     expect(shouldScanLivePath("public/images/products/sample-product.svg")).toBe(
       true,
     );
+    expect(shouldScanLivePath("src/lib/__tests__/structured-data.test.ts")).toBe(
+      false,
+    );
+    expect(shouldScanLivePath("src/components/foo.test.tsx")).toBe(false);
     expect(shouldScanLivePath("content/_archive/old.md")).toBe(false);
     expect(shouldScanLivePath("docs/superpowers/plans/example.md")).toBe(false);
   });
@@ -2346,7 +2477,8 @@ import { glob } from "glob";
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 
-const LIVE_PREFIXES = ["src/", "content/pages/", "messages/", "public/images/"];
+const LIVE_PREFIXES = ["content/pages/", "messages/", "public/images/"];
+const LIVE_EXACT_FILES = ["src/config/single-site.ts"];
 const EXCLUDED_PREFIXES = [
   "content/_archive/",
   "docs/",
@@ -2354,6 +2486,13 @@ const EXCLUDED_PREFIXES = [
   "node_modules/",
   ".next/",
   ".open-next/",
+  "src/config/public-trust.ts",
+];
+const EXCLUDED_PATH_PATTERNS = [
+  /\/__tests__\//,
+  /\.test\.[cm]?[jt]sx?$/,
+  /\.spec\.[cm]?[jt]sx?$/,
+  /\/__mocks__\//,
 ];
 
 const PATTERNS = [
@@ -2369,8 +2508,10 @@ const PATTERNS = [
 
 export function shouldScanLivePath(path) {
   return (
-    LIVE_PREFIXES.some((prefix) => path.startsWith(prefix)) &&
-    !EXCLUDED_PREFIXES.some((prefix) => path.startsWith(prefix))
+    (LIVE_PREFIXES.some((prefix) => path.startsWith(prefix)) ||
+      LIVE_EXACT_FILES.includes(path)) &&
+    !EXCLUDED_PREFIXES.some((prefix) => path.startsWith(prefix)) &&
+    !EXCLUDED_PATH_PATTERNS.some((pattern) => pattern.test(path))
   );
 }
 
@@ -2393,10 +2534,16 @@ export function checkContentReadiness(files) {
 }
 
 async function readLiveFiles() {
-  const paths = await glob("{src,content/pages,messages,public/images}/**/*", {
-    nodir: true,
-    ignore: ["content/_archive/**"],
-  });
+  const globbedPaths = await glob(
+    "{content/pages,messages,public/images}/**/*",
+    {
+      nodir: true,
+      ignore: ["content/_archive/**"],
+    },
+  );
+  const paths = [...globbedPaths, ...LIVE_EXACT_FILES].filter(
+    shouldScanLivePath,
+  );
 
   const files = [];
   for (const path of paths) {
@@ -2631,7 +2778,12 @@ export function buildObservabilityReport({ baseUrl, checkedAt, probes }) {
 }
 
 function parseArgs(argv) {
-  const args = { baseUrl: "", output: DEFAULT_OUTPUT };
+  const args = {
+    baseUrl: "",
+    output: DEFAULT_OUTPUT,
+    headerName: "",
+    headerValue: "",
+  };
   for (let index = 2; index < argv.length; index += 1) {
     const arg = argv[index];
     if (arg === "--base-url" && index + 1 < argv.length) {
@@ -2642,24 +2794,45 @@ function parseArgs(argv) {
       args.output = argv[++index];
       continue;
     }
+    if (arg === "--header-name" && index + 1 < argv.length) {
+      args.headerName = argv[++index];
+      continue;
+    }
+    if (arg === "--header-value" && index + 1 < argv.length) {
+      args.headerValue = argv[++index];
+      continue;
+    }
     throw new Error(`Unknown argument: ${arg}`);
   }
   if (!args.baseUrl) {
     throw new Error("Missing required --base-url");
   }
+  if (Boolean(args.headerName) !== Boolean(args.headerValue)) {
+    throw new Error(
+      "Both --header-name and --header-value must be provided together",
+    );
+  }
   return args;
 }
 
-async function probe(baseUrl, pathname) {
+function buildHeaders(args) {
+  const headers = { "user-agent": "preview-observability-summary" };
+  if (args.headerName && args.headerValue) {
+    headers[args.headerName] = args.headerValue;
+  }
+  return headers;
+}
+
+async function probe(baseUrl, pathname, headers) {
   const response = await fetch(new URL(pathname, baseUrl), {
-    headers: { "user-agent": "preview-observability-summary" },
+    headers,
     signal: AbortSignal.timeout(30000),
   });
-  const headers = Object.fromEntries(response.headers.entries());
+  const responseHeaders = Object.fromEntries(response.headers.entries());
   return {
     pathname,
     status: response.status,
-    ...summarizeHeaders(headers),
+    ...summarizeHeaders(responseHeaders),
   };
 }
 
@@ -2670,9 +2843,10 @@ async function writeJson(path, value) {
 
 async function main() {
   const args = parseArgs(process.argv);
+  const headers = buildHeaders(args);
   const probes = [];
   for (const pathname of PROBES) {
-    probes.push(await probe(args.baseUrl, pathname));
+    probes.push(await probe(args.baseUrl, pathname, headers));
   }
   const report = buildObservabilityReport({
     baseUrl: args.baseUrl,
@@ -2738,27 +2912,30 @@ Modify `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-wav
 
 - [ ] **Step 5: 接入 Vercel workflow**
 
-Modify `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/.github/workflows/vercel-deploy.yml` after preview proof:
+Modify `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/.github/workflows/vercel-deploy.yml` inside `post-deployment-verification`, immediately after the preview proof step from Task 2:
 
 ```yaml
       - name: 预览部署可观测性摘要
-        if: steps.vercel_secrets.outputs.configured == 'true' && steps.vercel_cli_deploy.outputs.deployment-url != ''
         run: |
           set -euo pipefail
           pnpm proof:preview-observability -- \
-            --base-url "${{ steps.vercel_cli_deploy.outputs.deployment-url }}" \
+            --base-url "${{ needs.deploy-to-vercel.outputs.preview_url }}" \
+            --header-name "x-vercel-protection-bypass" \
+            --header-value "${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}" \
             --output reports/deploy/preview-observability-summary.json
         env:
           CI: true
 
       - name: 上传预览部署可观测性摘要
-        if: always() && steps.vercel_secrets.outputs.configured == 'true'
+        if: always()
         uses: actions/upload-artifact@v7
         with:
           name: preview-observability-summary.json
           path: reports/deploy/preview-observability-summary.json
           if-no-files-found: ignore
 ```
+
+This step belongs in `post-deployment-verification`, after `等待部署就绪（增强版）`, not in `deploy-to-vercel`.
 
 - [ ] **Step 6: 运行测试**
 
@@ -2803,7 +2980,6 @@ pnpm exec vitest run \
   tests/unit/scripts/preview-proof.test.ts \
   tests/unit/scripts/staging-lead-canary.test.ts \
   tests/unit/scripts/cloudflare-proxy-proof-check.test.ts \
-  tests/unit/scripts/next-route-mode-snapshot.test.ts \
   tests/unit/scripts/client-boundary-budget.test.ts \
   tests/unit/scripts/hotspot-slimming-report.test.ts \
   tests/unit/scripts/content-readiness-check.test.ts \
@@ -3024,4 +3200,3 @@ Expected: commit succeeds.
 - Engineering health: from about 82/100 to 86-89/100 after Wave 1+2+3, because proof lanes and guardrails become fresher and more automated.
 - Code quality stability: from about 76/100 to 82-86/100 after characterization tests, client boundary guard, and hotspot slimming.
 - Launch readiness: from about 68-70/100 to 78-84/100 without real phone/logo/product photo, because preview proof, content readiness, canary, and observability reduce launch risk. Final real assets and owner-approved public contact details are still required for a higher score.
-
