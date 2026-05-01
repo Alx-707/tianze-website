@@ -660,6 +660,10 @@ Expected: commit succeeds.
 - Create: `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/tests/e2e/page-contracts.spec.ts`
 - Create: `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/tests/e2e/preview-contract.spec.ts`
 - Create: `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/src/test/e2e-target.ts`
+- Create: `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/tests/unit/e2e-target.test.ts`
+- Modify: `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/playwright.config.ts`
+- Modify: `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/src/app/[locale]/products/page.tsx`
+- Modify: `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/src/app/[locale]/products/__tests__/page.test.tsx`
 - Modify: `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/package.json`
 
 - [ ] **Step 1: 写 page contracts spec**
@@ -674,7 +678,11 @@ const keyPages = [
   { path: "/zh", cta: /联系|询盘|获取报价/i },
   { path: "/en/contact", cta: /send|submit|contact/i },
   { path: "/zh/contact", cta: /发送|提交|联系/i },
-  { path: "/en/products", cta: /request a quote|contact|inquiry|get quote/i },
+  {
+    path: "/en/products",
+    cta: /request a quote|get quote/i,
+    expectedCtaHref: /\/contact(?:[/?#]|$)/,
+  },
   { path: "/en/products/north-america", cta: /contact|inquiry|get quote/i },
   { path: "/en/about", cta: /contact|inquiry|get quote/i },
 ] as const;
@@ -750,15 +758,20 @@ Spec shape:
 
 ```ts
 import { expect, test } from "@playwright/test";
-import { hasRemoteE2ETarget } from "@/test/e2e-target";
+import {
+  hasRemoteE2ETarget,
+  selectExplicitE2ETarget,
+} from "@/test/e2e-target";
 
 const previewOnlyPages = ["/en", "/en/contact", "/en/products"] as const;
 
 function hasNonLocalExplicitPreviewTarget(): boolean {
-  const explicitTarget =
-    process.env.STAGING_URL || process.env.PLAYWRIGHT_BASE_URL || "";
+  const explicitTarget = selectExplicitE2ETarget(
+    process.env.STAGING_URL,
+    process.env.PLAYWRIGHT_BASE_URL,
+  );
 
-  return hasRemoteE2ETarget(explicitTarget);
+  return hasRemoteE2ETarget(explicitTarget?.href);
 }
 
 for (const pathname of previewOnlyPages) {

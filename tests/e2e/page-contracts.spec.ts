@@ -1,11 +1,19 @@
 import { expect, test } from "@playwright/test";
 
-const keyPages = [
+const keyPages: Array<{
+  path: string;
+  cta: RegExp;
+  expectedCtaHref?: RegExp;
+}> = [
   { path: "/en", cta: /contact|inquiry|get quote/i },
   { path: "/zh", cta: /联系|询盘|获取报价/i },
   { path: "/en/contact", cta: /send|submit|contact/i },
   { path: "/zh/contact", cta: /发送|提交|联系/i },
-  { path: "/en/products", cta: /request a quote|contact|inquiry|get quote/i },
+  {
+    path: "/en/products",
+    cta: /request a quote|get quote/i,
+    expectedCtaHref: /\/contact(?:[/?#]|$)/,
+  },
   { path: "/en/products/north-america", cta: /contact|inquiry|get quote/i },
   { path: "/en/about", cta: /contact|inquiry|get quote/i },
 ] as const;
@@ -53,16 +61,22 @@ for (const pageCase of keyPages) {
       await expect(page.locator("main")).toHaveCount(1);
 
       const main = page.locator("main");
-      const mainCta = main
+      const namedCta = main
         .getByRole("link", { name: pageCase.cta })
-        .or(main.getByRole("button", { name: pageCase.cta }))
-        .or(
-          main.locator(
-            'a[href*="/contact"]:visible, a[href^="mailto:"]:visible',
-          ),
-        )
-        .first();
+        .or(main.getByRole("button", { name: pageCase.cta }));
+      const mainCta = pageCase.expectedCtaHref
+        ? namedCta.first()
+        : namedCta
+            .or(
+              main.locator(
+                'a[href*="/contact"]:visible, a[href^="mailto:"]:visible',
+              ),
+            )
+            .first();
       await expect(mainCta).toBeVisible();
+      if (pageCase.expectedCtaHref) {
+        await expect(mainCta).toHaveAttribute("href", pageCase.expectedCtaHref);
+      }
 
       const html = await page.content();
       expect(count(html, /<main\b/gi)).toBe(1);
