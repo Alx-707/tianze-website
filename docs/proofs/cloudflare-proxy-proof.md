@@ -86,8 +86,10 @@ pnpm proof:cf:proxy
 
 The checker returns:
 
-- `proxy-compatible` only when every recorded step exits `0`
-- `keep-middleware` when any step fails
+- `proxy-compatible` only when every recorded step exits `0` and the proof worktree file state is exactly `src/proxy.ts` present + `src/middleware.ts` absent
+- `keep-middleware` when any step fails, the artifact subject is not `src/proxy.ts`, `src/proxy.ts` is missing, or `src/middleware.ts` is still present
+
+Run `pnpm proof:cf:proxy` from the proof worktree itself. The command reads the artifact exit codes from `reports/cloudflare-proxy/proof-artifact.json`, then checks the current worktree files on disk. Do not run the check from the main plan worktree, because mainline intentionally keeps `src/middleware.ts`.
 
 ## Mainline rule
 

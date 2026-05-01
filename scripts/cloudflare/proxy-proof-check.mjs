@@ -1,8 +1,10 @@
-import { readFile } from "node:fs/promises";
+import { access, readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 
 const DEFAULT_ARTIFACT_PATH = "reports/cloudflare-proxy/proof-artifact.json";
 const NEXT_BUILD_STEP_NAMES = new Set(["next-build", "cloudflare-build"]);
+const PROXY_PROOF_SUBJECT = "src/proxy.ts";
+const MIDDLEWARE_ENTRY_PATH = "src/middleware.ts";
 
 export function readProxyProofArtifact(rawJson) {
   const parsed = JSON.parse(rawJson);
@@ -24,10 +26,36 @@ export function parseBuildWarnings(logText) {
   return warnings;
 }
 
-export function classifyProxyProof({ subject: _subject, steps, warnings }) {
-  const blockers = steps
+export function classifyFileState({ subject, proxyExists, middlewareExists }) {
+  const blockers = [];
+
+  if (subject !== PROXY_PROOF_SUBJECT) {
+    blockers.push(
+      `proof subject must be "${PROXY_PROOF_SUBJECT}", got "${String(subject)}"`,
+    );
+  }
+
+  if (!proxyExists) {
+    blockers.push(`${PROXY_PROOF_SUBJECT} is missing in the proof worktree`);
+  }
+
+  if (middlewareExists) {
+    blockers.push(
+      `${MIDDLEWARE_ENTRY_PATH} is still present in the proof worktree`,
+    );
+  }
+
+  return { blockers };
+}
+
+export function classifyProxyProof({ subject, steps, warnings, fileState }) {
+  const commandBlockers = steps
     .filter((step) => step.exitCode !== 0)
     .map((step) => `${step.name} failed with exit code ${step.exitCode}`);
+  const fileStateBlockers = fileState
+    ? classifyFileState({ subject, ...fileState }).blockers
+    : ["proof worktree file state was not checked"];
+  const blockers = [...fileStateBlockers, ...commandBlockers];
 
   return {
     ok: blockers.length === 0,
@@ -36,6 +64,21 @@ export function classifyProxyProof({ subject: _subject, steps, warnings }) {
     blockers,
     warnings,
   };
+}
+
+async function pathExists(path) {
+  return access(path)
+    .then(() => true)
+    .catch(() => false);
+}
+
+async function readProofFileState() {
+  const [proxyExists, middlewareExists] = await Promise.all([
+    pathExists(PROXY_PROOF_SUBJECT),
+    pathExists(MIDDLEWARE_ENTRY_PATH),
+  ]);
+
+  return { proxyExists, middlewareExists };
 }
 
 async function readStepLog(step) {
@@ -54,6 +97,7 @@ async function main() {
   );
   const result = classifyProxyProof({
     ...artifact,
+    fileState: await readProofFileState(),
     warnings: parseBuildWarnings(logText),
   });
 

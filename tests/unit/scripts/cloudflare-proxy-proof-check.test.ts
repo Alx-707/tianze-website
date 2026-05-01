@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  classifyFileState,
   classifyProxyProof,
   parseBuildWarnings,
   readProxyProofArtifact,
@@ -38,6 +39,7 @@ describe("cloudflare proxy proof check", () => {
     expect(
       classifyProxyProof({
         subject: "src/proxy.ts",
+        fileState: { proxyExists: true, middlewareExists: false },
         steps: [
           { name: "next-build", exitCode: 0, logPath: "reports/a.log" },
           { name: "cloudflare-build", exitCode: 0, logPath: "reports/b.log" },
@@ -62,6 +64,7 @@ describe("cloudflare proxy proof check", () => {
     expect(
       classifyProxyProof({
         subject: "src/proxy.ts",
+        fileState: { proxyExists: true, middlewareExists: false },
         steps: [
           { name: "next-build", exitCode: 0, logPath: "reports/a.log" },
           { name: "cloudflare-build", exitCode: 1, logPath: "reports/b.log" },
@@ -73,6 +76,61 @@ describe("cloudflare proxy proof check", () => {
       recommendation: "keep-middleware",
       blockers: ["cloudflare-build failed with exit code 1"],
       warnings: [],
+    });
+  });
+
+  it("blocks proxy-compatible recommendation when proxy proof file is missing", () => {
+    expect(
+      classifyProxyProof({
+        subject: "src/proxy.ts",
+        fileState: { proxyExists: false, middlewareExists: true },
+        steps: [
+          { name: "next-build", exitCode: 0, logPath: "reports/a.log" },
+          { name: "cloudflare-build", exitCode: 0, logPath: "reports/b.log" },
+        ],
+        warnings: [],
+      }),
+    ).toEqual({
+      ok: false,
+      recommendation: "keep-middleware",
+      blockers: [
+        "src/proxy.ts is missing in the proof worktree",
+        "src/middleware.ts is still present in the proof worktree",
+      ],
+      warnings: [],
+    });
+  });
+
+  it("blocks proxy-compatible recommendation when middleware and proxy coexist", () => {
+    expect(
+      classifyProxyProof({
+        subject: "src/proxy.ts",
+        fileState: { proxyExists: true, middlewareExists: true },
+        steps: [
+          { name: "next-build", exitCode: 0, logPath: "reports/a.log" },
+          { name: "cloudflare-build", exitCode: 0, logPath: "reports/b.log" },
+        ],
+        warnings: [],
+      }),
+    ).toEqual({
+      ok: false,
+      recommendation: "keep-middleware",
+      blockers: ["src/middleware.ts is still present in the proof worktree"],
+      warnings: [],
+    });
+  });
+
+  it("blocks proxy-compatible recommendation when artifact subject is not proxy", () => {
+    expect(
+      classifyFileState({
+        subject: "src/middleware.ts",
+        proxyExists: true,
+        middlewareExists: false,
+      }),
+    ).toEqual({
+      blockers: [
+        'proof subject must be "src/proxy.ts", got "src/middleware.ts"',
+      ],
     });
   });
 });
