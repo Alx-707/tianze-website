@@ -6,6 +6,18 @@ import {
 } from "../../../scripts/deploy/preview-proof.mjs";
 
 describe("preview-proof", () => {
+  function buildValidHtml(body = '<a href="/en/contact">Contact</a>') {
+    return [
+      "<html><head>",
+      '<link rel="canonical" href="https://example.com/en/contact">',
+      '<link rel="alternate" hreflang="en" href="https://example.com/en/contact">',
+      '<link rel="alternate" hreflang="zh" href="https://example.com/zh/contact">',
+      '<link rel="alternate" hreflang="x-default" href="https://example.com/en/contact">',
+      '<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization"}]}</script>',
+      `</head><body><main><h1>Contact Us</h1>${body}</main></body></html>`,
+    ].join("");
+  }
+
   it("parses base url and optional protection header", () => {
     expect(
       parsePreviewProofArgs([
@@ -93,5 +105,44 @@ describe("preview-proof", () => {
         },
       ],
     });
+  });
+
+  it("reports buyer-facing placeholders as warnings by default", () => {
+    const result = assertPageContract({
+      pathname: "/en/contact",
+      html: buildValidHtml(
+        '<p>Call +86-518-0000-0000</p><p>Sample Product</p><a href="/en/contact">Contact</a>',
+      ),
+      status: 200,
+      finalUrl: "https://example-preview.vercel.app/en/contact",
+    });
+
+    expect(result.ok).toBe(true);
+    expect(result.failures).toEqual([]);
+    expect(result.warnings).toEqual([
+      "Public trust placeholder detected: Fake phone number (+86-518-0000-0000)",
+      "Public trust placeholder detected: Sample product copy (Sample Product)",
+    ]);
+  });
+
+  it("reports buyer-facing placeholders as failures in strict mode", () => {
+    const result = assertPageContract({
+      pathname: "/en/products",
+      html: buildValidHtml(
+        '<img src="/images/logo.svg" alt="Replace this image"><a href="/en/contact">Contact</a>',
+      ),
+      status: 200,
+      finalUrl: "https://example-preview.vercel.app/en/products",
+      strict: true,
+    });
+
+    expect(result.ok).toBe(false);
+    expect(result.warnings).toEqual([]);
+    expect(result.failures).toContain(
+      "Public trust placeholder detected: Replacement image instruction (Replace this image)",
+    );
+    expect(result.failures).toContain(
+      "Public trust placeholder detected: Default logo asset (/images/logo.svg)",
+    );
   });
 });

@@ -14,12 +14,26 @@ const DEFAULT_PAGES = [
 ];
 const REQUIRED_HREFLANGS = ["en", "zh", "x-default"];
 const TRUST_PLACEHOLDER_PATTERNS = [
-  /coming soon/i,
-  /placeholder/i,
-  /todo/i,
-  /tbd/i,
-  /lorem ipsum/i,
-  /your company/i,
+  {
+    label: "Fake phone number",
+    value: "+86-518-0000-0000",
+    pattern: /\+86-518-0000-0000/i,
+  },
+  {
+    label: "Sample product copy",
+    value: "Sample Product",
+    pattern: /Sample Product/i,
+  },
+  {
+    label: "Replacement image instruction",
+    value: "Replace this image",
+    pattern: /Replace this image/i,
+  },
+  {
+    label: "Default logo asset",
+    value: "/images/logo.svg",
+    pattern: /\/images\/logo\.svg/i,
+  },
 ];
 
 export function parsePreviewProofArgs(argv) {
@@ -219,12 +233,12 @@ function assertContactCta(html, failures) {
 }
 
 function assertTrustPlaceholders(html, strict, failures, warnings) {
-  const matchedPatterns = TRUST_PLACEHOLDER_PATTERNS.filter((pattern) =>
-    pattern.test(html),
+  const matchedPlaceholders = TRUST_PLACEHOLDER_PATTERNS.filter((placeholder) =>
+    placeholder.pattern.test(html),
   );
 
-  for (const pattern of matchedPatterns) {
-    const message = `Public trust placeholder detected: ${pattern.source}`;
+  for (const placeholder of matchedPlaceholders) {
+    const message = `Public trust placeholder detected: ${placeholder.label} (${placeholder.value})`;
     if (strict) {
       failures.push(message);
     } else {
