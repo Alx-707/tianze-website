@@ -818,6 +818,9 @@ Task 3 fourth-round blocker closure:
 - Empty and whitespace-only values are ignored before baseURL/webServer/preview skip decisions.
 - Protocol-less path-like values that start with `/`, `./`, `../`, `?`, or `#` are rejected instead of becoming fake remote hosts such as `http://relative/`.
 - `STAGING_URL` has priority over `PLAYWRIGHT_BASE_URL`; baseURL selection, local `webServer` selection, and preview-contract skipping must all use that same selected target.
+- `tests/e2e/global-setup.ts` must also use `src/test/e2e-target.ts`; global setup readiness is skipped only when the selected target is a non-local remote.
+- Missing, whitespace-only, local, invalid, or path-like targets must use the local fallback and still run local readiness in global setup.
+- `baseURL`, local `webServer`, global setup readiness, and deployed-only preview-contract skipping must all be driven by the same selected target.
 - Only missing or whitespace-only higher-priority values may fall back to lower-priority values. Invalid or path-like higher-priority values must stop fallback and use the local default.
 - Example: `STAGING_URL=localhost:3000 PLAYWRIGHT_BASE_URL=preview.example.vercel.app` stays local, keeps `webServer`, and skips deployed-only preview contracts.
 - Example: `STAGING_URL=/relative PLAYWRIGHT_BASE_URL=preview.example.vercel.app` also stays local, keeps `webServer`, and skips deployed-only preview contracts.
