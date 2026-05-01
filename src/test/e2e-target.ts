@@ -1,6 +1,5 @@
 const urlProtocolPattern = /^[a-z][a-z\d+\-.]*:\/\//i;
 const pathLikeTargetPattern = /^(?:\/|\.\/|\.\.\/|\?|#)/;
-const protocolLessPathPattern = /\//;
 const localE2EHostnames = new Set(["localhost", "127.0.0.1", "::1"]);
 
 function normalizeHostname(hostname: string): string {
@@ -18,19 +17,14 @@ export function normalizeE2ETarget(input?: string): URL | undefined {
     return undefined;
   }
 
-  if (
-    !urlProtocolPattern.test(trimmed) &&
-    protocolLessPathPattern.test(trimmed)
-  ) {
-    return undefined;
-  }
-
-  const candidate = urlProtocolPattern.test(trimmed)
-    ? trimmed
-    : `http://${trimmed}`;
+  const hasProtocol = urlProtocolPattern.test(trimmed);
+  const candidate = hasProtocol ? trimmed : `http://${trimmed}`;
 
   try {
     const url = new URL(candidate);
+    if (!hasProtocol && url.pathname !== "/") {
+      return undefined;
+    }
     return url.hostname ? url : undefined;
   } catch {
     return undefined;

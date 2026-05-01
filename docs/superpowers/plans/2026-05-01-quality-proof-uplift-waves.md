@@ -682,7 +682,12 @@ const keyPages = [
   {
     path: "/en/products",
     cta: /request a quote|get quote/i,
-    expectedCtaHref: /\/contact(?:[/?#]|$)/,
+    expectedCtaPath: "/en/contact",
+  },
+  {
+    path: "/zh/products",
+    cta: /获取报价|询盘|联系/i,
+    expectedCtaPath: "/zh/contact",
   },
   { path: "/en/products/north-america", cta: /contact|inquiry|get quote/i },
   { path: "/en/about", cta: /contact|inquiry|get quote/i },
@@ -724,14 +729,26 @@ for (const pageCase of keyPages) {
       await expect(page.locator("main")).toHaveCount(1);
 
       const main = page.locator("main");
-      const mainCta = main
+      const namedCta = main
         .getByRole("link", { name: pageCase.cta })
-        .or(main.getByRole("button", { name: pageCase.cta }))
-        .or(
-          main.locator('a[href*="/contact"]:visible, a[href^="mailto:"]:visible'),
-        )
-        .first();
+        .or(main.getByRole("button", { name: pageCase.cta }));
+      const mainCta = pageCase.expectedCtaPath
+        ? namedCta.first()
+        : namedCta
+            .or(
+              main.locator(
+                'a[href*="/contact"]:visible, a[href^="mailto:"]:visible',
+              ),
+            )
+            .first();
       await expect(mainCta).toBeVisible();
+      if (pageCase.expectedCtaPath) {
+        const href = await mainCta.getAttribute("href");
+        expect(href).not.toBeNull();
+        expect(new URL(href ?? "", "https://www.tianze-pipe.com").pathname).toBe(
+          pageCase.expectedCtaPath,
+        );
+      }
 
       const html = await page.content();
       expect(count(html, /<main\b/gi)).toBe(1);
@@ -817,7 +834,7 @@ Task 3 fourth-round blocker closure:
 - `src/test/e2e-target.ts` is the single source for explicit E2E target parsing.
 - Empty and whitespace-only values are ignored before baseURL/webServer/preview skip decisions.
 - Protocol-less path-like values that start with `/`, `./`, `../`, `?`, or `#` are rejected instead of becoming fake remote hosts such as `http://relative/`.
-- Protocol-less values that contain a path slash, such as `foo/bar`, are rejected; use a full URL like `https://preview.example.vercel.app/path` when a path is intentional.
+- Protocol-less host-like values may include only a root trailing slash, such as `preview.example.vercel.app/`; protocol-less values with a non-root path, such as `foo/bar`, are rejected. Use a full URL like `https://preview.example.vercel.app/path` when a path is intentional.
 - `STAGING_URL` has priority over `PLAYWRIGHT_BASE_URL`; baseURL selection, local `webServer` selection, and preview-contract skipping must all use that same selected target.
 - `tests/e2e/global-setup.ts` must also use `src/test/e2e-target.ts`; global setup readiness is skipped only when the selected target is a non-local remote.
 - Missing, whitespace-only, local, invalid, or path-like targets must use the local fallback and still run local readiness in global setup.

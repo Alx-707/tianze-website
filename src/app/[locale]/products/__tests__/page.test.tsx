@@ -34,11 +34,14 @@ vi.mock("@/i18n/routing", () => ({
   }: {
     href: string;
     children: React.ReactNode;
-  }) => (
-    <a href={href} {...props}>
-      {children}
-    </a>
-  ),
+  }) => {
+    const localizedHref = href.startsWith("/") ? `/en${href}` : href;
+    return (
+      <a href={localizedHref} {...props}>
+        {children}
+      </a>
+    );
+  },
   routing: {
     locales: ["en", "zh"],
     defaultLocale: "en",
@@ -143,6 +146,6 @@ describe("Products Overview Page", () => {
 
     expect(
       screen.getByRole("link", { name: "Request a Quote" }),
-    ).toHaveAttribute("href", "/contact");
+    ).toHaveAttribute("href", "/en/contact");
   });
 });

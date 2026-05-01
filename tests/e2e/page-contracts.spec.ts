@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 const keyPages: Array<{
   path: string;
   cta: RegExp;
-  expectedCtaHref?: RegExp;
+  expectedCtaPath?: string;
 }> = [
   { path: "/en", cta: /contact|inquiry|get quote/i },
   { path: "/zh", cta: /联系|询盘|获取报价/i },
@@ -12,7 +12,12 @@ const keyPages: Array<{
   {
     path: "/en/products",
     cta: /request a quote|get quote/i,
-    expectedCtaHref: /\/contact(?:[/?#]|$)/,
+    expectedCtaPath: "/en/contact",
+  },
+  {
+    path: "/zh/products",
+    cta: /获取报价|询盘|联系/i,
+    expectedCtaPath: "/zh/contact",
   },
   { path: "/en/products/north-america", cta: /contact|inquiry|get quote/i },
   { path: "/en/about", cta: /contact|inquiry|get quote/i },
@@ -64,7 +69,7 @@ for (const pageCase of keyPages) {
       const namedCta = main
         .getByRole("link", { name: pageCase.cta })
         .or(main.getByRole("button", { name: pageCase.cta }));
-      const mainCta = pageCase.expectedCtaHref
+      const mainCta = pageCase.expectedCtaPath
         ? namedCta.first()
         : namedCta
             .or(
@@ -74,8 +79,12 @@ for (const pageCase of keyPages) {
             )
             .first();
       await expect(mainCta).toBeVisible();
-      if (pageCase.expectedCtaHref) {
-        await expect(mainCta).toHaveAttribute("href", pageCase.expectedCtaHref);
+      if (pageCase.expectedCtaPath) {
+        const href = await mainCta.getAttribute("href");
+        expect(href).not.toBeNull();
+        expect(
+          new URL(href ?? "", "https://www.tianze-pipe.com").pathname,
+        ).toBe(pageCase.expectedCtaPath);
       }
 
       const html = await page.content();
