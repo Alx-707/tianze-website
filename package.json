@@ -115,6 +115,7 @@
     "review:all-guardrails": "node scripts/run-all-guardrails-review.js",
     "review:scripts-env": "node scripts/run-scripts-env-review.js",
     "review:client-boundary": "node scripts/client-boundary-budget.mjs",
+    "review:hotspot-slimming": "node scripts/hotspot-slimming-report.mjs",
     "review:server-env-boundaries": "node scripts/review-server-env-boundaries.js",
     "review:template-residue": "node scripts/review-template-residue.js",
     "review:architecture-truth": "pnpm config:check && pnpm review:legacy-markers && pnpm review:boundary-leaks && pnpm review:contract-smells && pnpm review:env-boundaries && pnpm review:server-env-boundaries && pnpm review:template-residue && pnpm truth:check",
