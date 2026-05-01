@@ -411,6 +411,25 @@ jobs:
           echo "等待超时，部署未就绪" >&2
           exit 1
 
+      - name: 预览部署合同证明
+        run: |
+          set -euo pipefail
+          pnpm proof:preview -- \
+            --base-url "${{ needs.deploy-to-vercel.outputs.preview_url }}" \
+            --header-name "x-vercel-protection-bypass" \
+            --header-value "${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}" \
+            --output reports/deploy/preview-proof.json
+        env:
+          CI: true
+
+      - name: 上传预览部署合同证明
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: preview-proof.json
+          path: reports/deploy/preview-proof.json
+          if-no-files-found: ignore
+
       - name: 验证部署健康状态
         run: |
           node scripts/deploy/post-deploy-smoke.mjs \
