@@ -422,12 +422,31 @@ jobs:
         env:
           CI: true
 
+      - name: 预览部署可观测性摘要
+        run: |
+          set -euo pipefail
+          node scripts/deploy/preview-observability-summary.mjs \
+            --base-url "${{ needs.deploy-to-vercel.outputs.preview_url }}" \
+            --header-name "x-vercel-protection-bypass" \
+            --header-value "${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}" \
+            --output reports/deploy/preview-observability-summary.json
+        env:
+          CI: true
+
       - name: 上传预览部署合同证明
         if: always()
         uses: actions/upload-artifact@v7
         with:
           name: preview-proof.json
           path: reports/deploy/preview-proof.json
+          if-no-files-found: ignore
+
+      - name: 上传预览部署可观测性摘要
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: preview-observability-summary.json
+          path: reports/deploy/preview-observability-summary.json
           if-no-files-found: ignore
 
       - name: 验证部署健康状态
