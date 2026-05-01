@@ -1,5 +1,10 @@
 import { defineConfig, devices } from "@playwright/test";
 import { config } from "dotenv";
+import {
+  isLocalE2ETarget,
+  normalizeE2ETarget,
+  selectExplicitE2ETarget,
+} from "@/test/e2e-target";
 
 // 加载测试环境配置
 config({ path: ".env.test", quiet: true });
@@ -17,58 +22,11 @@ const supportedLocales = (process.env.NEXT_PUBLIC_SUPPORTED_LOCALES || "en")
 const defaultLocale =
   process.env.NEXT_PUBLIC_DEFAULT_LOCALE?.trim() || supportedLocales[0] || "en";
 
-const urlProtocolPattern = /^[a-z][a-z\d+\-.]*:\/\//i;
-const localE2EHostnames = new Set(["localhost", "127.0.0.1", "::1"]);
-
-function normalizeHostname(hostname: string): string {
-  return hostname.replace(/^\[|\]$/g, "").toLowerCase();
-}
-
-function normalizeE2ETarget(input?: string): URL | undefined {
-  const trimmed = input?.trim();
-
-  if (!trimmed) {
-    return undefined;
-  }
-
-  const candidate = urlProtocolPattern.test(trimmed)
-    ? trimmed
-    : `http://${trimmed}`;
-
-  try {
-    const url = new URL(candidate);
-    return url.hostname ? url : undefined;
-  } catch {
-    return undefined;
-  }
-}
-
-function isLocalE2ETarget(input?: string): boolean {
-  const url = normalizeE2ETarget(input);
-
-  if (!url) {
-    return true;
-  }
-
-  return localE2EHostnames.has(normalizeHostname(url.hostname));
-}
-
-function hasRemoteE2ETarget(input?: string): boolean {
-  const trimmed = input?.trim();
-
-  if (!trimmed) {
-    return false;
-  }
-
-  const url = normalizeE2ETarget(trimmed);
-  return url ? !isLocalE2ETarget(trimmed) : false;
-}
-
 const ensureLocaleInUrl = (input: string): string => {
   const url = normalizeE2ETarget(input);
 
   if (!url) {
-    const trimmed = input.replace(/\/$/, "");
+    const trimmed = input.trim().replace(/\/$/, "");
     const hasLocale = supportedLocales.some((locale) =>
       trimmed.endsWith(`/${locale}`),
     );
@@ -91,15 +49,16 @@ const ensureLocaleInUrl = (input: string): string => {
   return `${url.origin}${normalizedPath}${url.search}${url.hash}`;
 };
 
+const selectedE2ETarget = selectExplicitE2ETarget(
+  process.env.STAGING_URL,
+  process.env.PLAYWRIGHT_BASE_URL,
+);
 const resolvedBaseUrl = ensureLocaleInUrl(
-  process.env.STAGING_URL ||
-    process.env.PLAYWRIGHT_BASE_URL ||
-    "http://localhost:3000",
+  selectedE2ETarget?.href ?? "http://localhost:3000",
 );
-const shouldUseLocalWebServer = !(
-  hasRemoteE2ETarget(process.env.STAGING_URL) ||
-  hasRemoteE2ETarget(process.env.PLAYWRIGHT_BASE_URL)
-);
+const shouldUseLocalWebServer = selectedE2ETarget
+  ? isLocalE2ETarget(selectedE2ETarget.href)
+  : true;
 
 // HTML reporter may start a local server and wait for Ctrl+C when open is enabled.
 // In non-interactive runners (e.g. ClaudeCode/CI logs), this causes the process to hang.

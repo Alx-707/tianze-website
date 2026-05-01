@@ -1,4 +1,5 @@
 const urlProtocolPattern = /^[a-z][a-z\d+\-.]*:\/\//i;
+const pathLikeTargetPattern = /^(?:\/|\.\/|\.\.\/|\?|#)/;
 const localE2EHostnames = new Set(["localhost", "127.0.0.1", "::1"]);
 
 function normalizeHostname(hostname: string): string {
@@ -9,6 +10,10 @@ export function normalizeE2ETarget(input?: string): URL | undefined {
   const trimmed = input?.trim();
 
   if (!trimmed) {
+    return undefined;
+  }
+
+  if (pathLikeTargetPattern.test(trimmed)) {
     return undefined;
   }
 
@@ -43,4 +48,18 @@ export function hasRemoteE2ETarget(input?: string): boolean {
 
   const url = normalizeE2ETarget(trimmed);
   return url ? !isLocalE2ETarget(trimmed) : false;
+}
+
+export function selectExplicitE2ETarget(
+  ...candidates: Array<string | undefined>
+): URL | undefined {
+  for (const candidate of candidates) {
+    const url = normalizeE2ETarget(candidate);
+
+    if (url) {
+      return url;
+    }
+  }
+
+  return undefined;
 }
