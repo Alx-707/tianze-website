@@ -35,6 +35,12 @@ const TRUST_PLACEHOLDER_PATTERNS = [
     pattern: /\/images\/logo\.svg/i,
   },
 ];
+const CTA_TEXT_PATTERN =
+  /(?:contact|inquiry|quote|request|联系|询盘|报价|咨询)/i;
+const USAGE_ERROR_MESSAGES = new Set([
+  "Missing required --base-url",
+  "Both --header-name and --header-value must be provided together",
+]);
 
 export function parsePreviewProofArgs(argv) {
   const args = {
@@ -161,6 +167,25 @@ export function buildPreviewProofReport({ baseUrl, checkedAt, pages }) {
   };
 }
 
+export function buildFetchFailurePageResult({ baseUrl, pathname, error }) {
+  return {
+    pathname,
+    status: 0,
+    finalUrl: new URL(pathname, baseUrl).toString(),
+    ok: false,
+    failures: [`Fetch failed for ${pathname}: ${getErrorMessage(error)}`],
+    warnings: [],
+  };
+}
+
+export function formatCliError(error) {
+  return `[preview-proof] ${getErrorMessage(error)}`;
+}
+
+export function isUsageError(error) {
+  return error instanceof Error && USAGE_ERROR_MESSAGES.has(error.message);
+}
+
 function addFailureIf(condition, message, failures) {
   if (condition) {
     failures.push(message);
@@ -227,19 +252,32 @@ function assertHreflangLinks(html, failures) {
 }
 
 function assertContactCta(html, failures) {
-  const normalized = html.toLowerCase();
   const hasContactCta =
-    normalized.includes('href="/en/contact"') ||
-    normalized.includes('href="/zh/contact"') ||
-    normalized.includes("inquiry") ||
-    normalized.includes("contact") ||
-    normalized.includes("mailto:");
+    hasHrefCta(html) || hasTextCtaElement(html, "a") || hasTextCtaElement(html, "button");
 
   addFailureIf(
     !hasContactCta,
     "Expected contact, inquiry, or mailto CTA",
     failures,
   );
+}
+
+function hasHrefCta(html) {
+  return matchAll(html, /href=["']([^"']+)["']/gi).some((match) => {
+    const href = match[1].trim().toLowerCase();
+    return (
+      href === "/en/contact" ||
+      href === "/zh/contact" ||
+      href.startsWith("mailto:")
+    );
+  });
+}
+
+function hasTextCtaElement(html, tagName) {
+  return matchAll(
+    html,
+    new RegExp(`<${tagName}\\b[^>]*>([\\s\\S]*?)<\\/${tagName}>`, "gi"),
+  ).some((match) => CTA_TEXT_PATTERN.test(stripTags(match[1])));
 }
 
 function assertTrustPlaceholders(html, strict, failures, warnings) {
@@ -269,6 +307,14 @@ function stripHtmlComments(value) {
   return value.replaceAll(/<!--|-->/g, "");
 }
 
+function stripTags(value) {
+  return value.replaceAll(/<[^>]*>/g, " ");
+}
+
+function getErrorMessage(error) {
+  return error instanceof Error ? error.message : String(error);
+}
+
 function escapeRegExp(value) {
   return value.replaceAll(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
@@ -286,21 +332,25 @@ function buildHeaders(headerName, headerValue) {
 }
 
 async function checkPage(baseUrl, pathname, headers, strict) {
-  const url = new URL(pathname, baseUrl);
-  const response = await fetch(url, {
-    headers,
-    redirect: "follow",
-    signal: AbortSignal.timeout(30000),
-  });
-  const html = await response.text();
+  try {
+    const url = new URL(pathname, baseUrl);
+    const response = await fetch(url, {
+      headers,
+      redirect: "follow",
+      signal: AbortSignal.timeout(30000),
+    });
+    const html = await response.text();
 
-  return assertPageContract({
-    pathname,
-    html,
-    status: response.status,
-    finalUrl: response.url,
-    strict,
-  });
+    return assertPageContract({
+      pathname,
+      html,
+      status: response.status,
+      finalUrl: response.url,
+      strict,
+    });
+  } catch (error) {
+    return buildFetchFailurePageResult({ baseUrl, pathname, error });
+  }
 }
 
 async function writeReport(output, report) {
@@ -338,7 +388,12 @@ const isCliEntry = process.argv[1] === fileURLToPath(import.meta.url);
 
 if (isCliEntry) {
   main().catch((error) => {
-    console.error("[preview-proof] Unexpected error:", error);
+    if (isUsageError(error)) {
+      console.error(formatCliError(error));
+      process.exit(1);
+    }
+
+    console.error(formatCliError(error));
     process.exit(1);
   });
 }

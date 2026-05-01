@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
   assertPageContract,
+  buildFetchFailurePageResult,
   buildPreviewProofReport,
+  formatCliError,
   parsePreviewProofArgs,
 } from "../../../scripts/deploy/preview-proof.mjs";
 
@@ -43,6 +45,14 @@ describe("preview-proof", () => {
     expect(() => parsePreviewProofArgs(["node", "preview-proof.mjs"])).toThrow(
       "Missing required --base-url",
     );
+  });
+
+  it("formats usage errors without unexpected error noise", () => {
+    const message = formatCliError(new Error("Missing required --base-url"));
+
+    expect(message).toBe("[preview-proof] Missing required --base-url");
+    expect(message).not.toContain("Unexpected error");
+    expect(message).not.toContain("Error:");
   });
 
   it("rejects incomplete protection header args", () => {
@@ -122,6 +132,37 @@ describe("preview-proof", () => {
     expect(result.ok).toBe(false);
     expect(result.failures).toContain(
       "Expected exactly one JSON-LD script, found 2",
+    );
+  });
+
+  it("reports fetch failures as page results", () => {
+    expect(
+      buildFetchFailurePageResult({
+        baseUrl: "https://example-preview.vercel.app",
+        pathname: "/en/contact",
+        error: new Error("connect ETIMEDOUT"),
+      }),
+    ).toEqual({
+      pathname: "/en/contact",
+      status: 0,
+      finalUrl: "https://example-preview.vercel.app/en/contact",
+      ok: false,
+      failures: ["Fetch failed for /en/contact: connect ETIMEDOUT"],
+      warnings: [],
+    });
+  });
+
+  it("rejects plain contact text without a clickable CTA", () => {
+    const result = assertPageContract({
+      pathname: "/en/contact",
+      html: buildValidHtml("<p>Please contact our team.</p>"),
+      status: 200,
+      finalUrl: "https://example-preview.vercel.app/en/contact",
+    });
+
+    expect(result.ok).toBe(false);
+    expect(result.failures).toContain(
+      "Expected contact, inquiry, or mailto CTA",
     );
   });
 
