@@ -789,11 +789,13 @@ for (const pathname of previewOnlyPages) {
 Modify `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/package.json`:
 
 ```json
-"test:e2e:page-contracts": "CI=1 pnpm exec playwright test tests/e2e/page-contracts.spec.ts --project=chromium",
-"test:e2e:preview-contract:deployed": "CI=1 pnpm exec playwright test tests/e2e/preview-contract.spec.ts --project=chromium"
+"test:e2e:page-contracts": "pnpm exec playwright test tests/e2e/page-contracts.spec.ts --project=chromium",
+"test:e2e:preview-contract:deployed": "pnpm exec playwright test tests/e2e/preview-contract.spec.ts --project=chromium"
 ```
 
 Place them near existing `test:e2e:*` scripts.
+
+Playwright config should skip the local `webServer` when `STAGING_URL` or `PLAYWRIGHT_BASE_URL` points to a non-local target; missing, `localhost`, `127.0.0.1`, and `::1` targets still use the local server.
 
 - [ ] **Step 4: 运行 page contracts，确认当前问题被捕获或通过**
 

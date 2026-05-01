@@ -17,6 +17,51 @@ const supportedLocales = (process.env.NEXT_PUBLIC_SUPPORTED_LOCALES || "en")
 const defaultLocale =
   process.env.NEXT_PUBLIC_DEFAULT_LOCALE?.trim() || supportedLocales[0] || "en";
 
+const localE2EHosts = new Set(["localhost", "127.0.0.1", "::1", "[::1]"]);
+
+const getTargetHostname = (input: string): string | undefined => {
+  const trimmed = input.trim();
+
+  for (const candidate of [trimmed, `http://${trimmed}`]) {
+    try {
+      const url = new URL(candidate);
+      if (url.hostname) {
+        return url.hostname;
+      }
+    } catch {
+      // Try the next URL shape.
+    }
+  }
+
+  return undefined;
+};
+
+const isLocalE2ETarget = (input: string): boolean => {
+  const trimmed = input.trim();
+
+  if (
+    !trimmed ||
+    trimmed === "::1" ||
+    trimmed.startsWith("::1:") ||
+    trimmed.startsWith("[::1]")
+  ) {
+    return true;
+  }
+
+  const hostname = getTargetHostname(trimmed);
+  return hostname ? localE2EHosts.has(hostname) : true;
+};
+
+const hasRemoteE2ETarget = (input?: string): boolean => {
+  const trimmed = input?.trim();
+
+  if (!trimmed) {
+    return false;
+  }
+
+  return !isLocalE2ETarget(trimmed);
+};
+
 const ensureLocaleInUrl = (input: string): string => {
   try {
     const url = new URL(input);
@@ -47,6 +92,10 @@ const resolvedBaseUrl = ensureLocaleInUrl(
   process.env.STAGING_URL ||
     process.env.PLAYWRIGHT_BASE_URL ||
     "http://localhost:3000",
+);
+const shouldUseLocalWebServer = !(
+  hasRemoteE2ETarget(process.env.STAGING_URL) ||
+  hasRemoteE2ETarget(process.env.PLAYWRIGHT_BASE_URL)
 );
 
 // HTML reporter may start a local server and wait for Ctrl+C when open is enabled.
@@ -131,10 +180,9 @@ export default defineConfig({
   projects: isDaily ? [...baseProjects, ...extendedProjects] : baseProjects,
 
   /* Run your local dev server before starting the tests */
-  // 如果设置了 STAGING_URL，跳过本地服务器
-  ...(process.env.STAGING_URL
-    ? {}
-    : {
+  // 显式远端目标跳过本地服务器；本地/缺失目标仍使用本地服务器。
+  ...(shouldUseLocalWebServer
+    ? {
         webServer: {
           // 统一使用生产模式运行 E2E 测试,消除开发模式的 Hydration mismatch 警告
           // 注意：必须使用 NODE_ENV=production 进行构建，否则 React 19 的某些内部 API
@@ -170,7 +218,8 @@ export default defineConfig({
             APP_ENV: "preview",
           },
         },
-      }),
+      }
+    : {}),
 
   /* Global setup and teardown */
   globalSetup: require.resolve("./tests/e2e/global-setup.ts"),
