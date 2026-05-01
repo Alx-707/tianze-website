@@ -1,5 +1,6 @@
 const urlProtocolPattern = /^[a-z][a-z\d+\-.]*:\/\//i;
 const pathLikeTargetPattern = /^(?:\/|\.\/|\.\.\/|\?|#)/;
+const protocolLessPathPattern = /\//;
 const localE2EHostnames = new Set(["localhost", "127.0.0.1", "::1"]);
 
 function normalizeHostname(hostname: string): string {
@@ -14,6 +15,13 @@ export function normalizeE2ETarget(input?: string): URL | undefined {
   }
 
   if (pathLikeTargetPattern.test(trimmed)) {
+    return undefined;
+  }
+
+  if (
+    !urlProtocolPattern.test(trimmed) &&
+    protocolLessPathPattern.test(trimmed)
+  ) {
     return undefined;
   }
 

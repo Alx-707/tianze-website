@@ -23,6 +23,12 @@ const normalizeCases: NormalizeCase[] = [
   { input: "example.com", expectedHref: "http://example.com/" },
   { input: "localhost:3000", expectedHref: "http://localhost:3000/" },
   { input: "[::1]:3000", expectedHref: "http://[::1]:3000/" },
+  { input: "foo/bar" },
+  { input: "preview.example.vercel.app/path" },
+  {
+    input: "https://preview.example.vercel.app/path",
+    expectedHref: "https://preview.example.vercel.app/path",
+  },
   { input: "/relative" },
   { input: "./relative" },
   { input: "../relative" },
@@ -45,6 +51,7 @@ describe("e2e target normalization", () => {
     expect(isLocalE2ETarget("localhost:3000")).toBe(true);
     expect(isLocalE2ETarget("[::1]:3000")).toBe(true);
     expect(hasRemoteE2ETarget("preview.example.vercel.app")).toBe(true);
+    expect(hasRemoteE2ETarget("foo/bar")).toBe(false);
     expect(hasRemoteE2ETarget("/relative")).toBe(false);
     expect(hasRemoteE2ETarget("   ")).toBe(false);
   });
@@ -69,6 +76,9 @@ describe("e2e target normalization", () => {
     ).toBeUndefined();
     expect(
       selectExplicitE2ETarget("foo bar", "preview.example.vercel.app"),
+    ).toBeUndefined();
+    expect(
+      selectExplicitE2ETarget("foo/bar", "preview.example.vercel.app"),
     ).toBeUndefined();
   });
 });

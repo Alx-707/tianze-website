@@ -817,6 +817,7 @@ Task 3 fourth-round blocker closure:
 - `src/test/e2e-target.ts` is the single source for explicit E2E target parsing.
 - Empty and whitespace-only values are ignored before baseURL/webServer/preview skip decisions.
 - Protocol-less path-like values that start with `/`, `./`, `../`, `?`, or `#` are rejected instead of becoming fake remote hosts such as `http://relative/`.
+- Protocol-less values that contain a path slash, such as `foo/bar`, are rejected; use a full URL like `https://preview.example.vercel.app/path` when a path is intentional.
 - `STAGING_URL` has priority over `PLAYWRIGHT_BASE_URL`; baseURL selection, local `webServer` selection, and preview-contract skipping must all use that same selected target.
 - `tests/e2e/global-setup.ts` must also use `src/test/e2e-target.ts`; global setup readiness is skipped only when the selected target is a non-local remote.
 - Missing, whitespace-only, local, invalid, or path-like targets must use the local fallback and still run local readiness in global setup.
