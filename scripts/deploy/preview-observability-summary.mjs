@@ -23,9 +23,7 @@ export function summarizeHeaders(headers) {
   if (!surface) {
     missing.push("x-observability-surface");
   } else if (surface !== EXPECTED_OBSERVABILITY_SURFACE) {
-    missing.push(
-      `x-observability-surface=${EXPECTED_OBSERVABILITY_SURFACE}`,
-    );
+    missing.push(`x-observability-surface=${EXPECTED_OBSERVABILITY_SURFACE}`);
   }
 
   return {

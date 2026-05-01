@@ -253,7 +253,9 @@ function assertHreflangLinks(html, failures) {
 
 function assertContactCta(html, failures) {
   const hasContactCta =
-    hasHrefCta(html) || hasTextCtaElement(html, "a") || hasTextCtaElement(html, "button");
+    hasHrefCta(html) ||
+    hasTextCtaElement(html, "a") ||
+    hasTextCtaElement(html, "button");
 
   addFailureIf(
     !hasContactCta,

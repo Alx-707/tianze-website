@@ -2,17 +2,13 @@
 
 import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
-import {
-  existsSync,
-  mkdirSync,
-  readFileSync,
-  writeFileSync,
-} from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 
 const DEFAULT_INPUT_PATH = "reports/quality/hotspots.json";
-const STRUCTURAL_INPUT_PATH = "reports/architecture/structural-hotspots-latest.json";
+const STRUCTURAL_INPUT_PATH =
+  "reports/architecture/structural-hotspots-latest.json";
 const REGISTER_PATH = "docs/quality/hotspot-slimming-register.md";
 const MAX_CANDIDATES = 5;
 const CRITICAL_SOURCE_PREFIXES = [
@@ -29,11 +25,7 @@ const CRITICAL_SOURCE_PREFIXES = [
   "src/types/",
   "scripts/",
 ];
-const TEST_PATH_PATTERNS = [
-  "/__tests__/",
-  ".test.",
-  ".spec.",
-];
+const TEST_PATH_PATTERNS = ["/__tests__/", ".test.", ".spec."];
 const INPUT_MODES = {
   FLAT: "flat input",
   STRUCTURAL: "structural-hotspots",
@@ -56,7 +48,9 @@ function isCriticalSourcePath(filePath) {
 
 function assertNumber(value, label) {
   if (!Number.isFinite(value) || value < 0) {
-    throw new Error(`Malformed hotspot input: ${label} must be a non-negative number`);
+    throw new Error(
+      `Malformed hotspot input: ${label} must be a non-negative number`,
+    );
   }
 
   return value;
@@ -64,7 +58,9 @@ function assertNumber(value, label) {
 
 function assertString(value, label) {
   if (typeof value !== "string" || value.trim() === "") {
-    throw new Error(`Malformed hotspot input: ${label} must be a non-empty string`);
+    throw new Error(
+      `Malformed hotspot input: ${label} must be a non-empty string`,
+    );
   }
 
   return value;
@@ -88,7 +84,9 @@ function getFlatRows(input) {
 
 function normalizeFlatRow(row, index) {
   if (!isObjectRecord(row)) {
-    throw new Error(`Malformed hotspot input: row ${index + 1} must be an object`);
+    throw new Error(
+      `Malformed hotspot input: row ${index + 1} must be an object`,
+    );
   }
 
   const file = normalizePath(assertString(row.file, `row ${index + 1} file`));
@@ -139,7 +137,9 @@ function normalizeStructuralRow(row, index, lineCounter) {
 
 function normalizeRowForRanking(row, index) {
   if (!isObjectRecord(row)) {
-    throw new Error(`Malformed hotspot input: row ${index + 1} must be an object`);
+    throw new Error(
+      `Malformed hotspot input: row ${index + 1} must be an object`,
+    );
   }
 
   const file = normalizePath(assertString(row.file, `row ${index + 1} file`));
@@ -162,10 +162,7 @@ function normalizeRowForRanking(row, index) {
     lines: assertNumber(row.lines, `row ${index + 1} (${file}) lines`),
     metricLabel,
     metricSource,
-    metricValue: assertNumber(
-      metricValue,
-      `row ${index + 1} (${file}) metric`,
-    ),
+    metricValue: assertNumber(metricValue, `row ${index + 1} (${file}) metric`),
   };
 }
 
@@ -351,14 +348,18 @@ export function createDerivedCandidateEvidence(candidates) {
   }));
 
   return {
-    hash: createHash("sha256").update(`${JSON.stringify(rows)}\n`).digest("hex"),
+    hash: createHash("sha256")
+      .update(`${JSON.stringify(rows)}\n`)
+      .digest("hex"),
     rowCount: rows.length,
   };
 }
 
 export function rankAllHotspotCandidates(rows) {
   if (!Array.isArray(rows)) {
-    throw new Error("Malformed hotspot input: rankHotspotCandidates expects an array");
+    throw new Error(
+      "Malformed hotspot input: rankHotspotCandidates expects an array",
+    );
   }
 
   return rows
@@ -372,7 +373,8 @@ export function rankAllHotspotCandidates(rows) {
 }
 
 export function normalizeHotspotInput(input, options = {}) {
-  const lineCounter = options.lineCounter ?? ((file) => countFileLines(file, process.cwd()));
+  const lineCounter =
+    options.lineCounter ?? ((file) => countFileLines(file, process.cwd()));
 
   if (isObjectRecord(input) && Array.isArray(input.summary?.hotspots)) {
     return input.summary.hotspots
@@ -508,10 +510,16 @@ export function renderHotspotRegister(candidates, options = {}) {
   lines.push("");
   lines.push("## Working sequence");
   lines.push("");
-  lines.push("1. Pick one candidate and write a failing characterization test for the behavior that must not change.");
+  lines.push(
+    "1. Pick one candidate and write a failing characterization test for the behavior that must not change.",
+  );
   lines.push("2. Extract one small helper, adapter, or presenter seam.");
-  lines.push("3. Rerun the focused test and the smallest relevant quality check.");
-  lines.push("4. Stop if the proof is unclear; do not batch-refactor the whole file.");
+  lines.push(
+    "3. Rerun the focused test and the smallest relevant quality check.",
+  );
+  lines.push(
+    "4. Stop if the proof is unclear; do not batch-refactor the whole file.",
+  );
 
   return `${lines.join("\n")}\n`;
 }
@@ -576,6 +584,9 @@ function runCli() {
   }
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (
+  process.argv[1] &&
+  import.meta.url === pathToFileURL(process.argv[1]).href
+) {
   runCli();
 }
