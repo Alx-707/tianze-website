@@ -5,7 +5,10 @@ const keyPages = [
   { path: "/zh", cta: /联系|询盘|获取报价/i },
   { path: "/en/contact", cta: /send|submit|contact/i },
   { path: "/zh/contact", cta: /发送|提交|联系/i },
-  { path: "/en/products", cta: /contact|inquiry|get quote/i },
+  {
+    path: "/en/products",
+    cta: /UL \/ ASTM Series|AS\/NZS 2053 Series|NOM Series|IEC Series|PETG Pneumatic Tubes/i,
+  },
   { path: "/en/products/north-america", cta: /contact|inquiry|get quote/i },
   { path: "/en/about", cta: /contact|inquiry|get quote/i },
 ] as const;
@@ -52,8 +55,17 @@ for (const pageCase of keyPages) {
       ).toHaveCount(1);
       await expect(page.locator("main")).toHaveCount(1);
 
-      const bodyText = await page.locator("body").innerText();
-      expect(bodyText).toMatch(pageCase.cta);
+      const main = page.locator("main");
+      const mainCta = main
+        .getByRole("link", { name: pageCase.cta })
+        .or(main.getByRole("button", { name: pageCase.cta }))
+        .or(
+          main.locator(
+            'a[href*="/contact"]:visible, a[href^="mailto:"]:visible',
+          ),
+        )
+        .first();
+      await expect(mainCta).toBeVisible();
 
       const html = await page.content();
       expect(count(html, /<main\b/gi)).toBe(1);

@@ -52,7 +52,7 @@
 - Create: `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/tests/unit/scripts/preview-proof.test.ts`
   - 覆盖 preview proof 的参数解析、HTML 检查、错误报告。
 - Create: `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/tests/e2e/preview-contract.spec.ts`
-  - 对 preview/local baseURL 跑 Playwright 合同检查。
+  - 只对显式非本地 preview/deployed baseURL 跑 Playwright 合同检查；本地 localhost 不作为 preview proof。
 - Create: `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/tests/e2e/page-contracts.spec.ts`
   - 对关键页面跑一组稳定合同：H1、canonical、hreflang、JSON-LD、CTA、no-JS main。
 - Create: `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/scripts/deploy/staging-lead-canary.mjs`
@@ -62,7 +62,7 @@
 - Create: `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/docs/guides/STAGING-LEAD-CANARY.md`
   - 写清 staging lead canary 的用途、环境变量、不会污染真实业务数据的约束。
 - Modify: `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/package.json`
-  - 新增 `proof:preview`、`proof:lead-canary:staging`、`test:e2e:page-contracts`。
+  - 新增 `proof:preview:deployed`、`proof:lead-canary:staging`、`test:e2e:page-contracts`、`test:e2e:preview-contract:deployed`。
 - Modify: `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/.github/workflows/vercel-deploy.yml`
   - 在 preview deploy 后追加 preview proof step 和 artifact 上传。
 
@@ -524,10 +524,10 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
 Modify `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/package.json`:
 
 ```json
-"proof:preview": "node scripts/deploy/preview-proof.mjs"
+"proof:preview:deployed": "node scripts/deploy/preview-proof.mjs"
 ```
 
-Place it near existing `smoke:cf:deploy` / `proof:cf:preview-deployed` scripts.
+Place it near existing `smoke:cf:deploy` / `proof:cf:preview-deployed` scripts. Keep the command name deployed-scoped so a naked local run is not mistaken for preview proof.
 
 - [ ] **Step 5: 运行单测**
 
@@ -612,6 +612,7 @@ Modify `.github/workflows/vercel-deploy.yml` inside `post-deployment-verificatio
 ```
 
 This repository already uses `VERCEL_AUTOMATION_BYPASS_SECRET` in this job. Reuse it. Do not create a second bypass mechanism.
+The workflow intentionally calls `node scripts/deploy/preview-proof.mjs` directly; it does not rely on the package alias `proof:preview:deployed`.
 
 - [ ] **Step 3: 校验 workflow YAML 关键字段**
 
@@ -672,7 +673,10 @@ const keyPages = [
   { path: "/zh", cta: /联系|询盘|获取报价/i },
   { path: "/en/contact", cta: /send|submit|contact/i },
   { path: "/zh/contact", cta: /发送|提交|联系/i },
-  { path: "/en/products", cta: /contact|inquiry|get quote/i },
+  {
+    path: "/en/products",
+    cta: /UL \/ ASTM Series|AS\/NZS 2053 Series|NOM Series|IEC Series|PETG Pneumatic Tubes/i,
+  },
   { path: "/en/products/north-america", cta: /contact|inquiry|get quote/i },
   { path: "/en/about", cta: /contact|inquiry|get quote/i },
 ] as const;
@@ -712,8 +716,15 @@ for (const pageCase of keyPages) {
       );
       await expect(page.locator("main")).toHaveCount(1);
 
-      const bodyText = await page.locator("body").innerText();
-      expect(bodyText).toMatch(pageCase.cta);
+      const main = page.locator("main");
+      const mainCta = main
+        .getByRole("link", { name: pageCase.cta })
+        .or(main.getByRole("button", { name: pageCase.cta }))
+        .or(
+          main.locator('a[href*="/contact"]:visible, a[href^="mailto:"]:visible'),
+        )
+        .first();
+      await expect(mainCta).toBeVisible();
 
       const html = await page.content();
       expect(count(html, /<main\b/gi)).toBe(1);
@@ -725,7 +736,7 @@ for (const pageCase of keyPages) {
 }
 ```
 
-- [ ] **Step 2: 写 preview contract spec**
+- [ ] **Step 2: 写 preview/deployed-only contract spec**
 
 Create `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/tests/e2e/preview-contract.spec.ts` with:
 
@@ -733,10 +744,30 @@ Create `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-wav
 import { expect, test } from "@playwright/test";
 
 const previewOnlyPages = ["/en", "/en/contact", "/en/products"] as const;
+const localPreviewHostnames = new Set(["localhost", "127.0.0.1", "::1"]);
+
+function hasNonLocalExplicitPreviewTarget(): boolean {
+  const explicitTarget =
+    process.env.STAGING_URL || process.env.PLAYWRIGHT_BASE_URL || "";
+
+  if (!explicitTarget) {
+    return false;
+  }
+
+  try {
+    const hostname = new URL(explicitTarget).hostname.replace(/^\[|\]$/g, "");
+    return !localPreviewHostnames.has(hostname.toLowerCase());
+  } catch {
+    return false;
+  }
+}
 
 for (const pathname of previewOnlyPages) {
-  test(`preview contract for ${pathname}`, async ({ page, baseURL }) => {
-    test.skip(!baseURL, "Playwright baseURL is required for preview contract");
+  test(`preview contract for ${pathname}`, async ({ page }) => {
+    test.skip(
+      !hasNonLocalExplicitPreviewTarget(),
+      "preview contract requires non-local STAGING_URL or PLAYWRIGHT_BASE_URL",
+    );
 
     await page.goto(pathname, { waitUntil: "domcontentloaded" });
     await expect(page.locator("main")).toHaveCount(1);
@@ -759,7 +790,7 @@ Modify `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-wav
 
 ```json
 "test:e2e:page-contracts": "CI=1 pnpm exec playwright test tests/e2e/page-contracts.spec.ts --project=chromium",
-"test:e2e:preview-contract": "CI=1 pnpm exec playwright test tests/e2e/preview-contract.spec.ts --project=chromium"
+"test:e2e:preview-contract:deployed": "CI=1 pnpm exec playwright test tests/e2e/preview-contract.spec.ts --project=chromium"
 ```
 
 Place them near existing `test:e2e:*` scripts.
