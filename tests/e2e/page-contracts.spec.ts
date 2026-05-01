@@ -5,8 +5,16 @@ const keyPages: Array<{
   cta: RegExp;
   expectedCtaPath?: string;
 }> = [
-  { path: "/en", cta: /contact|inquiry|get quote/i },
-  { path: "/zh", cta: /联系|询盘|获取报价/i },
+  {
+    path: "/en",
+    cta: /contact|inquiry|get (?:a )?quote|request (?:a )?quote/i,
+    expectedCtaPath: "/en/contact",
+  },
+  {
+    path: "/zh",
+    cta: /联系|询盘|获取报价/i,
+    expectedCtaPath: "/zh/contact",
+  },
   { path: "/en/contact", cta: /send|submit|contact/i },
   { path: "/zh/contact", cta: /发送|提交|联系/i },
   {
@@ -19,8 +27,16 @@ const keyPages: Array<{
     cta: /获取报价|询盘|联系/i,
     expectedCtaPath: "/zh/contact",
   },
-  { path: "/en/products/north-america", cta: /contact|inquiry|get quote/i },
-  { path: "/en/about", cta: /contact|inquiry|get quote/i },
+  {
+    path: "/en/products/north-america",
+    cta: /contact|inquiry|get (?:a )?quote|request (?:a )?quote/i,
+    expectedCtaPath: "/en/contact",
+  },
+  {
+    path: "/en/about",
+    cta: /contact|inquiry|get (?:a )?quote|request (?:a )?quote/i,
+    expectedCtaPath: "/en/contact",
+  },
 ] as const;
 
 const runtimeTextToReject = [
@@ -69,15 +85,7 @@ for (const pageCase of keyPages) {
       const namedCta = main
         .getByRole("link", { name: pageCase.cta })
         .or(main.getByRole("button", { name: pageCase.cta }));
-      const mainCta = pageCase.expectedCtaPath
-        ? namedCta.first()
-        : namedCta
-            .or(
-              main.locator(
-                'a[href*="/contact"]:visible, a[href^="mailto:"]:visible',
-              ),
-            )
-            .first();
+      const mainCta = namedCta.first();
       await expect(mainCta).toBeVisible();
       if (pageCase.expectedCtaPath) {
         const href = await mainCta.getAttribute("href");

@@ -7,9 +7,10 @@ const previewTextToReject = [
   "MISSING_MESSAGE",
   "BAILOUT_TO_CLIENT_SIDE_RENDERING",
 ] as const;
+const requiresRemotePreviewTarget =
+  process.env.E2E_REQUIRE_REMOTE_TARGET === "true";
 const previewContractSkipReason =
   "preview contract requires non-local STAGING_URL or PLAYWRIGHT_BASE_URL";
-
 function getExplicitPreviewTarget(): URL | undefined {
   return selectExplicitE2ETarget(
     process.env.STAGING_URL,
@@ -33,7 +34,13 @@ function expectNoPreviewLeak(pathname: string, html: string) {
 
 for (const pathname of previewOnlyPages) {
   test(`preview contract for ${pathname}`, async ({ page }) => {
-    test.skip(!hasNonLocalExplicitPreviewTarget(), previewContractSkipReason);
+    if (!requiresRemotePreviewTarget) {
+      test.skip(!hasNonLocalExplicitPreviewTarget(), previewContractSkipReason);
+    }
+
+    expect(hasNonLocalExplicitPreviewTarget(), previewContractSkipReason).toBe(
+      true,
+    );
 
     await page.goto(pathname, { waitUntil: "domcontentloaded" });
     await expect(page.locator("main")).toHaveCount(1);

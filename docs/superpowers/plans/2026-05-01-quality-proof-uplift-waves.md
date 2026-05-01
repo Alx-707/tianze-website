@@ -675,8 +675,16 @@ Create `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-wav
 import { expect, test } from "@playwright/test";
 
 const keyPages = [
-  { path: "/en", cta: /contact|inquiry|get quote/i },
-  { path: "/zh", cta: /联系|询盘|获取报价/i },
+  {
+    path: "/en",
+    cta: /contact|inquiry|get (?:a )?quote|request (?:a )?quote/i,
+    expectedCtaPath: "/en/contact",
+  },
+  {
+    path: "/zh",
+    cta: /联系|询盘|获取报价/i,
+    expectedCtaPath: "/zh/contact",
+  },
   { path: "/en/contact", cta: /send|submit|contact/i },
   { path: "/zh/contact", cta: /发送|提交|联系/i },
   {
@@ -689,8 +697,16 @@ const keyPages = [
     cta: /获取报价|询盘|联系/i,
     expectedCtaPath: "/zh/contact",
   },
-  { path: "/en/products/north-america", cta: /contact|inquiry|get quote/i },
-  { path: "/en/about", cta: /contact|inquiry|get quote/i },
+  {
+    path: "/en/products/north-america",
+    cta: /contact|inquiry|get (?:a )?quote|request (?:a )?quote/i,
+    expectedCtaPath: "/en/contact",
+  },
+  {
+    path: "/en/about",
+    cta: /contact|inquiry|get (?:a )?quote|request (?:a )?quote/i,
+    expectedCtaPath: "/en/contact",
+  },
 ] as const;
 
 function count(html: string, pattern: RegExp) {
@@ -732,15 +748,7 @@ for (const pageCase of keyPages) {
       const namedCta = main
         .getByRole("link", { name: pageCase.cta })
         .or(main.getByRole("button", { name: pageCase.cta }));
-      const mainCta = pageCase.expectedCtaPath
-        ? namedCta.first()
-        : namedCta
-            .or(
-              main.locator(
-                'a[href*="/contact"]:visible, a[href^="mailto:"]:visible',
-              ),
-            )
-            .first();
+      const mainCta = namedCta.first();
       await expect(mainCta).toBeVisible();
       if (pageCase.expectedCtaPath) {
         const href = await mainCta.getAttribute("href");
@@ -782,6 +790,10 @@ import {
 } from "@/test/e2e-target";
 
 const previewOnlyPages = ["/en", "/en/contact", "/en/products"] as const;
+const requiresRemotePreviewTarget =
+  process.env.E2E_REQUIRE_REMOTE_TARGET === "true";
+const previewContractSkipReason =
+  "preview contract requires non-local STAGING_URL or PLAYWRIGHT_BASE_URL";
 
 function hasNonLocalExplicitPreviewTarget(): boolean {
   const explicitTarget = selectExplicitE2ETarget(
@@ -794,9 +806,12 @@ function hasNonLocalExplicitPreviewTarget(): boolean {
 
 for (const pathname of previewOnlyPages) {
   test(`preview contract for ${pathname}`, async ({ page }) => {
-    test.skip(
-      !hasNonLocalExplicitPreviewTarget(),
-      "preview contract requires non-local STAGING_URL or PLAYWRIGHT_BASE_URL",
+    if (!requiresRemotePreviewTarget) {
+      test.skip(!hasNonLocalExplicitPreviewTarget(), previewContractSkipReason);
+    }
+
+    expect(hasNonLocalExplicitPreviewTarget(), previewContractSkipReason).toBe(
+      true,
     );
 
     await page.goto(pathname, { waitUntil: "domcontentloaded" });
@@ -820,7 +835,7 @@ Modify `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-wav
 
 ```json
 "test:e2e:page-contracts": "pnpm exec playwright test tests/e2e/page-contracts.spec.ts --project=chromium",
-"test:e2e:preview-contract:deployed": "pnpm exec playwright test tests/e2e/preview-contract.spec.ts --project=chromium"
+"test:e2e:preview-contract:deployed": "E2E_REQUIRE_REMOTE_TARGET=true pnpm exec playwright test tests/e2e/preview-contract.spec.ts --project=chromium"
 ```
 
 Place them near existing `test:e2e:*` scripts.
@@ -838,10 +853,12 @@ Task 3 fourth-round blocker closure:
 - `STAGING_URL` has priority over `PLAYWRIGHT_BASE_URL`; baseURL selection, local `webServer` selection, and preview-contract skipping must all use that same selected target.
 - `tests/e2e/global-setup.ts` must also use `src/test/e2e-target.ts`; global setup readiness is skipped only when the selected target is a non-local remote.
 - Missing, whitespace-only, local, invalid, or path-like targets must use the local fallback and still run local readiness in global setup.
-- `baseURL`, local `webServer`, global setup readiness, and deployed-only preview-contract skipping must all be driven by the same selected target.
+- `baseURL`, local `webServer`, global setup readiness, and preview-contract local skip/fail-fast behavior must all be driven by the same selected target.
+- `test:e2e:preview-contract:deployed` must fail fast when no non-local target is selected; missing or invalid deployed target is not a successful skip.
+- Local aggregate E2E runs may skip preview-only contracts when no remote target is selected; only the deployed script sets `E2E_REQUIRE_REMOTE_TARGET=true`.
 - Only missing or whitespace-only higher-priority values may fall back to lower-priority values. Invalid or path-like higher-priority values must stop fallback and use the local default.
-- Example: `STAGING_URL=localhost:3000 PLAYWRIGHT_BASE_URL=preview.example.vercel.app` stays local, keeps `webServer`, and skips deployed-only preview contracts.
-- Example: `STAGING_URL=/relative PLAYWRIGHT_BASE_URL=preview.example.vercel.app` also stays local, keeps `webServer`, and skips deployed-only preview contracts.
+- Example: `STAGING_URL=localhost:3000 PLAYWRIGHT_BASE_URL=preview.example.vercel.app` stays local, keeps `webServer`, skips preview-only contracts in local aggregate E2E, and fails the deployed preview script.
+- Example: `STAGING_URL=/relative PLAYWRIGHT_BASE_URL=preview.example.vercel.app` also stays local, keeps `webServer`, skips preview-only contracts in local aggregate E2E, and fails the deployed preview script.
 
 - [ ] **Step 4: 运行 page contracts，确认当前问题被捕获或通过**
 

@@ -53,12 +53,20 @@ const selectedE2ETarget = selectExplicitE2ETarget(
   process.env.STAGING_URL,
   process.env.PLAYWRIGHT_BASE_URL,
 );
+const requiresRemoteE2ETarget =
+  process.env.E2E_REQUIRE_REMOTE_TARGET === "true";
 const resolvedBaseUrl = ensureLocaleInUrl(
   selectedE2ETarget?.href ?? "http://localhost:3000",
 );
 const shouldUseLocalWebServer = selectedE2ETarget
   ? isLocalE2ETarget(selectedE2ETarget.href)
   : true;
+
+if (requiresRemoteE2ETarget && shouldUseLocalWebServer) {
+  throw new Error(
+    "E2E_REQUIRE_REMOTE_TARGET=true requires a non-local STAGING_URL or PLAYWRIGHT_BASE_URL",
+  );
+}
 
 // HTML reporter may start a local server and wait for Ctrl+C when open is enabled.
 // In non-interactive runners (e.g. ClaudeCode/CI logs), this causes the process to hang.

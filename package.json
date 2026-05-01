@@ -46,7 +46,7 @@
     "test:e2e": "playwright test",
     "test:e2e:page-contracts": "pnpm exec playwright test tests/e2e/page-contracts.spec.ts --project=chromium",
     "test:e2e:post-deploy": "POST_DEPLOY_TEST=1 playwright test tests/e2e/smoke/",
-    "test:e2e:preview-contract:deployed": "pnpm exec playwright test tests/e2e/preview-contract.spec.ts --project=chromium",
+    "test:e2e:preview-contract:deployed": "E2E_REQUIRE_REMOTE_TARGET=true pnpm exec playwright test tests/e2e/preview-contract.spec.ts --project=chromium",
     "test:e2e:visual-cross": "CI_DAILY=true playwright test tests/e2e/visual-cross-browser.spec.ts",
     "test:visual": "playwright test tests/e2e/visual-regression.spec.ts",
     "test:visual:update": "playwright test tests/e2e/visual-regression.spec.ts --update-snapshots",
