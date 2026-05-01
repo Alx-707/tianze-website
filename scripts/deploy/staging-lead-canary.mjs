@@ -3,6 +3,14 @@ import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const DEFAULT_OUTPUT = "reports/deploy/staging-lead-canary.json";
+const DRY_RUN_REASON =
+  "dry-run generates and records the intended product inquiry payload shape without submitting data";
+const NON_STAGING_URL_REASON =
+  "Refusing to submit staging canary to a non-staging URL; use localhost, 127.0.0.1, *.vercel.app, or a preview/staging host";
+const INQUIRY_SUCCESS_REASON = "staging canary accepted by inquiry API";
+const INQUIRY_FAILURE_REASON =
+  "inquiry API did not report success for staging canary";
+const RESPONSE_BODY_SNIPPET_LENGTH = 500;
 
 export function parseLeadCanaryArgs(argv) {
   const args = {
@@ -85,7 +93,7 @@ export function classifyCanaryMode({
       shouldSubmit: false,
       ok: true,
       status: "skipped",
-      reason: "Missing --base-url; dry-run mode does not submit data",
+      reason: DRY_RUN_REASON,
     };
   }
 
@@ -94,7 +102,16 @@ export function classifyCanaryMode({
       shouldSubmit: false,
       ok: true,
       status: "skipped",
-      reason: "dry-run mode does not submit data",
+      reason: DRY_RUN_REASON,
+    };
+  }
+
+  if (!isAllowedStagingBaseUrl(baseUrl)) {
+    return {
+      shouldSubmit: false,
+      ok: false,
+      status: "failed",
+      reason: NON_STAGING_URL_REASON,
     };
   }
 
@@ -106,7 +123,7 @@ export function classifyCanaryMode({
   };
 }
 
-export function buildCanaryPayload({ reference, checkedAt, turnstileToken }) {
+export function buildCanaryPayload({ reference, turnstileToken }) {
   const marker = reference || "manual";
   return {
     fullName: "Staging Canary",
@@ -118,7 +135,6 @@ export function buildCanaryPayload({ reference, checkedAt, turnstileToken }) {
     requirements: `[staging-canary ${marker}] This is an automated non-production lead proof.`,
     marketingConsent: false,
     turnstileToken,
-    checkedAt,
   };
 }
 
@@ -137,6 +153,46 @@ export function buildLeadCanaryReport(input) {
   };
 }
 
+export function classifyInquiryResponse(status, bodyText) {
+  let parsedBody;
+  try {
+    parsedBody = JSON.parse(bodyText);
+  } catch {
+    return {
+      responseStatus: status,
+      responseBodySnippet: bodyText.slice(0, RESPONSE_BODY_SNIPPET_LENGTH),
+      ok: false,
+      reason: "inquiry API returned non-JSON response for staging canary",
+    };
+  }
+
+  const ok = status >= 200 && status < 300 && parsedBody?.success === true;
+  return {
+    responseStatus: status,
+    responseBodySnippet: bodyText.slice(0, RESPONSE_BODY_SNIPPET_LENGTH),
+    ok,
+    reason: ok ? INQUIRY_SUCCESS_REASON : INQUIRY_FAILURE_REASON,
+  };
+}
+
+function isAllowedStagingBaseUrl(baseUrl) {
+  let url;
+  try {
+    url = new URL(baseUrl);
+  } catch {
+    return false;
+  }
+
+  const hostname = url.hostname.toLowerCase();
+  return (
+    hostname === "localhost" ||
+    hostname === "127.0.0.1" ||
+    hostname.endsWith(".vercel.app") ||
+    hostname.includes("preview") ||
+    hostname.includes("staging")
+  );
+}
+
 async function submitLead({ baseUrl, payload, idempotencyKey }) {
   const response = await fetch(new URL("/api/inquiry", baseUrl), {
     method: "POST",
@@ -148,12 +204,9 @@ async function submitLead({ baseUrl, payload, idempotencyKey }) {
     body: JSON.stringify(payload),
     signal: AbortSignal.timeout(30000),
   });
+  const bodyText = await response.text();
 
-  return {
-    responseStatus: response.status,
-    responseBodySnippet: (await response.text()).slice(0, 500),
-    ok: response.status >= 200 && response.status < 300,
-  };
+  return classifyInquiryResponse(response.status, bodyText);
 }
 
 async function writeJson(path, value) {
@@ -184,7 +237,6 @@ async function main() {
       baseUrl: args.baseUrl,
       payload: buildCanaryPayload({
         reference: args.reference,
-        checkedAt,
         turnstileToken: args.turnstileToken,
       }),
       idempotencyKey: args.idempotencyKey,
@@ -196,9 +248,7 @@ async function main() {
       reference: args.reference,
       status: result.ok ? "submitted" : "failed",
       ok: result.ok,
-      reason: result.ok
-        ? "staging canary accepted by inquiry API"
-        : "inquiry API rejected staging canary",
+      reason: result.reason,
       responseStatus: result.responseStatus,
       responseBodySnippet: result.responseBodySnippet,
     });

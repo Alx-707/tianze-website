@@ -4,7 +4,7 @@
 
 This proof has two levels:
 
-1. `dry-run`: validates and records the product inquiry payload shape without submitting data.
+1. `dry-run`: generates and records the intended product inquiry payload shape without submitting data.
 2. `submit` / `strict`: only allowed when staging has an explicit Turnstile test strategy and a non-production data target.
 
 Without the staging-only security/data contract, this script must not be described as an end-to-end lead proof.
@@ -33,6 +33,7 @@ Current `/api/inquiry` validates product inquiry data, requires Turnstile, and r
 - Do not send contact-form fields such as `firstName`, `lastName`, or `acceptPrivacy` to `/api/inquiry`.
 - Do not use invalid Turnstile tokens and call that a lead-chain proof.
 - Do not submit to production Airtable from this canary.
+- Do not submit to production URLs. The script only allows localhost, `127.0.0.1`, `*.vercel.app`, or hosts containing `preview` / `staging`.
 - If staging Turnstile bypass/test keys are unavailable, keep this lane in `dry-run`.
 
 ## Commands
