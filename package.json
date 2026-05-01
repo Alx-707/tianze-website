@@ -166,7 +166,8 @@
     "test:mutation:lead-security": "stryker run --mutate 'src/lib/lead-pipeline/**/*.ts,src/lib/security/**/*.ts'",
     "test:mutation:form-schema": "stryker run --mutate 'src/lib/form-schema/**/*.ts'",
     "review:mutation:critical": "node scripts/review-mutation-critical.js",
-    "proof:cf:preview-deployed": "node scripts/cloudflare/proof-preview-deployed.mjs"
+    "proof:cf:preview-deployed": "node scripts/cloudflare/proof-preview-deployed.mjs",
+    "proof:cf:proxy": "node scripts/cloudflare/proxy-proof-check.mjs reports/cloudflare-proxy/proof-artifact.json"
   },
   "dependencies": {
     "@marsidev/react-turnstile": "^1.5.1",
