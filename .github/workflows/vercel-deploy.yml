@@ -414,7 +414,7 @@ jobs:
       - name: 预览部署合同证明
         run: |
           set -euo pipefail
-          pnpm proof:preview -- \
+          node scripts/deploy/preview-proof.mjs \
             --base-url "${{ needs.deploy-to-vercel.outputs.preview_url }}" \
             --header-name "x-vercel-protection-bypass" \
             --header-value "${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}" \

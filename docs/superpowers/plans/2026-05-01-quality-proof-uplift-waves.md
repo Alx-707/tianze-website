@@ -594,7 +594,7 @@ Modify `.github/workflows/vercel-deploy.yml` inside `post-deployment-verificatio
       - name: 预览部署合同证明
         run: |
           set -euo pipefail
-          pnpm proof:preview -- \
+          node scripts/deploy/preview-proof.mjs \
             --base-url "${{ needs.deploy-to-vercel.outputs.preview_url }}" \
             --header-name "x-vercel-protection-bypass" \
             --header-value "${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}" \
@@ -619,12 +619,13 @@ Run:
 
 ```bash
 cd /Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501
-grep -n "预览部署合同证明\\|preview-proof.json\\|proof:preview\\|needs.deploy-to-vercel.outputs.preview_url\\|x-vercel-protection-bypass" .github/workflows/vercel-deploy.yml
+grep -n "预览部署合同证明\\|preview-proof.json\\|node scripts/deploy/preview-proof.mjs\\|needs.deploy-to-vercel.outputs.preview_url\\|x-vercel-protection-bypass" .github/workflows/vercel-deploy.yml
 ```
 
 Expected:
 
 - proof step appears under `post-deployment-verification`
+- script uses `node scripts/deploy/preview-proof.mjs`
 - script uses `needs.deploy-to-vercel.outputs.preview_url`
 - script passes `x-vercel-protection-bypass`
 - upload step stores `reports/deploy/preview-proof.json`
