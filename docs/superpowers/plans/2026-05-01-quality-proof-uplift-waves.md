@@ -659,6 +659,7 @@ Expected: commit succeeds.
 **Files:**
 - Create: `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/tests/e2e/page-contracts.spec.ts`
 - Create: `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/tests/e2e/preview-contract.spec.ts`
+- Create: `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/tests/e2e/helpers/e2e-target.ts`
 - Modify: `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/package.json`
 
 - [ ] **Step 1: 写 page contracts spec**
@@ -738,28 +739,29 @@ for (const pageCase of keyPages) {
 
 - [ ] **Step 2: 写 preview/deployed-only contract spec**
 
-Create `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/tests/e2e/preview-contract.spec.ts` with:
+Create `/Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501/tests/e2e/preview-contract.spec.ts` with the same explicit target normalization rule used by `playwright.config.ts`:
+
+- empty value: no explicit remote target, local fallback;
+- absolute URL with `://`: parse as-is;
+- host-like value without protocol: normalize by prepending `http://` before parsing;
+- examples: `preview.example.vercel.app` -> `http://preview.example.vercel.app`, `localhost:3000` -> `http://localhost:3000`, `[::1]:3000` -> `http://[::1]:3000`;
+- local/remote is decided from the normalized hostname only: `localhost`, `127.0.0.1`, and `::1` are local; every other hostname is remote.
+
+This prevents a half-supported state where config treats a protocol-less host as remote, but the spec skips or the Playwright `baseURL` becomes invalid.
+
+Spec shape:
 
 ```ts
 import { expect, test } from "@playwright/test";
+import { hasRemoteE2ETarget } from "./helpers/e2e-target";
 
 const previewOnlyPages = ["/en", "/en/contact", "/en/products"] as const;
-const localPreviewHostnames = new Set(["localhost", "127.0.0.1", "::1"]);
 
 function hasNonLocalExplicitPreviewTarget(): boolean {
   const explicitTarget =
     process.env.STAGING_URL || process.env.PLAYWRIGHT_BASE_URL || "";
 
-  if (!explicitTarget) {
-    return false;
-  }
-
-  try {
-    const hostname = new URL(explicitTarget).hostname.replace(/^\[|\]$/g, "");
-    return !localPreviewHostnames.has(hostname.toLowerCase());
-  } catch {
-    return false;
-  }
+  return hasRemoteE2ETarget(explicitTarget);
 }
 
 for (const pathname of previewOnlyPages) {
@@ -797,9 +799,18 @@ Place them near existing `test:e2e:*` scripts.
 
 Playwright config should skip the local `webServer` when `STAGING_URL` or `PLAYWRIGHT_BASE_URL` points to a non-local target; missing, `localhost`, `127.0.0.1`, and `::1` targets still use the local server.
 
+Protocol-less host-like targets are intentionally supported and normalized to `http://` before locale handling and local/remote checks. For example, `PLAYWRIGHT_BASE_URL=preview.example.vercel.app` must omit `webServer` and produce baseURL `http://preview.example.vercel.app/en`; `PLAYWRIGHT_BASE_URL=localhost:3000` must keep `webServer` and produce baseURL `http://localhost:3000/en`.
+
 - [ ] **Step 4: 运行 page contracts，确认当前问题被捕获或通过**
 
-Run:
+Default local run:
+
+```bash
+cd /Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501
+pnpm test:e2e:page-contracts
+```
+
+Only when debugging server startup manually, split build/start and test into two terminals:
 
 ```bash
 cd /Users/Data/conductor/workspaces/tianze-website/quality-proof-uplift-waves-20260501

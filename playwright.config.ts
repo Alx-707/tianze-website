@@ -17,75 +17,78 @@ const supportedLocales = (process.env.NEXT_PUBLIC_SUPPORTED_LOCALES || "en")
 const defaultLocale =
   process.env.NEXT_PUBLIC_DEFAULT_LOCALE?.trim() || supportedLocales[0] || "en";
 
-const localE2EHosts = new Set(["localhost", "127.0.0.1", "::1", "[::1]"]);
+const urlProtocolPattern = /^[a-z][a-z\d+\-.]*:\/\//i;
+const localE2EHostnames = new Set(["localhost", "127.0.0.1", "::1"]);
 
-const getTargetHostname = (input: string): string | undefined => {
-  const trimmed = input.trim();
+function normalizeHostname(hostname: string): string {
+  return hostname.replace(/^\[|\]$/g, "").toLowerCase();
+}
 
-  for (const candidate of [trimmed, `http://${trimmed}`]) {
-    try {
-      const url = new URL(candidate);
-      if (url.hostname) {
-        return url.hostname;
-      }
-    } catch {
-      // Try the next URL shape.
-    }
+function normalizeE2ETarget(input?: string): URL | undefined {
+  const trimmed = input?.trim();
+
+  if (!trimmed) {
+    return undefined;
   }
 
-  return undefined;
-};
+  const candidate = urlProtocolPattern.test(trimmed)
+    ? trimmed
+    : `http://${trimmed}`;
 
-const isLocalE2ETarget = (input: string): boolean => {
-  const trimmed = input.trim();
+  try {
+    const url = new URL(candidate);
+    return url.hostname ? url : undefined;
+  } catch {
+    return undefined;
+  }
+}
 
-  if (
-    !trimmed ||
-    trimmed === "::1" ||
-    trimmed.startsWith("::1:") ||
-    trimmed.startsWith("[::1]")
-  ) {
+function isLocalE2ETarget(input?: string): boolean {
+  const url = normalizeE2ETarget(input);
+
+  if (!url) {
     return true;
   }
 
-  const hostname = getTargetHostname(trimmed);
-  return hostname ? localE2EHosts.has(hostname) : true;
-};
+  return localE2EHostnames.has(normalizeHostname(url.hostname));
+}
 
-const hasRemoteE2ETarget = (input?: string): boolean => {
+function hasRemoteE2ETarget(input?: string): boolean {
   const trimmed = input?.trim();
 
   if (!trimmed) {
     return false;
   }
 
-  return !isLocalE2ETarget(trimmed);
-};
+  const url = normalizeE2ETarget(trimmed);
+  return url ? !isLocalE2ETarget(trimmed) : false;
+}
 
 const ensureLocaleInUrl = (input: string): string => {
-  try {
-    const url = new URL(input);
-    const segments = url.pathname.split("/").filter(Boolean);
-    const firstSegment = segments[0];
-    const lastSegment =
-      segments.length > 0 ? segments[segments.length - 1] : undefined;
-    const hasLocale =
-      (firstSegment ? supportedLocales.includes(firstSegment) : false) ||
-      (lastSegment ? supportedLocales.includes(lastSegment) : false);
+  const url = normalizeE2ETarget(input);
 
-    if (!hasLocale) {
-      url.pathname = `${url.pathname.replace(/\/$/, "")}/${defaultLocale}`;
-    }
-
-    const normalizedPath = url.pathname.replace(/\/$/, "");
-    return `${url.origin}${normalizedPath}${url.search}${url.hash}`;
-  } catch {
+  if (!url) {
     const trimmed = input.replace(/\/$/, "");
     const hasLocale = supportedLocales.some((locale) =>
       trimmed.endsWith(`/${locale}`),
     );
     return hasLocale ? trimmed : `${trimmed}/${defaultLocale}`;
   }
+
+  const segments = url.pathname.split("/").filter(Boolean);
+  const firstSegment = segments[0];
+  const lastSegment =
+    segments.length > 0 ? segments[segments.length - 1] : undefined;
+  const hasLocale =
+    (firstSegment ? supportedLocales.includes(firstSegment) : false) ||
+    (lastSegment ? supportedLocales.includes(lastSegment) : false);
+
+  if (!hasLocale) {
+    url.pathname = `${url.pathname.replace(/\/$/, "")}/${defaultLocale}`;
+  }
+
+  const normalizedPath = url.pathname.replace(/\/$/, "");
+  return `${url.origin}${normalizedPath}${url.search}${url.hash}`;
 };
 
 const resolvedBaseUrl = ensureLocaleInUrl(

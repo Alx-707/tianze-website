@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { hasRemoteE2ETarget } from "./helpers/e2e-target";
 
 const previewOnlyPages = ["/en", "/en/contact", "/en/products"] as const;
 const previewTextToReject = [
@@ -8,24 +9,14 @@ const previewTextToReject = [
 ] as const;
 const previewContractSkipReason =
   "preview contract requires non-local STAGING_URL or PLAYWRIGHT_BASE_URL";
-const localPreviewHostnames = new Set(["localhost", "127.0.0.1", "::1"]);
 
 function getExplicitPreviewTarget(): string {
   return process.env.STAGING_URL || process.env.PLAYWRIGHT_BASE_URL || "";
 }
 
-function isLocalPreviewTarget(rawTarget: string): boolean {
-  try {
-    const hostname = new URL(rawTarget).hostname.replace(/^\[|\]$/g, "");
-    return localPreviewHostnames.has(hostname.toLowerCase());
-  } catch {
-    return true;
-  }
-}
-
 function hasNonLocalExplicitPreviewTarget(): boolean {
   const explicitTarget = getExplicitPreviewTarget();
-  return Boolean(explicitTarget) && !isLocalPreviewTarget(explicitTarget);
+  return hasRemoteE2ETarget(explicitTarget);
 }
 
 function expectNoPreviewLeak(pathname: string, html: string) {
