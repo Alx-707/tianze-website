@@ -181,18 +181,28 @@ function assertJsonLdGraph(html, failures) {
     html,
     /<script\b[^>]*\btype=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi,
   );
-  const graphCount = blocks.filter((block) => {
-    try {
-      const parsed = JSON.parse(stripHtmlComments(block[1]).trim());
-      return Boolean(parsed?.["@graph"]);
-    } catch {
-      return false;
-    }
-  }).length;
 
   addFailureIf(
-    graphCount !== 1,
-    `Expected exactly one JSON-LD graph, found ${graphCount}`,
+    blocks.length !== 1,
+    `Expected exactly one JSON-LD script, found ${blocks.length}`,
+    failures,
+  );
+
+  if (blocks.length !== 1) {
+    return;
+  }
+
+  let parsed;
+  try {
+    parsed = JSON.parse(stripHtmlComments(blocks[0][1]).trim());
+  } catch {
+    failures.push("Expected JSON-LD script to contain valid JSON");
+    return;
+  }
+
+  addFailureIf(
+    !Array.isArray(parsed?.["@graph"]),
+    "Expected JSON-LD script to contain @graph array",
     failures,
   );
 }

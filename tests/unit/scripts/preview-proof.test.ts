@@ -45,6 +45,34 @@ describe("preview-proof", () => {
     );
   });
 
+  it("rejects incomplete protection header args", () => {
+    expect(() =>
+      parsePreviewProofArgs([
+        "node",
+        "preview-proof.mjs",
+        "--base-url",
+        "https://example-preview.vercel.app",
+        "--header-name",
+        "x-vercel-protection-bypass",
+      ]),
+    ).toThrow(
+      "Both --header-name and --header-value must be provided together",
+    );
+
+    expect(() =>
+      parsePreviewProofArgs([
+        "node",
+        "preview-proof.mjs",
+        "--base-url",
+        "https://example-preview.vercel.app",
+        "--header-value",
+        "secret",
+      ]),
+    ).toThrow(
+      "Both --header-name and --header-value must be provided together",
+    );
+  });
+
   it("detects duplicate canonical and duplicate hreflang", () => {
     const html = [
       "<html><head>",
@@ -69,6 +97,31 @@ describe("preview-proof", () => {
     );
     expect(result.failures).toContain(
       'Expected hreflang "en" exactly once, found 2',
+    );
+  });
+
+  it("rejects extra JSON-LD scripts even when one contains a graph", () => {
+    const html = [
+      "<html><head>",
+      '<link rel="canonical" href="https://example.com/en/contact">',
+      '<link rel="alternate" hreflang="en" href="https://example.com/en/contact">',
+      '<link rel="alternate" hreflang="zh" href="https://example.com/zh/contact">',
+      '<link rel="alternate" hreflang="x-default" href="https://example.com/en/contact">',
+      '<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization"}]}</script>',
+      '<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite"}</script>',
+      '</head><body><main><h1>Contact Us</h1><a href="/en/contact">Contact</a></main></body></html>',
+    ].join("");
+
+    const result = assertPageContract({
+      pathname: "/en/contact",
+      html,
+      status: 200,
+      finalUrl: "https://example-preview.vercel.app/en/contact",
+    });
+
+    expect(result.ok).toBe(false);
+    expect(result.failures).toContain(
+      "Expected exactly one JSON-LD script, found 2",
     );
   });
 
