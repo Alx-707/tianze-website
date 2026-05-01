@@ -1,12 +1,79 @@
+import { createHash } from "node:crypto";
+import path from "node:path";
+
 import { describe, expect, it } from "vitest";
 
 import {
+  chooseDefaultInput,
+  createSourceReportEvidence,
   normalizeHotspotInput,
   rankHotspotCandidates,
   renderHotspotRegister,
 } from "../../../scripts/hotspot-slimming-report.mjs";
 
 describe("hotspot slimming report", () => {
+  it("defaults to structural-hotspots when structural and flat inputs both exist", () => {
+    const rootDir = "/repo";
+    const selected = chooseDefaultInput(rootDir, {
+      fileExists: (candidate: string) =>
+        candidate.endsWith(
+          "reports/architecture/structural-hotspots-latest.json",
+        ) || candidate.endsWith("reports/quality/hotspots.json"),
+    });
+
+    expect(selected).toBe(
+      path.resolve(
+        rootDir,
+        "reports/architecture/structural-hotspots-latest.json",
+      ),
+    );
+  });
+
+  it("does not silently default to the old flat hotspot input", () => {
+    expect(() =>
+      chooseDefaultInput("/repo", {
+        fileExists: (candidate: string) =>
+          candidate.endsWith("reports/quality/hotspots.json"),
+      }),
+    ).toThrow("No structural hotspot input found");
+  });
+
+  it("extracts source report evidence from structural-hotspots raw JSON", () => {
+    const rawInput = `${JSON.stringify(
+      {
+        metadata: {
+          generatedAt: "2026-05-01T00:00:00.000Z",
+          windowDays: 180,
+        },
+        summary: {
+          commitsAnalyzed: 232,
+          uniqueFilesTouched: 1_149,
+          hotspots: [],
+        },
+      },
+      null,
+      2,
+    )}\n`;
+
+    expect(
+      createSourceReportEvidence(JSON.parse(rawInput), {
+        inputPath: "reports/architecture/structural-hotspots-latest.json",
+        rawInput,
+      }),
+    ).toEqual({
+      commandChain: [
+        "pnpm arch:metrics",
+        "pnpm arch:hotspots",
+        "pnpm review:hotspot-slimming reports/architecture/structural-hotspots-latest.json",
+      ],
+      commitsAnalyzed: 232,
+      generatedAt: "2026-05-01T00:00:00.000Z",
+      hash: createHash("sha256").update(rawInput).digest("hex"),
+      uniqueFilesTouched: 1_149,
+      windowDays: 180,
+    });
+  });
+
   it("prioritizes critical source hotspots", () => {
     const candidates = rankHotspotCandidates([
       {
@@ -166,7 +233,19 @@ describe("hotspot slimming report", () => {
       ],
       {
         generatedAt: "2026-05-01T00:00:00.000Z",
-        inputPath: "reports/quality/hotspots.json",
+        inputPath: "reports/architecture/structural-hotspots-latest.json",
+        sourceReport: {
+          commandChain: [
+            "pnpm arch:metrics",
+            "pnpm arch:hotspots",
+            "pnpm review:hotspot-slimming reports/architecture/structural-hotspots-latest.json",
+          ],
+          commitsAnalyzed: 232,
+          generatedAt: "2026-05-01T00:00:00.000Z",
+          hash: "a".repeat(64),
+          uniqueFilesTouched: 1_149,
+          windowDays: 180,
+        },
       },
     );
 
@@ -175,5 +254,15 @@ describe("hotspot slimming report", () => {
     );
     expect(markdown).toContain("| 1 | `src/lib/security/guard.ts` |");
     expect(markdown).toContain("Complexity metric");
+    expect(markdown).toContain(
+      "- Source report generatedAt: 2026-05-01T00:00:00.000Z",
+    );
+    expect(markdown).toContain("- Source report windowDays: 180");
+    expect(markdown).toContain("- Source report commitsAnalyzed: 232");
+    expect(markdown).toContain("- Source report uniqueFilesTouched: 1149");
+    expect(markdown).toContain(`- Source report sha256: \`${"a".repeat(64)}\``);
+    expect(markdown).toContain(
+      "- Command chain: `pnpm arch:metrics` -> `pnpm arch:hotspots` -> `pnpm review:hotspot-slimming reports/architecture/structural-hotspots-latest.json`",
+    );
   });
 });

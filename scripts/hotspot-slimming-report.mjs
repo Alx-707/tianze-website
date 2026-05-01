@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import { createHash } from "node:crypto";
 import {
   existsSync,
   mkdirSync,
@@ -185,12 +186,26 @@ function countPhysicalLines(source) {
   return withoutTrailingNewline.split("\n").length;
 }
 
-function readJsonFile(inputPath) {
+function readJsonInput(inputPath) {
+  let rawInput;
+
   try {
-    return JSON.parse(readFileSync(inputPath, "utf8"));
+    rawInput = readFileSync(inputPath, "utf8");
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     throw new Error(`Could not read hotspot input ${inputPath}: ${message}`, {
+      cause: error,
+    });
+  }
+
+  try {
+    return {
+      parsedInput: JSON.parse(rawInput),
+      rawInput,
+    };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    throw new Error(`Could not parse hotspot input ${inputPath}: ${message}`, {
       cause: error,
     });
   }
@@ -206,21 +221,18 @@ function countFileLines(file, rootDir) {
   return countPhysicalLines(readFileSync(filePath, "utf8"));
 }
 
-function chooseDefaultInput(rootDir) {
-  const qualityInput = path.resolve(rootDir, DEFAULT_INPUT_PATH);
-
-  if (existsSync(qualityInput)) {
-    return qualityInput;
-  }
-
+export function chooseDefaultInput(rootDir, options = {}) {
+  const fileExists = options.fileExists ?? existsSync;
   const structuralInput = path.resolve(rootDir, STRUCTURAL_INPUT_PATH);
 
-  if (existsSync(structuralInput)) {
+  if (fileExists(structuralInput)) {
     return structuralInput;
   }
 
+  const qualityInput = path.resolve(rootDir, DEFAULT_INPUT_PATH);
+
   throw new Error(
-    `No hotspot input found. Expected ${DEFAULT_INPUT_PATH}, or pass an input path after running pnpm arch:hotspots.`,
+    `No structural hotspot input found. Expected ${STRUCTURAL_INPUT_PATH}. Pass ${qualityInput} explicitly only for flat-input compatibility.`,
   );
 }
 
@@ -254,6 +266,43 @@ function getMetricNotes(candidates) {
 
 function getSlimmingPlan(candidate) {
   return `Characterize current behavior first, then extract one small seam around ${candidate.file}.`;
+}
+
+function getNumberOrNull(value) {
+  return Number.isFinite(value) ? value : null;
+}
+
+function getStructuralMetadata(input) {
+  const metadata = isObjectRecord(input) ? input.metadata : null;
+  const summary = isObjectRecord(input) ? input.summary : null;
+
+  return {
+    commitsAnalyzed: getNumberOrNull(summary?.commitsAnalyzed),
+    generatedAt:
+      typeof metadata?.generatedAt === "string" && metadata.generatedAt.trim()
+        ? metadata.generatedAt
+        : null,
+    uniqueFilesTouched: getNumberOrNull(summary?.uniqueFilesTouched),
+    windowDays: getNumberOrNull(metadata?.windowDays ?? input?.windowDays),
+  };
+}
+
+export function createSourceReportEvidence(input, options) {
+  const metadata = getStructuralMetadata(input);
+
+  return {
+    ...metadata,
+    commandChain: [
+      "pnpm arch:metrics",
+      "pnpm arch:hotspots",
+      `pnpm review:hotspot-slimming ${options.inputPath}`,
+    ],
+    hash: createHash("sha256").update(options.rawInput).digest("hex"),
+  };
+}
+
+function formatSourceValue(value) {
+  return value === null ? "not provided" : String(value);
 }
 
 export function normalizeHotspotInput(input, options = {}) {
@@ -295,6 +344,7 @@ export function rankHotspotCandidates(rows) {
 export function renderHotspotRegister(candidates, options = {}) {
   const generatedAt = options.generatedAt ?? new Date().toISOString();
   const inputPath = options.inputPath ?? "not provided";
+  const sourceReport = options.sourceReport ?? null;
   const skippedMissingFiles = options.skippedMissingFiles ?? [];
   const metricHeader = getMetricHeader(candidates);
   const lines = [
@@ -306,6 +356,28 @@ export function renderHotspotRegister(candidates, options = {}) {
     "",
     `- Generated at: ${generatedAt}`,
     `- Input: \`${inputPath}\``,
+  ];
+
+  if (sourceReport) {
+    lines.push(
+      `- Source report generatedAt: ${formatSourceValue(sourceReport.generatedAt)}`,
+    );
+    lines.push(
+      `- Source report windowDays: ${formatSourceValue(sourceReport.windowDays)}`,
+    );
+    lines.push(
+      `- Source report commitsAnalyzed: ${formatSourceValue(sourceReport.commitsAnalyzed)}`,
+    );
+    lines.push(
+      `- Source report uniqueFilesTouched: ${formatSourceValue(sourceReport.uniqueFilesTouched)}`,
+    );
+    lines.push(`- Source report sha256: \`${sourceReport.hash}\``);
+    lines.push(
+      `- Command chain: ${sourceReport.commandChain.map((command) => `\`${command}\``).join(" -> ")}`,
+    );
+  }
+
+  lines.push(
     "- Ranking formula: metric value x real file lines",
     "- Top candidates: 5",
     `- Current-tree filter: skipped ${skippedMissingFiles.length} structural hotspot paths that no longer exist in this checkout.`,
@@ -320,7 +392,7 @@ export function renderHotspotRegister(candidates, options = {}) {
     "",
     `| Rank | File | ${metricHeader} | Lines | Score | Slimming plan |`,
     "|---:|---|---:|---:|---:|---|",
-  ];
+  );
 
   candidates.forEach((candidate, index) => {
     lines.push(
@@ -366,7 +438,8 @@ function runCli() {
     const inputPath = process.argv[2]
       ? path.resolve(rootDir, process.argv[2])
       : chooseDefaultInput(rootDir);
-    const input = readJsonFile(inputPath);
+    const { parsedInput: input, rawInput } = readJsonInput(inputPath);
+    const displayInputPath = getDisplayPath(inputPath, rootDir);
     const rows = normalizeHotspotInput(input, {
       lineCounter: (file) => {
         const lines = countFileLines(file, rootDir);
@@ -388,7 +461,11 @@ function runCli() {
 
     const outputPath = path.resolve(rootDir, REGISTER_PATH);
     const markdown = renderHotspotRegister(candidates, {
-      inputPath: getDisplayPath(inputPath, rootDir),
+      inputPath: displayInputPath,
+      sourceReport: createSourceReportEvidence(input, {
+        inputPath: displayInputPath,
+        rawInput,
+      }),
       skippedMissingFiles,
     });
 
@@ -396,7 +473,7 @@ function runCli() {
     writeFileSync(outputPath, markdown, "utf8");
 
     console.log(`Hotspot slimming register written: ${REGISTER_PATH}`);
-    console.log(`Input: ${getDisplayPath(inputPath, rootDir)}`);
+    console.log(`Input: ${displayInputPath}`);
     console.log(`Candidates: ${candidates.length}`);
 
     if (skippedMissingFiles.length > 0) {

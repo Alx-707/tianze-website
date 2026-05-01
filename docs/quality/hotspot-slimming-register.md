@@ -4,8 +4,14 @@ This is a candidate register, not permission to refactor immediately.
 
 ## Source
 
-- Generated at: 2026-05-01T13:34:44.126Z
+- Generated at: 2026-05-01T13:49:05.688Z
 - Input: `reports/architecture/structural-hotspots-latest.json`
+- Source report generatedAt: 2026-05-01T13:48:57.221Z
+- Source report windowDays: 180
+- Source report commitsAnalyzed: 233
+- Source report uniqueFilesTouched: 1150
+- Source report sha256: `c272c386f7e7c4e20cd336507660ecac1387c8afbec23556887cb5024de86f62`
+- Command chain: `pnpm arch:metrics` -> `pnpm arch:hotspots` -> `pnpm review:hotspot-slimming reports/architecture/structural-hotspots-latest.json`
 - Ranking formula: metric value x real file lines
 - Top candidates: 5
 - Current-tree filter: skipped 1 structural hotspot paths that no longer exist in this checkout.
