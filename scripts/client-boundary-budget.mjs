@@ -2,7 +2,7 @@
 
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
-import { fileURLToPath } from "node:url";
+import { pathToFileURL } from "node:url";
 import { glob } from "glob";
 
 const BUDGET_PATH = "docs/quality/client-boundary-budget.json";
@@ -269,7 +269,10 @@ async function main() {
   process.exit(1);
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
+if (
+  process.argv[1] &&
+  import.meta.url === pathToFileURL(process.argv[1]).href
+) {
   main().catch((error) => {
     console.error(error instanceof Error ? error.message : String(error));
     process.exit(1);

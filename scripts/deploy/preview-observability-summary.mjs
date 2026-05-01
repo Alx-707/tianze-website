@@ -1,6 +1,6 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
-import { fileURLToPath } from "node:url";
+import { pathToFileURL } from "node:url";
 
 const DEFAULT_OUTPUT = "reports/deploy/preview-observability-summary.json";
 const DEFAULT_PROBES = ["/api/health"];
@@ -183,7 +183,10 @@ async function main() {
   console.log(`[preview-observability] Report written to ${args.output}`);
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
+if (
+  process.argv[1] &&
+  import.meta.url === pathToFileURL(process.argv[1]).href
+) {
   main().catch((error) => {
     console.error("[preview-observability] unexpected error:", error);
     process.exit(1);

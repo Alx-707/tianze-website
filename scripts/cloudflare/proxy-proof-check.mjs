@@ -1,5 +1,5 @@
 import { access, readFile } from "node:fs/promises";
-import { fileURLToPath } from "node:url";
+import { pathToFileURL } from "node:url";
 
 const DEFAULT_ARTIFACT_PATH = "reports/cloudflare-proxy/proof-artifact.json";
 const REQUIRED_STEP_NAMES = [
@@ -258,7 +258,10 @@ async function main() {
   }
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
+if (
+  process.argv[1] &&
+  import.meta.url === pathToFileURL(process.argv[1]).href
+) {
   main().catch((error) => {
     const message = error instanceof Error ? error.message : String(error);
     console.log(

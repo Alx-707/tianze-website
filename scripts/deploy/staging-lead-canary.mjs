@@ -1,6 +1,6 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
-import { fileURLToPath } from "node:url";
+import { pathToFileURL } from "node:url";
 
 const DEFAULT_OUTPUT = "reports/deploy/staging-lead-canary.json";
 const DRY_RUN_REASON =
@@ -264,7 +264,10 @@ async function main() {
   console.log(`[staging-lead-canary] ${report.status}: ${report.reason}`);
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
+if (
+  process.argv[1] &&
+  import.meta.url === pathToFileURL(process.argv[1]).href
+) {
   main().catch((error) => {
     console.error("[staging-lead-canary] unexpected error:", error);
     process.exit(1);

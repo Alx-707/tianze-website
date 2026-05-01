@@ -1,6 +1,6 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
-import { fileURLToPath } from "node:url";
+import { pathToFileURL } from "node:url";
 
 const DEFAULT_OUTPUT = "reports/deploy/preview-proof.json";
 const DEFAULT_PAGES = [
@@ -386,7 +386,8 @@ async function main() {
   console.log(`[preview-proof] Report written to ${output}`);
 }
 
-const isCliEntry = process.argv[1] === fileURLToPath(import.meta.url);
+const isCliEntry =
+  process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
 
 if (isCliEntry) {
   main().catch((error) => {
