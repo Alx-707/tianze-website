@@ -157,7 +157,10 @@ If this plan file is already committed, `git status` may be clean. That is accep
 Run:
 
 ```bash
-test ! -e /Users/Data/workspace/showcase-website-starter
+if [ -e /Users/Data/workspace/showcase-website-starter ]; then
+  echo "target path already exists: /Users/Data/workspace/showcase-website-starter"
+  exit 1
+fi
 echo "target path is available"
 ```
 
@@ -236,9 +239,9 @@ do
     exit 1
   fi
 done
-if find . -maxdepth 1 -name ".env*" -print -quit | grep -q .; then
+if find . -path ./.git -prune -o -name ".env*" -print -quit | grep -q .; then
   echo "unexpected copied env artifact"
-  find . -maxdepth 1 -name ".env*" -print
+  find . -path ./.git -prune -o -name ".env*" -print
   exit 1
 fi
 echo "copy artifact guard passed"
@@ -1256,9 +1259,9 @@ do
     exit 1
   fi
 done
-if find . -maxdepth 1 -name ".env*" -print -quit | grep -q .; then
+if find . -path ./.git -prune -o -name ".env*" -print -quit | grep -q .; then
   echo "unexpected runtime env artifact"
-  find . -maxdepth 1 -name ".env*" -print
+  find . -path ./.git -prune -o -name ".env*" -print
   exit 1
 fi
 echo "runtime artifacts absent"
@@ -1312,8 +1315,7 @@ The inherited `.gitignore` ignores `.codex/` because runtime state must stay loc
 Edit `/Users/Data/workspace/showcase-website-starter/.gitignore` near the `.codex/` rule:
 
 ```gitignore
-.codex/
-!.codex/
+.codex/*
 !.codex/README.md
 !.codex/config.example.toml
 ```
@@ -1386,7 +1388,10 @@ Run:
 ```bash
 cd /Users/Data/workspace/showcase-website-starter
 git check-ignore -v .codex/auth.json .codex/history.jsonl .codex/log/example.log .codex/shell_snapshots/example 2>/dev/null
-git check-ignore -v .codex/README.md .codex/config.example.toml && exit 1 || true
+if git check-ignore -v .codex/README.md .codex/config.example.toml; then
+  echo "unexpected: example files are ignored"
+  exit 1
+fi
 ```
 
 Expected:
