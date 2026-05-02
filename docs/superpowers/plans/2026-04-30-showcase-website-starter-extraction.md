@@ -24,7 +24,7 @@
 ## 当前 Tianze 仓库收尾状态
 
 - 当前工作分支：`docs/showcase-website-starter-plan`
-- Base commit：`5fc32c50`
+- Base commit：`ea0cae8f`
 - 当前仓库只应保留一个入库改动：`.gitignore` 新增 `.context/`
 - 已从当前项目移走 project-local `oh-my-codex` 状态：`.codex/`、`.omx/`
 - 已从当前项目 `.mcp.json` 移除直连 `storybook`，只保留 `dev`
