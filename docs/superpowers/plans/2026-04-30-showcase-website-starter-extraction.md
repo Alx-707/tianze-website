@@ -82,11 +82,7 @@
 - Do not create: `/Users/Data/workspace/showcase-website-starter/.wrangler/`
 - Do not create: `/Users/Data/workspace/showcase-website-starter/storybook-static/`
 - Do not create: `/Users/Data/workspace/showcase-website-starter/node_modules/`
-- Do not create: `/Users/Data/workspace/showcase-website-starter/.env`
-- Do not create: `/Users/Data/workspace/showcase-website-starter/.env.local`
-- Do not create: `/Users/Data/workspace/showcase-website-starter/.env.development.local`
-- Do not create: `/Users/Data/workspace/showcase-website-starter/.env.test.local`
-- Do not create: `/Users/Data/workspace/showcase-website-starter/.env.production.local`
+- Do not create: any `/Users/Data/workspace/showcase-website-starter/.env*` file
 - Do not create: `/Users/Data/workspace/showcase-website-starter/.dev.vars`
 - Do not create: `/Users/Data/workspace/showcase-website-starter/.claude/settings.local.json`
 
@@ -107,11 +103,14 @@ git status --short --branch
 git diff -- .gitignore
 ```
 
-Expected on an uncommitted working tree:
+Expected invariant:
 
-```text
-## docs/showcase-website-starter-plan
- M .gitignore
+- The current branch is `docs/showcase-website-starter-plan`.
+- If `.gitignore` is not committed yet, `git diff -- .gitignore` contains only `+ .context/`.
+- If `.gitignore` is already committed, compare against `origin/main`:
+
+```bash
+git diff origin/main...HEAD -- .gitignore
 ```
 
 Expected diff contains only:
@@ -143,7 +142,7 @@ git commit -m "chore: ignore local context runtime state"
 
 Expected: commit succeeds.
 
-If this plan file is already committed, `git status` will also include the plan file in branch history. That is acceptable. The invariant is: outside this plan document, the current Tianze repository change is only `.gitignore` adding `.context/`.
+If this plan file is already committed, `git status` may be clean. That is acceptable. The invariant is: outside this plan document, the current Tianze repository change is only `.gitignore` adding `.context/`.
 
 ---
 
@@ -198,11 +197,7 @@ rsync -a \
   --exclude='.eslintcache-audit' \
   --exclude='*.tsbuildinfo' \
   --exclude='.DS_Store' \
-  --exclude='.env' \
-  --exclude='.env.local' \
-  --exclude='.env.development.local' \
-  --exclude='.env.test.local' \
-  --exclude='.env.production.local' \
+  --exclude='.env*' \
   --exclude='.dev.vars' \
   --exclude='.mcp.json' \
   --exclude='.codex/auth.json' \
@@ -229,11 +224,6 @@ for p in \
   .claude/agents \
   .claude/skills \
   .claude/worktrees \
-  .env \
-  .env.local \
-  .env.development.local \
-  .env.test.local \
-  .env.production.local \
   .dev.vars \
   .mcp.json \
   .omx \
@@ -246,6 +236,11 @@ do
     exit 1
   fi
 done
+if find . -maxdepth 1 -name ".env*" -print -quit | grep -q .; then
+  echo "unexpected copied env artifact"
+  find . -maxdepth 1 -name ".env*" -print
+  exit 1
+fi
 echo "copy artifact guard passed"
 ```
 
@@ -262,7 +257,7 @@ Run:
 ```bash
 cd /Users/Data/workspace/showcase-website-starter
 git init
-git add .
+git add . ':!.env*' ':!.dev.vars' ':!.mcp.json' ':!CLAUDE.local.md' ':!.firecrawl' ':!.claude/agents' ':!.claude/skills' ':!.claude/worktrees' ':!.omx' ':!.context' ':!reports' ':!node_modules'
 git status --short | sed -n '1,80p'
 ```
 
@@ -1261,6 +1256,11 @@ do
     exit 1
   fi
 done
+if find . -maxdepth 1 -name ".env*" -print -quit | grep -q .; then
+  echo "unexpected runtime env artifact"
+  find . -maxdepth 1 -name ".env*" -print
+  exit 1
+fi
 echo "runtime artifacts absent"
 ```
 
@@ -1305,7 +1305,22 @@ trust_level = "trusted"
 
 Do not include oh-my-codex or OMX MCP servers.
 
-- [ ] **Step 4: Add MCP example**
+- [ ] **Step 4: Allow only committed Codex example files**
+
+The inherited `.gitignore` ignores `.codex/` because runtime state must stay local. Keep that default, but allow the two example files:
+
+Edit `/Users/Data/workspace/showcase-website-starter/.gitignore` near the `.codex/` rule:
+
+```gitignore
+.codex/
+!.codex/
+!.codex/README.md
+!.codex/config.example.toml
+```
+
+Do not unignore `.codex/auth.json`, `.codex/history.jsonl`, `.codex/log/`, `.codex/*.sqlite*`, or `.codex/shell_snapshots/`.
+
+- [ ] **Step 5: Add MCP example**
 
 Create `/Users/Data/workspace/showcase-website-starter/.mcp.example.json`:
 
@@ -1322,7 +1337,7 @@ Create `/Users/Data/workspace/showcase-website-starter/.mcp.example.json`:
 
 Do not include Storybook here. Storybook MCP is managed by MCPHub.
 
-- [ ] **Step 5: Update AGENTS and CLAUDE workflow pointers**
+- [ ] **Step 6: Update AGENTS and CLAUDE workflow pointers**
 
 In both `AGENTS.md` and `CLAUDE.md`, add:
 
@@ -1338,7 +1353,7 @@ Before making broad project changes, read:
 Do not rely on chat memory for project truth. If a decision must survive sessions, write it into the appropriate file under `docs/website/` or the relevant rule file.
 ```
 
-- [ ] **Step 6: Update Claude DWF references**
+- [ ] **Step 7: Update Claude DWF references**
 
 Find references to `TIANZE-DESIGN-TOKENS.md`:
 
@@ -1353,7 +1368,7 @@ Replace them with:
 docs/impeccable/system/DESIGN-TOKENS.md
 ```
 
-- [ ] **Step 7: Verify AI workflow has no old runtime references**
+- [ ] **Step 8: Verify AI workflow has no old runtime references**
 
 Run:
 
@@ -1364,13 +1379,28 @@ rg -n -i "oh-my-codex|OMX|\\.omx|auth.json|history.jsonl|settings.local.json|Tia
 
 Expected: no output except `.codex/README.md` explaining that `.omx/` is not committed.
 
-- [ ] **Step 8: Commit AI workflow migration**
+- [ ] **Step 9: Verify Codex examples are trackable but runtime state is ignored**
 
 Run:
 
 ```bash
 cd /Users/Data/workspace/showcase-website-starter
-git add AGENTS.md CLAUDE.md .claude .codex .mcp.example.json docs/website/AI工作流.md
+git check-ignore -v .codex/auth.json .codex/history.jsonl .codex/log/example.log .codex/shell_snapshots/example 2>/dev/null
+git check-ignore -v .codex/README.md .codex/config.example.toml && exit 1 || true
+```
+
+Expected:
+
+- runtime files are ignored by `.gitignore`
+- `.codex/README.md` and `.codex/config.example.toml` are not ignored
+
+- [ ] **Step 10: Commit AI workflow migration**
+
+Run:
+
+```bash
+cd /Users/Data/workspace/showcase-website-starter
+git add AGENTS.md CLAUDE.md .claude .gitignore .codex/README.md .codex/config.example.toml .mcp.example.json docs/website/AI工作流.md
 git commit -m "chore: migrate AI workflow without local runtime state"
 ```
 
@@ -1521,11 +1551,17 @@ If verification changed generated tracked files, run:
 
 ```bash
 cd /Users/Data/workspace/showcase-website-starter
-git add .
+git status --short --untracked-files=all
+```
+
+Inspect the output first. Do not stage runtime/local artifacts. If tracked generated files need to be committed, stage only those explicit paths, for example:
+
+```bash
+git add package.json pnpm-lock.yaml public/messages messages
 git commit -m "chore: finalize showcase website starter baseline"
 ```
 
-If no tracked files changed, skip commit.
+If no tracked files changed, skip commit. Do not use `git add .` for this final adjustment step.
 
 - [ ] **Step 5: Write final handoff**
 
