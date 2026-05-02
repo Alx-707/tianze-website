@@ -20,12 +20,13 @@
 - 禁用命名：不要新增 `docs/template/`，不要新增 `template:*` 命令，文档正文不要把项目称为 `template website`
 - 页面内容策略：保留页面结构和可运行示例内容，不做空项目；将 Tianze/PVC 专属内容替换为中性展示型网站示例内容
 - Storybook MCP 策略：不在项目 `.mcp.json` 直连 Storybook；统一放到 `/Users/Data/Tool/mcphub` live config 作为集中再分发项
+- 配置真相策略：`src/config/website/` 不是旁路文档样例，必须驱动现有 `single-site*` / `siteFacts` 兼容层；如果运行时仍直接读 Tianze 的 `single-site*` 真相源，本计划不能算完成
 
 ## 当前 Tianze 仓库收尾状态
 
 - 当前工作分支：`docs/showcase-website-starter-plan`
 - Base commit：`ea0cae8f`
-- 当前仓库只应保留一个入库改动：`.gitignore` 新增 `.context/`
+- 除本计划文档外，当前仓库只应保留一个入库改动：`.gitignore` 新增 `.context/`
 - 已从当前项目移走 project-local `oh-my-codex` 状态：`.codex/`、`.omx/`
 - 已从当前项目 `.mcp.json` 移除直连 `storybook`，只保留 `dev`
 - 已在 MCPHub live config 加入 `storybook`，默认 `enabled: false`
@@ -70,13 +71,22 @@
 - Do not create: `/Users/Data/workspace/showcase-website-starter/.codex/shell_snapshots/`
 - Do not create: `/Users/Data/workspace/showcase-website-starter/.omx/`
 - Do not create: `/Users/Data/workspace/showcase-website-starter/.context/`
+- Do not create: `/Users/Data/workspace/showcase-website-starter/CLAUDE.local.md`
+- Do not create: `/Users/Data/workspace/showcase-website-starter/.firecrawl/`
+- Do not create: `/Users/Data/workspace/showcase-website-starter/.claude/agents/`
+- Do not create: `/Users/Data/workspace/showcase-website-starter/.claude/skills/`
+- Do not create: `/Users/Data/workspace/showcase-website-starter/.claude/worktrees/`
 - Do not create: `/Users/Data/workspace/showcase-website-starter/reports/`
 - Do not create: `/Users/Data/workspace/showcase-website-starter/.next/`
 - Do not create: `/Users/Data/workspace/showcase-website-starter/.open-next/`
 - Do not create: `/Users/Data/workspace/showcase-website-starter/.wrangler/`
 - Do not create: `/Users/Data/workspace/showcase-website-starter/storybook-static/`
 - Do not create: `/Users/Data/workspace/showcase-website-starter/node_modules/`
+- Do not create: `/Users/Data/workspace/showcase-website-starter/.env`
 - Do not create: `/Users/Data/workspace/showcase-website-starter/.env.local`
+- Do not create: `/Users/Data/workspace/showcase-website-starter/.env.development.local`
+- Do not create: `/Users/Data/workspace/showcase-website-starter/.env.test.local`
+- Do not create: `/Users/Data/workspace/showcase-website-starter/.env.production.local`
 - Do not create: `/Users/Data/workspace/showcase-website-starter/.dev.vars`
 - Do not create: `/Users/Data/workspace/showcase-website-starter/.claude/settings.local.json`
 
@@ -97,7 +107,7 @@ git status --short --branch
 git diff -- .gitignore
 ```
 
-Expected:
+Expected on an uncommitted working tree:
 
 ```text
 ## docs/showcase-website-starter-plan
@@ -132,6 +142,8 @@ git commit -m "chore: ignore local context runtime state"
 ```
 
 Expected: commit succeeds.
+
+If this plan file is already committed, `git status` will also include the plan file in branch history. That is acceptable. The invariant is: outside this plan document, the current Tianze repository change is only `.gitignore` adding `.context/`.
 
 ---
 
@@ -175,13 +187,22 @@ rsync -a \
   --exclude='.trash-next-artifacts/' \
   --exclude='.omx/' \
   --exclude='.context/' \
+  --exclude='CLAUDE.local.md' \
+  --exclude='.firecrawl/' \
+  --exclude='.claude/agents/' \
+  --exclude='.claude/skills/' \
+  --exclude='.claude/worktrees/' \
   --exclude='reports/' \
   --exclude='test-results/' \
   --exclude='.eslintcache' \
   --exclude='.eslintcache-audit' \
   --exclude='*.tsbuildinfo' \
   --exclude='.DS_Store' \
+  --exclude='.env' \
   --exclude='.env.local' \
+  --exclude='.env.development.local' \
+  --exclude='.env.test.local' \
+  --exclude='.env.production.local' \
   --exclude='.dev.vars' \
   --exclude='.mcp.json' \
   --exclude='.codex/auth.json' \
@@ -196,7 +217,45 @@ rsync -a \
 
 Expected: command exits 0.
 
-- [ ] **Step 3: Initialize new Git repository**
+- [ ] **Step 3: Verify local/private artifacts were not copied**
+
+Run:
+
+```bash
+cd /Users/Data/workspace/showcase-website-starter
+for p in \
+  CLAUDE.local.md \
+  .firecrawl \
+  .claude/agents \
+  .claude/skills \
+  .claude/worktrees \
+  .env \
+  .env.local \
+  .env.development.local \
+  .env.test.local \
+  .env.production.local \
+  .dev.vars \
+  .mcp.json \
+  .omx \
+  .context \
+  reports \
+  node_modules
+do
+  if [ -e "$p" ]; then
+    echo "unexpected copied artifact: $p"
+    exit 1
+  fi
+done
+echo "copy artifact guard passed"
+```
+
+Expected:
+
+```text
+copy artifact guard passed
+```
+
+- [ ] **Step 4: Initialize new Git repository**
 
 Run:
 
@@ -207,9 +266,9 @@ git add .
 git status --short | sed -n '1,80p'
 ```
 
-Expected: files are staged as a new repository. No `.env.local`, `.dev.vars`, `.mcp.json`, `.omx`, `.context`, `reports`, or `node_modules` appear.
+Expected: files are staged as a new repository. No `.env*`, `.dev.vars`, `.mcp.json`, `CLAUDE.local.md`, `.firecrawl`, `.claude/agents`, `.claude/skills`, `.claude/worktrees`, `.omx`, `.context`, `reports`, or `node_modules` appear.
 
-- [ ] **Step 4: Commit initial imported skeleton**
+- [ ] **Step 5: Commit initial imported skeleton**
 
 Run:
 
@@ -578,6 +637,14 @@ Expected: commit succeeds.
 - Create: `/Users/Data/workspace/showcase-website-starter/src/config/website/products.ts`
 - Create: `/Users/Data/workspace/showcase-website-starter/src/config/website/contact.ts`
 - Create: `/Users/Data/workspace/showcase-website-starter/src/config/website/index.ts`
+- Modify: `/Users/Data/workspace/showcase-website-starter/src/config/single-site.ts`
+- Modify: `/Users/Data/workspace/showcase-website-starter/src/config/site-facts.ts`
+- Modify as needed: `/Users/Data/workspace/showcase-website-starter/src/config/single-site-navigation.ts`
+- Modify as needed: `/Users/Data/workspace/showcase-website-starter/src/config/single-site-seo.ts`
+- Modify as needed: `/Users/Data/workspace/showcase-website-starter/src/config/single-site-page-expression.ts`
+- Modify as needed: `/Users/Data/workspace/showcase-website-starter/src/config/single-site-product-catalog.ts`
+
+**Non-negotiable:** this task is not complete if `src/config/website/*` is only a new unused folder. The existing runtime consumers may keep importing `single-site*` / `siteFacts` for compatibility, but those compatibility modules must derive their generic starter identity, navigation, SEO, product categories, contact facts, and homepage defaults from `src/config/website/*`.
 
 - [ ] **Step 1: Create website config directory**
 
@@ -601,6 +668,8 @@ export interface WebsiteProfile {
   readonly email: string;
   readonly phone: string;
   readonly address: string;
+  readonly country: string;
+  readonly city: string;
   readonly foundedYear: number;
   readonly socialLinks: {
     readonly linkedin: string;
@@ -616,6 +685,8 @@ export const websiteProfile: WebsiteProfile = {
   email: "sales@example.com",
   phone: "+1 000 000 0000",
   address: "Example Business Park, Example City",
+  country: "Example Country",
+  city: "Example City",
   foundedYear: 2020,
   socialLinks: {
     linkedin: "https://www.linkedin.com/company/example",
@@ -707,6 +778,7 @@ export interface WebsiteProductCategory {
   readonly label: string;
   readonly description: string;
   readonly image: string;
+  readonly href: string;
 }
 
 export const websiteProductCategories: readonly WebsiteProductCategory[] = [
@@ -715,12 +787,14 @@ export const websiteProductCategories: readonly WebsiteProductCategory[] = [
     label: "Product Category A",
     description: "Example product category for a showcase website starter.",
     image: "/images/products/sample-product.svg",
+    href: "/products",
   },
   {
     id: "service-category-b",
     label: "Service Category B",
     description: "Example service category for companies that sell expertise.",
     image: "/images/products/sample-product.svg",
+    href: "/products",
   },
 ];
 ```
@@ -745,7 +819,91 @@ export const websiteContact: WebsiteContactConfig = {
 };
 ```
 
-- [ ] **Step 8: Create index export**
+- [ ] **Step 8: Connect website config to the existing runtime compatibility layer**
+
+Update the copied starter's existing `single-site*` / `siteFacts` modules so current app code reads the new `website` truth indirectly.
+
+Required intent:
+
+- `src/config/single-site.ts`
+  - Import from `src/config/website/index.ts`.
+  - Export the existing compatibility names expected by current consumers, but fill them from `websiteProfile`, `websiteSeo`, `websiteNavigation`, `websiteProductCategories`, `websiteContact`, and `websiteHomepage`.
+  - Keep the existing TypeScript shapes stable enough that current consumers do not need a broad rewrite in this task.
+- `src/config/site-facts.ts`
+  - Continue exporting `siteFacts` for existing consumers.
+  - Ensure `siteFacts.company.name`, `siteFacts.contact.email`, `siteFacts.contact.phone`, `siteFacts.company.location`, and visible business stats come from generic starter values, not Tianze values.
+- `src/config/single-site-navigation.ts`
+  - Keep exported navigation helpers stable.
+  - Derive active navigation labels/hrefs from `websiteNavigation` where practical.
+- `src/config/single-site-seo.ts`
+  - Derive site URL, default title, title template, description, and OG image from `websiteSeo`.
+- `src/config/single-site-page-expression.ts`
+  - Replace Tianze-specific proof items, scenario items, and trust items with generic example values.
+  - Use `websiteHomepage` for homepage section intent where practical.
+- `src/config/single-site-product-catalog.ts`
+  - Replace Tianze/PVC-specific catalog facts with generic product/service examples.
+  - Derive category labels and hrefs from `websiteProductCategories` where practical.
+
+Do not leave comments that say `single-site` is still Tianze-only truth. In the starter, these files are compatibility wrappers around `src/config/website/*`.
+
+- [ ] **Step 9: Add a runtime bridge contract test**
+
+Create `/Users/Data/workspace/showcase-website-starter/src/config/website/__tests__/website-runtime-bridge.test.ts`:
+
+```ts
+import { describe, expect, it } from "vitest";
+
+import { siteFacts } from "@/config/site-facts";
+import {
+  SINGLE_SITE_CONFIG,
+  SINGLE_SITE_FACTS,
+  SINGLE_SITE_NAVIGATION,
+} from "@/config/single-site";
+import { websiteNavigation, websiteProfile, websiteSeo } from "../index";
+
+describe("website runtime bridge", () => {
+  it("feeds the existing site facts compatibility export", () => {
+    expect(siteFacts.company.name).toBe(websiteProfile.name);
+    expect(siteFacts.contact.email).toBe(websiteProfile.email);
+    expect(siteFacts.contact.phone).toBe(websiteProfile.phone);
+    expect(SINGLE_SITE_FACTS.company.name).toBe(websiteProfile.name);
+  });
+
+  it("feeds the existing site config compatibility export", () => {
+    expect(SINGLE_SITE_CONFIG.name).toBe(websiteProfile.name);
+    expect(SINGLE_SITE_CONFIG.domain).toBe(websiteProfile.domain);
+    expect(SINGLE_SITE_CONFIG.seo.defaultTitle).toBe(websiteSeo.defaultTitle);
+  });
+
+  it("feeds the existing navigation compatibility export", () => {
+    expect(SINGLE_SITE_NAVIGATION.map((item) => item.href)).toEqual(
+      websiteNavigation.map((item) => item.href),
+    );
+  });
+});
+```
+
+- [ ] **Step 10: Verify no old config truth remains authoritative**
+
+Run:
+
+```bash
+cd /Users/Data/workspace/showcase-website-starter
+rg -n "Tianze|天泽|tianze-pipe|PVC conduit|PETG pneumatic|Lianyungang" src/config
+```
+
+Expected: no output, except explicitly documented forbidden-pattern fixtures in `scripts/brand-check.mjs` after Task 8.
+
+Run:
+
+```bash
+cd /Users/Data/workspace/showcase-website-starter
+rg -n "single-site.*truth|Tianze-only|current single-site baseline" src/config
+```
+
+Expected: no stale comments that describe the starter runtime truth as Tianze-specific.
+
+- [ ] **Step 11: Create index export**
 
 Create `/Users/Data/workspace/showcase-website-starter/src/config/website/index.ts`:
 
@@ -764,7 +922,7 @@ export { websiteSeo } from "./seo";
 export type { WebsiteSeo } from "./seo";
 ```
 
-- [ ] **Step 9: Add basic type test**
+- [ ] **Step 12: Add basic type test**
 
 Create `/Users/Data/workspace/showcase-website-starter/src/config/website/__tests__/website-config.test.ts`:
 
@@ -801,24 +959,24 @@ describe("website config", () => {
 });
 ```
 
-- [ ] **Step 10: Run focused test**
+- [ ] **Step 13: Run focused tests**
 
 Run:
 
 ```bash
 cd /Users/Data/workspace/showcase-website-starter
-pnpm exec vitest run src/config/website/__tests__/website-config.test.ts
+pnpm exec vitest run src/config/website/__tests__/website-config.test.ts src/config/website/__tests__/website-runtime-bridge.test.ts
 ```
 
-Expected: PASS.
+Expected: PASS. This is the minimum proof that `src/config/website/*` is not an unused fake surface.
 
-- [ ] **Step 11: Commit website config surface**
+- [ ] **Step 14: Commit website config surface**
 
 Run:
 
 ```bash
 cd /Users/Data/workspace/showcase-website-starter
-git add src/config/website
+git add src/config/website src/config/single-site*.ts src/config/site-facts.ts
 git commit -m "feat: add website replacement config surface"
 ```
 
@@ -1045,7 +1203,7 @@ cd /Users/Data/workspace/showcase-website-starter
 rg -n -i "Tianze|天泽|tianze-pipe|PVC conduit|PETG pneumatic|Lianyungang" docs README.md PRODUCT.md DESIGN.md HANDOFF.md AGENTS.md CLAUDE.md
 ```
 
-Expected: no output, except allowed historical references if explicitly listed in `docs/website/迁移来源说明.md`. Prefer no output.
+Expected: no output. Do not keep historical Tianze references in the starter docs.
 
 - [ ] **Step 6: Commit docs cleanup**
 
@@ -1077,7 +1235,27 @@ Run:
 
 ```bash
 cd /Users/Data/workspace/showcase-website-starter
-for p in .codex/auth.json .codex/history.jsonl .codex/log .codex/shell_snapshots .omx .context .claude/settings.local.json .mcp.json; do
+for p in \
+  .codex/auth.json \
+  .codex/history.jsonl \
+  .codex/log \
+  .codex/shell_snapshots \
+  .omx \
+  .context \
+  CLAUDE.local.md \
+  .firecrawl \
+  .claude/agents \
+  .claude/skills \
+  .claude/worktrees \
+  .claude/settings.local.json \
+  .mcp.json \
+  .env \
+  .env.local \
+  .env.development.local \
+  .env.test.local \
+  .env.production.local \
+  .dev.vars
+do
   if [ -e "$p" ]; then
     echo "unexpected runtime artifact: $p"
     exit 1
@@ -1181,7 +1359,7 @@ Run:
 
 ```bash
 cd /Users/Data/workspace/showcase-website-starter
-rg -n "oh-my-codex|OMX|\\.omx|auth.json|history.jsonl|settings.local.json|tianze" AGENTS.md CLAUDE.md .codex .claude docs/website
+rg -n -i "oh-my-codex|OMX|\\.omx|auth.json|history.jsonl|settings.local.json|Tianze|天泽|tianze-pipe|PVC conduit|PETG pneumatic|Lianyungang" AGENTS.md CLAUDE.md .codex .claude docs/website
 ```
 
 Expected: no output except `.codex/README.md` explaining that `.omx/` is not committed.
@@ -1313,6 +1491,11 @@ pnpm test
 pnpm build
 pnpm component:check
 pnpm build:cf
+pnpm release:verify
+pnpm truth:check
+pnpm review:docs-truth
+pnpm review:derivative-readiness
+pnpm ci:local:quick
 ```
 
 Expected: each command exits 0.
@@ -1330,7 +1513,7 @@ Expected:
 
 - tracked changes are either empty or intentionally staged
 - ignored artifacts may include `node_modules/`, `.next/`, `.open-next/`, `storybook-static/`, `.wrangler/`, `reports/`
-- no `.env.local`, `.dev.vars`, `.mcp.json`, `.codex/auth.json`, `.codex/history.jsonl`, `.omx/`, or `.context/` is tracked
+- no `.env*`, `.dev.vars`, `.mcp.json`, `CLAUDE.local.md`, `.firecrawl`, `.claude/agents`, `.claude/skills`, `.claude/worktrees`, `.codex/auth.json`, `.codex/history.jsonl`, `.omx/`, or `.context/` is tracked
 
 - [ ] **Step 4: Commit final verification adjustments**
 
@@ -1372,6 +1555,11 @@ pnpm content:check
 pnpm website:check
 pnpm component:check
 pnpm website:build:cf
+pnpm release:verify
+pnpm truth:check
+pnpm review:docs-truth
+pnpm review:derivative-readiness
+pnpm ci:local:quick
 ```
 ```
 
@@ -1394,8 +1582,10 @@ Expected: commit succeeds.
 - [ ] Docs use `docs/website/`, not `docs/template/`.
 - [ ] Commands use `website:*`, `brand:*`, `content:*`, `component:*`, `release:*`, not `template:*`.
 - [ ] Config surface uses `src/config/website/`.
+- [ ] Existing runtime compatibility exports (`single-site*` / `siteFacts`) derive from `src/config/website/`, so the new config surface is not an unused fake layer.
 - [ ] Page content is genericized, not deleted to empty.
 - [ ] Storybook MCP is centralized through MCPHub and not kept in project `.mcp.json`.
 - [ ] oh-my-codex / OMX local state is not migrated.
-- [ ] Secret/runtime artifacts are excluded from the starter.
-- [ ] Final verification includes brand residue scan, content checks, tests, build, Storybook build, and Cloudflare build.
+- [ ] Local/private state such as `CLAUDE.local.md`, `.firecrawl`, `.claude/agents`, `.claude/skills`, and `.claude/worktrees` is not copied into the starter.
+- [ ] Secret/runtime artifacts are excluded from the starter, including all `.env*` files.
+- [ ] Final verification includes brand residue scan, content checks, tests, build, Storybook build, Cloudflare build, release proof, truth checks, docs truth, derivative readiness, and quick local CI.
