@@ -1425,6 +1425,7 @@ Create `/Users/Data/workspace/showcase-website-starter/scripts/brand-check.mjs`:
 
 ```js
 import { execFileSync } from "node:child_process";
+import { existsSync } from "node:fs";
 
 const forbiddenPatterns = [
   "Tianze",
@@ -1451,12 +1452,24 @@ const searchTargets = [
 ];
 
 const pattern = forbiddenPatterns.join("|");
+const existingSearchTargets = searchTargets.filter((target) =>
+  existsSync(target),
+);
+
+if (existingSearchTargets.length === 0) {
+  console.error("[brand-check] No search targets found.");
+  process.exit(1);
+}
 
 try {
-  const output = execFileSync("rg", ["-n", "-i", pattern, ...searchTargets], {
-    encoding: "utf8",
-    stdio: ["ignore", "pipe", "pipe"],
-  });
+  const output = execFileSync(
+    "rg",
+    ["-n", "-i", pattern, ...existingSearchTargets],
+    {
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "pipe"],
+    },
+  );
   console.error(output);
   console.error("[brand-check] Old project brand residue found.");
   process.exit(1);
