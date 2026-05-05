@@ -3,6 +3,7 @@ import {
   buildPreviewDiagnosticReport,
   classifyPreviewDiagnosticReport,
   createBodySnippet,
+  DEFAULT_PREVIEW_DIAGNOSTIC_ROUTES,
   parsePreviewDiagnosticArgs,
   probePreviewRoute,
 } from "../../../scripts/cloudflare/preview-smoke-diagnostics.mjs";
@@ -10,6 +11,18 @@ import {
 describe("preview-smoke-diagnostics", () => {
   it("truncates route body snippets", () => {
     expect(createBodySnippet("x".repeat(620))).toHaveLength(500);
+  });
+
+  it("covers TD-004 page, API, and invalid-locale dynamic route evidence", () => {
+    expect(DEFAULT_PREVIEW_DIAGNOSTIC_ROUTES).toEqual([
+      "/",
+      "/en",
+      "/zh",
+      "/en/contact",
+      "/zh/contact",
+      "/fr/products/eu/fittings",
+      "/api/health",
+    ]);
   });
 
   it("classifies a clean report as passing", () => {

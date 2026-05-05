@@ -9,7 +9,15 @@ const DEFAULT_BASE_URL =
 const DEFAULT_OUTPUT =
   "reports/cloudflare-preview/preview-smoke-diagnostics.json";
 const BODY_SNIPPET_LENGTH = 500;
-const ROUTES = ["/", "/en", "/zh", "/en/contact", "/zh/contact", "/api/health"];
+export const DEFAULT_PREVIEW_DIAGNOSTIC_ROUTES = [
+  "/",
+  "/en",
+  "/zh",
+  "/en/contact",
+  "/zh/contact",
+  "/fr/products/eu/fittings",
+  "/api/health",
+];
 const LOCAL_PREVIEW_HOSTS = new Set(["127.0.0.1", "localhost", "::1"]);
 
 export function createBodySnippet(bodyText) {
@@ -149,7 +157,7 @@ async function main() {
   const args = parsePreviewDiagnosticArgs(process.argv);
   const routes = [];
 
-  for (const pathname of ROUTES) {
+  for (const pathname of DEFAULT_PREVIEW_DIAGNOSTIC_ROUTES) {
     routes.push(await probePreviewRoute({ baseUrl: args.baseUrl, pathname }));
   }
 

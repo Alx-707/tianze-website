@@ -126,13 +126,22 @@ function recordOwnerRecoveryForPartialSuccess(
     return;
   }
 
-  recordPartialSuccessRecovery({
-    lead,
-    referenceId,
-    emailSent: emailResult.success,
-    recordCreated: crmResult.success,
-    ...withRequestId(requestId),
-  });
+  try {
+    recordPartialSuccessRecovery({
+      lead,
+      referenceId,
+      emailSent: emailResult.success,
+      recordCreated: crmResult.success,
+      ...withRequestId(requestId),
+    });
+  } catch (error) {
+    logger.error("Lead partial success recovery logging failed", {
+      type: lead.type,
+      referenceId,
+      error: error instanceof Error ? error.message : "Unknown error",
+      ...withRequestId(requestId),
+    });
+  }
 }
 
 // eslint-disable-next-line require-await -- Handler functions are async; this wrapper provides exhaustive dispatch

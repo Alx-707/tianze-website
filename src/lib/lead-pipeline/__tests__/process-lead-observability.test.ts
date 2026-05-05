@@ -267,7 +267,7 @@ describe("processLead observability contracts", () => {
     expect(mockRecordPartialSuccessRecovery).not.toHaveBeenCalled();
   });
 
-  it("does not convert owner recovery failures into processing failed results", async () => {
+  it("keeps partial success response when owner recovery logging fails", async () => {
     const emailResult = {
       success: true as const,
       id: "email-123",
@@ -288,13 +288,31 @@ describe("processLead observability contracts", () => {
       throw recoveryError;
     });
 
-    await expect(
-      processLead(VALID_CONTACT_LEAD, { requestId: "req-recovery-error" }),
-    ).rejects.toThrow(recoveryError);
+    const result = await processLead(VALID_CONTACT_LEAD, {
+      requestId: "req-recovery-error",
+    });
 
+    expect(result).toEqual(
+      expect.objectContaining({
+        success: false,
+        partialSuccess: true,
+        emailSent: true,
+        recordCreated: false,
+        referenceId: expect.stringMatching(/^CON-/),
+      }),
+    );
     expect(mockLoggerError).not.toHaveBeenCalledWith(
       "Lead processing unexpected error",
       expect.any(Object),
+    );
+    expect(mockLoggerError).toHaveBeenCalledWith(
+      "Lead partial success recovery logging failed",
+      expect.objectContaining({
+        type: LEAD_TYPES.CONTACT,
+        referenceId: expect.stringMatching(/^CON-/),
+        error: "recovery logger failed",
+        requestId: "req-recovery-error",
+      }),
     );
   });
 
