@@ -113,10 +113,11 @@ describe("preview-smoke-diagnostics", () => {
     const route = await probePreviewRoute({
       baseUrl: "http://127.0.0.1:8787",
       pathname: "/en",
-      fetchImpl: async () => ({
-        status: 101,
-        text: async () => "switching protocols",
-      }),
+      fetchImpl: async () => {
+        const response = new Response("switching protocols");
+        Object.defineProperty(response, "status", { value: 101 });
+        return response;
+      },
     });
 
     expect(route).toMatchObject({
