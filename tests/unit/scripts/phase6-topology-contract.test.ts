@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import fs from "node:fs";
+import path from "node:path";
 import {
   getPhase6ApiPathnames,
   getPhase6ApiRouteRules,
@@ -8,6 +10,13 @@ import {
   getPhase6ServerActionsKeyWorkerNames,
   getPhase6WorkerNames,
 } from "../../../scripts/cloudflare/phase6-topology-contract.mjs";
+
+const REPO_ROOT = path.resolve(__dirname, "../../..");
+
+function readRepoFile(relativePath: string) {
+  // eslint-disable-next-line security/detect-non-literal-fs-filename -- test reads fixed repo fixture files by relative path
+  return fs.readFileSync(path.join(REPO_ROOT, relativePath), "utf8");
+}
 
 describe("phase6 topology contract", () => {
   it("derives worker names from one shared catalog", () => {
@@ -63,6 +72,20 @@ describe("phase6 topology contract", () => {
           workerKey: "apiLead",
         }),
       ]),
+    );
+  });
+
+  it("aliases Next.js dead imports that break Wrangler phase6 dry-run bundling", () => {
+    const phase6Builder = readRepoFile(
+      "scripts/cloudflare/build-phase6-workers.mjs",
+    );
+
+    expect(phase6Builder).toContain('"critters"');
+    expect(phase6Builder).toContain(
+      '"next/dist/compiled/@vercel/og/index.edge.js"',
+    );
+    expect(phase6Builder).toContain(
+      '"../../../scripts/cloudflare/shims/empty-module.mjs"',
     );
   });
 });
