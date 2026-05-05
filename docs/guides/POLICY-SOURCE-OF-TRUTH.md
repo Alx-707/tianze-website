@@ -11,38 +11,38 @@
 
 ### 当前状态入口
 
-- [`CURRENT-STATUS.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/CURRENT-STATUS.md)：当前状态、已过期旧结论、真问题清单。做质量/上线/修复判断时先读这里。
+- [`CURRENT-STATUS.md`](../CURRENT-STATUS.md)：当前状态、已过期旧结论、真问题清单。做质量/上线/修复判断时先读这里。
 
 ### 证明口径
 
-- [`QUALITY-PROOF-LEVELS.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/QUALITY-PROOF-LEVELS.md)
-- [`RELEASE-PROOF-RUNBOOK.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/RELEASE-PROOF-RUNBOOK.md)
-- [`CANONICAL-TRUTH-REGISTRY.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/CANONICAL-TRUTH-REGISTRY.md)
+- [`QUALITY-PROOF-LEVELS.md`](./QUALITY-PROOF-LEVELS.md)
+- [`RELEASE-PROOF-RUNBOOK.md`](./RELEASE-PROOF-RUNBOOK.md)
+- [`CANONICAL-TRUTH-REGISTRY.md`](./CANONICAL-TRUTH-REGISTRY.md)
 
 ### 结构治理
 
-- [`TIER-A-OWNER-MAP.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/TIER-A-OWNER-MAP.md)：高风险路径、审查角色、最低 proof 要求
-- [`STRUCTURAL-CHANGE-CLUSTERS.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/STRUCTURAL-CHANGE-CLUSTERS.md)：哪些文件要按一组一起看
-- [`.github/CODEOWNERS`](/Users/Data/Warehouse/Pipe/tianze-website/.github/CODEOWNERS)：仓库级强制 owner 映射
+- [`TIER-A-OWNER-MAP.md`](./TIER-A-OWNER-MAP.md)：高风险路径、审查角色、最低 proof 要求
+- [`STRUCTURAL-CHANGE-CLUSTERS.md`](./STRUCTURAL-CHANGE-CLUSTERS.md)：哪些文件要按一组一起看
+- [`.github/CODEOWNERS`](../../.github/CODEOWNERS)：仓库级强制 owner 映射
 
 ### Cloudflare 问题归类
 
-- [`CLOUDFLARE-ISSUE-TAXONOMY.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/CLOUDFLARE-ISSUE-TAXONOMY.md)
+- [`CLOUDFLARE-ISSUE-TAXONOMY.md`](./CLOUDFLARE-ISSUE-TAXONOMY.md)
 
 ### 性能阈值
 
-- [`lighthouserc.js`](/Users/Data/Warehouse/Pipe/tianze-website/lighthouserc.js)
+- [`lighthouserc.js`](../../lighthouserc.js)
 
 ### 覆盖率与质量门禁阈值
 
-- [`scripts/quality-gate.js`](/Users/Data/Warehouse/Pipe/tianze-website/scripts/quality-gate.js)
+- [`scripts/quality-gate.js`](../../scripts/quality-gate.js)
 
 ### 架构 / 依赖治理
 
-- [`.dependency-cruiser.js`](/Users/Data/Warehouse/Pipe/tianze-website/.dependency-cruiser.js)
-- [`scripts/architecture-metrics.js`](/Users/Data/Warehouse/Pipe/tianze-website/scripts/architecture-metrics.js)
-- [`scripts/dependency-conformance.js`](/Users/Data/Warehouse/Pipe/tianze-website/scripts/dependency-conformance.js)
-- [`scripts/structural-hotspots.js`](/Users/Data/Warehouse/Pipe/tianze-website/scripts/structural-hotspots.js)
+- [`.dependency-cruiser.js`](../../.dependency-cruiser.js)
+- [`scripts/architecture-metrics.js`](../../scripts/architecture-metrics.js)
+- [`scripts/dependency-conformance.js`](../../scripts/dependency-conformance.js)
+- [`scripts/structural-hotspots.js`](../../scripts/structural-hotspots.js)
 
 ## Supplemental, Not Canonical
 
