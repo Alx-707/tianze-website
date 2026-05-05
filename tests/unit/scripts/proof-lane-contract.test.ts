@@ -99,8 +99,8 @@ describe("proof lane contract", () => {
     const playwrightConfig = readRepoFile("playwright.config.ts");
     const globalSetup = readRepoFile("tests/e2e/global-setup.ts");
 
-    expect(playwrightConfig).not.toContain('from "@/');
-    expect(globalSetup).not.toContain('from "@/');
+    expect(playwrightConfig).not.toMatch(/from\s+['"]@\//);
+    expect(globalSetup).not.toMatch(/from\s+['"]@\//);
   });
 
   it("keeps local contact E2E titles scoped to test-mode behavior", () => {
