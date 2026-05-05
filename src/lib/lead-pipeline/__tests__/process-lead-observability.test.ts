@@ -396,34 +396,6 @@ describe("processLead observability contracts", () => {
     expect(mockRecordPartialSuccessRecovery).not.toHaveBeenCalled();
   });
 
-  it("preserves an empty requestId on process-level observability context", async () => {
-    const emailResult = {
-      success: true as const,
-      id: "email-123",
-      latencyMs: 10,
-    };
-    const crmResult = {
-      success: true as const,
-      id: "record-123",
-      latencyMs: 20,
-    };
-    mockProcessContactLead.mockResolvedValue({ emailResult, crmResult });
-
-    await processLead(VALID_CONTACT_LEAD, { requestId: "" });
-
-    expect(mockLoggerInfo).toHaveBeenCalledWith(
-      "Processing lead",
-      expect.objectContaining({
-        requestId: "",
-      }),
-    );
-    expect(mockRecordPipelineObservability).toHaveBeenCalledWith(
-      expect.objectContaining({
-        requestId: "",
-      }),
-    );
-  });
-
   it("logs unexpected non-Error rejections as Unknown error with latency and requestId", async () => {
     mockProcessContactLead.mockRejectedValue("boom");
 

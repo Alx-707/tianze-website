@@ -70,7 +70,7 @@ interface PartialSuccessRecoveryParams extends ProcessedLeadResultParams {
 function withRequestId(
   requestId?: string,
 ): { requestId: string } | Record<string, never> {
-  return requestId !== undefined ? { requestId } : {};
+  return requestId ? { requestId } : {};
 }
 
 function createValidationFailureResult(): LeadResult {
