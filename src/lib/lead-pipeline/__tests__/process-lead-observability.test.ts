@@ -298,6 +298,46 @@ describe("processLead observability contracts", () => {
     );
   });
 
+  it("keeps observability failures on the processing failed path", async () => {
+    const emailResult = {
+      success: true as const,
+      id: "email-123",
+      latencyMs: 10,
+    };
+    const crmResult = {
+      success: true as const,
+      id: "record-123",
+      latencyMs: 20,
+    };
+    mockProcessContactLead.mockResolvedValue({ emailResult, crmResult });
+    mockRecordPipelineObservability.mockImplementation(() => {
+      throw new Error("observability failed");
+    });
+
+    const result = await processLead(VALID_CONTACT_LEAD, {
+      requestId: "req-observability-error",
+    });
+
+    expect(result).toEqual({
+      success: false,
+      partialSuccess: false,
+      emailSent: false,
+      recordCreated: false,
+      referenceId: expect.stringMatching(/^CON-/),
+      error: "PROCESSING_FAILED",
+    });
+    expect(mockLoggerError).toHaveBeenCalledWith(
+      "Lead processing unexpected error",
+      expect.objectContaining({
+        type: LEAD_TYPES.CONTACT,
+        error: "observability failed",
+        totalLatencyMs: 321,
+        requestId: "req-observability-error",
+      }),
+    );
+    expect(mockRecordPartialSuccessRecovery).not.toHaveBeenCalled();
+  });
+
   it("does not record owner recovery for complete failure", async () => {
     const emailResult = {
       success: false as const,
@@ -354,6 +394,34 @@ describe("processLead observability contracts", () => {
       }),
     );
     expect(mockRecordPartialSuccessRecovery).not.toHaveBeenCalled();
+  });
+
+  it("preserves an empty requestId on process-level observability context", async () => {
+    const emailResult = {
+      success: true as const,
+      id: "email-123",
+      latencyMs: 10,
+    };
+    const crmResult = {
+      success: true as const,
+      id: "record-123",
+      latencyMs: 20,
+    };
+    mockProcessContactLead.mockResolvedValue({ emailResult, crmResult });
+
+    await processLead(VALID_CONTACT_LEAD, { requestId: "" });
+
+    expect(mockLoggerInfo).toHaveBeenCalledWith(
+      "Processing lead",
+      expect.objectContaining({
+        requestId: "",
+      }),
+    );
+    expect(mockRecordPipelineObservability).toHaveBeenCalledWith(
+      expect.objectContaining({
+        requestId: "",
+      }),
+    );
   });
 
   it("logs unexpected non-Error rejections as Unknown error with latency and requestId", async () => {
