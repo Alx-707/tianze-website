@@ -27,6 +27,7 @@ export interface SingleSiteSitemapPageConfig {
 }
 
 const SINGLE_SITE_STATIC_LASTMOD_ISO = "2026-04-26T00:00:00Z";
+const UTC_SECONDS_ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/;
 
 export const SINGLE_SITE_PRODUCT_MARKET_LASTMOD_SOURCE =
   "market-specs.updatedAt" as const;
@@ -100,8 +101,15 @@ function getRequiredProductMarketUpdatedAt(marketSlug: string): string {
     throw new Error(`Missing product market sitemap updatedAt: ${marketSlug}`);
   }
 
-  const timestamp = new Date(updatedAt).getTime();
-  if (Number.isNaN(timestamp)) {
+  const date = new Date(updatedAt);
+  const timestamp = date.getTime();
+  const normalizedDate = Number.isNaN(timestamp)
+    ? undefined
+    : date.toISOString().replace(".000Z", "Z");
+  if (
+    !UTC_SECONDS_ISO_DATE_PATTERN.test(updatedAt) ||
+    normalizedDate !== updatedAt
+  ) {
     throw new Error(`Invalid product market sitemap updatedAt: ${marketSlug}`);
   }
 
