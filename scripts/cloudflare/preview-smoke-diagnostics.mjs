@@ -56,6 +56,13 @@ export function parsePreviewDiagnosticArgs(argv) {
     output: DEFAULT_OUTPUT,
   };
 
+  function readFlagValue(index, flag) {
+    if (index + 1 >= argv.length || argv[index + 1].startsWith("--")) {
+      throw new Error(`Missing value for ${flag}`);
+    }
+    return argv[index + 1];
+  }
+
   for (let index = 2; index < argv.length; index += 1) {
     const arg = argv[index];
 
@@ -64,18 +71,14 @@ export function parsePreviewDiagnosticArgs(argv) {
     }
 
     if (arg === "--base-url") {
-      if (index + 1 >= argv.length) {
-        throw new Error("Missing value for --base-url");
-      }
-      args.baseUrl = argv[++index];
+      args.baseUrl = readFlagValue(index, "--base-url");
+      index += 1;
       continue;
     }
 
     if (arg === "--output") {
-      if (index + 1 >= argv.length) {
-        throw new Error("Missing value for --output");
-      }
-      args.output = argv[++index];
+      args.output = readFlagValue(index, "--output");
+      index += 1;
       continue;
     }
 
@@ -88,12 +91,10 @@ export function parsePreviewDiagnosticArgs(argv) {
 }
 
 function getRouteFailureKind(status) {
-  if (status >= 500) {
-    return "server-error";
+  if (status < 200 || status >= 300) {
+    return status >= 500 ? "server-error" : "http-status";
   }
-  if (status >= 300) {
-    return "http-status";
-  }
+
   return null;
 }
 
@@ -167,7 +168,7 @@ async function main() {
     process.exit(1);
   }
 
-  console.log("[preview-smoke-diagnostics] all routes returned <500");
+  console.log("[preview-smoke-diagnostics] all routes returned 2xx");
 }
 
 if (

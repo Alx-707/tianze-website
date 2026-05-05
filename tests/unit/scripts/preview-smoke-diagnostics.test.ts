@@ -74,6 +74,45 @@ describe("preview-smoke-diagnostics", () => {
         "--base-url",
       ]),
     ).toThrow("Missing value for --base-url");
+
+    expect(() =>
+      parsePreviewDiagnosticArgs([
+        "node",
+        "preview-smoke-diagnostics.mjs",
+        "--base-url",
+        "--output",
+        "report.json",
+      ]),
+    ).toThrow("Missing value for --base-url");
+
+    expect(() =>
+      parsePreviewDiagnosticArgs([
+        "node",
+        "preview-smoke-diagnostics.mjs",
+        "--output",
+        "--base-url",
+        "http://127.0.0.1:8787",
+      ]),
+    ).toThrow("Missing value for --output");
+  });
+
+  it("treats only 2xx responses as passing route evidence", async () => {
+    const route = await probePreviewRoute({
+      baseUrl: "http://127.0.0.1:8787",
+      pathname: "/en",
+      fetchImpl: async () => ({
+        status: 101,
+        text: async () => "switching protocols",
+      }),
+    });
+
+    expect(route).toMatchObject({
+      pathname: "/en",
+      status: 101,
+      ok: false,
+      failureKind: "http-status",
+      bodySnippet: "switching protocols",
+    });
   });
 
   it("classifies 404 routes as failed preview evidence", async () => {
