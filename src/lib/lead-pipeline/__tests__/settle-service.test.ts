@@ -12,10 +12,15 @@ vi.mock("@/lib/lead-pipeline/metrics", () => ({
   createLatencyTimer: vi.fn(),
 }));
 
-vi.mock("@/lib/lead-pipeline/with-timeout", () => ({
-  OPERATION_TIMEOUT_MS: 10000,
-  withTimeout: vi.fn(),
-}));
+vi.mock("@/lib/lead-pipeline/with-timeout", async () => {
+  const actual = await vi.importActual<
+    typeof import("@/lib/lead-pipeline/with-timeout")
+  >("@/lib/lead-pipeline/with-timeout");
+  return {
+    ...actual,
+    withTimeout: vi.fn(),
+  };
+});
 
 describe("settleService", () => {
   const mockStop = vi.fn();
@@ -155,6 +160,28 @@ describe("settleService", () => {
         success: false,
         error: timeoutError,
         latencyMs: expectedLatency,
+      });
+    });
+
+    it("marks timeout failures explicitly", async () => {
+      const expectedLatency = 250;
+      mockStop.mockReturnValue(expectedLatency);
+
+      const { withTimeout, LeadOperationTimeoutError } =
+        await import("@/lib/lead-pipeline/with-timeout");
+      vi.mocked(withTimeout).mockRejectedValue(
+        new LeadOperationTimeoutError("CRM record", 10000),
+      );
+
+      const result = await settleService(Promise.resolve({ id: "late" }), {
+        operationName: "CRM record",
+      });
+
+      expect(result).toEqual({
+        success: false,
+        error: expect.any(LeadOperationTimeoutError),
+        latencyMs: expectedLatency,
+        timedOut: true,
       });
     });
 

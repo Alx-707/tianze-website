@@ -294,6 +294,31 @@ describe("Lead Schema", () => {
       expect(result.success).toBe(true);
     });
 
+    it("defaults newsletter marketing consent to false", () => {
+      const result = newsletterLeadSchema.safeParse({
+        type: LEAD_TYPES.NEWSLETTER,
+        email: "subscriber@example.com",
+      });
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.marketingConsent).toBe(false);
+      }
+    });
+
+    it("accepts explicit newsletter marketing consent", () => {
+      const result = newsletterLeadSchema.safeParse({
+        type: LEAD_TYPES.NEWSLETTER,
+        email: "subscriber@example.com",
+        marketingConsent: true,
+      });
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.marketingConsent).toBe(true);
+      }
+    });
+
     it("should reject newsletter with invalid email", () => {
       const invalidNewsletter = {
         type: LEAD_TYPES.NEWSLETTER,
@@ -404,6 +429,7 @@ describe("Lead Schema", () => {
       const newsletterLead: NewsletterLeadInput = {
         type: LEAD_TYPES.NEWSLETTER,
         email: "test@example.com",
+        marketingConsent: false,
       };
       expect(isNewsletterLead(newsletterLead)).toBe(true);
       expect(isContactLead(newsletterLead)).toBe(false);

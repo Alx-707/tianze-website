@@ -7,6 +7,7 @@ import "server-only";
 
 import {
   isContactLead,
+  isNewsletterLead,
   isProductLead,
   leadSchema,
   type LeadInput,
@@ -39,6 +40,21 @@ type LeadHandlerResult = {
   emailResult: ServiceResult;
   crmResult: ServiceResult;
 };
+
+function getUnsupportedLeadType(lead: never): string {
+  if (typeof lead === "object" && lead !== null && "type" in lead) {
+    const candidate = (lead as { type?: unknown }).type;
+    if (typeof candidate === "string" && candidate.length > 0) {
+      return candidate;
+    }
+  }
+
+  return typeof lead;
+}
+
+function assertNeverLead(lead: never): never {
+  throw new Error(`Unsupported lead type: ${getUnsupportedLeadType(lead)}`);
+}
 
 interface ObservedLeadProcessingResult extends LeadHandlerResult {
   outcome: PipelineObservabilityOutcome;
@@ -155,8 +171,11 @@ async function dispatchLeadHandler(
   if (isProductLead(lead)) {
     return processProductLead(lead, referenceId);
   }
+  if (isNewsletterLead(lead)) {
+    return processNewsletterLead(lead, referenceId);
+  }
 
-  return processNewsletterLead(lead, referenceId);
+  return assertNeverLead(lead);
 }
 
 async function observeLeadProcessing(

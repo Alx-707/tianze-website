@@ -123,6 +123,7 @@ function handlePost(
         const leadValidation = newsletterLeadSchema.safeParse({
           type: LEAD_TYPES.NEWSLETTER,
           email,
+          marketingConsent: true,
         });
         if (!leadValidation.success) {
           return createApiErrorResponse(

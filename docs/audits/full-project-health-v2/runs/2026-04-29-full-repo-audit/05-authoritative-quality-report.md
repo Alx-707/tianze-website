@@ -2,6 +2,12 @@
 
 Run id: `2026-04-29-full-repo-audit`
 
+> Current-truth note (2026-05-05): This historical audit remains useful as
+> evidence, but several findings have been superseded. In particular,
+> idempotency wait now has a bounded timeout, pending logo assets use text
+> fallback instead of rendering a broken header image, and test-file counts must
+> include co-located `src/**/__tests__` files rather than only root `tests/`.
+
 Scope of this second-stage review: repair wave 前深审，只做诊断、分流和修复准备，不改业务代码。
 
 Current HEAD reviewed: `0bf6db0b5345c02aaa3d5c3c23f7fccd0c666a78`

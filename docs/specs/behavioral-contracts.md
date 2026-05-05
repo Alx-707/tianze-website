@@ -411,7 +411,9 @@ Retired contracts are kept for historical traceability but excluded from active 
 
 - **BC-017** (Untested): About page content and CTA
 - **BC-010** (Partial): Contact submission proof is not production-like in both locales
-- **BC-024** (Partial): Idempotency only tested for contact, not inquiry/subscribe
+- **BC-024** (Partial): Idempotency replay/conflict behavior has route-level
+  coverage for contact, inquiry, and subscribe; remaining proof boundary is
+  family-wide deployed alignment across all lead surfaces.
 
 ### Medium-priority gaps
 

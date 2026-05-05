@@ -72,11 +72,15 @@ function addProductFields(fields: AirtableFields, data: ProductLeadData): void {
   fields["Marketing Consent"] = data.marketingConsent || false;
 }
 
-function addNewsletterFields(fields: AirtableFields): void {
+function addNewsletterFields(
+  fields: AirtableFields,
+  data: NewsletterLeadData,
+): void {
   fields["First Name"] = "";
   fields["Last Name"] = "";
   fields["Company"] = "";
   fields["Message"] = "Newsletter subscription";
+  fields["Marketing Consent"] = data.marketingConsent || false;
 }
 
 function addTypeSpecificFields(
@@ -92,7 +96,7 @@ function addTypeSpecificFields(
       addProductFields(fields, data as ProductLeadData);
       return;
     case LEAD_TYPES.NEWSLETTER:
-      addNewsletterFields(fields);
+      addNewsletterFields(fields, data as NewsletterLeadData);
       return;
     default:
       addContactFields(fields, data as ContactLeadData);

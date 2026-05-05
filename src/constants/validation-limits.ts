@@ -42,8 +42,14 @@ export const MAX_LEAD_REQUIREMENTS_LENGTH = 2000 as const;
 /** AES-GCM key length in bits */
 export const AES_KEY_LENGTH_BITS = 256 as const;
 
-/** PBKDF2 iteration count for key derivation */
-export const PBKDF2_ITERATIONS = 100000 as const;
+/** PBKDF2 iteration count for AES-GCM passphrase-based key derivation. */
+export const AES_KEY_DERIVATION_PBKDF2_ITERATIONS = 100000 as const;
+
+/** PBKDF2-HMAC-SHA-256 iteration count for stored password hashes. */
+export const PASSWORD_HASH_PBKDF2_ITERATIONS = 600000 as const;
+
+/** PBKDF2 stored password hash output length in bits. */
+export const PASSWORD_HASH_KEY_LENGTH_BITS = 256 as const;
 
 /** Salt byte length for password hashing */
 export const SALT_BYTE_LENGTH = 16 as const;

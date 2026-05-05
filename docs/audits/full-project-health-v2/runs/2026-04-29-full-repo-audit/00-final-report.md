@@ -2,6 +2,12 @@
 
 Run id: `2026-04-29-full-repo-audit`
 
+> Current-truth note (2026-05-05): This historical audit remains useful as
+> evidence, but several findings have been superseded. In particular,
+> idempotency wait now has a bounded timeout, pending logo assets use text
+> fallback instead of rendering a broken header image, and test-file counts must
+> include co-located `src/**/__tests__` files rather than only root `tests/`.
+
 ## One-line verdict
 
 The repo is engineering-healthy, but not launch-clean yet. I would not call it ready for broad public launch until the two P1 issues are fixed: Contact SEO duplicate tags and public placeholder trust assets.

@@ -7,18 +7,36 @@
 
 export const OPERATION_TIMEOUT_MS = 10000; // 10 seconds
 
+export class LeadOperationTimeoutError extends Error {
+  constructor(
+    readonly operationName: string,
+    readonly timeoutMs: number,
+  ) {
+    super(`${operationName} timed out after ${timeoutMs}ms`);
+    this.name = "LeadOperationTimeoutError";
+  }
+}
+
+export function isLeadOperationTimeoutError(
+  error: unknown,
+): error is LeadOperationTimeoutError {
+  return error instanceof LeadOperationTimeoutError;
+}
+
 export function withTimeout<T>(
   promise: Promise<T>,
   timeoutMs: number,
   operationName: string,
 ): Promise<T> {
+  let timeoutHandle: ReturnType<typeof setTimeout>;
   const timeoutPromise = new Promise<never>((_, reject) => {
-    setTimeout(
-      () =>
-        reject(new Error(`${operationName} timed out after ${timeoutMs}ms`)),
+    timeoutHandle = setTimeout(
+      () => reject(new LeadOperationTimeoutError(operationName, timeoutMs)),
       timeoutMs,
     );
   });
 
-  return Promise.race([promise, timeoutPromise]);
+  return Promise.race([promise, timeoutPromise]).finally(() => {
+    clearTimeout(timeoutHandle);
+  });
 }

@@ -4,7 +4,7 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { withTimeout } from "../with-timeout";
+import { LeadOperationTimeoutError, withTimeout } from "../with-timeout";
 
 describe("withTimeout", () => {
   beforeEach(() => {
@@ -28,6 +28,17 @@ describe("withTimeout", () => {
     expect(result).toEqual(expectedValue);
   });
 
+  it("clears the timeout timer when the original promise settles first", async () => {
+    const resultPromise = withTimeout(
+      Promise.resolve("fast-result"),
+      1000,
+      "fastOperation",
+    );
+
+    await expect(resultPromise).resolves.toBe("fast-result");
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
   it("should reject with timeout error when timeout elapses first", async () => {
     // Create a promise that never resolves
     const neverResolves = new Promise(() => {});
@@ -40,6 +51,33 @@ describe("withTimeout", () => {
     await expect(resultPromise).rejects.toThrow(
       "slowOperation timed out after 500ms",
     );
+  });
+
+  it("rejects with LeadOperationTimeoutError when timeout elapses first", async () => {
+    const neverResolves = new Promise(() => {});
+
+    const resultPromise = withTimeout(neverResolves, 500, "slowOperation");
+    vi.advanceTimersByTime(500);
+
+    await expect(resultPromise).rejects.toBeInstanceOf(
+      LeadOperationTimeoutError,
+    );
+  });
+
+  it("does not cancel the original promise after timeout", async () => {
+    let resolveOriginal!: (value: string) => void;
+    const original = new Promise<string>((resolve) => {
+      resolveOriginal = resolve;
+    });
+
+    const resultPromise = withTimeout(original, 500, "lateOperation");
+    vi.advanceTimersByTime(500);
+    await expect(resultPromise).rejects.toBeInstanceOf(
+      LeadOperationTimeoutError,
+    );
+
+    resolveOriginal("late-success");
+    await expect(original).resolves.toBe("late-success");
   });
 
   it("should preserve original error when promise rejects before timeout", async () => {
