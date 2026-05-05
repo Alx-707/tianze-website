@@ -80,12 +80,12 @@ describe("phase6 topology contract", () => {
       "scripts/cloudflare/build-phase6-workers.mjs",
     );
 
-    expect(phase6Builder).toContain('"critters"');
-    expect(phase6Builder).toContain(
-      '"next/dist/compiled/@vercel/og/index.edge.js"',
+    expect(phase6Builder).toMatch(/(?:["']critters["']|critters)\s*:/);
+    expect(phase6Builder).toMatch(
+      /["']next\/dist\/compiled\/@vercel\/og\/index\.edge\.js["']\s*:/,
     );
-    expect(phase6Builder).toContain(
-      '"../../../scripts/cloudflare/shims/empty-module.mjs"',
+    expect(phase6Builder).toMatch(
+      /["']\.\.\/\.\.\/\.\.\/scripts\/cloudflare\/shims\/empty-module\.mjs["']/,
     );
   });
 });
