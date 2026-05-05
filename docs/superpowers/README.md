@@ -2,6 +2,8 @@
 
 这个目录用于保留当前项目仍需要的 Superpowers 工作产物。
 
+当前状态说明见 `ARCHIVE-NOTE.md`。旧执行计划和旧 prompt 已经做过一轮 Trash-first 瘦身，默认通过 git 历史或 Trash 批次追溯。
+
 默认放这里的内容包括：
 
 - 仍有效的 design spec
@@ -27,6 +29,9 @@
 ## 当前结构
 
 - `current/`：当前仍在用的 Superpowers 产物
+- `specs/`：仍有解释价值的设计记录
+- `plans/`：只保留当前仍有执行意义的 plan
+- `prompts/`：只保留仍被当前技术债或 runbook 引用的 prompt
 
 清理原则：
 

@@ -9,36 +9,40 @@
 
 ## Canonical Current Sources
 
+### 当前状态入口
+
+- [`CURRENT-STATUS.md`](../CURRENT-STATUS.md)：当前状态、已过期旧结论、真问题清单。做质量/上线/修复判断时先读这里。
+
 ### 证明口径
 
-- [`QUALITY-PROOF-LEVELS.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/QUALITY-PROOF-LEVELS.md)
-- [`RELEASE-PROOF-RUNBOOK.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/RELEASE-PROOF-RUNBOOK.md)
-- [`CANONICAL-TRUTH-REGISTRY.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/CANONICAL-TRUTH-REGISTRY.md)
+- [`QUALITY-PROOF-LEVELS.md`](./QUALITY-PROOF-LEVELS.md)
+- [`RELEASE-PROOF-RUNBOOK.md`](./RELEASE-PROOF-RUNBOOK.md)
+- [`CANONICAL-TRUTH-REGISTRY.md`](./CANONICAL-TRUTH-REGISTRY.md)
 
 ### 结构治理
 
-- [`TIER-A-OWNER-MAP.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/TIER-A-OWNER-MAP.md)：高风险路径、审查角色、最低 proof 要求
-- [`STRUCTURAL-CHANGE-CLUSTERS.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/STRUCTURAL-CHANGE-CLUSTERS.md)：哪些文件要按一组一起看
-- [`.github/CODEOWNERS`](/Users/Data/Warehouse/Pipe/tianze-website/.github/CODEOWNERS)：仓库级强制 owner 映射
+- [`TIER-A-OWNER-MAP.md`](./TIER-A-OWNER-MAP.md)：高风险路径、审查角色、最低 proof 要求
+- [`STRUCTURAL-CHANGE-CLUSTERS.md`](./STRUCTURAL-CHANGE-CLUSTERS.md)：哪些文件要按一组一起看
+- [`.github/CODEOWNERS`](../../.github/CODEOWNERS)：仓库级强制 owner 映射
 
 ### Cloudflare 问题归类
 
-- [`CLOUDFLARE-ISSUE-TAXONOMY.md`](/Users/Data/Warehouse/Pipe/tianze-website/docs/guides/CLOUDFLARE-ISSUE-TAXONOMY.md)
+- [`CLOUDFLARE-ISSUE-TAXONOMY.md`](./CLOUDFLARE-ISSUE-TAXONOMY.md)
 
 ### 性能阈值
 
-- [`lighthouserc.js`](/Users/Data/Warehouse/Pipe/tianze-website/lighthouserc.js)
+- [`lighthouserc.js`](../../lighthouserc.js)
 
 ### 覆盖率与质量门禁阈值
 
-- [`scripts/quality-gate.js`](/Users/Data/Warehouse/Pipe/tianze-website/scripts/quality-gate.js)
+- [`scripts/quality-gate.js`](../../scripts/quality-gate.js)
 
 ### 架构 / 依赖治理
 
-- [`.dependency-cruiser.js`](/Users/Data/Warehouse/Pipe/tianze-website/.dependency-cruiser.js)
-- [`scripts/architecture-metrics.js`](/Users/Data/Warehouse/Pipe/tianze-website/scripts/architecture-metrics.js)
-- [`scripts/dependency-conformance.js`](/Users/Data/Warehouse/Pipe/tianze-website/scripts/dependency-conformance.js)
-- [`scripts/structural-hotspots.js`](/Users/Data/Warehouse/Pipe/tianze-website/scripts/structural-hotspots.js)
+- [`.dependency-cruiser.js`](../../.dependency-cruiser.js)
+- [`scripts/architecture-metrics.js`](../../scripts/architecture-metrics.js)
+- [`scripts/dependency-conformance.js`](../../scripts/dependency-conformance.js)
+- [`scripts/structural-hotspots.js`](../../scripts/structural-hotspots.js)
 
 ## Supplemental, Not Canonical
 
@@ -46,9 +50,25 @@
 
 - `.claude/rules/quality-gates.md`
 - `.claude/rules/review-checklist.md`
+- `docs/audits/**` 下的旧审计包，包括文件名带 `final` 或 `authoritative` 的报告
+- `docs/superpowers/plans/**` 下的旧执行计划
+- `docs/superpowers/prompts/**` 下的旧 handoff / prompt 材料
 - 已移走、只保留在 git 历史或 Trash 的旧计划、旧审计包、旧治理记录
 - 已经从 `docs/guides/` 挪走、只保留在 git 历史或 Trash 的 retired docs
 - 任何自称“current”“final”“optimized”的报告，只要这里没点名，就不是最终真相
+
+## Historical Snapshot Rule
+
+旧文档可以解释当时为什么这么改，但不能直接回答“现在项目有没有这个问题”。
+
+如果旧文档和当前代码、脚本、测试输出冲突，优先级是：
+
+1. 当前运行结果
+2. 当前脚本和配置
+3. 当前 canonical docs
+4. 历史审计和历史计划
+
+需要引用历史审计时，必须写清楚它的日期和 HEAD，并说明是否已经重新验证。
 
 ## 已被替换的结构审计材料
 

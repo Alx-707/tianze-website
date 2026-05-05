@@ -10,7 +10,7 @@ This is not a CI summary. Passing `type-check`, lint, tests, and builds is only 
 
 - Audit baseline: clean `origin/main`.
 - Local untracked files are excluded from the formal quality verdict.
-- Current untracked file intentionally excluded: `docs/superpowers/prompts/codebase-quality-audit-codex.md`.
+- Historical prompt drafts are not part of the formal quality verdict.
 - Audit posture: read-only for product code. The audit may create report artifacts only.
 - Mutation testing is not auto-run by the agent. If needed, provide standalone terminal commands for the owner to run manually.
 

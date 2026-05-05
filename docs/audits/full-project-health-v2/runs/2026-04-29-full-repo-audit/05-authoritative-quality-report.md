@@ -1,5 +1,12 @@
 # Full Project Health Audit v2 - Authoritative Quality Report
 
+> Historical snapshot, not current truth.
+>
+> "Authoritative" here only meant authoritative for the 2026-04-29 audit run at
+> HEAD `0bf6db0b5345c02aaa3d5c3c23f7fccd0c666a78`. Current `main` has moved on.
+> Read `docs/CURRENT-STATUS.md` before relying on this report, and re-run the
+> relevant checks before reopening any finding.
+
 Run id: `2026-04-29-full-repo-audit`
 
 > Current-truth note (2026-05-05): This historical audit remains useful as
@@ -268,7 +275,7 @@ pnpm build
 - `.claude/rules/cloudflare.md:80-82` 明确写：`src/proxy.ts` 过去能过 `next build`，但会阻塞 `pnpm build:cf`。
 - `docs/guides/QUALITY-PROOF-LEVELS.md:197-200` 仍写当前 Cloudflare 兼容链里 `src/middleware.ts` 是优先入口。
 - `docs/technical/deployment-notes.md:150-156` 也写当前运行时入口仍是 `src/middleware.ts`。
-- `docs/superpowers/plans/2026-04-27-health-audit-repair-plan.md:1575-1584` 明确把 middleware deprecation parked，不要现在 rename。
+- 2026-04-27 历史 repair plan 曾明确把 middleware deprecation parked，不要现在 rename。该 plan 已从 live docs tree 移走；需要追溯时看 git 历史或 Trash 批次。
 
 处理建议：
 

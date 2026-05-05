@@ -6,7 +6,7 @@ This is the current-state audit for project-wide "same problem, different scheme
 
 ## Repair status
 
-The confirmed "must unify" items from this audit have been repaired in the follow-up commits listed in `docs/superpowers/plans/2026-04-24-config-unification-governance.md`.
+The confirmed "must unify" items from this audit have been repaired. The follow-up implementation plan has been removed from the live docs tree; use git history or the Trash archive if exact historical task steps are needed.
 
 Two items remain as documented exceptions, not open repair tasks:
 

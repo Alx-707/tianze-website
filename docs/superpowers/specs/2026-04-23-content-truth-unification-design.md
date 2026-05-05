@@ -262,7 +262,7 @@ TOC is generated from MDX headings, but anchors must be stable:
 
 ### Absorption of existing plan
 
-The existing implementation plan (`docs/superpowers/plans/2026-04-23-content-truth-legal-about.md`) is absorbed:
+The earlier legal/about implementation plan was absorbed into this design. That historical plan has been removed from the live docs tree; use git history or the Trash archive if exact old task wording is needed.
 
 | Original task | Treatment |
 |---------------|-----------|
