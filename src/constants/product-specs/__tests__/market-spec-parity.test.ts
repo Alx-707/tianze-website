@@ -90,14 +90,14 @@ describe("market spec parity", () => {
     );
   });
 
-  it("keeps custom input reports sorted and de-duplicated", () => {
+  it("keeps custom input reports sorted without hiding duplicate drift", () => {
     const report = createMarketSpecParityReport({
       catalogFamiliesByMarket: {
         beta: ["zeta", "alpha", "alpha"],
         alpha: ["delta"],
       },
       specFamiliesByMarket: {
-        beta: ["omega"],
+        beta: ["omega", "alpha"],
         alpha: [],
       },
     });
@@ -110,5 +110,27 @@ describe("market spec parity", () => {
     expect(report.orphanSpecFamilies).toEqual([
       { marketSlug: "beta", familySlug: "omega" },
     ]);
+  });
+
+  it("formats mixed drift in a stable multi-line order", () => {
+    const report = createMarketSpecParityReport({
+      catalogFamiliesByMarket: {
+        beta: ["zeta", "alpha", "alpha"],
+        alpha: ["delta"],
+      },
+      specFamiliesByMarket: {
+        beta: ["omega", "alpha"],
+        alpha: [],
+      },
+    });
+
+    expect(formatMarketSpecParityError(report)).toBe(
+      [
+        "missing spec: alpha/delta",
+        "missing spec: beta/alpha",
+        "missing spec: beta/zeta",
+        "orphan spec: beta/omega",
+      ].join("\n"),
+    );
   });
 });

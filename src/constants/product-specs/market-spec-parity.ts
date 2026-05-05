@@ -22,24 +22,60 @@ export interface MarketSpecParityInput {
   specFamiliesByMarket: Record<string, readonly string[]>;
 }
 
-function uniqueSorted(values: readonly string[]): string[] {
+function sorted(values: readonly string[]): string[] {
+  return [...values].sort();
+}
+
+function uniqueSortedKeys(values: readonly string[]): string[] {
   return Array.from(new Set(values)).sort();
+}
+
+function countBySlug(values: readonly string[]): Map<string, number> {
+  const counts = new Map<string, number>();
+  for (const value of values) {
+    counts.set(value, (counts.get(value) ?? 0) + 1);
+  }
+
+  return counts;
+}
+
+function collectMissingIssues({
+  marketSlug,
+  sourceFamilies,
+  targetFamilies,
+}: {
+  marketSlug: string;
+  sourceFamilies: readonly string[];
+  targetFamilies: readonly string[];
+}): MarketFamilyParityIssue[] {
+  const targetCounts = countBySlug(targetFamilies);
+  const issues: MarketFamilyParityIssue[] = [];
+
+  for (const familySlug of sorted(sourceFamilies)) {
+    const remaining = targetCounts.get(familySlug) ?? 0;
+    if (remaining > 0) {
+      targetCounts.set(familySlug, remaining - 1);
+      continue;
+    }
+
+    issues.push({ marketSlug, familySlug });
+  }
+
+  return issues;
 }
 
 function createLiveParityInput(): MarketSpecParityInput {
   const catalogFamiliesByMarket = Object.fromEntries(
     getAllMarketSlugs().map((marketSlug) => [
       marketSlug,
-      uniqueSorted(
-        getFamiliesForMarket(marketSlug).map((family) => family.slug),
-      ),
+      sorted(getFamiliesForMarket(marketSlug).map((family) => family.slug)),
     ]),
   );
 
   const specFamiliesByMarket = Object.fromEntries(
     getMarketSpecEntries().map(([marketSlug, specs]) => [
       marketSlug,
-      uniqueSorted(specs.families.map((family) => family.slug)),
+      sorted(specs.families.map((family) => family.slug)),
     ]),
   );
 
@@ -49,7 +85,7 @@ function createLiveParityInput(): MarketSpecParityInput {
 export function createMarketSpecParityReport(
   input: MarketSpecParityInput = createLiveParityInput(),
 ): MarketSpecParityReport {
-  const marketSlugs = uniqueSorted([
+  const marketSlugs = uniqueSortedKeys([
     ...Object.keys(input.catalogFamiliesByMarket),
     ...Object.keys(input.specFamiliesByMarket),
   ]);
@@ -57,24 +93,20 @@ export function createMarketSpecParityReport(
   const orphanSpecFamilies: MarketFamilyParityIssue[] = [];
 
   for (const marketSlug of marketSlugs) {
-    const catalogFamilies = new Set(
-      uniqueSorted(input.catalogFamiliesByMarket[marketSlug] ?? []),
+    missingSpecFamilies.push(
+      ...collectMissingIssues({
+        marketSlug,
+        sourceFamilies: input.catalogFamiliesByMarket[marketSlug] ?? [],
+        targetFamilies: input.specFamiliesByMarket[marketSlug] ?? [],
+      }),
     );
-    const specFamilies = new Set(
-      uniqueSorted(input.specFamiliesByMarket[marketSlug] ?? []),
+    orphanSpecFamilies.push(
+      ...collectMissingIssues({
+        marketSlug,
+        sourceFamilies: input.specFamiliesByMarket[marketSlug] ?? [],
+        targetFamilies: input.catalogFamiliesByMarket[marketSlug] ?? [],
+      }),
     );
-
-    for (const familySlug of catalogFamilies) {
-      if (!specFamilies.has(familySlug)) {
-        missingSpecFamilies.push({ marketSlug, familySlug });
-      }
-    }
-
-    for (const familySlug of specFamilies) {
-      if (!catalogFamilies.has(familySlug)) {
-        orphanSpecFamilies.push({ marketSlug, familySlug });
-      }
-    }
   }
 
   return { missingSpecFamilies, orphanSpecFamilies };
