@@ -137,7 +137,7 @@
 
 ### Cloudflare 构建链
 
-- **@opennextjs/cloudflare 1.19.4**
+- **@opennextjs/cloudflare 1.19.6**
 - **wrangler 4.86.0**
 - `pnpm build`：标准 Next.js 构建
 - `pnpm build:cf`：Cloudflare 构建
