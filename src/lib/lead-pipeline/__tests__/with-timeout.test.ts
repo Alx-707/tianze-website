@@ -28,6 +28,17 @@ describe("withTimeout", () => {
     expect(result).toEqual(expectedValue);
   });
 
+  it("clears the timeout timer when the original promise settles first", async () => {
+    const resultPromise = withTimeout(
+      Promise.resolve("fast-result"),
+      1000,
+      "fastOperation",
+    );
+
+    await expect(resultPromise).resolves.toBe("fast-result");
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
   it("should reject with timeout error when timeout elapses first", async () => {
     // Create a promise that never resolves
     const neverResolves = new Promise(() => {});

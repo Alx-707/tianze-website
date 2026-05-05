@@ -85,6 +85,7 @@ const productLeadArb = fc
 const newsletterLeadArb = fc.record({
   type: fc.constant(LEAD_TYPES.NEWSLETTER),
   email: fc.emailAddress(),
+  marketingConsent: fc.boolean(),
 });
 
 const leadInputArb = fc.oneof(

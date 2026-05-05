@@ -28,12 +28,15 @@ export function withTimeout<T>(
   timeoutMs: number,
   operationName: string,
 ): Promise<T> {
+  let timeoutHandle: ReturnType<typeof setTimeout>;
   const timeoutPromise = new Promise<never>((_, reject) => {
-    setTimeout(
+    timeoutHandle = setTimeout(
       () => reject(new LeadOperationTimeoutError(operationName, timeoutMs)),
       timeoutMs,
     );
   });
 
-  return Promise.race([promise, timeoutPromise]);
+  return Promise.race([promise, timeoutPromise]).finally(() => {
+    clearTimeout(timeoutHandle);
+  });
 }

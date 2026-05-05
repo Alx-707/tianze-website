@@ -38,8 +38,11 @@ export const ENCRYPTION_CONSTANTS = {
   /** 推荐的盐长度 (字节) */
   SALT_LENGTH: 32,
 
-  /** PBKDF2 迭代次数 */
-  PBKDF2_ITERATIONS: 100000,
+  /** AES-GCM passphrase-based key derivation PBKDF2 iterations */
+  AES_KEY_DERIVATION_PBKDF2_ITERATIONS: 100000,
+
+  /** Stored password hash PBKDF2-HMAC-SHA-256 iterations */
+  PASSWORD_HASH_PBKDF2_ITERATIONS: 600000,
 
   /** JWT 密钥最小长度 (字节) */
   JWT_SECRET_MIN_LENGTH: 32,

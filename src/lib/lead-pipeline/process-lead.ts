@@ -41,8 +41,19 @@ type LeadHandlerResult = {
   crmResult: ServiceResult;
 };
 
+function getUnsupportedLeadType(lead: never): string {
+  if (typeof lead === "object" && lead !== null && "type" in lead) {
+    const candidate = (lead as { type?: unknown }).type;
+    if (typeof candidate === "string" && candidate.length > 0) {
+      return candidate;
+    }
+  }
+
+  return typeof lead;
+}
+
 function assertNeverLead(lead: never): never {
-  throw new Error(`Unsupported lead type: ${JSON.stringify(lead)}`);
+  throw new Error(`Unsupported lead type: ${getUnsupportedLeadType(lead)}`);
 }
 
 interface ObservedLeadProcessingResult extends LeadHandlerResult {

@@ -429,6 +429,7 @@ describe("Lead Schema", () => {
       const newsletterLead: NewsletterLeadInput = {
         type: LEAD_TYPES.NEWSLETTER,
         email: "test@example.com",
+        marketingConsent: false,
       };
       expect(isNewsletterLead(newsletterLead)).toBe(true);
       expect(isContactLead(newsletterLead)).toBe(false);

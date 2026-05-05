@@ -300,6 +300,7 @@ describe("processLead", () => {
     const validNewsletterLead = {
       type: LEAD_TYPES.NEWSLETTER,
       email: "subscriber@example.com",
+      marketingConsent: true,
     };
 
     it("should process newsletter lead successfully", async () => {

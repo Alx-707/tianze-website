@@ -1,9 +1,11 @@
 import {
+  AES_KEY_DERIVATION_PBKDF2_ITERATIONS,
   AES_KEY_LENGTH_BITS,
   COUNT_TWO,
   AES_GCM_IV_BYTES,
   HEX_RADIX,
-  PBKDF2_ITERATIONS,
+  PASSWORD_HASH_KEY_LENGTH_BITS,
+  PASSWORD_HASH_PBKDF2_ITERATIONS,
   ZERO,
 } from "@/constants";
 
@@ -23,7 +25,6 @@ const CRYPTO_CONSTANTS = {
 } as const;
 
 const PASSWORD_HASH_VERSION = "pbkdf2-sha256";
-const PASSWORD_HASH_KEY_LENGTH_BITS = AES_KEY_LENGTH_BITS;
 const HEX_BYTE_PATTERN = /^[0-9a-f]{2}$/i;
 
 function bytesToHex(bytes: Uint8Array): string {
@@ -70,7 +71,7 @@ async function derivePasswordHash(
     {
       name: "PBKDF2",
       salt: toArrayBuffer(saltBytes),
-      iterations: PBKDF2_ITERATIONS,
+      iterations: PASSWORD_HASH_PBKDF2_ITERATIONS,
       hash: "SHA-256",
     },
     passwordKey,
@@ -275,7 +276,7 @@ export async function encryptData(
     {
       name: "PBKDF2",
       salt,
-      iterations: PBKDF2_ITERATIONS,
+      iterations: AES_KEY_DERIVATION_PBKDF2_ITERATIONS,
       hash: "SHA-256",
     },
     passwordKey,
@@ -361,7 +362,7 @@ export async function decryptData(params: {
     {
       name: "PBKDF2",
       salt,
-      iterations: PBKDF2_ITERATIONS,
+      iterations: AES_KEY_DERIVATION_PBKDF2_ITERATIONS,
       hash: "SHA-256",
     },
     passwordKey,

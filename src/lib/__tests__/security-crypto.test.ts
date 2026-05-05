@@ -1,5 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
+  PASSWORD_HASH_KEY_LENGTH_BITS,
+  PASSWORD_HASH_PBKDF2_ITERATIONS,
+} from "@/constants";
+import {
   constantTimeCompare,
   decryptData,
   encryptData,
@@ -18,6 +22,16 @@ import {
 describe("security-crypto", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  describe("password hash parameters", () => {
+    it("uses OWASP-aligned PBKDF2-HMAC-SHA-256 iterations for stored password hashes", () => {
+      expect(PASSWORD_HASH_PBKDF2_ITERATIONS).toBeGreaterThanOrEqual(600000);
+    });
+
+    it("keeps password hash output length independent from AES key sizing", () => {
+      expect(PASSWORD_HASH_KEY_LENGTH_BITS).toBe(256);
+    });
   });
 
   describe("hashPassword", () => {

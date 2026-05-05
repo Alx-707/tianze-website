@@ -625,6 +625,7 @@ describe("pipeline-observability", () => {
         lead: {
           type: LEAD_TYPES.NEWSLETTER,
           email: "subscriber@example.com",
+          marketingConsent: true,
         },
         referenceId: "NEW-123",
         emailResult: {
@@ -663,6 +664,7 @@ describe("pipeline-observability", () => {
         lead: {
           type: LEAD_TYPES.NEWSLETTER,
           email: "subscriber@example.com",
+          marketingConsent: true,
         },
         referenceId: "NEW-456",
         emailResult: {

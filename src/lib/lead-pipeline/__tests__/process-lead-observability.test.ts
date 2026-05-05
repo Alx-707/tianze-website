@@ -65,6 +65,7 @@ const VALID_CONTACT_LEAD = {
 const VALID_NEWSLETTER_LEAD = {
   type: LEAD_TYPES.NEWSLETTER,
   email: "subscriber@example.com",
+  marketingConsent: true,
 };
 
 describe("processLead observability contracts", () => {
