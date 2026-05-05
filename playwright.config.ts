@@ -4,7 +4,7 @@ import {
   isLocalE2ETarget,
   normalizeE2ETarget,
   selectExplicitE2ETarget,
-} from "@/test/e2e-target";
+} from "./src/test/e2e-target";
 
 // 加载测试环境配置
 config({ path: ".env.test", quiet: true });

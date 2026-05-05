@@ -500,8 +500,8 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
     });
   });
 
-  test.describe("9. 表单提交验证", () => {
-    test("应该能够成功提交表单（英文）", async ({ page }) => {
+  test.describe("9. 提交前就绪验证", () => {
+    test("完整填写英文表单后提交按钮可见", async ({ page }) => {
       await gotoContactPage(page, test.info(), "en");
 
       // 等待 Turnstile 加载
@@ -533,7 +533,7 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
       await expect(submitButton).toBeVisible();
     });
 
-    test("应该能够成功提交表单（中文）", async ({ page }) => {
+    test("完整填写中文表单后提交按钮可见", async ({ page }) => {
       await gotoContactPage(page, test.info(), "zh");
 
       // 等待 Turnstile 加载

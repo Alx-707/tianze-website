@@ -5,7 +5,10 @@ import {
   setupTestEnvironment,
   waitForStablePage,
 } from "./test-environment-setup";
-import { isLocalE2ETarget, selectExplicitE2ETarget } from "@/test/e2e-target";
+import {
+  isLocalE2ETarget,
+  selectExplicitE2ETarget,
+} from "../../src/test/e2e-target";
 
 async function globalSetup(config: FullConfig) {
   console.log("🚀 Starting global setup for Playwright tests...");

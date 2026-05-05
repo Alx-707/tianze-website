@@ -95,6 +95,49 @@ describe("proof lane contract", () => {
     expect(releaseProofRunbook).toContain("manual launch gate");
   });
 
+  it("keeps Playwright config loadable by external proof tools", () => {
+    const playwrightConfig = readRepoFile("playwright.config.ts");
+    const globalSetup = readRepoFile("tests/e2e/global-setup.ts");
+
+    expect(playwrightConfig).not.toMatch(/from\s+['"]@\//);
+    expect(globalSetup).not.toMatch(/from\s+['"]@\//);
+  });
+
+  it("keeps local contact E2E titles scoped to test-mode behavior", () => {
+    const contactSmoke = readRepoFile("tests/e2e/contact-form-smoke.spec.ts");
+
+    expect(contactSmoke).toContain("Contact Form Smoke Tests - Test Mode");
+    expect(contactSmoke).toContain(
+      'test.describe("Contact Form - Test-Mode Smoke"',
+    );
+    expect(contactSmoke).not.toContain("表单提交验证");
+    expect(contactSmoke).toContain("提交前就绪验证");
+    expect(contactSmoke).not.toContain("应该能够成功提交表单");
+    expect(contactSmoke).toContain("完整填写英文表单后提交按钮可见");
+    expect(contactSmoke).toContain("完整填写中文表单后提交按钮可见");
+  });
+
+  it("labels lead-family CI proof as local rather than deployed proof", () => {
+    const ciWorkflow = readRepoFile(".github/workflows/ci.yml");
+    const proofBoundaryMap = readRepoFile("docs/guides/PROOF-BOUNDARY-MAP.md");
+
+    expect(ciWorkflow).toContain("Lead API Local Contract/Protection Review");
+    expect(ciWorkflow).not.toContain("Lead API Family Contract Review");
+    expect(proofBoundaryMap).toContain("pnpm review:lead-family");
+    expect(proofBoundaryMap).toContain("local contract/protection");
+    expect(proofBoundaryMap).toContain("deployed lead submission");
+  });
+
+  it("documents local E2E as test-mode proof, not deployed lead proof", () => {
+    const proofBoundaryMap = readRepoFile("docs/guides/PROOF-BOUNDARY-MAP.md");
+
+    expect(proofBoundaryMap).toContain("pnpm test:e2e");
+    expect(proofBoundaryMap).toContain("local/test-mode");
+    expect(proofBoundaryMap).toContain("production Turnstile");
+    expect(proofBoundaryMap).toContain("Airtable/Resend");
+    expect(proofBoundaryMap).toContain("production buyer inquiry success");
+  });
+
   it("keeps review:mutation:critical pointed at an existing script", () => {
     const packageJson = JSON.parse(readRepoFile("package.json")) as {
       scripts: Record<string, string>;
