@@ -149,4 +149,14 @@ describe("proof lane contract", () => {
       readRepoFile("scripts/review-mutation-critical.js"),
     ).not.toThrow();
   });
+
+  it("keeps CSP paid-traffic decision memo explicit about no immediate rewrite", () => {
+    const cspMemo = readRepoFile("docs/technical/csp-paid-traffic-decision.md");
+
+    expect(cspMemo).toContain("No immediate CSP policy rewrite");
+    expect(cspMemo).toContain("script-src-elem 'unsafe-inline'");
+    expect(cspMemo).toContain("pnpm security:csp:check");
+    expect(cspMemo).toContain("paid traffic");
+    expect(cspMemo).toContain("Cache Components");
+  });
 });
