@@ -19,7 +19,8 @@ partly mitigated by the current site shape:
 - no user-generated HTML surface;
 - lead inputs are processed server-side;
 - CSP reports are routed through `/api/csp-report`;
-- `pnpm security:csp:check` verifies the runtime script shape.
+- `pnpm security:csp:check` samples the current runtime inline script shape on
+  representative `/en` and `/zh` routes before CSP changes.
 
 ## Options before paid traffic
 

@@ -158,5 +158,9 @@ describe("proof lane contract", () => {
     expect(cspMemo).toContain("pnpm security:csp:check");
     expect(cspMemo).toContain("paid traffic");
     expect(cspMemo).toContain("Cache Components");
+    expect(cspMemo).toContain("representative `/en` and `/zh` routes");
+    expect(cspMemo).not.toMatch(
+      /rewrite (the )?CSP (now|immediately)|immediate CSP rewrite recommended|should rewrite (the )?CSP immediately/i,
+    );
   });
 });
