@@ -24,7 +24,7 @@ Exa 报告是外部风险池，不是执行命令。里面很多问题来自 Git
 
 - Next.js：`16.2.4`
 - React / React DOM：`19.2.5`
-- `@opennextjs/cloudflare`：`1.19.4`
+- `@opennextjs/cloudflare`：`1.19.6`
 - Wrangler：`4.86.0`
 - Node runtime policy：`>=24 <25`
 - Proof baseline：Node `24.15.x` LTS
@@ -56,7 +56,7 @@ Exa 报告是外部风险池，不是执行命令。里面很多问题来自 Git
 
 当前状态：
 
-- 项目使用 `@opennextjs/cloudflare 1.19.4`。
+- 项目使用 `@opennextjs/cloudflare 1.19.6`。
 - 2026-04-26 runtime cache removal 后，当前上线链路不再配置 R2 incremental cache、D1 tag cache 或 Durable Object queue。
 - 内容更新采用静态生成 + 重新部署，不走运行时 tag cache。
 

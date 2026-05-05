@@ -16,6 +16,9 @@ const SOURCE_WRANGLER_CONFIG_PATH = path.join(ROOT_DIR, "wrangler.jsonc");
 const PHASE6_ALIAS = {
   "@vercel/turbopack-ecmascript-runtime/browser/dev/hmr-client/hmr-client.ts":
     "../../../scripts/cloudflare/shims/empty-module.mjs",
+  critters: "../../../scripts/cloudflare/shims/empty-module.mjs",
+  "next/dist/compiled/@vercel/og/index.edge.js":
+    "../../../scripts/cloudflare/shims/empty-module.mjs",
 };
 
 const BIND_DOMAIN = process.argv.includes("--bind-domain");

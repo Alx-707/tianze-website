@@ -17,7 +17,7 @@
 | Proof baseline | Node `24.15.x` LTS |
 | Next.js | `16.2.4` |
 | React / React DOM | `19.2.5` |
-| @opennextjs/cloudflare | `1.19.4` |
+| @opennextjs/cloudflare | `1.19.6` |
 | Wrangler | `4.86.0` |
 | TypeScript | `6.0.3` |
 | ESLint | `10.2.1` |
