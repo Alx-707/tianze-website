@@ -58,9 +58,11 @@ export function createMarketSpecParityReport(
 
   for (const marketSlug of marketSlugs) {
     const catalogFamilies = new Set(
-      input.catalogFamiliesByMarket[marketSlug] ?? [],
+      uniqueSorted(input.catalogFamiliesByMarket[marketSlug] ?? []),
     );
-    const specFamilies = new Set(input.specFamiliesByMarket[marketSlug] ?? []);
+    const specFamilies = new Set(
+      uniqueSorted(input.specFamiliesByMarket[marketSlug] ?? []),
+    );
 
     for (const familySlug of catalogFamilies) {
       if (!specFamilies.has(familySlug)) {

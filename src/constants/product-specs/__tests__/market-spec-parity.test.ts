@@ -49,4 +49,66 @@ describe("market spec parity", () => {
       "orphan spec: europe/orphan-family",
     );
   });
+
+  it("reports every catalog family when a market is missing from specs", () => {
+    const report = createMarketSpecParityReport({
+      catalogFamiliesByMarket: {
+        "new-market": ["zeta", "alpha"],
+      },
+      specFamiliesByMarket: {},
+    });
+
+    expect(report.missingSpecFamilies).toEqual([
+      { marketSlug: "new-market", familySlug: "alpha" },
+      { marketSlug: "new-market", familySlug: "zeta" },
+    ]);
+    expect(formatMarketSpecParityError(report)).toContain(
+      "missing spec: new-market/alpha",
+    );
+    expect(formatMarketSpecParityError(report)).toContain(
+      "missing spec: new-market/zeta",
+    );
+  });
+
+  it("reports every spec family when a market is missing from catalog", () => {
+    const report = createMarketSpecParityReport({
+      catalogFamiliesByMarket: {},
+      specFamiliesByMarket: {
+        "legacy-market": ["zeta", "alpha"],
+      },
+    });
+
+    expect(report.orphanSpecFamilies).toEqual([
+      { marketSlug: "legacy-market", familySlug: "alpha" },
+      { marketSlug: "legacy-market", familySlug: "zeta" },
+    ]);
+    expect(formatMarketSpecParityError(report)).toContain(
+      "orphan spec: legacy-market/alpha",
+    );
+    expect(formatMarketSpecParityError(report)).toContain(
+      "orphan spec: legacy-market/zeta",
+    );
+  });
+
+  it("keeps custom input reports sorted and de-duplicated", () => {
+    const report = createMarketSpecParityReport({
+      catalogFamiliesByMarket: {
+        beta: ["zeta", "alpha", "alpha"],
+        alpha: ["delta"],
+      },
+      specFamiliesByMarket: {
+        beta: ["omega"],
+        alpha: [],
+      },
+    });
+
+    expect(report.missingSpecFamilies).toEqual([
+      { marketSlug: "alpha", familySlug: "delta" },
+      { marketSlug: "beta", familySlug: "alpha" },
+      { marketSlug: "beta", familySlug: "zeta" },
+    ]);
+    expect(report.orphanSpecFamilies).toEqual([
+      { marketSlug: "beta", familySlug: "omega" },
+    ]);
+  });
 });
