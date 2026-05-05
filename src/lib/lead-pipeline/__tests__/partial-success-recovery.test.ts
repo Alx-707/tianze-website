@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { CONTACT_SUBJECTS, LEAD_TYPES } from "../lead-schema";
+import { CONTACT_SUBJECTS, LEAD_TYPES, type LeadInput } from "../lead-schema";
 
 const mockLoggerError = vi.hoisted(() => vi.fn());
 
@@ -12,6 +12,15 @@ vi.mock("@/lib/logger", () => ({
 }));
 
 describe("recordPartialSuccessRecovery", () => {
+  const contactLead = {
+    type: LEAD_TYPES.CONTACT,
+    fullName: "Jane Doe",
+    email: "jane@example.com",
+    subject: CONTACT_SUBJECTS.OTHER,
+    message: "This is another test message with enough characters.",
+    turnstileToken: "valid-token",
+  } satisfies LeadInput;
+
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -54,14 +63,7 @@ describe("recordPartialSuccessRecovery", () => {
       await import("../partial-success-recovery");
 
     recordPartialSuccessRecovery({
-      lead: {
-        type: LEAD_TYPES.CONTACT,
-        fullName: "Jane Doe",
-        email: "jane@example.com",
-        subject: CONTACT_SUBJECTS.OTHER,
-        message: "This is another test message with enough characters.",
-        turnstileToken: "valid-token",
-      },
+      lead: contactLead,
       referenceId: "CON-456",
       emailSent: false,
       recordCreated: true,
@@ -77,6 +79,56 @@ describe("recordPartialSuccessRecovery", () => {
         recordCreated: true,
         recoveryReason: "email_delivery_missing",
       },
+    );
+
+    const [, payload] = mockLoggerError.mock.calls[0] ?? [];
+    expect(payload).not.toHaveProperty("requestId");
+  });
+
+  it.each([
+    { emailSent: true, recordCreated: true },
+    { emailSent: false, recordCreated: false },
+  ])(
+    "emits a mixed recovery reason for emailSent=$emailSent and recordCreated=$recordCreated",
+    async ({ emailSent, recordCreated }) => {
+      const { recordPartialSuccessRecovery } =
+        await import("../partial-success-recovery");
+
+      recordPartialSuccessRecovery({
+        lead: contactLead,
+        referenceId: "CON-mixed",
+        emailSent,
+        recordCreated,
+      });
+
+      expect(mockLoggerError).toHaveBeenCalledWith(
+        "Lead partial success requires owner follow-up",
+        expect.objectContaining({
+          recoveryReason: "mixed_partial_success",
+          emailSent,
+          recordCreated,
+        }),
+      );
+    },
+  );
+
+  it("records requestId when the property is provided as an empty string", async () => {
+    const { recordPartialSuccessRecovery } =
+      await import("../partial-success-recovery");
+
+    recordPartialSuccessRecovery({
+      lead: contactLead,
+      referenceId: "CON-empty-request",
+      emailSent: true,
+      recordCreated: false,
+      requestId: "",
+    });
+
+    expect(mockLoggerError).toHaveBeenCalledWith(
+      "Lead partial success requires owner follow-up",
+      expect.objectContaining({
+        requestId: "",
+      }),
     );
   });
 });

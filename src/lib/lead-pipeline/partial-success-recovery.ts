@@ -1,3 +1,5 @@
+import "server-only";
+
 import type { LeadInput } from "@/lib/lead-pipeline/lead-schema";
 import { logger, sanitizeEmail } from "@/lib/logger";
 
@@ -11,7 +13,7 @@ export interface PartialSuccessRecoveryEvent {
   referenceId: string;
   emailSent: boolean;
   recordCreated: boolean;
-  requestId?: string | undefined;
+  requestId?: string;
 }
 
 function getRecoveryReason(
@@ -37,6 +39,6 @@ export function recordPartialSuccessRecovery(
     emailSent: event.emailSent,
     recordCreated: event.recordCreated,
     recoveryReason: getRecoveryReason(event.emailSent, event.recordCreated),
-    ...(event.requestId ? { requestId: event.requestId } : {}),
+    ...(event.requestId !== undefined ? { requestId: event.requestId } : {}),
   });
 }
