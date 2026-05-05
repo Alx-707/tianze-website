@@ -74,3 +74,6 @@ The report must include:
 - `reason`
 - `responseStatus`
 - `responseBodySnippet`
+- `proofBoundary`: always `staging-non-production; not production deployed lead proof`
+
+Any report without this boundary field must be treated as incomplete proof evidence.
