@@ -19,6 +19,7 @@ export async function processNewsletterLead(
   const crmResult = await settleService(
     airtableService.createLead(LEAD_TYPES.NEWSLETTER, {
       email: lead.email,
+      marketingConsent: lead.marketingConsent,
       referenceId,
     }),
     {

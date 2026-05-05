@@ -78,4 +78,17 @@ describe("idempotency property tests", () => {
       }),
     );
   });
+
+  it("prefers nextUrl.pathname when a NextRequest exposes rewritten semantics", () => {
+    const request = createRequest("POST", "/api/original");
+    Object.defineProperty(request, "nextUrl", {
+      value: {
+        pathname: "/api/rewritten",
+      },
+    });
+
+    expect(createRequestFingerprint(request, "abc123")).toBe(
+      "POST:/api/rewritten:abc123",
+    );
+  });
 });

@@ -22,6 +22,7 @@ export interface ServiceFailure {
   readonly success: false;
   readonly error: Error;
   readonly latencyMs: number;
+  readonly timedOut?: boolean | undefined;
 }
 
 /**
@@ -45,8 +46,17 @@ export function createSuccess(
 /**
  * Create a failed service result
  */
-export function createFailure(error: Error, latencyMs: number): ServiceFailure {
-  return { success: false, error, latencyMs };
+export function createFailure(
+  error: Error,
+  latencyMs: number,
+  options: { timedOut?: boolean } = {},
+): ServiceFailure {
+  return {
+    success: false,
+    error,
+    latencyMs,
+    ...(options.timedOut !== undefined ? { timedOut: options.timedOut } : {}),
+  };
 }
 
 /**

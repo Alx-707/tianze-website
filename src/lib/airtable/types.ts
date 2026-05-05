@@ -64,8 +64,9 @@ export interface ProductLeadData extends BaseLeadData {
 }
 
 // Newsletter subscription lead data
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type -- intentionally minimal, only email from BaseLeadData
-export interface NewsletterLeadData extends BaseLeadData {}
+export interface NewsletterLeadData extends BaseLeadData {
+  marketingConsent?: boolean;
+}
 
 // Union type for all lead data
 export type LeadData = ContactLeadData | ProductLeadData | NewsletterLeadData;

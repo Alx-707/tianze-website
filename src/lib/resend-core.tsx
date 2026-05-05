@@ -17,7 +17,6 @@ import { EMAIL_CONFIG, ResendUtils } from "@/lib/resend-utils";
 import { ConfirmationEmail } from "@/emails/ConfirmationEmail";
 import { ContactFormEmail } from "@/emails/ContactFormEmail";
 import { ProductInquiryEmail } from "@/emails/ProductInquiryEmail";
-import { ZERO } from "@/constants";
 
 /**
  * Resend邮件服务配置
@@ -227,16 +226,12 @@ export class ResendService {
    * Get email sending statistics
    */
   public getEmailStats(): {
-    sent: number;
-    delivered: number;
-    bounced: number;
-    complained: number;
+    supported: false;
+    reason: string;
   } {
     return {
-      sent: ZERO,
-      delivered: ZERO,
-      bounced: ZERO,
-      complained: ZERO,
+      supported: false,
+      reason: "Resend aggregate email statistics are not implemented",
     };
   }
 

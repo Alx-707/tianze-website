@@ -86,7 +86,7 @@ export function createRequestFingerprint(
   request: NextRequest,
   bodyHash?: string,
 ): string {
-  const { pathname } = new URL(request.url);
+  const pathname = request.nextUrl?.pathname ?? new URL(request.url).pathname;
   const baseFingerprint = `${request.method}:${pathname}`;
   return bodyHash ? `${baseFingerprint}:${bodyHash}` : baseFingerprint;
 }
@@ -116,12 +116,8 @@ interface ExistingEntryContext {
 /**
  * Handle the case where an existing entry is found (stored or in-flight).
  *
- * FIXED: Changed from `async (4 params)` to `sync (3 params + context)`
- * - Removed `async` keyword (no actual `await` in body — waitForCompletion is not awaited)
- * - Consolidated `fingerprint` and `store` into `context` parameter
- * - Return type: `NextResponse | Promise<NextResponse> | null` (can return Promise from waitForCompletion)
- * - Null-check moved to caller; all accesses to `existing` here are type-safe
- * - FIXED: Added NonNullable<> wrapper to parameter type to eliminate TypeScript null-narrowing error
+ * Pending entries wait for the winner to finish. Success entries replay the
+ * stored body/status. Error entries fail closed and ask the client to retry.
  */
 function handleExistingEntry(
   idempotencyKey: string,
@@ -151,16 +147,13 @@ function handleExistingEntry(
     );
   }
 
-  // Status is "pending" — wait for completion (this is a Promise, not awaited by caller)
+  // Existing pending entry from another request; wait up to the bounded polling
+  // timeout in waitForCompletion().
   return waitForCompletion(idempotencyKey, store);
 }
 
 /**
  * Atomic claim: if no entry exists, create PENDING entry; otherwise return false.
- *
- * FIXED: Consolidate parameters from 4 to 3 via context object
- * - Consolidated `ttlMs` and `store` into `context` parameter
- * - Kept `async` keyword (contains actual `await` in body)
  */
 async function claimIdempotencyKeyAtomic(
   idempotencyKey: string,
@@ -212,7 +205,6 @@ async function handleWithIdempotencyKey<T>(
   }
 
   // Attempt to claim the key (atomic SETNX)
-  // FIXED: Call site 2 — KEEP `await`, PASS context object
   const claimed = await claimIdempotencyKeyAtomic(idempotencyKey, fingerprint, {
     store,
     ttlMs,
@@ -328,6 +320,12 @@ function resolveIdempotentResultTtl(ttl?: number): number {
   return typeof ttl === "number" && ttl > 0 ? ttl : DEFAULT_TTL_MS;
 }
 
+/**
+ * Typed idempotency helper for non-HTTP orchestration.
+ *
+ * Use this when the caller needs `{ ok, result }` instead of a NextResponse.
+ * API route handlers should use `withIdempotency()` below.
+ */
 export async function withIdempotentResult<T>(
   idempotencyKey: string | null,
   handler: () => Promise<T>,
@@ -392,7 +390,10 @@ export async function withIdempotentResult<T>(
 }
 
 /**
- * 幂等键中间件
+ * HTTP idempotency wrapper for Next.js route handlers.
+ *
+ * Use this in API routes that need to replay a NextResponse-compatible JSON
+ * payload and status code.
  *
  * 核心行为：
  * - 当请求携带 Idempotency-Key 时：

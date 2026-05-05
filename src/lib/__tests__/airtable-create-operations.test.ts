@@ -376,4 +376,42 @@ describe("Airtable Service - Create Operations Tests", () => {
       ).rejects.toThrow("Failed to create lead record");
     });
   });
+
+  describe("创建 Lead 记录 (newsletter type)", () => {
+    it("should include newsletter marketing consent when provided", async () => {
+      const service = new AirtableServiceClass();
+      setServiceReady(service);
+
+      const newsletterLeadData = {
+        email: "subscriber@example.com",
+        marketingConsent: true,
+        referenceId: "NEW-test-ref-001",
+      };
+      const mockRecordData = {
+        id: "rec-newsletter",
+        fields: newsletterLeadData,
+        createdTime: "2023-01-01T00:00:00Z",
+      };
+      mockCreate.mockResolvedValue([createMockRecord(mockRecordData)]);
+
+      await service.createLead("newsletter", newsletterLeadData);
+
+      expect(mockCreate).toHaveBeenCalledWith([
+        {
+          fields: expect.objectContaining({
+            Email: "subscriber@example.com",
+            "First Name": "",
+            "Last Name": "",
+            Company: "",
+            Message: "Newsletter subscription",
+            "Marketing Consent": true,
+            "Reference ID": "NEW-test-ref-001",
+            Status: "New",
+            Source: "Newsletter Subscription",
+            "Submitted At": expect.any(String),
+          }),
+        },
+      ]);
+    });
+  });
 });

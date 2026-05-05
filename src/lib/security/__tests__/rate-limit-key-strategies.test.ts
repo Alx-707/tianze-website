@@ -379,6 +379,25 @@ describe("rate-limit-key-strategies", () => {
       mockGetClientIP.mockReturnValue("192.168.1.100");
     });
 
+    describe("extractBearerToken", () => {
+      it.each([
+        ["Bearer token-123", "token-123"],
+        ["BEARER token-123", "token-123"],
+        ["bearer token-123", "token-123"],
+        ["BeArEr token-123", "token-123"],
+        ["Bearer    token-123   ", "token-123"],
+      ])("extracts a %s header case-insensitively", (header, expected) => {
+        expect(extractBearerToken(header)).toBe(expected);
+      });
+
+      it.each(["Bearer", "BearerToken", "Bearer ", "Basic token-123"])(
+        "rejects malformed bearer header %s",
+        (header) => {
+          expect(extractBearerToken(header)).toBeNull();
+        },
+      );
+    });
+
     it("should extract a normal Bearer token", () => {
       expect(extractBearerToken("Bearer sk-test-key")).toBe("sk-test-key");
     });

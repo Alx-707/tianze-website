@@ -246,6 +246,7 @@ describe("/api/inquiry route", () => {
       expect(response.status).toBe(400);
       expect(data.success).toBe(false);
       expect(data.errorCode).toBe(API_ERROR_CODES.INQUIRY_SECURITY_REQUIRED);
+      expect(processLead).not.toHaveBeenCalled();
     });
 
     it("should reject invalid email before turnstile and lead processing", async () => {

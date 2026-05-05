@@ -170,6 +170,7 @@ describe("/api/subscribe route", () => {
       {
         type: "newsletter",
         email: "subscriber@example.com",
+        marketingConsent: true,
       },
       expect.objectContaining({
         requestId: expect.any(String),

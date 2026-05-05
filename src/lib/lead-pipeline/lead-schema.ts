@@ -125,6 +125,7 @@ export const productLeadSchema = z.object({
 export const newsletterLeadSchema = z.object({
   type: z.literal(LEAD_TYPES.NEWSLETTER),
   email: z.string().email().max(MAX_LEAD_EMAIL_LENGTH),
+  marketingConsent: z.boolean().optional().default(false),
 });
 
 /**

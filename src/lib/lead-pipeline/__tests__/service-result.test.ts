@@ -45,6 +45,14 @@ describe("ServiceResult", () => {
       expect(isServiceFailure(result)).toBe(true);
       expect(isServiceSuccess(result)).toBe(false);
     });
+
+    it("can mark a failure as timed out", () => {
+      const error = new Error("Operation timed out");
+      const result = createFailure(error, 200, { timedOut: true });
+
+      expect(result.success).toBe(false);
+      expect(result.timedOut).toBe(true);
+    });
   });
 
   describe("type narrowing", () => {

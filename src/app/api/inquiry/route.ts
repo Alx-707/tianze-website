@@ -151,6 +151,9 @@ const POST_RATE_LIMITED = withRateLimit(
             );
           }
 
+          // Turnstile is a transport anti-abuse control, not persisted lead
+          // data. Keep it route-level so productLeadSchema stays focused on
+          // CRM lead fields.
           const turnstileError = await validateLeadTurnstileToken({
             token:
               typeof data.turnstileToken === "string"

@@ -106,6 +106,7 @@ class RedisRateLimitStore implements RateLimitStore {
       },
       body: JSON.stringify([
         ["INCR", key],
+        // Fixed-window semantics: later requests must not refresh the window.
         ["PEXPIRE", key, windowMs.toString(), "NX"],
         ["PTTL", key],
       ]),
@@ -210,6 +211,8 @@ class MemoryRateLimitStore implements RateLimitStore {
 
     const entry = this.store.get(key);
     if (entry && entry.expiresAt > now) {
+      // Match Redis PEXPIRE NX semantics: active windows increment without
+      // extending expiresAt; expired entries start a new fixed window.
       entry.count += 1;
       return Promise.resolve({
         count: entry.count,
@@ -219,7 +222,7 @@ class MemoryRateLimitStore implements RateLimitStore {
 
     const newEntry = { count: 1, expiresAt };
     this.store.set(key, newEntry);
-    return Promise.resolve(newEntry);
+    return Promise.resolve({ ...newEntry });
   }
 
   get(key: string): Promise<RateLimitEntry | null> {

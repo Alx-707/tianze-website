@@ -22,6 +22,76 @@ const CRYPTO_CONSTANTS = {
   HEX_PAD_LENGTH: COUNT_TWO,
 } as const;
 
+const PASSWORD_HASH_VERSION = "pbkdf2-sha256";
+const PASSWORD_HASH_KEY_LENGTH_BITS = AES_KEY_LENGTH_BITS;
+const HEX_BYTE_PATTERN = /^[0-9a-f]{2}$/i;
+
+function bytesToHex(bytes: Uint8Array): string {
+  return Array.from(bytes)
+    .map((byte) =>
+      byte
+        .toString(CRYPTO_CONSTANTS.HEX_BASE)
+        .padStart(CRYPTO_CONSTANTS.HEX_PAD_LENGTH, "0"),
+    )
+    .join("");
+}
+
+function hexToBytes(hex: string): Uint8Array {
+  const bytes: number[] = [];
+  for (let index = ZERO; index < hex.length; index += COUNT_TWO) {
+    const segment = hex.slice(index, index + COUNT_TWO);
+    if (!HEX_BYTE_PATTERN.test(segment)) {
+      throw new Error("Invalid hex input");
+    }
+    bytes.push(parseInt(segment, HEX_RADIX));
+  }
+  return new Uint8Array(bytes);
+}
+
+function toArrayBuffer(bytes: Uint8Array): ArrayBuffer {
+  const copy = new Uint8Array(bytes.byteLength);
+  copy.set(bytes);
+  return copy.buffer;
+}
+
+async function derivePasswordHash(
+  password: string,
+  saltBytes: Uint8Array,
+): Promise<string> {
+  const encoder = new TextEncoder();
+  const passwordKey = await crypto.subtle.importKey(
+    "raw",
+    encoder.encode(password),
+    "PBKDF2",
+    false,
+    ["deriveBits"],
+  );
+  const bits = await crypto.subtle.deriveBits(
+    {
+      name: "PBKDF2",
+      salt: toArrayBuffer(saltBytes),
+      iterations: PBKDF2_ITERATIONS,
+      hash: "SHA-256",
+    },
+    passwordKey,
+    PASSWORD_HASH_KEY_LENGTH_BITS,
+  );
+  return bytesToHex(new Uint8Array(bits));
+}
+
+async function hashPasswordLegacy(
+  password: string,
+  saltBytes: Uint8Array,
+): Promise<string> {
+  const encoder = new TextEncoder();
+  const passwordBytes = encoder.encode(password);
+  const combined = new Uint8Array(saltBytes.length + passwordBytes.length);
+  combined.set(saltBytes);
+  combined.set(passwordBytes, saltBytes.length);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", combined);
+  return bytesToHex(new Uint8Array(hashBuffer));
+}
+
 /**
  * Hash password using Web Crypto API
  */
@@ -33,31 +103,10 @@ export async function hashPassword(
   const saltBytes = salt
     ? encoder.encode(salt)
     : crypto.getRandomValues(new Uint8Array(CRYPTO_CONSTANTS.SALT_BYTE_LENGTH));
-  const passwordBytes = encoder.encode(password);
+  const hashHex = await derivePasswordHash(password, saltBytes);
+  const saltHex = bytesToHex(saltBytes);
 
-  const combined = new Uint8Array(saltBytes.length + passwordBytes.length);
-  combined.set(saltBytes);
-  combined.set(passwordBytes, saltBytes.length);
-
-  const hashBuffer = await crypto.subtle.digest("SHA-256", combined);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  const hashHex = hashArray
-    .map((b) =>
-      b
-        .toString(CRYPTO_CONSTANTS.HEX_BASE)
-        .padStart(CRYPTO_CONSTANTS.HEX_PAD_LENGTH, "0"),
-    )
-    .join("");
-
-  const saltHex = Array.from(saltBytes)
-    .map((b) =>
-      b
-        .toString(CRYPTO_CONSTANTS.HEX_BASE)
-        .padStart(CRYPTO_CONSTANTS.HEX_PAD_LENGTH, "0"),
-    )
-    .join("");
-
-  return `${saltHex}:${hashHex}`;
+  return `${PASSWORD_HASH_VERSION}:${saltHex}:${hashHex}`;
 }
 
 /**
@@ -68,30 +117,30 @@ export async function verifyPassword(
   hash: string,
 ): Promise<boolean> {
   try {
-    const [saltHex, expectedHash] = hash.split(":");
+    const parts = hash.split(":");
+
+    if (parts.length === 3) {
+      const [version, saltHex, expectedHash] = parts;
+      if (version !== PASSWORD_HASH_VERSION || !saltHex || !expectedHash) {
+        return false;
+      }
+      const actualHash = await derivePasswordHash(
+        password,
+        hexToBytes(saltHex),
+      );
+      return constantTimeCompare(actualHash, expectedHash);
+    }
+
+    if (parts.length !== COUNT_TWO) {
+      return false;
+    }
+
+    const [saltHex, expectedHash] = parts;
     if (!saltHex || !expectedHash) {
       return false;
     }
-
-    const salt = (() => {
-      const pairs: string[] = [];
-      for (let i = 0; i < saltHex.length; i += COUNT_TWO) {
-        const seg = saltHex.slice(i, i + COUNT_TWO);
-        if (seg.length === COUNT_TWO) pairs.push(seg);
-      }
-      return pairs.map((byte) => parseInt(byte, HEX_RADIX));
-    })();
-    if (!salt) {
-      return false;
-    }
-
-    const saltBytes = new Uint8Array(salt);
-    const actualHash = await hashPassword(
-      password,
-      new TextDecoder().decode(saltBytes),
-    );
-
-    return actualHash === hash;
+    const actualHash = await hashPasswordLegacy(password, hexToBytes(saltHex));
+    return constantTimeCompare(actualHash, expectedHash);
   } catch {
     return false;
   }
@@ -193,7 +242,7 @@ export async function verifyHMAC(params: {
   try {
     const { data, signature, secret, algorithm = "SHA-256" } = params;
     const expectedSignature = await generateHMAC(data, secret, algorithm);
-    return expectedSignature === signature;
+    return constantTimeCompare(expectedSignature, signature);
   } catch {
     return false;
   }

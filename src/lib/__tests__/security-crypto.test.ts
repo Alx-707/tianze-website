@@ -21,23 +21,23 @@ describe("security-crypto", () => {
   });
 
   describe("hashPassword", () => {
-    it("should hash password with auto-generated salt", async () => {
+    it("hashes passwords with a versioned PBKDF2 format", async () => {
       const hash = await hashPassword("testPassword123");
 
-      expect(hash).toBeDefined();
-      expect(hash).toContain(":");
-
-      const [saltHex, hashHex] = hash.split(":");
-      expect(saltHex!.length).toBe(32); // 16 bytes = 32 hex chars
-      expect(hashHex!.length).toBe(64); // SHA-256 = 64 hex chars
+      const [version, saltHex, hashHex] = hash.split(":");
+      expect(version).toBe("pbkdf2-sha256");
+      expect(saltHex).toHaveLength(32);
+      expect(hashHex).toHaveLength(64);
     });
 
-    it("should hash password with provided salt", async () => {
-      const salt = "customSalt123456";
-      const hash = await hashPassword("testPassword", salt);
+    it("uses the provided salt for deterministic PBKDF2 hashes", async () => {
+      const salt = "consistentSalt16";
 
-      expect(hash).toBeDefined();
-      expect(hash).toContain(":");
+      const hash1 = await hashPassword("samePassword", salt);
+      const hash2 = await hashPassword("samePassword", salt);
+
+      expect(hash1).toBe(hash2);
+      expect(hash1.startsWith("pbkdf2-sha256:")).toBe(true);
     });
 
     it("should produce different hashes for different passwords", async () => {
@@ -90,6 +90,28 @@ describe("security-crypto", () => {
     it("should handle errors gracefully", async () => {
       const isValid = await verifyPassword("password", "");
       expect(isValid).toBe(false);
+    });
+
+    it("verifies legacy saltHex:sha256Hex password hashes", async () => {
+      const password = "legacyPassword";
+      const salt = "legacySalt123456";
+      const encoder = new TextEncoder();
+      const saltBytes = encoder.encode(salt);
+      const passwordBytes = encoder.encode(password);
+      const combined = new Uint8Array(saltBytes.length + passwordBytes.length);
+      combined.set(saltBytes);
+      combined.set(passwordBytes, saltBytes.length);
+      const digest = await crypto.subtle.digest("SHA-256", combined);
+      const legacyHashHex = Array.from(new Uint8Array(digest))
+        .map((byte) => byte.toString(16).padStart(2, "0"))
+        .join("");
+      const saltHex = Array.from(saltBytes)
+        .map((byte) => byte.toString(16).padStart(2, "0"))
+        .join("");
+
+      await expect(
+        verifyPassword(password, `${saltHex}:${legacyHashHex}`),
+      ).resolves.toBe(true);
     });
   });
 
@@ -253,6 +275,18 @@ describe("security-crypto", () => {
       });
 
       expect(isValid).toBe(false);
+    });
+
+    it("rejects signatures with the same prefix but different suffix", async () => {
+      const data = "important-data";
+      const secret = "secret-key";
+      const signature = await generateHMAC(data, secret);
+      const tampered =
+        signature.slice(0, -1) + (signature.endsWith("0") ? "1" : "0");
+
+      await expect(
+        verifyHMAC({ data, signature: tampered, secret }),
+      ).resolves.toBe(false);
     });
   });
 

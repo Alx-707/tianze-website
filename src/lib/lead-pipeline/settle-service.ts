@@ -5,6 +5,7 @@ import {
   type ServiceResult,
 } from "@/lib/lead-pipeline/service-result";
 import {
+  isLeadOperationTimeoutError,
   OPERATION_TIMEOUT_MS,
   withTimeout,
 } from "@/lib/lead-pipeline/with-timeout";
@@ -32,6 +33,11 @@ export async function settleService<T>(
     const id = options.mapId ? options.mapId(result) : undefined;
     return createSuccess(id, timer.stop());
   } catch (error) {
-    return createFailure(normalizeError(error), timer.stop());
+    const isTimedOut = isLeadOperationTimeoutError(error);
+    return createFailure(
+      normalizeError(error),
+      timer.stop(),
+      isTimedOut ? { timedOut: true } : {},
+    );
   }
 }

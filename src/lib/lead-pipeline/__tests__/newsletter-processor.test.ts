@@ -25,6 +25,7 @@ vi.mock("@/lib/lead-pipeline/settle-service", () => ({
 const VALID_NEWSLETTER_LEAD: NewsletterLeadInput = {
   type: LEAD_TYPES.NEWSLETTER,
   email: "subscriber@example.com",
+  marketingConsent: true,
 };
 
 const REFERENCE_ID = "NEW-test-ref-001";
@@ -59,6 +60,7 @@ describe("processNewsletterLead", () => {
 
     expect(mockCreateLead).toHaveBeenCalledWith(LEAD_TYPES.NEWSLETTER, {
       email: "subscriber@example.com",
+      marketingConsent: true,
       referenceId: REFERENCE_ID,
     });
 

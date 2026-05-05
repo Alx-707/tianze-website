@@ -701,6 +701,40 @@ describe("rate-limit-store", () => {
       vi.useRealTimers();
     });
 
+    it("increments active entries without refreshing expiresAt", async () => {
+      vi.spyOn(Date, "now").mockReturnValue(1_700_000_000_000);
+      const store = new MemoryRateLimitStore();
+
+      const first = await store.increment("ratelimit:test", 60_000);
+
+      vi.mocked(Date.now).mockReturnValue(1_700_000_030_000);
+      const second = await store.increment("ratelimit:test", 60_000);
+
+      expect(first).toEqual({
+        count: 1,
+        expiresAt: 1_700_000_060_000,
+      });
+      expect(second).toEqual({
+        count: 2,
+        expiresAt: 1_700_000_060_000,
+      });
+    });
+
+    it("starts a new fixed window after the stored entry expires", async () => {
+      vi.spyOn(Date, "now").mockReturnValue(1_700_000_000_000);
+      const store = new MemoryRateLimitStore();
+
+      await store.increment("ratelimit:test", 60_000);
+
+      vi.mocked(Date.now).mockReturnValue(1_700_000_060_001);
+      const nextWindow = await store.increment("ratelimit:test", 60_000);
+
+      expect(nextWindow).toEqual({
+        count: 1,
+        expiresAt: 1_700_000_120_001,
+      });
+    });
+
     it("deletes keys explicitly", async () => {
       const store = new MemoryRateLimitStore();
 

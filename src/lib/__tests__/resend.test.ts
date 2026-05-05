@@ -183,6 +183,25 @@ describe("resend - Email Operations", () => {
       );
     });
 
+    it("logs the external Resend message id for operational tracing", async () => {
+      const service = new ResendServiceClass();
+      const { logger } = await import("@/lib/logger");
+      vi.mocked(logger.info).mockClear();
+      mockResendSend.mockResolvedValue({
+        data: { id: "resend-message-123" },
+        error: null,
+      });
+
+      await service.sendContactFormEmail(validEmailData);
+
+      expect(logger.info).toHaveBeenCalledWith(
+        "Contact form email sent successfully",
+        expect.objectContaining({
+          messageId: "resend-message-123",
+        }),
+      );
+    });
+
     it("should use custom subject when provided", async () => {
       const service = new ResendServiceClass();
       const dataWithSubject = { ...validEmailData, subject: "Custom Subject" };
@@ -562,15 +581,13 @@ describe("resend - Product Inquiry and Utility Methods", () => {
   });
 
   describe("getEmailStats", () => {
-    it("should return email statistics with zero values", () => {
+    it("returns an explicit unsupported email statistics contract", () => {
       const service = new ResendServiceClass();
       const stats = service.getEmailStats();
 
       expect(stats).toEqual({
-        sent: 0,
-        delivered: 0,
-        bounced: 0,
-        complained: 0,
+        supported: false,
+        reason: "Resend aggregate email statistics are not implemented",
       });
     });
   });

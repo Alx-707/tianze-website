@@ -4,7 +4,7 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { withTimeout } from "../with-timeout";
+import { LeadOperationTimeoutError, withTimeout } from "../with-timeout";
 
 describe("withTimeout", () => {
   beforeEach(() => {
@@ -40,6 +40,33 @@ describe("withTimeout", () => {
     await expect(resultPromise).rejects.toThrow(
       "slowOperation timed out after 500ms",
     );
+  });
+
+  it("rejects with LeadOperationTimeoutError when timeout elapses first", async () => {
+    const neverResolves = new Promise(() => {});
+
+    const resultPromise = withTimeout(neverResolves, 500, "slowOperation");
+    vi.advanceTimersByTime(500);
+
+    await expect(resultPromise).rejects.toBeInstanceOf(
+      LeadOperationTimeoutError,
+    );
+  });
+
+  it("does not cancel the original promise after timeout", async () => {
+    let resolveOriginal!: (value: string) => void;
+    const original = new Promise<string>((resolve) => {
+      resolveOriginal = resolve;
+    });
+
+    const resultPromise = withTimeout(original, 500, "lateOperation");
+    vi.advanceTimersByTime(500);
+    await expect(resultPromise).rejects.toBeInstanceOf(
+      LeadOperationTimeoutError,
+    );
+
+    resolveOriginal("late-success");
+    await expect(original).resolves.toBe("late-success");
   });
 
   it("should preserve original error when promise rejects before timeout", async () => {
