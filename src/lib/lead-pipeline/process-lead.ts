@@ -40,7 +40,18 @@ type LeadHandlerResult = {
   crmResult: ServiceResult;
 };
 
+interface ObservedLeadProcessingResult extends LeadHandlerResult {
+  outcome: PipelineObservabilityOutcome;
+}
+
 interface ProcessLeadOptions {
+  requestId?: string;
+}
+
+interface ObserveLeadProcessingParams {
+  lead: LeadInput;
+  referenceId: string;
+  pipelineTimer: ReturnType<typeof createLatencyTimer>;
   requestId?: string;
 }
 
@@ -139,6 +150,29 @@ async function dispatchLeadHandler(
   return processNewsletterLead(lead, referenceId);
 }
 
+async function observeLeadProcessing(
+  params: ObserveLeadProcessingParams,
+): Promise<ObservedLeadProcessingResult> {
+  const { lead, referenceId, pipelineTimer, requestId } = params;
+  const results = await dispatchLeadHandler(lead, referenceId);
+  const { hasEmailOperation } = LEAD_HANDLER_CONFIG[lead.type];
+
+  const { emailResult, crmResult } = results;
+  const totalLatencyMs = pipelineTimer.stop();
+
+  const outcome = recordPipelineObservability({
+    lead,
+    referenceId,
+    emailResult,
+    crmResult,
+    hasEmailOperation,
+    totalLatencyMs,
+    ...withRequestId(requestId),
+  });
+
+  return { emailResult, crmResult, outcome };
+}
+
 export interface LeadResult {
   success: boolean;
   partialSuccess: boolean;
@@ -175,37 +209,14 @@ export async function processLead(
     ...withRequestId(requestId),
   });
 
+  let observedResult: ObservedLeadProcessingResult;
+
   try {
-    const results = await dispatchLeadHandler(lead, referenceId);
-    const { hasEmailOperation } = LEAD_HANDLER_CONFIG[lead.type];
-
-    const { emailResult, crmResult } = results;
-    const totalLatencyMs = pipelineTimer.stop();
-
-    const outcome = recordPipelineObservability({
+    observedResult = await observeLeadProcessing({
       lead,
       referenceId,
-      emailResult,
-      crmResult,
-      hasEmailOperation,
-      totalLatencyMs,
+      pipelineTimer,
       ...withRequestId(requestId),
-    });
-
-    recordOwnerRecoveryForPartialSuccess({
-      lead,
-      referenceId,
-      emailResult,
-      crmResult,
-      outcome,
-      ...withRequestId(requestId),
-    });
-
-    return createProcessedLeadResult({
-      referenceId,
-      emailResult,
-      crmResult,
-      outcome,
     });
   } catch (error) {
     const totalLatencyMs = pipelineTimer.stop();
@@ -220,4 +231,16 @@ export async function processLead(
 
     return createProcessingFailureResult(referenceId);
   }
+
+  recordOwnerRecoveryForPartialSuccess({
+    lead,
+    referenceId,
+    ...observedResult,
+    ...withRequestId(requestId),
+  });
+
+  return createProcessedLeadResult({
+    referenceId,
+    ...observedResult,
+  });
 }

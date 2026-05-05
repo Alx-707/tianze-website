@@ -267,6 +267,62 @@ describe("processLead observability contracts", () => {
     expect(mockRecordPartialSuccessRecovery).not.toHaveBeenCalled();
   });
 
+  it("does not convert owner recovery failures into processing failed results", async () => {
+    const emailResult = {
+      success: true as const,
+      id: "email-123",
+      latencyMs: 10,
+    };
+    const crmResult = {
+      success: false as const,
+      error: new Error("CRM failed"),
+      latencyMs: 20,
+    };
+    const recoveryError = new Error("recovery logger failed");
+    mockProcessContactLead.mockResolvedValue({ emailResult, crmResult });
+    mockRecordPipelineObservability.mockReturnValue({
+      success: false,
+      partialSuccess: true,
+    });
+    mockRecordPartialSuccessRecovery.mockImplementation(() => {
+      throw recoveryError;
+    });
+
+    await expect(
+      processLead(VALID_CONTACT_LEAD, { requestId: "req-recovery-error" }),
+    ).rejects.toThrow(recoveryError);
+
+    expect(mockLoggerError).not.toHaveBeenCalledWith(
+      "Lead processing unexpected error",
+      expect.any(Object),
+    );
+  });
+
+  it("does not record owner recovery for complete failure", async () => {
+    const emailResult = {
+      success: false as const,
+      error: new Error("Email failed"),
+      latencyMs: 10,
+    };
+    const crmResult = {
+      success: false as const,
+      error: new Error("CRM failed"),
+      latencyMs: 20,
+    };
+    mockProcessContactLead.mockResolvedValue({ emailResult, crmResult });
+    mockRecordPipelineObservability.mockReturnValue({
+      success: false,
+      partialSuccess: false,
+    });
+
+    const result = await processLead(VALID_CONTACT_LEAD, {
+      requestId: "req-complete-failure",
+    });
+
+    expect(result.partialSuccess).toBe(false);
+    expect(mockRecordPartialSuccessRecovery).not.toHaveBeenCalled();
+  });
+
   it("treats newsletter leads as no-email-operation in the consolidated helper", async () => {
     const emailResult = {
       success: false as const,
@@ -297,6 +353,7 @@ describe("processLead observability contracts", () => {
         requestId: "req-newsletter",
       }),
     );
+    expect(mockRecordPartialSuccessRecovery).not.toHaveBeenCalled();
   });
 
   it("logs unexpected non-Error rejections as Unknown error with latency and requestId", async () => {
