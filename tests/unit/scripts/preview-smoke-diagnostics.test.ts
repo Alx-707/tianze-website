@@ -3,6 +3,8 @@ import {
   buildPreviewDiagnosticReport,
   classifyPreviewDiagnosticReport,
   createBodySnippet,
+  parsePreviewDiagnosticArgs,
+  probePreviewRoute,
 } from "../../../scripts/cloudflare/preview-smoke-diagnostics.mjs";
 
 describe("preview-smoke-diagnostics", () => {
@@ -50,6 +52,64 @@ describe("preview-smoke-diagnostics", () => {
     expect(classifyPreviewDiagnosticReport(report)).toEqual({
       ok: false,
       failedRoutes: ["/en"],
+    });
+  });
+
+  it("rejects remote base URLs", () => {
+    expect(() =>
+      parsePreviewDiagnosticArgs([
+        "node",
+        "preview-smoke-diagnostics.mjs",
+        "--base-url",
+        "https://example.com",
+      ]),
+    ).toThrow("Cloudflare preview diagnostics only supports local base URLs");
+  });
+
+  it("reports missing argument values clearly", () => {
+    expect(() =>
+      parsePreviewDiagnosticArgs([
+        "node",
+        "preview-smoke-diagnostics.mjs",
+        "--base-url",
+      ]),
+    ).toThrow("Missing value for --base-url");
+  });
+
+  it("classifies 404 routes as failed preview evidence", async () => {
+    const route = await probePreviewRoute({
+      baseUrl: "http://127.0.0.1:8787",
+      pathname: "/en",
+      fetchImpl: async () =>
+        new Response("not found", {
+          status: 404,
+        }),
+    });
+
+    expect(route).toMatchObject({
+      pathname: "/en",
+      status: 404,
+      ok: false,
+      failureKind: "http-status",
+      bodySnippet: "not found",
+    });
+  });
+
+  it("records fetch failures as route evidence", async () => {
+    const route = await probePreviewRoute({
+      baseUrl: "http://127.0.0.1:8787",
+      pathname: "/en",
+      fetchImpl: async () => {
+        throw new Error("connect ECONNREFUSED");
+      },
+    });
+
+    expect(route).toMatchObject({
+      pathname: "/en",
+      status: null,
+      ok: false,
+      failureKind: "fetch-error",
+      bodySnippet: "connect ECONNREFUSED",
     });
   });
 });

@@ -10,6 +10,7 @@ const DEFAULT_OUTPUT =
   "reports/cloudflare-preview/preview-smoke-diagnostics.json";
 const BODY_SNIPPET_LENGTH = 500;
 const ROUTES = ["/", "/en", "/zh", "/en/contact", "/zh/contact", "/api/health"];
+const LOCAL_PREVIEW_HOSTS = new Set(["127.0.0.1", "localhost", "::1"]);
 
 export function createBodySnippet(bodyText) {
   return bodyText.slice(0, BODY_SNIPPET_LENGTH);
@@ -35,7 +36,21 @@ export function classifyPreviewDiagnosticReport(report) {
   };
 }
 
-function parseArgs(argv) {
+function assertLocalBaseUrl(baseUrl) {
+  const url = new URL(baseUrl);
+  if (!["http:", "https:"].includes(url.protocol)) {
+    throw new Error(
+      `Unsupported preview diagnostics protocol: ${url.protocol}`,
+    );
+  }
+  if (!LOCAL_PREVIEW_HOSTS.has(url.hostname)) {
+    throw new Error(
+      "Cloudflare preview diagnostics only supports local base URLs",
+    );
+  }
+}
+
+export function parsePreviewDiagnosticArgs(argv) {
   const args = {
     baseUrl: DEFAULT_BASE_URL,
     output: DEFAULT_OUTPUT,
@@ -48,12 +63,18 @@ function parseArgs(argv) {
       continue;
     }
 
-    if (arg === "--base-url" && index + 1 < argv.length) {
+    if (arg === "--base-url") {
+      if (index + 1 >= argv.length) {
+        throw new Error("Missing value for --base-url");
+      }
       args.baseUrl = argv[++index];
       continue;
     }
 
-    if (arg === "--output" && index + 1 < argv.length) {
+    if (arg === "--output") {
+      if (index + 1 >= argv.length) {
+        throw new Error("Missing value for --output");
+      }
       args.output = argv[++index];
       continue;
     }
@@ -61,14 +82,30 @@ function parseArgs(argv) {
     throw new Error(`Unknown argument: ${arg}`);
   }
 
+  assertLocalBaseUrl(args.baseUrl);
+
   return args;
 }
 
-async function probeRoute(baseUrl, pathname) {
+function getRouteFailureKind(status) {
+  if (status >= 500) {
+    return "server-error";
+  }
+  if (status >= 300) {
+    return "http-status";
+  }
+  return null;
+}
+
+export async function probePreviewRoute({
+  baseUrl,
+  pathname,
+  fetchImpl = fetch,
+}) {
   const startedAt = performance.now();
 
   try {
-    const response = await fetch(new URL(pathname, baseUrl), {
+    const response = await fetchImpl(new URL(pathname, baseUrl), {
       redirect: "manual",
       headers: {
         "user-agent": "cloudflare-preview-diagnostics",
@@ -77,11 +114,13 @@ async function probeRoute(baseUrl, pathname) {
     });
     const bodyText = await response.text();
     const durationMs = Math.round(performance.now() - startedAt);
+    const failureKind = getRouteFailureKind(response.status);
 
     return {
       pathname,
       status: response.status,
-      ok: response.status >= 200 && response.status < 500,
+      ok: failureKind === null,
+      ...(failureKind ? { failureKind } : {}),
       durationMs,
       bodySnippet: createBodySnippet(bodyText),
     };
@@ -93,6 +132,7 @@ async function probeRoute(baseUrl, pathname) {
       pathname,
       status: null,
       ok: false,
+      failureKind: "fetch-error",
       durationMs,
       bodySnippet: createBodySnippet(message),
     };
@@ -105,11 +145,11 @@ async function writeJson(path, value) {
 }
 
 async function main() {
-  const args = parseArgs(process.argv);
+  const args = parsePreviewDiagnosticArgs(process.argv);
   const routes = [];
 
   for (const pathname of ROUTES) {
-    routes.push(await probeRoute(args.baseUrl, pathname));
+    routes.push(await probePreviewRoute({ baseUrl: args.baseUrl, pathname }));
   }
 
   const report = buildPreviewDiagnosticReport({
