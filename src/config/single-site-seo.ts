@@ -116,18 +116,21 @@ function getRequiredProductMarketUpdatedAt(marketSlug: string): string {
   return updatedAt;
 }
 
-const SINGLE_SITE_PRODUCT_MARKET_LASTMOD: Record<string, string> =
-  Object.fromEntries(
-    getAllMarketSlugs().map((marketSlug) => [
-      getProductMarketPath(marketSlug),
-      getRequiredProductMarketUpdatedAt(marketSlug),
-    ]),
-  );
-
 export const SINGLE_SITE_STATIC_PAGE_LASTMOD = {
   ...fromRouteConfig(SINGLE_SITE_STATIC_PAGE_LASTMOD_BY_ROUTE),
-  ...SINGLE_SITE_PRODUCT_MARKET_LASTMOD,
 } as const satisfies Record<string, string>;
+
+export function getSingleSiteSitemapLastmod(): Record<string, string> {
+  return {
+    ...SINGLE_SITE_STATIC_PAGE_LASTMOD,
+    ...Object.fromEntries(
+      getAllMarketSlugs().map((marketSlug) => [
+        getProductMarketPath(marketSlug),
+        getRequiredProductMarketUpdatedAt(marketSlug),
+      ]),
+    ),
+  };
+}
 
 export const SINGLE_SITE_ROBOTS_DISALLOW_PATHS = [
   "/api/",

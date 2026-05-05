@@ -9,6 +9,7 @@ import {
   SINGLE_SITE_SITEMAP_DEFAULT_CONFIG,
   SINGLE_SITE_SITEMAP_PAGE_CONFIG,
   SINGLE_SITE_STATIC_PAGE_LASTMOD,
+  getSingleSiteSitemapLastmod,
 } from "@/config/single-site-seo";
 import { getAllMarketSlugs } from "@/constants/product-catalog";
 import { getMarketSpecsBySlug } from "@/constants/product-specs/market-spec-registry";
@@ -90,7 +91,7 @@ describe("single-site-seo", () => {
 
       expect(specs, `${marketSlug} should have market specs`).toBeDefined();
       expect(
-        SINGLE_SITE_STATIC_PAGE_LASTMOD[getProductMarketPath(marketSlug)],
+        getSingleSiteSitemapLastmod()[getProductMarketPath(marketSlug)],
       ).toBe(specs?.updatedAt);
     }
     expect(SINGLE_SITE_ROBOTS_DISALLOW_PATHS).toEqual([
@@ -112,7 +113,7 @@ describe("single-site-seo", () => {
         /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/,
       );
       expect(
-        SINGLE_SITE_STATIC_PAGE_LASTMOD[getProductMarketPath(marketSlug)],
+        getSingleSiteSitemapLastmod()[getProductMarketPath(marketSlug)],
         `${marketSlug} lastmod`,
       ).toBe(specs?.updatedAt);
     }
@@ -127,12 +128,34 @@ describe("single-site-seo", () => {
       getMarketSpecsBySlug: () => undefined,
     }));
 
-    await expect(import("@/config/single-site-seo")).rejects.toThrow(
+    const seoConfig = await import("@/config/single-site-seo");
+
+    expect(() => seoConfig.getSingleSiteSitemapLastmod()).toThrow(
       "Missing product market sitemap updatedAt: mock-market",
     );
   });
 
+  it("does not validate product sitemap dates when reading robots config", async () => {
+    vi.resetModules();
+    vi.doMock("@/constants/product-catalog", () => ({
+      getAllMarketSlugs: () => ["mock-market"],
+    }));
+    vi.doMock("@/constants/product-specs/market-spec-registry", () => ({
+      getMarketSpecsBySlug: () => createMockMarketSpecs("not-a-date"),
+    }));
+
+    const seoConfig = await import("@/config/single-site-seo");
+
+    expect(seoConfig.SINGLE_SITE_ROBOTS_DISALLOW_PATHS).toEqual([
+      "/api/",
+      "/_next/",
+      "/error-test/",
+    ]);
+  });
+
   it.each([
+    "not-a-date",
+    "2026-13-01T00:00:00Z",
     "2026-04-26",
     "2026-04-26T00:00:00.000Z",
     "2026-04-26T00:00:00+08:00",
@@ -147,7 +170,9 @@ describe("single-site-seo", () => {
         getMarketSpecsBySlug: () => createMockMarketSpecs(updatedAt),
       }));
 
-      await expect(import("@/config/single-site-seo")).rejects.toThrow(
+      const seoConfig = await import("@/config/single-site-seo");
+
+      expect(() => seoConfig.getSingleSiteSitemapLastmod()).toThrow(
         "Invalid product market sitemap updatedAt: mock-market",
       );
     },
