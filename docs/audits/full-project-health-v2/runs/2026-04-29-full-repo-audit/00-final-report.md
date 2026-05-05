@@ -1,5 +1,12 @@
 # Full Project Health Audit v2 - Final Report
 
+> Historical snapshot, not current truth.
+>
+> This report captured the repository state on 2026-04-29. Several findings,
+> counts, and repair recommendations have changed since then. Before using it
+> for a new decision, read `docs/CURRENT-STATUS.md` and re-run the relevant
+> checks. Do not copy the launch-blocker list below as the current issue list.
+
 Run id: `2026-04-29-full-repo-audit`
 
 > Current-truth note (2026-05-05): This historical audit remains useful as

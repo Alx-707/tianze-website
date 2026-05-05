@@ -1,5 +1,13 @@
 # Wave 1 业务资产交付清单
 
+> Historical checklist with some still-useful owner-input reminders.
+>
+> This file was written on 2026-04-26. Some "current behavior" descriptions are
+> now stale: the header falls back to text when logo assets are pending, the
+> placeholder phone is guarded from public runtime output, and live product
+> content should be checked separately from archived sample content. For current
+> status, read `docs/CURRENT-STATUS.md`.
+
 **日期**: 2026-04-26
 **分支**: `wave1-release-blockers`
 **状态**: 工程代码已就绪，等业务方交付后逐项落地

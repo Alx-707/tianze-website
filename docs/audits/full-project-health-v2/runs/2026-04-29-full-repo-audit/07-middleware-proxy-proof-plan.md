@@ -29,7 +29,9 @@ Repo-specific constraints:
   - trusted client IP internal header
 - `docs/guides/QUALITY-PROOF-LEVELS.md:197-200` says the current Cloudflare compatibility chain still prefers `src/middleware.ts`.
 - `docs/technical/deployment-notes.md:150-156` says current runtime entry remains `src/middleware.ts`.
-- `docs/superpowers/plans/2026-04-27-health-audit-repair-plan.md:1575-1584` explicitly parks middleware deprecation and says not to rename now.
+- The historical 2026-04-27 repair plan explicitly parked middleware deprecation
+  and said not to rename now. That plan has been removed from the live docs tree;
+  use git history or the Trash archive if exact historical wording is needed.
 
 ## Proof branch shape
 

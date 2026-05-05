@@ -50,7 +50,7 @@ Check `git branch` for current feature branches.
 
 ## Key Files Changed Recently
 
-- `docs/superpowers/plans/2026-04-26-launch-readiness-series.md`：更新为当前 workers.dev preview / JSON-LD / zone 权限真实状态。
+- 历史 launch readiness plan 已从 live docs tree 移走；需要追溯 2026-04-26 workers.dev preview / JSON-LD / zone 权限状态时，看 git 历史或 Trash 批次。
 - `HANDOFF.md`：更新当前 launch readiness 主线与剩余阻塞。
 - `docs/technical/deployment-notes.md`：记录 runtime cache removal proof、preview deploy、JSON-LD @graph、Smart Placement、domain/zone boundary。
 - `docs/audits/2026-04-26-*.md`：记录 JSON-LD / hreflang / Suspense 的 deployed preview 证据。
