@@ -28,6 +28,9 @@ export interface SingleSiteSitemapPageConfig {
 
 const SINGLE_SITE_STATIC_LASTMOD_ISO = "2026-04-26T00:00:00Z";
 
+export const SINGLE_SITE_PRODUCT_MARKET_LASTMOD_SOURCE =
+  "market-specs.updatedAt" as const;
+
 function toSitemapStaticPath(path: string): string {
   return path === "/" ? "" : path;
 }
@@ -91,12 +94,25 @@ const SINGLE_SITE_STATIC_PAGE_LASTMOD_BY_ROUTE = {
   products: SINGLE_SITE_STATIC_LASTMOD_ISO,
 } as const satisfies Partial<Record<PageType, string>>;
 
+function getRequiredProductMarketUpdatedAt(marketSlug: string): string {
+  const updatedAt = getMarketSpecsBySlug(marketSlug)?.updatedAt;
+  if (!updatedAt) {
+    throw new Error(`Missing product market sitemap updatedAt: ${marketSlug}`);
+  }
+
+  const timestamp = new Date(updatedAt).getTime();
+  if (Number.isNaN(timestamp)) {
+    throw new Error(`Invalid product market sitemap updatedAt: ${marketSlug}`);
+  }
+
+  return updatedAt;
+}
+
 const SINGLE_SITE_PRODUCT_MARKET_LASTMOD: Record<string, string> =
   Object.fromEntries(
     getAllMarketSlugs().map((marketSlug) => [
       getProductMarketPath(marketSlug),
-      getMarketSpecsBySlug(marketSlug)?.updatedAt ??
-        SINGLE_SITE_STATIC_LASTMOD_ISO,
+      getRequiredProductMarketUpdatedAt(marketSlug),
     ]),
   );
 

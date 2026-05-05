@@ -4,6 +4,7 @@ import { getCanonicalPath, getProductMarketPath } from "@/config/paths/utils";
 import {
   SINGLE_SITE_PUBLIC_STATIC_PAGE_ROUTES,
   SINGLE_SITE_PUBLIC_STATIC_PAGES,
+  SINGLE_SITE_PRODUCT_MARKET_LASTMOD_SOURCE,
   SINGLE_SITE_ROBOTS_DISALLOW_PATHS,
   SINGLE_SITE_SITEMAP_DEFAULT_CONFIG,
   SINGLE_SITE_SITEMAP_PAGE_CONFIG,
@@ -74,5 +75,23 @@ describe("single-site-seo", () => {
       "/_next/",
       "/error-test/",
     ]);
+  });
+
+  it("declares product market sitemap freshness as market specs updatedAt", () => {
+    expect(SINGLE_SITE_PRODUCT_MARKET_LASTMOD_SOURCE).toBe(
+      "market-specs.updatedAt",
+    );
+
+    for (const marketSlug of getAllMarketSlugs()) {
+      const specs = getMarketSpecsBySlug(marketSlug);
+
+      expect(specs?.updatedAt, `${marketSlug} updatedAt`).toMatch(
+        /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/,
+      );
+      expect(
+        SINGLE_SITE_STATIC_PAGE_LASTMOD[getProductMarketPath(marketSlug)],
+        `${marketSlug} lastmod`,
+      ).toBe(specs?.updatedAt);
+    }
   });
 });
