@@ -13,6 +13,7 @@ import {
   type LeadType,
 } from "@/lib/lead-pipeline/lead-schema";
 import { createLatencyTimer } from "@/lib/lead-pipeline/metrics";
+import { recordPartialSuccessRecovery } from "@/lib/lead-pipeline/partial-success-recovery";
 import {
   recordPipelineObservability,
   type PipelineObservabilityOutcome,
@@ -48,6 +49,11 @@ interface ProcessedLeadResultParams {
   emailResult: ServiceResult;
   crmResult: ServiceResult;
   outcome: PipelineObservabilityOutcome;
+}
+
+interface PartialSuccessRecoveryParams extends ProcessedLeadResultParams {
+  lead: LeadInput;
+  requestId?: string;
 }
 
 function withRequestId(
@@ -97,6 +103,25 @@ function createProcessedLeadResult(
     referenceId: exposeReferenceId ? referenceId : undefined,
     error: exposeReferenceId ? undefined : "PROCESSING_FAILED",
   };
+}
+
+function recordOwnerRecoveryForPartialSuccess(
+  params: PartialSuccessRecoveryParams,
+): void {
+  const { lead, referenceId, emailResult, crmResult, outcome, requestId } =
+    params;
+
+  if (!outcome.partialSuccess) {
+    return;
+  }
+
+  recordPartialSuccessRecovery({
+    lead,
+    referenceId,
+    emailSent: emailResult.success,
+    recordCreated: crmResult.success,
+    ...withRequestId(requestId),
+  });
 }
 
 // eslint-disable-next-line require-await -- Handler functions are async; this wrapper provides exhaustive dispatch
@@ -164,6 +189,15 @@ export async function processLead(
       crmResult,
       hasEmailOperation,
       totalLatencyMs,
+      ...withRequestId(requestId),
+    });
+
+    recordOwnerRecoveryForPartialSuccess({
+      lead,
+      referenceId,
+      emailResult,
+      crmResult,
+      outcome,
       ...withRequestId(requestId),
     });
 
