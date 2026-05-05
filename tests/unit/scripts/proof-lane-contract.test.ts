@@ -159,8 +159,9 @@ describe("proof lane contract", () => {
     expect(cspMemo).toContain("paid traffic");
     expect(cspMemo).toContain("Cache Components");
     expect(cspMemo).toContain("representative `/en` and `/zh` routes");
+    expect(cspMemo).toContain("Why not rewrite now");
     expect(cspMemo).not.toMatch(
-      /rewrite (the )?CSP (now|immediately)|immediate CSP rewrite recommended|should rewrite (the )?CSP immediately/i,
+      /(?:^|\n)\s*(?:rewrite now|rewrite (?:the )?CSP (?:now|immediately)|immediate CSP rewrite recommended|should rewrite (?:the )?(?:CSP )?immediately)/i,
     );
   });
 });
