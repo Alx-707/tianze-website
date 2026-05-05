@@ -168,3 +168,50 @@ to introduce the failure.
 
 **Decision trigger:** Before relying on local Cloudflare preview smoke as a
 merge gate again.
+
+### 2026-05-04 fresh diagnostic lane
+
+Use this local-only diagnostic command while `pnpm preview:cf` is running:
+
+```bash
+pnpm diagnose:cf:preview
+```
+
+It writes:
+
+```text
+reports/cloudflare-preview/preview-smoke-diagnostics.json
+```
+
+This artifact records route status, request duration, failure kind, and a
+bounded response-body snippet for `/`, `/en`, `/zh`, `/en/contact`,
+`/zh/contact`, and `/api/health`. It is diagnostic evidence only. It does not
+mutate Cloudflare state and does not replace deployed preview smoke when a real
+deployed preview URL exists.
+
+Fresh status on 2026-05-04: still reproduces locally. `pnpm preview:cf`
+successfully built and started Wrangler `4.86.0`, but `pnpm smoke:cf:preview`
+failed with:
+
+- `/en`, `/zh`, `/en/contact`, `/zh/contact`: expected 200, got 500.
+- `/fr/products/eu/fittings`: expected redirect to
+  `/en/products/eu/fittings`, got `/en/fr/products/eu/fittings`.
+
+`pnpm diagnose:cf:preview` produced local-only diagnostic evidence:
+
+- `/`: 307 redirect, classified as `http-status` by the diagnostic script.
+- `/en`, `/zh`, `/en/contact`, `/zh/contact`: timed out after 30 seconds and
+  were classified as `fetch-error`.
+- `/api/health`: 200 with `{"status":"ok"}`.
+
+The preview terminal also logged repeated worker-hung errors:
+
+```text
+Uncaught Error: The Workers runtime canceled this request because it detected
+that your Worker's code had hung and would never generate a response.
+```
+
+Keep TD-004 open. The current evidence separates the failure as a local
+Cloudflare page-route/runtime proof gap rather than an API health failure.
+Use the diagnostic artifact to separate route/runtime failure from smoke-script
+assertion failure in the next TD-004 investigation.
