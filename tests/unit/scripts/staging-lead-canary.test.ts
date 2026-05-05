@@ -253,6 +253,8 @@ describe("staging-lead-canary", () => {
       reason: "dry run",
       responseStatus: null,
       responseBodySnippet: "",
+      proofBoundary:
+        "staging-non-production; not production deployed lead proof",
     });
   });
 });

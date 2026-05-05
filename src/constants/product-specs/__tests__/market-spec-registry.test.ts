@@ -1,8 +1,6 @@
 import { describe, expect, it } from "vitest";
-import {
-  getAllMarketSlugs,
-  getFamiliesForMarket,
-} from "@/constants/product-catalog";
+import { getAllMarketSlugs } from "@/constants/product-catalog";
+import { assertMarketSpecParity } from "@/constants/product-specs/market-spec-parity";
 import {
   getMarketSpecEntries,
   getMarketSpecsBySlug,
@@ -29,16 +27,7 @@ describe("market spec registry", () => {
   });
 
   it("keeps catalog family slugs aligned with market spec families per market", () => {
-    for (const marketSlug of getAllMarketSlugs()) {
-      const catalogFamilySlugs = getFamiliesForMarket(marketSlug)
-        .map((family) => family.slug)
-        .sort();
-      const specFamilySlugs = (getMarketSpecsBySlug(marketSlug)?.families ?? [])
-        .map((family) => family.slug)
-        .sort();
-
-      expect(specFamilySlugs, marketSlug).toEqual(catalogFamilySlugs);
-    }
+    expect(() => assertMarketSpecParity()).not.toThrow();
   });
 
   it("returns undefined for unknown and prototype-like market slugs", () => {

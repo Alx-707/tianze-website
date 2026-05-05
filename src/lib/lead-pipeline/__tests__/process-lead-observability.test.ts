@@ -12,6 +12,7 @@ const mockLoggerInfo = vi.hoisted(() => vi.fn());
 const mockLoggerWarn = vi.hoisted(() => vi.fn());
 const mockLoggerError = vi.hoisted(() => vi.fn());
 const mockRecordPipelineObservability = vi.hoisted(() => vi.fn());
+const mockRecordPartialSuccessRecovery = vi.hoisted(() => vi.fn());
 const mockTimerStop = vi.hoisted(() => vi.fn(() => 321));
 
 vi.mock("@/lib/lead-pipeline/processors/contact", () => ({
@@ -38,6 +39,10 @@ vi.mock("@/lib/logger", () => ({
 
 vi.mock("@/lib/lead-pipeline/pipeline-observability", () => ({
   recordPipelineObservability: mockRecordPipelineObservability,
+}));
+
+vi.mock("@/lib/lead-pipeline/partial-success-recovery", () => ({
+  recordPartialSuccessRecovery: mockRecordPartialSuccessRecovery,
 }));
 
 vi.mock("@/lib/lead-pipeline/metrics", () => ({
@@ -172,6 +177,210 @@ describe("processLead observability contracts", () => {
     );
   });
 
+  it("records owner recovery when partial success is email-only", async () => {
+    const emailResult = {
+      success: true as const,
+      id: "email-123",
+      latencyMs: 10,
+    };
+    const crmResult = {
+      success: false as const,
+      error: new Error("CRM failed"),
+      latencyMs: 20,
+    };
+    mockProcessContactLead.mockResolvedValue({ emailResult, crmResult });
+    mockRecordPipelineObservability.mockReturnValue({
+      success: false,
+      partialSuccess: true,
+    });
+
+    const result = await processLead(VALID_CONTACT_LEAD, {
+      requestId: "req-email-only",
+    });
+
+    expect(result.partialSuccess).toBe(true);
+    expect(mockRecordPartialSuccessRecovery).toHaveBeenCalledWith(
+      expect.objectContaining({
+        lead: expect.objectContaining({ email: "john@example.com" }),
+        referenceId: expect.stringMatching(/^CON-/),
+        emailSent: true,
+        recordCreated: false,
+        requestId: "req-email-only",
+      }),
+    );
+  });
+
+  it("records owner recovery when partial success is CRM-only", async () => {
+    const emailResult = {
+      success: false as const,
+      error: new Error("Email failed"),
+      latencyMs: 10,
+    };
+    const crmResult = {
+      success: true as const,
+      id: "record-123",
+      latencyMs: 20,
+    };
+    mockProcessContactLead.mockResolvedValue({ emailResult, crmResult });
+    mockRecordPipelineObservability.mockReturnValue({
+      success: false,
+      partialSuccess: true,
+    });
+
+    const result = await processLead(VALID_CONTACT_LEAD, {
+      requestId: "req-crm-only",
+    });
+
+    expect(result.partialSuccess).toBe(true);
+    expect(mockRecordPartialSuccessRecovery).toHaveBeenCalledWith(
+      expect.objectContaining({
+        referenceId: expect.stringMatching(/^CON-/),
+        emailSent: false,
+        recordCreated: true,
+        requestId: "req-crm-only",
+      }),
+    );
+  });
+
+  it("does not record owner recovery for complete success", async () => {
+    const emailResult = {
+      success: true as const,
+      id: "email-123",
+      latencyMs: 10,
+    };
+    const crmResult = {
+      success: true as const,
+      id: "record-123",
+      latencyMs: 20,
+    };
+    mockProcessContactLead.mockResolvedValue({ emailResult, crmResult });
+    mockRecordPipelineObservability.mockReturnValue({
+      success: true,
+      partialSuccess: false,
+    });
+
+    const result = await processLead(VALID_CONTACT_LEAD, {
+      requestId: "req-success",
+    });
+
+    expect(result.success).toBe(true);
+    expect(mockRecordPartialSuccessRecovery).not.toHaveBeenCalled();
+  });
+
+  it("keeps partial success response when owner recovery logging fails", async () => {
+    const emailResult = {
+      success: true as const,
+      id: "email-123",
+      latencyMs: 10,
+    };
+    const crmResult = {
+      success: false as const,
+      error: new Error("CRM failed"),
+      latencyMs: 20,
+    };
+    const recoveryError = new Error("recovery logger failed");
+    mockProcessContactLead.mockResolvedValue({ emailResult, crmResult });
+    mockRecordPipelineObservability.mockReturnValue({
+      success: false,
+      partialSuccess: true,
+    });
+    mockRecordPartialSuccessRecovery.mockImplementation(() => {
+      throw recoveryError;
+    });
+
+    const result = await processLead(VALID_CONTACT_LEAD, {
+      requestId: "req-recovery-error",
+    });
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        success: false,
+        partialSuccess: true,
+        emailSent: true,
+        recordCreated: false,
+        referenceId: expect.stringMatching(/^CON-/),
+      }),
+    );
+    expect(mockLoggerError).not.toHaveBeenCalledWith(
+      "Lead processing unexpected error",
+      expect.any(Object),
+    );
+    expect(mockLoggerError).toHaveBeenCalledWith(
+      "Lead partial success recovery logging failed",
+      expect.objectContaining({
+        type: LEAD_TYPES.CONTACT,
+        referenceId: expect.stringMatching(/^CON-/),
+        error: "recovery logger failed",
+        requestId: "req-recovery-error",
+      }),
+    );
+  });
+
+  it("keeps observability failures on the processing failed path", async () => {
+    const emailResult = {
+      success: true as const,
+      id: "email-123",
+      latencyMs: 10,
+    };
+    const crmResult = {
+      success: true as const,
+      id: "record-123",
+      latencyMs: 20,
+    };
+    mockProcessContactLead.mockResolvedValue({ emailResult, crmResult });
+    mockRecordPipelineObservability.mockImplementation(() => {
+      throw new Error("observability failed");
+    });
+
+    const result = await processLead(VALID_CONTACT_LEAD, {
+      requestId: "req-observability-error",
+    });
+
+    expect(result).toEqual({
+      success: false,
+      partialSuccess: false,
+      emailSent: false,
+      recordCreated: false,
+      referenceId: expect.stringMatching(/^CON-/),
+      error: "PROCESSING_FAILED",
+    });
+    expect(mockLoggerError).toHaveBeenCalledWith(
+      "Lead processing unexpected error",
+      expect.objectContaining({
+        type: LEAD_TYPES.CONTACT,
+        error: "observability failed",
+        totalLatencyMs: 321,
+        requestId: "req-observability-error",
+      }),
+    );
+    expect(mockRecordPartialSuccessRecovery).not.toHaveBeenCalled();
+  });
+
+  it("does not record owner recovery for complete failure", async () => {
+    const emailResult = {
+      success: false as const,
+      error: new Error("Email failed"),
+      latencyMs: 10,
+    };
+    const crmResult = {
+      success: false as const,
+      error: new Error("CRM failed"),
+      latencyMs: 20,
+    };
+    mockProcessContactLead.mockResolvedValue({ emailResult, crmResult });
+    mockRecordPipelineObservability.mockReturnValue({
+      success: false,
+      partialSuccess: false,
+    });
+
+    const result = await processLead(VALID_CONTACT_LEAD, {
+      requestId: "req-complete-failure",
+    });
+
+    expect(result.partialSuccess).toBe(false);
+    expect(mockRecordPartialSuccessRecovery).not.toHaveBeenCalled();
+  });
+
   it("treats newsletter leads as no-email-operation in the consolidated helper", async () => {
     const emailResult = {
       success: false as const,
@@ -202,6 +411,7 @@ describe("processLead observability contracts", () => {
         requestId: "req-newsletter",
       }),
     );
+    expect(mockRecordPartialSuccessRecovery).not.toHaveBeenCalled();
   });
 
   it("logs unexpected non-Error rejections as Unknown error with latency and requestId", async () => {

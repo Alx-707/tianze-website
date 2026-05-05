@@ -10,9 +10,9 @@ import {
 import { SITE_CONFIG } from "@/config/paths";
 import { getProductMarketPath } from "@/config/paths/utils";
 import {
+  getSingleSiteSitemapLastmod,
   getSingleSiteSitemapPageConfig,
   SINGLE_SITE_PUBLIC_STATIC_PAGES,
-  SINGLE_SITE_STATIC_PAGE_LASTMOD,
   type SingleSiteSitemapPageConfig,
 } from "@/config/single-site-seo";
 import { routing } from "@/i18n/routing";
@@ -23,16 +23,18 @@ const BASE_URL = SITE_CONFIG.baseUrl;
 
 type PageConfig = SingleSiteSitemapPageConfig;
 
-const STATIC_PAGE_LASTMOD: StaticPageLastModConfig = new Map(
-  Object.entries(SINGLE_SITE_STATIC_PAGE_LASTMOD).map(([route, isoDate]) => [
-    route,
-    new Date(isoDate),
-  ]),
-);
-
 // Helper to get page config
 function getPageConfig(path: string): PageConfig {
   return getSingleSiteSitemapPageConfig(path);
+}
+
+function createStaticPageLastmodConfig(): StaticPageLastModConfig {
+  return new Map(
+    Object.entries(getSingleSiteSitemapLastmod()).map(([route, isoDate]) => [
+      route,
+      new Date(isoDate),
+    ]),
+  );
 }
 
 // Build alternate languages object for a URL path
@@ -69,7 +71,9 @@ function createSitemapEntry(
 }
 
 // Generate static page entries for all locales
-async function generateStaticPageEntries(): Promise<MetadataRoute.Sitemap> {
+async function generateStaticPageEntries(
+  staticPageLastmod: StaticPageLastModConfig,
+): Promise<MetadataRoute.Sitemap> {
   const mdxPages = SINGLE_SITE_PUBLIC_STATIC_PAGES.filter(isMdxDrivenPage);
   const mdxDates = new Map<string, Date>();
   await Promise.all(
@@ -87,7 +91,7 @@ async function generateStaticPageEntries(): Promise<MetadataRoute.Sitemap> {
       const alternates = buildAlternateLanguages(page);
       const lastModified =
         mdxDates.get(page) ??
-        getStaticPageLastModified(page, STATIC_PAGE_LASTMOD);
+        getStaticPageLastModified(page, staticPageLastmod);
 
       entries.push(
         createSitemapEntry({ url, lastModified, config, alternates }),
@@ -99,14 +103,16 @@ async function generateStaticPageEntries(): Promise<MetadataRoute.Sitemap> {
 }
 
 // Generate product catalog entries (market + family pages) for all locales
-function generateCatalogEntries(): MetadataRoute.Sitemap {
+function generateCatalogEntries(
+  staticPageLastmod: StaticPageLastModConfig,
+): MetadataRoute.Sitemap {
   const entries: MetadataRoute.Sitemap = [];
 
   // Market landing pages
   const marketConfig = getPageConfig("productMarket");
   for (const market of PRODUCT_CATALOG.markets) {
     const path = getProductMarketPath(market.slug);
-    const lastModified = getStaticPageLastModified(path, STATIC_PAGE_LASTMOD);
+    const lastModified = getStaticPageLastModified(path, staticPageLastmod);
 
     for (const locale of routing.locales) {
       entries.push(
@@ -128,8 +134,9 @@ function generateCatalogEntries(): MetadataRoute.Sitemap {
  * Includes static pages and product catalog pages with i18n alternates.
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const staticEntries = await generateStaticPageEntries();
-  const catalogEntries = generateCatalogEntries();
+  const staticPageLastmod = createStaticPageLastmodConfig();
+  const staticEntries = await generateStaticPageEntries(staticPageLastmod);
+  const catalogEntries = generateCatalogEntries(staticPageLastmod);
 
   return [...staticEntries, ...catalogEntries];
 }

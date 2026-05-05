@@ -11,6 +11,8 @@ const INQUIRY_SUCCESS_REASON = "staging canary accepted by inquiry API";
 const INQUIRY_FAILURE_REASON =
   "inquiry API did not report success for staging canary";
 const RESPONSE_BODY_SNIPPET_LENGTH = 500;
+const PROOF_BOUNDARY =
+  "staging-non-production; not production deployed lead proof";
 
 export function parseLeadCanaryArgs(argv) {
   const args = {
@@ -150,6 +152,7 @@ export function buildLeadCanaryReport(input) {
     reason: input.reason,
     responseStatus: input.responseStatus,
     responseBodySnippet: input.responseBodySnippet,
+    proofBoundary: PROOF_BOUNDARY,
   };
 }
 

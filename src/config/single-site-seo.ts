@@ -27,6 +27,10 @@ export interface SingleSiteSitemapPageConfig {
 }
 
 const SINGLE_SITE_STATIC_LASTMOD_ISO = "2026-04-26T00:00:00Z";
+const UTC_SECONDS_ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/;
+
+export const SINGLE_SITE_PRODUCT_MARKET_LASTMOD_SOURCE =
+  "market-specs.updatedAt" as const;
 
 function toSitemapStaticPath(path: string): string {
   return path === "/" ? "" : path;
@@ -91,19 +95,42 @@ const SINGLE_SITE_STATIC_PAGE_LASTMOD_BY_ROUTE = {
   products: SINGLE_SITE_STATIC_LASTMOD_ISO,
 } as const satisfies Partial<Record<PageType, string>>;
 
-const SINGLE_SITE_PRODUCT_MARKET_LASTMOD: Record<string, string> =
-  Object.fromEntries(
-    getAllMarketSlugs().map((marketSlug) => [
-      getProductMarketPath(marketSlug),
-      getMarketSpecsBySlug(marketSlug)?.updatedAt ??
-        SINGLE_SITE_STATIC_LASTMOD_ISO,
-    ]),
-  );
+function getRequiredProductMarketUpdatedAt(marketSlug: string): string {
+  const updatedAt = getMarketSpecsBySlug(marketSlug)?.updatedAt;
+  if (!updatedAt) {
+    throw new Error(`Missing product market sitemap updatedAt: ${marketSlug}`);
+  }
+
+  const date = new Date(updatedAt);
+  const timestamp = date.getTime();
+  const normalizedDate = Number.isNaN(timestamp)
+    ? undefined
+    : date.toISOString().replace(".000Z", "Z");
+  if (
+    !UTC_SECONDS_ISO_DATE_PATTERN.test(updatedAt) ||
+    normalizedDate !== updatedAt
+  ) {
+    throw new Error(`Invalid product market sitemap updatedAt: ${marketSlug}`);
+  }
+
+  return updatedAt;
+}
 
 export const SINGLE_SITE_STATIC_PAGE_LASTMOD = {
   ...fromRouteConfig(SINGLE_SITE_STATIC_PAGE_LASTMOD_BY_ROUTE),
-  ...SINGLE_SITE_PRODUCT_MARKET_LASTMOD,
 } as const satisfies Record<string, string>;
+
+export function getSingleSiteSitemapLastmod(): Record<string, string> {
+  return {
+    ...SINGLE_SITE_STATIC_PAGE_LASTMOD,
+    ...Object.fromEntries(
+      getAllMarketSlugs().map((marketSlug) => [
+        getProductMarketPath(marketSlug),
+        getRequiredProductMarketUpdatedAt(marketSlug),
+      ]),
+    ),
+  };
+}
 
 export const SINGLE_SITE_ROBOTS_DISALLOW_PATHS = [
   "/api/",
