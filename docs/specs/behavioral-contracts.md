@@ -395,9 +395,9 @@ All 5 market spec files contain required fields (product families, dimensions, s
 |----------|--------------|---------|---------|----------|---------|
 | Navigation & Discovery | 6 | 4 | 2 | 0 | 0 |
 | Inquiry & Conversion | 6 | 2 | 4 | 0 | 0 |
-| Content & Information | 5 | 1 | 2 | 2 | 2 |
+| Content & Information | 4 | 1 | 2 | 1 | 3 |
 | Resilience & Edge Cases | 6 | 4 | 2 | 0 | 0 |
-| **Total** | **23** | **11** | **10** | **2** | **2** |
+| **Total** | **22** | **11** | **10** | **1** | **3** |
 
 Retired contracts are kept for historical traceability but excluded from active coverage totals.
 

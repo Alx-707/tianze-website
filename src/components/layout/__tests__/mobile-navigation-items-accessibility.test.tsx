@@ -76,6 +76,8 @@ describe("Mobile Navigation - Advanced Integration Tests", () => {
           "navigation.contact": "Contact",
           "navigation.menu": "Toggle mobile menu",
           "navigation.close": "Close",
+          "language.english": "English",
+          "language.chinese": "Simplified Chinese",
           "accessibility.openMenu": "Open menu",
           "accessibility.closeMenu": "Close menu",
           "seo.siteName": "Site Name",
@@ -212,7 +214,7 @@ describe("Mobile Navigation - Advanced Integration Tests", () => {
         "Blog",
         "About",
         "Contact Sales",
-        "简体中文",
+        "Simplified Chinese",
       ]);
     });
 

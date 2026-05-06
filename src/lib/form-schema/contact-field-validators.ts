@@ -32,8 +32,8 @@ const createNameValidator = (fieldLabel: string) => {
         `${fieldLabel} must be less than ${NAME_MAX_LENGTH} characters`,
       )
       .regex(
-        /^[a-zA-Z\s\u4e00-\u9fff]+$/,
-        `${fieldLabel} can only contain letters and spaces`,
+        /^[\p{L}\p{M}\s.'-]+$/u,
+        `${fieldLabel} contains invalid characters`,
       );
 
     return applyOptionality(schema, field);

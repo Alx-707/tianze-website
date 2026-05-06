@@ -648,7 +648,7 @@ describe("MobileLanguageSwitcher Integration", () => {
     // Should show language section
     expect(screen.getByText(/Language|Select Language/)).toBeInTheDocument();
     expect(screen.getByText("English")).toBeInTheDocument();
-    expect(screen.getByText("简体中文")).toBeInTheDocument();
+    expect(screen.getByText("Simplified Chinese")).toBeInTheDocument();
   });
 
   it("detects current locale from next-intl locale context", async () => {
@@ -661,7 +661,7 @@ describe("MobileLanguageSwitcher Integration", () => {
 
     expect(
       screen.getByTestId("mobile-language-current-label-zh"),
-    ).toHaveTextContent("简体中文");
+    ).toHaveTextContent("Simplified Chinese");
     expect(
       screen.getByTestId("mobile-language-option-label-en"),
     ).toHaveTextContent("English");
@@ -683,7 +683,7 @@ describe("MobileLanguageSwitcher Integration", () => {
     ).toHaveTextContent("English");
     expect(
       screen.getByTestId("mobile-language-option-label-zh"),
-    ).toHaveTextContent("简体中文");
+    ).toHaveTextContent("Simplified Chinese");
     expect(
       screen.queryByTestId("mobile-language-option-label-en"),
     ).not.toBeInTheDocument();
@@ -696,7 +696,7 @@ describe("MobileLanguageSwitcher Integration", () => {
     await user.click(trigger);
 
     // Click on a language link
-    const chineseLink = screen.getByText("简体中文");
+    const chineseLink = screen.getByText("Simplified Chinese");
     await user.click(chineseLink);
 
     // Menu should close

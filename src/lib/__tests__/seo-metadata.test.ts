@@ -186,6 +186,7 @@ describe("SEO Metadata", () => {
         "about",
         "contact",
         "products",
+        "blog",
         "privacy",
         "terms",
       ] as const;

@@ -131,11 +131,14 @@ function MobileLanguageSwitcher({
   onNavigate?: () => void;
   pathname: string;
 }) {
+  const t = useTranslations();
   const currentLocale = useLocale() === "zh" ? "zh" : "en";
 
   const targetLocale = currentLocale === "zh" ? "en" : "zh";
-  const currentLabel = currentLocale === "zh" ? "简体中文" : "English";
-  const targetLabel = targetLocale === "zh" ? "简体中文" : "English";
+  const currentLabel =
+    currentLocale === "zh" ? t("language.chinese") : t("language.english");
+  const targetLabel =
+    targetLocale === "zh" ? t("language.chinese") : t("language.english");
 
   return (
     <div

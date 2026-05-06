@@ -9,6 +9,7 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type AirtableNS from "airtable";
 import type {
   AirtableBaseLike,
   AirtableServicePrivate,
@@ -62,6 +63,9 @@ const setServiceReady = (service: unknown) =>
     service as AirtableServicePrivate,
     createMockBase(tableFactory),
   );
+
+const createMockAirtableBase = (): AirtableNS.Base =>
+  createMockBase(tableFactory) as unknown as AirtableNS.Base;
 
 vi.mock("airtable", () => ({
   default: {
@@ -228,7 +232,7 @@ describe("Airtable Service - Create Operations Tests", () => {
       ]);
 
       await createContactRecord({
-        base: createMockBase(tableFactory),
+        base: createMockAirtableBase(),
         tableName: "Contacts",
         formData: {
           fullName: "  John   Doe  ",

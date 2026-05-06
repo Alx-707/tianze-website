@@ -320,18 +320,24 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
       await gotoContactPage(page, test.info(), "en");
 
       // 检查英文标签
-      await expect(page.getByText(/name/i).first()).toBeVisible();
-      await expect(page.getByText(/email/i).first()).toBeVisible();
-      await expect(page.getByText(/company/i).first()).toBeVisible();
+      const fullNameInput = page.locator('input[name="fullName"]');
+      await expect(fullNameInput).toBeVisible();
+      await expect(fullNameInput).toHaveAccessibleName(/^name\s*\*?$/i);
+      await expect(page.getByRole("textbox", { name: /email/i })).toBeVisible();
+      await expect(
+        page.getByRole("textbox", { name: /company/i }),
+      ).toBeVisible();
     });
 
     test("中文页面应该显示中文标签", async ({ page }) => {
       await gotoContactPage(page, test.info(), "zh");
 
       // 检查中文标签
-      await expect(page.getByText(/姓名/).first()).toBeVisible();
-      await expect(page.getByText(/邮箱/).first()).toBeVisible();
-      await expect(page.getByText(/公司/).first()).toBeVisible();
+      const fullNameInput = page.locator('input[name="fullName"]');
+      await expect(fullNameInput).toBeVisible();
+      await expect(fullNameInput).toHaveAccessibleName(/姓名/);
+      await expect(page.getByRole("textbox", { name: /邮箱/ })).toBeVisible();
+      await expect(page.getByRole("textbox", { name: /公司/ })).toBeVisible();
     });
   });
 
@@ -492,6 +498,11 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
     test("完整填写英文表单后提交按钮可见", async ({ page }) => {
       await gotoContactPage(page, test.info(), "en");
 
+      const submitButton = page.getByRole("button", {
+        name: /send message|submit/i,
+      });
+      await expect(submitButton).toBeDisabled();
+
       // 等待 Turnstile 加载
       await page.waitForTimeout(2000);
 
@@ -513,21 +524,21 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
         await privacyCheckbox.check();
       }
 
-      // 检查提交按钮
-      const submitButton = page.getByRole("button", {
-        name: /send message|submit/i,
-      });
       await expect(submitButton).toBeVisible();
+      await expect(submitButton).toBeEnabled();
     });
 
     test("完整填写中文表单后提交按钮可见", async ({ page }) => {
       await gotoContactPage(page, test.info(), "zh");
 
+      const submitButton = page.getByRole("button", { name: /发送|提交/i });
+      await expect(submitButton).toBeDisabled();
+
       // 等待 Turnstile 加载
       await page.waitForTimeout(2000);
 
       // 填写完整表单
-      await page.fill('input[name="fullName"]', "张");
+      await page.fill('input[name="fullName"]', "张三");
       await page.fill('input[name="email"]', "zhangsan@example.com");
       await page.fill('input[name="company"]', "测试公司");
       await page.fill('textarea[name="message"]', "这是来自 E2E 测试的消息。");
@@ -540,9 +551,8 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
         await privacyCheckbox.check();
       }
 
-      // 检查提交按钮
-      const submitButton = page.getByRole("button", { name: /发送|提交/i });
       await expect(submitButton).toBeVisible();
+      await expect(submitButton).toBeEnabled();
     });
   });
 });

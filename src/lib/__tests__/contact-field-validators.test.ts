@@ -43,16 +43,20 @@ function createEmailContext(
 }
 
 describe("contact-field-validators", () => {
-  it("uses the field label in full name errors and rejects invalid leading characters", () => {
+  it("rejects invalid leading characters in full names", () => {
     const schema = fullName(createContext("fullName"));
 
     const result = schema.safeParse("1Full name");
     expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.error.issues[0]?.message).toBe(
-        "Full name can only contain letters and spaces",
-      );
-    }
+  });
+
+  it("accepts common international full name formats", () => {
+    const schema = fullName(createContext("fullName"));
+
+    expect(schema.safeParse("张伟").success).toBe(true);
+    expect(schema.safeParse("O'Connor").success).toBe(true);
+    expect(schema.safeParse("Anne-Marie").success).toBe(true);
+    expect(schema.safeParse("José García").success).toBe(true);
   });
 
   it("validates email format, max length, and whitelist matching against any allowed domain", () => {

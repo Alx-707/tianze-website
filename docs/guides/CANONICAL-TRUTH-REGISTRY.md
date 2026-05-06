@@ -28,7 +28,7 @@
 | Privacy | Layer 3 `content/pages/{locale}/privacy.mdx` | Layer 3 | 不适用 | Layer 2 不再保存 TOC key | Layer 4 `legal.*` | TOC 从 MDX heading 派生 |
 | Terms | Layer 3 `content/pages/{locale}/terms.mdx` | Layer 3 | 不适用 | Layer 2 不再保存 TOC key | Layer 4 `legal.*` | TOC 从 MDX heading 派生 |
 | Product market pages | Route metadata helper + catalog/config | Product catalog/config | 不适用；当前不挂载共享 FAQ | Layer 2/product config + `src/config/single-site-seo.ts` | Layer 4 | ProductGroup schema 从产品结构派生 |
-| Blog listing | Route metadata helper + translation namespace | `src/app/[locale]/blog/page.tsx` + `messages/{locale}/critical.json` | 不适用 | `src/config/single-site-seo.ts` | Layer 4 | 当前是最小资源列表页，不是文章详情系统 |
+| Blog listing | Route metadata helper; future page prose should move to Layer 3 typed/MDX content | `src/app/[locale]/blog/page.tsx` typed topic list; `messages/{locale}/critical.json` 只作临时 UI chrome | 不适用 | `src/config/single-site-seo.ts` | Layer 4 | 当前是最小资源列表页，不是文章详情系统；不要把 translation JSON 当页面正文/FAQ/SEO 的长期写作源 |
 | OEM/custom capability | Home/About/Contact capability copy | Home/About/Contact sections and contact FAQ | Contact/About FAQ when applicable | Layer 2 only where existing sections need ordering/CTA | Layer 4 | 不再是独立页面；统一引导到 Contact/询盘 |
 
 ## SEO Metadata Ownership

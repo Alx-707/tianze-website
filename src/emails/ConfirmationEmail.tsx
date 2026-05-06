@@ -24,7 +24,11 @@ const summaryLineStyle: CSSProperties = {
 };
 
 export function ConfirmationEmail(data: EmailTemplateData) {
-  const displayName = [data.firstName, data.lastName].filter(Boolean).join(" ");
+  const displayName =
+    [data.firstName, data.lastName]
+      .map((namePart) => namePart.trim())
+      .filter(Boolean)
+      .join(" ") || data.email;
   const summaryLines = [
     `Name: ${displayName}`,
     data.company ? `Company: ${data.company}` : null,

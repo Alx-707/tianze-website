@@ -52,6 +52,7 @@ describe("page-dates", () => {
     }
 
     expect(SINGLE_SITE_PUBLIC_STATIC_PAGE_ROUTES).not.toContain("oem");
+    expect(SINGLE_SITE_PUBLIC_STATIC_PAGE_ROUTES).toContain("blog");
     expect(isMdxDrivenPage("/oem-custom-manufacturing")).toBe(false);
   });
 

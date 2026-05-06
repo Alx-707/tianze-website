@@ -116,7 +116,7 @@
           "required": "Name is required",
           "tooShort": "Name must be at least 2 characters",
           "tooLong": "Name must be less than 50 characters",
-          "invalid": "Name can only contain letters and spaces"
+          "invalid": "Please enter a valid name using letters, spaces, apostrophes, hyphens, or periods"
         },
         "email": {
           "required": "Email address is required",

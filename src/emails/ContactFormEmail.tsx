@@ -24,7 +24,11 @@ const messageLineStyle: CSSProperties = {
 export function ContactFormEmail(data: EmailTemplateData) {
   const messageLines = data.message.split("\n");
   const submittedAt = ResendUtils.formatDateTime(data.submittedAt);
-  const displayName = [data.firstName, data.lastName].filter(Boolean).join(" ");
+  const displayName =
+    [data.firstName, data.lastName]
+      .map((namePart) => namePart.trim())
+      .filter(Boolean)
+      .join(" ") || data.email;
 
   return (
     <EmailLayout

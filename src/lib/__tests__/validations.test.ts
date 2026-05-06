@@ -58,9 +58,7 @@ describe("validations - Schema Validation", () => {
       const result = contactFormSchema.safeParse(invalidData);
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues[0]?.message).toContain(
-          "only contain letters",
-        );
+        expect(result.error.issues[0]?.message).toContain("invalid characters");
       }
     });
 

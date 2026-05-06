@@ -147,7 +147,7 @@ export const languageMessages = {
   toggle: "Toggle language",
   selectLanguage: "Select Language",
   english: "English",
-  chinese: "中文",
+  chinese: "Simplified Chinese",
   switching: "Switching language...",
   switchSuccess: "Language switched successfully",
   switchError: "Failed to switch language",

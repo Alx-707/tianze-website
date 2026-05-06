@@ -33,6 +33,7 @@ const getMockTurnstile = () => mockTurnstile;
 describe("TurnstileWidget", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.stubEnv("NEXT_PUBLIC_TEST_MODE", "false");
   });
 
   afterEach(() => {
@@ -176,6 +177,16 @@ describe("TurnstileWidget", () => {
       handleLoad?.();
 
       expect(onLoad).toHaveBeenCalled();
+    });
+
+    it("应该在测试模式下提供测试 token", () => {
+      vi.stubEnv("NEXT_PUBLIC_TEST_MODE", "true");
+      const onSuccess = vi.fn();
+
+      render(<TurnstileWidget onSuccess={onSuccess} />);
+
+      expect(screen.getByTestId("turnstile-mock")).toBeInTheDocument();
+      expect(onSuccess).toHaveBeenCalledWith("XXXX.DUMMY.TOKEN.XXXX");
     });
 
     it("应该处理没有onError回调的错误", () => {
