@@ -3,6 +3,8 @@ import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { TurnstileWidget, useTurnstile } from "@/components/security/turnstile";
 
+const CLOUDFLARE_TURNSTILE_ALWAYS_PASS_SITE_KEY = "1x00000000000000000000AA";
+
 // 最早时机设置环境变量 - 在任何模块导入之前
 vi.stubEnv("NEXT_PUBLIC_TURNSTILE_SITE_KEY", "test-site-key-12345");
 vi.stubEnv("NEXT_PUBLIC_TEST_MODE", "false");
@@ -33,10 +35,14 @@ const getMockTurnstile = () => mockTurnstile;
 describe("TurnstileWidget", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.stubEnv("NODE_ENV", "test");
+    vi.stubEnv("NEXT_PUBLIC_TURNSTILE_SITE_KEY", "test-site-key-12345");
     vi.stubEnv("NEXT_PUBLIC_TEST_MODE", "false");
+    vi.stubEnv("NEXT_PUBLIC_BASE_URL", "https://example.com");
   });
 
   afterEach(() => {
+    vi.unstubAllEnvs();
     vi.resetModules(); // 清除Node模块缓存，防止跨测试污染
   });
 
@@ -181,12 +187,46 @@ describe("TurnstileWidget", () => {
 
     it("应该在测试模式下提供测试 token", () => {
       vi.stubEnv("NEXT_PUBLIC_TEST_MODE", "true");
+      vi.stubEnv(
+        "NEXT_PUBLIC_TURNSTILE_SITE_KEY",
+        CLOUDFLARE_TURNSTILE_ALWAYS_PASS_SITE_KEY,
+      );
       const onSuccess = vi.fn();
 
       render(<TurnstileWidget onSuccess={onSuccess} />);
 
       expect(screen.getByTestId("turnstile-mock")).toBeInTheDocument();
       expect(onSuccess).toHaveBeenCalledWith("XXXX.DUMMY.TOKEN.XXXX");
+    });
+
+    it("不应该只因为 NEXT_PUBLIC_TEST_MODE=true 就绕过真实 Turnstile", () => {
+      vi.stubEnv("NEXT_PUBLIC_TEST_MODE", "true");
+      vi.stubEnv("NEXT_PUBLIC_TURNSTILE_SITE_KEY", "real-site-key");
+      const onSuccess = vi.fn();
+
+      render(<TurnstileWidget onSuccess={onSuccess} />);
+
+      expect(screen.queryByTestId("turnstile-mock")).not.toBeInTheDocument();
+      expect(screen.getByTestId("turnstile-widget")).toBeInTheDocument();
+      expect(onSuccess).not.toHaveBeenCalled();
+    });
+
+    it("生产外部地址即使配置测试 key 也不应该启用测试模式", () => {
+      vi.stubEnv("NODE_ENV", "production");
+      vi.stubEnv("NEXT_PUBLIC_TEST_MODE", "true");
+      vi.stubEnv(
+        "NEXT_PUBLIC_TURNSTILE_SITE_KEY",
+        CLOUDFLARE_TURNSTILE_ALWAYS_PASS_SITE_KEY,
+      );
+      vi.stubEnv("NEXT_PUBLIC_BASE_URL", "https://tianze-pipe.com");
+      vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://tianze-pipe.com");
+      const onSuccess = vi.fn();
+
+      render(<TurnstileWidget onSuccess={onSuccess} />);
+
+      expect(screen.queryByTestId("turnstile-mock")).not.toBeInTheDocument();
+      expect(screen.getByTestId("turnstile-widget")).toBeInTheDocument();
+      expect(onSuccess).not.toHaveBeenCalled();
     });
 
     it("应该处理没有onError回调的错误", () => {
