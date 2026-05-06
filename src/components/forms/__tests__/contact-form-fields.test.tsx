@@ -23,30 +23,26 @@ describe("Contact Form Fields - React 19 Native Form Tests", () => {
   });
 
   describe("NameFields Component", () => {
-    it("should render first name and last name fields", () => {
+    it("should render a single full name field", () => {
       render(<NameFields {...defaultProps} />);
 
-      expect(screen.getByLabelText(/firstName/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/lastName/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/fullName/i)).toBeInTheDocument();
+      expect(screen.queryByLabelText(/lastName/i)).not.toBeInTheDocument();
     });
 
     it("should have required attributes on inputs", () => {
       render(<NameFields {...defaultProps} />);
 
-      const firstNameInput = screen.getByLabelText(/firstName/i);
-      const lastNameInput = screen.getByLabelText(/lastName/i);
+      const fullNameInput = screen.getByLabelText(/fullName/i);
 
-      expect(firstNameInput).toHaveAttribute("required");
-      expect(lastNameInput).toHaveAttribute("required");
-      expect(firstNameInput).toHaveAttribute("name", "firstName");
-      expect(lastNameInput).toHaveAttribute("name", "lastName");
+      expect(fullNameInput).toHaveAttribute("required");
+      expect(fullNameInput).toHaveAttribute("name", "fullName");
     });
 
     it("should disable inputs when isPending is true", () => {
       render(<NameFields {...defaultProps} isPending={true} />);
 
-      expect(screen.getByLabelText(/firstName/i)).toBeDisabled();
-      expect(screen.getByLabelText(/lastName/i)).toBeDisabled();
+      expect(screen.getByLabelText(/fullName/i)).toBeDisabled();
     });
   });
 
@@ -68,6 +64,7 @@ describe("Contact Form Fields - React 19 Native Form Tests", () => {
       expect(emailInput).toHaveAttribute("type", "email");
       expect(emailInput).toHaveAttribute("name", "email");
       expect(companyInput).toHaveAttribute("name", "company");
+      expect(companyInput).not.toHaveAttribute("required");
     });
 
     it("should disable inputs when isPending is true", () => {
@@ -161,8 +158,7 @@ describe("Contact Form Fields - React 19 Native Form Tests", () => {
       );
 
       // Verify translation function was called for field labels
-      expect(mockT).toHaveBeenCalledWith("firstName");
-      expect(mockT).toHaveBeenCalledWith("lastName");
+      expect(mockT).toHaveBeenCalledWith("fullName");
       expect(mockT).toHaveBeenCalledWith("email");
       expect(mockT).toHaveBeenCalledWith("company");
       expect(mockT).toHaveBeenCalledWith("phone");

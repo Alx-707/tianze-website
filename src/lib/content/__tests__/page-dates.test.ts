@@ -30,12 +30,17 @@ describe("page-dates", () => {
   });
 
   it("keeps sitemap MDX page detection aligned with public static routes", () => {
-    const nonMdxPages = new Set(["", getCanonicalPath("products")]);
+    const nonMdxPages = new Set([
+      "",
+      getCanonicalPath("products"),
+      getCanonicalPath("blog"),
+    ]);
     const representativePageContracts = [
       { path: "", isMdx: false },
       { path: "/products", isMdx: false },
+      { path: "/blog", isMdx: false },
       { path: "/about", isMdx: true },
-      { path: "/oem-custom-manufacturing", isMdx: true },
+      { path: "/oem-custom-manufacturing", isMdx: false },
     ] as const;
 
     for (const pagePath of SINGLE_SITE_PUBLIC_STATIC_PAGES) {
@@ -46,8 +51,9 @@ describe("page-dates", () => {
       expect(isMdxDrivenPage(path)).toBe(isMdx);
     }
 
-    expect(SINGLE_SITE_PUBLIC_STATIC_PAGE_ROUTES).toContain("oem");
-    expect(isMdxDrivenPage(getCanonicalPath("oem"))).toBe(true);
+    expect(SINGLE_SITE_PUBLIC_STATIC_PAGE_ROUTES).not.toContain("oem");
+    expect(SINGLE_SITE_PUBLIC_STATIC_PAGE_ROUTES).toContain("blog");
+    expect(isMdxDrivenPage("/oem-custom-manufacturing")).toBe(false);
   });
 
   it("loads the latest MDX updatedAt across locales for route-derived paths", async () => {

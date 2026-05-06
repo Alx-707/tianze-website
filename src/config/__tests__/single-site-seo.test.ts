@@ -46,9 +46,9 @@ describe("single-site-seo", () => {
       "about",
       "contact",
       "products",
+      "blog",
       "privacy",
       "terms",
-      "oem",
     ]);
     expect([...SINGLE_SITE_PUBLIC_STATIC_PAGE_ROUTES].sort()).toEqual(
       Object.keys(PATHS_CONFIG).sort(),
@@ -64,6 +64,9 @@ describe("single-site-seo", () => {
     expect(SINGLE_SITE_PUBLIC_STATIC_PAGES).toEqual(expectedPages);
     expect(SINGLE_SITE_PUBLIC_STATIC_PAGES).not.toContain(
       RETIRED_BENDING_MACHINES_PATH,
+    );
+    expect(SINGLE_SITE_PUBLIC_STATIC_PAGES).not.toContain(
+      "/oem-custom-manufacturing",
     );
   });
 

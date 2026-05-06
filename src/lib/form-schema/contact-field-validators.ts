@@ -14,7 +14,7 @@ const applyOptionality = (
 ): z.ZodTypeAny => (field.required ? schema : schema.optional());
 
 /**
- * Factory function for creating name field validators (firstName, lastName)
+ * Factory function for creating buyer name validators.
  * Eliminates code duplication by parameterizing the field label
  */
 const createNameValidator = (fieldLabel: string) => {
@@ -32,16 +32,15 @@ const createNameValidator = (fieldLabel: string) => {
         `${fieldLabel} must be less than ${NAME_MAX_LENGTH} characters`,
       )
       .regex(
-        /^[a-zA-Z\s\u4e00-\u9fff]+$/,
-        `${fieldLabel} can only contain letters and spaces`,
+        /^[\p{L}\p{M}\s.'-]+$/u,
+        `${fieldLabel} contains invalid characters`,
       );
 
     return applyOptionality(schema, field);
   };
 };
 
-export const firstName = createNameValidator("First name");
-export const lastName = createNameValidator("Last name");
+export const fullName = createNameValidator("Full name");
 
 export function email({ field, config }: ContactFormFieldValidatorContext) {
   let schema = z
@@ -75,14 +74,16 @@ export function company({ field }: ContactFormFieldValidatorContext) {
     .transform((val) => val.trim())
     .refine(
       (val) =>
-        val.length >= COMPANY_MIN_LENGTH && val.length <= COMPANY_MAX_LENGTH,
+        val.length === 0 ||
+        (val.length >= COMPANY_MIN_LENGTH && val.length <= COMPANY_MAX_LENGTH),
       {
         message: `Company name must be between ${COMPANY_MIN_LENGTH} and ${COMPANY_MAX_LENGTH} characters`,
       },
     )
-    .refine((val) => /^[a-zA-Z0-9\s\u4e00-\u9fff&.,'-]+$/.test(val), {
-      message: "Company name contains invalid characters",
-    });
+    .refine((val) => {
+      return val.length === 0 || /^[a-zA-Z0-9\s\u4e00-\u9fff&.,'-]+$/.test(val);
+    }, "Company name contains invalid characters")
+    .transform((val) => (val.length > 0 ? val : undefined));
 
   return applyOptionality(schema, field);
 }
@@ -156,8 +157,7 @@ export function website({ field }: ContactFormFieldValidatorContext) {
 }
 
 export const contactFieldValidators: ContactFormFieldValidators = {
-  firstName,
-  lastName,
+  fullName,
   email,
   company,
   message,

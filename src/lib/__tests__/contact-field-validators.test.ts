@@ -9,8 +9,7 @@ import { type ContactFormFieldValidatorContext } from "@/config/contact-form-val
 import {
   company,
   email,
-  firstName,
-  lastName,
+  fullName,
   message,
   phone,
   subject,
@@ -44,22 +43,20 @@ function createEmailContext(
 }
 
 describe("contact-field-validators", () => {
-  it("uses the field labels in first/last name errors and rejects invalid leading characters", () => {
-    const firstNameSchema = firstName(createContext("firstName"));
-    const lastNameSchema = lastName(createContext("lastName"));
+  it("rejects invalid leading characters in full names", () => {
+    const schema = fullName(createContext("fullName"));
 
-    for (const [schema, expectedLabel] of [
-      [firstNameSchema, "First name"],
-      [lastNameSchema, "Last name"],
-    ] as const) {
-      const result = schema.safeParse(`1${expectedLabel}`);
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues[0]?.message).toBe(
-          `${expectedLabel} can only contain letters and spaces`,
-        );
-      }
-    }
+    const result = schema.safeParse("1Full name");
+    expect(result.success).toBe(false);
+  });
+
+  it("accepts common international full name formats", () => {
+    const schema = fullName(createContext("fullName"));
+
+    expect(schema.safeParse("张伟").success).toBe(true);
+    expect(schema.safeParse("O'Connor").success).toBe(true);
+    expect(schema.safeParse("Anne-Marie").success).toBe(true);
+    expect(schema.safeParse("José García").success).toBe(true);
   });
 
   it("validates email format, max length, and whitelist matching against any allowed domain", () => {
@@ -110,6 +107,7 @@ describe("contact-field-validators", () => {
 
     expect(schema.parse(`  ${minCompany}  `)).toBe(minCompany);
     expect(schema.parse(maxCompany)).toBe(maxCompany);
+    expect(schema.parse("")).toBeUndefined();
 
     const tooShort = schema.safeParse("A");
     expect(tooShort.success).toBe(false);

@@ -54,9 +54,9 @@ export const SINGLE_SITE_PUBLIC_STATIC_PAGE_ROUTES = [
   "about",
   "contact",
   "products",
+  "blog",
   "privacy",
   "terms",
-  "oem",
 ] as const satisfies readonly PageType[];
 
 export const SINGLE_SITE_PUBLIC_STATIC_PAGES =
@@ -69,9 +69,9 @@ const SINGLE_SITE_STATIC_SITEMAP_PAGE_CONFIG_BY_ROUTE = {
   about: { changeFrequency: "monthly", priority: 0.8 },
   contact: { changeFrequency: "monthly", priority: 0.8 },
   products: { changeFrequency: "weekly", priority: 0.9 },
+  blog: { changeFrequency: "weekly", priority: 0.7 },
   privacy: { changeFrequency: "monthly", priority: 0.7 },
   terms: { changeFrequency: "monthly", priority: 0.7 },
-  oem: { changeFrequency: "monthly", priority: 0.8 },
 } as const satisfies Record<PageType, SingleSiteSitemapPageConfig>;
 
 export const SINGLE_SITE_SITEMAP_PAGE_CONFIG: Readonly<
@@ -93,6 +93,7 @@ const SINGLE_SITE_STATIC_PAGE_LASTMOD_BY_ROUTE = {
   // MDX-driven pages read updatedAt from content/pages/{locale}/*.mdx.
   home: SINGLE_SITE_STATIC_LASTMOD_ISO,
   products: SINGLE_SITE_STATIC_LASTMOD_ISO,
+  blog: SINGLE_SITE_STATIC_LASTMOD_ISO,
 } as const satisfies Partial<Record<PageType, string>>;
 
 function getRequiredProductMarketUpdatedAt(marketSlug: string): string {

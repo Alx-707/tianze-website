@@ -39,7 +39,7 @@ Notes: Hero section visibility and CTA link count are tested. CTA `href` targets
 
 #### BC-002: Buyer can navigate to all main pages from the header
 
-Desktop: Navigation bar shows links to Home, Products, OEM, About, and Contact. Mobile: Hamburger menu opens a sheet with the same links. Clicking any link reaches the correct page. Blog links are intentionally absent while BC-015 and BC-016 remain retired.
+Desktop: Navigation bar shows Home, Products, Blog, and About as the main navigation links. Contact is presented as a conversion CTA outside the main navigation, placed before the language switcher. Mobile: the header keeps a Contact CTA visible next to the menu trigger; the sheet shows Home, Products, Blog, and About, plus a Contact CTA below the navigation links. Clicking any link reaches the correct page.
 
 | Field | Value |
 |-------|-------|
@@ -108,7 +108,7 @@ On mobile viewports, tapping the hamburger opens a navigation sheet. Selecting a
 
 #### BC-007: Buyer can submit a contact inquiry
 
-The /contact page renders a form with fields: firstName, lastName, email, company, message, and a privacy policy checkbox. Filling all required fields and passing Turnstile verification enables the submit button. Submission invokes the contact Server Action and displays a success or error message.
+The /contact page renders a form with fields: fullName, email, company (optional), message, and a privacy policy checkbox. Filling all required fields and passing Turnstile verification enables the submit button. Submission invokes the contact Server Action and displays a success or error message.
 
 | Field | Value |
 |-------|-------|
@@ -123,7 +123,7 @@ Notes: `tests/e2e/contact-form-smoke.spec.ts` is a test-mode smoke only; it prov
 
 #### BC-008: Contact form validates required fields before submission
 
-Empty required fields (firstName, lastName, email, message, acceptPrivacy) prevent submission. Email field validates email format. Submit button stays disabled until Turnstile verification completes.
+Empty required fields (fullName, email, message, acceptPrivacy) prevent submission. Email field validates email format. Submit button stays disabled until Turnstile verification completes.
 
 | Field | Value |
 |-------|-------|
@@ -232,16 +232,16 @@ Notes: Product spec data integrity is unit-tested. E2E journey test verifies a m
 
 ---
 
-#### BC-015: Retired — Blog listing page
+#### BC-015: Blog listing page
 
-The blog listing route was retired from the current public single-site route set. /blog should not be listed in navigation or sitemap until a blog route is intentionally restored.
+/blog renders a localized minimal buyer-resource listing page. The page introduces planned resource topics for PVC conduit fitting standards, inquiry preparation, and PETG pneumatic tube selection, and includes a Contact CTA for buyers who need an answer before articles are published. /blog is listed in header navigation and sitemap and keeps the same no-JS HTML landmark contract as other public pages.
 
 | Field | Value |
 |-------|-------|
 | Priority | Medium |
-| Test Type | Unit |
-| Test File | `src/app/__tests__/sitemap.test.ts` |
-| Status | Retired |
+| Test Type | Unit + E2E |
+| Test File | `src/app/[locale]/blog/__tests__/page.test.tsx`, `src/app/__tests__/sitemap.test.ts`, `tests/e2e/navigation.spec.ts`, `tests/e2e/i18n.spec.ts`, `tests/e2e/page-contracts.spec.ts`, `tests/e2e/no-js-html-contract.spec.ts` |
+| Status | Covered |
 
 ---
 
@@ -255,6 +255,8 @@ The blog post route was retired from the current public single-site route set. /
 | Test Type | Unit |
 | Test File | `src/app/__tests__/sitemap.test.ts` |
 | Status | Retired |
+
+Notes: The current restored Blog scope is listing-only. Individual article routes remain retired until a real publishing model is added.
 
 ---
 
@@ -288,16 +290,16 @@ Notes: The active proof is that public navigation, sitemap, and E2E key-page cov
 
 ---
 
-#### BC-019: OEM page communicates custom manufacturing capability
+#### BC-019: Retired — OEM standalone page
 
-/oem-custom-manufacturing renders OEM capabilities, customization options, and a CTA to /contact. The page loads in both locales without errors.
+The OEM/custom manufacturing standalone route is retired. OEM remains a manufacturing capability shown inside Home, About, Contact, and inquiry context, but `/oem-custom-manufacturing` is no longer an active public page or sitemap URL. Historical localized URLs permanently redirect to the matching `/contact` page so indexed or shared links still land on the inquiry path.
 
 | Field | Value |
 |-------|-------|
 | Priority | Medium |
-| Test Type | E2E |
-| Test File | -- |
-| Status | Untested |
+| Test Type | Static Truth + Unit + E2E |
+| Test File | `src/app/__tests__/sitemap.test.ts`, `src/config/__tests__/paths.test.ts`, `src/config/__tests__/single-site-seo.test.ts`, `src/__tests__/middleware-locale-cookie.test.ts`, `tests/e2e/navigation.spec.ts` |
+| Status | Retired |
 
 ---
 
@@ -348,7 +350,7 @@ Notes: `tests/integration/api/health.test.ts` covers the route in-suite. Deploye
 
 #### BC-023: Sitemap includes all public pages in both locales
 
-/sitemap.xml lists all active public pages (homepage, about, contact, products, products/[market], oem-custom-manufacturing, privacy, terms) with hreflang alternates for en and zh. Retired blog routes are explicitly excluded.
+/sitemap.xml lists all active public pages (homepage, about, contact, products, blog, products/[market], privacy, terms) with hreflang alternates for en and zh. Retired standalone OEM and blog post-detail routes are explicitly excluded.
 
 | Field | Value |
 |-------|-------|
@@ -393,9 +395,9 @@ All 5 market spec files contain required fields (product families, dimensions, s
 |----------|--------------|---------|---------|----------|---------|
 | Navigation & Discovery | 6 | 4 | 2 | 0 | 0 |
 | Inquiry & Conversion | 6 | 2 | 4 | 0 | 0 |
-| Content & Information | 4 | 0 | 2 | 2 | 3 |
+| Content & Information | 4 | 1 | 2 | 1 | 3 |
 | Resilience & Edge Cases | 6 | 4 | 2 | 0 | 0 |
-| **Total** | **22** | **10** | **10** | **2** | **3** |
+| **Total** | **22** | **11** | **10** | **1** | **3** |
 
 Retired contracts are kept for historical traceability but excluded from active coverage totals.
 
@@ -417,4 +419,4 @@ Retired contracts are kept for historical traceability but excluded from active 
 
 ### Medium-priority gaps
 
-- **BC-019** (Untested): OEM page
+- No active medium-priority untested contracts after the standalone OEM route retirement.

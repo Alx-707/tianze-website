@@ -63,6 +63,7 @@ describe("paths configuration", () => {
         "about",
         "contact",
         "products",
+        "blog",
         "privacy",
         "terms",
       ];
@@ -90,6 +91,7 @@ describe("paths configuration", () => {
         "about",
         "contact",
         "products",
+        "blog",
         "privacy",
         "terms",
       ];
@@ -312,7 +314,7 @@ describe("paths configuration", () => {
       expect(getCanonicalPath("home")).toBe("/");
       expect(getCanonicalPath("contact")).toBe("/contact");
       expect(getCanonicalPath("products")).toBe("/products");
-      expect(getCanonicalPath("oem")).toBe("/oem-custom-manufacturing");
+      expect(getCanonicalPath("blog")).toBe("/blog");
     });
 
     it("should derive product market paths from the products route", () => {
@@ -328,6 +330,7 @@ describe("paths configuration", () => {
       expect(getPageTypeFromPath("", "en")).toBe("home");
       expect(getPageTypeFromPath("/about", "en")).toBe("about");
       expect(getPageTypeFromPath("/contact", "zh")).toBe("contact");
+      expect(getPageTypeFromPath("/blog", "en")).toBe("blog");
     });
 
     it("should return null for invalid paths", () => {
@@ -392,6 +395,7 @@ describe("paths configuration", () => {
         "about",
         "contact",
         "products",
+        "blog",
         "privacy",
         "terms",
       ];
@@ -654,9 +658,9 @@ describe("paths configuration", () => {
         "about",
         "contact",
         "products",
+        "blog",
         "privacy",
         "terms",
-        "oem",
       ];
 
       // All expected types should be present

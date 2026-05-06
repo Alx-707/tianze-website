@@ -37,6 +37,15 @@ describe("contact email templates", () => {
       expect(text).toContain("PVC conduit fitting quote");
       expect(text).toContain("Need a distributor quote.");
     });
+
+    it("falls back to email when admin notification name parts are blank", async () => {
+      const text = await render(
+        <ContactFormEmail {...contactEmailData} firstName=" " lastName="" />,
+        { plainText: true },
+      );
+
+      expect(text).toMatch(/Name\s+jane\.smith@example\.com/);
+    });
   });
 
   describe("ConfirmationEmail", () => {
@@ -58,6 +67,16 @@ describe("contact email templates", () => {
       expect(text).toContain("Dear Jane");
       expect(text).toContain("Smith Industries");
       expect(text).toContain("get back to you within 24 hours");
+    });
+
+    it("falls back to email when customer name parts are blank", async () => {
+      const text = await render(
+        <ConfirmationEmail {...contactEmailData} firstName=" " lastName="" />,
+        { plainText: true },
+      );
+
+      expect(text).toContain("Dear jane.smith@example.com");
+      expect(text).toContain("Name: jane.smith@example.com");
     });
   });
 });

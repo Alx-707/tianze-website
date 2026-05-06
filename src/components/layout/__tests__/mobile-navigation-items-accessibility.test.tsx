@@ -71,11 +71,13 @@ describe("Mobile Navigation - Advanced Integration Tests", () => {
         const translations: Record<string, string> = {
           "navigation.home": "Home",
           "navigation.about": "About",
+          "navigation.blog": "Blog",
           "navigation.products": "Products",
-          "navigation.oem": "OEM",
           "navigation.contact": "Contact",
           "navigation.menu": "Toggle mobile menu",
           "navigation.close": "Close",
+          "language.english": "English",
+          "language.chinese": "Simplified Chinese",
           "accessibility.openMenu": "Open menu",
           "accessibility.closeMenu": "Close menu",
           "seo.siteName": "Site Name",
@@ -164,8 +166,8 @@ describe("Mobile Navigation - Advanced Integration Tests", () => {
 
       const links = screen.getAllByRole("link");
       expect(links.length).toBeGreaterThanOrEqual(3);
-      const [homeLink, productsLink, oemLink] = links as HTMLAnchorElement[];
-      if (!homeLink || !productsLink || !oemLink) {
+      const [homeLink, productsLink, blogLink] = links as HTMLAnchorElement[];
+      if (!homeLink || !productsLink || !blogLink) {
         throw new Error(
           "Expected navigation links to be present for keyboard test",
         );
@@ -178,7 +180,7 @@ describe("Mobile Navigation - Advanced Integration Tests", () => {
       expect(productsLink).toHaveFocus();
 
       await user.tab();
-      expect(oemLink).toHaveFocus();
+      expect(blogLink).toHaveFocus();
     });
 
     it("handles missing translations gracefully", async () => {
@@ -209,12 +211,10 @@ describe("Mobile Navigation - Advanced Integration Tests", () => {
       expect(linkTexts).toEqual([
         "Home",
         "Products",
-        "OEM",
+        "Blog",
         "About",
-        "Contact",
         "Contact Sales",
-        "English✓",
-        "简体中文",
+        "Simplified Chinese",
       ]);
     });
 
@@ -259,8 +259,9 @@ describe("Mobile Navigation - Advanced Integration Tests", () => {
           const translations: Record<string, string> = {
             "navigation.home": "Very Long Home Page Title",
             "navigation.about": "About Us and Our Company",
-            "navigation.services": "Our Professional Services",
-            "navigation.contact": "Contact Information",
+            "navigation.blog": "PVC Electrical Standards Blog",
+            "navigation.products": "Industrial Conduit Products",
+            "navigation.contactSales": "Contact Information",
             "navigation.menu": "Menu",
             "navigation.close": "Close",
           };
@@ -441,6 +442,7 @@ describe("Mobile Navigation - Advanced Integration Tests", () => {
             "navigation.about": "关于我们",
             "navigation.products": "产品",
             "navigation.blog": "博客",
+            "navigation.contactSales": "联系销售",
             "accessibility.openMenu": "打开菜单",
             "accessibility.closeMenu": "关闭菜单",
             "seo.siteName": "网站名称",

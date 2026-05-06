@@ -9,6 +9,7 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type AirtableNS from "airtable";
 import type {
   AirtableBaseLike,
   AirtableServicePrivate,
@@ -62,6 +63,9 @@ const setServiceReady = (service: unknown) =>
     service as AirtableServicePrivate,
     createMockBase(tableFactory),
   );
+
+const createMockAirtableBase = (): AirtableNS.Base =>
+  createMockBase(tableFactory) as unknown as AirtableNS.Base;
 
 vi.mock("airtable", () => ({
   default: {
@@ -207,6 +211,45 @@ describe("Airtable Service - Create Operations Tests", () => {
             Status: "New",
             Source: "Website Contact Form",
             "Submitted At": expect.any(String),
+          }),
+        },
+      ]);
+    });
+
+    it("should collapse repeated whitespace when mapping full name to Airtable fields", async () => {
+      const { createContactRecord } =
+        await import("../airtable/service-internal/contact-records");
+
+      mockCreate.mockResolvedValue([
+        createMockRecord({
+          id: "rec123456",
+          fields: {
+            "First Name": "John",
+            "Last Name": "Doe",
+          },
+          createdTime: "2023-01-01T00:00:00Z",
+        }),
+      ]);
+
+      await createContactRecord({
+        base: createMockAirtableBase(),
+        tableName: "Contacts",
+        formData: {
+          fullName: "  John   Doe  ",
+          email: "JOHN.DOE@example.com",
+          company: undefined,
+          message: "This is a test message",
+          acceptPrivacy: true,
+        },
+      });
+
+      expect(mockCreate).toHaveBeenCalledWith([
+        {
+          fields: expect.objectContaining({
+            "First Name": "John",
+            "Last Name": "Doe",
+            Email: "john.doe@example.com",
+            Company: "",
           }),
         },
       ]);

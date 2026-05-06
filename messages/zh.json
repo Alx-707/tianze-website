@@ -47,9 +47,9 @@
     "home": "首页",
     "more": "更多",
     "about": "关于",
+    "blog": "博客",
     "contact": "联系我们",
     "contactSales": "联系我们",
-    "oem": "OEM 定制",
     "services": "服务",
     "products": "产品",
     "solutions": "解决方案",
@@ -78,6 +78,31 @@
     "docsDescription": "完整的文档和指南",
     "guidesDescription": "分步教程",
     "blogDescription": "最新更新和见解"
+  },
+  "blog": {
+    "eyebrow": "买家资源",
+    "title": "博客",
+    "description": "面向经销商和项目采购的实用笔记，帮助评估 PVC 电工套管配件、PETG 气动物流管和工厂合作伙伴。",
+    "intro": "这些内容会围绕规格确认、标准差异和询盘准备展开，帮助买家更快判断供应商是否匹配。",
+    "topicsTitle": "准备中的主题",
+    "contactCta": "咨询产品问题",
+    "topics": {
+      "standards": {
+        "label": "标准",
+        "title": "不同市场的 PVC 电工管件标准",
+        "description": "说明 UL / ASTM、AS/NZS、NOM、IEC 等标准如何影响产品选择。"
+      },
+      "inquiry": {
+        "label": "询盘准备",
+        "title": "请求报价前需要准备什么",
+        "description": "包括口径、弯曲半径、壁厚、认证、包装和样品需求。"
+      },
+      "pneumatic": {
+        "label": "PETG 管",
+        "title": "PETG 气动物流管选型笔记",
+        "description": "梳理医院物流气动传输管项目中的基础选型要点。"
+      }
+    }
   },
   "theme": {
     "toggle": "切换主题",
@@ -198,7 +223,7 @@
         "spec2": "贴牌包装服务",
         "spec3": "从打样到量产全程支持",
         "standard": "按您的规格",
-        "link": "/oem-custom-manufacturing"
+        "link": "/contact"
       }
     },
     "resources": {
@@ -1531,15 +1556,13 @@
       "title": "联系我们",
       "description": "与我们取得联系，我们很乐意听到您的声音。",
       "optional": "选填",
-      "firstName": "名字",
-      "lastName": "姓氏",
+      "fullName": "姓名",
       "email": "邮箱地址",
       "company": "公司名称",
       "phone": "电话号码",
       "subject": "主题",
       "message": "消息内容",
-      "firstNamePlaceholder": "请输入您的名字",
-      "lastNamePlaceholder": "请输入您的姓氏",
+      "fullNamePlaceholder": "请输入您的姓名",
       "emailPlaceholder": "your@email.com",
       "companyPlaceholder": "您的公司名称",
       "phonePlaceholder": "+86 138 0000 0000",
@@ -1558,17 +1581,11 @@
       "rateLimitMessage": "您刚刚提交过表单，请稍候再尝试。",
       "errors": {
         "generic": "请检查标记的字段后再试一次。",
-        "firstName": {
-          "required": "名字为必填项",
-          "tooShort": "名字至少需要2个字符",
-          "tooLong": "名字长度需少于50个字符",
-          "invalid": "名字仅允许字母和空格"
-        },
-        "lastName": {
-          "required": "姓氏为必填项",
-          "tooShort": "姓氏至少需要2个字符",
-          "tooLong": "姓氏长度需少于50个字符",
-          "invalid": "姓氏仅允许字母和空格"
+        "fullName": {
+          "required": "姓名为必填项",
+          "tooShort": "姓名至少需要2个字符",
+          "tooLong": "姓名长度需少于50个字符",
+          "invalid": "请输入有效姓名，可包含中文、字母、空格、撇号、连字符或句点"
         },
         "email": {
           "required": "邮箱地址为必填项",
@@ -1599,10 +1616,8 @@
         }
       },
       "validation": {
-        "firstNameRequired": "名字为必填项",
-        "firstNameTooShort": "名字至少需要2个字符",
-        "lastNameRequired": "姓氏为必填项",
-        "lastNameTooShort": "姓氏至少需要2个字符",
+        "fullNameRequired": "姓名为必填项",
+        "fullNameTooShort": "姓名至少需要2个字符",
         "emailRequired": "邮箱地址为必填项",
         "emailInvalid": "请输入有效的邮箱地址",
         "messageRequired": "消息内容为必填项",
@@ -1822,73 +1837,6 @@
       "governing": "适用法律",
       "disputes": "争议解决",
       "contact": "联系方式"
-    }
-  },
-  "oem": {
-    "meta": {
-      "title": "OEM定制制造 | 天泽",
-      "description": "定制PVC线管管件制造——您的规格，我们的产能。从原型到量产。"
-    },
-    "hero": {
-      "title": "OEM定制制造",
-      "subtitle": "您的规格，我们的产能。"
-    },
-    "scope": {
-      "title": "服务范围",
-      "customSizes": {
-        "title": "定制尺寸",
-        "desc": "按您的精确要求生产非标管径、角度和壁厚。"
-      },
-      "privateLabel": {
-        "title": "自有品牌",
-        "desc": "您的品牌，您的包装。完整的品牌产品解决方案。"
-      },
-      "moldDevelopment": {
-        "title": "模具开发",
-        "desc": "自主模具设计和制造，适用于任何管件几何形状。"
-      },
-      "qualityAssurance": {
-        "title": "质量保证",
-        "desc": "全检并可选第三方认证，满足您要求的标准。"
-      }
-    },
-    "process": {
-      "title": "合作流程",
-      "step1": {
-        "title": "询盘",
-        "desc": "分享您的规格和需求",
-        "timeline": "第1天"
-      },
-      "step2": {
-        "title": "打样",
-        "desc": "我们生产样品供您确认",
-        "timeline": "7-15天"
-      },
-      "step3": {
-        "title": "模具开发",
-        "desc": "根据需要进行定制模具开发",
-        "timeline": "15-30天"
-      },
-      "step4": {
-        "title": "试产",
-        "desc": "小批量生产用于最终验证",
-        "timeline": "7-10天"
-      },
-      "step5": {
-        "title": "量产",
-        "desc": "全面生产和质量控制交付",
-        "timeline": "15-20天"
-      }
-    },
-    "standards": {
-      "title": "支持标准",
-      "desc": "我们按所有主要国际线管标准制造——也支持定制规格。",
-      "custom": "也支持定制标准"
-    },
-    "cta": {
-      "heading": "开始您的OEM项目",
-      "description": "告诉我们您的规格。我们将提供包含时间表和价格的详细方案。",
-      "button": "立即开始"
     }
   }
 }

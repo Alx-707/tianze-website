@@ -14,10 +14,9 @@ import { ONE, PERCENTAGE_FULL, ZERO } from "@/constants";
 
 function sanitizeFormData(formData: ContactFormData): ContactFormData {
   return {
-    firstName: sanitizePlainText(formData.firstName),
-    lastName: sanitizePlainText(formData.lastName),
+    fullName: sanitizePlainText(formData.fullName),
     email: formData.email.toLowerCase().trim(),
-    company: sanitizePlainText(formData.company),
+    company: formData.company ? sanitizePlainText(formData.company) : undefined,
     message: sanitizePlainText(formData.message),
     phone: formData.phone ? sanitizePlainText(formData.phone) : undefined,
     subject: formData.subject ? sanitizePlainText(formData.subject) : undefined,
@@ -40,12 +39,15 @@ export async function createContactRecord(params: {
 
   try {
     const sanitizedData = sanitizeFormData(formData);
+    const [firstName, ...restNameParts] = sanitizedData.fullName
+      .trim()
+      .split(/\s+/u);
 
     const recordData = {
-      "First Name": sanitizedData.firstName,
-      "Last Name": sanitizedData.lastName,
+      "First Name": firstName ?? sanitizedData.fullName,
+      "Last Name": restNameParts.join(" "),
       Email: sanitizedData.email,
-      Company: sanitizedData.company,
+      Company: sanitizedData.company ?? "",
       Message: sanitizedData.message,
       Phone: sanitizedData.phone || "",
       Subject: sanitizedData.subject || "",

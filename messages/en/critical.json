@@ -47,9 +47,9 @@
     "home": "Home",
     "more": "More",
     "about": "About",
+    "blog": "Blog",
     "contact": "Contact",
     "contactSales": "Contact Sales",
-    "oem": "OEM",
     "services": "Services",
     "products": "Products",
     "solutions": "Solutions",
@@ -79,6 +79,31 @@
     "guidesDescription": "Step-by-step tutorials",
     "blogDescription": "Latest updates and insights"
   },
+  "blog": {
+    "eyebrow": "Buyer resources",
+    "title": "Blog",
+    "description": "Practical notes for distributors and project buyers evaluating PVC conduit fittings, PETG pneumatic tubes, and factory partners.",
+    "intro": "Use these notes to prepare clearer specifications and shorten supplier evaluation.",
+    "topicsTitle": "Topics we are preparing",
+    "contactCta": "Ask us a product question",
+    "topics": {
+      "standards": {
+        "label": "Standards",
+        "title": "PVC conduit fitting standards by market",
+        "description": "How UL / ASTM, AS/NZS, NOM, and IEC expectations affect product selection."
+      },
+      "inquiry": {
+        "label": "Inquiry prep",
+        "title": "What to prepare before requesting a quote",
+        "description": "Diameter, bend radius, wall thickness, certification, packaging, and sample expectations."
+      },
+      "pneumatic": {
+        "label": "PETG tubes",
+        "title": "PETG pneumatic tube selection notes",
+        "description": "Basic selection points for hospital logistics pneumatic tube projects."
+      }
+    }
+  },
   "theme": {
     "toggle": "Toggle theme",
     "toggleLabel": "Theme toggle",
@@ -95,7 +120,7 @@
     "toggle": "Toggle language",
     "selectLanguage": "Select Language",
     "english": "English",
-    "chinese": "中文",
+    "chinese": "Simplified Chinese",
     "switching": "Switching language...",
     "switchSuccess": "Language switched successfully",
     "switchError": "Failed to switch language",
@@ -198,7 +223,7 @@
         "spec2": "Private labeling and packaging",
         "spec3": "Prototype to mass production support",
         "standard": "Per your spec",
-        "link": "/oem-custom-manufacturing"
+        "link": "/contact"
       }
     },
     "resources": {

@@ -282,6 +282,10 @@ export function createPageSEOConfig(
       type: "website" as const,
       keywords: ["Products", "Solutions", "Enterprise", "B2B"],
     },
+    blog: {
+      type: "website" as const,
+      keywords: ["Blog", "Buyer Resources", "PVC Conduit", "PETG Tubes"],
+    },
     privacy: {
       type: "website" as const,
       keywords: ["Privacy", "Policy", "Data Protection"],
@@ -289,10 +293,6 @@ export function createPageSEOConfig(
     terms: {
       type: "website" as const,
       keywords: ["Terms", "Conditions", "Legal"],
-    },
-    oem: {
-      type: "website" as const,
-      keywords: ["OEM", "Custom Manufacturing", "PVC Conduit", "Private Label"],
     },
   };
 

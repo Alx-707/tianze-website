@@ -174,56 +174,6 @@ const _entries: ContentEntry[] = [
   {
     "type": "pages",
     "locale": "en",
-    "slug": "oem-custom-manufacturing",
-    "extension": ".mdx",
-    "filePath": "/content/pages/en/oem-custom-manufacturing.mdx",
-    "relativePath": "content/pages/en/oem-custom-manufacturing.mdx",
-    "metadata": {
-      "locale": "en",
-      "title": "OEM Custom Manufacturing",
-      "description": "Custom PVC conduit fittings manufacturing — your brand, your specs, our factory.",
-      "slug": "oem-custom-manufacturing",
-      "publishedAt": "2024-06-01",
-      "updatedAt": "2026-04-01",
-      "lastReviewed": "2026-04-01",
-      "draft": false,
-      "seo": {
-        "title": "OEM Custom PVC Conduit Manufacturing | Tianze Pipe",
-        "description": "Full OEM/ODM services for PVC conduit fittings. Custom colors, sizes, packaging, and branding from our ISO-certified factory."
-      },
-      "faq": [
-        {
-          "id": "oem-moq",
-          "question": "What is the MOQ for OEM orders?",
-          "answer": "OEM orders typically require a minimum of 1,000 pieces per SKU. For new molds, higher quantities may be required to offset tooling costs."
-        },
-        {
-          "id": "oem-lead-time",
-          "question": "How long does an OEM order take?",
-          "answer": "First order with new molds: 35-45 days. Repeat orders: 20-25 days. Rush orders may be available — contact us for details."
-        },
-        {
-          "id": "oem-branding",
-          "question": "Can you put our brand on the products?",
-          "answer": "Yes, we offer full branding services including custom printing, embossing, packaging design, and labeling to your specifications."
-        },
-        {
-          "id": "oem-standards",
-          "question": "Which international standards can you manufacture to?",
-          "answer": "We manufacture to AS/NZS 2053, ASTM D1785, IEC 61386, NOM, and other regional standards. We can also work with your custom specifications."
-        },
-        {
-          "id": "oem-quality",
-          "question": "How do you ensure quality for OEM orders?",
-          "answer": "We maintain ISO 9001:2015 certification. Every OEM order goes through our standard QC process including raw material testing, in-process inspection, and final inspection with photo documentation."
-        }
-      ]
-    },
-    "content": "\n## OEM Manufacturing Scope\n\nThis MDX file owns SEO metadata and FAQ content for the OEM page. The visible scope cards, process steps, standards, and CTA modules remain structured page sections powered by the translation namespace.\n"
-  },
-  {
-    "type": "pages",
-    "locale": "en",
     "slug": "privacy",
     "extension": ".mdx",
     "filePath": "/content/pages/en/privacy.mdx",
@@ -435,56 +385,6 @@ const _entries: ContentEntry[] = [
   {
     "type": "pages",
     "locale": "zh",
-    "slug": "oem-custom-manufacturing",
-    "extension": ".mdx",
-    "filePath": "/content/pages/zh/oem-custom-manufacturing.mdx",
-    "relativePath": "content/pages/zh/oem-custom-manufacturing.mdx",
-    "metadata": {
-      "locale": "zh",
-      "title": "OEM 定制制造",
-      "description": "PVC 电工套管配件定制制造——您的品牌、您的规格、我们的工厂。",
-      "slug": "oem-custom-manufacturing",
-      "publishedAt": "2024-06-01",
-      "updatedAt": "2026-04-01",
-      "lastReviewed": "2026-04-01",
-      "draft": false,
-      "seo": {
-        "title": "OEM PVC 电工套管定制制造 | Tianze Pipe",
-        "description": "为 PVC 电工套管配件提供完整 OEM/ODM 服务，包括定制颜色、尺寸、包装和品牌标识，由 ISO 认证工厂生产。"
-      },
-      "faq": [
-        {
-          "id": "oem-moq",
-          "question": "OEM 订单的起订量是多少？",
-          "answer": "OEM 订单通常每个 SKU 最低 1,000 件。涉及新模具时，为分摊模具成本，起订量可能更高。"
-        },
-        {
-          "id": "oem-lead-time",
-          "question": "OEM 订单需要多久？",
-          "answer": "新模具首单通常 35-45 天；复购订单通常 20-25 天。紧急订单可联系我们确认排产可能性。"
-        },
-        {
-          "id": "oem-branding",
-          "question": "可以在产品上使用我们的品牌吗？",
-          "answer": "可以。我们支持定制印刷、压印、包装设计和标签，按您的品牌规范执行。"
-        },
-        {
-          "id": "oem-standards",
-          "question": "你们可以按哪些国际标准生产？",
-          "answer": "我们可按 AS/NZS 2053、ASTM D1785、IEC 61386、NOM 及其他区域标准生产，也可配合您的自定义规格。"
-        },
-        {
-          "id": "oem-quality",
-          "question": "OEM 订单如何保证质量？",
-          "answer": "我们保持 ISO 9001:2015 认证。每个 OEM 订单都会经过原料检测、过程检验和最终检验，并可提供照片记录。"
-        }
-      ]
-    },
-    "content": "\n## OEM 定制范围\n\n本 MDX 文件负责 OEM 页面 SEO 元数据和 FAQ 内容。页面可见的范围卡片、流程步骤、标准说明和 CTA 模块仍由结构化页面组件与翻译命名空间驱动。\n"
-  },
-  {
-    "type": "pages",
-    "locale": "zh",
     "slug": "privacy",
     "extension": ".mdx",
     "filePath": "/content/pages/zh/privacy.mdx",
@@ -553,14 +453,12 @@ const _entries: ContentEntry[] = [
 const _byKeyIndex: Record<string, number> = {
   "pages/en/about": 0,
   "pages/en/contact": 1,
-  "pages/en/oem-custom-manufacturing": 2,
-  "pages/en/privacy": 3,
-  "pages/en/terms": 4,
-  "pages/zh/about": 5,
-  "pages/zh/contact": 6,
-  "pages/zh/oem-custom-manufacturing": 7,
-  "pages/zh/privacy": 8,
-  "pages/zh/terms": 9
+  "pages/en/privacy": 2,
+  "pages/en/terms": 3,
+  "pages/zh/about": 4,
+  "pages/zh/contact": 5,
+  "pages/zh/privacy": 6,
+  "pages/zh/terms": 7
 };
 
 const _byKey: Record<string, ContentEntry> = Object.fromEntries(

@@ -175,14 +175,11 @@ function HeaderUtilityControls({
     >
       {locale ? (
         <>
-          <div className="header-desktop-only h-10 w-28 items-center justify-end">
-            <LanguageToggleIsland locale={locale} />
-          </div>
           <Button
             variant="default"
             size="sm"
             asChild
-            className="header-cta-desktop-only"
+            className="header-cta-primary"
           >
             <Link
               href={SINGLE_SITE_HOME_LINK_TARGETS.contact}
@@ -194,6 +191,9 @@ function HeaderUtilityControls({
               </span>
             </Link>
           </Button>
+          <div className="header-desktop-only h-10 w-28 items-center justify-end">
+            <LanguageToggleIsland locale={locale} />
+          </div>
           <div className="header-mobile-only h-10 w-10">
             <MobileNavigationIsland
               openMenuLabel={openMenuLabel}

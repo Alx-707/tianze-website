@@ -17,9 +17,9 @@ export type PageType =
   | "about"
   | "contact"
   | "products"
+  | "blog"
   | "privacy"
-  | "terms"
-  | "oem";
+  | "terms";
 
 // 动态路由类型定义
 export type DynamicPageType = "productMarket";

@@ -24,9 +24,14 @@ const summaryLineStyle: CSSProperties = {
 };
 
 export function ConfirmationEmail(data: EmailTemplateData) {
+  const displayName =
+    [data.firstName, data.lastName]
+      .map((namePart) => namePart.trim())
+      .filter(Boolean)
+      .join(" ") || data.email;
   const summaryLines = [
-    `Name: ${data.firstName} ${data.lastName}`,
-    `Company: ${data.company}`,
+    `Name: ${displayName}`,
+    data.company ? `Company: ${data.company}` : null,
     `Email: ${data.email}`,
     data.subject ? `Subject: ${data.subject}` : null,
     `Submitted: ${ResendUtils.formatDateTime(data.submittedAt)}`,
@@ -40,7 +45,7 @@ export function ConfirmationEmail(data: EmailTemplateData) {
       footerText={FOOTER_TEXT}
       contentBackgroundColor={CONTENT_BACKGROUND}
     >
-      <Text style={paragraphStyle}>Dear {data.firstName},</Text>
+      <Text style={paragraphStyle}>Dear {displayName},</Text>
       <Text style={paragraphStyle}>
         Thank you for reaching out to us. We have received your message and will
         get back to you within 24 hours.

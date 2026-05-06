@@ -73,10 +73,10 @@ describe("Mobile Navigation - Core Tests", () => {
         const translations: Record<string, string> = {
           "navigation.home": "Home",
           "navigation.about": "About",
+          "navigation.blog": "Blog",
           "navigation.contact": "Contact",
           "navigation.contactSales": "Contact Sales",
           "navigation.products": "Products",
-          "navigation.oem": "OEM",
           "navigation.menu": "Menu",
           "navigation.close": "Close",
           "accessibility.openMenu": "Open menu",
@@ -163,10 +163,16 @@ describe("Mobile Navigation - Core Tests", () => {
       expect(
         screen.getByRole("link", { name: /products/i }),
       ).toBeInTheDocument();
-      expect(screen.getByRole("link", { name: /oem/i })).toBeInTheDocument();
+      expect(screen.getByRole("link", { name: /blog/i })).toBeInTheDocument();
       expect(
-        screen.getByRole("link", { name: /^Contact$/i }),
+        screen.getByRole("link", { name: /contact sales/i }),
       ).toBeInTheDocument();
+      expect(
+        screen.queryByRole("link", { name: /oem/i }),
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("link", { name: /^Contact$/i }),
+      ).not.toBeInTheDocument();
     });
 
     it("should highlight active navigation item", async () => {
@@ -286,8 +292,16 @@ describe("Mobile Navigation - Core Tests", () => {
       expect(
         screen.getByRole("link", { name: "Products" }),
       ).toBeInTheDocument();
-      expect(screen.getByRole("link", { name: "OEM" })).toBeInTheDocument();
-      expect(screen.getByRole("link", { name: "Contact" })).toBeInTheDocument();
+      expect(screen.getByRole("link", { name: "Blog" })).toBeInTheDocument();
+      expect(
+        screen.getByRole("link", { name: "Contact Sales" }),
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByRole("link", { name: "OEM" }),
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("link", { name: "Contact" }),
+      ).not.toBeInTheDocument();
     });
 
     it("should handle missing translations gracefully", async () => {
@@ -320,9 +334,9 @@ describe("Mobile Navigation - Core Tests", () => {
 
       // Should still render navigation items
       expect(screen.getByRole("navigation")).toBeInTheDocument();
-      // +3 = CTA button + 2 language links (English, 简体中文)
+      // +2 = Contact CTA + one target-language link. Current language is text.
       expect(screen.getAllByRole("link")).toHaveLength(
-        mobileNavigation.length + 3,
+        mobileNavigation.length + 2,
       );
     });
 

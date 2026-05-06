@@ -45,8 +45,7 @@ test.describe("Post-Deploy: Production-Like Contact Form Chain", () => {
     await page.waitForLoadState("load");
 
     // 2. Fill form
-    await page.fill('input[name="firstName"]', "Smoke");
-    await page.fill('input[name="lastName"]', "Test");
+    await page.fill('input[name="fullName"]', "Smoke");
     await page.fill('input[name="email"]', CANARY_EMAIL);
     await page.fill('input[name="company"]', "Automated Test");
     await page.fill(

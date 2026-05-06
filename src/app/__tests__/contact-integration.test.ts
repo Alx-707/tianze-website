@@ -100,8 +100,7 @@ async function settleDuplicateReplay<T>(work: Promise<T>): Promise<T> {
 
 function validContactFields(): Record<string, string> {
   return {
-    firstName: "Alice",
-    lastName: "Zhang",
+    fullName: "Alice Zhang",
     email: "alice@example.com",
     company: "Tianze Co.",
     phone: "+8613800138000",

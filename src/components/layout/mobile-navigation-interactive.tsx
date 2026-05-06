@@ -13,7 +13,7 @@ import {
   type ComponentProps,
   type ReactNode,
 } from "react";
-import { Check, Globe, Menu, X } from "lucide-react";
+import { Globe, Menu, X } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { Link, usePathname } from "@/i18n/routing";
@@ -131,48 +131,53 @@ function MobileLanguageSwitcher({
   onNavigate?: () => void;
   pathname: string;
 }) {
+  const t = useTranslations();
   const currentLocale = useLocale() === "zh" ? "zh" : "en";
 
-  const languages = [
-    { locale: "en" as const, label: "English" },
-    { locale: "zh" as const, label: "简体中文" },
-  ];
+  const targetLocale = currentLocale === "zh" ? "en" : "zh";
+  const currentLabel =
+    currentLocale === "zh" ? t("language.chinese") : t("language.english");
+  const targetLabel =
+    targetLocale === "zh" ? t("language.chinese") : t("language.english");
 
   return (
-    <div className="space-y-1" data-testid="mobile-language-switcher">
+    <div
+      className="flex items-center justify-between gap-3 rounded-md px-3 py-2 text-sm"
+      data-testid="mobile-language-switcher"
+    >
       <div
-        className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-muted-foreground"
+        className="flex items-center gap-2 text-muted-foreground"
         data-testid="mobile-language-switcher-label"
       >
         <Globe className="h-4 w-4" />
         <span translate="no">{languageLabel}</span>
       </div>
-      {languages.map(({ locale, label }) => {
-        const isActive = currentLocale === locale;
-        return (
-          <Link
-            key={locale}
-            href={(pathname || "/") as "/"}
-            locale={locale}
-            prefetch={false}
-            className={cn(
-              "flex items-center justify-between rounded-md px-3 py-2 text-sm font-medium transition-colors duration-200",
-              isActive
-                ? "bg-accent text-accent-foreground"
-                : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
-            )}
-            onClick={onNavigate}
+      <div className="flex items-center gap-2">
+        <span
+          className="text-muted-foreground"
+          data-testid={`mobile-language-current-label-${currentLocale}`}
+          translate="no"
+        >
+          {currentLabel}
+        </span>
+        <span className="text-muted-foreground" aria-hidden="true">
+          /
+        </span>
+        <Link
+          href={(pathname || "/") as "/"}
+          locale={targetLocale}
+          prefetch={false}
+          className="rounded-md font-medium text-foreground underline-offset-4 transition-colors duration-200 hover:text-primary hover:underline"
+          onClick={onNavigate}
+        >
+          <span
+            data-testid={`mobile-language-option-label-${targetLocale}`}
+            translate="no"
           >
-            <span
-              data-testid={`mobile-language-option-label-${locale}`}
-              translate="no"
-            >
-              {label}
-            </span>
-            {isActive && <Check className="h-4 w-4" />}
-          </Link>
-        );
-      })}
+            {targetLabel}
+          </span>
+        </Link>
+      </div>
     </div>
   );
 }

@@ -153,6 +153,29 @@ describe("middleware locale cookie", () => {
     expect(setCookie).toContain("max-age=31536000");
   });
 
+  it("permanently redirects retired localized OEM route to contact", () => {
+    const request = new NextRequest(
+      "http://localhost/zh/oem-custom-manufacturing",
+      {
+        headers: {
+          cookie: "NEXT_LOCALE=en",
+        },
+      },
+    );
+
+    const response = middleware(request);
+
+    expect(response.status).toBe(308);
+    expect(response.headers.get("location")).toBe(
+      "http://localhost/zh/contact",
+    );
+    expect(intlMiddlewareMock).not.toHaveBeenCalled();
+
+    const setCookie = (response.headers.get("set-cookie") ?? "").toLowerCase();
+    expect(setCookie).toContain("next_locale=zh");
+    expect(setCookie).toContain("max-age=31536000");
+  });
+
   it("normalizes root redirect locale cookie flags and strips leaked middleware cookie header", () => {
     vi.stubEnv("APP_ENV", "preview");
     intlMiddlewareMock.mockImplementation(() => {

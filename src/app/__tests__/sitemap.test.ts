@@ -73,6 +73,7 @@ vi.mock("@/lib/content/page-dates", async () => {
 describe("sitemap.ts", () => {
   const BASE_URL = "https://example.com";
   const RETIRED_BENDING_MACHINES_URL = `${BASE_URL}/en/capabilities/bending-machines`;
+  const RETIRED_OEM_URL = `${BASE_URL}/en/oem-custom-manufacturing`;
   const defaultLocale = "en";
 
   function sitemapPathForCanonical(path: string): string {
@@ -117,6 +118,7 @@ describe("sitemap.ts", () => {
         expect(urls).toContain(localizedUrl(defaultLocale, pagePath));
       }
       expect(urls).not.toContain(RETIRED_BENDING_MACHINES_URL);
+      expect(urls).not.toContain(RETIRED_OEM_URL);
     });
 
     it("pins representative sitemap contract entries with fixed values", async () => {
@@ -146,11 +148,12 @@ describe("sitemap.ts", () => {
       });
     });
 
-    it("should not include removed blog pages", async () => {
+    it("should include the restored blog listing but not blog post pages", async () => {
       const result = await sitemap();
       const urls = result.map((entry) => entry.url);
 
-      expect(urls).not.toContain("https://example.com/en/blog");
+      expect(urls).toContain("https://example.com/en/blog");
+      expect(urls).toContain("https://example.com/zh/blog");
       expect(urls).not.toContain("https://example.com/en/blog/post-a");
       expect(urls).not.toContain("https://example.com/zh/blog/post-a");
     });
@@ -320,15 +323,14 @@ describe("sitemap.ts", () => {
       expect(uniqueUrls.size).toBe(urls.length);
     });
 
-    it("should include standalone pages with correct config", async () => {
+    it("should exclude the retired OEM standalone page", async () => {
       const result = await sitemap();
-      const oemPath = getCanonicalPath("oem");
-      const oem = findEntry(result, defaultLocale, oemPath);
-      const oemConfig = getSingleSiteSitemapPageConfig(oemPath);
+      const urls = result.map((entry) => entry.url);
 
-      expect(oem).toBeDefined();
-      expect(oem?.priority).toBe(oemConfig.priority);
-      expect(oem?.changeFrequency).toBe(oemConfig.changeFrequency);
+      expect(urls).not.toContain(RETIRED_OEM_URL);
+      expect(getSingleSiteSitemapPageConfig("/oem-custom-manufacturing")).toBe(
+        getSingleSiteSitemapPageConfig("unknown"),
+      );
     });
   });
 });

@@ -33,6 +33,11 @@ export const PATHS_CONFIG = Object.freeze({
     zh: "/products",
   }),
 
+  blog: Object.freeze({
+    en: "/blog",
+    zh: "/blog",
+  }),
+
   // 法律页面 - 统一使用标准路径
   privacy: Object.freeze({
     en: "/privacy",
@@ -42,11 +47,6 @@ export const PATHS_CONFIG = Object.freeze({
   terms: Object.freeze({
     en: "/terms",
     zh: "/terms",
-  }),
-
-  oem: Object.freeze({
-    en: "/oem-custom-manufacturing",
-    zh: "/oem-custom-manufacturing",
   }),
 } as const satisfies Record<PageType, LocalizedPath>);
 

@@ -151,12 +151,12 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
   };
 
   const expectInteractiveContactForm = async (page: Page): Promise<void> => {
-    const firstNameInput = page.locator('input[name="firstName"]').first();
+    const fullNameInput = page.locator('input[name="fullName"]').first();
     const messageInput = page.locator('textarea[name="message"]').first();
     const privacyCheckbox = page.locator('input[name="acceptPrivacy"]').first();
 
-    await expect(firstNameInput).toBeVisible();
-    await expect(firstNameInput).toBeEditable();
+    await expect(fullNameInput).toBeVisible();
+    await expect(fullNameInput).toBeEditable();
     await expect(messageInput).toBeEditable();
     await expect(privacyCheckbox).toBeEnabled();
   };
@@ -248,12 +248,8 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
       const count = await requiredInputs.count();
       expect(count).toBeGreaterThan(0);
 
-      // 验证核心必填字段（firstName, lastName, email, message, acceptPrivacy）
-      // 注意：Production 环境的 company 字段可能不是 required（与本地代码不同步）
-      await expect(page.locator('input[name="firstName"]')).toHaveAttribute(
-        "required",
-      );
-      await expect(page.locator('input[name="lastName"]')).toHaveAttribute(
+      // Company is intentionally optional; core required fields stay explicit.
+      await expect(page.locator('input[name="fullName"]')).toHaveAttribute(
         "required",
       );
       await expect(page.locator('input[name="email"]')).toHaveAttribute(
@@ -278,7 +274,7 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
       expect(count).toBeGreaterThan(0);
 
       // 验证关键必填字段
-      await expect(page.locator('input[name="firstName"]')).toHaveAttribute(
+      await expect(page.locator('input[name="fullName"]')).toHaveAttribute(
         "required",
       );
       await expect(page.locator('input[name="email"]')).toHaveAttribute(
@@ -299,8 +295,7 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
       await gotoContactPage(page, test.info(), "en");
 
       // 检查所有必需字段
-      await expect(page.locator('input[name="firstName"]')).toBeVisible();
-      await expect(page.locator('input[name="lastName"]')).toBeVisible();
+      await expect(page.locator('input[name="fullName"]')).toBeVisible();
       await expect(page.locator('input[name="email"]')).toBeVisible();
       await expect(page.locator('input[name="company"]')).toBeVisible();
       await expect(page.locator('textarea[name="message"]')).toBeVisible();
@@ -313,8 +308,7 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
       await gotoContactPage(page, test.info(), "zh");
 
       // 检查所有必需字段
-      await expect(page.locator('input[name="firstName"]')).toBeVisible();
-      await expect(page.locator('input[name="lastName"]')).toBeVisible();
+      await expect(page.locator('input[name="fullName"]')).toBeVisible();
       await expect(page.locator('input[name="email"]')).toBeVisible();
       await expect(page.locator('input[name="company"]')).toBeVisible();
       await expect(page.locator('textarea[name="message"]')).toBeVisible();
@@ -326,20 +320,24 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
       await gotoContactPage(page, test.info(), "en");
 
       // 检查英文标签
-      await expect(page.getByText(/first name/i).first()).toBeVisible();
-      await expect(page.getByText(/last name/i).first()).toBeVisible();
-      await expect(page.getByText(/email/i).first()).toBeVisible();
-      await expect(page.getByText(/company/i).first()).toBeVisible();
+      const fullNameInput = page.locator('input[name="fullName"]');
+      await expect(fullNameInput).toBeVisible();
+      await expect(fullNameInput).toHaveAccessibleName(/^name\s*\*?$/i);
+      await expect(page.getByRole("textbox", { name: /email/i })).toBeVisible();
+      await expect(
+        page.getByRole("textbox", { name: /company/i }),
+      ).toBeVisible();
     });
 
     test("中文页面应该显示中文标签", async ({ page }) => {
       await gotoContactPage(page, test.info(), "zh");
 
       // 检查中文标签
-      await expect(page.getByText(/名字/).first()).toBeVisible();
-      await expect(page.getByText(/姓氏/).first()).toBeVisible();
-      await expect(page.getByText(/邮箱/).first()).toBeVisible();
-      await expect(page.getByText(/公司/).first()).toBeVisible();
+      const fullNameInput = page.locator('input[name="fullName"]');
+      await expect(fullNameInput).toBeVisible();
+      await expect(fullNameInput).toHaveAccessibleName(/姓名/);
+      await expect(page.getByRole("textbox", { name: /邮箱/ })).toBeVisible();
+      await expect(page.getByRole("textbox", { name: /公司/ })).toBeVisible();
     });
   });
 
@@ -365,9 +363,9 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
       const form = page.locator("form").first();
       await expect(form).toBeVisible();
 
-      const firstNameInput = page.getByLabel(/first name/i);
-      await expect(firstNameInput).toHaveAttribute("name", "firstName");
-      await expect(firstNameInput).toHaveAttribute("type", "text");
+      const fullNameInput = page.locator('input[name="fullName"]');
+      await expect(fullNameInput).toHaveAttribute("name", "fullName");
+      await expect(fullNameInput).toHaveAttribute("type", "text");
 
       const emailInput = page.getByLabel(/email/i);
       await expect(emailInput).toHaveAttribute("name", "email");
@@ -445,8 +443,7 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
     }) => {
       await gotoContactPage(page, test.info(), "en");
 
-      await page.fill('input[name="firstName"]', "Test");
-      await page.fill('input[name="lastName"]', "User");
+      await page.fill('input[name="fullName"]', "Test");
       await page.fill('input[name="email"]', "test@example.com");
       await page.fill('input[name="company"]', "Test Company");
       await page.fill(
@@ -461,8 +458,7 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
         await privacyCheckbox.check();
       }
 
-      await expect(page.locator('input[name="firstName"]')).toHaveValue("Test");
-      await expect(page.locator('input[name="lastName"]')).toHaveValue("User");
+      await expect(page.locator('input[name="fullName"]')).toHaveValue("Test");
       await expect(page.locator('input[name="email"]')).toHaveValue(
         "test@example.com",
       );
@@ -476,8 +472,7 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
     }) => {
       await gotoContactPage(page, test.info(), "zh");
 
-      await page.fill('input[name="firstName"]', "测试");
-      await page.fill('input[name="lastName"]', "用户");
+      await page.fill('input[name="fullName"]', "测试");
       await page.fill('input[name="email"]', "test@example.com");
       await page.fill('input[name="company"]', "测试公司");
       await page.fill('textarea[name="message"]', "用于速率限制验证的测试消息");
@@ -489,8 +484,7 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
         await privacyCheckbox.check();
       }
 
-      await expect(page.locator('input[name="firstName"]')).toHaveValue("测试");
-      await expect(page.locator('input[name="lastName"]')).toHaveValue("用户");
+      await expect(page.locator('input[name="fullName"]')).toHaveValue("测试");
       await expect(page.locator('input[name="email"]')).toHaveValue(
         "test@example.com",
       );
@@ -504,12 +498,16 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
     test("完整填写英文表单后提交按钮可见", async ({ page }) => {
       await gotoContactPage(page, test.info(), "en");
 
-      // 等待 Turnstile 加载
-      await page.waitForTimeout(2000);
+      const submitButton = page.getByRole("button", {
+        name: /send message|submit/i,
+      });
+      await expect(submitButton).toBeDisabled();
+
+      // 等待 Turnstile test-mode token 写入表单状态。
+      await expect(page.getByTestId("turnstile-mock")).toBeVisible();
 
       // 填写完整表单
-      await page.fill('input[name="firstName"]', "John");
-      await page.fill('input[name="lastName"]', "Doe");
+      await page.fill('input[name="fullName"]', "John");
       await page.fill('input[name="email"]', "john.doe@example.com");
       await page.fill('input[name="company"]', "Acme Corp");
       await page.fill(
@@ -524,24 +522,24 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
       });
       if (await privacyCheckbox.isVisible()) {
         await privacyCheckbox.check();
+        await expect(privacyCheckbox).toBeChecked();
       }
 
-      // 检查提交按钮
-      const submitButton = page.getByRole("button", {
-        name: /send message|submit/i,
-      });
       await expect(submitButton).toBeVisible();
+      await expect(submitButton).toBeEnabled();
     });
 
     test("完整填写中文表单后提交按钮可见", async ({ page }) => {
       await gotoContactPage(page, test.info(), "zh");
 
-      // 等待 Turnstile 加载
-      await page.waitForTimeout(2000);
+      const submitButton = page.getByRole("button", { name: /发送|提交/i });
+      await expect(submitButton).toBeDisabled();
+
+      // 等待 Turnstile test-mode token 写入表单状态。
+      await expect(page.getByTestId("turnstile-mock")).toBeVisible();
 
       // 填写完整表单
-      await page.fill('input[name="firstName"]', "张");
-      await page.fill('input[name="lastName"]', "三");
+      await page.fill('input[name="fullName"]', "张三");
       await page.fill('input[name="email"]', "zhangsan@example.com");
       await page.fill('input[name="company"]', "测试公司");
       await page.fill('textarea[name="message"]', "这是来自 E2E 测试的消息。");
@@ -552,11 +550,11 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
       });
       if (await privacyCheckbox.isVisible()) {
         await privacyCheckbox.check();
+        await expect(privacyCheckbox).toBeChecked();
       }
 
-      // 检查提交按钮
-      const submitButton = page.getByRole("button", { name: /发送|提交/i });
       await expect(submitButton).toBeVisible();
+      await expect(submitButton).toBeEnabled();
     });
   });
 });

@@ -6,8 +6,7 @@ const messages = {
   contact: {
     form: {
       title: "Contact form",
-      firstName: "First Name",
-      lastName: "Last Name",
+      fullName: "Name",
       email: "Email",
       company: "Company Name",
       message: "Message",
@@ -27,7 +26,7 @@ describe("ContactFormStaticFallback", () => {
 
     expect(form).toBeInTheDocument();
     expect(form).toHaveAttribute("aria-busy", "true");
-    expect(screen.getByLabelText("First Name")).toBeDisabled();
+    expect(screen.getByLabelText("Name")).toBeDisabled();
     expect(screen.getByLabelText("Email")).toBeDisabled();
     expect(screen.getByRole("button", { name: "Submit" })).toBeDisabled();
   });
@@ -35,10 +34,10 @@ describe("ContactFormStaticFallback", () => {
   it("protects fallback labels and submit copy at the leaf level", () => {
     render(<ContactFormStaticFallback messages={messages} />);
 
-    const firstNameLabel = screen.getByText("First Name");
+    const nameLabel = screen.getByText("Name");
     const submitLabel = screen.getByText("Submit");
 
-    expect(firstNameLabel).toHaveAttribute("translate", "no");
+    expect(nameLabel).toHaveAttribute("translate", "no");
     expect(submitLabel).toHaveAttribute("translate", "no");
   });
 

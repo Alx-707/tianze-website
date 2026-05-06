@@ -62,10 +62,9 @@ export interface ContactFormWithToken extends ContactFormData {
  */
 function extractContactFormData(formData: FormData): ContactFormWithToken {
   return {
-    firstName: getFormDataString(formData, "firstName"),
-    lastName: getFormDataString(formData, "lastName"),
+    fullName: getFormDataString(formData, "fullName"),
     email: getFormDataString(formData, "email"),
-    company: getFormDataString(formData, "company"),
+    company: getFormDataString(formData, "company") || undefined,
     phone: getFormDataString(formData, "phone"),
     subject: getFormDataString(formData, "subject"),
     message: getFormDataString(formData, "message"),
@@ -198,8 +197,7 @@ async function executeContactSubmissionAttempt(
  *
  * return (
  *   <form action={formAction}>
- *     <input name="firstName" required />
- *     <input name="lastName" required />
+ *     <input name="fullName" required />
  *     <input name="email" type="email" required />
  *     <button disabled={isPending} type="submit">
  *       {isPending ? 'Submitting...' : 'Submit'}

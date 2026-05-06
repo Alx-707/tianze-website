@@ -447,7 +447,7 @@ test.describe("Internationalization (i18n)", () => {
       } else {
         await expect(nav).toBeVisible();
       }
-      const englishNavItems = ["Home", "Products", "OEM", "About", "Contact"];
+      const englishNavItems = ["Home", "Products", "Blog", "About"];
 
       for (const item of englishNavItems) {
         const candidate = container
@@ -494,7 +494,7 @@ test.describe("Internationalization (i18n)", () => {
       await waitForStablePage(page);
 
       // Test Chinese navigation (adjust based on actual translations)
-      const chineseNavItems = ["首页", "产品", "OEM 定制", "关于", "联系我们"];
+      const chineseNavItems = ["首页", "产品", "博客", "关于"];
 
       // Recompute container after navigation to zh (dialog/nav may have re-rendered)
       {
@@ -583,7 +583,7 @@ test.describe("Internationalization (i18n)", () => {
 
       // Find and click Chinese language link in mobile menu
       const chineseLink = mobileNavSheet.getByRole("link", {
-        name: "简体中文",
+        name: /^(Simplified Chinese|简体中文)$/,
       });
       await expect(chineseLink).toBeVisible();
       try {

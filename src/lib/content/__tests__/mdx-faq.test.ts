@@ -57,11 +57,7 @@ describe("generateFaqSchemaFromItems", () => {
 });
 
 describe("FAQ locale parity", () => {
-  const FAQ_PAGE_SLUGS = [
-    "about",
-    "contact",
-    "oem-custom-manufacturing",
-  ] as const;
+  const FAQ_PAGE_SLUGS = ["about", "contact"] as const;
 
   for (const slug of FAQ_PAGE_SLUGS) {
     it(`${slug} keeps identical FAQ IDs in en and zh`, async () => {

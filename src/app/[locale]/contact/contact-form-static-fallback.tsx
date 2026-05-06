@@ -21,33 +21,22 @@ export function ContactFormStaticFallback({
         data-contact-form-fallback="static"
         noValidate
       >
+        <div className="grid grid-cols-1 gap-4">
+          <div className="space-y-2">
+            <label className="text-sm" htmlFor="fullName">
+              <span translate="no">{pick("fullName")}</span>
+            </label>
+            <input
+              id="fullName"
+              name="fullName"
+              type="text"
+              disabled
+              required
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+            />
+          </div>
+        </div>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <div className="space-y-2">
-            <label className="text-sm" htmlFor="firstName">
-              <span translate="no">{pick("firstName")}</span>
-            </label>
-            <input
-              id="firstName"
-              name="firstName"
-              type="text"
-              disabled
-              required
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm" htmlFor="lastName">
-              <span translate="no">{pick("lastName")}</span>
-            </label>
-            <input
-              id="lastName"
-              name="lastName"
-              type="text"
-              disabled
-              required
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-            />
-          </div>
           <div className="space-y-2">
             <label className="text-sm" htmlFor="email">
               <span translate="no">{pick("email")}</span>

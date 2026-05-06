@@ -59,8 +59,7 @@ vi.mock("@marsidev/react-turnstile", () => ({
 // Mock next-intl
 const mockT = vi.fn((key: string) => {
   const translations: Record<string, string> = {
-    firstName: "First Name",
-    lastName: "Last Name",
+    fullName: "Name",
     email: "Email",
     company: "Company",
     phone: "Phone",
@@ -80,15 +79,9 @@ vi.mock("next-intl", () => ({
 // 填写有效表单但排除指定字段的辅助函数
 const _fillValidFormExcept = async (excludeFields: string[]) => {
   await act(async () => {
-    if (!excludeFields.includes("firstName")) {
-      fireEvent.change(screen.getByLabelText(/first name/i), {
+    if (!excludeFields.includes("fullName")) {
+      fireEvent.change(screen.getByLabelText(/name/i), {
         target: { value: "John" },
-      });
-    }
-
-    if (!excludeFields.includes("lastName")) {
-      fireEvent.change(screen.getByLabelText(/last name/i), {
-        target: { value: "Doe" },
       });
     }
 
