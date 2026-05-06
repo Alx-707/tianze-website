@@ -48,6 +48,11 @@ describe("contact-field-validators", () => {
 
     const result = schema.safeParse("1Full name");
     expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues[0]?.message).toBe(
+        "Full name contains invalid characters",
+      );
+    }
   });
 
   it("accepts common international full name formats", () => {
@@ -57,6 +62,14 @@ describe("contact-field-validators", () => {
     expect(schema.safeParse("O'Connor").success).toBe(true);
     expect(schema.safeParse("Anne-Marie").success).toBe(true);
     expect(schema.safeParse("José García").success).toBe(true);
+  });
+
+  it("rejects full names made only of punctuation or whitespace", () => {
+    const schema = fullName(createContext("fullName"));
+
+    for (const invalidName of ["...", "---", "   '"]) {
+      expect(schema.safeParse(invalidName).success).toBe(false);
+    }
   });
 
   it("validates email format, max length, and whitelist matching against any allowed domain", () => {
@@ -125,7 +138,11 @@ describe("contact-field-validators", () => {
       );
     }
 
-    for (const invalidCompany of ["!Valid Company", "Valid Company!"]) {
+    for (const invalidCompany of [
+      "!Valid Company",
+      "Valid Company!",
+      "Valid!Company",
+    ]) {
       const invalid = schema.safeParse(invalidCompany);
       expect(invalid.success).toBe(false);
       if (!invalid.success) {

@@ -32,7 +32,7 @@ const createNameValidator = (fieldLabel: string) => {
         `${fieldLabel} must be less than ${NAME_MAX_LENGTH} characters`,
       )
       .regex(
-        /^[\p{L}\p{M}\s.'-]+$/u,
+        /^(?=.*\p{L})[\p{L}\p{M}\s.'-]+$/u,
         `${fieldLabel} contains invalid characters`,
       );
 
