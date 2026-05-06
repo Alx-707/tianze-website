@@ -241,10 +241,7 @@ function tryHandleInvalidLocalePrefix(
   return resp;
 }
 
-function tryHandleRetiredOemRoute(
-  request: NextRequest,
-  nonce: string,
-): NextResponse | null {
+function tryHandleRetiredOemRoute(request: NextRequest): NextResponse | null {
   const { pathname } = request.nextUrl;
   const segments = splitPathSegments(pathname);
   const [locale, route] = segments;
@@ -262,8 +259,6 @@ function tryHandleRetiredOemRoute(
   targetUrl.pathname = `/${locale}${RETIRED_OEM_DESTINATION}`;
   const response = NextResponse.redirect(targetUrl, PERMANENT_REDIRECT_STATUS);
   setLocaleCookie(response, locale);
-  removeLeakedMiddlewareCookieHeader(response);
-  addSecurityHeaders(response, nonce);
 
   return response;
 }
@@ -283,7 +278,7 @@ function tryHandleMiddlewareRedirects(
   nonce: string,
   trustedClientIP: string | null,
 ): NextResponse | null {
-  const retiredOemHandled = tryHandleRetiredOemRoute(request, nonce);
+  const retiredOemHandled = tryHandleRetiredOemRoute(request);
   if (retiredOemHandled) {
     applyCommonMiddlewareHeaders(retiredOemHandled, nonce, trustedClientIP);
     return retiredOemHandled;

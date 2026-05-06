@@ -212,6 +212,45 @@ describe("Airtable Service - Create Operations Tests", () => {
       ]);
     });
 
+    it("should collapse repeated whitespace when mapping full name to Airtable fields", async () => {
+      const { createContactRecord } =
+        await import("../airtable/service-internal/contact-records");
+
+      mockCreate.mockResolvedValue([
+        createMockRecord({
+          id: "rec123456",
+          fields: {
+            "First Name": "John",
+            "Last Name": "Doe",
+          },
+          createdTime: "2023-01-01T00:00:00Z",
+        }),
+      ]);
+
+      await createContactRecord({
+        base: createMockBase(tableFactory),
+        tableName: "Contacts",
+        formData: {
+          fullName: "  John   Doe  ",
+          email: "JOHN.DOE@example.com",
+          company: undefined,
+          message: "This is a test message",
+          acceptPrivacy: true,
+        },
+      });
+
+      expect(mockCreate).toHaveBeenCalledWith([
+        {
+          fields: expect.objectContaining({
+            "First Name": "John",
+            "Last Name": "Doe",
+            Email: "john.doe@example.com",
+            Company: "",
+          }),
+        },
+      ]);
+    });
+
     it("should throw error when service is not configured", async () => {
       const service = new AirtableServiceClass();
 

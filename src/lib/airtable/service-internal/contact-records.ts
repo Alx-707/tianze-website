@@ -39,7 +39,9 @@ export async function createContactRecord(params: {
 
   try {
     const sanitizedData = sanitizeFormData(formData);
-    const [firstName, ...restNameParts] = sanitizedData.fullName.split(" ");
+    const [firstName, ...restNameParts] = sanitizedData.fullName
+      .trim()
+      .split(/\s+/u);
 
     const recordData = {
       "First Name": firstName ?? sanitizedData.fullName,
