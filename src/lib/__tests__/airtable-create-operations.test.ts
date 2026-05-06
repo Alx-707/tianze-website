@@ -21,6 +21,8 @@ import {
   createMockBase,
 } from "./mocks/airtable-test-helpers";
 
+vi.unmock("zod");
+
 // Mock Airtable
 const mockCreate = vi.fn();
 const mockSelectAll = vi.fn();

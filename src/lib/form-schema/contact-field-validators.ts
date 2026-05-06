@@ -18,6 +18,8 @@ const applyOptionality = (
  * Eliminates code duplication by parameterizing the field label
  */
 const createNameValidator = (fieldLabel: string) => {
+  const invalidCharacterMessage = `Please enter a valid ${fieldLabel.toLowerCase()} using characters from your language, spaces, apostrophes, hyphens, or periods`;
+
   return ({ field }: ContactFormFieldValidatorContext) => {
     const { NAME_MIN_LENGTH, NAME_MAX_LENGTH } =
       CONTACT_FORM_VALIDATION_CONSTANTS;
@@ -31,10 +33,7 @@ const createNameValidator = (fieldLabel: string) => {
         NAME_MAX_LENGTH,
         `${fieldLabel} must be less than ${NAME_MAX_LENGTH} characters`,
       )
-      .regex(
-        /^[\p{L}\p{M}\s.'-]+$/u,
-        `${fieldLabel} contains invalid characters`,
-      );
+      .regex(/^(?=.*\p{L})[\p{L}\p{M}\s.'-]+$/u, invalidCharacterMessage);
 
     return applyOptionality(schema, field);
   };

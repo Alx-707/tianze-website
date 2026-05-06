@@ -245,6 +245,15 @@ describe("SEO Metadata", () => {
       });
     });
 
+    it("should return specific blog page config", () => {
+      const config = createPageSEOConfig("blog");
+
+      expect(config).toEqual({
+        type: "website",
+        keywords: ["Blog", "Buyer Resources", "PVC Conduit", "PETG Tubes"],
+      });
+    });
+
     it("should merge custom config with base config", () => {
       const customConfig = {
         title: "Custom Title",

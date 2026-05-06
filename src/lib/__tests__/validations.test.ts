@@ -15,6 +15,9 @@ vi.unmock("zod");
 vi.unmock("@/config/contact-form-config");
 vi.unmock("@/config/contact-form-validation");
 
+const fullNameInvalidCharacterMessage =
+  "Please enter a valid full name using characters from your language, spaces, apostrophes, hyphens, or periods";
+
 describe("validations - Schema Validation", () => {
   describe("contactFormSchema", () => {
     const validFormData = {
@@ -58,7 +61,9 @@ describe("validations - Schema Validation", () => {
       const result = contactFormSchema.safeParse(invalidData);
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues[0]?.message).toContain("invalid characters");
+        expect(result.error.issues[0]?.message).toBe(
+          fullNameInvalidCharacterMessage,
+        );
       }
     });
 
