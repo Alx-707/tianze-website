@@ -15,18 +15,13 @@ export const SINGLE_SITE_NAVIGATION: SiteNavigationItem[] = [
     translationKey: "navigation.products",
   },
   {
-    key: "oem",
-    href: SINGLE_SITE_ROUTE_HREFS.oem,
-    translationKey: "navigation.oem",
+    key: "blog",
+    href: SINGLE_SITE_ROUTE_HREFS.blog,
+    translationKey: "navigation.blog",
   },
   {
     key: "about",
     href: SINGLE_SITE_ROUTE_HREFS.about,
     translationKey: "navigation.about",
-  },
-  {
-    key: "contact",
-    href: SINGLE_SITE_ROUTE_HREFS.contact,
-    translationKey: "navigation.contact",
   },
 ];

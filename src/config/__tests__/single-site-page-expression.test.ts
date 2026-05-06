@@ -13,7 +13,6 @@ import {
   SINGLE_SITE_HOME_QUALITY_STANDARD_ITEMS,
   SINGLE_SITE_HOME_SCENARIO_ITEMS,
   SINGLE_SITE_HOME_TRAILING_SECTION_ORDER,
-  SINGLE_SITE_OEM_PAGE_EXPRESSION,
   SINGLE_SITE_PRODUCTS_PAGE_EXPRESSION,
 } from "@/config/single-site-page-expression";
 
@@ -112,6 +111,5 @@ describe("single-site-page-expression", () => {
       "/contact",
     );
     expect(SINGLE_SITE_ABOUT_PAGE_EXPRESSION.ctaHref).toBe("/contact");
-    expect(SINGLE_SITE_OEM_PAGE_EXPRESSION.ctaHref).toBe("/contact");
   });
 });

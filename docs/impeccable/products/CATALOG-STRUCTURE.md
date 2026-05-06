@@ -6,7 +6,7 @@
 > - `docs/strategy/current-strategy-summary.md`
 > - `docs/strategy/ring4-implementation-handoff.md`
 >
-> Important: this file still reflects the older decision that bending machines lived under `/capabilities/` and OEM lived outside `/products/`. Do not use it as the current source of truth for routing or page ownership.
+> Important: this file reflects an older product-catalog research state. It no longer represents current routing or page ownership. OEM/custom manufacturing is now a capability expressed inside Home/About/Contact and inquiry context, not a standalone public route.
 
 ## Navigation Labels
 
@@ -44,7 +44,7 @@ Products
     /petg-tubes/
     /fittings/
 
-/oem-custom-manufacturing/           ← Independent service page
+/contact                            ← OEM/custom inquiries route to Contact
 /capabilities/bending-machines/      ← Manufacturing capability showcase
 ```
 
@@ -79,14 +79,14 @@ Angle, size, wall thickness, end type (plain/bell), color, schedule/duty → spe
 
 ### 6. Separated from product catalog
 - **Bending machines** → `/capabilities/bending-machines/` (trust signal, not sellable SKU)
-- **OEM/Custom** → `/oem-custom-manufacturing/` (service page, not product category)
+- **OEM/Custom** → expressed as capability content and routed to `/contact` for inquiries
 - **PETG pneumatic tubes** → independent business line under `/products/pneumatic-tube-systems/`
 
 ## Page Count Summary
 - 4 standard series landing pages
 - ~14 product family pages (3-4 per standard)
 - 2 pneumatic system pages
-- 1 OEM service page
+- 0 standalone OEM service pages
 - 1 capabilities page
 - **Total: ~22 pages**
 

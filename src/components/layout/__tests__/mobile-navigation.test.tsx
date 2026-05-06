@@ -46,18 +46,17 @@ vi.mock("@/i18n/routing", () => ({
 vi.mock("@/lib/navigation", () => {
   const mockItems = [
     { key: "home", href: "/", translationKey: "navigation.home" },
-    { key: "about", href: "/about", translationKey: "navigation.about" },
-    {
-      key: "services",
-      href: "/services",
-      translationKey: "navigation.services",
-    },
     {
       key: "products",
       href: "/products",
       translationKey: "navigation.products",
     },
-    { key: "contact", href: "/contact", translationKey: "navigation.contact" },
+    {
+      key: "blog",
+      href: "/blog",
+      translationKey: "navigation.blog",
+    },
+    { key: "about", href: "/about", translationKey: "navigation.about" },
   ];
 
   return {
@@ -348,11 +347,14 @@ describe("MobileNavigation Component", () => {
         screen.getByTestId("mobile-language-switcher"),
       ).not.toHaveAttribute("translate", "no");
       expect(
-        screen.getByTestId("mobile-language-option-label-en"),
+        screen.getByTestId("mobile-language-current-label-en"),
       ).toHaveAttribute("translate", "no");
       expect(
         screen.getByTestId("mobile-language-option-label-zh"),
       ).toHaveAttribute("translate", "no");
+      expect(
+        screen.queryByTestId("mobile-language-option-label-en"),
+      ).not.toBeInTheDocument();
     });
 
     it("displays all navigation items when open", async () => {
@@ -363,10 +365,12 @@ describe("MobileNavigation Component", () => {
 
       // Should show all navigation links
       expect(screen.getByText("Home")).toBeInTheDocument();
-      expect(screen.getByText("About")).toBeInTheDocument();
-      expect(screen.getByText("Services")).toBeInTheDocument();
       expect(screen.getByText("Products")).toBeInTheDocument();
-      expect(screen.getByText("Contact")).toBeInTheDocument();
+      expect(screen.getByText("Blog")).toBeInTheDocument();
+      expect(screen.getByText("About")).toBeInTheDocument();
+      expect(screen.getByText("Contact Sales")).toBeInTheDocument();
+      expect(screen.queryByText("Services")).not.toBeInTheDocument();
+      expect(screen.queryByText("Contact")).not.toBeInTheDocument();
     });
 
     it("closes menu when navigation item is clicked", async () => {
@@ -655,9 +659,15 @@ describe("MobileLanguageSwitcher Integration", () => {
     const trigger = screen.getByRole("button", { name: /menu/i });
     await user.click(trigger);
 
-    // Chinese should be marked as active (has check icon)
-    const chineseLink = screen.getByText("简体中文").closest("a");
-    expect(chineseLink).toHaveClass("bg-accent");
+    expect(
+      screen.getByTestId("mobile-language-current-label-zh"),
+    ).toHaveTextContent("简体中文");
+    expect(
+      screen.getByTestId("mobile-language-option-label-en"),
+    ).toHaveTextContent("English");
+    expect(
+      screen.queryByTestId("mobile-language-option-label-zh"),
+    ).not.toBeInTheDocument();
   });
 
   it("defaults to English when locale context is not zh", async () => {
@@ -668,9 +678,15 @@ describe("MobileLanguageSwitcher Integration", () => {
     const trigger = screen.getByRole("button", { name: /menu/i });
     await user.click(trigger);
 
-    // English should be marked as active
-    const englishLink = screen.getByText("English").closest("a");
-    expect(englishLink).toHaveClass("bg-accent");
+    expect(
+      screen.getByTestId("mobile-language-current-label-en"),
+    ).toHaveTextContent("English");
+    expect(
+      screen.getByTestId("mobile-language-option-label-zh"),
+    ).toHaveTextContent("简体中文");
+    expect(
+      screen.queryByTestId("mobile-language-option-label-en"),
+    ).not.toBeInTheDocument();
   });
 
   it("closes menu when language link is clicked", async () => {
@@ -690,7 +706,7 @@ describe("MobileLanguageSwitcher Integration", () => {
     });
   });
 
-  it("shows check icon for active language", async () => {
+  it("does not expand the current language into an active option", async () => {
     Object.defineProperty(document.documentElement, "lang", {
       value: "en",
       writable: true,
@@ -702,11 +718,10 @@ describe("MobileLanguageSwitcher Integration", () => {
     const trigger = screen.getByRole("button", { name: /menu/i });
     await user.click(trigger);
 
-    // Check icon should be visible for English
-    const englishLink = screen.getByText("English").closest("a");
     expect(
-      englishLink?.querySelector('[data-testid="check-icon"]'),
-    ).toBeInTheDocument();
+      screen.getByTestId("mobile-language-current-label-en"),
+    ).toHaveTextContent("English");
+    expect(screen.queryByTestId("check-icon")).not.toBeInTheDocument();
   });
 });
 

@@ -28,6 +28,16 @@ const keyPages: Array<{
     expectedCtaPath: "/zh/contact",
   },
   {
+    path: "/en/blog",
+    cta: /ask us a product question|contact/i,
+    expectedCtaPath: "/en/contact",
+  },
+  {
+    path: "/zh/blog",
+    cta: /咨询产品问题|联系/i,
+    expectedCtaPath: "/zh/contact",
+  },
+  {
     path: "/en/products/north-america",
     cta: /contact|inquiry|get (?:a )?quote|request (?:a )?quote/i,
     expectedCtaPath: "/en/contact",

@@ -18,10 +18,9 @@ vi.unmock("@/config/contact-form-validation");
 describe("validations - Schema Validation", () => {
   describe("contactFormSchema", () => {
     const validFormData = {
-      firstName: "John",
-      lastName: "Doe",
+      fullName: "John Doe",
       email: "john.doe@example.com",
-      company: "Test Company",
+      company: "",
       message: "This is a test message with sufficient length.",
       acceptPrivacy: true,
       website: "", // honeypot field
@@ -32,8 +31,8 @@ describe("validations - Schema Validation", () => {
       expect(result.success).toBe(true);
     });
 
-    it("should reject form data with short first name", () => {
-      const invalidData = { ...validFormData, firstName: "J" };
+    it("should reject form data with short full name", () => {
+      const invalidData = { ...validFormData, fullName: "J" };
       const result = contactFormSchema.safeParse(invalidData);
       expect(result.success).toBe(false);
       if (!result.success) {
@@ -43,8 +42,8 @@ describe("validations - Schema Validation", () => {
       }
     });
 
-    it("should reject form data with long first name", () => {
-      const invalidData = { ...validFormData, firstName: "J".repeat(51) };
+    it("should reject form data with long full name", () => {
+      const invalidData = { ...validFormData, fullName: "J".repeat(51) };
       const result = contactFormSchema.safeParse(invalidData);
       expect(result.success).toBe(false);
       if (!result.success) {
@@ -54,8 +53,8 @@ describe("validations - Schema Validation", () => {
       }
     });
 
-    it("should reject form data with invalid first name characters", () => {
-      const invalidData = { ...validFormData, firstName: "John123" };
+    it("should reject form data with invalid full name characters", () => {
+      const invalidData = { ...validFormData, fullName: "John123" };
       const result = contactFormSchema.safeParse(invalidData);
       expect(result.success).toBe(false);
       if (!result.success) {
@@ -68,8 +67,7 @@ describe("validations - Schema Validation", () => {
     it("should accept Chinese characters in names", () => {
       const chineseData = {
         ...validFormData,
-        firstName: "张三",
-        lastName: "李四",
+        fullName: "张三",
       };
       const result = contactFormSchema.safeParse(chineseData);
       expect(result.success).toBe(true);
@@ -98,14 +96,11 @@ describe("validations - Schema Validation", () => {
       }
     });
 
-    it("should reject form data without company", () => {
-      const invalidData = { ...validFormData, company: "" };
-      const result = contactFormSchema.safeParse(invalidData);
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues[0]?.message).toContain(
-          "Company name must be between",
-        );
+    it("should accept form data without company", () => {
+      const result = contactFormSchema.safeParse(validFormData);
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.company).toBeUndefined();
       }
     });
 
@@ -266,6 +261,7 @@ describe("validations - API and Data Schemas", () => {
     it("should validate with optional fields", () => {
       const dataWithOptionals = {
         ...validTemplateData,
+        company: undefined,
         phone: "+1234567890",
         subject: "Test Subject",
         marketingConsent: true,
@@ -280,10 +276,9 @@ describe("validations - Types", () => {
   describe("TypeScript types", () => {
     it("should infer correct ContactFormData type", () => {
       const formData: ContactFormData = {
-        firstName: "John",
-        lastName: "Doe",
+        fullName: "John Doe",
         email: "john@example.com",
-        company: "Test Co",
+        company: undefined,
         message: "Test message",
         acceptPrivacy: true,
         website: "",

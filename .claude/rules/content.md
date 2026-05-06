@@ -49,8 +49,8 @@ Structural switches and pointers only. "About page shows FAQ = yes" belongs here
 
 All substantive page content: prose, hero copy, FAQ Q&A (in frontmatter), page-level metadata (title, SEO description, dates). If it must be rewritten when changing brands, it belongs here. Third set to replace.
 
-**Exception:** Structured card data (product catalog and OEM scope/process cards) stays in typed config with i18n.
-OEM pages are mixed structured pages: MDX owns FAQ and SEO metadata, while scope cards, process steps, standards, and CTA modules remain in their translation namespaces.
+**Exception:** Structured card data for product catalog and homepage capability cards stays in typed config with i18n.
+OEM/custom manufacturing is no longer a standalone page; keep it as capability/support copy in Home, About, Contact, or product-context sections rather than a route-owned content namespace.
 Product market pages do not currently mount FAQ content. Market-specific FAQ may be reconsidered later, but shared product market FAQ is not part of the current live product-page contract. Typed product catalog/spec config owns families, standards, and dimensions, and the `catalog` translation namespace owns reusable labels/descriptions used across cards and dynamic routes.
 Home is a structured campaign landing exception: section order and reusable section copy remain in config/i18n until a dedicated conversion-copy rewrite migrates it. Do not treat Home's current shape as a template for normal static pages.
 

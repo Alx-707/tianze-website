@@ -87,8 +87,7 @@ for (const localeCase of localeCases) {
       expect(html).toContain('id="main-content"');
       expect(html).toContain("<form");
       for (const fieldName of [
-        "firstName",
-        "lastName",
+        "fullName",
         "email",
         "company",
         "message",
@@ -103,11 +102,11 @@ for (const localeCase of localeCases) {
     }) => {
       for (const path of [
         `/${localeCase.locale}/about`,
+        `/${localeCase.locale}/blog`,
         `/${localeCase.locale}/products`,
         `/${localeCase.locale}/products/north-america`,
         `/${localeCase.locale}/privacy`,
         `/${localeCase.locale}/terms`,
-        `/${localeCase.locale}/oem-custom-manufacturing`,
       ]) {
         await page.goto(`http://localhost:3000${path}`, {
           waitUntil: "domcontentloaded",

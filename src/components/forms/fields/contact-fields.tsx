@@ -2,6 +2,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FORM_FIELD_REQUIRED_CLASS_NAME } from "@/components/forms/form-status-styles";
 
+const OPTIONAL_LABEL_CLASS_NAME = "text-muted-foreground";
+
 /**
  * Contact fields component - React 19 Native Form Version
  * 使用原生HTML表单属性，配合Server Actions进行表单处理
@@ -32,8 +34,9 @@ export function ContactFields({ t, isPending }: ContactFieldsProps) {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="company" className={FORM_FIELD_REQUIRED_CLASS_NAME}>
-          {t("company")}
+        <Label htmlFor="company">
+          {t("company")}{" "}
+          <span className={OPTIONAL_LABEL_CLASS_NAME}>({t("optional")})</span>
         </Label>
         <Input
           id="company"
@@ -41,7 +44,6 @@ export function ContactFields({ t, isPending }: ContactFieldsProps) {
           type="text"
           placeholder={t("companyPlaceholder")}
           disabled={isPending}
-          required
           aria-describedby="company-error"
         />
       </div>

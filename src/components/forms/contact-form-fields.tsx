@@ -28,14 +28,9 @@ export function getFieldInputProps(
   field: ContactFormFieldDescriptor,
 ): Partial<React.ComponentProps<"input"> & React.ComponentProps<"textarea">> {
   switch (field.key) {
-    case "firstName":
+    case "fullName":
       return {
-        autoComplete: "given-name",
-        autoCapitalize: "words",
-      };
-    case "lastName":
-      return {
-        autoComplete: "family-name",
+        autoComplete: "name",
         autoCapitalize: "words",
       };
     case "email":

@@ -153,14 +153,13 @@ describe("URLGenerator", () => {
     it("should generate entries for all pages and languages", () => {
       const entries = generator.generateAllSitemapEntries();
 
-      // 7 live page types x 2 languages = 14 entries (/blog and bending-machines are retired)
+      // 7 live static page types x 2 languages = 14 entries.
+      // Blog listing is restored; OEM and bending machines stay retired as routes.
       expect(entries).toHaveLength(14);
+      expect(entries.some((entry) => entry.loc.includes("/blog"))).toBe(true);
+      expect(entries.some((entry) => entry.loc.includes("/oem"))).toBe(false);
       expect(
-        entries.some(
-          (entry) =>
-            entry.loc.includes("/blog") ||
-            entry.loc.includes("/bending-machines"),
-        ),
+        entries.some((entry) => entry.loc.includes("/bending-machines")),
       ).toBe(false);
 
       // 检查是否包含主页条目

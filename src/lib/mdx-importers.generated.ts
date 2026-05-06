@@ -27,14 +27,12 @@ export const pageImporters: Record<string, Record<string, ContentImporter>> = {
   en: {
     'about': () => import('@content/pages/en/about.mdx'),
     'contact': () => import('@content/pages/en/contact.mdx'),
-    'oem-custom-manufacturing': () => import('@content/pages/en/oem-custom-manufacturing.mdx'),
     'privacy': () => import('@content/pages/en/privacy.mdx'),
     'terms': () => import('@content/pages/en/terms.mdx'),
   },
   zh: {
     'about': () => import('@content/pages/zh/about.mdx'),
     'contact': () => import('@content/pages/zh/contact.mdx'),
-    'oem-custom-manufacturing': () => import('@content/pages/zh/oem-custom-manufacturing.mdx'),
     'privacy': () => import('@content/pages/zh/privacy.mdx'),
     'terms': () => import('@content/pages/zh/terms.mdx'),
   },

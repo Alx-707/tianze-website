@@ -64,23 +64,19 @@ describe("navigation", () => {
           translationKey: "navigation.products",
         },
         {
-          key: "oem",
-          href: "/oem-custom-manufacturing",
-          translationKey: "navigation.oem",
+          key: "blog",
+          href: "/blog",
+          translationKey: "navigation.blog",
         },
         { key: "about", href: "/about", translationKey: "navigation.about" },
-        {
-          key: "contact",
-          href: "/contact",
-          translationKey: "navigation.contact",
-        },
       ]);
     });
 
-    it("should remove blog and privacy from the main navigation", () => {
+    it("should keep conversion and legal pages out of the main navigation", () => {
       const actualKeys = mainNavigation.map((item) => item.key);
 
-      expect(actualKeys).not.toContain("blog");
+      expect(actualKeys).not.toContain("contact");
+      expect(actualKeys).not.toContain("oem");
       expect(actualKeys).not.toContain("privacy");
     });
 

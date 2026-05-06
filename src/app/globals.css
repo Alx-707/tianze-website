@@ -821,9 +821,12 @@
     }
   }
 
-  .header-cta-desktop-only {
-    @apply hidden;
-    @media (min-width: 1280px) {
+  .header-cta-primary {
+    @apply inline-flex h-8 px-3 text-xs;
+    @media (min-width: 480px) {
+      @apply text-sm;
+    }
+    @media (min-width: 1024px) {
       @apply inline-flex;
     }
   }

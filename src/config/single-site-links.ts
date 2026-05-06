@@ -5,9 +5,9 @@ export const SINGLE_SITE_ROUTE_HREFS = {
   about: getCanonicalPath("about"),
   contact: getCanonicalPath("contact"),
   products: getCanonicalPath("products"),
+  blog: getCanonicalPath("blog"),
   privacy: getCanonicalPath("privacy"),
   terms: getCanonicalPath("terms"),
-  oem: getCanonicalPath("oem"),
 } as const;
 
 export const SINGLE_SITE_HOME_LINK_TARGETS = {

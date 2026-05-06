@@ -281,9 +281,9 @@ describe("SEO Metadata", () => {
         "about",
         "contact",
         "products",
+        "blog",
         "privacy",
         "terms",
-        "oem",
       ];
 
       pageTypes.forEach((pageType) => {
@@ -301,6 +301,7 @@ describe("SEO Metadata", () => {
         "about",
         "contact",
         "products",
+        "blog",
         "privacy",
         "terms",
       ];

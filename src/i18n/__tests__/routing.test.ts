@@ -63,6 +63,7 @@ describe("i18n Routing Configuration", () => {
             "/about": "/about",
             "/contact": "/contact",
             "/products": "/products",
+            "/blog": "/blog",
           }),
           alternateLinks: true,
           localeDetection: true,
@@ -83,6 +84,7 @@ describe("i18n Routing Configuration", () => {
         "/about",
         "/contact",
         "/products",
+        "/blog",
         "/products/[market]",
         "/privacy",
         "/terms",
@@ -167,7 +169,7 @@ describe("i18n Routing Configuration", () => {
       const config = await getRoutingDefinition();
       const pathnames = config?.pathnames;
 
-      const mainPages = ["/", "/about", "/contact", "/products"];
+      const mainPages = ["/", "/about", "/contact", "/products", "/blog"];
       mainPages.forEach((page) => {
         expect(pathnames).toHaveProperty(page);
       });

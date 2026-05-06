@@ -11,6 +11,9 @@ import { REQUEST_ID_HEADER } from "@/lib/api/request-observability";
 const intlMiddleware = createMiddleware(routing);
 const SUPPORTED_LOCALES = new Set<string>(routing.locales);
 const NONCE_REQUEST_HEADER_KEY = "x-nonce";
+const RETIRED_OEM_ROUTE = "/oem-custom-manufacturing";
+const RETIRED_OEM_DESTINATION = "/contact";
+const PERMANENT_REDIRECT_STATUS = 308;
 function getRequestIdForHealth(request: NextRequest): string {
   const fromRequest =
     request.headers.get(REQUEST_ID_HEADER)?.trim() ||
@@ -238,6 +241,63 @@ function tryHandleInvalidLocalePrefix(
   return resp;
 }
 
+function tryHandleRetiredOemRoute(
+  request: NextRequest,
+  nonce: string,
+): NextResponse | null {
+  const { pathname } = request.nextUrl;
+  const segments = splitPathSegments(pathname);
+  const [locale, route] = segments;
+
+  if (
+    !locale ||
+    segments.length !== 2 ||
+    !isValidLocale(locale) ||
+    `/${route ?? ""}` !== RETIRED_OEM_ROUTE
+  ) {
+    return null;
+  }
+
+  const targetUrl = request.nextUrl.clone();
+  targetUrl.pathname = `/${locale}${RETIRED_OEM_DESTINATION}`;
+  const response = NextResponse.redirect(targetUrl, PERMANENT_REDIRECT_STATUS);
+  setLocaleCookie(response, locale);
+  removeLeakedMiddlewareCookieHeader(response);
+  addSecurityHeaders(response, nonce);
+
+  return response;
+}
+
+function getResponseLocale(
+  request: NextRequest,
+  response: NextResponse,
+): Locale | undefined {
+  return (
+    extractLocaleCandidate(request.nextUrl.pathname) ??
+    extractLocaleFromLocationHeader(request, response.headers.get("location"))
+  );
+}
+
+function tryHandleMiddlewareRedirects(
+  request: NextRequest,
+  nonce: string,
+  trustedClientIP: string | null,
+): NextResponse | null {
+  const retiredOemHandled = tryHandleRetiredOemRoute(request, nonce);
+  if (retiredOemHandled) {
+    applyCommonMiddlewareHeaders(retiredOemHandled, nonce, trustedClientIP);
+    return retiredOemHandled;
+  }
+
+  const invalidLocaleHandled = tryHandleInvalidLocalePrefix(request, nonce);
+  if (invalidLocaleHandled) {
+    applyCommonMiddlewareHeaders(invalidLocaleHandled, nonce, trustedClientIP);
+    return invalidLocaleHandled;
+  }
+
+  return null;
+}
+
 export default function middleware(request: NextRequest) {
   const healthHandled = tryHandleHealthRoute(request);
   if (healthHandled) {
@@ -246,17 +306,17 @@ export default function middleware(request: NextRequest) {
 
   const nonce = generateNonce();
   const trustedClientIP = getTrustedClientIPForInternalHeader(request);
-
-  const invalidLocaleHandled = tryHandleInvalidLocalePrefix(request, nonce);
-  if (invalidLocaleHandled) {
-    applyCommonMiddlewareHeaders(invalidLocaleHandled, nonce, trustedClientIP);
-    return invalidLocaleHandled;
+  const redirectHandled = tryHandleMiddlewareRedirects(
+    request,
+    nonce,
+    trustedClientIP,
+  );
+  if (redirectHandled) {
+    return redirectHandled;
   }
 
   const response = intlMiddleware(request);
-  const locale =
-    extractLocaleCandidate(request.nextUrl.pathname) ??
-    extractLocaleFromLocationHeader(request, response.headers.get("location"));
+  const locale = getResponseLocale(request, response);
   const existingLocale = request.cookies.get("NEXT_LOCALE")?.value;
   if (response && locale && existingLocale !== locale) {
     setLocaleCookie(response, locale);

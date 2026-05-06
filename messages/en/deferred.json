@@ -87,15 +87,13 @@
       "title": "Contact Us",
       "description": "Get in touch with us. We'd love to hear from you.",
       "optional": "optional",
-      "firstName": "First Name",
-      "lastName": "Last Name",
+      "fullName": "Name",
       "email": "Email Address",
       "company": "Company Name",
       "phone": "Phone Number",
       "subject": "Subject",
       "message": "Message",
-      "firstNamePlaceholder": "Enter your first name",
-      "lastNamePlaceholder": "Enter your last name",
+      "fullNamePlaceholder": "Enter your name",
       "emailPlaceholder": "your@email.com",
       "companyPlaceholder": "Your company name",
       "phonePlaceholder": "+1 (555) 123-4567",
@@ -114,17 +112,11 @@
       "rateLimitMessage": "You've recently contacted us. Please wait a moment before sending another message.",
       "errors": {
         "generic": "Please review the highlighted fields and try again.",
-        "firstName": {
-          "required": "First name is required",
-          "tooShort": "First name must be at least 2 characters",
-          "tooLong": "First name must be less than 50 characters",
-          "invalid": "First name can only contain letters and spaces"
-        },
-        "lastName": {
-          "required": "Last name is required",
-          "tooShort": "Last name must be at least 2 characters",
-          "tooLong": "Last name must be less than 50 characters",
-          "invalid": "Last name can only contain letters and spaces"
+        "fullName": {
+          "required": "Name is required",
+          "tooShort": "Name must be at least 2 characters",
+          "tooLong": "Name must be less than 50 characters",
+          "invalid": "Name can only contain letters and spaces"
         },
         "email": {
           "required": "Email address is required",
@@ -155,10 +147,8 @@
         }
       },
       "validation": {
-        "firstNameRequired": "First name is required",
-        "firstNameTooShort": "First name must be at least 2 characters",
-        "lastNameRequired": "Last name is required",
-        "lastNameTooShort": "Last name must be at least 2 characters",
+        "fullNameRequired": "Name is required",
+        "fullNameTooShort": "Name must be at least 2 characters",
         "emailRequired": "Email address is required",
         "emailInvalid": "Please enter a valid email address",
         "messageRequired": "Message is required",
@@ -378,73 +368,6 @@
       "governing": "Governing Law",
       "disputes": "Dispute Resolution",
       "contact": "Contact Information"
-    }
-  },
-  "oem": {
-    "meta": {
-      "title": "OEM & Custom Manufacturing | Tianze",
-      "description": "Custom PVC conduit fittings manufacturing — your specifications, our production capability. From prototype to mass production."
-    },
-    "hero": {
-      "title": "OEM & Custom Manufacturing",
-      "subtitle": "Your specifications. Our production capability."
-    },
-    "scope": {
-      "title": "Service Scope",
-      "customSizes": {
-        "title": "Custom Sizes",
-        "desc": "Non-standard diameters, angles, and wall thicknesses to your exact specifications."
-      },
-      "privateLabel": {
-        "title": "Private Label",
-        "desc": "Your brand, your packaging. Complete branded product solutions."
-      },
-      "moldDevelopment": {
-        "title": "Mold Development",
-        "desc": "In-house mold design and manufacturing for any fitting geometry."
-      },
-      "qualityAssurance": {
-        "title": "Quality Assurance",
-        "desc": "Full inspection with optional third-party certification to your required standards."
-      }
-    },
-    "process": {
-      "title": "How We Work Together",
-      "step1": {
-        "title": "Inquiry",
-        "desc": "Share your specifications and requirements",
-        "timeline": "Day 1"
-      },
-      "step2": {
-        "title": "Sample",
-        "desc": "We produce samples for your approval",
-        "timeline": "7-15 days"
-      },
-      "step3": {
-        "title": "Mold & Tooling",
-        "desc": "Custom mold development if needed",
-        "timeline": "15-30 days"
-      },
-      "step4": {
-        "title": "Trial Run",
-        "desc": "Small batch production for final validation",
-        "timeline": "7-10 days"
-      },
-      "step5": {
-        "title": "Mass Production",
-        "desc": "Full-scale production and quality-controlled delivery",
-        "timeline": "15-20 days"
-      }
-    },
-    "standards": {
-      "title": "Supported Standards",
-      "desc": "We manufacture to all major international conduit standards — and custom specifications.",
-      "custom": "Custom standards also supported"
-    },
-    "cta": {
-      "heading": "Start Your OEM Project",
-      "description": "Tell us your specifications. We'll provide a detailed proposal with timeline and pricing.",
-      "button": "Get Started"
     }
   }
 }

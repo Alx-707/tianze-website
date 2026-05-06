@@ -9,8 +9,7 @@ import { type ContactFormFieldValidatorContext } from "@/config/contact-form-val
 import {
   company,
   email,
-  firstName,
-  lastName,
+  fullName,
   message,
   phone,
   subject,
@@ -44,21 +43,15 @@ function createEmailContext(
 }
 
 describe("contact-field-validators", () => {
-  it("uses the field labels in first/last name errors and rejects invalid leading characters", () => {
-    const firstNameSchema = firstName(createContext("firstName"));
-    const lastNameSchema = lastName(createContext("lastName"));
+  it("uses the field label in full name errors and rejects invalid leading characters", () => {
+    const schema = fullName(createContext("fullName"));
 
-    for (const [schema, expectedLabel] of [
-      [firstNameSchema, "First name"],
-      [lastNameSchema, "Last name"],
-    ] as const) {
-      const result = schema.safeParse(`1${expectedLabel}`);
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues[0]?.message).toBe(
-          `${expectedLabel} can only contain letters and spaces`,
-        );
-      }
+    const result = schema.safeParse("1Full name");
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues[0]?.message).toBe(
+        "Full name can only contain letters and spaces",
+      );
     }
   });
 
@@ -110,6 +103,7 @@ describe("contact-field-validators", () => {
 
     expect(schema.parse(`  ${minCompany}  `)).toBe(minCompany);
     expect(schema.parse(maxCompany)).toBe(maxCompany);
+    expect(schema.parse("")).toBeUndefined();
 
     const tooShort = schema.safeParse("A");
     expect(tooShort.success).toBe(false);

@@ -242,7 +242,6 @@ workers.dev preview 抓取结果：
 | `/zh/contact` | 1 | 3 |
 | `/en/products` | 1 | 3 |
 | `/en/products/north-america` | 1 | 5 |
-| `/en/oem-custom-manufacturing` | 1 | 4 |
 
 本地证明：
 

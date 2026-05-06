@@ -10,7 +10,6 @@ const MDX_PAGE_SLUGS_BY_ROUTE = {
   contact: "contact",
   privacy: "privacy",
   terms: "terms",
-  oem: "oem-custom-manufacturing",
 } as const satisfies Partial<Record<PageType, string>>;
 
 type MdxPageRoute = keyof typeof MDX_PAGE_SLUGS_BY_ROUTE;

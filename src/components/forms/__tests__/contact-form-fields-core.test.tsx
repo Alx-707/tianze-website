@@ -23,41 +23,36 @@ describe("Contact Form Fields - Core Tests", () => {
   });
 
   describe("NameFields Component", () => {
-    it("should render first name and last name fields", () => {
+    it("should render a single full name field", () => {
       render(<NameFields {...defaultProps} />);
 
-      expect(screen.getByLabelText(/firstName/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/lastName/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/fullName/i)).toBeInTheDocument();
+      expect(screen.queryByLabelText(/lastName/i)).not.toBeInTheDocument();
     });
 
     it("should show required indicators", () => {
       render(<NameFields {...defaultProps} />);
 
       // Check for required asterisks (*) in labels
-      const labels = screen.getAllByText(/firstName|lastName/);
+      const labels = screen.getAllByText(/fullName/);
       expect(labels.length).toBeGreaterThan(0);
     });
 
     it("should have required attributes on inputs", () => {
       render(<NameFields {...defaultProps} />);
 
-      const firstNameInput = screen.getByLabelText(/firstName/i);
-      const lastNameInput = screen.getByLabelText(/lastName/i);
+      const fullNameInput = screen.getByLabelText(/fullName/i);
 
-      expect(firstNameInput).toHaveAttribute("required");
-      expect(lastNameInput).toHaveAttribute("required");
-      expect(firstNameInput).toHaveAttribute("name", "firstName");
-      expect(lastNameInput).toHaveAttribute("name", "lastName");
+      expect(fullNameInput).toHaveAttribute("required");
+      expect(fullNameInput).toHaveAttribute("name", "fullName");
     });
 
     it("should disable inputs when isPending is true", () => {
       render(<NameFields {...defaultProps} isPending={true} />);
 
-      const firstNameInput = screen.getByLabelText(/firstName/i);
-      const lastNameInput = screen.getByLabelText(/lastName/i);
+      const fullNameInput = screen.getByLabelText(/fullName/i);
 
-      expect(firstNameInput).toBeDisabled();
-      expect(lastNameInput).toBeDisabled();
+      expect(fullNameInput).toBeDisabled();
     });
   });
 
@@ -85,6 +80,7 @@ describe("Contact Form Fields - Core Tests", () => {
 
       expect(emailInput).toHaveAttribute("name", "email");
       expect(companyInput).toHaveAttribute("name", "company");
+      expect(companyInput).not.toHaveAttribute("required");
     });
 
     it("should disable inputs when isPending is true", () => {
@@ -191,13 +187,9 @@ describe("Contact Form Fields - Core Tests", () => {
       );
 
       // Verify all fields have correct name attributes for form submission
-      expect(screen.getByLabelText(/firstName/i)).toHaveAttribute(
+      expect(screen.getByLabelText(/fullName/i)).toHaveAttribute(
         "name",
-        "firstName",
-      );
-      expect(screen.getByLabelText(/lastName/i)).toHaveAttribute(
-        "name",
-        "lastName",
+        "fullName",
       );
       expect(screen.getByLabelText(/email/i)).toHaveAttribute("name", "email");
       expect(screen.getByLabelText(/company/i)).toHaveAttribute(
@@ -257,8 +249,7 @@ describe("Contact Form Fields - Core Tests", () => {
       );
 
       // Check that all form fields have accessible labels
-      expect(screen.getByLabelText(/firstName/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/lastName/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/fullName/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/company/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/phone/i)).toBeInTheDocument();
@@ -275,19 +266,14 @@ describe("Contact Form Fields - Core Tests", () => {
         </div>,
       );
 
-      const firstNameField = screen.getByLabelText(/firstName/i);
-      const lastNameField = screen.getByLabelText(/lastName/i);
+      const fullNameField = screen.getByLabelText(/fullName/i);
       const emailField = screen.getByLabelText(/email/i);
       const phoneField = screen.getByLabelText(/phone/i);
 
       // Fields should have aria-describedby for error messages
-      expect(firstNameField).toHaveAttribute(
+      expect(fullNameField).toHaveAttribute(
         "aria-describedby",
-        "firstName-error",
-      );
-      expect(lastNameField).toHaveAttribute(
-        "aria-describedby",
-        "lastName-error",
+        "fullName-error",
       );
       expect(emailField).toHaveAttribute("aria-describedby", "email-error");
       expect(phoneField).toHaveAttribute("aria-describedby", "phone-error");
@@ -306,8 +292,7 @@ describe("Contact Form Fields - Core Tests", () => {
       );
 
       // Verify translation function was called for field labels
-      expect(mockT).toHaveBeenCalledWith("firstName");
-      expect(mockT).toHaveBeenCalledWith("lastName");
+      expect(mockT).toHaveBeenCalledWith("fullName");
       expect(mockT).toHaveBeenCalledWith("email");
       expect(mockT).toHaveBeenCalledWith("company");
       expect(mockT).toHaveBeenCalledWith("phone");

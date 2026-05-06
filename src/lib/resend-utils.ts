@@ -44,7 +44,7 @@ export class ResendUtils {
       firstName: sanitizePlainText(data.firstName),
       lastName: sanitizePlainText(data.lastName),
       email: data.email.toLowerCase().trim(),
-      company: sanitizePlainText(data.company),
+      company: data.company ? sanitizePlainText(data.company) : undefined,
       message: sanitizePlainText(data.message),
       phone: data.phone ? sanitizePlainText(data.phone) : undefined,
       subject: data.subject ? sanitizePlainText(data.subject) : undefined,
@@ -58,9 +58,13 @@ export class ResendUtils {
    * Generate email subject
    */
   static generateContactSubject(data: EmailTemplateData): string {
+    const contactName = [data.firstName, data.lastName]
+      .filter(Boolean)
+      .join(" ");
+
     return data.subject
       ? `Contact Form: ${data.subject}`
-      : `New Contact from ${data.firstName} ${data.lastName}`;
+      : `New Contact from ${contactName}`;
   }
 
   /**

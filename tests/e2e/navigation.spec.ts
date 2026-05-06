@@ -87,12 +87,14 @@ test.describe("Navigation System", () => {
       const nav = getNav(page);
       await expect(nav).toBeVisible();
 
-      // All navigation items are links (Products no longer has dropdown children)
+      // Contact is a CTA, not a peer navigation item.
       await expect(nav.getByRole("link", { name: "Home" })).toBeVisible();
       await expect(nav.getByRole("link", { name: "Products" })).toBeVisible();
-      await expect(nav.getByRole("link", { name: "OEM" })).toBeVisible();
+      await expect(nav.getByRole("link", { name: "Blog" })).toBeVisible();
       await expect(nav.getByRole("link", { name: "About" })).toBeVisible();
-      await expect(nav.getByRole("link", { name: "Contact" })).toBeVisible();
+      await expect(
+        nav.getByRole("link", { name: "Contact Sales" }),
+      ).toHaveCount(0);
     });
 
     test("should navigate between pages and highlight active link", async ({
@@ -256,8 +258,8 @@ test.describe("Navigation System", () => {
       // Verify sheet content
       await expect(mobileNavSheet.getByRole("heading").first()).toBeVisible();
 
-      // Verify navigation links in mobile menu (match actual config)
-      const expectedLinks = ["Home", "Products", "OEM", "About", "Contact"];
+      // Contact is rendered as a conversion CTA below the main mobile links.
+      const expectedLinks = ["Home", "Products", "Blog", "About"];
       for (const linkText of expectedLinks) {
         const link = mobileNavSheet.getByRole("link", {
           exact: true,
@@ -265,6 +267,9 @@ test.describe("Navigation System", () => {
         });
         await expect(link).toBeVisible();
       }
+      await expect(
+        mobileNavSheet.getByRole("link", { name: "Contact Sales" }),
+      ).toBeVisible();
       await expect(mobileNavSheet.getByText("Select Language")).toBeVisible();
 
       // Close menu by clicking close button
@@ -359,6 +364,28 @@ test.describe("Navigation System", () => {
   });
 
   test.describe("Route Handling", () => {
+    test("should redirect retired OEM route to localized contact page", async ({
+      request,
+    }) => {
+      for (const locale of ["en", "zh"] as const) {
+        const response = await request.get(
+          `${BASE_ORIGIN}/${locale}/oem-custom-manufacturing`,
+          {
+            maxRedirects: 0,
+          },
+        );
+
+        expect(response.status()).toBe(308);
+        const location =
+          response.headers()["location"] ||
+          response.headers()["Location"] ||
+          "";
+        expect(new URL(location, BASE_ORIGIN).pathname).toBe(
+          `/${locale}/contact`,
+        );
+      }
+    });
+
     test("should handle non-existent routes with 404 page", async ({
       page,
     }) => {

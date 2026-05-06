@@ -124,20 +124,3 @@ export const SINGLE_SITE_PRODUCTS_PAGE_EXPRESSION = {
     ctaHref: SINGLE_SITE_HOME_LINK_TARGETS.contact,
   },
 } as const;
-
-export const SINGLE_SITE_OEM_PAGE_EXPRESSION = {
-  supportedStandards: [
-    "UL 651 / ASTM D1785",
-    "AS/NZS 2053",
-    "NOM-001-SEDE",
-    "IEC 61386",
-  ],
-  scopeKeys: [
-    "customSizes",
-    "privateLabel",
-    "moldDevelopment",
-    "qualityAssurance",
-  ],
-  processStepCount: 5,
-  ctaHref: SINGLE_SITE_HOME_LINK_TARGETS.contact,
-} as const;

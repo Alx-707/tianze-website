@@ -24,26 +24,27 @@ const messageLineStyle: CSSProperties = {
 export function ContactFormEmail(data: EmailTemplateData) {
   const messageLines = data.message.split("\n");
   const submittedAt = ResendUtils.formatDateTime(data.submittedAt);
+  const displayName = [data.firstName, data.lastName].filter(Boolean).join(" ");
 
   return (
     <EmailLayout
       title="New Contact Form Submission"
-      preview={`${PREVIEW_PREFIX} from ${data.firstName} ${data.lastName}`}
+      preview={`${PREVIEW_PREFIX} from ${displayName}`}
       accentColor={ACCENT_COLOR}
       footerText={FOOTER_TEXT}
       contentBackgroundColor={CONTENT_BACKGROUND}
     >
       <EmailField label="Name">
-        <Text
-          style={valueTextStyle}
-        >{`${data.firstName} ${data.lastName}`}</Text>
+        <Text style={valueTextStyle}>{displayName}</Text>
       </EmailField>
       <EmailField label="Email">
         <Text style={valueTextStyle}>{data.email}</Text>
       </EmailField>
-      <EmailField label="Company">
-        <Text style={valueTextStyle}>{data.company}</Text>
-      </EmailField>
+      {data.company ? (
+        <EmailField label="Company">
+          <Text style={valueTextStyle}>{data.company}</Text>
+        </EmailField>
+      ) : null}
       {data.phone ? (
         <EmailField label="Phone">
           <Text style={valueTextStyle}>{data.phone}</Text>

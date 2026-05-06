@@ -28,8 +28,7 @@ vi.mock("react", async () => {
 // Mock next-intl
 const mockT = vi.fn((key: string) => {
   const translations: Record<string, string> = {
-    firstName: "First Name",
-    lastName: "Last Name",
+    fullName: "Name",
     email: "Email",
     company: "Company",
     phone: "Phone",
@@ -42,8 +41,7 @@ const mockT = vi.fn((key: string) => {
     submitSuccess: "Message sent successfully",
     submitError: "Failed to submit form. Please try again.",
     rateLimitMessage: "Please wait before submitting again.",
-    firstNamePlaceholder: "Enter your first name",
-    lastNamePlaceholder: "Enter your last name",
+    fullNamePlaceholder: "Enter your name",
     emailPlaceholder: "your@email.com",
     companyPlaceholder: "Your company name",
     phonePlaceholder: "+1 (555) 123-4567",
@@ -166,15 +164,9 @@ const renderContactForm = async () => {
 // Note: phone field is disabled per Lead Pipeline requirements
 const _fillValidForm = async (excludeFields: string[] = []) => {
   await act(async () => {
-    if (!excludeFields.includes("firstName")) {
-      fireEvent.change(screen.getByLabelText(/first name/i), {
+    if (!excludeFields.includes("fullName")) {
+      fireEvent.change(screen.getByLabelText(/name/i), {
         target: { value: "John" },
-      });
-    }
-
-    if (!excludeFields.includes("lastName")) {
-      fireEvent.change(screen.getByLabelText(/last name/i), {
-        target: { value: "Doe" },
       });
     }
 
@@ -287,8 +279,7 @@ describe("ContactFormContainer - 核心功能", () => {
       expect(await screen.findByTestId("turnstile-mock")).toBeInTheDocument();
 
       // 检查所有表单字段都存在
-      expect(screen.getByLabelText(/first name/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/last name/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/name/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/company/i)).toBeInTheDocument();
     });
@@ -298,8 +289,7 @@ describe("ContactFormContainer - 核心功能", () => {
 
       // 检查所有字段是否存在
       // Note: phone field is disabled per Lead Pipeline requirements
-      expect(screen.getByLabelText(/first name/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/last name/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/name/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/company/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/subject/i)).toBeInTheDocument();
