@@ -108,7 +108,7 @@ On mobile viewports, tapping the hamburger opens a navigation sheet. Selecting a
 
 #### BC-007: Buyer can submit a contact inquiry
 
-The /contact page renders a form with fields: firstName, lastName, email, company, message, and a privacy policy checkbox. Filling all required fields and passing Turnstile verification enables the submit button. Submission invokes the contact Server Action and displays a success or error message.
+The /contact page renders a form with fields: fullName, email, company (optional), message, and a privacy policy checkbox. Filling all required fields and passing Turnstile verification enables the submit button. Submission invokes the contact Server Action and displays a success or error message.
 
 | Field | Value |
 |-------|-------|
@@ -123,7 +123,7 @@ Notes: `tests/e2e/contact-form-smoke.spec.ts` is a test-mode smoke only; it prov
 
 #### BC-008: Contact form validates required fields before submission
 
-Empty required fields (firstName, lastName, email, message, acceptPrivacy) prevent submission. Email field validates email format. Submit button stays disabled until Turnstile verification completes.
+Empty required fields (fullName, email, message, acceptPrivacy) prevent submission. Email field validates email format. Submit button stays disabled until Turnstile verification completes.
 
 | Field | Value |
 |-------|-------|

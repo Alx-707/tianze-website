@@ -707,21 +707,23 @@ describe("MobileLanguageSwitcher Integration", () => {
   });
 
   it("does not expand the current language into an active option", async () => {
-    Object.defineProperty(document.documentElement, "lang", {
-      value: "en",
-      writable: true,
-      configurable: true,
-    });
+    const originalLang = document.documentElement.lang;
 
-    renderWithIntl(<MobileNavigation />);
+    try {
+      document.documentElement.lang = "en";
 
-    const trigger = screen.getByRole("button", { name: /menu/i });
-    await user.click(trigger);
+      renderWithIntl(<MobileNavigation />);
 
-    expect(
-      screen.getByTestId("mobile-language-current-label-en"),
-    ).toHaveTextContent("English");
-    expect(screen.queryByTestId("check-icon")).not.toBeInTheDocument();
+      const trigger = screen.getByRole("button", { name: /menu/i });
+      await user.click(trigger);
+
+      expect(
+        screen.getByTestId("mobile-language-current-label-en"),
+      ).toHaveTextContent("English");
+      expect(screen.queryByTestId("check-icon")).not.toBeInTheDocument();
+    } finally {
+      document.documentElement.lang = originalLang;
+    }
   });
 });
 
