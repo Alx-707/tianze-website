@@ -583,7 +583,7 @@ test.describe("Internationalization (i18n)", () => {
 
       // Find and click Chinese language link in mobile menu
       const chineseLink = mobileNavSheet.getByRole("link", {
-        name: "简体中文",
+        name: /^(Simplified Chinese|简体中文)$/,
       });
       await expect(chineseLink).toBeVisible();
       try {

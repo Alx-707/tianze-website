@@ -503,8 +503,8 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
       });
       await expect(submitButton).toBeDisabled();
 
-      // 等待 Turnstile 加载
-      await page.waitForTimeout(2000);
+      // 等待 Turnstile test-mode token 写入表单状态。
+      await expect(page.getByTestId("turnstile-mock")).toBeVisible();
 
       // 填写完整表单
       await page.fill('input[name="fullName"]', "John");
@@ -522,6 +522,7 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
       });
       if (await privacyCheckbox.isVisible()) {
         await privacyCheckbox.check();
+        await expect(privacyCheckbox).toBeChecked();
       }
 
       await expect(submitButton).toBeVisible();
@@ -534,8 +535,8 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
       const submitButton = page.getByRole("button", { name: /发送|提交/i });
       await expect(submitButton).toBeDisabled();
 
-      // 等待 Turnstile 加载
-      await page.waitForTimeout(2000);
+      // 等待 Turnstile test-mode token 写入表单状态。
+      await expect(page.getByTestId("turnstile-mock")).toBeVisible();
 
       // 填写完整表单
       await page.fill('input[name="fullName"]', "张三");
@@ -549,6 +550,7 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
       });
       if (await privacyCheckbox.isVisible()) {
         await privacyCheckbox.check();
+        await expect(privacyCheckbox).toBeChecked();
       }
 
       await expect(submitButton).toBeVisible();
